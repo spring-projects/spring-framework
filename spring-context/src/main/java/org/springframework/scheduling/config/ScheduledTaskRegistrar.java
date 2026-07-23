@@ -18,6 +18,7 @@ package org.springframework.scheduling.config;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,6 +57,7 @@ import org.springframework.util.CollectionUtils;
  * @author Sam Brannen
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Vedran Pavic
  * @since 3.0
  * @see org.springframework.scheduling.annotation.EnableAsync
  * @see org.springframework.scheduling.annotation.SchedulingConfigurer
@@ -284,13 +286,28 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	}
 
 	/**
-	 * Add a {@link Runnable} task to be triggered per the given cron {@code expression}.
+	 * Add a {@link Runnable} task to be triggered per the given cron {@code expression}
+	 * in the default time zone.
 	 * <p>This method will not register the task if the {@code expression} is
 	 * equal to {@link #CRON_DISABLED}.
+	 * @see CronTask
 	 */
 	public void addCronTask(Runnable task, String expression) {
 		if (!CRON_DISABLED.equals(expression)) {
 			addCronTask(new CronTask(task, expression));
+		}
+	}
+
+	/**
+	 * Add a {@link Runnable} task to be triggered per the given cron {@code expression}
+	 * and time zone.
+	 * <p>This method will not register the task if the {@code expression} is
+	 * equal to {@link #CRON_DISABLED}.
+	 * @see CronTask
+	 */
+	public void addCronTask(Runnable task, String expression, ZoneId zoneId) {
+		if (!CRON_DISABLED.equals(expression)) {
+			addCronTask(new CronTask(task, new CronTrigger(expression, zoneId)));
 		}
 	}
 
