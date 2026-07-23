@@ -168,6 +168,11 @@ class DefaultWebTestClient implements WebTestClient {
 	}
 
 	@Override
+	public RequestBodyUriSpec query() {
+		return methodInternal(HttpMethod.QUERY);
+	}
+
+	@Override
 	public RequestBodyUriSpec method(HttpMethod httpMethod) {
 		return methodInternal(httpMethod);
 	}
