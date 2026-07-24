@@ -220,10 +220,28 @@ public abstract class ValueCodeGeneratorDelegates {
 			if (value instanceof Long) {
 				return CodeBlock.of("$LL", value);
 			}
-			if (value instanceof Float) {
+			if (value instanceof Float floatValue) {
+				if (Float.isNaN(floatValue)) {
+					return CodeBlock.of("$T.NaN", Float.class);
+				}
+				if (floatValue == Float.POSITIVE_INFINITY) {
+					return CodeBlock.of("$T.POSITIVE_INFINITY", Float.class);
+				}
+				if (floatValue == Float.NEGATIVE_INFINITY) {
+					return CodeBlock.of("$T.NEGATIVE_INFINITY", Float.class);
+				}
 				return CodeBlock.of("$LF", value);
 			}
-			if (value instanceof Double) {
+			if (value instanceof Double doubleValue) {
+				if (Double.isNaN(doubleValue)) {
+					return CodeBlock.of("$T.NaN", Double.class);
+				}
+				if (doubleValue == Double.POSITIVE_INFINITY) {
+					return CodeBlock.of("$T.POSITIVE_INFINITY", Double.class);
+				}
+				if (doubleValue == Double.NEGATIVE_INFINITY) {
+					return CodeBlock.of("$T.NEGATIVE_INFINITY", Double.class);
+				}
 				return CodeBlock.of("(double) $L", value);
 			}
 			if (value instanceof Character character) {
