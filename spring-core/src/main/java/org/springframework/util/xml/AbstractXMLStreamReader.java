@@ -190,7 +190,7 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 	@Override
 	public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) {
 		char[] source = getTextCharacters();
-		length = Math.min(length, source.length);
+		length = Math.min(length, source.length - sourceStart);
 		System.arraycopy(source, sourceStart, target, targetStart, length);
 		return length;
 	}
