@@ -47,7 +47,6 @@ import org.jspecify.annotations.Nullable;
  * @param <V> the type of the cached values, does not allow null values
  * @see #get(Object)
  */
-@SuppressWarnings({"unchecked", "NullAway"})
 public final class ConcurrentLruCache<K, V> {
 
 	private final int capacity;
@@ -388,16 +387,15 @@ public final class ConcurrentLruCache<K, V> {
 		// Number of operations processed, for each buffer
 		private final AtomicLongArray processedCount = new AtomicLongArray(BUFFER_COUNT);
 
-		@SuppressWarnings("rawtypes")
-		private final AtomicReferenceArray<Node<K, V>>[] buffers = new AtomicReferenceArray[BUFFER_COUNT];
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		private final AtomicReferenceArray<@Nullable Node<K, V>>[] buffers = new AtomicReferenceArray[BUFFER_COUNT];
 
 		private final EvictionQueue<K, V> evictionQueue;
 
-		@SuppressWarnings("rawtypes")
 		ReadOperations(EvictionQueue<K, V> evictionQueue) {
 			this.evictionQueue = evictionQueue;
 			for (int i = 0; i < BUFFER_COUNT; i++) {
-				this.buffers[i] = new AtomicReferenceArray(BUFFER_SIZE);
+				this.buffers[i] = new AtomicReferenceArray<>(BUFFER_SIZE);
 			}
 		}
 
@@ -427,7 +425,7 @@ public final class ConcurrentLruCache<K, V> {
 
 		void clear() {
 			for (int i = 0; i < BUFFER_COUNT; i++) {
-				AtomicReferenceArray<Node<K, V>> buffer = this.buffers[i];
+				AtomicReferenceArray<@Nullable Node<K, V>> buffer = this.buffers[i];
 				for (int j = 0; j < BUFFER_SIZE; j++) {
 					buffer.lazySet(j, null);
 				}
@@ -438,7 +436,7 @@ public final class ConcurrentLruCache<K, V> {
 			final long writeCount = this.recordedCount.get(bufferIndex);
 			for (int i = 0; i < MAX_DRAIN_COUNT; i++) {
 				final int index = (int) (this.readCount[bufferIndex] & BUFFER_INDEX_MASK);
-				final AtomicReferenceArray<Node<K, V>> buffer = this.buffers[bufferIndex];
+				final AtomicReferenceArray<@Nullable Node<K, V>> buffer = this.buffers[bufferIndex];
 				final Node<K, V> node = buffer.get(index);
 				if (node == null) {
 					break;
