@@ -81,7 +81,7 @@ public final class GeneratedClass {
 	 */
 	public void reserveMethodNames(String... reservedMethodNames) {
 		for (String reservedMethodName : reservedMethodNames) {
-			String generatedName = generateSequencedMethodName(MethodName.of(reservedMethodNames));
+			String generatedName = generateSequencedMethodName(MethodName.of(reservedMethodName));
 			Assert.state(generatedName.equals(reservedMethodName),
 					() -> String.format("Unable to reserve method name '%s'", reservedMethodName));
 		}
