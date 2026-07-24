@@ -153,4 +153,126 @@ class TableMetaDataContextTests {
 		verify(columnsResultSet).close();
 	}
 
+	@Test
+	void declaredColumnsIncludingGeneratedKeyAreExcluded() throws Exception {
+		final String TABLE = "customers";
+		final String USER = "me";
+
+		ResultSet metaDataResultSet = mock();
+		given(metaDataResultSet.next()).willReturn(true, false);
+		given(metaDataResultSet.getString("TABLE_SCHEM")).willReturn(USER);
+		given(metaDataResultSet.getString("TABLE_NAME")).willReturn(TABLE);
+		given(metaDataResultSet.getString("TABLE_TYPE")).willReturn("TABLE");
+
+		ResultSet columnsResultSet = mock();
+		given(columnsResultSet.next()).willReturn(true, true, false);
+		given(columnsResultSet.getString("COLUMN_NAME")).willReturn("id", "name");
+		given(columnsResultSet.getInt("DATA_TYPE")).willReturn(Types.INTEGER, Types.VARCHAR);
+		given(columnsResultSet.getBoolean("NULLABLE")).willReturn(false, true);
+
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+		given(databaseMetaData.getDatabaseProductVersion()).willReturn("1.0");
+		given(databaseMetaData.getUserName()).willReturn(USER);
+		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
+		given(databaseMetaData.getTables(null, null, TABLE, null)).willReturn(metaDataResultSet);
+		given(databaseMetaData.getColumns(null, USER, TABLE, null)).willReturn(columnsResultSet);
+
+		MapSqlParameterSource map = new MapSqlParameterSource();
+		map.addValue("id", 1);
+		map.addValue("name", "Sven");
+		String[] keyCols = new String[] { "id" };
+		context.setTableName(TABLE);
+		context.processMetaData(dataSource, List.of("id", "name"), keyCols);
+		List<Object> values = context.matchInParameterValuesWithInsertColumns(map);
+		String insertString = context.createInsertString(keyCols);
+		int[] insertTypes = context.createInsertTypes();
+
+		assertThat(insertString).as("insert string should exclude the declared generated key column")
+				.isEqualTo("INSERT INTO customers (name) VALUES(?)");
+		assertThat(values).as("values should exclude the declared generated key column").containsExactly("Sven");
+		assertThat(insertTypes.length).as("types array must match the number of placeholders").isEqualTo(1);
+		verify(metaDataResultSet, atLeastOnce()).next();
+		verify(columnsResultSet, atLeastOnce()).next();
+		verify(metaDataResultSet).close();
+		verify(columnsResultSet).close();
+	}
+
+	@Test
+	void declaredColumnsMatchingGeneratedKeysProduceEmptyInsert() throws Exception {
+		final String TABLE = "customers";
+		final String USER = "me";
+
+		ResultSet metaDataResultSet = mock();
+		given(metaDataResultSet.next()).willReturn(true, false);
+		given(metaDataResultSet.getString("TABLE_SCHEM")).willReturn(USER);
+		given(metaDataResultSet.getString("TABLE_NAME")).willReturn(TABLE);
+		given(metaDataResultSet.getString("TABLE_TYPE")).willReturn("TABLE");
+
+		ResultSet columnsResultSet = mock();
+		given(columnsResultSet.next()).willReturn(true, false);
+		given(columnsResultSet.getString("COLUMN_NAME")).willReturn("id");
+		given(columnsResultSet.getInt("DATA_TYPE")).willReturn(Types.INTEGER);
+		given(columnsResultSet.getBoolean("NULLABLE")).willReturn(false);
+
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+		given(databaseMetaData.getDatabaseProductVersion()).willReturn("1.0");
+		given(databaseMetaData.getUserName()).willReturn(USER);
+		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
+		given(databaseMetaData.getTables(null, null, TABLE, null)).willReturn(metaDataResultSet);
+		given(databaseMetaData.getColumns(null, USER, TABLE, null)).willReturn(columnsResultSet);
+
+		MapSqlParameterSource map = new MapSqlParameterSource();
+		map.addValue("id", 1);
+		String[] keyCols = new String[] { "id" };
+		context.setTableName(TABLE);
+		context.processMetaData(dataSource, List.of("id"), keyCols);
+		List<Object> values = context.matchInParameterValuesWithInsertColumns(map);
+		String insertString = context.createInsertString(keyCols);
+		int[] insertTypes = context.createInsertTypes();
+
+		assertThat(insertString).as("empty insert not generated correctly")
+				.isEqualTo("INSERT INTO customers () VALUES()");
+		assertThat(values).as("no values should remain once the only declared column is the generated key").isEmpty();
+		assertThat(insertTypes).as("no types should remain once the only declared column is the generated key").isEmpty();
+	}
+
+	@Test
+	void declaredColumnsExcludeGeneratedKeyRegardlessOfCase() throws Exception {
+		final String TABLE = "customers";
+		final String USER = "me";
+
+		ResultSet metaDataResultSet = mock();
+		given(metaDataResultSet.next()).willReturn(true, false);
+		given(metaDataResultSet.getString("TABLE_SCHEM")).willReturn(USER);
+		given(metaDataResultSet.getString("TABLE_NAME")).willReturn(TABLE);
+		given(metaDataResultSet.getString("TABLE_TYPE")).willReturn("TABLE");
+
+		ResultSet columnsResultSet = mock();
+		given(columnsResultSet.next()).willReturn(true, true, false);
+		given(columnsResultSet.getString("COLUMN_NAME")).willReturn("id", "name");
+		given(columnsResultSet.getInt("DATA_TYPE")).willReturn(Types.INTEGER, Types.VARCHAR);
+		given(columnsResultSet.getBoolean("NULLABLE")).willReturn(false, true);
+
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+		given(databaseMetaData.getDatabaseProductVersion()).willReturn("1.0");
+		given(databaseMetaData.getUserName()).willReturn(USER);
+		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
+		given(databaseMetaData.getTables(null, null, TABLE, null)).willReturn(metaDataResultSet);
+		given(databaseMetaData.getColumns(null, USER, TABLE, null)).willReturn(columnsResultSet);
+
+		MapSqlParameterSource map = new MapSqlParameterSource();
+		map.addValue("ID", 1);
+		map.addValue("name", "Sven");
+		String[] keyCols = new String[] { "id" };
+		context.setTableName(TABLE);
+		context.processMetaData(dataSource, List.of("ID", "name"), keyCols);
+		List<Object> values = context.matchInParameterValuesWithInsertColumns(map);
+		String insertString = context.createInsertString(keyCols);
+
+		assertThat(insertString).as("insert string should exclude the declared generated key column regardless of case")
+				.isEqualTo("INSERT INTO customers (name) VALUES(?)");
+		assertThat(values).as("values should exclude the declared generated key column regardless of case")
+				.containsExactly("Sven");
+	}
+
 }
