@@ -217,6 +217,86 @@ class BeanInstanceSupplierTests {
 	}
 
 	@Test
+	void getWithGeneratorAndExplicitArgumentsCallsBiFunction() {
+		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
+		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
+		List<Object> result = new ArrayList<>();
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class)
+				.withGenerator((registeredBean, args) -> result.add(args));
+		resolver.get(registerBean, "test");
+		assertThat(result).hasSize(1);
+		assertThat(((AutowiredArguments) result.get(0)).toArray()).containsExactly("test");
+	}
+
+	@Test
+	void getWithGeneratorAndIncorrectExplicitArgumentCountThrowsException() {
+		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
+		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class)
+				.withGenerator((registeredBean, args) -> args.get(0));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> resolver.get(registerBean, "test", "extra"))
+				.withMessage("Incorrect number of arguments: expected 1 but got 2");
+	}
+
+	@Test
+	void getWithNoGeneratorAndExplicitArgumentsUsesReflection() {
+		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
+		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
+		BeanInstanceSupplier<SingleArgConstructor> resolver = BeanInstanceSupplier.forConstructor(String.class);
+		assertThat(resolver.get(registerBean, "test").getString()).isEqualTo("test");
+	}
+
+	@Test
+	void supportsExplicitArgumentsReturnsTrue() {
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor();
+		assertThat(resolver.supportsExplicitArguments()).isTrue();
+	}
+
+	@Test
+	void supportsExplicitArgumentsWhenArgumentCountMatchesReturnsTrue() {
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class);
+		assertThat(resolver.supportsExplicitArguments("test")).isTrue();
+	}
+
+	@Test
+	void supportsExplicitArgumentsWhenArgumentCountDoesNotMatchReturnsFalse() {
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class);
+		assertThat(resolver.supportsExplicitArguments("test", "extra")).isFalse();
+	}
+
+	@Test
+	void supportsExplicitArgumentsWhenArgumentTypeDoesNotMatchReturnsFalse() {
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class);
+		assertThat(resolver.supportsExplicitArguments(1)).isFalse();
+	}
+
+	@Test
+	void supportsExplicitArgumentsWhenArgumentTypeIsAssignableButNotExactReturnsFalse() {
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(Object.class);
+		assertThat(resolver.supportsExplicitArguments("test")).isFalse();
+	}
+
+	@Test
+	void supportsExplicitArgumentsWhenArgumentIsNullReturnsFalse() {
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class);
+		assertThat(resolver.supportsExplicitArguments((Object) null)).isFalse();
+	}
+
+	@Test
+	void supportsExplicitArgumentsWhenPrimitiveParameterMatchesWrapperReturnsTrue() {
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(int.class);
+		assertThat(resolver.supportsExplicitArguments(1)).isTrue();
+	}
+
+	@Test
+	void supportsExplicitArgumentsWhenUsingGeneratorWithoutArgumentsReturnsFalse() {
+		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier.<String>forConstructor()
+				.withGenerator(registeredBean -> "test");
+		assertThat(resolver.supportsExplicitArguments()).isFalse();
+	}
+
+	@Test
 	void getWithGeneratorCallsFunction() {
 		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
 		this.beanFactory.registerSingleton("one", "1");
