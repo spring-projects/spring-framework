@@ -1,15 +1,30 @@
-As a request goes through proxies such as load balancers the host, port, and
-scheme may change, and that makes it a challenge to create links that point to the correct
-host, port, and scheme from a client perspective.
+As a request goes through a chain of proxies, request details such as the scheme, host,
+port, remote address, and local address change. Proxies can insert headers that keep track of
+the hops, and that can help to restore the request from the original client's perspective.
+This allows an application to create self-reference links for external clients.
 
-{rfc-site}/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
-that proxies can use to provide information about the original request.
+There are two alternatives for headers that proxies can use:
+
+- {rfc-site}/rfc7239[RFC 7239] defines the `"Forwarded"` HTTP header, a single header with
+individual attributes for each component in the chain of proxied requests with the
+following syntax.
+- `"X-Forwarded-"` prefixed headers are the original approach that predates the standard
+and uses a separate header for each request component.
+
+The Spring Framework supports both approaches. Most proxies today support the original
+`"X-Forwarded"` headers only as a de facto standard.
+
+WARNING: For maximum security, a proxy at the edge of trust must be configured to reset both
+the standard `"Forwarded"` and `"X-Forwarded-"` headers regardless of which ones are chosen
+for use. Likewise, when configuring forwarded header handling in Spring, you need to indicate
+which type of headers to use. More on security considerations later in this section.
+
+
 
 [[forwarded-headers-non-standard]]
-=== Non-standard Headers
+=== X-Forwarded Headers
 
-There are other non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
-`X-Forwarded-Proto`, `X-Forwarded-Ssl`, `X-Forwarded-Prefix`, and `X-Forwarded-For`.
+This section describes supported `"X-Forwarded"` headers.
 
 [[x-forwarded-host]]
 ==== X-Forwarded-Host

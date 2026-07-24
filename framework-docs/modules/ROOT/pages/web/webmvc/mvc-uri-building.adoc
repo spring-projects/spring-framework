@@ -112,8 +112,8 @@ Kotlin::
 
 NOTE: As of 5.1, `ServletUriComponentsBuilder` ignores information from the `Forwarded` and
 `X-Forwarded-*` headers, which specify the client-originated address. Consider using the
-xref:web/webmvc/filters.adoc#filters-forwarded-headers[`ForwardedHeaderFilter`] to extract and use or to discard
-such headers.
+xref:web/webmvc/filters.adoc#filters-forwarded-headers[`ForwardedHeaderFilter`]
+to extract and use or to discard such headers.
 
 
 [[mvc-links-to-controllers]]
@@ -261,8 +261,8 @@ Kotlin::
 
 NOTE: As of 5.1, `MvcUriComponentsBuilder` ignores information from the `Forwarded` and
 `X-Forwarded-*` headers, which specify the client-originated address. Consider using the
-xref:web/webmvc/filters.adoc#filters-forwarded-headers[ForwardedHeaderFilter] to extract and use or to discard
-such headers.
+xref:web/webmvc/filters.adoc#filters-forwarded-headers[ForwardedHeaderFilter] to extract
+and use or to discard such headers.
 
 
 [[mvc-links-to-controllers-from-views]]
