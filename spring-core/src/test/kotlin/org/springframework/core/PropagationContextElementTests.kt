@@ -68,6 +68,25 @@ class PropagationContextElementTests {
 		Hooks.disableAutomaticContextPropagation()
 	}
 
+	@Test
+	fun nestedInvocations() {
+		val observation = Observation.createNotStarted("coroutine", observationRegistry)
+		observation.observe {
+			val element = PropagationContextElement()
+			val scope1 = element.updateThreadContext(kotlin.coroutines.EmptyCoroutineContext)
+			assertThat(observationRegistry.currentObservation).isEqualTo(observation)
+
+			val scope2 = element.updateThreadContext(kotlin.coroutines.EmptyCoroutineContext)
+			assertThat(observationRegistry.currentObservation).isEqualTo(observation)
+
+			element.restoreThreadContext(kotlin.coroutines.EmptyCoroutineContext, scope1)
+			assertThat(observationRegistry.currentObservation).isEqualTo(observation)
+
+			element.restoreThreadContext(kotlin.coroutines.EmptyCoroutineContext, scope2)
+			assertThat(observationRegistry.currentObservation).isEqualTo(observation)
+		}
+	}
+
 	suspend fun suspendingFunction(value: String): String? {
 		delay(1)
 		val currentObservation = observationRegistry.currentObservation
