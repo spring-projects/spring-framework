@@ -19,6 +19,7 @@ package org.springframework.core.convert;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
@@ -549,6 +550,18 @@ public class TypeDescriptor implements Serializable {
 
 
 	/**
+	 * Create a new type descriptor for the specified {@link Parameter}.
+	 * <p>This is a convenience factory method for scenarios where a {@code Parameter}
+	 * descriptor is already available.
+	 * @param parameter the source parameter
+	 * @return the corresponding type descriptor
+	 * @since 7.1
+	 */
+	public static TypeDescriptor forParameter(Parameter parameter) {
+		return new TypeDescriptor(MethodParameter.forParameter(parameter));
+	}
+
+	/**
 	 * Create a new type descriptor for an object.
 	 * <p>Use this factory method to introspect a source object before asking the
 	 * conversion system to convert it to some other type.
@@ -674,6 +687,32 @@ public class TypeDescriptor implements Serializable {
 					"use the nestingLevel parameter to specify the desired nestingLevel for nested type traversal");
 		}
 		return new TypeDescriptor(methodParameter).nested(nestingLevel);
+	}
+
+	/**
+	 * Create a type descriptor for a nested type declared within the parameter.
+	 * <p>For example, if the parameter is a {@code List<String>} and the
+	 * nesting level is 1, the nested type descriptor will be {@code String.class}.
+	 * <p>If the parameter is a {@code List<List<String>>} and the nesting
+	 * level is 2, the nested type descriptor will also be a {@code String.class}.
+	 * <p>If the parameter is a {@code Map<Integer, String>} and the nesting
+	 * level is 1, the nested type descriptor will be String, derived from the map value.
+	 * <p>If the parameter is a {@code List<Map<Integer, String>>} and the
+	 * nesting level is 2, the nested type descriptor will be String, derived from the map value.
+	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not declared.
+	 * For example, if the parameter is a {@code List<?>}, the nested type
+	 * descriptor returned will be {@code null}.
+	 * @param parameter the parameter
+	 * @param nestingLevel the nesting level of the collection/array element or
+	 * map key/value declaration within the parameter
+	 * @return the nested type descriptor at the specified nesting level,
+	 * or {@code null} if it could not be obtained
+	 * @throws IllegalArgumentException if the types up to the specified nesting
+	 * level are not of collection, array, or map types
+	 * @since 7.1
+	 */
+	public static @Nullable TypeDescriptor nested(Parameter parameter, int nestingLevel) {
+		return new TypeDescriptor(MethodParameter.forParameter(parameter)).nested(nestingLevel);
 	}
 
 	/**
