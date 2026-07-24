@@ -31,7 +31,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1
- * @deprecated together with {@link HandlerMappingIntrospector} without a replacement.
+ * @deprecated without a replacement.
  */
 @Deprecated(since = "7.0", forRemoval = true)
 public interface MatchableHandlerMapping extends HandlerMapping {
