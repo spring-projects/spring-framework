@@ -1324,6 +1324,48 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	void matcherDoesNotMatchAcrossNonContiguousDelimiterBytes(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = stringBuffer("a\rXY\nb");
+
+		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int result = matcher.match(buffer);
+		assertThat(result).isEqualTo(-1);
+
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void matcherMatchesContiguousTwoByteDelimiter(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = stringBuffer("a\r\nb");
+
+		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int result = matcher.match(buffer);
+		assertThat(result).isEqualTo(2);
+
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void matcherDoesNotMatchAfterRepeatedFirstDelimiterByte(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = stringBuffer("a\r\rX\nb");
+
+		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int result = matcher.match(buffer);
+		assertThat(result).isEqualTo(-1);
+
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
 	void propagateContextByteChannel(DataBufferFactory bufferFactory) throws IOException {
 		Path path = Paths.get(this.resource.getURI());
 		try (SeekableByteChannel out = Files.newByteChannel(this.tempFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
