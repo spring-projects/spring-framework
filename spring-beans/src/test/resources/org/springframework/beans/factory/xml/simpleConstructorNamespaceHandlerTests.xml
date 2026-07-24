@@ -4,18 +4,18 @@
 		xmlns:c="http://www.springframework.org/schema/c"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
- <!--
+<!--
 	<bean id="simple1" class="org.springframework.beans.testfixture.beans.DummyBean">
 		<constructor-arg value="name"/>
 	</bean>
- -->
+-->
 	<bean id="simple" class="org.springframework.beans.testfixture.beans.DummyBean" c:_="simple"/>
 
 <!--
 	<bean id="simple1-ref" class="org.springframework.beans.testfixture.beans.DummyBean">
 		<constructor-arg ref="name"/>
 	</bean>
- -->
+-->
 	<bean id="simple-ref" class="org.springframework.beans.testfixture.beans.DummyBean" c:_-ref="name"/>
 
 	<bean id="name" class="java.lang.String">
@@ -27,7 +27,7 @@
 		<constructor-arg name="name" value="foo"/>
 		<constructor-arg name="age" value="10"/>
 	</bean>
- -->
+-->
 	<bean id="name-value" class="org.springframework.beans.testfixture.beans.TestBean" c:age="10" c:name="name-value"/>
 
 <!-- 
@@ -35,7 +35,7 @@
 		<constructor-arg name="name" ref="name"/>
 		<constructor-arg name="spouse" ref="name-value"/>
 	</bean>
- -->
+-->
 	<bean id="name-ref" class="org.springframework.beans.testfixture.beans.DummyBean" c:name-ref="name" c:spouse-ref="name-value"/>
 
 	<bean id="indexed-value" class="org.springframework.beans.testfixture.beans.DummyBean" c:_1="austria" c:_0="at" c:_2="10"/>

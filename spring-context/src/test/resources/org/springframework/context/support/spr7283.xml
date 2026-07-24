@@ -8,7 +8,7 @@
 
 	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean"/>
 
-    <util:list id="list">
+	<util:list id="list">
 		<bean class="org.springframework.context.support.Spr7283Tests$A"/>
 		<bean class="org.springframework.context.support.Spr7283Tests$B"/>
 	</util:list>

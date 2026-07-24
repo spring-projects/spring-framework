@@ -25,7 +25,7 @@
 				</bean>
 			</list>
 		</property>
-    <property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
+		<property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
 	</bean>
 
 	<bean id="queryWithNamedParameters" class="org.springframework.jdbc.object.GenericSqlQuery">
@@ -47,7 +47,7 @@
 				</bean>
 			</list>
 		</property>
-        <property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
+		<property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
 	</bean>
 
 	<bean id="queryWithRowMapperBean" class="org.springframework.jdbc.object.GenericSqlQuery">

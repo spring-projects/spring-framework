@@ -26,7 +26,7 @@
 		<!--
 			Aspect interfaces don't need to be included here.
 			They may, for example, be added by global interceptors.
-		 -->
+		-->
 		<property name="interfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>
 
 		<!--

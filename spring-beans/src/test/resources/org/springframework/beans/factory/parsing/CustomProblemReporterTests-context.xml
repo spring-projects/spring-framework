@@ -18,9 +18,9 @@
 		<property name="spouse">
 			<bean class="org.springframework.beans.testfixture.beans.TestBean">
 				<property name="someMap">
-				    <map>
-				        <entry/>
-				    </map>
+					<map>
+						<entry/>
+					</map>
 				</property>
 			</bean>
 		</property>

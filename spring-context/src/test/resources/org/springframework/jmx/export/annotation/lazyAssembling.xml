@@ -7,9 +7,9 @@
 
 	<context:mbean-export server="server" registration="replaceExisting"/>
 
-    <context:property-placeholder/>
+	<context:property-placeholder/>
 
-    <bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+	<bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
 
 	<bean name="testBean4" class="org.springframework.jmx.export.annotation.AnnotationTestBean" lazy-init="true">
 		<property name="name" value="TEST"/>

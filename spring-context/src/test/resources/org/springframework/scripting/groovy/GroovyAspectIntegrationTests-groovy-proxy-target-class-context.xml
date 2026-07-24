@@ -7,12 +7,12 @@
 						http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 						http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang-3.1.xsd">
 
-    <aop:config >
-       <aop:advisor id="logUserAdvisor" pointcut="@within(org.springframework.scripting.groovy.Log)" advice-ref="logUserAdvice"/>
-    </aop:config>
+	<aop:config >
+		<aop:advisor id="logUserAdvisor" pointcut="@within(org.springframework.scripting.groovy.Log)" advice-ref="logUserAdvice"/>
+	</aop:config>
 
-    <bean id="logUserAdvice" class="org.springframework.scripting.groovy.LogUserAdvice" />
+	<bean id="logUserAdvice" class="org.springframework.scripting.groovy.LogUserAdvice" />
 
-    <lang:groovy id="groovyBean" script-source="classpath:/org/springframework/scripting/groovy/GroovyServiceImpl.grv" refresh-check-delay="1000" proxy-target-class="true"/>
+	<lang:groovy id="groovyBean" script-source="classpath:/org/springframework/scripting/groovy/GroovyServiceImpl.grv" refresh-check-delay="1000" proxy-target-class="true"/>
 
 </beans>

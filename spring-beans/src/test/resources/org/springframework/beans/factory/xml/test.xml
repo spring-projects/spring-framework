@@ -121,7 +121,7 @@
 	<bean id="validEmpty" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="commentsInValue" class="org.springframework.beans.testfixture.beans.TestBean">
-	  <property name="name"><value>this is<!-- don't mind me --> a <![CDATA[<!--comment-->]]></value></property>
+		<property name="name"><value>this is<!-- don't mind me --> a <![CDATA[<!--comment-->]]></value></property>
 	</bean>
 
 </beans>
