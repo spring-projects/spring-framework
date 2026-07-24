@@ -19,12 +19,15 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ResolvableType;
@@ -32,8 +35,12 @@ import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -47,6 +54,8 @@ import org.springframework.util.ObjectUtils;
  * @since 6.1
  */
 final class StatusHandler {
+
+	private static final Log logger = LogFactory.getLog(StatusHandler.class);
 
 	private final ResponsePredicate predicate;
 
@@ -163,16 +172,13 @@ final class StatusHandler {
 		return preface + bodyText;
 	}
 
-	@SuppressWarnings({"NullAway", "removal"})
+	@SuppressWarnings("NullAway")
 	private static Function<ResolvableType, ? extends @Nullable Object> initBodyConvertFunction(
 			ClientHttpResponse response, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
 
 		return resolvableType -> {
 			try {
-				HttpMessageConverterExtractor<?> extractor =
-						new HttpMessageConverterExtractor<>(resolvableType.getType(), messageConverters);
-
-				return extractor.extractData(new ClientHttpResponseDecorator(response) {
+				return extractData(resolvableType, messageConverters, new ClientHttpResponseDecorator(response) {
 					@Override
 					public InputStream getBody() {
 						return new ByteArrayInputStream(body);
@@ -183,6 +189,65 @@ final class StatusHandler {
 				throw new RestClientException("Error while extracting response for type [" + resolvableType + "]", ex);
 			}
 		};
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private static @Nullable Object extractData(ResolvableType resolvableType,
+			List<HttpMessageConverter<?>> messageConverters, ClientHttpResponse response) throws IOException {
+
+		IntrospectingClientHttpResponse responseWrapper = new IntrospectingClientHttpResponse(response);
+		if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
+			return null;
+		}
+		MediaType contentType = getContentType(responseWrapper);
+		Type responseType = resolvableType.getType();
+		Class<?> responseClass = (responseType instanceof Class<?> clazz ? clazz : null);
+
+		try {
+			for (HttpMessageConverter<?> messageConverter : messageConverters) {
+				if (messageConverter instanceof GenericHttpMessageConverter genericMessageConverter) {
+					if (genericMessageConverter.canRead(responseType, null, contentType)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Reading to [" + resolvableType + "]");
+						}
+						return genericMessageConverter.read(responseType, null, responseWrapper);
+					}
+				}
+				else if (messageConverter instanceof SmartHttpMessageConverter smartMessageConverter) {
+					if (smartMessageConverter.canRead(resolvableType, contentType)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Reading to [" + resolvableType + "]");
+						}
+						return smartMessageConverter.read(resolvableType, responseWrapper, null);
+					}
+				}
+				else if (responseClass != null && messageConverter.canRead(responseClass, contentType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reading to [" + responseClass.getName() + "] as \"" + contentType + "\"");
+					}
+					return messageConverter.read((Class) responseClass, responseWrapper);
+				}
+			}
+		}
+		catch (IOException | HttpMessageNotReadableException ex) {
+			throw new RestClientException("Error while extracting response for type [" +
+					responseType + "] and content type [" + contentType + "]", ex);
+		}
+
+		throw new UnknownContentTypeException(responseType, contentType,
+				responseWrapper.getStatusCode(), responseWrapper.getStatusText(),
+				responseWrapper.getHeaders(), RestClientUtils.getBody(responseWrapper));
+	}
+
+	private static MediaType getContentType(ClientHttpResponse response) {
+		MediaType contentType = response.getHeaders().getContentType();
+		if (contentType == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No content-type, using 'application/octet-stream'");
+			}
+			contentType = MediaType.APPLICATION_OCTET_STREAM;
+		}
+		return contentType;
 	}
 
 
