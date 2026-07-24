@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.BiPredicate;
@@ -246,7 +246,9 @@ public abstract class MimeTypeUtils {
 			String parameter = mimeType.substring(index + 1, nextIndex).trim();
 			if (parameter.length() > 0) {
 				if (parameters == null) {
-					parameters = new LinkedHashMap<>(4);
+					// Parameter names are case-insensitive, so use a case-insensitive
+					// map in order to reject duplicates that differ only in case.
+					parameters = new LinkedCaseInsensitiveMap<>(4, Locale.ROOT);
 				}
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex >= 0) {
