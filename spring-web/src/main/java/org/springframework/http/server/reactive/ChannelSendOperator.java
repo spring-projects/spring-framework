@@ -168,7 +168,9 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 				requiredWriteSubscriber().onNext(item);
 				return;
 			}
-			// FIXME revisit in case of reentrant sync deadlock
+
+			boolean invokeWriteFunction = false;
+
 			synchronized (this) {
 				if (this.state == State.READY_TO_WRITE) {
 					requiredWriteSubscriber().onNext(item);
@@ -176,15 +178,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 				else if (this.state == State.NEW) {
 					this.item = item;
 					this.state = State.FIRST_SIGNAL_RECEIVED;
-					Publisher<Void> result;
-					try {
-						result = writeFunction.apply(this);
-					}
-					catch (Throwable ex) {
-						this.writeCompletionBarrier.onError(ex);
-						return;
-					}
-					result.subscribe(this.writeCompletionBarrier);
+					invokeWriteFunction = true;
 				}
 				else {
 					if (this.subscription != null) {
@@ -193,6 +187,20 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 					this.writeCompletionBarrier.onError(new IllegalStateException("Unexpected item."));
 				}
 			}
+
+			if (!invokeWriteFunction) {
+				return;
+			}
+
+			Publisher<Void> result;
+			try {
+				result = writeFunction.apply(this);
+			}
+			catch (Throwable ex) {
+				this.writeCompletionBarrier.onError(ex);
+				return;
+			}
+			result.subscribe(this.writeCompletionBarrier);
 		}
 
 		private Subscriber<? super T> requiredWriteSubscriber() {
@@ -226,6 +234,9 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 				requiredWriteSubscriber().onComplete();
 				return;
 			}
+
+			boolean invokeWriteFunction = false;
+
 			synchronized (this) {
 				if (this.state == State.READY_TO_WRITE) {
 					requiredWriteSubscriber().onComplete();
@@ -233,20 +244,26 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 				else if (this.state == State.NEW) {
 					this.completed = true;
 					this.state = State.FIRST_SIGNAL_RECEIVED;
-					Publisher<Void> result;
-					try {
-						result = writeFunction.apply(this);
-					}
-					catch (Throwable ex) {
-						this.writeCompletionBarrier.onError(ex);
-						return;
-					}
-					result.subscribe(this.writeCompletionBarrier);
+					invokeWriteFunction = true;
 				}
 				else {
 					this.completed = true;
 				}
 			}
+
+			if (!invokeWriteFunction) {
+				return;
+			}
+
+			Publisher<Void> result;
+			try {
+				result = writeFunction.apply(this);
+			}
+			catch (Throwable ex) {
+				this.writeCompletionBarrier.onError(ex);
+				return;
+			}
+			result.subscribe(this.writeCompletionBarrier);
 		}
 
 		@Override
