@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.assertj.core.api.ThrowableTypeAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +33,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests invocation of constructors.
@@ -142,6 +144,28 @@ class ConstructorInvocationTests extends AbstractExpressionTests {
 		assertThat(ctx.getConstructorResolvers()).hasSize(2);
 	}
 
+	@Test  // gh-36985
+	void cachedConstructorExecutorIsNotUsedWithoutRegisteredConstructorResolvers() {
+		((StandardTypeLocator) super.context.getTypeLocator()).registerImport(Fruit.class.getPackageName());
+
+		// reflective constructor accessor is the only one by default
+		assertThat(super.context.getConstructorResolvers()).hasSize(1);
+
+		String expression = "new Fruit('apple', T(java.awt.Color).RED, 'red').name";
+		Expression expr = parser.parseExpression(expression);
+		assertThat(expr.getValue(super.context)).isEqualTo("apple");
+		// Ensure the same expression can be evaluated again.
+		assertThat(expr.getValue(super.context)).isEqualTo("apple");
+
+		super.context.setConstructorResolvers(List.of());
+		assertThat(super.context.getConstructorResolvers()).isEmpty();
+
+		// Evaluation of the same expression should no longer work.
+		assertThatSpelEvaluationException()
+				.isThrownBy(() -> expr.getValue(super.context))
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.CONSTRUCTOR_NOT_FOUND);
+	}
+
 	@Test
 	void varargsConstructors() {
 		((StandardTypeLocator) super.context.getTypeLocator()).registerImport(Fruit.class.getPackageName());
@@ -182,6 +206,10 @@ class ConstructorInvocationTests extends AbstractExpressionTests {
 	@Test
 	void argumentConversion() {
 		evaluate("new String(3.0d)", "3.0", String.class);
+	}
+
+	private ThrowableTypeAssert<SpelEvaluationException> assertThatSpelEvaluationException() {
+		return assertThatExceptionOfType(SpelEvaluationException.class);
 	}
 
 
