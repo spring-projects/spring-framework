@@ -49,8 +49,8 @@ import org.springframework.expression.spel.SpelMessage;
  * should be meaningfully restricted. Examples include but are not limited to
  * data binding expressions, property-based filters, and others. To that effect,
  * {@code SimpleEvaluationContext} is tailored to support only a subset of the
- * SpEL language syntax, for example, excluding references to Java types, constructors,
- * and bean references.
+ * SpEL language syntax &mdash; for example, excluding references to Java types,
+ * constructors, and bean references.
  *
  * <p>When creating a {@code SimpleEvaluationContext} you need to choose the level of
  * support that you need for data binding in SpEL expressions:
@@ -65,9 +65,10 @@ import org.springframework.expression.spel.SpelMessage;
  * read-only access to properties via {@link DataBindingPropertyAccessor}. Similarly,
  * {@link SimpleEvaluationContext#forReadWriteDataBinding()} enables read and write access
  * to properties. Alternatively, configure custom accessors via
- * {@link SimpleEvaluationContext#forPropertyAccessors}, potentially
- * {@linkplain Builder#withAssignmentDisabled() disable assignment}, and optionally
- * activate method resolution and/or a type converter through the builder.
+ * {@link SimpleEvaluationContext#forPropertyAccessors}, consider
+ * {@linkplain Builder#withAssignmentDisabled() disabling assignment} (recommended),
+ * and optionally activate method resolution and/or a type converter through the
+ * builder.
  *
  * <p>Note that {@code SimpleEvaluationContext} is typically not configured
  * with a default root object. Instead it is meant to be created once and
@@ -86,6 +87,23 @@ import org.springframework.expression.spel.SpelMessage;
  *
  * <p>For more power and flexibility, in particular for internal configuration
  * scenarios, consider using {@link StandardEvaluationContext} instead.
+ *
+ * <p><strong>WARNING</strong>: {@code SimpleEvaluationContext} takes a
+ * best-effort approach to restricting the SpEL language to a subset of its
+ * features; however, it cannot guarantee that evaluation of an expression is
+ * safe. Evaluating a SpEL expression obtained from an untrusted source is inherently
+ * dangerous and should generally be avoided, since doing so can effectively grant
+ * that source the ability to execute arbitrary code within the application. Even
+ * within the restricted language subset supported by {@code SimpleEvaluationContext},
+ * an expression can potentially invoke any property, method, or function reachable
+ * via the configured root object, property accessors, method resolvers, variables,
+ * and functions. It is therefore the responsibility of the code that configures a
+ * {@code SimpleEvaluationContext} &mdash; for example, by supplying a root
+ * object or by registering property accessors, method resolvers, variables, or
+ * functions &mdash; to ensure that none of those reachable objects expose
+ * operations that would be dangerous if invoked by an expression from an
+ * untrusted source. For details on what qualifies as a "trusted" source, see
+ * {@link StandardEvaluationContext}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller

@@ -253,6 +253,39 @@ properties. Alternatively, configure custom accessors via
 `SimpleEvaluationContext.forPropertyAccessors(...)`, potentially disable assignment, and
 optionally activate method resolution and/or a type converter through the builder.
 
+[[expressions-evaluation-context-security]]
+=== Security Considerations
+
+SpEL is a powerful expression language that can invoke constructors and methods, read and
+write properties and fields, and reference beans – all backed by reflection. Because of
+this power, evaluating a SpEL expression obtained from an untrusted source is inherently
+dangerous and should generally be avoided, since doing so can effectively grant that
+source the ability to execute arbitrary code within the application, regardless of which
+`EvaluationContext` implementation is used.
+
+Throughout this section, a source is considered "trusted" only if it is a developer of
+the application or an administrator responsible for configuring or operating the
+application. Any other source of a SpEL expression must be treated as untrusted – for
+example, an expression supplied by an end user of the application or received from an
+external system.
+
+[WARNING]
+====
+`StandardEvaluationContext` exposes the complete SpEL language and must *never* be used
+to evaluate an expression obtained from an untrusted source.
+====
+
+Although `SimpleEvaluationContext` restricts the SpEL language to a subset of its
+features, that restriction is provided on a best-effort basis and does not guarantee that
+expression evaluation is safe. Since an expression can potentially invoke any property,
+method, or function reachable via the configured root object, property accessors, method
+resolvers, variables, and functions, care must be taken if you choose to evaluate
+expressions from an untrusted source. It is therefore the responsibility of the code that
+configures an `EvaluationContext` – for example, by supplying a root object or by
+registering property accessors, resolvers, variables, or functions – to ensure that none
+of the objects reachable via the context expose operations that would be dangerous if
+invoked by an expression from an untrusted source.
+
 [[expressions-type-conversion]]
 === Type Conversion
 
