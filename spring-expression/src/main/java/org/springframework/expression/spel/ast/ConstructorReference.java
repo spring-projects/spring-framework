@@ -136,36 +136,43 @@ public class ConstructorReference extends SpelNodeImpl {
 
 		ConstructorExecutor executorToUse = this.cachedExecutor;
 		if (executorToUse != null) {
-			try {
-				return executorToUse.execute(state.getEvaluationContext(), arguments);
-			}
-			catch (AccessException ex) {
-				// Two reasons this can occur:
-				// 1. the constructor invoked actually threw a real exception
-				// 2. the constructor invoked was not passed the arguments it expected and has become 'stale'
-
-				// In the first case we should not retry, in the second case we should see if there is a
-				// better suited constructor.
-
-				// To determine which situation it is, the AccessException will contain a cause.
-				// If the cause is an InvocationTargetException, a user exception was thrown inside the constructor.
-				// Otherwise, the constructor could not be invoked.
-				if (ex.getCause() instanceof InvocationTargetException cause) {
-					// User exception was the root cause - exit now
-					Throwable rootCause = cause.getCause();
-					if (rootCause instanceof RuntimeException runtimeException) {
-						throw runtimeException;
-					}
-					else {
-						String typeName = (String) this.children[0].getValueInternal(state).getValue();
-						throw new SpelEvaluationException(getStartPosition(), rootCause,
-								SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
-								FormatHelper.formatMethodForMessage("", argumentTypes));
-					}
-				}
-
-				// At this point we know it wasn't a user problem so worth a retry if a better candidate can be found
+			if (state.getEvaluationContext().getConstructorResolvers().isEmpty()) {
+				// Constructor resolution is not supported in the current context,
+				// so we discard the cached executor.
 				this.cachedExecutor = null;
+			}
+			else {
+				try {
+					return executorToUse.execute(state.getEvaluationContext(), arguments);
+				}
+				catch (AccessException ex) {
+					// Two reasons this can occur:
+					// 1. the constructor invoked actually threw a real exception
+					// 2. the constructor invoked was not passed the arguments it expected and has become 'stale'
+
+					// In the first case we should not retry, in the second case we should see if there is a
+					// better suited constructor.
+
+					// To determine which situation it is, the AccessException will contain a cause.
+					// If the cause is an InvocationTargetException, a user exception was thrown inside the constructor.
+					// Otherwise, the constructor could not be invoked.
+					if (ex.getCause() instanceof InvocationTargetException cause) {
+						// User exception was the root cause - exit now
+						Throwable rootCause = cause.getCause();
+						if (rootCause instanceof RuntimeException runtimeException) {
+							throw runtimeException;
+						}
+						else {
+							String typeName = (String) this.children[0].getValueInternal(state).getValue();
+							throw new SpelEvaluationException(getStartPosition(), rootCause,
+									SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typeName,
+									FormatHelper.formatMethodForMessage("", argumentTypes));
+						}
+					}
+
+					// At this point we know it wasn't a user problem so worth a retry if a better candidate can be found
+					this.cachedExecutor = null;
+				}
 			}
 		}
 
