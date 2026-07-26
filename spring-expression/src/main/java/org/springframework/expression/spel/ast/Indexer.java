@@ -756,9 +756,10 @@ public class Indexer extends SpelNodeImpl {
 				if (cachedPropertyReadState != null) {
 					String cachedPropertyName = cachedPropertyReadState.name;
 					Class<?> cachedTargetType = cachedPropertyReadState.targetType;
+					PropertyAccessor accessor = cachedPropertyReadState.accessor;
 					// Is it OK to use the cached accessor?
-					if (cachedPropertyName.equals(this.name) && cachedTargetType.equals(targetType)) {
-						PropertyAccessor accessor = cachedPropertyReadState.accessor;
+					if (cachedPropertyName.equals(this.name) && cachedTargetType.equals(targetType) &&
+							this.evaluationContext.getPropertyAccessors().contains(accessor)) {
 						this.expressionState.trackOperation();
 						return accessor.read(this.evaluationContext, this.targetObject, this.name);
 					}
@@ -800,9 +801,10 @@ public class Indexer extends SpelNodeImpl {
 				if (cachedPropertyWriteState != null) {
 					String cachedPropertyName = cachedPropertyWriteState.name;
 					Class<?> cachedTargetType = cachedPropertyWriteState.targetType;
+					PropertyAccessor accessor = cachedPropertyWriteState.accessor;
 					// Is it OK to use the cached accessor?
-					if (cachedPropertyName.equals(this.name) && cachedTargetType.equals(targetType)) {
-						PropertyAccessor accessor = cachedPropertyWriteState.accessor;
+					if (cachedPropertyName.equals(this.name) && cachedTargetType.equals(targetType) &&
+							this.evaluationContext.getPropertyAccessors().contains(accessor)) {
 						this.expressionState.trackOperation();
 						accessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
 						return;
