@@ -3,13 +3,16 @@ description = "Spring R2DBC"
 apply plugin: "kotlin"
 
 dependencies {
-	api(project(":spring-beans"))
+    annotationProcessor project(":framework-annotation-processor")
+    api(project(":spring-beans"))
 	api(project(":spring-core"))
 	api(project(":spring-tx"))
 	api("io.projectreactor:reactor-core")
 	api("io.r2dbc:r2dbc-spi")
 	compileOnly("com.google.code.findbugs:jsr305") // for r2dbc-spi
-	optional("org.jetbrains.kotlin:kotlin-reflect")
+    compileOnly("guru.mocker.annotation:mixin-annotation:${mixinAnnotationVersion}")
+    annotationProcessor("guru.mocker.annotation:mixin-annotation-processor:${mixinAnnotationVersion}")
+    optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")

@@ -16,10 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.security.Principal;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -32,35 +28,23 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.accept.ApiVersionHolder;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.ApiVersionStrategy;
-import org.springframework.web.reactive.function.BodyExtractor;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -1223,181 +1207,11 @@ public abstract class RequestPredicates {
 		}
 	}
 
-
-
-	private abstract static class DelegatingServerRequest implements ServerRequest {
-
-		private final ServerRequest delegate;
-
+	@Mixin
+	abstract static class DelegatingServerRequest extends DelegatingServerRequestForwarder implements ServerRequest {
 
 		protected DelegatingServerRequest(ServerRequest delegate) {
-			Assert.notNull(delegate, "Delegate must not be null");
-			this.delegate = delegate;
-		}
-
-		@Override
-		public HttpMethod method() {
-			return this.delegate.method();
-		}
-
-		@Override
-		public URI uri() {
-			return this.delegate.uri();
-		}
-
-		@Override
-		public UriBuilder uriBuilder() {
-			return this.delegate.uriBuilder();
-		}
-
-		@Override
-		public String path() {
-			return this.delegate.path();
-		}
-
-		@Override
-		public RequestPath requestPath() {
-			return this.delegate.requestPath();
-		}
-
-		@Override
-		public Headers headers() {
-			return this.delegate.headers();
-		}
-
-		@Override
-		public MultiValueMap<String, HttpCookie> cookies() {
-			return this.delegate.cookies();
-		}
-
-		@Override
-		public Optional<InetSocketAddress> remoteAddress() {
-			return this.delegate.remoteAddress();
-		}
-
-		@Override
-		public Optional<InetSocketAddress> localAddress() {
-			return this.delegate.localAddress();
-		}
-
-		@Override
-		public List<HttpMessageReader<?>> messageReaders() {
-			return this.delegate.messageReaders();
-		}
-
-		@Override
-		public @Nullable ApiVersionStrategy apiVersionStrategy() {
-			return this.delegate.apiVersionStrategy();
-		}
-
-		@Override
-		public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
-			return this.delegate.body(extractor);
-		}
-
-		@Override
-		public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
-			return this.delegate.body(extractor, hints);
-		}
-
-		@Override
-		public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
-			return this.delegate.bodyToMono(elementClass);
-		}
-
-		@Override
-		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-			return this.delegate.bodyToMono(typeReference);
-		}
-
-		@Override
-		public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-			return this.delegate.bodyToFlux(elementClass);
-		}
-
-		@Override
-		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-			return this.delegate.bodyToFlux(typeReference);
-		}
-
-		@Override
-		public <T> Mono<T> bind(Class<T> bindType) {
-			return this.delegate.bind(bindType);
-		}
-
-		@Override
-		public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
-			return this.delegate.bind(bindType, dataBinderCustomizer);
-		}
-
-		@Override
-		public Optional<Object> attribute(String name) {
-			return this.delegate.attribute(name);
-		}
-
-		@Override
-		public Map<String, Object> attributes() {
-			return this.delegate.attributes();
-		}
-
-		@Override
-		public Optional<String> queryParam(String name) {
-			return this.delegate.queryParam(name);
-		}
-
-		@Override
-		public MultiValueMap<String, String> queryParams() {
-			return this.delegate.queryParams();
-		}
-
-		@Override
-		public String pathVariable(String name) {
-			return this.delegate.pathVariable(name);
-		}
-
-		@Override
-		public Map<String, String> pathVariables() {
-			return this.delegate.pathVariables();
-		}
-
-		@Override
-		public Mono<WebSession> session() {
-			return this.delegate.session();
-		}
-
-		@Override
-		public Mono<? extends Principal> principal() {
-			return this.delegate.principal();
-		}
-
-		@Override
-		public Mono<MultiValueMap<String, String>> formData() {
-			return this.delegate.formData();
-		}
-
-		@Override
-		public Mono<MultiValueMap<String, Part>> multipartData() {
-			return this.delegate.multipartData();
-		}
-
-		@Override
-		public ServerWebExchange exchange() {
-			return this.delegate.exchange();
-		}
-
-		@Override
-		public Mono<ServerResponse> checkNotModified(Instant lastModified) {
-			return this.delegate.checkNotModified(lastModified);
-		}
-
-		@Override
-		public Mono<ServerResponse> checkNotModified(String etag) {
-			return this.delegate.checkNotModified(etag);
-		}
-
-		@Override
-		public Mono<ServerResponse> checkNotModified(Instant lastModified, String etag) {
-			return this.delegate.checkNotModified(lastModified, etag);
+			super(delegate);
 		}
 
 		@Override

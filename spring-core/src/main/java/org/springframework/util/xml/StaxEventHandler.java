@@ -28,6 +28,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Namespace;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.jspecify.annotations.Nullable;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -50,6 +51,7 @@ class StaxEventHandler extends AbstractStaxHandler {
 	/**
 	 * Construct a new instance of the {@code StaxEventContentHandler} that writes to the
 	 * given {@code XMLEventWriter}. A default {@code XMLEventFactory} will be created.
+	 *
 	 * @param eventWriter the writer to write events to
 	 */
 	public StaxEventHandler(XMLEventWriter eventWriter) {
@@ -60,8 +62,9 @@ class StaxEventHandler extends AbstractStaxHandler {
 	/**
 	 * Construct a new instance of the {@code StaxEventContentHandler} that uses the given
 	 * event factory to create events and writes to the given {@code XMLEventConsumer}.
+	 *
 	 * @param eventWriter the writer to write events to
-	 * @param factory the factory used to create events
+	 * @param factory     the factory used to create events
 	 */
 	public StaxEventHandler(XMLEventWriter eventWriter, XMLEventFactory factory) {
 		this.eventFactory = factory;
@@ -88,7 +91,7 @@ class StaxEventHandler extends AbstractStaxHandler {
 
 	@Override
 	protected void startElementInternal(QName name, Attributes atts,
-			Map<String, String> namespaceMapping) throws XMLStreamException {
+										Map<String, String> namespaceMapping) throws XMLStreamException {
 
 		List<Attribute> attributes = getAttributes(atts);
 		List<Namespace> namespaces = getNamespaces(namespaceMapping);
@@ -157,39 +160,16 @@ class StaxEventHandler extends AbstractStaxHandler {
 	protected void skippedEntityInternal(String name) {
 	}
 
-
-	private static final class LocatorLocationAdapter implements Location {
-
-		private final Locator locator;
+	@Mixin
+	protected static final class LocatorLocationAdapter extends LocatorLocationAdapterForwarder implements Location {
 
 		public LocatorLocationAdapter(Locator locator) {
-			this.locator = locator;
-		}
-
-		@Override
-		public int getLineNumber() {
-			return this.locator.getLineNumber();
-		}
-
-		@Override
-		public int getColumnNumber() {
-			return this.locator.getColumnNumber();
+			super(locator);
 		}
 
 		@Override
 		public int getCharacterOffset() {
 			return -1;
 		}
-
-		@Override
-		public String getPublicId() {
-			return this.locator.getPublicId();
-		}
-
-		@Override
-		public String getSystemId() {
-			return this.locator.getSystemId();
-		}
 	}
-
 }

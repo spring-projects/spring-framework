@@ -16,11 +16,7 @@
 
 package org.springframework.web.service.invoker;
 
-import org.jspecify.annotations.Nullable;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import guru.mocker.annotation.mixin.Mixin;
 
 /**
  * {@link HttpExchangeAdapter} that wraps and delegates to another adapter instance.
@@ -28,52 +24,18 @@ import org.springframework.http.ResponseEntity;
  * @author Rossen Stoyanchev
  * @since 7.0
  */
-public class HttpExchangeAdapterDecorator implements HttpExchangeAdapter {
+public class HttpExchangeAdapterDecorator extends HttpExchangeAdapterDecoratorForwarder implements HttpExchangeAdapter {
 
-	private final HttpExchangeAdapter delegate;
-
-
+	@Mixin
 	public HttpExchangeAdapterDecorator(HttpExchangeAdapter delegate) {
-		this.delegate = delegate;
+		super(delegate);
 	}
-
 
 	/**
 	 * Return the wrapped delegate {@code HttpExchangeAdapter}.
 	 */
 	public HttpExchangeAdapter getHttpExchangeAdapter() {
-		return this.delegate;
-	}
-
-
-	@Override
-	public boolean supportsRequestAttributes() {
-		return this.delegate.supportsRequestAttributes();
-	}
-
-	@Override
-	public void exchange(HttpRequestValues requestValues) {
-		this.delegate.exchange(requestValues);
-	}
-
-	@Override
-	public HttpHeaders exchangeForHeaders(HttpRequestValues requestValues) {
-		return this.delegate.exchangeForHeaders(requestValues);
-	}
-
-	@Override
-	public <T> @Nullable T exchangeForBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return this.delegate.exchangeForBody(requestValues, bodyType);
-	}
-
-	@Override
-	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues requestValues) {
-		return this.delegate.exchangeForBodilessEntity(requestValues);
-	}
-
-	@Override
-	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		return this.delegate.exchangeForEntity(requestValues, bodyType);
+		return delegate;
 	}
 
 }

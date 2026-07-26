@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.server;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -27,6 +26,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
@@ -35,10 +35,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -1436,23 +1434,11 @@ public abstract class RouterFunctions {
 		}
 	}
 
-
-	private static class HandlerStrategiesResponseContext implements ServerResponse.Context {
-
-		private final HandlerStrategies strategies;
+	@Mixin
+	static class HandlerStrategiesResponseContext extends HandlerStrategiesResponseContextForwarder implements ServerResponse.Context {
 
 		public HandlerStrategiesResponseContext(HandlerStrategies strategies) {
-			this.strategies = strategies;
-		}
-
-		@Override
-		public List<HttpMessageWriter<?>> messageWriters() {
-			return this.strategies.messageWriters();
-		}
-
-		@Override
-		public List<ViewResolver> viewResolvers() {
-			return this.strategies.viewResolvers();
+			super(strategies);
 		}
 	}
 

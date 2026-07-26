@@ -18,8 +18,6 @@ package org.springframework.util;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.AbstractCollection;
-import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,11 +25,10 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -348,22 +345,11 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 
-	private class KeySet extends AbstractSet<String> {
-
-		private final Set<String> delegate;
+	@Mixin
+	class KeySet extends KeySetForwarder implements Set<String> {
 
 		KeySet(Set<String> delegate) {
-			this.delegate = delegate;
-		}
-
-		@Override
-		public int size() {
-			return this.delegate.size();
-		}
-
-		@Override
-		public boolean contains(Object o) {
-			return this.delegate.contains(o);
+			super(delegate);
 		}
 
 		@Override
@@ -380,35 +366,13 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		public void clear() {
 			LinkedCaseInsensitiveMap.this.clear();
 		}
-
-		@Override
-		public Spliterator<String> spliterator() {
-			return this.delegate.spliterator();
-		}
-
-		@Override
-		public void forEach(Consumer<? super String> action) {
-			this.delegate.forEach(action);
-		}
 	}
 
-
-	private class Values extends AbstractCollection<V> {
-
-		private final Collection<V> delegate;
+	@Mixin
+	class Values extends ValuesForwarder<V> implements Collection<V> {
 
 		Values(Collection<V> delegate) {
-			this.delegate = delegate;
-		}
-
-		@Override
-		public int size() {
-			return this.delegate.size();
-		}
-
-		@Override
-		public boolean contains(Object o) {
-			return this.delegate.contains(o);
+			super(delegate);
 		}
 
 		@Override
@@ -420,30 +384,13 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		public void clear() {
 			LinkedCaseInsensitiveMap.this.clear();
 		}
-
-		@Override
-		public Spliterator<V> spliterator() {
-			return this.delegate.spliterator();
-		}
-
-		@Override
-		public void forEach(Consumer<? super V> action) {
-			this.delegate.forEach(action);
-		}
 	}
 
-
-	private class EntrySet extends AbstractSet<Entry<String, V>> {
-
-		private final Set<Entry<String, V>> delegate;
+	@Mixin
+	class EntrySet extends EntrySetForwarder<V> implements Set<Entry<String, V>> {
 
 		EntrySet(Set<Entry<String, V>> delegate) {
-			this.delegate = delegate;
-		}
-
-		@Override
-		public int size() {
-			return this.delegate.size();
+			super(delegate);
 		}
 
 		@Override
@@ -479,21 +426,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 			}
 			LinkedCaseInsensitiveMap.this.remove(key);
 			return true;
-		}
-
-		@Override
-		public void clear() {
-			LinkedCaseInsensitiveMap.this.clear();
-		}
-
-		@Override
-		public Spliterator<Entry<String, V>> spliterator() {
-			return this.delegate.spliterator();
-		}
-
-		@Override
-		public void forEach(Consumer<? super Entry<String, V>> action) {
-			this.delegate.forEach(action);
 		}
 	}
 

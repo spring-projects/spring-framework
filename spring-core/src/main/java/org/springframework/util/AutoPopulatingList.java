@@ -21,11 +21,9 @@ import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -45,12 +43,12 @@ import org.jspecify.annotations.Nullable;
  * @param <E> the element type
  */
 @SuppressWarnings("serial")
-public class AutoPopulatingList<E> implements List<E>, Serializable {
+public class AutoPopulatingList<E> extends AutoPopulatingListForwarder<E> implements List<E>, Serializable {
 
 	/**
 	 * The {@link List} that all operations are eventually delegated to.
 	 */
-	private final List<E> backingList;
+	final List<E> backingList;
 
 	/**
 	 * The {@link ElementFactory} to use to create new {@link List} elements
@@ -89,47 +87,13 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	 * Creates a new {@code AutoPopulatingList} that is backed by the supplied {@link List}
 	 * and creates new elements on demand using the supplied {@link ElementFactory}.
 	 */
+	@Mixin
 	public AutoPopulatingList(List<E> backingList, ElementFactory<E> elementFactory) {
+		super(backingList, elementFactory);
 		Assert.notNull(backingList, "Backing List must not be null");
 		Assert.notNull(elementFactory, "Element factory must not be null");
 		this.backingList = backingList;
 		this.elementFactory = elementFactory;
-	}
-
-
-	@Override
-	public void add(int index, E element) {
-		this.backingList.add(index, element);
-	}
-
-	@Override
-	public boolean add(E o) {
-		return this.backingList.add(o);
-	}
-
-	@Override
-	public boolean addAll(Collection<? extends E> c) {
-		return this.backingList.addAll(c);
-	}
-
-	@Override
-	public boolean addAll(int index, Collection<? extends E> c) {
-		return this.backingList.addAll(index, c);
-	}
-
-	@Override
-	public void clear() {
-		this.backingList.clear();
-	}
-
-	@Override
-	public boolean contains(Object o) {
-		return this.backingList.contains(o);
-	}
-
-	@Override
-	public boolean containsAll(Collection<?> c) {
-		return this.backingList.containsAll(c);
 	}
 
 	/**
@@ -158,82 +122,6 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 	@Override
-	public int indexOf(Object o) {
-		return this.backingList.indexOf(o);
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return this.backingList.isEmpty();
-	}
-
-	@Override
-	public Iterator<E> iterator() {
-		return this.backingList.iterator();
-	}
-
-	@Override
-	public int lastIndexOf(Object o) {
-		return this.backingList.lastIndexOf(o);
-	}
-
-	@Override
-	public ListIterator<E> listIterator() {
-		return this.backingList.listIterator();
-	}
-
-	@Override
-	public ListIterator<E> listIterator(int index) {
-		return this.backingList.listIterator(index);
-	}
-
-	@Override
-	public E remove(int index) {
-		return this.backingList.remove(index);
-	}
-
-	@Override
-	public boolean remove(Object o) {
-		return this.backingList.remove(o);
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> c) {
-		return this.backingList.removeAll(c);
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> c) {
-		return this.backingList.retainAll(c);
-	}
-
-	@Override
-	public E set(int index, E element) {
-		return this.backingList.set(index, element);
-	}
-
-	@Override
-	public int size() {
-		return this.backingList.size();
-	}
-
-	@Override
-	public List<E> subList(int fromIndex, int toIndex) {
-		return this.backingList.subList(fromIndex, toIndex);
-	}
-
-	@Override
-	public Object[] toArray() {
-		return this.backingList.toArray();
-	}
-
-	@Override
-	public <T> T[] toArray(T[] a) {
-		return this.backingList.toArray(a);
-	}
-
-
-	@Override
 	public boolean equals(@Nullable Object other) {
 		return this.backingList.equals(other);
 	}
@@ -242,7 +130,6 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	public int hashCode() {
 		return this.backingList.hashCode();
 	}
-
 
 	/**
 	 * Factory interface for creating elements for an index-based access
@@ -262,7 +149,6 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 		E createElement(int index) throws ElementInstantiationException;
 	}
 
-
 	/**
 	 * Exception to be thrown from ElementFactory.
 	 */
@@ -276,7 +162,6 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 			super(message, cause);
 		}
 	}
-
 
 	/**
 	 * Reflective implementation of the ElementFactory interface, using

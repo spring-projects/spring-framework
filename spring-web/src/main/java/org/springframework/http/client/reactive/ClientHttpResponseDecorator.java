@@ -16,14 +16,9 @@
 
 package org.springframework.http.client.reactive;
 
-import reactor.core.publisher.Flux;
+import guru.mocker.annotation.mixin.Mixin;
 
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Wraps another {@link ClientHttpResponse} and delegates all methods to it.
@@ -32,47 +27,16 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ClientHttpResponseDecorator implements ClientHttpResponse {
+public class ClientHttpResponseDecorator extends ClientHttpResponseDecoratorForwarder implements ClientHttpResponse {
 
-	private final ClientHttpResponse delegate;
-
-
+	@Mixin
 	public ClientHttpResponseDecorator(ClientHttpResponse delegate) {
+		super(delegate);
 		Assert.notNull(delegate, "Delegate is required");
-		this.delegate = delegate;
 	}
-
 
 	public ClientHttpResponse getDelegate() {
-		return this.delegate;
-	}
-
-
-	// ClientHttpResponse delegation methods...
-
-	@Override
-	public String getId() {
-		return this.delegate.getId();
-	}
-
-	@Override
-	public HttpStatusCode getStatusCode() {
-		return this.delegate.getStatusCode();
-	}
-
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.delegate.getHeaders();
-	}
-
-	@Override
-	public MultiValueMap<String, ResponseCookie> getCookies() {
-		return this.delegate.getCookies();
-	}
-
-	@Override
-	public Flux<DataBuffer> getBody() {
-		return this.delegate.getBody();
+		return delegate;
 	}
 
 	@Override

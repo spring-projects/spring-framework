@@ -16,10 +16,7 @@
 
 package org.springframework.beans;
 
-import java.awt.Image;
-import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
-import java.beans.EventSetDescriptor;
 import java.beans.IndexedPropertyDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -34,6 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
@@ -78,11 +76,10 @@ import org.springframework.util.ObjectUtils;
  * @see ExtendedBeanInfoFactory
  * @see CachedIntrospectionResults
  */
-class ExtendedBeanInfo implements BeanInfo {
+@Mixin
+class ExtendedBeanInfo extends ExtendedBeanInfoForwarder implements BeanInfo {
 
 	private static final Log logger = LogFactory.getLog(ExtendedBeanInfo.class);
-
-	private final BeanInfo delegate;
 
 	private final Set<PropertyDescriptor> propertyDescriptors = new TreeSet<>(new PropertyDescriptorComparator());
 
@@ -98,7 +95,7 @@ class ExtendedBeanInfo implements BeanInfo {
 	 * @see #getPropertyDescriptors()
 	 */
 	public ExtendedBeanInfo(BeanInfo delegate) {
-		this.delegate = delegate;
+		super(delegate);
 		for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
 			try {
 				this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor indexedPd ?
@@ -222,42 +219,6 @@ class ExtendedBeanInfo implements BeanInfo {
 	public PropertyDescriptor[] getPropertyDescriptors() {
 		return this.propertyDescriptors.toArray(PropertyDescriptorUtils.EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
 	}
-
-	@Override
-	public BeanInfo[] getAdditionalBeanInfo() {
-		return this.delegate.getAdditionalBeanInfo();
-	}
-
-	@Override
-	public BeanDescriptor getBeanDescriptor() {
-		return this.delegate.getBeanDescriptor();
-	}
-
-	@Override
-	public int getDefaultEventIndex() {
-		return this.delegate.getDefaultEventIndex();
-	}
-
-	@Override
-	public int getDefaultPropertyIndex() {
-		return this.delegate.getDefaultPropertyIndex();
-	}
-
-	@Override
-	public EventSetDescriptor[] getEventSetDescriptors() {
-		return this.delegate.getEventSetDescriptors();
-	}
-
-	@Override
-	public Image getIcon(int iconKind) {
-		return this.delegate.getIcon(iconKind);
-	}
-
-	@Override
-	public MethodDescriptor[] getMethodDescriptors() {
-		return this.delegate.getMethodDescriptors();
-	}
-
 
 	/**
 	 * A simple {@link PropertyDescriptor}.

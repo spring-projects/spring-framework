@@ -18,12 +18,10 @@ package org.springframework.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -38,18 +36,16 @@ import org.jspecify.annotations.Nullable;
  * @see LinkedMultiValueMap
  */
 @SuppressWarnings("serial")
-public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
-
-	private final Map<K, List<V>> targetMap;
-
+@Mixin
+public class MultiValueMapAdapter<K, V> extends MapForwarder<K,V> implements MultiValueMap<K, V>, Serializable {
 
 	/**
 	 * Wrap the given target {@link Map} as a {@link MultiValueMap} adapter.
-	 * @param targetMap the plain target {@code Map}
+	 * @param mapForwarder the plain target {@code Map}
 	 */
-	public MultiValueMapAdapter(Map<K, List<V>> targetMap) {
-		Assert.notNull(targetMap, "'targetMap' must not be null");
-		this.targetMap = targetMap;
+	public MultiValueMapAdapter(Map<K, List<V>> mapForwarder) {
+		super(mapForwarder);
+		Assert.notNull(mapForwarder, "'targetMap' must not be null");
 	}
 
 
@@ -57,19 +53,19 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 
 	@Override
 	public @Nullable V getFirst(K key) {
-		List<V> values = this.targetMap.get(key);
+		List<V> values = this.mapForwarder.get(key);
 		return (!CollectionUtils.isEmpty(values) ? values.get(0) : null);
 	}
 
 	@Override
 	public void add(K key, @Nullable V value) {
-		List<V> values = this.targetMap.computeIfAbsent(key, k -> new ArrayList<>(1));
+		List<V> values = this.mapForwarder.computeIfAbsent(key, k -> new ArrayList<>(1));
 		values.add(value);
 	}
 
 	@Override
 	public void addAll(K key, List<? extends V> values) {
-		List<V> currentValues = this.targetMap.computeIfAbsent(key, k -> new ArrayList<>(values.size()));
+		List<V> currentValues = this.mapForwarder.computeIfAbsent(key, k -> new ArrayList<>(values.size()));
 		currentValues.addAll(values);
 	}
 
@@ -82,7 +78,7 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	public void set(K key, @Nullable V value) {
 		List<V> values = new ArrayList<>(1);
 		values.add(value);
-		this.targetMap.put(key, values);
+		this.mapForwarder.put(key, values);
 	}
 
 	@Override
@@ -92,8 +88,8 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 
 	@Override
 	public Map<K, V> toSingleValueMap() {
-		Map<K, V> singleValueMap = CollectionUtils.newLinkedHashMap(this.targetMap.size());
-		this.targetMap.forEach((key, values) -> {
+		Map<K, V> singleValueMap = CollectionUtils.newLinkedHashMap(this.mapForwarder.size());
+		this.mapForwarder.forEach((key, values) -> {
 			if (!CollectionUtils.isEmpty(values)) {
 				singleValueMap.put(key, values.get(0));
 			}
@@ -105,88 +101,12 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	// Map implementation
 
 	@Override
-	public int size() {
-		return this.targetMap.size();
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return this.targetMap.isEmpty();
-	}
-
-	@Override
-	public boolean containsKey(Object key) {
-		return this.targetMap.containsKey(key);
-	}
-
-	@Override
-	public boolean containsValue(Object value) {
-		return this.targetMap.containsValue(value);
-	}
-
-	@Override
-	public @Nullable List<V> get(Object key) {
-		return this.targetMap.get(key);
-	}
-
-	@Override
-	public @Nullable List<V> put(K key, List<V> value) {
-		return this.targetMap.put(key, value);
-	}
-
-	@Override
-	public @Nullable List<V> putIfAbsent(K key, List<V> value) {
-		return this.targetMap.putIfAbsent(key, value);
-	}
-
-	@Override
-	public @Nullable List<V> remove(Object key) {
-		return this.targetMap.remove(key);
-	}
-
-	@Override
-	public void putAll(Map<? extends K, ? extends List<V>> map) {
-		this.targetMap.putAll(map);
-	}
-
-	@Override
-	public void clear() {
-		this.targetMap.clear();
-	}
-
-	@Override
-	public Set<K> keySet() {
-		return this.targetMap.keySet();
-	}
-
-	@Override
-	public Collection<List<V>> values() {
-		return this.targetMap.values();
-	}
-
-	@Override
-	public Set<Entry<K, List<V>>> entrySet() {
-		return this.targetMap.entrySet();
-	}
-
-	@Override
-	public void forEach(BiConsumer<? super K, ? super List<V>> action) {
-		this.targetMap.forEach(action);
-	}
-
-	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || this.targetMap.equals(other));
+		return (this == other || this.mapForwarder.equals(other));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.targetMap.hashCode();
+		return this.mapForwarder.hashCode();
 	}
-
-	@Override
-	public String toString() {
-		return this.targetMap.toString();
-	}
-
 }

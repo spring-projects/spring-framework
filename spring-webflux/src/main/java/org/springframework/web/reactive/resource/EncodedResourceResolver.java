@@ -16,14 +16,7 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
@@ -200,91 +194,34 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	}
 
 
+	@Mixin(grandparent = AbstractResource.class)
+	static sealed class EncodedResourceInterForwarder extends EncodedResourceForwarder implements HttpResource permits EncodedResource {
+		public EncodedResourceInterForwarder(Resource encoded) {
+			super(encoded);
+		}
+
+		/**
+		 * To be overridden in the child class.
+		 * @return a dummy new http headers
+		 */
+		@Override
+		public HttpHeaders getResponseHeaders() {
+			return new HttpHeaders();
+		}
+	}
 	/**
 	 * An encoded {@link HttpResource}.
 	 */
-	static final class EncodedResource extends AbstractResource implements HttpResource {
+	static final class EncodedResource extends EncodedResourceInterForwarder {
 
 		private final Resource original;
 
 		private final String coding;
 
-		private final Resource encoded;
-
 		EncodedResource(Resource original, String coding, String extension) throws IOException {
+			super(original.createRelative(original.getFilename() + extension));
 			this.original = original;
 			this.coding = coding;
-			this.encoded = original.createRelative(original.getFilename() + extension);
-		}
-
-		@Override
-		public boolean exists() {
-			return this.encoded.exists();
-		}
-
-		@Override
-		public boolean isReadable() {
-			return this.encoded.isReadable();
-		}
-
-		@Override
-		public boolean isOpen() {
-			return this.encoded.isOpen();
-		}
-
-		@Override
-		public boolean isFile() {
-			return this.encoded.isFile();
-		}
-
-		@Override
-		public URL getURL() throws IOException {
-			return this.encoded.getURL();
-		}
-
-		@Override
-		public URI getURI() throws IOException {
-			return this.encoded.getURI();
-		}
-
-		@Override
-		public File getFile() throws IOException {
-			return this.encoded.getFile();
-		}
-
-		@Override
-		public Path getFilePath() throws IOException {
-			return this.encoded.getFilePath();
-		}
-
-		@Override
-		public InputStream getInputStream() throws IOException {
-			return this.encoded.getInputStream();
-		}
-
-		@Override
-		public ReadableByteChannel readableChannel() throws IOException {
-			return this.encoded.readableChannel();
-		}
-
-		@Override
-		public byte[] getContentAsByteArray() throws IOException {
-			return this.encoded.getContentAsByteArray();
-		}
-
-		@Override
-		public String getContentAsString(Charset charset) throws IOException {
-			return this.encoded.getContentAsString(charset);
-		}
-
-		@Override
-		public long contentLength() throws IOException {
-			return this.encoded.contentLength();
-		}
-
-		@Override
-		public long lastModified() throws IOException {
-			return this.encoded.lastModified();
 		}
 
 		@Override
@@ -295,11 +232,6 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		@Override
 		public @Nullable String getFilename() {
 			return this.original.getFilename();
-		}
-
-		@Override
-		public String getDescription() {
-			return this.encoded.getDescription();
 		}
 
 		@Override

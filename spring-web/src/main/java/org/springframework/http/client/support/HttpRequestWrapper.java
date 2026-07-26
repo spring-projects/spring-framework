@@ -16,11 +16,8 @@
 
 package org.springframework.http.client.support;
 
-import java.net.URI;
-import java.util.Map;
+import guru.mocker.annotation.mixin.Mixin;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 
@@ -33,58 +30,23 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.1
  */
-public class HttpRequestWrapper implements HttpRequest {
-
-	private final HttpRequest request;
-
+public class HttpRequestWrapper extends HttpRequestWrapperForwarder implements HttpRequest {
 
 	/**
 	 * Create a new {@code HttpRequest} wrapping the given request object.
 	 * @param request the request object to be wrapped
 	 */
+	@Mixin
 	public HttpRequestWrapper(HttpRequest request) {
+		super(request);
 		Assert.notNull(request, "HttpRequest must not be null");
-		this.request = request;
 	}
-
 
 	/**
 	 * Return the wrapped request.
 	 */
 	public HttpRequest getRequest() {
-		return this.request;
-	}
-
-	/**
-	 * Return the method of the wrapped request.
-	 */
-	@Override
-	public HttpMethod getMethod() {
-		return this.request.getMethod();
-	}
-
-	/**
-	 * Return the URI of the wrapped request.
-	 */
-	@Override
-	public URI getURI() {
-		return this.request.getURI();
-	}
-
-	/**
-	 * Return the attributes of the wrapped request.
-	 */
-	@Override
-	public Map<String, Object> getAttributes() {
-		return this.request.getAttributes();
-	}
-
-	/**
-	 * Return the headers of the wrapped request.
-	 */
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.request.getHeaders();
+		return request;
 	}
 
 }

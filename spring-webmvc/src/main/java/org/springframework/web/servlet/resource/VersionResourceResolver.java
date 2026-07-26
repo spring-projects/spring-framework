@@ -16,14 +16,6 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -31,10 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import guru.mocker.annotation.mixin.Mixin;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.AntPathMatcher;
@@ -237,107 +229,18 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	}
 
 
-	private static class FileNameVersionedResource extends AbstractResource implements HttpResource {
+	static class FileNameVersionedResource extends FileNameVersionedResourceForwarder implements HttpResource {
 
-		private final Resource original;
-
-		private final String version;
-
+		@Mixin
 		public FileNameVersionedResource(Resource original, String version) {
-			this.original = original;
-			this.version = version;
-		}
-
-		@Override
-		public boolean exists() {
-			return this.original.exists();
-		}
-
-		@Override
-		public boolean isReadable() {
-			return this.original.isReadable();
-		}
-
-		@Override
-		public boolean isOpen() {
-			return this.original.isOpen();
-		}
-
-		@Override
-		public boolean isFile() {
-			return this.original.isFile();
-		}
-
-		@Override
-		public URL getURL() throws IOException {
-			return this.original.getURL();
-		}
-
-		@Override
-		public URI getURI() throws IOException {
-			return this.original.getURI();
-		}
-
-		@Override
-		public File getFile() throws IOException {
-			return this.original.getFile();
-		}
-
-		@Override
-		public Path getFilePath() throws IOException {
-			return this.original.getFilePath();
-		}
-
-		@Override
-		public InputStream getInputStream() throws IOException {
-			return this.original.getInputStream();
-		}
-
-		@Override
-		public ReadableByteChannel readableChannel() throws IOException {
-			return this.original.readableChannel();
-		}
-
-		@Override
-		public byte[] getContentAsByteArray() throws IOException {
-			return this.original.getContentAsByteArray();
-		}
-
-		@Override
-		public String getContentAsString(Charset charset) throws IOException {
-			return this.original.getContentAsString(charset);
-		}
-
-		@Override
-		public long contentLength() throws IOException {
-			return this.original.contentLength();
-		}
-
-		@Override
-		public long lastModified() throws IOException {
-			return this.original.lastModified();
-		}
-
-		@Override
-		public Resource createRelative(String relativePath) throws IOException {
-			return this.original.createRelative(relativePath);
-		}
-
-		@Override
-		public @Nullable String getFilename() {
-			return this.original.getFilename();
-		}
-
-		@Override
-		public String getDescription() {
-			return this.original.getDescription();
+			super(original, version);
 		}
 
 		@Override
 		public HttpHeaders getResponseHeaders() {
-			HttpHeaders headers = (this.original instanceof HttpResource httpResource ?
+			HttpHeaders headers = (original instanceof HttpResource httpResource ?
 					httpResource.getResponseHeaders() : new HttpHeaders());
-			headers.setETag("W/\"" + this.version + "\"");
+			headers.setETag("W/\"" + version + "\"");
 			return headers;
 		}
 	}

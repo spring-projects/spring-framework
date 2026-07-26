@@ -18,22 +18,18 @@ package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.security.Principal;
-import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -48,7 +44,6 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -56,7 +51,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
 
 /**
@@ -310,8 +304,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 	}
 
-
-	private static class DelegatingServerWebExchange implements ServerWebExchange {
+	@Mixin
+	static class DelegatingServerWebExchange extends DelegatingServerWebExchangeForwarder implements ServerWebExchange {
 
 		private static final ResolvableType FORM_DATA_TYPE =
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
@@ -329,25 +323,21 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Map<String, Object> attributes;
 
-		private final ServerWebExchange delegate;
-
 		private final Mono<MultiValueMap<String, String>> formDataMono;
 
 		private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
 		DelegatingServerWebExchange(ServerHttpRequest request, Map<String, Object> attributes,
-				ServerWebExchange delegate, List<HttpMessageReader<?>> messageReaders) {
-
+										ServerWebExchange delegate, List<HttpMessageReader<?>> messageReaders) {
+			super(delegate);
 			this.request = request;
 			this.attributes = attributes;
-			this.delegate = delegate;
 			this.formDataMono = initFormData(request, messageReaders);
 			this.multipartDataMono = initMultipartData(request, messageReaders);
 		}
 
 		@SuppressWarnings("unchecked")
-		private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request,
-				List<HttpMessageReader<?>> readers) {
+		private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request, List<HttpMessageReader<?>> readers) {
 
 			try {
 				MediaType contentType = request.getHeaders().getContentType();
@@ -368,7 +358,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		@SuppressWarnings("unchecked")
 		private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
-				List<HttpMessageReader<?>> readers) {
+																		List<HttpMessageReader<?>> readers) {
 
 			try {
 				MediaType contentType = request.getHeaders().getContentType();
@@ -406,68 +396,5 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		public Mono<MultiValueMap<String, Part>> getMultipartData() {
 			return this.multipartDataMono;
 		}
-
-		// Delegating methods
-
-		@Override
-		public ServerHttpResponse getResponse() {
-			return this.delegate.getResponse();
-		}
-
-		@Override
-		public Mono<WebSession> getSession() {
-			return this.delegate.getSession();
-		}
-
-		@Override
-		public <T extends Principal> Mono<T> getPrincipal() {
-			return this.delegate.getPrincipal();
-		}
-
-		@Override
-		public LocaleContext getLocaleContext() {
-			return this.delegate.getLocaleContext();
-		}
-
-		@Override
-		public @Nullable ApplicationContext getApplicationContext() {
-			return this.delegate.getApplicationContext();
-		}
-
-		@Override
-		public boolean isNotModified() {
-			return this.delegate.isNotModified();
-		}
-
-		@Override
-		public boolean checkNotModified(Instant lastModified) {
-			return this.delegate.checkNotModified(lastModified);
-		}
-
-		@Override
-		public boolean checkNotModified(String etag) {
-			return this.delegate.checkNotModified(etag);
-		}
-
-		@Override
-		public boolean checkNotModified(@Nullable String etag, Instant lastModified) {
-			return this.delegate.checkNotModified(etag, lastModified);
-		}
-
-		@Override
-		public String transformUrl(String url) {
-			return this.delegate.transformUrl(url);
-		}
-
-		@Override
-		public void addUrlTransformer(Function<String, String> transformer) {
-			this.delegate.addUrlTransformer(transformer);
-		}
-
-		@Override
-		public String getLogPrefix() {
-			return this.delegate.getLogPrefix();
-		}
 	}
-
 }

@@ -1,6 +1,9 @@
 description = "Spring WebSocket"
 
 dependencies {
+	compileOnly("guru.mocker.annotation:mixin-annotation:${mixinAnnotationVersion}")
+	annotationProcessor("guru.mocker.annotation:mixin-annotation-processor:${mixinAnnotationVersion}")
+	annotationProcessor(project(":framework-annotation-processor"))
 	api(project(":spring-context"))
 	api(project(":spring-core"))
 	api(project(":spring-web"))

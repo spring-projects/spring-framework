@@ -1,12 +1,15 @@
 description = "Spring JMS"
 
 dependencies {
-	api(project(":spring-beans"))
+    annotationProcessor project(":framework-annotation-processor")
+    api(project(":spring-beans"))
 	api(project(":spring-core"))
 	api(project(":spring-messaging"))
 	api(project(":spring-tx"))
 	api("io.micrometer:micrometer-observation")
 	compileOnly("jakarta.jms:jakarta.jms-api")
+    compileOnly("guru.mocker.annotation:mixin-annotation:${mixinAnnotationVersion}")
+    annotationProcessor("guru.mocker.annotation:mixin-annotation-processor:${mixinAnnotationVersion}")
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))

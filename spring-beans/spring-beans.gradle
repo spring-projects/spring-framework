@@ -3,8 +3,11 @@ description = "Spring Beans"
 apply plugin: "kotlin"
 
 dependencies {
+    annotationProcessor project(":framework-annotation-processor")
 	api(project(":spring-core"))
-	optional("jakarta.inject:jakarta.inject-api")
+    compileOnly("guru.mocker.annotation:mixin-annotation:${mixinAnnotationVersion}")
+    annotationProcessor("guru.mocker.annotation:mixin-annotation-processor:${mixinAnnotationVersion}")
+    optional("jakarta.inject:jakarta.inject-api")
 	optional("org.apache.groovy:groovy-xml")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")

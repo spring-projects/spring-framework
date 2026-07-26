@@ -16,11 +16,8 @@
 
 package org.springframework.web.client;
 
-import java.io.IOException;
-import java.io.InputStream;
+import guru.mocker.annotation.mixin.Mixin;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 
@@ -31,48 +28,19 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-class ClientHttpResponseDecorator implements ClientHttpResponse {
+class ClientHttpResponseDecorator extends ClientHttpResponseDecoratorForwarder implements ClientHttpResponse {
 
-	private final ClientHttpResponse delegate;
-
-
+	@Mixin
 	public ClientHttpResponseDecorator(ClientHttpResponse delegate) {
+		super(delegate);
 		Assert.notNull(delegate, "ClientHttpResponse delegate is required");
-		this.delegate = delegate;
 	}
-
 
 	/**
 	 * Return the wrapped response.
 	 */
 	public ClientHttpResponse getDelegate() {
-		return this.delegate;
-	}
-
-
-	@Override
-	public HttpStatusCode getStatusCode() throws IOException {
-		return this.delegate.getStatusCode();
-	}
-
-	@Override
-	public String getStatusText() throws IOException {
-		return this.delegate.getStatusText();
-	}
-
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.delegate.getHeaders();
-	}
-
-	@Override
-	public InputStream getBody() throws IOException {
-		return this.delegate.getBody();
-	}
-
-	@Override
-	public void close() {
-		this.delegate.close();
+		return delegate;
 	}
 
 }

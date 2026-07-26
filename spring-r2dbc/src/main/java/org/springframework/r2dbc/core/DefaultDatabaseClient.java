@@ -32,6 +32,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import guru.mocker.annotation.mixin.Mixin;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Parameter;
@@ -576,34 +577,10 @@ final class DefaultDatabaseClient implements DatabaseClient {
 		}
 	}
 
-
-	static class StatementWrapper implements BindTarget {
-
-		final Statement statement;
-
+	@Mixin
+	static class StatementWrapper extends StatementWrapperForwarder implements BindTarget {
 		StatementWrapper(Statement statement) {
-			this.statement = statement;
-		}
-
-		@Override
-		public void bind(String identifier, Object value) {
-			this.statement.bind(identifier, value);
-		}
-
-		@Override
-		public void bind(int index, Object value) {
-			this.statement.bind(index, value);
-		}
-
-		@Override
-		public void bindNull(String identifier, Class<?> type) {
-			this.statement.bindNull(identifier, type);
-		}
-
-		@Override
-		public void bindNull(int index, Class<?> type) {
-			this.statement.bindNull(index, type);
+			super(statement);
 		}
 	}
-
 }

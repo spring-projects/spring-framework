@@ -12,6 +12,7 @@ plugins {
 ext {
 	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
 	javaProjects = subprojects.findAll { !it.name.startsWith("framework-") }
+	mixinAnnotationVersion = "1.1.18"
 }
 
 description = "Spring Framework"

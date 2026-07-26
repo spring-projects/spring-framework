@@ -520,11 +520,11 @@ public abstract class CollectionUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <K, V> MultiValueMap<K, V> unmodifiableMultiValueMap(
-			MultiValueMap<? extends K, ? extends V> targetMap) {
+			MultiValueMap<K, V> targetMap) {
 
 		Assert.notNull(targetMap, "'targetMap' must not be null");
 		if (targetMap instanceof UnmodifiableMultiValueMap) {
-			return (MultiValueMap<K, V>) targetMap;
+			return targetMap;
 		}
 		return new UnmodifiableMultiValueMap<>(targetMap);
 	}

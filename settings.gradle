@@ -28,6 +28,7 @@ include "framework-api"
 include "framework-bom"
 include "framework-docs"
 include "framework-platform"
+include 'framework-annotation-processor'
 include "integration-tests"
 
 rootProject.name = "spring"
@@ -50,3 +51,4 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+

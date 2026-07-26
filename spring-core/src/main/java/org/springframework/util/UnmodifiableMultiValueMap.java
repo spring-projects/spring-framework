@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -43,12 +44,10 @@ import org.jspecify.annotations.Nullable;
  * @param <K> the key type
  * @param <V> the value element type
  */
-final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serializable {
+@Mixin
+final class UnmodifiableMultiValueMap<K,V> extends UnmodifiableMultiValueMapForwarder<K,V> implements MultiValueMap<K,V>, Serializable {
 
 	private static final long serialVersionUID = -8697084563854098920L;
-
-	@SuppressWarnings("serial")
-	private final MultiValueMap<K, V> delegate;
 
 	private transient @Nullable Set<K> keySet;
 
@@ -58,67 +57,25 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 
 	@SuppressWarnings("unchecked")
-	public UnmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> delegate) {
+	public UnmodifiableMultiValueMap(MultiValueMap<K,V> delegate) {
+		super(delegate);
 		Assert.notNull(delegate, "Delegate must not be null");
-		this.delegate = (MultiValueMap<K, V>) delegate;
 	}
 
-
-	// delegation
-
-	@Override
-	public int size() {
-		return this.delegate.size();
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return this.delegate.isEmpty();
-	}
-
-	@Override
-	public boolean containsKey(Object key) {
-		return this.delegate.containsKey(key);
-	}
-
-	@Override
-	public boolean containsValue(Object value) {
-		return this.delegate.containsValue(value);
-	}
 
 	@Override
 	public @Nullable List<V> get(Object key) {
-		List<V> result = this.delegate.get(key);
+		List<V> result = super.get(key);
 		return (result != null ? Collections.unmodifiableList(result) : null);
 	}
 
 	@Override
-	public @Nullable V getFirst(K key) {
-		return this.delegate.getFirst(key);
-	}
-
-	@Override
 	public List<V> getOrDefault(Object key, List<V> defaultValue) {
-		List<V> result = this.delegate.getOrDefault(key, defaultValue);
+		List<V> result = super.getOrDefault(key, defaultValue);
 		if (result != defaultValue) {
 			result = Collections.unmodifiableList(result);
 		}
 		return result;
-	}
-
-	@Override
-	public void forEach(BiConsumer<? super K, ? super List<V>> action) {
-		this.delegate.forEach((k, vs) -> action.accept(k, Collections.unmodifiableList(vs)));
-	}
-
-	@Override
-	public Map<K, V> toSingleValueMap() {
-		return this.delegate.toSingleValueMap();
-	}
-
-	@Override
-	public Map<K, V> asSingleValueMap() {
-		return this.delegate.asSingleValueMap();
 	}
 
 	@Override
@@ -132,10 +89,9 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	}
 
 	@Override
-	public String toString() {
-		return this.delegate.toString();
+	public void forEach(BiConsumer<? super K, ? super List<V>> action) {
+		super.forEach((k, vs) -> action.accept(k, Collections.unmodifiableList(vs)));
 	}
-
 
 	// lazy init
 
@@ -143,7 +99,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	public Set<K> keySet() {
 		Set<K> keySet = this.keySet;
 		if (keySet == null) {
-			keySet = Collections.unmodifiableSet(this.delegate.keySet());
+			keySet = Collections.unmodifiableSet(super.keySet());
 			this.keySet = keySet;
 		}
 		return keySet;
@@ -153,7 +109,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	public Set<Entry<K, List<V>>> entrySet() {
 		Set<Entry<K, List<V>>> entrySet = this.entrySet;
 		if (entrySet == null) {
-			entrySet = new UnmodifiableEntrySet<>(this.delegate.entrySet());
+			entrySet = new UnmodifiableEntrySet<>(super.entrySet());
 			this.entrySet = entrySet;
 		}
 		return entrySet;
@@ -163,7 +119,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	public Collection<List<V>> values() {
 		Collection<List<V>> values = this.values;
 		if (values == null) {
-			values = new UnmodifiableValueCollection<>(this.delegate.values());
+			values = new UnmodifiableValueCollection<>(super.values());
 			this.values = values;
 		}
 		return values;
@@ -172,7 +128,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	// unsupported
 
 	@Override
-	public @Nullable List<V> put(K key, List<V> value) {
+	public List<V> put(K key, List<V> value) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -266,44 +222,20 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		throw new UnsupportedOperationException();
 	}
 
-
-	private static class UnmodifiableEntrySet<K,V> implements Set<Map.Entry<K, List<V>>>, Serializable {
+	@Mixin
+	protected static class UnmodifiableEntrySet<K,V> extends UnmodifiableEntrySetForwarder<K,V> implements Set<Map.Entry<K, List<V>>>, Serializable {
 
 		private static final long serialVersionUID = 2407578793783925203L;
 
-		@SuppressWarnings("serial")
-		private final Set<Entry<K, List<V>>> delegate;
 
 		@SuppressWarnings("unchecked")
-		public UnmodifiableEntrySet(Set<? extends Entry<? extends K, ? extends List<? extends V>>> delegate) {
-			this.delegate = (Set<Entry<K, List<V>>>) delegate;
-		}
-
-		// delegation
-
-		@Override
-		public int size() {
-			return this.delegate.size();
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return this.delegate.isEmpty();
-		}
-
-		@Override
-		public boolean contains(Object o) {
-			return this.delegate.contains(o);
-		}
-
-		@Override
-		public boolean containsAll(Collection<?> c) {
-			return this.delegate.containsAll(c);
+		public UnmodifiableEntrySet(Set<Entry<K, List<V>>> delegate) {
+			super(delegate);
 		}
 
 		@Override
 		public Iterator<Entry<K, List<V>>> iterator() {
-			Iterator<? extends Entry<? extends K, ? extends List<? extends V>>> iterator = this.delegate.iterator();
+			Iterator<? extends Entry<? extends K, ? extends List<? extends V>>> iterator = super.iterator();
 			return new Iterator<>() {
 				@Override
 				public boolean hasNext() {
@@ -319,14 +251,14 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 		@Override
 		public Object[] toArray() {
-			Object[] result = this.delegate.toArray();
+			Object[] result = super.toArray();
 			filterArray(result);
 			return result;
 		}
 
 		@Override
 		public <T> T[] toArray(T[] a) {
-			T[] result = this.delegate.toArray(a);
+			T[] result = super.toArray(a);
 			filterArray(result);
 			return result;
 		}
@@ -342,7 +274,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 		@Override
 		public void forEach(Consumer<? super Entry<K, List<V>>> action) {
-			this.delegate.forEach(e -> action.accept(new UnmodifiableEntry<>(e)));
+			super.forEach(e -> action.accept(new UnmodifiableEntry<>(e)));
 		}
 
 		@Override
@@ -357,7 +289,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 		@Override
 		public Spliterator<Entry<K, List<V>>> spliterator() {
-			return new UnmodifiableEntrySpliterator<>(this.delegate.spliterator());
+			return new UnmodifiableEntrySpliterator<>(super.spliterator());
 		}
 
 		@Override
@@ -365,14 +297,13 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 			return (this == other || other instanceof Set<?> that && size() == that.size() && containsAll(that));
 		}
 
+		/**
+		 * We must override hashCode to ensure checkstyle is not complaining.
+		 * @return the hash code
+		 */
 		@Override
 		public int hashCode() {
-			return this.delegate.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return this.delegate.toString();
+			return super.hashCode();
 		}
 
 		// unsupported
@@ -515,50 +446,25 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		}
 	}
 
-
-	private static class UnmodifiableValueCollection<V> implements Collection<List<V>>, Serializable {
+	@Mixin
+	protected static class UnmodifiableValueCollection<V> extends UnmodifiableValueCollectionForwarder<V> implements Collection<List<V>>, Serializable {
 
 		private static final long serialVersionUID = 5518377583904339588L;
 
-		@SuppressWarnings("serial")
-		private final Collection<List<V>> delegate;
-
 		public UnmodifiableValueCollection(Collection<List<V>> delegate) {
-			this.delegate = delegate;
-		}
-
-		 // delegation
-
-		@Override
-		public int size() {
-			return this.delegate.size();
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return this.delegate.isEmpty();
-		}
-
-		@Override
-		public boolean contains(Object o) {
-			return this.delegate.contains(o);
-		}
-
-		@Override
-		public boolean containsAll(Collection<?> c) {
-			return this.delegate.containsAll(c);
+			super(delegate);
 		}
 
 		@Override
 		public Object[] toArray() {
-			Object[] result = this.delegate.toArray();
+			Object[] result = super.toArray();
 			filterArray(result);
 			return result;
 		}
 
 		@Override
 		public <T> T[] toArray(T[] a) {
-			T[] result = this.delegate.toArray(a);
+			T[] result = super.toArray(a);
 			filterArray(result);
 			return result;
 		}
@@ -573,7 +479,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 		@Override
 		public Iterator<List<V>> iterator() {
-			Iterator<List<V>> iterator = this.delegate.iterator();
+			Iterator<List<V>> iterator = super.iterator();
 			return new Iterator<>() {
 				@Override
 				public boolean hasNext() {
@@ -589,12 +495,12 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 		@Override
 		public void forEach(Consumer<? super List<V>> action) {
-			this.delegate.forEach(list -> action.accept(Collections.unmodifiableList(list)));
+			super.forEach(list -> action.accept(Collections.unmodifiableList(list)));
 		}
 
 		@Override
 		public Spliterator<List<V>> spliterator() {
-			return new UnmodifiableValueSpliterator<>(this.delegate.spliterator());
+			return new UnmodifiableValueSpliterator<>(super.spliterator());
 		}
 
 		@Override
@@ -605,21 +511,6 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		@Override
 		public Stream<List<V>> parallelStream() {
 			return StreamSupport.stream(spliterator(), true);
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || this.delegate.equals(other));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.delegate.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return this.delegate.toString();
 		}
 
 		// unsupported
@@ -659,28 +550,26 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 			throw new UnsupportedOperationException();
 		}
 
-
-		private static class UnmodifiableValueSpliterator<T> implements Spliterator<List<T>> {
-
-			private final Spliterator<List<T>> delegate;
+		@Mixin
+		protected static class UnmodifiableValueSpliterator<T> extends UnmodifiableValueSpliteratorForwarder<T> implements Spliterator<List<T>> {
 
 			public UnmodifiableValueSpliterator(Spliterator<List<T>> delegate) {
-				this.delegate = delegate;
+				super(delegate);
 			}
 
 			@Override
 			public boolean tryAdvance(Consumer<? super List<T>> action) {
-				return this.delegate.tryAdvance(l -> action.accept(Collections.unmodifiableList(l)));
+				return super.tryAdvance(l -> action.accept(Collections.unmodifiableList(l)));
 			}
 
 			@Override
 			public void forEachRemaining(Consumer<? super List<T>> action) {
-				this.delegate.forEachRemaining(l -> action.accept(Collections.unmodifiableList(l)));
+				super.forEachRemaining(l -> action.accept(Collections.unmodifiableList(l)));
 			}
 
 			@Override
-			public @Nullable Spliterator<List<T>> trySplit() {
-				Spliterator<List<T>> split = this.delegate.trySplit();
+			public UnmodifiableMultiValueMap.UnmodifiableValueCollection.@Nullable UnmodifiableValueSpliterator<T> trySplit() {
+				Spliterator<List<T>> split = super.trySplit();
 				if (split != null) {
 					return new UnmodifiableValueSpliterator<>(split);
 				}
@@ -688,32 +577,6 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 					return null;
 				}
 			}
-
-			@Override
-			public long estimateSize() {
-				return this.delegate.estimateSize();
-			}
-
-			@Override
-			public long getExactSizeIfKnown() {
-				return this.delegate.getExactSizeIfKnown();
-			}
-
-			@Override
-			public int characteristics() {
-				return this.delegate.characteristics();
-			}
-
-			@Override
-			public boolean hasCharacteristics(int characteristics) {
-				return this.delegate.hasCharacteristics(characteristics);
-			}
-
-			@Override
-			public Comparator<? super List<T>> getComparator() {
-				return this.delegate.getComparator();
-			}
 		}
 	}
-
 }

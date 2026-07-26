@@ -19,6 +19,7 @@ package org.springframework.web.bind;
 import java.util.ArrayList;
 import java.util.List;
 
+import guru.mocker.annotation.mixin.Mixin;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
@@ -41,173 +42,54 @@ import org.springframework.web.util.HtmlUtils;
  * @see org.springframework.web.servlet.support.RequestContext#getErrors
  * @see org.springframework.web.servlet.tags.BindTag
  */
-public class EscapedErrors implements Errors {
-
-	private final Errors source;
-
+public class EscapedErrors extends EscapedErrorsForwarder implements Errors {
 
 	/**
 	 * Create a new EscapedErrors instance for the given source instance.
 	 */
+	@Mixin
 	public EscapedErrors(Errors source) {
+		super(source);
 		Assert.notNull(source, "Errors source must not be null");
-		this.source = source;
 	}
 
 	public Errors getSource() {
-		return this.source;
-	}
-
-
-	@Override
-	public String getObjectName() {
-		return this.source.getObjectName();
-	}
-
-	@Override
-	public void setNestedPath(String nestedPath) {
-		this.source.setNestedPath(nestedPath);
-	}
-
-	@Override
-	public String getNestedPath() {
-		return this.source.getNestedPath();
-	}
-
-	@Override
-	public void pushNestedPath(String subPath) {
-		this.source.pushNestedPath(subPath);
-	}
-
-	@Override
-	public void popNestedPath() throws IllegalStateException {
-		this.source.popNestedPath();
-	}
-
-
-	@Override
-	public void reject(String errorCode) {
-		this.source.reject(errorCode);
-	}
-
-	@Override
-	public void reject(String errorCode, String defaultMessage) {
-		this.source.reject(errorCode, defaultMessage);
-	}
-
-	@Override
-	public void reject(String errorCode, Object @Nullable [] errorArgs, @Nullable String defaultMessage) {
-		this.source.reject(errorCode, errorArgs, defaultMessage);
-	}
-
-	@Override
-	public void rejectValue(@Nullable String field, String errorCode) {
-		this.source.rejectValue(field, errorCode);
-	}
-
-	@Override
-	public void rejectValue(@Nullable String field, String errorCode, String defaultMessage) {
-		this.source.rejectValue(field, errorCode, defaultMessage);
-	}
-
-	@Override
-	public void rejectValue(@Nullable String field, String errorCode,
-			Object @Nullable [] errorArgs, @Nullable String defaultMessage) {
-
-		this.source.rejectValue(field, errorCode, errorArgs, defaultMessage);
-	}
-
-	@Override
-	public void addAllErrors(Errors errors) {
-		this.source.addAllErrors(errors);
-	}
-
-
-	@Override
-	public boolean hasErrors() {
-		return this.source.hasErrors();
-	}
-
-	@Override
-	public int getErrorCount() {
-		return this.source.getErrorCount();
+		return source;
 	}
 
 	@Override
 	public List<ObjectError> getAllErrors() {
-		return escapeObjectErrors(this.source.getAllErrors());
+		return escapeObjectErrors(source.getAllErrors());
 	}
 
-	@Override
-	public boolean hasGlobalErrors() {
-		return this.source.hasGlobalErrors();
-	}
-
-	@Override
-	public int getGlobalErrorCount() {
-		return this.source.getGlobalErrorCount();
-	}
 
 	@Override
 	public List<ObjectError> getGlobalErrors() {
-		return escapeObjectErrors(this.source.getGlobalErrors());
+		return escapeObjectErrors(source.getGlobalErrors());
 	}
 
 	@Override
 	public @Nullable ObjectError getGlobalError() {
-		return escapeObjectError(this.source.getGlobalError());
+		return escapeObjectError(source.getGlobalError());
 	}
 
-	@Override
-	public boolean hasFieldErrors() {
-		return this.source.hasFieldErrors();
-	}
-
-	@Override
-	public int getFieldErrorCount() {
-		return this.source.getFieldErrorCount();
-	}
-
-	@Override
-	public List<FieldError> getFieldErrors() {
-		return this.source.getFieldErrors();
-	}
-
-	@Override
-	public @Nullable FieldError getFieldError() {
-		return this.source.getFieldError();
-	}
-
-	@Override
-	public boolean hasFieldErrors(String field) {
-		return this.source.hasFieldErrors(field);
-	}
-
-	@Override
-	public int getFieldErrorCount(String field) {
-		return this.source.getFieldErrorCount(field);
-	}
 
 	@Override
 	public List<FieldError> getFieldErrors(String field) {
-		return escapeObjectErrors(this.source.getFieldErrors(field));
+		return escapeObjectErrors(source.getFieldErrors(field));
 	}
 
 	@Override
 	public @Nullable FieldError getFieldError(String field) {
-		return escapeObjectError(this.source.getFieldError(field));
+		return escapeObjectError(source.getFieldError(field));
 	}
 
 	@Override
 	public @Nullable Object getFieldValue(String field) {
-		Object value = this.source.getFieldValue(field);
+		Object value = source.getFieldValue(field);
 		return (value instanceof String text ? HtmlUtils.htmlEscape(text) : value);
 	}
 
-	@Override
-	public @Nullable Class<?> getFieldType(String field) {
-		return this.source.getFieldType(field);
-	}
 
 	@SuppressWarnings("unchecked")
 	private <T extends ObjectError> @Nullable T escapeObjectError(@Nullable T source) {
