@@ -72,8 +72,6 @@ public abstract class AbstractFactoryBean<T>
 
 	private @Nullable BeanFactory beanFactory;
 
-	private boolean initialized = false;
-
 	private @Nullable T singletonInstance;
 
 	private @Nullable T earlySingletonInstance;
@@ -133,7 +131,6 @@ public abstract class AbstractFactoryBean<T>
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (isSingleton()) {
-			this.initialized = true;
 			this.singletonInstance = createInstance();
 			this.earlySingletonInstance = null;
 		}
@@ -146,9 +143,10 @@ public abstract class AbstractFactoryBean<T>
 	 * @see #getEarlySingletonInterfaces()
 	 */
 	@Override
-	public final @Nullable T getObject() throws Exception {
+	public final T getObject() throws Exception {
 		if (isSingleton()) {
-			return (this.initialized ? this.singletonInstance : getEarlySingletonInstance());
+			T instance = this.singletonInstance;
+			return (instance != null ? instance : getEarlySingletonInstance());
 		}
 		else {
 			return createInstance();
@@ -160,7 +158,7 @@ public abstract class AbstractFactoryBean<T>
 	 * circular reference. Not called in a non-circular scenario.
 	 */
 	@SuppressWarnings("unchecked")
-	private T getEarlySingletonInstance() throws Exception {
+	private T getEarlySingletonInstance() {
 		Class<?>[] ifcs = getEarlySingletonInterfaces();
 		if (ifcs == null) {
 			throw new FactoryBeanNotInitializedException(
@@ -178,9 +176,10 @@ public abstract class AbstractFactoryBean<T>
 	 * @return the singleton instance that this FactoryBean holds
 	 * @throws IllegalStateException if the singleton instance is not initialized
 	 */
-	private @Nullable T getSingletonInstance() throws IllegalStateException {
-		Assert.state(this.initialized, "Singleton instance not initialized yet");
-		return this.singletonInstance;
+	private T getSingletonInstance() throws IllegalStateException {
+		T instance = this.singletonInstance;
+		Assert.state(instance != null, "Singleton instance not initialized yet");
+		return instance;
 	}
 
 	/**
@@ -190,7 +189,10 @@ public abstract class AbstractFactoryBean<T>
 	@Override
 	public void destroy() throws Exception {
 		if (isSingleton()) {
-			destroyInstance(this.singletonInstance);
+			T instance = this.singletonInstance;
+			if (instance != null) {
+				destroyInstance(instance);
+			}
 		}
 	}
 
@@ -240,7 +242,7 @@ public abstract class AbstractFactoryBean<T>
 	 * @throws Exception in case of shutdown errors
 	 * @see #createInstance()
 	 */
-	protected void destroyInstance(@Nullable T instance) throws Exception {
+	protected void destroyInstance(T instance) throws Exception {
 	}
 
 
@@ -259,7 +261,7 @@ public abstract class AbstractFactoryBean<T>
 				// Use hashCode of reference proxy.
 				return System.identityHashCode(proxy);
 			}
-			else if (!initialized && ReflectionUtils.isToStringMethod(method)) {
+			else if (ReflectionUtils.isToStringMethod(method) && singletonInstance == null) {
 				return "Early singleton proxy for interfaces " +
 						ObjectUtils.nullSafeToString(getEarlySingletonInterfaces());
 			}
