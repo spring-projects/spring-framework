@@ -286,6 +286,102 @@ registering property accessors, resolvers, variables, or functions – to ensure
 of the objects reachable via the context expose operations that would be dangerous if
 invoked by an expression from an untrusted source.
 
+Furthermore, a property "getter" reachable from an expression is not necessarily a pure,
+side-effect-free read operation. A JavaBean-style accessor (such as `getName()` or
+`isActive()`) and a plain accessor method used to support data classes such as Java
+records and Kotlin data classes (such as `name()`) are indistinguishable from a method
+that performs an action and happens to return a value (that is, a method which is
+*accessor-shaped*). For example, the `public boolean delete()` method in `java.io.File`
+looks like a plain accessor method to SpEL. Specifically, neither
+`ReflectivePropertyAccessor` nor `DataBindingPropertyAccessor` can determine whether such
+a method is free of side effects. Moreover, restricting a `SimpleEvaluationContext` to
+read-only data binding governs only whether *assignment* to a property is permitted: it
+does not verify that reading a property is side-effect-free. When exposing a root object
+or other reachable object to an untrusted expression, you must ensure that none of its
+accessor-shaped methods perform an action that would be unsafe if triggered by that
+expression.
+
+[NOTE]
+.What makes a method "accessor-shaped"?
+====
+A method is accessor-shaped if it is `public`, takes no arguments, and returns a value –
+the same shape that `ReflectivePropertyAccessor` and `DataBindingPropertyAccessor` look
+for when resolving a property "getter" by name. That shape says nothing about whether
+invoking the method is actually free of side effects. For example, the following methods
+are all accessor-shaped, but only some of them are safe to invoke as a property read.
+
+Side-effect-free (safe to expose as properties):
+
+* `getName()` and `isActive()`: conventional JavaBean-style accessors.
+* `name()` and `active()`: plain accessor methods used by data classes such as Java
+  records and Kotlin data classes.
+
+Side-effecting (unsafe to expose as properties, despite the identical shape):
+
+* `java.io.File#delete()`: deletes the underlying file and returns whether the deletion
+  succeeded.
+* `java.util.Queue#poll()`: removes and returns the head element, mutating the queue.
+* `java.util.concurrent.atomic.AtomicInteger#incrementAndGet()`: increments and returns
+  a counter, mutating it.
+
+If an untrusted expression can reference `someFile.delete`, `someQueue.poll`, or
+`someCounter.incrementAndGet` as a property, SpEL invokes the corresponding method just
+as readily as it would invoke a genuine getter.
+====
+
+[[expressions-evaluation-context-object-design]]
+=== Object Design
+
+Similar to the design guidance for
+xref:web/webmvc/mvc-data-binding.adoc#mvc-data-binding-design[web data binding], you
+should carefully design any object that may be reached from a SpEL expression evaluated
+against untrusted input. This applies not only to the root object supplied to an
+`EvaluationContext` but also to every object that such an expression can navigate to from
+that root object – for example, an object returned by a property, a method, an index
+operation, a variable, or a function.
+
+When exposing an object to expressions from an untrusted source, consider the following
+recommendations.
+
+Use a dedicated type::
+  Prefer a dedicated type, designed specifically to be evaluated against untrusted
+  expressions, over passing an existing domain or infrastructure type "as is". A
+  dedicated type lets you control exactly which properties and methods are reachable from
+  an expression, rather than exposing the full surface area of a class such as a JPA
+  entity, `java.io.File`, or a JDBC `Connection` – most of which were never designed with
+  SpEL evaluation in mind.
+
+Prefer immutability::
+  An immutable type – for example, a Java record or a Kotlin data class exposing only
+  `val` properties – rules out property writes and eliminates any concern that a "getter"
+  might mutate state as a side effect, since there is no mutable state to affect.
+  Immutability does not, on its own, rule out an accessor-shaped method with an external
+  side effect (such as a network call or a file system operation), but it removes an
+  entire class of risk.
+
+Limit scope::
+  Expose only the properties and methods that the expression is expected to use, and
+  nothing more. Because a `PropertyAccessor` cannot restrict access to specific
+  properties or methods on a per-expression basis, every accessor-shaped method reachable
+  on an exposed object is reachable by any expression that can reach that object –
+  regardless of which property or method the application intended the expression to use.
+
+Audit accessor-shaped methods::
+  Review every accessor-shaped method exposed by a type before making it reachable from
+  an untrusted expression, keeping the <<expressions-evaluation-context-security,
+  security considerations>> discussed above in mind. None of the reachable methods should
+  perform an action that would be unsafe if triggered by that expression.
+
+[WARNING]
+====
+These recommendations apply transitively. If the root object exposes a property or method
+that returns another object, and an untrusted expression can navigate to it (for example,
+`rootObject.child.grandchild`), the nested object is just as reachable as the root object
+itself and must meet the same design requirements. The same is true for an object reached
+via indexing (for example, `rootObject.items[0]` or `rootObject.items['key']`): whatever
+is returned by the index operation is just as reachable as any other nested object.
+====
+
 [[expressions-evaluation-context-lifecycle]]
 === Lifecycle and Reuse
 
