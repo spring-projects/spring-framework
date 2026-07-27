@@ -56,6 +56,18 @@ import org.jspecify.annotations.Nullable;
  * those reachable objects expose operations that would be dangerous if invoked
  * by an expression from an untrusted source.
  *
+ * <p>An {@code EvaluationContext} is designed to be built once and reused across
+ * many evaluations, potentially of many different {@link Expression} instances. A
+ * single {@link Expression}, in turn, may cache accessor and executor state resolved
+ * against a particular {@code EvaluationContext} configuration. Reusing an
+ * {@code Expression} across {@code EvaluationContext} instances of the same type and
+ * with equivalent configuration is supported; reusing an {@code Expression} across
+ * contexts with different security implications &mdash; for example, first against a
+ * {@code StandardEvaluationContext} and later against a
+ * {@code SimpleEvaluationContext} &mdash; is not, since cached state from the more
+ * permissive evaluation may be reused during the more restrictive one. See
+ * {@link Expression} for details.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen

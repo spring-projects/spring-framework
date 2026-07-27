@@ -80,6 +80,15 @@ import org.springframework.util.Assert;
  * regardless of the {@code EvaluationContext} implementation in use; see
  * {@link SimpleEvaluationContext} for further details.
  *
+ * <p>Because a parsed {@code Expression} may cache accessor and executor state
+ * resolved against a particular {@code EvaluationContext} configuration, a parsed
+ * {@code Expression} must never be evaluated first against a
+ * {@code StandardEvaluationContext} and later against a {@code SimpleEvaluationContext}
+ * (or any other, more restrictive {@code EvaluationContext}). If the same expression
+ * string must be evaluated under both kinds of contexts, parse it into two distinct
+ * {@code Expression} instances instead. See {@link org.springframework.expression.Expression
+ * Expression} for further details on this lifecycle contract.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen

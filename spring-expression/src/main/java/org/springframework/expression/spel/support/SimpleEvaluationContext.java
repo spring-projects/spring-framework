@@ -105,6 +105,16 @@ import org.springframework.expression.spel.SpelMessage;
  * untrusted source. For details on what qualifies as a "trusted" source, see
  * {@link StandardEvaluationContext}.
  *
+ * <p>Because a parsed {@code Expression} may cache accessor and executor state
+ * resolved against a particular {@code EvaluationContext} configuration, a parsed
+ * {@code Expression} must never be evaluated first against a
+ * {@code StandardEvaluationContext} (or any other, less restrictive,
+ * {@code EvaluationContext}) and later against a {@code SimpleEvaluationContext}. If the
+ * same expression string must be evaluated under both kinds of contexts, parse it into
+ * two distinct {@code Expression} instances instead. See
+ * {@link org.springframework.expression.Expression Expression} for further details on
+ * this lifecycle contract.
+ *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen

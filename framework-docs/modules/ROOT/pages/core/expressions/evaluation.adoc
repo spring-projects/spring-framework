@@ -286,6 +286,46 @@ registering property accessors, resolvers, variables, or functions – to ensure
 of the objects reachable via the context expose operations that would be dangerous if
 invoked by an expression from an untrusted source.
 
+[[expressions-evaluation-context-lifecycle]]
+=== Lifecycle and Reuse
+
+For performance, the AST nodes that make up a parsed `Expression` may cache the specific
+`PropertyAccessor`, `IndexAccessor`, `MethodExecutor`, or `ConstructorExecutor` that
+satisfied a previous evaluation, so that later evaluations of the same node can avoid
+asking every registered accessor or resolver in turn. Understanding this caching behavior
+is essential to using `Expression` and `EvaluationContext` correctly, in addition to the
+<<expressions-evaluation-context-security,security considerations>> discussed previously.
+
+A parsed `Expression` is designed to be created once and evaluated repeatedly, and doing
+so is both supported and encouraged. In particular:
+
+* A parsed `Expression` may be evaluated against different root objects, and against
+  different `EvaluationContext` instances of the *same type and with equivalent
+  configuration* – for example, several `StandardEvaluationContext` instances each
+  registering the same kind of custom `PropertyAccessor`. Changing the accessors or
+  resolvers registered with a context between evaluations of the same expression is
+  atypical and generally not advised, but is expected to work correctly: the registered
+  state of the *current* context is what is consulted, not a snapshot taken during an
+  earlier evaluation.
+* A parsed `Expression` must *not* be evaluated first against a context with one set of
+  security implications and later against a context with different, typically more
+  restrictive, security implications – for example, first against a
+  `StandardEvaluationContext` and later against a `SimpleEvaluationContext`. Doing so is
+  analogous to executing a database query on behalf of an administrator, caching the
+  resulting administrator-privileged execution plan, and then reusing that cached plan for
+  a lower-privileged user while expecting the lower-privileged user's restrictions to
+  apply: cached state from the first, more permissive evaluation may be reused during the
+  second, and the second context's restrictions cannot be reliably enforced as a result.
+  If the same expression string must be evaluated under contexts with different security
+  implications, parse it into *distinct* `Expression` instances, one per context.
+
+[WARNING]
+====
+Reusing a single parsed `Expression` across `EvaluationContext` instances with different
+security implications is not a supported usage pattern and must be avoided, regardless of
+which `EvaluationContext` implementations are involved.
+====
+
 [[expressions-type-conversion]]
 === Type Conversion
 
