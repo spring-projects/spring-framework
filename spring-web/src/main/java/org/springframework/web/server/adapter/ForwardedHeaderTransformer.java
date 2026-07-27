@@ -112,7 +112,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	 * <p>"X-Forwarded-Prefix" is enabled separately via {@link #setUseForwardedPrefix}.
 	 * @param useStandardHeader whether to use the standard "Forwarded" header
 	 * (true), or the "X-Forwarded-*" alternative headers (false).
-	 * @since 7.1
+	 * @since 7.0.9
 	 */
 	public ForwardedHeaderTransformer(boolean useStandardHeader) {
 		this.useStandardHeader = useStandardHeader;

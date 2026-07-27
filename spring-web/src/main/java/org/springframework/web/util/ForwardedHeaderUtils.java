@@ -68,7 +68,7 @@ public abstract class ForwardedHeaderUtils {
 	 * @param remoteAddress for a default port for the parsed "for" value
 	 * @param localAddress for a default port for the parsed "by" value
 	 * @return a {@link ForwardedInfo} with the parse results
-	 * @since 7.1
+	 * @since 7.0.9
 	 * @see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>
 	 */
 	public static ForwardedInfo parseStandardHeader(URI uri, HttpHeaders headers,
@@ -252,7 +252,7 @@ public abstract class ForwardedHeaderUtils {
 	 * this argument is ignored currently and the byAddress is always {@code null}
 	 * @return a {@link ForwardedInfo} with the scheme, host, and port adapted
 	 * from the "X-Forwarded-*" headers, and the parsed "for" address
-	 * @since 7.1
+	 * @since 7.0.9
 	 */
 	public static ForwardedInfo parseXForwardedHeaders(URI uri, HttpHeaders headers,
 			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
