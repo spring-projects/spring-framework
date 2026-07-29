@@ -515,7 +515,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * applicable to constructor binding via {@link #construct},
 	 * which uses only the values it needs.
 	 * @param allowedFields array of allowed field patterns
-	 * @see #setDisallowedFields
 	 * @see #isAllowed(String)
 	 */
 	public void setAllowedFields(String @Nullable ... allowedFields) {
@@ -553,7 +552,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @param disallowedFields array of disallowed field patterns
 	 * @see #setAllowedFields
 	 * @see #isAllowed(String)
-	 * @deprecated as of 7.1, in favor of {@link #setAllowedFields}.
+	 * @deprecated as of 7.1 as it is fragile and easy to get out of sync with the
+	 * actual properties over time. Please use constructor binding, a model object
+	 * designed for the expected inputs, or {@link #setAllowedFields} instead.
 	 */
 	@Deprecated(since = "7.1", forRemoval = true)
 	public void setDisallowedFields(String @Nullable ... disallowedFields) {
@@ -572,8 +573,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/**
 	 * Return the field patterns that should <i>not</i> be allowed for binding.
 	 * @return array of disallowed field patterns
-	 * @see #setDisallowedFields(String...)
-	 * @deprecated as of 7.1, in favor of {@link #getAllowedFields()}.
+	 * @deprecated as of 7.1 together with {@link #setDisallowedFields(String...)}
 	 */
 	@Deprecated(since = "7.1", forRemoval = true)
 	public String @Nullable [] getDisallowedFields() {
@@ -1285,7 +1285,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @param field the field to check
 	 * @return {@code true} if the field is allowed
 	 * @see #setAllowedFields
-	 * @see #setDisallowedFields
 	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isAllowed(String field) {
