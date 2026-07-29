@@ -24,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import org.eclipse.persistence.sessions.DatabaseLogin;
+import org.eclipse.persistence.sessions.DatabaseSession;
 import org.eclipse.persistence.sessions.UnitOfWork;
 import org.jspecify.annotations.Nullable;
 
@@ -45,10 +46,6 @@ import org.springframework.transaction.TransactionException;
  * EclipseLink in shared cache mode.
  *
  * <p><b>NOTE: This dialect supports custom isolation levels with limitations.</b>
- * Consistent isolation level handling is only guaranteed when all Spring
- * transaction definitions specify a concrete isolation level and when using the
- * default isolation level with non-readOnly and non-lazy transactions; see the
- * {@link #setLazyDatabaseTransaction "lazyDatabaseTransaction" javadoc} for details.
  * Internal locking happens for transaction isolation management in EclipseLink's
  * DatabaseLogin, at the granularity of the {@code EclipseLinkJpaDialect} instance;
  * for independent persistence units with different target databases, use distinct
@@ -79,13 +76,6 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 	 * even for non-read-only transactions, allowing access to EclipseLink's
 	 * shared cache and following EclipseLink's connection mode configuration,
 	 * assuming that isolation and visibility at the JDBC level are less important.
-	 * <p><b>NOTE: Lazy database transactions are not guaranteed to work reliably
-	 * in combination with custom isolation levels. Use read-only as well as this
-	 * lazy flag with care. If other transactions use custom isolation levels,
-	 * it is not recommended to use read-only and lazy transactions at all.</b>
-	 * Otherwise, you may see non-default isolation levels used during read-only
-	 * or lazy access. If this is not acceptable, don't use read-only and lazy
-	 * next to custom isolation levels in potentially concurrent transactions.
 	 * @see org.eclipse.persistence.sessions.UnitOfWork#beginEarlyTransaction()
 	 * @see TransactionDefinition#isReadOnly()
 	 * @see TransactionDefinition#getIsolationLevel()
@@ -186,12 +176,20 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 		public Connection getConnection() {
 			Connection con = this.connection;
 			if (con == null) {
-				transactionIsolationLock.lock();
-				try {
+				DatabaseSession dbs = this.entityManager.unwrap(DatabaseSession.class);
+				if (dbs.isInTransaction()) {
+					// Existing Connection to be retrieved from this EntityManager.
 					con = this.entityManager.unwrap(Connection.class);
 				}
-				finally {
-					transactionIsolationLock.unlock();
+				else {
+					// New Connection to be acquired by this EntityManager.
+					transactionIsolationLock.lock();
+					try {
+						con = this.entityManager.unwrap(Connection.class);
+					}
+					finally {
+						transactionIsolationLock.unlock();
+					}
 				}
 				this.connection = con;
 			}
