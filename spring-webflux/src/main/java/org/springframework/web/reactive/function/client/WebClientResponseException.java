@@ -312,6 +312,7 @@ public class WebClientResponseException extends WebClientException {
 				case NOT_ACCEPTABLE -> new WebClientResponseException.NotAcceptable(statusText, headers, body, charset, request);
 				case CONFLICT -> new WebClientResponseException.Conflict(statusText, headers, body, charset, request);
 				case GONE -> new WebClientResponseException.Gone(statusText, headers, body, charset, request);
+				case PRECONDITION_FAILED -> new WebClientResponseException.PreconditionFailed(statusText, headers, body, charset, request);
 				case UNSUPPORTED_MEDIA_TYPE -> new WebClientResponseException.UnsupportedMediaType(statusText, headers, body, charset, request);
 				case TOO_MANY_REQUESTS -> new WebClientResponseException.TooManyRequests(statusText, headers, body, charset, request);
 				case UNPROCESSABLE_CONTENT -> new WebClientResponseException.UnprocessableContent(statusText, headers, body, charset, request);
@@ -448,6 +449,21 @@ public class WebClientResponseException extends WebClientException {
 				@Nullable HttpRequest request) {
 
 			super(HttpStatus.GONE, statusText, headers, body, charset, request);
+		}
+	}
+
+	/**
+	 * {@link WebClientResponseException} for status HTTP 412 Precondition Failed.
+	 * @since 7.1
+	 */
+	@SuppressWarnings("serial")
+	public static class PreconditionFailed extends WebClientResponseException {
+
+		PreconditionFailed(
+				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable HttpRequest request) {
+
+			super(HttpStatus.PRECONDITION_FAILED, statusText, headers, body, charset, request);
 		}
 	}
 
