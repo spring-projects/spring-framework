@@ -35,7 +35,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.web.servlet.handler.DefaultPreFlightRequestHandler;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
@@ -72,14 +72,14 @@ public abstract class MvcNamespaceUtils {
 
 	private static final String CORS_CONFIGURATION_BEAN_NAME = "mvcCorsConfigurations";
 
-	private static final String HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME = "mvcHandlerMappingIntrospector";
+	private static final String PRE_FLIGHT_REQUEST_HANDLER = "mvcPreFlightRequestHandler";
 
 
 	public static void registerDefaultComponents(ParserContext context, @Nullable Object source) {
 		registerBeanNameUrlHandlerMapping(context, source);
 		registerHttpRequestHandlerAdapter(context, source);
 		registerSimpleControllerHandlerAdapter(context, source);
-		registerHandlerMappingIntrospector(context, source);
+		registerPreFlightRequestHandler(context, source);
 		registerLocaleResolver(context, source);
 		registerViewNameTranslator(context, source);
 		registerFlashMapManager(context, source);
@@ -276,18 +276,17 @@ public abstract class MvcNamespaceUtils {
 	}
 
 	/**
-	 * Registers an {@link HandlerMappingIntrospector} under a well-known name
+	 * Registers an {@link DefaultPreFlightRequestHandler} under a well-known name
 	 * unless already registered.
 	 */
-	@SuppressWarnings("removal")
-	private static void registerHandlerMappingIntrospector(ParserContext context, @Nullable Object source) {
-		if (!context.getRegistry().containsBeanDefinition(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME)) {
-			RootBeanDefinition beanDef = new RootBeanDefinition(HandlerMappingIntrospector.class);
+	private static void registerPreFlightRequestHandler(ParserContext context, @Nullable Object source) {
+		if (!context.getRegistry().containsBeanDefinition(PRE_FLIGHT_REQUEST_HANDLER)) {
+			RootBeanDefinition beanDef = new RootBeanDefinition(DefaultPreFlightRequestHandler.class);
 			beanDef.setSource(source);
 			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			beanDef.setLazyInit(true);
-			context.getRegistry().registerBeanDefinition(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME, beanDef);
-			context.registerComponent(new BeanComponentDefinition(beanDef, HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME));
+			context.getRegistry().registerBeanDefinition(PRE_FLIGHT_REQUEST_HANDLER, beanDef);
+			context.registerComponent(new BeanComponentDefinition(beanDef, PRE_FLIGHT_REQUEST_HANDLER));
 		}
 	}
 

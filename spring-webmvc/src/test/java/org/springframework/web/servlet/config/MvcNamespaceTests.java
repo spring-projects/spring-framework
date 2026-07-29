@@ -95,7 +95,7 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.web.servlet.handler.DefaultPreFlightRequestHandler;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
@@ -261,12 +261,12 @@ class MvcNamespaceTests {
 
 		assertThat(uriComponentsContributor).isNotNull();
 
-		String name = "mvcHandlerMappingIntrospector";
-		HandlerMappingIntrospector introspector = this.appContext.getBean(name, HandlerMappingIntrospector.class);
-		assertThat(introspector).isNotNull();
-		assertThat(introspector.getHandlerMappings()).hasSize(2);
-		assertThat(introspector.getHandlerMappings()).element(0).isSameAs(mapping);
-		assertThat(introspector.getHandlerMappings().get(1).getClass()).isEqualTo(BeanNameUrlHandlerMapping.class);
+		String name = "mvcPreFlightRequestHandler";
+		DefaultPreFlightRequestHandler requestHandler = this.appContext.getBean(name, DefaultPreFlightRequestHandler.class);
+		assertThat(requestHandler).isNotNull();
+		assertThat(requestHandler.getHandlerMappings()).hasSize(2);
+		assertThat(requestHandler.getHandlerMappings()).element(0).isSameAs(mapping);
+		assertThat(requestHandler.getHandlerMappings().get(1).getClass()).isEqualTo(BeanNameUrlHandlerMapping.class);
 	}
 
 	@Test  // gh-25290
