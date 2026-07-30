@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Build
         id: build
         uses: ./.github/actions/build
@@ -19,7 +19,7 @@ jobs:
         uses: ./.github/actions/print-jvm-thread-dumps
       - name: Upload Build Reports
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: build-reports
           path: '**/build/reports/'
