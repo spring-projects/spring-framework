@@ -88,22 +88,14 @@ import org.springframework.expression.spel.SpelMessage;
  * <p>For more power and flexibility, in particular for internal configuration
  * scenarios, consider using {@link StandardEvaluationContext} instead.
  *
- * <p><strong>WARNING</strong>: {@code SimpleEvaluationContext} takes a
- * best-effort approach to restricting the SpEL language to a subset of its
- * features; however, it cannot guarantee that evaluation of an expression is
- * safe. Evaluating a SpEL expression obtained from an untrusted source is inherently
- * dangerous and should generally be avoided, since doing so can effectively grant
- * that source the ability to execute arbitrary code within the application. Even
- * within the restricted language subset supported by {@code SimpleEvaluationContext},
- * an expression can potentially invoke any property, method, or function reachable
- * via the configured root object, property accessors, method resolvers, variables,
- * and functions. It is therefore the responsibility of the code that configures a
- * {@code SimpleEvaluationContext} &mdash; for example, by supplying a root
- * object or by registering property accessors, method resolvers, variables, or
- * functions &mdash; to ensure that none of those reachable objects expose
- * operations that would be dangerous if invoked by an expression from an
- * untrusted source. For details on what qualifies as a "trusted" source, see
- * {@link StandardEvaluationContext}.
+ * <p><strong>WARNING</strong>: Although {@code SimpleEvaluationContext} restricts
+ * the SpEL language to a subset of its features, that restriction is provided on
+ * a best-effort basis and does not guarantee that evaluation of an expression is
+ * safe; {@code SimpleEvaluationContext} must not be considered safe for evaluating
+ * a SpEL expression obtained from an untrusted source. See the
+ * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-security"
+ * >Security Considerations</a> section of the Spring Framework reference
+ * documentation for details.
  *
  * <p>Because a parsed {@code Expression} may cache accessor and executor state
  * resolved against a particular {@code EvaluationContext} configuration, a parsed
