@@ -51,6 +51,12 @@ abstract class PropertyDescriptorUtils {
 	 * <p>This just supports the basic JavaBeans conventions, without indexed
 	 * properties or any customizers, and without other BeanInfo metadata.
 	 * For standard JavaBeans introspection, use the JavaBeans Introspector.
+	 * <p>Note that, in contrast to the standard {@link java.beans.Introspector},
+	 * this method does support a static {@code set} method as the write method
+	 * for a property, resulting in a write-only property if no corresponding
+	 * instance {@code get}/{@code is} method is present. Static {@code get} and
+	 * {@code is} methods, on the other hand, are never considered read methods
+	 * for a property, aligning with standard JavaBeans introspection.
 	 * @param beanClass the target class to introspect
 	 * @return a collection of property descriptors
 	 * @throws IntrospectionException from introspecting the given bean class
