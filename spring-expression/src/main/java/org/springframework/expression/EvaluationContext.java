@@ -38,23 +38,13 @@ import org.jspecify.annotations.Nullable;
  * manually.</li>
  * </ul>
  *
- * <p><strong>WARNING</strong>: Evaluating a SpEL expression obtained from an
- * untrusted source is inherently dangerous, since doing so can effectively
- * grant that source the ability to execute arbitrary code within the
- * application. See the class-level documentation for
- * {@code StandardEvaluationContext} and {@code SimpleEvaluationContext} for
- * details on the trust model applicable to each implementation. Regardless of
- * which {@code EvaluationContext} implementation is in use, any restrictions
- * that an implementation imposes on the SpEL language are provided on a
- * best-effort basis and do not, by themselves, guarantee that expression
- * evaluation is safe. An expression can potentially invoke any property, method,
- * or function reachable via the configured root object, property accessors,
- * index accessors, resolvers, variables, and functions. It is therefore the
- * responsibility of the code that configures an {@code EvaluationContext}
- * &mdash; for example, by supplying a root object or by registering property
- * accessors, resolvers, variables, or functions &mdash; to ensure that none of
- * those reachable objects expose operations that would be dangerous if invoked
- * by an expression from an untrusted source.
+ * <p><strong>WARNING</strong>: Special security considerations apply to the
+ * evaluation of SpEL expressions, particularly those obtained from an untrusted
+ * source. See the
+ * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-security"
+ * >Security Considerations</a> section of the Spring Framework reference
+ * documentation for details, as well as the class-level documentation for
+ * {@code StandardEvaluationContext} and {@code SimpleEvaluationContext}.
  *
  * <p>An {@code EvaluationContext} is designed to be built once and reused across
  * many evaluations, potentially of many different {@link Expression} instances. A

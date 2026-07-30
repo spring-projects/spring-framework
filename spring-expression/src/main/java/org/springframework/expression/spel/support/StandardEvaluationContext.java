@@ -65,20 +65,12 @@ import org.springframework.util.Assert;
  * opting into several SpEL features as needed by specific use cases.
  *
  * <p><strong>WARNING</strong>: {@code StandardEvaluationContext} exposes the
- * complete SpEL language, including the ability to invoke arbitrary constructors
- * and methods and to read and write arbitrary properties and fields &mdash; all
- * backed by reflection &mdash; as well as the ability to reference beans in an
- * {@code ApplicationContext} via a configured {@link BeanResolver}. For that
- * reason, a {@code StandardEvaluationContext} must <strong>never</strong> be used
- * to evaluate a SpEL expression obtained from an untrusted source. In this context,
- * a "trusted" source is limited to a developer of the application or an
- * administrator who is responsible for configuring or operating the
- * application. Any other source of a SpEL expression &mdash; for example, an
- * expression supplied by an end user or received from an external system
- * &mdash; must be treated as untrusted. Note, however, that evaluating a SpEL
- * expression obtained from an untrusted source is inherently dangerous
- * regardless of the {@code EvaluationContext} implementation in use; see
- * {@link SimpleEvaluationContext} for further details.
+ * complete SpEL language, backed by reflection, and must <strong>never</strong>
+ * be used to evaluate a SpEL expression obtained from an untrusted source. See
+ * the
+ * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-security"
+ * >Security Considerations</a> section of the Spring Framework reference
+ * documentation for details, including the definition of a "trusted" source.
  *
  * <p>Because a parsed {@code Expression} may cache accessor and executor state
  * resolved against a particular {@code EvaluationContext} configuration, a parsed
