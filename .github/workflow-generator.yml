@@ -1,0 +1,18 @@
+workflow:
+  generator:
+    project:
+      java:
+        versions:
+          primary: 25
+    workflows:
+      release-train:
+        build:
+          env:
+            COMMERCIAL_REPO_USERNAME: secrets.COMMERCIAL_ARTIFACTORY_USERNAME
+            COMMERCIAL_REPO_PASSWORD: secrets.COMMERCIAL_ARTIFACTORY_PASSWORD
+            COMMERCIAL_RELEASE_REPO_URL: vars.COMMERCIAL_RELEASE_REPO_URL
+        test:
+          env:
+            COMMERCIAL_REPO_USERNAME: secrets.COMMERCIAL_ARTIFACTORY_USERNAME
+            COMMERCIAL_REPO_PASSWORD: secrets.COMMERCIAL_ARTIFACTORY_PASSWORD
+            COMMERCIAL_RELEASE_REPO_URL: vars.COMMERCIAL_RELEASE_REPO_URL

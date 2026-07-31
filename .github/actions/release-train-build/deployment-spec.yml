@@ -1,0 +1,16 @@
+artifactory:
+  artifacts:
+    - pattern: "/**/framework-api-*.zip"
+      properties:
+        zip.deployed: "false"
+        zip.name: "spring-framework"
+    - pattern: "/**/framework-api-*-docs.zip"
+      properties:
+        zip.type: "docs"
+    - pattern: "/**/framework-api-*-schema.zip"
+      properties:
+        zip.type: "schema"
+maven-central:
+  excludes:
+    - "org/springframework/framework-api/**"
+    - "org/springframework/framework-docs/**"
