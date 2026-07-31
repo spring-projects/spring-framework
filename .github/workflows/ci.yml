@@ -2,31 +2,33 @@ name: CI
 on:
   schedule:
     - cron: '30 9 * * *'
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  contents: read
 jobs:
   ci:
     name: '${{ matrix.os.name}} | Java ${{ matrix.java.version}}'
-    if: ${{ github.repository == 'spring-projects/spring-framework' }}
+    if: ${{ github.repository == 'spring-projects/spring-framework' || github.repository == 'spring-projects/spring-framework-commercial' }}
     runs-on: ${{ matrix.os.id }}
     timeout-minutes: 60
     strategy:
       matrix:
         os:
-          - id: ubuntu-latest
+          - id: ${{ vars.UBUNTU_MEDIUM || 'ubuntu-latest' }}
             name: Linux
         java:
           - version: 17
-            toolchain: false
+            toolchain: true
           - version: 21
             toolchain: true
           - version: 25
+            toolchain: false
+          - version: 26
             toolchain: true
         exclude:
           - os:
               name: Linux
             java:
-              version: 17
+              version: 25
     steps:
       - name: Prepare Windows runner
         if: ${{ runner.os == 'Windows' }}
@@ -35,11 +37,15 @@ jobs:
           git config --global core.longPaths true
           Stop-Service -name Docker
       - name: Check Out Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Build
         id: build
         uses: ./.github/actions/build
         with:
+          commercial-release-repository-url: ${{ vars.COMMERCIAL_RELEASE_REPO_URL }}
+          commercial-repository-password: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
+          commercial-repository-username: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
+          commercial-snapshot-repository-url: ${{ vars.COMMERCIAL_SNAPSHOT_REPO_URL }}
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           java-early-access: ${{ matrix.java.early-access || 'false' }}
           java-distribution: ${{ matrix.java.distribution }}

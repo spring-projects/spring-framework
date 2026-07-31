@@ -29,27 +29,25 @@ runs:
         distribution: ${{ inputs.java-early-access == 'true' && 'temurin' || (inputs.java-distribution || 'liberica') }}
         java-version: |
           ${{ inputs.java-early-access == 'true' && format('{0}-ea', inputs.java-version) || inputs.java-version }}
-          ${{ inputs.java-toolchain == 'true' && '17' || '' }}
-          25
+          ${{ inputs.java-toolchain == 'true' && '25' || '' }}
     - name: Set Up Gradle
-      uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+      uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # 6.2.0
       with:
+        cache-provider: basic
         cache-read-only: false
         develocity-access-key: ${{ inputs.develocity-access-key }}
         develocity-token-expiry: 4
     - name: Configure Gradle Properties
       shell: bash
       run: |
-        mkdir -p $HOME/.gradle
-        echo 'systemProp.user.name=spring-builds+github' >> $HOME/.gradle/gradle.properties
-        echo 'systemProp.org.gradle.internal.launcher.welcomeMessageEnabled=false' >> $HOME/.gradle/gradle.properties
-        echo 'org.gradle.daemon=false' >> $HOME/.gradle/gradle.properties
-        echo 'org.gradle.daemon=4' >> $HOME/.gradle/gradle.properties
+        echo 'systemProp.user.name=spring-builds+github' >> $GRADLE_USER_HOME/gradle.properties
+        echo 'systemProp.org.gradle.internal.launcher.welcomeMessageEnabled=false' >> $GRADLE_USER_HOME/gradle.properties
+        echo 'org.gradle.daemon=false' >> $GRADLE_USER_HOME/gradle.properties
     - name: Configure Toolchain Properties
       if: ${{ inputs.java-toolchain == 'true' }}
       shell: bash
       run: |
-        echo toolchainVersion=${{ inputs.java-version }} >> $HOME/.gradle/gradle.properties
-        echo systemProp.org.gradle.java.installations.auto-detect=false >> $HOME/.gradle/gradle.properties
-        echo systemProp.org.gradle.java.installations.auto-download=false >> $HOME/.gradle/gradle.properties
-        echo systemProp.org.gradle.java.installations.paths=${{ format('$JAVA_HOME_{0}_X64', inputs.java-version) }} >> $HOME/.gradle/gradle.properties
+        echo toolchainVersion=${{ inputs.java-version }} >> $GRADLE_USER_HOME/gradle.properties
+        echo systemProp.org.gradle.java.installations.auto-detect=false >> $GRADLE_USER_HOME/gradle.properties
+        echo systemProp.org.gradle.java.installations.auto-download=false >> $GRADLE_USER_HOME/gradle.properties
+        echo systemProp.org.gradle.java.installations.paths=${{ format('$JAVA_HOME_{0}_X64', inputs.java-version) }} >> $GRADLE_USER_HOME/gradle.properties
