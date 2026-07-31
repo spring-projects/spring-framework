@@ -50,20 +50,22 @@ public class RepositoriesPlugin implements Plugin <Project> {
 	}
 
 	private void configureCommercialRepositories(Project project) {
-		if (System.getenv().containsKey("COMMERCIAL_RELEASE_REPO_URL")) {
+		String releaseRepositoryUrl = getEnv("COMMERCIAL_RELEASE_REPO_URL");
+		if (releaseRepositoryUrl != null) {
 			project.getRepositories().maven((repository) -> {
 				repository.setName("spring-commercial-release");
-				repository.setUrl(System.getenv("COMMERCIAL_RELEASE_REPO_URL"));
+				repository.setUrl(releaseRepositoryUrl);
 				repository.credentials((creds) -> {
 					creds.setUsername(System.getenv("COMMERCIAL_REPO_USERNAME"));
 					creds.setPassword(System.getenv("COMMERCIAL_REPO_PASSWORD"));
 				});
 			});
 		}
-		if (System.getenv().containsKey("COMMERCIAL_SNAPSHOT_REPO_URL") && project.getVersion().toString().endsWith("-SNAPSHOT")) {
+		String snapshotRepositoryUrl = getEnv("COMMERCIAL_SNAPSHOT_REPO_URL");
+		if (snapshotRepositoryUrl != null && project.getVersion().toString().endsWith("-SNAPSHOT")) {
 			project.getRepositories().maven((repository) -> {
 				repository.setName("spring-commercial-snapshot");
-				repository.setUrl(System.getenv("COMMERCIAL_SNAPSHOT_REPO_URL"));
+				repository.setUrl(snapshotRepositoryUrl);
 				repository.credentials((creds) -> {
 					creds.setUsername(System.getenv("COMMERCIAL_REPO_USERNAME"));
 					creds.setPassword(System.getenv("COMMERCIAL_REPO_PASSWORD"));
@@ -73,15 +75,24 @@ public class RepositoriesPlugin implements Plugin <Project> {
 	}
 
 	private void configureReleaseTrainRepository(Project project) {
-		if (System.getenv().containsKey("RELEASE_TRAIN_MAVEN_REPOSITORY_URL")) {
+		String releaseTrainRepositoryUrl = getEnv("RELEASE_TRAIN_MAVEN_REPOSITORY_URL");
+		if (releaseTrainRepositoryUrl != null) {
 			project.getRepositories().maven(repository -> {
 				repository.setName("spring-release-train");
-				repository.setUrl(System.getenv("RELEASE_TRAIN_MAVEN_REPOSITORY_URL"));
+				repository.setUrl(releaseTrainRepositoryUrl);
 				repository.credentials((creds) -> {
 					creds.setUsername(System.getenv("RELEASE_TRAIN_MAVEN_REPOSITORY_USERNAME"));
 					creds.setPassword(System.getenv("RELEASE_TRAIN_MAVEN_REPOSITORY_PASSWORD"));
 				});
 			});
 		}
+	}
+
+	/**
+	 * Returns the environment variable's value, or {@code null} if it is unset or blank.
+	 */
+	private static String getEnv(String name) {
+		String value = System.getenv(name);
+		return (value != null && !value.isBlank()) ? value : null;
 	}
 }
