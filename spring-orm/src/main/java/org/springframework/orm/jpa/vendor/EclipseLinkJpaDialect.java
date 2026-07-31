@@ -24,7 +24,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import org.eclipse.persistence.sessions.DatabaseLogin;
-import org.eclipse.persistence.sessions.DatabaseSession;
 import org.eclipse.persistence.sessions.UnitOfWork;
 import org.jspecify.annotations.Nullable;
 
@@ -176,8 +175,8 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 		public Connection getConnection() {
 			Connection con = this.connection;
 			if (con == null) {
-				DatabaseSession dbs = this.entityManager.unwrap(DatabaseSession.class);
-				if (dbs.isInTransaction()) {
+				UnitOfWork uow = this.entityManager.unwrap(UnitOfWork.class);
+				if (uow.getParent().isInTransaction()) {
 					// Existing Connection to be retrieved from this EntityManager.
 					con = this.entityManager.unwrap(Connection.class);
 				}
