@@ -7,27 +7,15 @@ on:
   push:
     branches:
       - '*.x'
-permissions:
-  contents: read
 jobs:
-  build:
+  backport-issue:
     permissions:
       contents: read
       issues: write
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-      - name: Set up Java
-        uses: actions/setup-java@v5
+      - name: Create Backport Issue
+        uses: spring-io/backport-bot@v0.0.2
         with:
-          distribution: 'liberica'
-          java-version: 17
-      - name: Download BackportBot
-        run: wget https://github.com/spring-io/backport-bot/releases/download/latest/backport-bot-0.0.1-SNAPSHOT.jar
-      - name: Backport
-        env:
-          GITHUB_EVENT: ${{ toJSON(github.event) }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: java -jar backport-bot-0.0.1-SNAPSHOT.jar --github.accessToken="$GITHUB_TOKEN" --github.event_name "$GITHUB_EVENT_NAME" --github.event "$GITHUB_EVENT"
+          token: ${{ secrets.GITHUB_TOKEN }}

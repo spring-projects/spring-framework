@@ -1,6 +1,18 @@
 name: 'Build'
 description: 'Builds the project, optionally publishing it to a local deployment repository'
 inputs:
+  commercial-release-repository-url:
+    description: 'URL of the release repository'
+    required: false
+  commercial-repository-password:
+    description: 'Password for authentication with the commercial repository'
+    required: false
+  commercial-repository-username:
+    description: 'Username for authentication with the commercial repository'
+    required: false
+  commercial-snapshot-repository-url:
+    description: 'URL of the snapshot repository'
+    required: false
   develocity-access-key:
     description: 'Access key for authentication with ge.spring.io'
     required: false
@@ -46,11 +58,21 @@ runs:
       id: build
       if: ${{ inputs.publish == 'false' }}
       shell: bash
+      env:
+        COMMERCIAL_RELEASE_REPO_URL: ${{ inputs.commercial-release-repository-url }}
+        COMMERCIAL_REPO_PASSWORD: ${{ inputs.commercial-repository-password }}
+        COMMERCIAL_REPO_USERNAME: ${{ inputs.commercial-repository-username }}
+        COMMERCIAL_SNAPSHOT_REPO_URL: ${{ inputs.commercial-snapshot-repository-url }}
       run: ./gradlew check antora
     - name: Publish
       id: publish
       if: ${{ inputs.publish == 'true' }}
       shell: bash
+      env:
+        COMMERCIAL_RELEASE_REPO_URL: ${{ inputs.commercial-release-repository-url }}
+        COMMERCIAL_REPO_PASSWORD: ${{ inputs.commercial-repository-password }}
+        COMMERCIAL_REPO_USERNAME: ${{ inputs.commercial-repository-username }}
+        COMMERCIAL_SNAPSHOT_REPO_URL: ${{ inputs.commercial-snapshot-repository-url }}
       run: ./gradlew -PdeploymentRepository=$(pwd)/deployment-repository build publishAllPublicationsToDeploymentRepository
     - name: Read Version From gradle.properties
       id: read-version

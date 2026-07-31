@@ -1,0 +1,33 @@
+changelog:
+  repository: spring-projects/spring-framework-commercial
+  sections:
+    - title: ":warning: Attention Required"
+      labels:
+        - "for: upgrade-attention"
+      summary:
+        mode: "member-comment"
+        config:
+          prefix: "Attention Required:"
+    - title: ":star: New Features"
+      labels:
+        - "type: enhancement"
+    - title: ":lady_beetle: Bug Fixes"
+      labels:
+        - "type: bug"
+        - "type: regression"
+    - title: ":notebook_with_decorative_cover: Documentation"
+      labels:
+        - "type: documentation"
+    - title: ":hammer: Dependency Upgrades"
+      sort: "title"
+      labels:
+        - "type: dependency-upgrade"
+  contributors:
+    exclude:
+      names:
+        - "bclozel"
+        - "jhoeller"
+        - "rstoyanchev"
+        - "sbrannen"
+        - "sdeleuze"
+        - "snicoll"

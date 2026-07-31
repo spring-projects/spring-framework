@@ -18,16 +18,8 @@ description = "Spring Framework"
 
 configure(allprojects) { project ->
 	apply plugin: "org.springframework.build.localdev"
+    apply plugin: "org.springframework.build.repositories"
 	group = "org.springframework"
-	repositories {
-		mavenCentral()
-		if (version.contains('-')) {
-			maven { url = "https://repo.spring.io/milestone" }
-		}
-		if (version.endsWith('-SNAPSHOT')) {
-			maven { url = "https://repo.spring.io/snapshot" }
-		}
-	}
 	configurations.all {
 		resolutionStrategy {
 			cacheChangingModulesFor 0, "seconds"
