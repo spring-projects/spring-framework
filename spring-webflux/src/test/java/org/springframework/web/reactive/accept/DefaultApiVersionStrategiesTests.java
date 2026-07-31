@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.test.publisher.TestPublisher;
 
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MissingApiVersionException;
@@ -128,8 +129,40 @@ class DefaultApiVersionStrategiesTests {
 				.withMessage("versionRequired cannot be set to true if a defaultVersion is also configured");
 	}
 
+	@Test
+	void resolveVersionWithResolversInOrder() {
+		TestPublisher<String> firstResolverPublisher = TestPublisher.create();
+		ApiVersionStrategy strategy = apiVersionStrategy(List.of(
+				(AsyncApiVersionResolver) exchange -> firstResolverPublisher.flux().next(),
+				(AsyncApiVersionResolver) exchange -> Mono.just("2.0")));
+
+		StepVerifier.create(strategy.resolveApiVersion(
+					MockServerWebExchange.from(MockServerHttpRequest.get("/"))))
+				.then(() -> firstResolverPublisher.emit("1.0"))
+				.expectNext("1.0")
+				.verifyComplete();
+	}
+
+	@Test
+	void resolveVersionPropagatesErrorFromEarlierResolver() {
+		TestPublisher<String> firstResolverPublisher = TestPublisher.create();
+		ApiVersionStrategy strategy = apiVersionStrategy(List.of(
+				(AsyncApiVersionResolver) exchange -> firstResolverPublisher.flux().next(),
+				(AsyncApiVersionResolver) exchange -> Mono.just("2.0")));
+
+		StepVerifier.create(strategy.resolveApiVersion(
+					MockServerWebExchange.from(MockServerHttpRequest.get("/"))))
+				.then(() -> firstResolverPublisher.error(new IllegalStateException("test")))
+				.expectErrorMessage("test")
+				.verify();
+	}
+
 	private static DefaultApiVersionStrategy apiVersionStrategy() {
 		return apiVersionStrategy(null, false, null);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy(List<ApiVersionResolver> resolvers) {
+		return new DefaultApiVersionStrategy(resolvers, parser, null, null, false, null, null);
 	}
 
 	private static DefaultApiVersionStrategy apiVersionStrategy(

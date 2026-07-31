@@ -169,7 +169,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	@Override
 	public Mono<String> resolveApiVersion(ServerWebExchange exchange) {
 		return Flux.fromIterable(this.versionResolvers)
-				.flatMap(resolver -> resolver instanceof AsyncApiVersionResolver asyncResolver ?
+				.concatMap(resolver -> resolver instanceof AsyncApiVersionResolver asyncResolver ?
 						asyncResolver.resolveVersionAsync(exchange) :
 						Mono.justOrEmpty(resolver.resolveVersion(exchange)))
 				.next();
