@@ -158,6 +158,12 @@ public interface RetryPolicy {
 		public static final long DEFAULT_DELAY = 1000;
 
 		/**
+		 * The default {@linkplain #jitter(Duration) jitter}: {@value}.
+		 * @since 7.0.9
+		 */
+		public static final long DEFAULT_JITTER = 0;
+
+		/**
 		 * The default {@linkplain #multiplier(double) multiplier}: {@value}.
 		 */
 		public static final double DEFAULT_MULTIPLIER = 1.0;
@@ -179,8 +185,6 @@ public interface RetryPolicy {
 
 		private @Nullable Long maxRetries;
 
-		private Duration timeout = Duration.ZERO;
-
 		private @Nullable Duration delay;
 
 		private @Nullable Duration jitter;
@@ -188,6 +192,8 @@ public interface RetryPolicy {
 		private @Nullable Double multiplier;
 
 		private @Nullable Duration maxDelay;
+
+		private Duration timeout = DEFAULT_TIMEOUT;
 
 		private final Set<Class<? extends Throwable>> includes = new LinkedHashSet<>();
 
@@ -237,24 +243,6 @@ public interface RetryPolicy {
 		public Builder maxRetries(long maxRetries) {
 			assertMaxRetriesIsNotNegative(maxRetries);
 			this.maxRetries = maxRetries;
-			return this;
-		}
-
-		/**
-		 * Specify a timeout for the maximum amount of elapsed time allowed for
-		 * the initial invocation and any subsequent retry attempts, including
-		 * delays.
-		 * <p>The default is {@link Duration#ZERO}, which signals that no timeout
-		 * should be applied.
-		 * <p>The supplied value will override any previously configured value.
-		 * @param timeout the timeout, typically in milliseconds or seconds;
-		 * must be greater than or equal to zero
-		 * @return this {@code Builder} instance for chained method invocations
-		 * @since 7.0.2
-		 */
-		public Builder timeout(Duration timeout) {
-			assertIsNotNegative("timeout", timeout);
-			this.timeout = timeout;
 			return this;
 		}
 
@@ -350,6 +338,24 @@ public interface RetryPolicy {
 		public Builder maxDelay(Duration maxDelay) {
 			assertIsPositive("maxDelay", maxDelay);
 			this.maxDelay = maxDelay;
+			return this;
+		}
+
+		/**
+		 * Specify a timeout for the maximum amount of elapsed time allowed for
+		 * the initial invocation and any subsequent retry attempts, including
+		 * delays.
+		 * <p>The default is {@link Duration#ZERO}, which signals that no timeout
+		 * should be applied.
+		 * <p>The supplied value will override any previously configured value.
+		 * @param timeout the timeout, typically in milliseconds or seconds;
+		 * must be greater than or equal to zero
+		 * @return this {@code Builder} instance for chained method invocations
+		 * @since 7.0.2
+		 */
+		public Builder timeout(Duration timeout) {
+			assertIsNotNegative("timeout", timeout);
+			this.timeout = timeout;
 			return this;
 		}
 
@@ -483,11 +489,9 @@ public interface RetryPolicy {
 				ExponentialBackOff exponentialBackOff = new ExponentialBackOff();
 				exponentialBackOff.setMaxAttempts(this.maxRetries != null ? this.maxRetries : DEFAULT_MAX_RETRIES);
 				exponentialBackOff.setInitialInterval(this.delay != null ? this.delay.toMillis() : DEFAULT_DELAY);
-				exponentialBackOff.setMaxInterval(this.maxDelay != null ? this.maxDelay.toMillis() : DEFAULT_MAX_DELAY);
+				exponentialBackOff.setJitter(this.jitter != null ? this.jitter.toMillis() : DEFAULT_JITTER);
 				exponentialBackOff.setMultiplier(this.multiplier != null ? this.multiplier : DEFAULT_MULTIPLIER);
-				if (this.jitter != null) {
-					exponentialBackOff.setJitter(this.jitter.toMillis());
-				}
+				exponentialBackOff.setMaxInterval(this.maxDelay != null ? this.maxDelay.toMillis() : DEFAULT_MAX_DELAY);
 				backOff = exponentialBackOff;
 			}
 			return new DefaultRetryPolicy(this.includes, this.excludes, this.predicate, this.timeout, backOff);
