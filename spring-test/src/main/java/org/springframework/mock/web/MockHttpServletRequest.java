@@ -251,7 +251,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private @Nullable HttpSession session;
 
-	private boolean requestedSessionIdValid = true;
+	private @Nullable Boolean requestedSessionIdValid;
 
 	private boolean requestedSessionIdFromCookie = true;
 
@@ -1352,7 +1352,14 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public boolean isRequestedSessionIdValid() {
-		return this.requestedSessionIdValid;
+		if (this.requestedSessionIdValid != null) {
+			return this.requestedSessionIdValid;
+		}
+		if (this.requestedSessionId == null) {
+			return false;
+		}
+		HttpSession session = getSession(false);
+		return (session != null && this.requestedSessionId.equals(session.getId()));
 	}
 
 	public void setRequestedSessionIdFromCookie(boolean requestedSessionIdFromCookie) {
