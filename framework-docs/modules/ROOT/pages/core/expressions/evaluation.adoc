@@ -263,11 +263,11 @@ dangerous and should generally be avoided, since doing so can effectively grant 
 source the ability to execute arbitrary code within the application, regardless of which
 `EvaluationContext` implementation is used.
 
-Throughout this section, a source is considered "trusted" only if it is a developer of
-the application or an administrator responsible for configuring or operating the
-application. Any other source of a SpEL expression must be treated as untrusted – for
-example, an expression supplied by an end user of the application or received from an
-external system.
+Throughout this section, a source of a SpEL expression is considered "trusted" only if it
+is a developer of the application or an administrator responsible for configuring or
+operating the application. Any other source of a SpEL expression must be treated as
+untrusted – for example, an expression supplied by an end user of the application or
+received from an external system.
 
 [WARNING]
 ====
