@@ -20,8 +20,8 @@ import java.time.Duration;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.util.SseUtils;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web support.
@@ -112,7 +112,7 @@ public final class ServerSentEvent<T> {
 		}
 		if (this.comment != null) {
 			sb.append(':');
-			appendEscaped(this.comment, "\n:", sb);
+			SseUtils.appendFieldValue("", this.comment, sb);
 			sb.append('\n');
 		}
 		if (this.data != null) {
@@ -123,30 +123,6 @@ public final class ServerSentEvent<T> {
 
 	private void appendAttribute(String fieldName, Object fieldValue, StringBuilder sb) {
 		sb.append(fieldName).append(':').append(fieldValue).append('\n');
-	}
-
-	private void appendEscaped(String input, String replacement, StringBuilder sb) {
-		if (input.indexOf('\n') == -1 && input.indexOf('\r') == -1) {
-			sb.append(input);
-		}
-		else {
-			int length = input.length();
-			for (int i = 0; i < length; i++) {
-				char c = input.charAt(i);
-				if (c == '\r') {
-					if (i + 1 < length && input.charAt(i + 1) == '\n') {
-						i++;
-					}
-					sb.append(replacement);
-				}
-				else if (c == '\n') {
-					sb.append(replacement);
-				}
-				else {
-					sb.append(c);
-				}
-			}
-		}
 	}
 
 	@Override
@@ -265,21 +241,16 @@ public final class ServerSentEvent<T> {
 
 		@Override
 		public Builder<T> id(String id) {
-			checkEvent(id);
+			SseUtils.assertNoLineSeparator(id);
 			this.id = id;
 			return this;
 		}
 
 		@Override
 		public Builder<T> event(String event) {
-			checkEvent(event);
+			SseUtils.assertNoLineSeparator(event);
 			this.event = event;
 			return this;
-		}
-
-		private static void checkEvent(String content) {
-			Assert.isTrue(content.indexOf('\n') == -1 && content.indexOf('\r') == -1,
-					"illegal character '\\n' or '\\r' in event content");
 		}
 
 		@Override
