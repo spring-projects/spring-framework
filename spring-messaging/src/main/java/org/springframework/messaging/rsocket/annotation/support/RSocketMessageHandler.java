@@ -425,6 +425,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 				responder = createResponder(setupPayload, sendingRSocket);
 			}
 			catch (Throwable ex) {
+				setupPayload.release();
 				return Mono.error(ex);
 			}
 			return responder.handleConnectionSetupPayload(setupPayload).then(Mono.just(responder));
