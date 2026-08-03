@@ -92,10 +92,16 @@ import org.springframework.expression.spel.SpelMessage;
  * the SpEL language to a subset of its features, that restriction is provided on
  * a best-effort basis and does not guarantee that evaluation of an expression is
  * safe; {@code SimpleEvaluationContext} must not be considered safe for evaluating
- * a SpEL expression obtained from an untrusted source. See the
+ * a SpEL expression obtained from an untrusted source. This responsibility extends
+ * to property accessors: restricting a {@code SimpleEvaluationContext} to read-only
+ * data binding governs only whether <em>assignment</em> to a property is permitted
+ * and does not verify that reading a property is free of side effects. See the
  * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-security"
- * >Security Considerations</a> section of the Spring Framework reference
- * documentation for details.
+ * >Security Considerations</a> and
+ * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-object-design"
+ * >Object Design</a> sections of the Spring Framework reference documentation, as well
+ * as the class-level documentation for {@link ReflectivePropertyAccessor} and
+ * {@link DataBindingPropertyAccessor}, for details.
  *
  * <p>Because a parsed {@code Expression} may cache accessor and executor state
  * resolved against a particular {@code EvaluationContext} configuration, a parsed
