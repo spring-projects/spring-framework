@@ -53,6 +53,7 @@ jobs:
   trigger-docs-build:
     name: Trigger Docs Build
     needs: build-and-deploy-snapshot
+    if: ${{ !vars.COMMERCIAL }} # remove when commercial support
     permissions:
       actions: write
     runs-on: ${{ vars.UBUNTU_SMALL || 'ubuntu-latest' }}
