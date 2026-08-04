@@ -16,6 +16,9 @@
 
 package org.springframework.core.convert;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -73,7 +76,7 @@ public class TypeDescriptor implements Serializable {
 
 	private final ResolvableType resolvableType;
 
-	private final AnnotatedElementSupplier annotatedElementSupplier;
+	private transient AnnotatedElementSupplier annotatedElementSupplier;
 
 	private volatile @Nullable AnnotatedElementAdapter annotatedElement;
 
@@ -724,6 +727,22 @@ public class TypeDescriptor implements Serializable {
 	 */
 	public static @Nullable TypeDescriptor nested(Property property, int nestingLevel) {
 		return new TypeDescriptor(property).nested(nestingLevel);
+	}
+
+
+	private void writeObject(ObjectOutputStream outputStream) throws IOException {
+		// Resolve the annotations up front since the supplier is transient: it captures
+		// the Field/MethodParameter/Property this descriptor has been created from.
+		getAnnotatedElement();
+		outputStream.defaultWriteObject();
+	}
+
+	private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+		inputStream.defaultReadObject();
+		AnnotatedElementAdapter annotatedElement = AnnotatedElementAdapter.from(
+				this.annotatedElement != null ? this.annotatedElement.getAnnotations() : null);
+		this.annotatedElement = annotatedElement;
+		this.annotatedElementSupplier = () -> annotatedElement;
 	}
 
 
