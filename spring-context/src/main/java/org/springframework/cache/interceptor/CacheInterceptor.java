@@ -23,6 +23,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 
 /**
@@ -43,7 +45,11 @@ import org.springframework.util.Assert;
  * @since 3.1
  */
 @SuppressWarnings("serial")
-public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
+public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, ApplicationEventPublisherAware, Serializable {
+	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		super.setApplicationEventPublisher(applicationEventPublisher);
+	}
 
 	@Override
 	public @Nullable Object invoke(final MethodInvocation invocation) throws Throwable {
