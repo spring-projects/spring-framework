@@ -63,7 +63,6 @@ import org.springframework.http.client.observation.ClientRequestObservationConve
 import org.springframework.http.client.observation.DefaultClientRequestObservationConvention;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -213,56 +212,26 @@ final class DefaultRestClient implements RestClient {
 		return new DefaultRestClientBuilder(this.builder);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings("unchecked")
 	private <T> @Nullable T readWithMessageConverters(
 			ClientHttpResponse clientResponse, Runnable callback, Type bodyType, Class<T> bodyClass,
 			@Nullable Map<String, Object> hints) {
 
-		MediaType contentType = getContentType(clientResponse);
-
 		try {
 			callback.run();
 
-			IntrospectingClientHttpResponse responseWrapper = new IntrospectingClientHttpResponse(clientResponse);
-			if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
-				return null;
-			}
-
-			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter genericMessageConverter) {
-					if (genericMessageConverter.canRead(bodyType, null, contentType)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Reading to [" + ResolvableType.forType(bodyType) + "]");
-						}
-						return (T) genericMessageConverter.read(bodyType, null, responseWrapper);
-					}
-				}
-				else if (messageConverter instanceof SmartHttpMessageConverter smartMessageConverter) {
-					ResolvableType resolvableType = ResolvableType.forType(bodyType);
-					if (smartMessageConverter.canRead(resolvableType, contentType)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Reading to [" + resolvableType + "]");
-						}
-						return (T) smartMessageConverter.read(resolvableType, responseWrapper, hints);
-					}
-				}
-				else if (messageConverter.canRead(bodyClass, contentType)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Reading to [" + bodyClass.getName() + "] as \"" + contentType + "\"");
-					}
-					return (T) messageConverter.read((Class)bodyClass, responseWrapper);
-				}
-			}
-
 			if (bodyClass.equals(InputStream.class)) {
+				IntrospectingClientHttpResponse responseWrapper = new IntrospectingClientHttpResponse(clientResponse);
+				if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
+					return null;
+				}
 				return (T) responseWrapper.getBody();
 			}
 
-			throw new UnknownContentTypeException(bodyType, contentType,
-					responseWrapper.getStatusCode(), responseWrapper.getStatusText(),
-					responseWrapper.getHeaders(), RestClientUtils.getBody(responseWrapper));
+			return RestClientUtils.readWithMessageConverters(
+					clientResponse, this.messageConverters, bodyType, bodyClass, hints);
 		}
-		catch (UncheckedIOException | IOException | HttpMessageNotReadableException exc) {
+		catch (UncheckedIOException | IOException exc) {
 			Throwable cause;
 			if (exc instanceof UncheckedIOException uncheckedIOException) {
 				cause = uncheckedIOException.getCause();
@@ -271,16 +240,8 @@ final class DefaultRestClient implements RestClient {
 				cause = exc;
 			}
 			throw new RestClientException("Error while extracting response for type [" +
-					ResolvableType.forType(bodyType) + "] and content type [" + contentType + "]", cause);
+					ResolvableType.forType(bodyType) + "] and content type [" + RestClientUtils.getContentType(clientResponse) + "]", cause);
 		}
-	}
-
-	private static MediaType getContentType(ClientHttpResponse clientResponse) {
-		MediaType contentType = clientResponse.getHeaders().getContentType();
-		if (contentType == null) {
-			contentType = MediaType.APPLICATION_OCTET_STREAM;
-		}
-		return contentType;
 	}
 
 	@SuppressWarnings("unchecked")
