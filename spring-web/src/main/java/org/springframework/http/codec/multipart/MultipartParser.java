@@ -96,12 +96,12 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 */
 	public static Flux<Token> parse(Flux<DataBuffer> buffers, byte[] boundary, int maxHeadersSize,
 			Charset headersCharset) {
-		return Flux.create(sink -> {
+		return Flux.<Token>create(sink -> {
 			MultipartParser parser = new MultipartParser(sink, boundary, maxHeadersSize, headersCharset);
 			sink.onCancel(parser::onSinkCancel);
 			sink.onRequest(l -> parser.requestBuffer());
 			buffers.subscribe(parser);
-		});
+		}).doOnDiscard(BodyToken.class, body -> DataBufferUtils.release(body.buffer()));
 	}
 
 	@Override
