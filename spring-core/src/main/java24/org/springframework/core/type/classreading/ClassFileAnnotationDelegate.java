@@ -76,7 +76,7 @@ abstract class ClassFileAnnotationDelegate {
 				}
 			}
 			Map<String, Object> compactedAttributes = (attributes.isEmpty() ? Collections.emptyMap() : attributes);
-			return MergedAnnotation.of(classLoader, new Source(annotation), annotationType, compactedAttributes);
+			return MergedAnnotation.of(classLoader, new Source(className), annotationType, compactedAttributes);
 		}
 		catch (ClassNotFoundException | LinkageError ex) {
 			// Non-loadable annotation type -> ignore.
@@ -151,7 +151,7 @@ abstract class ClassFileAnnotationDelegate {
 	}
 
 
-	record Source(Annotation annotation) {
+	record Source(String className) {
 	}
 
 }
