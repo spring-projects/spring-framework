@@ -154,6 +154,30 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 	}
 
 	@Test
+	void decodePreservesCharacterBeforeLoneNewlineAfterCarriageReturn() {
+		Flux<DataBuffer> input = Flux.just(stringBuffer("a\rXY\nb"));
+
+		testDecode(input, String.class, step -> step
+				.expectNext("a\rXY")
+				.expectNext("b")
+				.expectComplete()
+				.verify());
+	}
+
+	@Test
+	void decodePreservesCharacterAcrossBuffersAfterCarriageReturn() {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("a\r"),
+				stringBuffer("Xb\n")
+		);
+
+		testDecode(input, String.class, step -> step
+				.expectNext("a\rXb")
+				.expectComplete()
+				.verify());
+	}
+
+	@Test
 	void maxInMemoryLimit() {
 		Flux<DataBuffer> input = Flux.just(
 				stringBuffer("abc\n"), stringBuffer("defg\n"),
