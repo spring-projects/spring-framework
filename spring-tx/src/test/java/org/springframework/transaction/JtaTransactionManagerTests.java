@@ -558,6 +558,8 @@ class JtaTransactionManagerTests {
 		given(tm.suspend()).willReturn(tx);
 
 		final JtaTransactionManager ptm = newJtaTransactionManager(ut, tm);
+		// ptm.setEnforceReadOnly(true);
+
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		tt.setName("txName");
@@ -584,8 +586,16 @@ class JtaTransactionManagerTests {
 		});
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
+		// Traditional JTA transaction
 		verify(ut, times(2)).begin();
 		verify(ut, times(2)).commit();
+
+		// JTA 2.1 with setEnforceReadOnly(true)
+		// verify(ut, times(1)).begin();
+		// verify(ut, times(1)).begin(true);
+		// verify(ut, times(1)).rollback();
+		// verify(ut, times(1)).commit();
+
 		verify(tm).resume(tx);
 	}
 
