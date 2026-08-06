@@ -58,6 +58,8 @@ public class CacheControl {
 
 	private boolean noStore = false;
 
+	private boolean mustUnderstand = false;
+
 	private boolean mustRevalidate = false;
 
 	private boolean noTransform = false;
@@ -165,6 +167,20 @@ public class CacheControl {
 		return cc;
 	}
 
+	/**
+	 * Add a "must-understand" directive.
+	 * <p>This directive limits caching of the response to caches that
+	 * understand and conform to the requirements for the response status code.
+	 * The {@link #noStore()} directive should also be set as a fallback for
+	 * caches that do not implement the "must-understand" directive.
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 7.1
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9111#section-5.2.2.3">rfc9111 section 5.2.2.3</a>
+	 */
+	public CacheControl mustUnderstand() {
+		this.mustUnderstand = true;
+		return this;
+	}
 
 	/**
 	 * Add a "must-revalidate" directive.
@@ -357,6 +373,9 @@ public class CacheControl {
 		}
 		if (this.noStore) {
 			appendDirective(headerValue, "no-store");
+		}
+		if (this.mustUnderstand) {
+			appendDirective(headerValue, "must-understand");
 		}
 		if (this.mustRevalidate) {
 			appendDirective(headerValue, "must-revalidate");
