@@ -25,7 +25,24 @@ import com.tngtech.archunit.library.dependencies.SliceIdentifier;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 import java.util.List;
 
-abstract class ArchitectureRules {
+public enum ArchitectureRules {
+
+	ALL_PACKAGES_SHOULD_BE_FREE_OF_TANGLES(allPackagesShouldBeFreeOfTangles()),
+	NO_CLASSES_SHOULD_CALL_STRING_TO_LOWER_CASE_WITHOUT_LOCALE(noClassesShouldCallStringToLowerCaseWithoutLocale()),
+	NO_CLASSES_SHOULD_CALL_STRING_TO_UPPER_CASE_WITHOUT_LOCALE(noClassesShouldCallStringToUpperCaseWithoutLocale()),
+	CLASSES_SHOULD_NOT_IMPORT_FORBIDDEN_TYPES(classesShouldNotImportForbiddenTypes()),
+	JAVA_CLASSES_SHOULD_NOT_IMPORT_KOTLIN_ANNOTATIONS(javaClassesShouldNotImportKotlinAnnotations())
+	;
+
+	private final ArchRule archRule;
+
+	public ArchRule archRule() {
+		return this.archRule;
+	}
+
+	private ArchitectureRules(ArchRule archRule) {
+		this.archRule = archRule;
+	}
 
 	static ArchRule allPackagesShouldBeFreeOfTangles() {
 		return SlicesRuleDefinition.slices()
