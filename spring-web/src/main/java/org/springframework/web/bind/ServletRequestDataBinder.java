@@ -16,7 +16,7 @@
 
 package org.springframework.web.bind;
 
-import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,7 +31,6 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.multipart.MultipartFile;
@@ -240,8 +239,15 @@ public class ServletRequestDataBinder extends WebDataBinder {
 		}
 
 		protected @Nullable Object getRequestParameter(String name, Class<?> type) {
-			Object value = this.request.getParameterValues(name);
-			return (ObjectUtils.isArray(value) && Array.getLength(value) == 1 ? Array.get(value, 0) : value);
+			String[] values = this.request.getParameterValues(name);
+			if (values == null && !name.endsWith("[]") && isCollectionOrArray(type)) {
+				values = this.request.getParameterValues(name + "[]");
+			}
+			return (values != null && values.length == 1 ? values[0] : values);
+		}
+
+		private static boolean isCollectionOrArray(Class<?> type) {
+			return (type.isArray() || Collection.class.isAssignableFrom(type));
 		}
 
 		private @Nullable Object getMultipartValue(String name) {
