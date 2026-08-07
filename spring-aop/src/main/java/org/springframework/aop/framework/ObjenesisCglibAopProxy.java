@@ -21,6 +21,7 @@ import java.lang.reflect.Constructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
@@ -67,13 +68,11 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 				proxyInstance = objenesis.newInstance(proxyClass, enhancer.getUseCache());
 			}
 			catch (Throwable ex) {
-				logger.debug("Unable to instantiate proxy using Objenesis, " +
-						"falling back to regular proxy construction", ex);
+				logger.debug("Unable to instantiate proxy using Objenesis, falling back to regular construction", ex);
 			}
 		}
 
 		if (proxyInstance == null) {
-			// Regular instantiation via default constructor...
 			try {
 				Constructor<?> ctor = (this.constructorArgs != null ?
 						proxyClass.getDeclaredConstructor(this.constructorArgTypes) :
@@ -83,12 +82,73 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 						ctor.newInstance(this.constructorArgs) : ctor.newInstance());
 			}
 			catch (Throwable ex) {
-				throw new AopConfigException("Unable to instantiate proxy using Objenesis, " +
-						"and regular proxy instantiation via default constructor fails as well", ex);
+				throw new AopConfigException("Unable to instantiate proxy", ex);
 			}
 		}
+		/*
+		 * Workaround for issue #30985.
+		 *
+		 * In native image mode, SpringNamingPolicy can generate colliding class names
+		 * (all ending with $$SpringCGLIB$$0) when multiple incompatible CGLIB proxies
+		 * are needed for the same bean (e.g. @Lazy constructor proxy + AOP class proxy).
+		 *
+		 * This leads to a ClassCastException when setCallbacks() is called because
+		 * the pre-generated proxy class does not match the required callback layout.
+		 *
+		 * This fallback tries the next numbered proxy class ($$SpringCGLIB$$1,
+		 * $$SpringCGLIB$$2, ...) from the classpath until a compatible one is found.
+		 *
+		 * Note: This is a targeted runtime workaround because changing SpringNamingPolicy
+		 * would be a breaking change for many existing components.
+		 */
+		// === Safe fallback only for SpringNamingPolicy ===
+		if (enhancer.getNamingPolicy() == SpringNamingPolicy.INSTANCE) {
+			try {
+				((Factory) proxyInstance).setCallbacks(callbacks);
+				return proxyInstance;
+			}
+			catch (ClassCastException ex) {
+				// Name collision detected ? try next numbered proxy ($$1, $$2, ...)
+				String className = proxyClass.getName();
+				int lastDoubleDollar = className.lastIndexOf("$$");
 
-		((Factory) proxyInstance).setCallbacks(callbacks);
+				if (lastDoubleDollar == -1) {
+					throw ex; // not a Spring CGLIB proxy ? rethrow
+				}
+
+				String base = className.substring(0, lastDoubleDollar + 2);
+				String numberStr = className.substring(lastDoubleDollar + 2);
+				int counter = Integer.parseInt(numberStr);
+
+				// Safety limit to prevent infinite loop
+				for (int i = 0; i < 10; i++) {   // max 10 attempts
+					counter++;
+					String nextName = base + counter;
+
+					try {
+						Class<?> nextProxyClass = Class.forName(nextName);
+						proxyInstance = (this.constructorArgs != null ?
+								nextProxyClass.getDeclaredConstructor(this.constructorArgTypes)
+								.newInstance(this.constructorArgs) :
+								nextProxyClass.getDeclaredConstructor().newInstance());
+
+						((Factory) proxyInstance).setCallbacks(callbacks);
+						logger.debug("Used fallback proxy class: {}");
+						return proxyInstance;
+					}
+					catch (Exception ignored) {
+						// Class does not exist or cannot be instantiated ? try next number
+					}
+				}
+
+				// If we reach here, no suitable proxy was found
+				throw new AopConfigException("Could not find a compatible CGLIB proxy for " + className, ex);
+			}
+		}
+		else {
+			((Factory) proxyInstance).setCallbacks(callbacks);
+		}
+
 		return proxyInstance;
 	}
 
