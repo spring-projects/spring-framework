@@ -16,6 +16,7 @@
 
 package org.springframework.mail;
 
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -52,6 +53,16 @@ public interface MailMessage {
 	void setBcc(String... bcc) throws MailParseException;
 
 	void setSentDate(Date sentDate) throws MailParseException;
+
+	/**
+	 * Set the sent-date of the message.
+	 * @param sentDate the date to set (never {@code null})
+	 * @throws MailParseException in case of errors
+	 * @since 7.1
+	 */
+	default void setSentDate(Instant sentDate) throws MailParseException {
+		setSentDate(Date.from(sentDate));
+	}
 
 	void setSubject(String subject) throws MailParseException;
 
