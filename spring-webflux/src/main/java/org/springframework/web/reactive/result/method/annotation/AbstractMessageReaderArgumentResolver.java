@@ -74,7 +74,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 public abstract class AbstractMessageReaderArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
-			Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+			Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.QUERY);
 
 
 	private final List<HttpMessageReader<?>> messageReaders;

@@ -80,10 +80,11 @@ class RequestPredicatesTests {
 
 	@Test
 	void methods() {
-		RequestPredicate predicate = RequestPredicates.methods(HttpMethod.GET, HttpMethod.HEAD);
+		RequestPredicate predicate = RequestPredicates.methods(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.QUERY);
 		assertThat(predicate.test(initRequest("GET", "https://example.com"))).isTrue();
 		assertThat(predicate.test(initRequest("HEAD", "https://example.com"))).isTrue();
 		assertThat(predicate.test(initRequest("POST", "https://example.com"))).isFalse();
+		assertThat(predicate.test(initRequest("QUERY", "https://example.com"))).isTrue();
 	}
 
 	@Test
@@ -108,6 +109,9 @@ class RequestPredicatesTests {
 
 		predicate = RequestPredicates.OPTIONS("/p*");
 		assertThat(predicate.test(initRequest("OPTIONS", "/path"))).isTrue();
+
+		predicate = RequestPredicates.QUERY("/p*");
+		assertThat(predicate.test(initRequest("QUERY", "/path"))).isTrue();
 	}
 
 	@Test
