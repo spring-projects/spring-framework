@@ -113,17 +113,22 @@ class ConfigurationClassBeanDefinitionReader {
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, resourceLoader);
 	}
 
-
 	/**
-	 * Read {@code configurationModel}, registering bean definitions
-	 * with the registry based on its contents.
-	 */
-	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
-		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
-		for (ConfigurationClass configClass : configurationModel) {
-			loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
-		}
-	}
+     * Read {@code configurationModel}, registering bean definitions
+     * with the registry based on its contents.
+     */
+    public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
+        TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
+        for (ConfigurationClass configClass : configurationModel) {
+            loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
+        }
+
+        // --- ADD THIS TRIGGER BLOCK ---
+        for (ConfigurationClass configClass : configurationModel) {
+            configClass.detectTransitiveImports(this.registry);
+        }
+        // ------------------------------
+    }
 
 	/**
 	 * Read a particular {@link ConfigurationClass}, registering bean definitions
@@ -225,6 +230,7 @@ class ConfigurationClassBeanDefinitionReader {
 		ConfigurationClassBeanDefinition beanDef =
 				new ConfigurationClassBeanDefinition(configClass, metadata, localBeanName);
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
+		beanDef.setAttribute("org.springframework.config.origin", configClass.getMetadata().getClassName());
 
 		// Has this effectively been overridden before (for example, via XML)?
 		if (isOverriddenByExistingDefinition(beanMethod, beanName, beanDef)) {

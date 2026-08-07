@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,12 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
@@ -63,6 +69,8 @@ final class ConfigurationClass {
 
 	private final Set<ConfigurationClass> importedBy = new LinkedHashSet<>(1);
 
+	private final Set<ConfigurationClass> directImports = new LinkedHashSet<>();
+
 	private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
 
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
@@ -72,6 +80,8 @@ final class ConfigurationClass {
 
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<>();
+
+	private static final Log logger = LogFactory.getLog(ConfigurationClass.class);
 
 	final Set<String> skippedBeanMethods = new HashSet<>();
 
@@ -200,6 +210,20 @@ final class ConfigurationClass {
 		return this.importedBy;
 	}
 
+	/**
+	 * Record a configuration class that was explicitly imported by this one.
+	 */
+	void addDirectImport(ConfigurationClass importedClass) {
+		this.directImports.add(importedClass);
+	}
+
+	/**
+	 * Return the configuration classes explicitly imported by this one.
+	 */
+	Set<ConfigurationClass> getDirectImports() {
+		return this.directImports;
+	}
+
 	void addBeanMethod(BeanMethod method) {
 		this.beanMethods.add(method);
 	}
@@ -239,6 +263,44 @@ final class ConfigurationClass {
 
 	Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> getImportBeanDefinitionRegistrars() {
 		return this.importBeanDefinitionRegistrars;
+	}
+
+	void detectTransitiveImports(BeanDefinitionRegistry registry) {
+	    if (!Boolean.getBoolean("spring.strict.imports")) {
+	        return;
+	    }
+
+	    if (!(registry instanceof ListableBeanFactory lbf)) {
+	        return;
+	    }
+	
+	    for (BeanMethod method : this.beanMethods) {
+	        // Look at the parameters of the @Bean method
+	        MethodMetadata metadata = method.getMetadata();
+	        
+	        // We iterate through all registered beans to find who provides the dependencies
+	        for (String targetBeanName : lbf.getBeanDefinitionNames()) {
+	            BeanDefinition bd = registry.getBeanDefinition(targetBeanName);
+	            String origin = (String) bd.getAttribute("org.springframework.config.origin");
+	
+	            if (origin != null && !isAllowed(origin)) {
+	                // Check if this bean is actually used by our current config class
+	                // For this proof of concept, we'll trigger if ANY transitive bean 
+	                // exists in the context that isn't explicitly imported.
+	                throw new org.springframework.beans.factory.BeanDefinitionStoreException(
+	                    String.format("Strict import violation: @Configuration [%s] detected transitive bean [%s] from source [%s].",
+	                    this.metadata.getClassName(), targetBeanName, origin));
+	            }
+	        }
+	    }
+	}
+	
+	private boolean isAllowed(String origin) {
+	    if (origin.equals(this.metadata.getClassName())) return true;
+	    for (ConfigurationClass dc : this.directImports) {
+	        if (dc.getMetadata().getClassName().equals(origin)) return true;
+	    }
+	    return false;
 	}
 
 	@SuppressWarnings("NullAway") // Reflection
