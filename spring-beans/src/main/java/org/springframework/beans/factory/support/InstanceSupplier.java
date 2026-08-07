@@ -65,6 +65,25 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	}
 
 	/**
+	 * Apply only the post-processing steps of this supplier to an
+	 * already-created instance, without invoking the instance creation itself.
+	 * <p>This is used when the instance was created through a different path
+	 * (for example, when explicit constructor arguments bypass the instance
+	 * supplier) but post-processing registered via {@link #andThen} still
+	 * needs to be applied.
+	 * @param registeredBean the registered bean
+	 * @param instance the already-created instance to post-process
+	 * @return the post-processed instance
+	 * @throws Exception on error
+	 * @since 7.0
+	 * @see #andThen
+	 */
+	@SuppressWarnings("unchecked")
+	default T postProcessInstance(RegisteredBean registeredBean, T instance) throws Exception {
+		return instance;
+	}
+
+	/**
 	 * Return a composed instance supplier that first obtains the instance from
 	 * this supplier and then applies the {@code after} function to obtain the
 	 * result.
@@ -81,6 +100,12 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 			@Override
 			public V get(RegisteredBean registeredBean) throws Exception {
 				return after.applyWithException(registeredBean, InstanceSupplier.this.get(registeredBean));
+			}
+			@Override
+			@SuppressWarnings("unchecked")
+			public V postProcessInstance(RegisteredBean registeredBean, V instance) throws Exception {
+				T postProcessed = InstanceSupplier.this.postProcessInstance(registeredBean, (T) instance);
+				return after.applyWithException(registeredBean, postProcessed);
 			}
 			@Override
 			public @Nullable Method getFactoryMethod() {
