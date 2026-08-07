@@ -162,22 +162,33 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 
 		requestSender = setUri(requestSender, uri);
 		AtomicReference<ReactorClientHttpResponse> responseRef = new AtomicReference<>();
+		AtomicReference<Connection> connectionRef = new AtomicReference<>();
 
-		return requestSender
+			return requestSender
 				.send((request, outbound) -> requestCallback.apply(adaptRequest(method, uri, request, outbound)))
 				.responseConnection((response, connection) -> {
 					ReactorClientHttpResponse clientResponse = new ReactorClientHttpResponse(response, connection);
 					responseRef.set(clientResponse);
-					registerAttributeCallback(connection);
+					connectionRef.set(connection); 
 					return Mono.just((ClientHttpResponse) clientResponse);
 				})
 				.next()
+				.doFinally(signal -> { 
+					ReactorClientHttpResponse response = responseRef.get();
+					if (response != null) {
+						clearChannelAttribute(response.connection);
+					}
+				})
 				.doOnCancel(() -> {
 					ReactorClientHttpResponse response = responseRef.get();
 					if (response != null) {
 						response.releaseAfterCancel(method);
 					}
 				});
+	}
+
+	private static void clearChannelAttribute(Connection connection) {
+		connection.channel().attr(ATTRIBUTES_KEY).set(null);
 	}
 
 	private static HttpClient.RequestSender setUri(HttpClient.RequestSender requestSender, URI uri) {
