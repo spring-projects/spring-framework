@@ -70,6 +70,8 @@ public final class PropagationContextElement extends AbstractCoroutineContextEle
 	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.ReactorContext",
 			PropagationContextElement.class.getClassLoader());
 
+	private static final ThreadLocal<Integer> nestingDepth = ThreadLocal.withInitial(() -> 0);
+
 	private final ContextSnapshot threadLocalContextSnapshot;
 
 
@@ -85,6 +87,11 @@ public final class PropagationContextElement extends AbstractCoroutineContextEle
 
 	@Override
 	public ContextSnapshot.Scope updateThreadContext(CoroutineContext context) {
+		int depth = nestingDepth.get();
+		nestingDepth.set(depth + 1);
+		if (depth > 0) {
+			return new NoOpScope();
+		}
 		ContextSnapshot contextSnapshot;
 		if (coroutinesReactorPresent) {
 			contextSnapshot = ReactorDelegate.captureFrom(context);
@@ -95,7 +102,7 @@ public final class PropagationContextElement extends AbstractCoroutineContextEle
 		else {
 			contextSnapshot = this.threadLocalContextSnapshot;
 		}
-		return contextSnapshot.setThreadLocals();
+		return new WrapperScope(contextSnapshot.setThreadLocals());
 	}
 
 	public static final class Key implements CoroutineContext.Key<PropagationContextElement> {
@@ -113,6 +120,33 @@ public final class PropagationContextElement extends AbstractCoroutineContextEle
 			else {
 				return null;
 			}
+		}
+	}
+
+	private static final class WrapperScope implements ContextSnapshot.Scope {
+
+		private final ContextSnapshot.Scope delegate;
+
+		WrapperScope(ContextSnapshot.Scope delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public void close() {
+			try {
+				this.delegate.close();
+			}
+			finally {
+				nestingDepth.set(0);
+			}
+		}
+	}
+
+	private static final class NoOpScope implements ContextSnapshot.Scope {
+
+		@Override
+		public void close() {
+			// No-op
 		}
 	}
 }
