@@ -417,13 +417,29 @@ If the algorithms used by `SqlScriptsTestExecutionListener` to detect a `DataSou
 you can specify explicit names by setting the `dataSource` and `transactionManager`
 attributes of `@SqlConfig`. Furthermore, you can control the transaction propagation
 behavior by setting the `transactionMode` attribute of `@SqlConfig` (for example, whether
-scripts should be run in an isolated transaction). Although a thorough discussion of all
-supported options for transaction management with `@Sql` is beyond the scope of this
-reference manual, the javadoc for
+scripts should be run in an isolated transaction). See the Javadoc for
 {spring-framework-api}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] and
 {spring-framework-api}/test/context/jdbc/SqlScriptsTestExecutionListener.html[`SqlScriptsTestExecutionListener`]
-provide detailed information, and the following example shows a typical testing scenario
-that uses JUnit Jupiter and transactional tests with `@Sql`:
+for the complete reference.
+
+[[testcontext-executing-sql-declaratively-tx-inferred]]
+===== `INFERRED` transaction mode
+
+The `INFERRED` mode (which is the effective default) determines the transaction behavior
+automatically based on which beans are available in the test's `ApplicationContext`:
+
+* If neither a transaction manager nor a data source is available, an exception is thrown.
+* If a transaction manager is not available but a data source is available, SQL scripts
+  are executed directly against the data source without a transaction.
+* If a transaction manager is available, scripts are executed within an existing
+  Spring-managed transaction if one is active (for example, when the test method is
+  annotated with `@Transactional`); otherwise, a new transaction is started and
+  immediately committed.
+
+The following example shows a typical testing scenario that uses JUnit Jupiter and
+transactional tests with `@Sql`. With `INFERRED` (the default), the `/test-data.sql`
+script participates in the same transaction as the test method and its changes are
+automatically rolled back afterward:
 
 [tabs]
 ======
@@ -496,6 +512,76 @@ run, since any changes made to the database (either within the test method or wi
 `/test-data.sql` script) are automatically rolled back by the
 `TransactionalTestExecutionListener` (see xref:testing/testcontext-framework/tx.adoc[transaction management] for
 details).
+
+[[testcontext-executing-sql-declaratively-tx-isolated]]
+===== `ISOLATED` transaction mode
+
+Use `ISOLATED` when SQL scripts must be committed to the database _before_ the test
+method's own transaction is able to see the changes, or when the data set up by the
+script must persist after the test method's transaction has rolled back.
+
+A common scenario is testing code that spawns a new transaction internally. Because the
+test method's transaction and the code-under-test's transaction are separate, the
+code-under-test can only see data that has been committed. With the `INFERRED` mode the
+SQL setup script runs within the test's transaction, so its data is not yet committed
+and therefore invisible to the code-under-test. Using `ISOLATED` causes the script to
+run in a new, separate transaction that is committed immediately, making the data visible
+across all subsequent connections.
+
+`ISOLATED` requires both a `PlatformTransactionManager` and a `DataSource` to be
+present in the test's `ApplicationContext`. The following example demonstrates the
+pattern:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestDatabaseConfig.class)
+	class IsolatedSqlScriptsTests {
+
+		@Test
+		@Sql(
+			scripts = "/test-data.sql",
+			config = @SqlConfig(transactionMode = ISOLATED)
+		)
+		@Sql(
+			scripts = "/cleanup-test-data.sql",
+			config = @SqlConfig(transactionMode = ISOLATED),
+			executionPhase = AFTER_TEST_METHOD
+		)
+		void testCodeThatOpensItsOwnTransaction() {
+			// The test data was committed before this method runs, so the
+			// code-under-test can see it even in a separate transaction.
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestDatabaseConfig::class)
+	class IsolatedSqlScriptsTests {
+
+		@Test
+		@Sql("/test-data.sql", config = SqlConfig(transactionMode = ISOLATED))
+		@Sql(
+			"/cleanup-test-data.sql",
+			config = SqlConfig(transactionMode = ISOLATED),
+			executionPhase = AFTER_TEST_METHOD
+		)
+		fun testCodeThatOpensItsOwnTransaction() {
+			// The test data was committed before this method runs, so the
+			// code-under-test can see it even in a separate transaction.
+		}
+	}
+----
+======
+
+NOTE: `ISOLATED`, `AFTER_TEST_METHOD`, and `INFERRED` are statically imported from
+`SqlConfig.TransactionMode` and `Sql.ExecutionPhase`, respectively.
 
 [[testcontext-executing-sql-declaratively-script-merging]]
 === Merging and Overriding Configuration with `@SqlMergeMode`

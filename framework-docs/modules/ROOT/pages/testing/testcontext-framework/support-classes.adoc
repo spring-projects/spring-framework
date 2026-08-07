@@ -493,6 +493,80 @@ Kotlin::
 ======
 
 
+The following example demonstrates `@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)`.
+In this scenario, the `SpecialCaseTests` inner class needs a different Spring configuration
+than the enclosing class and therefore declares its own `@SpringJUnitConfig` annotation,
+overriding the one inherited from `GreetingServiceTests`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	class GreetingServiceTests {
+
+		@Nested
+		@ActiveProfiles("lang_en")
+		class EnglishGreetings {
+
+			@Test
+			void hello(@Autowired GreetingService service) {
+				assertThat(service.greetWorld()).isEqualTo("Hello World");
+			}
+		}
+
+		// Opt out of inheriting configuration from the enclosing class and
+		// supply a dedicated configuration for this nested test class.
+		@Nested
+		@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
+		@SpringJUnitConfig(SpecialConfig.class)
+		class SpecialCaseTests {
+
+			@Test
+			void specialCase(@Autowired SpecialService service) {
+				// test using SpecialConfig, not TestConfig
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class GreetingServiceTests {
+
+		@Nested
+		@ActiveProfiles("lang_en")
+		inner class EnglishGreetings {
+
+			@Test
+			fun hello(@Autowired service: GreetingService) {
+				assertThat(service.greetWorld()).isEqualTo("Hello World")
+			}
+		}
+
+		// Opt out of inheriting configuration from the enclosing class and
+		// supply a dedicated configuration for this nested test class.
+		@Nested
+		@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
+		@SpringJUnitConfig(SpecialConfig::class)
+		inner class SpecialCaseTests {
+
+			@Test
+			fun specialCase(@Autowired service: SpecialService) {
+				// test using SpecialConfig, not TestConfig
+			}
+		}
+	}
+----
+======
+
+NOTE: `EnclosingConfiguration` is statically imported from `NestedTestConfiguration.EnclosingConfiguration`.
+
 [[testcontext-junit4-support]]
 == JUnit 4 Support
 
