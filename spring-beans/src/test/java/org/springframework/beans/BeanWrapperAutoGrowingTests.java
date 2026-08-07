@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -224,7 +223,7 @@ class BeanWrapperAutoGrowingTests {
 		assertThat(bean.getNestedMap().get("A").get("B")).isInstanceOf(Bean.class);
 	}
 
-	@Test @Disabled  // gh-32154
+	@Test
 	void setPropertyValueAutoGrowNestedNestedMapWithinMap() {
 		wrapper.setPropertyValue("nestedNestedMap[A][B][C]", new Bean());
 		assertThat(bean.getNestedNestedMap().get("A").get("B").get("C")).isInstanceOf(Bean.class);
