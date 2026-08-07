@@ -149,6 +149,24 @@ class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@Test
+	void customizeReaderWithMediaType() throws IOException {
+		MediaType contentType = new MediaType("application", "json");
+		MappingJackson2HttpMessageConverter customConverter = new MappingJackson2HttpMessageConverter() {
+			@Override
+			protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType, @Nullable MediaType mediaType) {
+				assertThat(mediaType).isEqualTo(contentType);
+				return super.customizeReader(reader, javaType, mediaType);
+			}
+		};
+
+		String body = "{\"string\":\"Foo\"}";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentType(contentType);
+		MyBean result = (MyBean) customConverter.read(MyBean.class, inputMessage);
+		assertThat(result.getString()).isEqualTo("Foo");
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")
 	void readUntyped() throws IOException {
 		String body = "{" +
