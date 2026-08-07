@@ -513,7 +513,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	@Override
 	public UriComponentsBuilder port(@Nullable String port) {
-		this.port = port;
+		this.port = (StringUtils.hasText(port) ? port : null);
 		if (port != null) {
 			resetSchemeSpecificPart();
 		}

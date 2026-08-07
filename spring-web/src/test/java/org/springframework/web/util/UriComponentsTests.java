@@ -201,10 +201,9 @@ class UriComponentsTests {
 				.isThrownBy(() -> fromUriString("https://example.com:XXX/bar", parserType));
 	}
 
-	@ParameterizedTest
-	@EnumSource
-	void invalidPortSet(ParserType parserType) {
-		UriComponents uriComponents = fromUriString("https://example.com/bar", parserType).port("XXX").build();
+	@Test
+	void invalidPortSet() {
+		UriComponents uriComponents = fromUriString("https://example.com/bar").port("XXX").build();
 
 		assertThatIllegalStateException()
 			.isThrownBy(uriComponents::getPort)
@@ -213,6 +212,12 @@ class UriComponentsTests {
 		assertThatIllegalStateException()
 			.isThrownBy(uriComponents::toUri)
 			.withMessage("The port must be an integer: XXX");
+	}
+
+	@Test // gh-37117
+	void emptyPortSet() {
+		UriComponents uriComponents = fromUriString("https://example.com/bar").port("").build();
+		assertThat(uriComponents.getPort()).isEqualTo(-1);
 	}
 
 	@Test
