@@ -937,11 +937,17 @@ class UriComponentsBuilderTests {
 	@ParameterizedTest
 	@EnumSource
 	void verifyInvalidPort(ParserType parserType) {
-		String url = "http://localhost:XXX/path";
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> UriComponentsBuilder.fromUriString(url, parserType).build().toUri());
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> UriComponentsBuilder.fromUriString(url, parserType).build().toUri());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromUriString("http://localhost:XXX/path", parserType).build().toUri());
+	}
+
+	@ParameterizedTest // gh-37117
+	@EnumSource
+	void verifyEmptyPort(ParserType parserType) {
+		URI uri = UriComponentsBuilder.fromUriString("http://localhost:/path", parserType).build().toUri();
+		assertThat(uri.getHost()).isEqualTo("localhost");
+		assertThat(uri.getPort()).isEqualTo(-1);
+		assertThat(uri.getPath()).isEqualTo("/path");
 	}
 
 	@ParameterizedTest // gh-27039

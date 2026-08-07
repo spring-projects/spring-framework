@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Parser for URIs based on RFC 3986 syntax.
@@ -545,7 +546,8 @@ abstract class RfcUriParser {
 
 		public InternalParser capturePort() {
 			verify(this.openCurlyBracketCount == 0, this, "Bad authority");
-			this.port = captureComponent("port");
+			String value = captureComponent("port");
+			this.port = (StringUtils.hasText(value) ? value : null);
 			return this;
 		}
 
