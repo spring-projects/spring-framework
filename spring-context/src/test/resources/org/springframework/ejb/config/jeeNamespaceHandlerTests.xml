@@ -64,7 +64,7 @@
 			resource-ref="true"
 			home-interface="org.springframework.beans.testfixture.beans.ITestBean"
 			refresh-home-on-connect-failure="true"
-      		cache-session-bean="true">
+			cache-session-bean="true">
 		<jee:environment>foo=bar</jee:environment>
 	</jee:remote-slsb>
 

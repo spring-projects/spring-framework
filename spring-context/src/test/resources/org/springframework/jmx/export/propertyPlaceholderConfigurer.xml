@@ -31,7 +31,7 @@
 				</entry>
 			</map>
 		</property>
-    <property name="server" ref="server"/>
+		<property name="server" ref="server"/>
 	</bean>
 
 	<bean id="testBean" class="org.springframework.jmx.JmxTestBean" scope="myScope">

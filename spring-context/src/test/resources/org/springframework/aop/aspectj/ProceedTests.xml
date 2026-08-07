@@ -22,11 +22,11 @@
 	<bean id="testBean" class="org.springframework.aop.aspectj.SimpleBeanImpl"/>
 
 	<bean id="firstTestAspect"  class="org.springframework.aop.aspectj.ProceedTestingAspect">
-	   <property name="order" value="1"/>
+		<property name="order" value="1"/>
 	</bean>
 
 	<bean id="secondTestAspect" class="org.springframework.aop.aspectj.ProceedTestingAspect">
-	   <property name="order" value="2"/>
+		<property name="order" value="2"/>
 	</bean>
 
 </beans>

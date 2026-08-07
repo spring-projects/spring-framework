@@ -4,13 +4,13 @@
 
 <beans>
 
-  <bean id="beans1.bean1" class="org.springframework.beans.factory.access.TestBean">
-    <property name="name"><value>beans1.bean1</value></property>
-  </bean>
+	<bean id="beans1.bean1" class="org.springframework.beans.factory.access.TestBean">
+		<property name="name"><value>beans1.bean1</value></property>
+	</bean>
 
-  <bean id="beans1.bean2" class="org.springframework.beans.factory.access.TestBean">
-    <property name="name"><value>bean2</value></property>
-    <property name="objRef"><ref bean="beans1.bean2"/></property>
-  </bean>
+	<bean id="beans1.bean2" class="org.springframework.beans.factory.access.TestBean">
+		<property name="name"><value>bean2</value></property>
+		<property name="objRef"><ref bean="beans1.bean2"/></property>
+	</bean>
 
 </beans>

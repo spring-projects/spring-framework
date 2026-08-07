@@ -8,7 +8,7 @@
 		<constructor-arg>
 			<!-- 'inline:' prefix is preceded by whitespace... -->
 			<value>
-    inline:
+	inline:
 			
 	class Bingo {
 

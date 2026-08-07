@@ -12,7 +12,7 @@
 	<bean id="gamma" class="org.springframework.beans.factory.FactoryBeanTests$Gamma"/>
 
 	<bean id="betaFactory" class="org.springframework.beans.factory.FactoryBeanTests$BetaFactoryBean" autowire="constructor">
-    	<property name="beta" ref="beta"/>
+		<property name="beta" ref="beta"/>
 	</bean>
 
 	<bean id="gammaFactory" factory-bean="${gammaFactory}" factory-method="${gamma}"/>

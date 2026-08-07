@@ -8,16 +8,16 @@
 	<aop:config>
 
 		<aop:advisor pointcut="target(org.springframework.aop.aspectj.TargetPointcutSelectionTests$TestImpl1)"
-        advice-ref="testInterceptor"/>
+					 advice-ref="testInterceptor"/>
 
 		<aop:aspect ref="testAspectForTestImpl1">
 			<aop:before pointcut="target(org.springframework.aop.aspectj.TargetPointcutSelectionTests$TestImpl1)"
-          method="increment"/>
+						method="increment"/>
 		</aop:aspect>
 
 		<aop:aspect ref="testAspectForAbstractTestImpl">
 			<aop:before pointcut="target(org.springframework.aop.aspectj.TargetPointcutSelectionTests$AbstractTestImpl)"
-          method="increment"/>
+						method="increment"/>
 		</aop:aspect>
 
 	</aop:config>

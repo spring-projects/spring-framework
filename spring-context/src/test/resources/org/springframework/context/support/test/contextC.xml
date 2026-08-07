@@ -7,7 +7,7 @@
 
 	<context:property-placeholder location="org/springframework/context/support/placeholder.properties"/>
 
-  <context:property-placeholder/>
+	<context:property-placeholder/>
 
 	<bean name="logicTwo" class="org.springframework.context.support.Logic">
 		<!--<property name="assembler"><ref bean="assemblerOne"/></property>-->

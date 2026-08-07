@@ -3,6 +3,6 @@
 		[<!ENTITY entity "entity">]>
 <!--Comment-->
 <element>
-    <cdata><![CDATA[cdata]]></cdata>
-    <entity>&entity;</entity>
+	<cdata><![CDATA[cdata]]></cdata>
+	<entity>&entity;</entity>
 </element>

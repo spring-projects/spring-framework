@@ -20,7 +20,7 @@
 			<value>
 				test1=testvalue1
 				test2=testvalue2
-      </value>
+			</value>
 		</property>
 	</bean>
 

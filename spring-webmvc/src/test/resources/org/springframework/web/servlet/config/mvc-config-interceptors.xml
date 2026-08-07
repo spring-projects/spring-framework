@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
@@ -11,13 +11,13 @@
 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
 	</mvc:interceptors>
 
-    <mvc:interceptors path-matcher="pathMatcher">
-        <mvc:interceptor>
-            <mvc:mapping path="/accounts/[0-9]*" />
-            <bean class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor"/>
-        </mvc:interceptor>
-    </mvc:interceptors>
+	<mvc:interceptors path-matcher="pathMatcher">
+		<mvc:interceptor>
+			<mvc:mapping path="/accounts/[0-9]*" />
+			<bean class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
 
-    <bean id="pathMatcher" class="org.springframework.web.servlet.config.MvcNamespaceTests$TestPathMatcher"/>
+	<bean id="pathMatcher" class="org.springframework.web.servlet.config.MvcNamespaceTests$TestPathMatcher"/>
 
 </beans>
