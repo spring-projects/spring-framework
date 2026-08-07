@@ -317,7 +317,7 @@ public final class MultipartBodyBuilder {
 		}
 
 		public HttpEntity<?> build() {
-			return new HttpEntity<>(this.body, this.headers);
+			return new HttpEntity<@Nullable Object>(this.body, this.headers);
 		}
 	}
 
