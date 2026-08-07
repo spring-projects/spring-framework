@@ -22,12 +22,15 @@ import java.lang.reflect.Method;
 import java.nio.charset.MalformedInputException;
 import java.nio.file.AccessDeniedException;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +42,11 @@ import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -61,6 +69,7 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 /**
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Juhwan Lee
  * @since 7.0
  */
 class RetryInterceptorTests {
@@ -313,6 +322,31 @@ class RetryInterceptorTests {
 		assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> proxy.retryOperation().join())
 				.withCauseInstanceOf(IllegalStateException.class);
 		assertThat(target.counter).hasValue(3);
+	}
+
+	@Test
+	void withCacheableAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(CacheableAnnotatedBean.class));
+		ctx.registerBeanDefinition("cacheManager", new RootBeanDefinition(CountingCacheManager.class));
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(EnablingConfigWithCaching.class));
+		ctx.refresh();
+		CacheableAnnotatedBean proxy = ctx.getBean(CacheableAnnotatedBean.class);
+		CacheableAnnotatedBean target = (CacheableAnnotatedBean) AopProxyUtils.getSingletonTarget(proxy);
+		CountingCacheManager cacheManager = ctx.getBean(CountingCacheManager.class);
+
+		// 2 = 1 initial invocation + 1 retry attempt
+		String result = proxy.retryOperation();
+		assertThat(result).isEqualTo("result");
+		assertThat(target.counter).hasValue(2);
+		// 2 = cache checked on each retry attempt; proves retry is outermost
+		assertThat(cacheManager.gets).isEqualTo(2);
+
+		// 2 = cache hit; target not invoked on second call
+		assertThat(proxy.retryOperation()).isEqualTo("result");
+		assertThat(target.counter).hasValue(2);
+		// 3 = one more cache check for the cache hit
+		assertThat(cacheManager.gets).isEqualTo(3);
 	}
 
 	@Test
@@ -639,6 +673,92 @@ class RetryInterceptorTests {
 	}
 
 
+	static class CacheableAnnotatedBean {
+
+		AtomicInteger counter = new AtomicInteger();
+
+		@Cacheable("tests")
+		@Retryable(maxRetries = 2, delay = 10)
+		public String retryOperation() {
+			if (counter.incrementAndGet() < 2) {
+				throw new IllegalStateException();
+			}
+			return "result";
+		}
+	}
+
+
+	static class CountingCacheManager implements CacheManager {
+
+		int gets;
+
+		private final ConcurrentMapCacheManager delegate = new ConcurrentMapCacheManager();
+
+		@Override
+		public @Nullable Cache getCache(String name) {
+			Cache cache = this.delegate.getCache(name);
+			return (cache != null ? new CountingCache(cache) : null);
+		}
+
+		@Override
+		public Collection<String> getCacheNames() {
+			return this.delegate.getCacheNames();
+		}
+
+		class CountingCache implements Cache {
+
+			private final Cache delegate;
+
+			CountingCache(Cache delegate) {
+				this.delegate = delegate;
+			}
+
+			@Override
+			public String getName() {
+				return this.delegate.getName();
+			}
+
+			@Override
+			public Object getNativeCache() {
+				return this.delegate.getNativeCache();
+			}
+
+			@Override
+			public @Nullable ValueWrapper get(Object key) {
+				gets++;
+				return this.delegate.get(key);
+			}
+
+			@Override
+			public <T> @Nullable T get(Object key, @Nullable Class<T> type) {
+				gets++;
+				return this.delegate.get(key, type);
+			}
+
+			@Override
+			public <T> T get(Object key, Callable<T> valueLoader) {
+				gets++;
+				return this.delegate.get(key, valueLoader);
+			}
+
+			@Override
+			public void put(Object key, @Nullable Object value) {
+				this.delegate.put(key, value);
+			}
+
+			@Override
+			public void evict(Object key) {
+				this.delegate.evict(key);
+			}
+
+			@Override
+			public void clear() {
+				this.delegate.clear();
+			}
+		}
+	}
+
+
 	@EnableResilientMethods
 	static class EnablingConfig {
 	}
@@ -647,6 +767,12 @@ class RetryInterceptorTests {
 	@EnableAsync
 	@EnableResilientMethods
 	static class EnablingConfigWithAsync {
+	}
+
+
+	@EnableCaching
+	@EnableResilientMethods
+	static class EnablingConfigWithCaching {
 	}
 
 }
