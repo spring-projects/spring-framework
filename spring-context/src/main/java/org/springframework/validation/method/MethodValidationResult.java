@@ -56,7 +56,7 @@ public interface MethodValidationResult {
 	 * Whether the result contains any validation errors.
 	 */
 	default boolean hasErrors() {
-		return !getParameterValidationResults().isEmpty();
+		return (!getParameterValidationResults().isEmpty() || !getCrossParameterValidationResults().isEmpty());
 	}
 
 	/**
@@ -65,8 +65,10 @@ public interface MethodValidationResult {
 	 * @see ParameterValidationResult#getResolvableErrors()
 	 */
 	default List<? extends MessageSourceResolvable> getAllErrors() {
-		return getParameterValidationResults().stream()
-				.flatMap(result -> result.getResolvableErrors().stream())
+		return java.util.stream.Stream.concat(
+				getParameterValidationResults().stream()
+						.flatMap(result -> result.getResolvableErrors().stream()),
+				getCrossParameterValidationResults().stream())
 				.toList();
 	}
 

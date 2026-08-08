@@ -247,6 +247,8 @@ class MethodValidationAdapterTests {
 		Method method = getMethod(target, "addRange");
 
 		testArgs(target, method, new Object[] {90, 50}, ex -> {
+			assertThat(ex.hasErrors()).isTrue();
+			assertThat(ex.getAllErrors()).hasSize(1);
 			assertThat(ex.getParameterValidationResults()).isEmpty();
 			assertThat(ex.getCrossParameterValidationResults()).hasSize(1);
 			assertThat(ex.getCrossParameterValidationResults().get(0).toString()).isEqualTo("""
