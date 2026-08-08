@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -201,6 +200,13 @@ class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
+	void getPropertyValueAutoGrowNestedNestedMap() {
+		assertThat(wrapper.getPropertyValue("nestedNestedMap[A][B][C]")).isNotNull();
+		assertThat(bean.getNestedNestedMap()).hasSize(1);
+		assertThat(bean.getNestedNestedMap().get("A").get("B").get("C")).isInstanceOf(Bean.class);
+	}
+
+	@Test
 	void getPropertyValueAutoGrowListNotParameterized() {
 		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
 				wrapper.getPropertyValue("listNotParameterized[0]"));
@@ -224,7 +230,7 @@ class BeanWrapperAutoGrowingTests {
 		assertThat(bean.getNestedMap().get("A").get("B")).isInstanceOf(Bean.class);
 	}
 
-	@Test @Disabled  // gh-32154
+	@Test
 	void setPropertyValueAutoGrowNestedNestedMapWithinMap() {
 		wrapper.setPropertyValue("nestedNestedMap[A][B][C]", new Bean());
 		assertThat(bean.getNestedNestedMap().get("A").get("B").get("C")).isInstanceOf(Bean.class);
