@@ -70,12 +70,21 @@ The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE`
 xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-strategy[strategy for bean overrides].
 If a corresponding bean does not exist, a new bean will be created. However, you can
 switch to the `REPLACE` strategy by setting the `enforceOverride` attribute to `true` –
-for example, `@MockitoBean(enforceOverride = true)`.
+for example, `@MockitoBean(enforceOverride = true)`. Because this strategy replaces the
+bean directly, bypassing the container's normal bean post-processing, the resulting mock
+is a bare object: it is never wrapped in a Spring AOP proxy, even if the original bean
+would have been — for example, due to `@Transactional`, `@Cacheable`, or `@Retryable`. See
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-aop-proxies[Bean
+Overrides and Spring AOP Proxies] for details.
 
 The `@MockitoSpyBean` annotation uses the `WRAP`
 xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-strategy[strategy],
 and the original instance is wrapped in a Mockito spy. This strategy requires that
-exactly one candidate bean exists.
+exactly one candidate bean exists. In contrast to `@MockitoBean`, if the original bean
+would have been wrapped in a Spring AOP proxy, that proxy is still created around the spy.
+See
+<<spring-testing-annotation-beanoverriding-mockitospybean-aop-proxies,`@MockitoSpyBean` and Spring AOP Proxies>>
+for the consequences this has for stubbing and verification.
 
 [TIP]
 ====
@@ -620,3 +629,284 @@ Kotlin::
 TIP: The spies can also be injected into `@Configuration` classes or other test-related
 components in the `ApplicationContext` in order to configure them with Mockito's stubbing
 APIs.
+
+
+[[spring-testing-annotation-beanoverriding-mockitospybean-aop-proxies]]
+== `@MockitoSpyBean` and Spring AOP Proxies
+
+As explained in
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-aop-proxies[Bean
+Overrides and Spring AOP Proxies], if the bean being spied on would normally be wrapped in
+a Spring AOP proxy — for example, due to `@Transactional`, `@Cacheable`, or `@Retryable`
+— that proxy is still created, with the spy as its target. The bean injected into the
+test class and into other beans in the `ApplicationContext` is therefore the proxy, not
+the spy itself.
+
+Verification via Mockito's `verify()` API is unaffected by this and works transparently,
+regardless of whether it is invoked on the proxy or on the underlying spy.
+
+[[spring-testing-annotation-beanoverriding-mockitospybean-aop-proxies-stubbing]]
+=== Stubbing Through the Proxy
+
+Stubbing requires more care than verification, since `Mockito.doReturn(...).when(...)`,
+`Mockito.doThrow(...).when(...)`, and similar methods behave differently depending on the
+nature of the AOP advice involved when invoked on the proxy.
+
+NOTE: Since `when` is a reserved keyword in Kotlin, the Kotlin examples below use the
+`given(...)`, `willReturn(...)`, and `willThrow(...)` methods from `BDDMockito` instead
+of `Mockito.doReturn(...).when(...)` and `Mockito.doThrow(...).when(...)`.
+
+Advice that does not retain state between invocations — such as
+xref:core/resilience.adoc#resilience-annotations-retryable[`@Retryable`] — has no adverse
+effect on stubbing. The following stubbing sequence, invoked on the proxy, behaves exactly
+as it would on the underlying spy directly, including triggering a retry when the thrown
+exception is encountered.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	doReturn("ok")
+		.doThrow(new RuntimeException("Message delivery failed"))
+		.doReturn("ok again")
+		.when(clientService).sendMessage(any()); // <1>
+----
+<1> `clientService` is the injected proxy. Since `@Retryable` advice is a stateless
+    pass-through, each call — including the one that throws — reaches the spy directly.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	willReturn("ok")
+		.willThrow(RuntimeException("Message delivery failed"))
+		.willReturn("ok again")
+		.given(clientService).sendMessage(any()) // <1>
+----
+<1> `clientService` is the injected proxy. Since `@Retryable` advice is a stateless
+    pass-through, each call — including the one that throws — reaches the spy directly.
+======
+
+Advice that caches or otherwise memoizes the outcome of an invocation — such as
+`@Cacheable` — does not behave the same way. While a `doReturn(...)`, `doThrow(...)`, or
+similar declaration is being recorded, Mockito does not invoke the spy's real or
+previously stubbed behavior; instead, the invocation used to declare the stubbing returns
+an empty value (for example, `null`). If that invocation is made on the proxy, the caching
+advice caches this empty value, which then permanently shadows the spy for that
+combination of arguments — including for the very invocation that was supposed to
+configure the stubbing.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	doReturn(1L).when(dateService).getDate(false); // <1>
+	dateService.getDate(false); // <2>
+----
+<1> `dateService` is the injected proxy. This invocation is intercepted by Mockito's
+    stubbing infrastructure before it reaches the spy, so the caching advice ends up
+    caching an empty value for argument `false`.
+<2> Returns the empty value cached by the previous invocation — not `1L` — because the
+    cache was already populated.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	willReturn(1L).given(dateService).getDate(false) // <1>
+	dateService.getDate(false) // <2>
+----
+<1> `dateService` is the injected proxy. This invocation is intercepted by Mockito's
+    stubbing infrastructure before it reaches the spy, so the caching advice ends up
+    caching an empty value for argument `false`.
+<2> Returns the empty value cached by the previous invocation — not `1L` — because the
+    cache was already populated.
+======
+
+To avoid this, stub directly on the spy instead of on the proxy, by unwrapping the proxy
+with
+{spring-framework-api}/test/util/AopTestUtils.html#getUltimateTargetObject(java.lang.Object)[`AopTestUtils.getUltimateTargetObject(...)`].
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	DateService spy = AopTestUtils.getUltimateTargetObject(dateService);
+	doReturn(1L).when(spy).getDate(false);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val spy = AopTestUtils.getUltimateTargetObject<DateService>(dateService)
+	willReturn(1L).given(spy).getDate(false)
+----
+======
+
+[[spring-testing-annotation-beanoverriding-mockitospybean-aop-proxies-disabling]]
+=== Disabling AOP Advice for Tests
+
+Rather than working around the proxy as shown above, you may instead prefer to disable
+the underlying AOP advice for the duration of the test, while keeping `@Retryable`,
+`@Cacheable`, or similar annotations in place in production code. Common reasons include
+avoiding retry delays that slow down the test suite, or avoiding caching altogether so
+that every invocation reaches the spy directly — which also sidesteps the stubbing
+pitfall described above, without having to unwrap the proxy at all.
+
+The general technique is to externalize whatever controls the advice's effective behavior
+— for example, the number of retry attempts or the `CacheManager` backing `@Cacheable`
+— and override that configuration for tests only, typically by using a bean override or a
+test-specific property. The proxy and its advice are still created, but their behavior is
+simply made a no-op or pure pass-through for the test.
+
+For `@Retryable`, bind the `maxRetriesString` attribute to a property placeholder with a
+sensible default (so that production configuration is unaffected if the property is not
+set), and override that property in the test with
+xref:testing/annotations/integration-spring/annotation-testpropertysource.adoc[`@TestPropertySource`]
+so that no retries are attempted.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Retryable(maxRetriesString = "${sendMessage.maxRetries:3}", delay = 10)
+	public String sendMessage(String request) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Retryable(maxRetriesString = "\${sendMessage.maxRetries:3}", delay = 10)
+	fun sendMessage(request: String): String {
+		// ...
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig
+	@TestPropertySource(properties = "sendMessage.maxRetries = 0") // <1>
+	class ClientServiceTests {
+
+		@MockitoSpyBean
+		ClientService clientService;
+
+		// test case body...
+	}
+----
+<1> With no retries permitted, the first (and only) attempt is made, and a thrown
+    exception propagates immediately, so the spy's stubbing chain behaves exactly as
+    declared, including for `doThrow(...)` answers.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig
+	@TestPropertySource(properties = ["sendMessage.maxRetries = 0"]) // <1>
+	class ClientServiceTests {
+
+		@MockitoSpyBean
+		lateinit var clientService: ClientService
+
+		// test case body...
+	}
+----
+<1> With no retries permitted, the first (and only) attempt is made, and a thrown
+    exception propagates immediately, so the spy's stubbing chain behaves exactly as
+    declared, including for `doThrow(...)` answers.
+======
+
+For `@Cacheable`, Spring provides
+{spring-framework-api}/cache/support/NoOpCacheManager.html[`NoOpCacheManager`] — a
+`CacheManager` that accepts cache entries but never actually stores them, so every
+invocation results in a cache miss and therefore an invocation of the target method.
+Overriding the `CacheManager` bean with a `NoOpCacheManager` — for example, with
+xref:testing/annotations/integration-spring/annotation-testbean.adoc[`@TestBean`] —
+effectively disables caching for the test without touching the `@Cacheable` annotation in
+production code.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig
+	class DateServiceTests {
+
+		@MockitoSpyBean
+		DateService dateService;
+
+		@TestBean // <1>
+		CacheManager cacheManager;
+
+		static CacheManager cacheManager() { // <2>
+			return new NoOpCacheManager();
+		}
+
+		@Test
+		void test() {
+			doReturn(1L).when(dateService).getDate(false);
+			assertThat(dateService.getDate(false)).isEqualTo(1L);
+
+			doReturn(2L).when(dateService).getDate(false);
+			assertThat(dateService.getDate(false)).isEqualTo(2L); // <3>
+		}
+	}
+----
+<1> Override the `CacheManager` bean for this test.
+<2> Replace it with a `NoOpCacheManager`, so `@Cacheable` never actually caches anything.
+<3> No longer masked by a stale cache entry, since every call reaches the spy.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig
+	class DateServiceTests {
+
+		@MockitoSpyBean
+		lateinit var dateService: DateService
+
+		@TestBean // <1>
+		lateinit var cacheManager: CacheManager
+
+		companion object {
+			@JvmStatic
+			fun cacheManager(): CacheManager { // <2>
+				return NoOpCacheManager()
+			}
+		}
+
+		@Test
+		fun test() {
+			willReturn(1L).given(dateService).getDate(false)
+			assertThat(dateService.getDate(false)).isEqualTo(1L)
+
+			willReturn(2L).given(dateService).getDate(false)
+			assertThat(dateService.getDate(false)).isEqualTo(2L) // <3>
+		}
+	}
+----
+<1> Override the `CacheManager` bean for this test.
+<2> Replace it with a `NoOpCacheManager`, so `@Cacheable` never actually caches anything.
+<3> No longer masked by a stale cache entry, since every call reaches the spy.
+======

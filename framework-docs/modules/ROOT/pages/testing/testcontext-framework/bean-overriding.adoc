@@ -91,3 +91,31 @@ Alternatively, the user can directly provide the bean name in the custom annotat
 `BeanOverrideProcessor` implementations may also internally compute a bean name based on
 a convention or some other method.
 ====
+
+[[testcontext-bean-overriding-aop-proxies]]
+== Bean Overrides and Spring AOP Proxies
+
+Beans in a Spring `ApplicationContext` are frequently wrapped in an AOP proxy — for
+example, to support `@Transactional`, `@Cacheable`, or `@Retryable` semantics. Whether an
+overridden bean retains such a proxy depends on the `BeanOverrideStrategy` used to create
+the override.
+
+* Overrides that use the `REPLACE` or `REPLACE_OR_CREATE` strategy (such as `@TestBean`
+  and `@MockitoBean`) register their override instance directly as a manual singleton,
+  which bypasses the container's normal bean post-processing. Consequently, the override
+  instance is a bare object: none of the AOP advice that would otherwise apply to the
+  original bean (`@Transactional`, `@Cacheable`, `@Retryable`, method security, and so
+  on) is present.
+* Overrides that use the `WRAP` strategy (such as `@MockitoSpyBean`) capture an early
+  reference to the original bean and wrap it before the rest of the container's
+  post-processors — including the one responsible for creating AOP proxies — have run.
+  Consequently, if the original bean would have been proxied, that proxy is still
+  created, but with the override instance as its target rather than the original bean.
+  The bean that ends up in the `ApplicationContext`, and that is injected into
+  collaborating beans and test classes, is therefore a proxy wrapping the override
+  instance, not the bare override instance itself.
+
+This distinction has practical consequences when combining bean overrides with Mockito's
+stubbing and verification APIs. See
+xref:testing/annotations/integration-spring/annotation-mockitobean.adoc#spring-testing-annotation-beanoverriding-mockitospybean-aop-proxies[`@MockitoSpyBean`
+and Spring AOP Proxies] for details.
