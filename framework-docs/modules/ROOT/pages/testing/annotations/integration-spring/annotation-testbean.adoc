@@ -171,3 +171,15 @@ Similarly, when overriding a bean created by a `FactoryBean`, the `FactoryBean` 
 replaced with a singleton bean corresponding to the value returned from the `@TestBean`
 factory method.
 ====
+
+[NOTE]
+====
+`@TestBean` uses the `REPLACE` or `REPLACE_OR_CREATE`
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-strategy[strategy
+for bean overrides], which registers the value returned from the factory method directly
+as the bean, bypassing the container's normal bean post-processing. Consequently, none of
+the Spring AOP advice that would otherwise apply to the original bean (for example,
+`@Transactional`, `@Cacheable`, or `@Retryable`) is present on the override instance. See
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-aop-proxies[Bean
+Overrides and Spring AOP Proxies] for details.
+====
