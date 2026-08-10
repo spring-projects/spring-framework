@@ -3,12 +3,11 @@
 :page-aliases: integration/class-data-sharing.adoc
 :page-aliases: integration/cds.adoc
 
-The ahead-of-time cache is a JVM feature introduced in Java 24 via
-https://openjdk.org/jeps/483[JEP 483] that can help reduce the startup time and memory
+The ahead-of-time cache is a JVM feature that can help reduce the startup time and memory
 footprint of Java applications. AOT cache is a natural evolution of
 https://docs.oracle.com/en/java/javase/17/vm/class-data-sharing.html[Class Data Sharing (CDS)].
 Spring Framework supports both CDS and AOT cache, and it is recommended that you use the
-latter if available in the JVM version you are using (Java 24+).
+latter if available in the JVM version you are using (Java 25+).
 
 To use this feature, an AOT cache should be created for the particular classpath of the
 application. It is possible to create this cache on the deployed instance, or during a
@@ -38,20 +37,11 @@ JVM flag to start and then exit your Spring application once the
 [tabs]
 ======
 
-AOT cache (Java 25+)::
+AOT cache::
 +
 [source,bash,subs="verbatim,quotes"]
 ----
 java -XX:AOTCacheOutput=app.aot -Dspring.context.exit=onRefresh -jar application.jar ...
-----
-
-AOT cache (Java 24)::
-+
-[source,bash,subs="verbatim,quotes"]
-----
-# Both commands need to be run with the same classpath
-java -XX:AOTMode=record -XX:AOTConfiguration=app.aotconf -Dspring.context.exit=onRefresh ...
-java -XX:AOTMode=create -XX:AOTConfiguration=app.aotconf -XX:AOTCache=app.aot ...
 ----
 
 CDS::
@@ -118,3 +108,54 @@ the cache, make sure that the following conditions are fulfilled when creating a
  - The timestamps of the JARs must be preserved.
  - When using the cache, the classpath must be the same as the one used to create it, in the same order.
 Additional JARs or directories can be specified *at the end* (but will not be cached).
+
+[[aot-cache-integration-tests]]
+== Generating the cache from integration tests
+
+In addition to creating the AOT cache via a dedicated training run, you can also
+generate the cache as a side effect of running integration tests. This is useful
+when your test suite exercises a significant portion of the application's startup
+and request-handling workflow, producing a more effective cache than a simple
+`-Dspring.context.exit=onRefresh` run. The cache also stores method
+profiling information, so exercising realistic code paths improves warmup behavior as well.
+
+Spring Framework provides the
+`org.springframework.test.context.aot.AotCacheTestExecutionListener` for this purpose.
+The listener is registered by default and activates automatically when the test JVM is
+started with AOT cache recording enabled. When active, this listener:
+
+. Validates that the JDK supports AOT cache recording (JDK 25+).
+. Eagerly loads the `ApplicationContext` so that context creation is part of the training workload.
+. Warns when the `-Dspring.context.exit=onRefresh` flag is present, since it would
+  terminate the test JVM mid-run.
+. Verifies the cache file was produced on JVM exit.
+
+To enable AOT cache recording from integration tests, the build tool (Maven or Gradle)
+must pass the JVM flag that specifies the cache output path. By convention, the cache is
+written to `aot-cache/application.aot` relative to the test working directory, which
+matches the location detected by the Paketo Spring Boot buildpack and bundled into the
+image by the Spring Boot build plugins:
+
+[source,bash,subs="verbatim,quotes"]
+----
+-XX:AOTCacheOutput=aot-cache/application.aot
+----
+
+The listener does not set JVM flags itself; it only detects them. No additional Spring
+configuration is required, since the JVM flags are the single source of truth for whether
+recording is enabled and where the cache file is written.
+
+NOTE: The `-Dspring.context.exit=onRefresh` flag is *not* needed when generating the
+cache from integration tests, because the test JVM exits normally at the end of the run.
+If it is present, the listener logs a warning.
+
+For the AOT cache to work correctly, the application must:
+
+* Use the standard JDK class loader (not a custom class loader).
+* Be deployed as an extracted JAR or with a standard classpath layout.
+
+On JVM exit, the listener verifies that the cache file was produced at the path specified
+by the `-XX:AOTCacheOutput` flag and logs a warning if it is missing.
+
+TIP: The Maven/Gradle flag wiring for `-XX:AOTCacheOutput` is provided by the Spring Boot
+Maven and Gradle plugins. Consult the Spring Boot documentation for build tool integration details.

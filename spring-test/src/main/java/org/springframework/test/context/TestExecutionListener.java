@@ -106,6 +106,8 @@ package org.springframework.test.context;
  * DirtiesContextTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.CommonCachesTestExecutionListener
  * CommonCachesTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.aot.AotCacheTestExecutionListener
+ * AotCacheTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * TransactionalTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener

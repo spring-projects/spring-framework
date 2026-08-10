@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationConfigurationException;
+import org.springframework.test.context.aot.AotCacheTestExecutionListener;
 import org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener;
 import org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener;
 import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
@@ -73,6 +74,7 @@ class TestExecutionListenersTests {
 				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
+				AotCacheTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
@@ -96,6 +98,7 @@ class TestExecutionListenersTests {
 				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
+				AotCacheTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
@@ -118,6 +121,7 @@ class TestExecutionListenersTests {
 				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
+				AotCacheTestExecutionListener.class,
 				TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
@@ -142,6 +146,7 @@ class TestExecutionListenersTests {
 				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
+				AotCacheTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
