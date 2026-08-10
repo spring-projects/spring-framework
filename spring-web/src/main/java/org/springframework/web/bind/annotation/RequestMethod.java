@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  * {@link RequestMapping#method()} attribute of the {@link RequestMapping} annotation.
  *
  * <p>Note that, by default, {@link org.springframework.web.servlet.DispatcherServlet}
- * supports GET, HEAD, POST, PUT, PATCH, and DELETE only. DispatcherServlet will
+ * supports GET, HEAD, POST, PUT, PATCH, QUERY, and DELETE only. DispatcherServlet will
  * process TRACE and OPTIONS with the default HttpServlet behavior unless explicitly
  * told to dispatch those request types as well: Check out the "dispatchOptionsRequest"
  * and "dispatchTraceRequest" properties, switching them to "true" if necessary.
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  */
 public enum RequestMethod {
 
-	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
+	GET, HEAD, POST, PUT, PATCH, QUERY, DELETE, OPTIONS, TRACE;
 
 
 	/**
@@ -57,6 +57,7 @@ public enum RequestMethod {
 			case "POST" -> POST;
 			case "PUT" -> PUT;
 			case "PATCH" -> PATCH;
+			case "QUERY" -> QUERY;
 			case "DELETE" -> DELETE;
 			case "OPTIONS" -> OPTIONS;
 			case "TRACE" -> TRACE;
@@ -89,6 +90,7 @@ public enum RequestMethod {
 			case POST -> HttpMethod.POST;
 			case PUT -> HttpMethod.PUT;
 			case PATCH -> HttpMethod.PATCH;
+			case QUERY -> HttpMethod.QUERY;
 			case DELETE -> HttpMethod.DELETE;
 			case OPTIONS -> HttpMethod.OPTIONS;
 			case TRACE -> HttpMethod.TRACE;

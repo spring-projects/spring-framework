@@ -121,6 +121,25 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a QUERY request.
+	 * @param uriTemplate a URI template; the resulting URI will be encoded
+	 * @param uriVariables zero or more URI variables
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc10008.html">RFC 10008</a>
+	 */
+	public static MockHttpServletRequestBuilder query(String uriTemplate, @Nullable Object... uriVariables) {
+		return new MockHttpServletRequestBuilder(HttpMethod.QUERY).uri(uriTemplate, uriVariables);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a QUERY request.
+	 * @param uri the URI
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc10008.html">RFC 10008</a>
+	 */
+	public static MockHttpServletRequestBuilder query(URI uri) {
+		return new MockHttpServletRequestBuilder(HttpMethod.QUERY).uri(uri);
+	}
+
+	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a DELETE request.
 	 * @param uriTemplate a URI template; the resulting URI will be encoded
 	 * @param uriVariables zero or more URI variables

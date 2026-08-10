@@ -155,7 +155,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 		boolean mayWrite =
 				("POST".equals(httpMethod) || "PUT".equals(httpMethod) ||
-						"PATCH".equals(httpMethod) || "DELETE".equals(httpMethod));
+						"PATCH".equals(httpMethod) || "QUERY".equals(httpMethod) || "DELETE".equals(httpMethod));
 
 		connection.setDoInput(true);
 		connection.setInstanceFollowRedirects("GET".equals(httpMethod));

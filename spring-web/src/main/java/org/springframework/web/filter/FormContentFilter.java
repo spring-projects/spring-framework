@@ -56,7 +56,7 @@ import org.springframework.util.StringUtils;
  */
 public class FormContentFilter extends OncePerRequestFilter {
 
-	private static final List<String> HTTP_METHODS = Arrays.asList("PUT", "PATCH", "DELETE");
+	private static final List<String> HTTP_METHODS = Arrays.asList("PUT", "PATCH", "QUERY", "DELETE");
 
 	private FormHttpMessageConverter formConverter = new FormHttpMessageConverter();
 

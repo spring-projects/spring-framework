@@ -895,6 +895,21 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 	}
 
 	@PathPatternsParameterizedTest
+	void httpQuery(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(RequestResponseBodyController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("QUERY", "/something");
+		String requestBody = "Hello query!";
+		request.setContent(requestBody.getBytes(StandardCharsets.UTF_8));
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("Accept", "text/*, */*");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getContentAsString()).isEqualTo(requestBody);
+	}
+
+	@PathPatternsParameterizedTest
 	void responseBodyNoAcceptableMediaType(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(RequestResponseBodyProducesController.class, usePathPatterns, wac -> {
 			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
@@ -3135,6 +3150,12 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		@RequestMapping(value = "/something", method = RequestMethod.PATCH)
 		@ResponseBody
 		public String handlePartialUpdate(@RequestBody String content) throws IOException {
+			return content;
+		}
+
+		@RequestMapping(value = "/something", method = RequestMethod.QUERY)
+		@ResponseBody
+		public String handleQuery(@RequestBody String content) throws IOException {
 			return content;
 		}
 	}

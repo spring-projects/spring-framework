@@ -160,7 +160,7 @@ abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTest
 
 	protected void assertHttpMethod(String path, HttpMethod method) throws Exception {
 		ClientHttpRequest request = factory.createRequest(URI.create(baseUrl + "/methods/" + path), method);
-		if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
+		if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH || method == HttpMethod.QUERY) {
 			if (request instanceof StreamingHttpOutputMessage streamingRequest) {
 				streamingRequest.setBody(outputStream -> outputStream.write(32));
 			}

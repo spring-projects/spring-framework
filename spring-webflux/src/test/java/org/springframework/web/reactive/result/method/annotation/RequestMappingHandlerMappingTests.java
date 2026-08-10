@@ -202,6 +202,11 @@ class RequestMappingHandlerMappingTests {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
 	}
 
+	@Test
+	void queryMapping() {
+		assertComposedAnnotationMapping(RequestMethod.QUERY);
+	}
+
 	@Test  // gh-32049
 	void httpExchangeWithMultipleAnnotationsAtClassLevel() {
 		this.handlerMapping.afterPropertiesSet();
@@ -571,6 +576,10 @@ class RequestMappingHandlerMappingTests {
 
 		@PatchMapping("/patch")
 		public void patch() {
+		}
+
+		@RequestMapping(path = "/query", method = RequestMethod.QUERY)
+		public void query() {
 		}
 	}
 

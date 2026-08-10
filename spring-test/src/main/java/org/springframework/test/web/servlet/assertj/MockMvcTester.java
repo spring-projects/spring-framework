@@ -306,6 +306,21 @@ public final class MockMvcTester {
 	}
 
 	/**
+	 * Prepare an HTTP QUERY request.
+	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
+	 * assertions on the result. For multi-statements assertions, use
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
+	 * @return a request builder for specifying the target URI
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc10008.html">RFC 10008</a>
+	 */
+	public MockMvcRequestBuilder query() {
+		return method(HttpMethod.QUERY);
+	}
+
+	/**
 	 * Prepare an HTTP DELETE request.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use

@@ -402,6 +402,10 @@ class CorsConfigurationTests {
 		config.addAllowedMethod("POST");
 		assertThat(config.checkHttpMethod(HttpMethod.GET)).containsExactly(HttpMethod.GET, HttpMethod.POST);
 		assertThat(config.checkHttpMethod(HttpMethod.POST)).containsExactly(HttpMethod.GET, HttpMethod.POST);
+
+		config.addAllowedMethod("QUERY");
+		assertThat(config.checkHttpMethod(HttpMethod.QUERY))
+				.containsExactly(HttpMethod.GET, HttpMethod.POST, HttpMethod.QUERY);
 	}
 
 	@Test
@@ -409,6 +413,7 @@ class CorsConfigurationTests {
 		CorsConfiguration config = new CorsConfiguration();
 		assertThat(config.checkHttpMethod(null)).isNull();
 		assertThat(config.checkHttpMethod(HttpMethod.DELETE)).isNull();
+		assertThat(config.checkHttpMethod(HttpMethod.QUERY)).isNull();
 
 		config.setAllowedMethods(new ArrayList<>());
 		assertThat(config.checkHttpMethod(HttpMethod.POST)).isNull();

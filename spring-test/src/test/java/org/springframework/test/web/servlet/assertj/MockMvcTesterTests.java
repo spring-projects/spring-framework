@@ -179,6 +179,12 @@ class MockMvcTesterTests {
 	}
 
 	@Test
+	void queryConfiguresBuilder() {
+		assertThat(createMockHttpServletRequest(tester -> tester.query().uri("/search/{id}", 123)))
+				.satisfies(hasSettings(HttpMethod.QUERY, "/search/{id}", "/search/123"));
+	}
+
+	@Test
 	void deleteConfiguresBuilder() {
 		assertThat(createMockHttpServletRequest(tester -> tester.delete().uri("/users/{id}", 42)))
 				.satisfies(hasSettings(HttpMethod.DELETE, "/users/{id}", "/users/42"));

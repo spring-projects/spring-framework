@@ -112,6 +112,15 @@ public interface WebClient {
 	RequestBodyUriSpec patch();
 
 	/**
+	 * Start building an HTTP QUERY request.
+	 * @return a spec for specifying the target URL
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc10008.html">RFC 10008</a>
+	 */
+	default RequestBodyUriSpec query() {
+		return method(HttpMethod.QUERY);
+	}
+
+	/**
 	 * Start building an HTTP DELETE request.
 	 * @return a spec for specifying the target URL
 	 */

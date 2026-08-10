@@ -44,12 +44,12 @@ class HttpMethodTests {
 	void values() {
 		HttpMethod[] values = HttpMethod.values();
 		assertThat(values).containsExactly(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST, HttpMethod.PUT,
-				HttpMethod.PATCH, HttpMethod.DELETE, HttpMethod.OPTIONS, HttpMethod.TRACE);
+				HttpMethod.PATCH, HttpMethod.QUERY, HttpMethod.DELETE, HttpMethod.OPTIONS, HttpMethod.TRACE);
 
 		// check defensive copy
 		values[0] = HttpMethod.POST;
 		assertThat(HttpMethod.values()).containsExactly(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST, HttpMethod.PUT,
-				HttpMethod.PATCH, HttpMethod.DELETE, HttpMethod.OPTIONS, HttpMethod.TRACE);
+				HttpMethod.PATCH, HttpMethod.QUERY, HttpMethod.DELETE, HttpMethod.OPTIONS, HttpMethod.TRACE);
 	}
 
 	@Test
@@ -62,6 +62,10 @@ class HttpMethodTests {
 
 		get = HttpMethod.valueOf("get");
 		assertThat(get).isSameAs(HttpMethod.GET);
+
+		HttpMethod query = HttpMethod.valueOf("QUERY");
+		assertThat(query).isSameAs(HttpMethod.QUERY);
+		assertThat(HttpMethod.valueOf("query")).isSameAs(HttpMethod.QUERY);
 
 		HttpMethod foo = HttpMethod.valueOf("foo");
 		HttpMethod other = HttpMethod.valueOf("foo");
