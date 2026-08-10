@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConcurrentMapCacheManagerTests {
 
 	@Test
-	void testDynamicMode() {
+	void dynamicMode() {
 		ConcurrentMapCacheManager cm = new ConcurrentMapCacheManager();
 		Cache cache1 = cm.getCache("c1");
 		assertThat(cache1).isInstanceOf(ConcurrentMapCache.class);
@@ -75,7 +75,7 @@ class ConcurrentMapCacheManagerTests {
 	}
 
 	@Test
-	void testStaticMode() {
+	void staticMode() {
 		ConcurrentMapCacheManager cm = new ConcurrentMapCacheManager("c1", "c2");
 		Cache cache1 = cm.getCache("c1");
 		assertThat(cache1).isInstanceOf(ConcurrentMapCache.class);
@@ -135,7 +135,7 @@ class ConcurrentMapCacheManagerTests {
 	}
 
 	@Test
-	void testChangeStoreByValue() {
+	void changeStoreByValue() {
 		ConcurrentMapCacheManager cm = new ConcurrentMapCacheManager("c1", "c2");
 		assertThat(cm.isStoreByValue()).isFalse();
 		Cache cache1 = cm.getCache("c1");

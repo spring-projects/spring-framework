@@ -75,7 +75,7 @@ inline fun <reified B : Any> ResponseSpec.expectBody(): BodySpec<B, *> =
  * @author Sebastien Deleuze
  * @since 5.0
  */
-inline fun <reified E : Any> ResponseSpec.expectBodyList(): ListBodySpec<E> =
+inline fun <reified E : Any?> ResponseSpec.expectBodyList(): ListBodySpec<E> =
 		expectBodyList(object : ParameterizedTypeReference<E>() {})
 
 /**

@@ -276,7 +276,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 					strategyType.getName() + "]: a zero-argument constructor is required", ex);
 		}
 
-		if (!strategyType.isAssignableFrom(result.getClass())) {
+		if (!strategyType.isInstance(result)) {
 			throw new IllegalArgumentException("Provided class name must be an implementation of " + strategyType);
 		}
 		return result;

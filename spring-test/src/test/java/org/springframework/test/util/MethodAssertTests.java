@@ -65,7 +65,7 @@ class MethodAssertTests {
 	}
 
 	@Test
-	void haDeclaringClassWithWrongClass() {
+	void hasDeclaringClassWithWrongClass() {
 		Method method = ReflectionUtils.findMethod(TestData.class, "counter");
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(method).hasDeclaringClass(Method.class))

@@ -471,11 +471,29 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	@Override
 	public ObjectName registerManagedResource(Object managedResource) throws MBeanExportException {
+		return registerManagedResource(managedResource, (String) null);
+	}
+
+	/**
+	 * Register the supplied resource with JMX. If the resource is not a valid MBean already,
+	 * Spring will generate a management interface for it. The exact interface generated will
+	 * depend on the implementation and its configuration. This call also generates an
+	 * {@link ObjectName} for the managed resource and returns this to the caller.
+	 * @param managedResource the resource to expose via JMX
+	 * @param beanKey the corresponding bean key for {@link ObjectNamingStrategy} purposes
+	 * (making the generated {@code ObjectName} unique without the need for an identity key)
+	 * @return the {@link ObjectName} under which the resource was exposed
+	 * @throws MBeanExportException if Spring is unable to generate an {@link ObjectName}
+	 * or register the MBean
+	 * @since 7.0.7
+	 * @see ObjectNamingStrategy#getObjectName(Object, String)
+	 */
+	public ObjectName registerManagedResource(Object managedResource, @Nullable String beanKey) throws MBeanExportException {
 		Assert.notNull(managedResource, "Managed resource must not be null");
 		ObjectName objectName;
 		try {
-			objectName = getObjectName(managedResource, null);
-			if (this.ensureUniqueRuntimeObjectNames) {
+			objectName = getObjectName(managedResource, beanKey);
+			if (beanKey == null && this.ensureUniqueRuntimeObjectNames) {
 				objectName = JmxUtils.appendIdentityToObjectName(objectName, managedResource);
 			}
 		}

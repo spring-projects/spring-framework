@@ -441,13 +441,13 @@ class JavaMailSenderTests {
 	}
 
 	@Test
-	void testConnection() {
+	void connection() {
 		sender.setHost("host");
 		assertThatNoException().isThrownBy(sender::testConnection);
 	}
 
 	@Test
-	void testConnectionWithFailure() {
+	void connectionWithFailure() {
 		sender.setHost(null);
 		assertThatExceptionOfType(MessagingException.class).isThrownBy(sender::testConnection);
 	}

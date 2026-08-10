@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class ConstructorArgumentEntryTests {
 
 	@Test
-	void testCtorBailsOnNegativeCtorIndexArgument() {
+	void ctorBailsOnNegativeCtorIndexArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConstructorArgumentEntry(-1));
 	}

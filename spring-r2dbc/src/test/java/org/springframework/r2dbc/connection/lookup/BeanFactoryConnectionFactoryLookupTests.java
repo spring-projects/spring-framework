@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
  * @author Mark Paluch
  */
 @ExtendWith(MockitoExtension.class)
-public class BeanFactoryConnectionFactoryLookupTests {
+class BeanFactoryConnectionFactoryLookupTests {
 
 	private static final String CONNECTION_FACTORY_BEAN_NAME = "connectionFactory";
 

@@ -76,7 +76,7 @@ public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueSy
 								parameter.getGenericParameterType() + " doesn't support empty values.");
 				return toAdapter.fromPublisher(Mono.empty());
 			}
-			if (parameter.getParameterType().isAssignableFrom(value.getClass())) {
+			if (parameter.getParameterType().isInstance(value)) {
 				return value;
 			}
 			ReactiveAdapter fromAdapter = getAdapterRegistry().getAdapter(value.getClass());

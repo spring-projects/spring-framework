@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Chris Beams
  */
-public class PackagePrivateBeanMethodInheritanceTests {
+class PackagePrivateBeanMethodInheritanceTests {
 
 	@Test
 	void repro() {
@@ -62,9 +62,6 @@ public class PackagePrivateBeanMethodInheritanceTests {
 		public Foo(Bar bar) {
 			this.bar = bar;
 		}
-	}
-
-	public static class Bar {
 	}
 
 	@Configuration

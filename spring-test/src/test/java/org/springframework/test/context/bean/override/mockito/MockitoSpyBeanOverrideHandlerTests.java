@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
-import org.springframework.test.context.bean.override.BeanOverrideTestUtils;
+import org.springframework.test.context.bean.override.BeanOverrideUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,13 +38,13 @@ class MockitoSpyBeanOverrideHandlerTests {
 
 	@Test
 	void beanNameIsSetToNullIfAnnotationNameIsEmpty() {
-		List<BeanOverrideHandler> list = BeanOverrideTestUtils.findHandlers(SampleOneSpy.class);
+		List<BeanOverrideHandler> list = BeanOverrideUtils.findHandlersForFields(SampleOneSpy.class);
 		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isNull());
 	}
 
 	@Test
 	void beanNameIsSetToAnnotationName() {
-		List<BeanOverrideHandler> list = BeanOverrideTestUtils.findHandlers(SampleOneSpyWithName.class);
+		List<BeanOverrideHandler> list = BeanOverrideUtils.findHandlersForFields(SampleOneSpyWithName.class);
 		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isEqualTo("anotherService"));
 	}
 

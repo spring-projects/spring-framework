@@ -66,7 +66,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rossen Stoyanchev
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class DefaultStompSessionTests {
+class DefaultStompSessionTests {
 
 	private DefaultStompSession session;
 
@@ -115,7 +115,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test // SPR-16844
-	public void afterConnectedWithSpecificVersion() {
+	void afterConnectedWithSpecificVersion() {
 		assertThat(this.session.isConnected()).isFalse();
 		this.connectHeaders.setAcceptVersion("1.1");
 
@@ -397,7 +397,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test // gh-23358
-	public void sendByteArray() {
+	void sendByteArray() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -509,7 +509,7 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test // SPR-15131
-	public void unsubscribeWithCustomHeader() {
+	void unsubscribeWithCustomHeader() {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
@@ -633,7 +633,7 @@ public class DefaultStompSessionTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void receiptNotReceived() {
+	void receiptNotReceived() {
 		TaskScheduler taskScheduler = mock();
 
 		this.session.afterConnected(this.connection);

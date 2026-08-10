@@ -60,12 +60,12 @@ class TestConstructorUtilsTests {
 	}
 
 	@Test
-	void testConstructorAnnotation() throws Exception {
+	void constructorAnnotation() throws Exception {
 		assertAutowirable(TestConstructorAnnotationTestCase.class);
 	}
 
 	@Test
-	void testConstructorAsMetaAnnotation() throws Exception {
+	void constructorAsMetaAnnotation() throws Exception {
 		assertAutowirable(TestConstructorAsMetaAnnotationTestCase.class);
 	}
 

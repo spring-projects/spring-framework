@@ -18,12 +18,13 @@ package org.springframework.aot.nativex;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -35,7 +36,6 @@ import org.springframework.aot.hint.ProxyHints;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.SerializationHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.codec.StringDecoder;
 
@@ -47,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  * @author Janne Valkealahti
  * @author Sam Brannen
+ * @author Stephane Nicoll
  */
 class FileNativeConfigurationWriterTests {
 
@@ -63,25 +64,25 @@ class FileNativeConfigurationWriterTests {
 	}
 
 	@Test
-	void serializationConfig() throws IOException, JSONException {
+	void serializationConfig() throws Exception {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
-		SerializationHints serializationHints = hints.serialization();
-		serializationHints.registerType(Integer.class);
-		serializationHints.registerType(Long.class);
+		ReflectionHints reflectionHints = hints.reflection();
+		reflectionHints.registerJavaSerialization(Integer.class);
+		reflectionHints.registerJavaSerialization(Long.class);
 		generator.write(hints);
 		assertEquals("""
 				{
-					"serialization": [
-						{ "type": "java.lang.Integer" },
-						{ "type": "java.lang.Long" }
+					"reflection": [
+						{ "type": "java.lang.Integer", "serializable": true },
+						{ "type": "java.lang.Long", "serializable": true }
 					]
 				}
 				""");
 	}
 
 	@Test
-	void proxyConfig() throws IOException, JSONException {
+	void proxyConfig() throws Exception {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ProxyHints proxyHints = hints.proxies();
@@ -99,7 +100,7 @@ class FileNativeConfigurationWriterTests {
 	}
 
 	@Test
-	void reflectionConfig() throws IOException, JSONException {
+	void reflectionConfig() throws Exception {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ReflectionHints reflectionHints = hints.reflection();
@@ -137,8 +138,36 @@ class FileNativeConfigurationWriterTests {
 				""");
 	}
 
+	@Test  // gh-36989
+	void lambdaConfig() throws Exception {
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
+		RuntimeHints hints = new RuntimeHints();
+		hints.reflection().registerLambda(Integer.class, builder -> builder
+				.withDeclaringMethod("getCell", Integer.class, Integer.class)
+				.withInterfaces(Supplier.class));
+		generator.write(hints);
+		assertEquals("""
+				{
+					"reflection": [
+						{
+							"type": {
+								"lambda": {
+									"declaringClass": "java.lang.Integer",
+									"declaringMethod": {
+										"name": "getCell",
+										"parameterTypes": [ "java.lang.Integer", "java.lang.Integer" ]
+									},
+									"interfaces": [ "java.util.function.Supplier" ]
+								}
+							}
+						}
+					]
+				}
+				""");
+	}
+
 	@Test
-	void jniConfig() throws IOException, JSONException {
+	void jniConfig() throws Exception {
 		// same format as reflection so just test basic file generation
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
@@ -157,7 +186,7 @@ class FileNativeConfigurationWriterTests {
 	}
 
 	@Test
-	void resourceConfig() throws IOException, JSONException {
+	void resourceConfig() throws Exception {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ResourceHints resourceHints = hints.resources();
@@ -176,6 +205,17 @@ class FileNativeConfigurationWriterTests {
 				}""");
 	}
 
+	@Test  // gh-36972
+	void resourceConfigWithNonAsciiPatternIsWrittenAsUtf8() throws IOException {
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
+		RuntimeHints hints = new RuntimeHints();
+		hints.resources().registerPattern("com/example/café/**");
+		generator.write(hints);
+		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve("reachability-metadata.json");
+		byte[] content = Files.readAllBytes(jsonFile);
+		assertThat(content).containsSequence("café".getBytes(StandardCharsets.UTF_8));
+	}
+
 	@Test
 	void namespace() {
 		String groupId = "foo.bar";
@@ -190,7 +230,8 @@ class FileNativeConfigurationWriterTests {
 		assertThat(jsonFile.toFile()).exists();
 	}
 
-	private void assertEquals(String expectedString) throws IOException, JSONException {
+
+	private static void assertEquals(String expectedString) throws Exception {
 		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve("reachability-metadata.json");
 		String content = Files.readString(jsonFile);
 		JSONAssert.assertEquals(expectedString, content, JSONCompareMode.NON_EXTENSIBLE);

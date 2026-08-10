@@ -32,10 +32,9 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpsServer;
 
@@ -52,10 +51,7 @@ class ServerHttpsRequestIntegrationTests {
 
 	private final HttpServer server = new ReactorHttpsServer();
 
-	private int port;
-
-	private RestTemplate restTemplate;
-
+	private RestClient restClient;
 
 	@BeforeEach
 	void startServer() throws Exception {
@@ -63,8 +59,6 @@ class ServerHttpsRequestIntegrationTests {
 		this.server.afterPropertiesSet();
 		this.server.start();
 
-		// Set dynamically chosen port
-		this.port = this.server.getPort();
 
 		SSLContextBuilder builder = new SSLContextBuilder();
 		builder.loadTrustMaterial(new TrustSelfSignedStrategy());
@@ -77,7 +71,8 @@ class ServerHttpsRequestIntegrationTests {
 				setConnectionManager(connectionManager).build();
 		HttpComponentsClientHttpRequestFactory requestFactory =
 				new HttpComponentsClientHttpRequestFactory(httpclient);
-		this.restTemplate = new RestTemplate(requestFactory);
+		this.restClient = RestClient.builder().baseUrl("https://localhost:" + this.server.getPort())
+				.requestFactory(requestFactory).build();
 	}
 
 	@AfterEach
@@ -87,9 +82,7 @@ class ServerHttpsRequestIntegrationTests {
 
 	@Test
 	void checkUri() {
-		URI url = URI.create("https://localhost:" + port + "/foo?param=bar");
-		RequestEntity<Void> request = RequestEntity.post(url).build();
-		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
+		ResponseEntity<Void> response = this.restClient.post().uri("/foo?param=bar").retrieve().toBodilessEntity();
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 

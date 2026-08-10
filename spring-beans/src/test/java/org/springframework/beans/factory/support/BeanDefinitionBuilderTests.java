@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -48,7 +47,7 @@ class BeanDefinitionBuilderTests {
 		RootBeanDefinition rbd = (RootBeanDefinition) bdb.getBeanDefinition();
 		assertThat(rbd.isSingleton()).isFalse();
 		assertThat(rbd.getBeanClass()).isEqualTo(TestBean.class);
-		assertThat(Arrays.equals(dependsOn, rbd.getDependsOn())).as("Depends on was added").isTrue();
+		assertThat(rbd.getDependsOn()).as("Depends on was added").isEqualTo(dependsOn);
 		assertThat(rbd.getPropertyValues().contains("age")).isTrue();
 	}
 

@@ -76,8 +76,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	private static final Log logger = LogFactory.getLog(AbstractNestablePropertyAccessor.class);
 
-	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
-
 	@Nullable Object wrappedObject;
 
 	private String nestedPath = "";
@@ -155,21 +153,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		setConversionService(parent.getConversionService());
 	}
 
-
-	/**
-	 * Specify a limit for array and collection auto-growing.
-	 * <p>Default is unlimited on a plain accessor.
-	 */
-	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
-		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
-	}
-
-	/**
-	 * Return the limit for array and collection auto-growing.
-	 */
-	public int getAutoGrowCollectionLimit() {
-		return this.autoGrowCollectionLimit;
-	}
 
 	/**
 	 * Switch the target object, replacing the cached introspection results only
@@ -298,7 +281,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				Object convertedValue = convertIfNecessary(tokens.canonicalName, oldValue, pv.getValue(),
 						componentType, ph.nested(tokens.keys.length));
 				int length = Array.getLength(propValue);
-				if (arrayIndex >= length && arrayIndex < this.autoGrowCollectionLimit) {
+				if (arrayIndex >= length && arrayIndex < getAutoGrowCollectionLimit()) {
 					Object newArray = Array.newInstance(componentType, arrayIndex + 1);
 					System.arraycopy(propValue, 0, newArray, 0, length);
 					int lastKeyIndex = tokens.canonicalName.lastIndexOf('[');
@@ -324,7 +307,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			Object convertedValue = convertIfNecessary(tokens.canonicalName, oldValue, pv.getValue(),
 					requiredType.getResolvableType().resolve(), requiredType);
 			int size = list.size();
-			if (index >= size && index < this.autoGrowCollectionLimit) {
+			if (index >= size && index < getAutoGrowCollectionLimit()) {
 				for (int i = size; i < index; i++) {
 					try {
 						list.add(null);
@@ -761,7 +744,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			return array;
 		}
 		int length = Array.getLength(array);
-		if (index >= length && index < this.autoGrowCollectionLimit) {
+		if (index >= length && index < getAutoGrowCollectionLimit()) {
 			Class<?> componentType = array.getClass().componentType();
 			Object newArray = Array.newInstance(componentType, index + 1);
 			System.arraycopy(array, 0, newArray, 0, length);
@@ -785,7 +768,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			return;
 		}
 		int size = collection.size();
-		if (index >= size && index < this.autoGrowCollectionLimit) {
+		if (index >= size && index < getAutoGrowCollectionLimit()) {
 			Class<?> elementType = ph.getResolvableType().getNested(nestingLevel).asCollection().resolveGeneric();
 			if (elementType != null) {
 				for (int i = collection.size(); i < index + 1; i++) {
@@ -956,8 +939,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						actualName = propertyName.substring(0, keyStart);
 					}
 					String key = propertyName.substring(keyStart + PROPERTY_KEY_PREFIX.length(), keyEnd);
-					if (key.length() > 1 && (key.startsWith("'") && key.endsWith("'")) ||
-							(key.startsWith("\"") && key.endsWith("\""))) {
+					if (key.length() > 1 && ((key.startsWith("'") && key.endsWith("'")) ||
+							(key.startsWith("\"") && key.endsWith("\"")))) {
 						key = key.substring(1, key.length() - 1);
 					}
 					keys.add(key);

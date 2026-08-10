@@ -98,19 +98,19 @@ class CustomNamespaceHandlerTests {
 
 
 	@Test
-	void testSimpleParser() {
+	void simpleParser() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertTestBean(bean);
 	}
 
 	@Test
-	void testSimpleDecorator() {
+	void simpleDecorator() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("customisedTestBean");
 		assertTestBean(bean);
 	}
 
 	@Test
-	void testProxyingDecorator() {
+	void proxyingDecorator() {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("debuggingTestBean");
 		assertTestBean(bean);
 		assertThat(AopUtils.isAopProxy(bean)).isTrue();
@@ -120,7 +120,7 @@ class CustomNamespaceHandlerTests {
 	}
 
 	@Test
-	void testProxyingDecoratorNoInstance() {
+	void proxyingDecoratorNoInstance() {
 		String[] beanNames = this.beanFactory.getBeanNamesForType(ApplicationListener.class);
 		assertThat(Arrays.asList(beanNames)).contains("debuggingTestBeanNoInstance");
 		assertThat(this.beanFactory.getType("debuggingTestBeanNoInstance")).isEqualTo(ApplicationListener.class);
@@ -131,7 +131,7 @@ class CustomNamespaceHandlerTests {
 	}
 
 	@Test
-	void testChainedDecorators() {
+	void chainedDecorators() {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("chainedTestBean");
 		assertTestBean(bean);
 		assertThat(AopUtils.isAopProxy(bean)).isTrue();
@@ -142,27 +142,27 @@ class CustomNamespaceHandlerTests {
 	}
 
 	@Test
-	void testDecorationViaAttribute() {
+	void decorationViaAttribute() {
 		BeanDefinition beanDefinition = this.beanFactory.getBeanDefinition("decorateWithAttribute");
 		assertThat(beanDefinition.getAttribute("objectName")).isEqualTo("foo");
 	}
 
 	@Test  // SPR-2728
-	public void testCustomElementNestedWithinUtilList() {
+	void customElementNestedWithinUtilList() {
 		List<?> things = (List<?>) this.beanFactory.getBean("list.of.things");
 		assertThat(things).isNotNull();
 		assertThat(things).hasSize(2);
 	}
 
 	@Test  // SPR-2728
-	public void testCustomElementNestedWithinUtilSet() {
+	void customElementNestedWithinUtilSet() {
 		Set<?> things = (Set<?>) this.beanFactory.getBean("set.of.things");
 		assertThat(things).isNotNull();
 		assertThat(things).hasSize(2);
 	}
 
 	@Test  // SPR-2728
-	public void testCustomElementNestedWithinUtilMap() {
+	void customElementNestedWithinUtilMap() {
 		Map<?, ?> things = (Map<?, ?>) this.beanFactory.getBean("map.of.things");
 		assertThat(things).isNotNull();
 		assertThat(things).hasSize(2);

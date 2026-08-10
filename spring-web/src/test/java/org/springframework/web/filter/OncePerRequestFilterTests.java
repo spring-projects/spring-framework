@@ -51,7 +51,7 @@ class OncePerRequestFilterTests {
 
 	@BeforeEach
 	@SuppressWarnings("serial")
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
 		this.request.setServerName("localhost");
@@ -101,7 +101,7 @@ class OncePerRequestFilterTests {
 	}
 
 	@Test // gh-23196
-	public void filterNestedErrorDispatch() throws ServletException, IOException {
+	void filterNestedErrorDispatch() throws ServletException, IOException {
 
 		// Opt in for ERROR dispatch
 		this.filter.setShouldNotFilterErrorDispatch(false);

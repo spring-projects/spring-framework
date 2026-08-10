@@ -26,10 +26,11 @@ import org.jspecify.annotations.Nullable;
  * This type is used by {@link CompositeMap}.
  *
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  * @since 6.2
  * @param <E> the type of elements maintained by this set
  */
-final class FilteredSet<E> extends FilteredCollection<E> implements Set<E> {
+final class FilteredSet<E extends @Nullable Object> extends FilteredCollection<E> implements Set<E> {
 
 	public FilteredSet(Set<E> delegate, Predicate<E> filter) {
 		super(delegate, filter);

@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SpringBeanAutowiringSupportTests {
 
 	@Test
-	void testProcessInjectionBasedOnServletContext() {
+	void processInjectionBasedOnServletContext() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
 
@@ -50,8 +50,7 @@ class SpringBeanAutowiringSupportTests {
 
 		InjectionTarget target = new InjectionTarget();
 		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(target, sc);
-		boolean condition = target.testBean instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(target.testBean).isInstanceOf(TestBean.class);
 		assertThat(target.name).isEqualTo("tb");
 	}
 

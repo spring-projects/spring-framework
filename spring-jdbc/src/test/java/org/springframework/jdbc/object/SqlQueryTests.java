@@ -103,7 +103,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testQueryWithoutParams() throws SQLException {
+	void queryWithoutParams() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(1);
 
@@ -128,7 +128,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testStreamWithoutParams() throws SQLException {
+	void streamWithoutParams() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(1);
 
@@ -154,7 +154,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testStreamByNamedParam() throws SQLException {
+	void streamByNamedParam() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -194,7 +194,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testQueryWithoutEnoughParams() {
+	void queryWithoutEnoughParams() {
 		MappingSqlQuery<Integer> query = new MappingSqlQuery<>() {
 			@Override
 			protected Integer mapRow(ResultSet rs, int rownum) throws SQLException {
@@ -212,7 +212,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testQueryWithMissingMapParams() {
+	void queryWithMissingMapParams() {
 		MappingSqlQuery<Integer> query = new MappingSqlQuery<>() {
 			@Override
 			protected Integer mapRow(ResultSet rs, int rownum) throws SQLException {
@@ -230,7 +230,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testStringQueryWithResults() throws Exception {
+	void stringQueryWithResults() throws Exception {
 		String[] dbResults = new String[] { "alpha", "beta", "charlie" };
 		given(resultSet.next()).willReturn(true, true, true, false);
 		given(resultSet.getString(1)).willReturn(dbResults[0], dbResults[1], dbResults[2]);
@@ -244,7 +244,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testStringQueryWithoutResults() throws SQLException {
+	void stringQueryWithoutResults() throws SQLException {
 		given(resultSet.next()).willReturn(false);
 		StringQuery query = new StringQuery(dataSource, SELECT_FORENAME_EMPTY);
 		String[] results = query.run();
@@ -256,7 +256,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testFindCustomerIntInt() throws SQLException {
+	void findCustomerIntInt() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -297,7 +297,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testFindCustomerString() throws SQLException {
+	void findCustomerString() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -336,7 +336,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testFindCustomerMixed() throws SQLException {
+	void findCustomerMixed() throws SQLException {
 		reset(connection);
 		PreparedStatement preparedStatement2 = mock();
 		ResultSet resultSet2 = mock();
@@ -390,7 +390,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testFindTooManyCustomers() throws SQLException {
+	void findTooManyCustomers() throws SQLException {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getInt("id")).willReturn(1, 2);
 		given(resultSet.getString("forename")).willReturn("rod", "rod");
@@ -427,7 +427,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testListCustomersIntInt() throws SQLException {
+	void listCustomersIntInt() throws SQLException {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getInt("id")).willReturn(1, 2);
 		given(resultSet.getString("forename")).willReturn("rod", "dave");
@@ -464,7 +464,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testListCustomersString() throws SQLException {
+	void listCustomersString() throws SQLException {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getInt("id")).willReturn(1, 2);
 		given(resultSet.getString("forename")).willReturn("rod", "dave");
@@ -499,7 +499,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testFancyCustomerQuery() throws SQLException {
+	void fancyCustomerQuery() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -541,7 +541,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testUnnamedParameterDeclarationWithNamedParameterQuery() {
+	void unnamedParameterDeclarationWithNamedParameterQuery() {
 		class CustomerQuery extends MappingSqlQuery<Customer> {
 
 			public CustomerQuery(DataSource ds) {
@@ -573,13 +573,13 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testNamedParameterCustomerQueryWithUnnamedDeclarations()
+	void namedParameterCustomerQueryWithUnnamedDeclarations()
 			throws SQLException {
 		doTestNamedParameterCustomerQuery(false);
 	}
 
 	@Test
-	void testNamedParameterCustomerQueryWithNamedDeclarations()
+	void namedParameterCustomerQueryWithNamedDeclarations()
 			throws SQLException {
 		doTestNamedParameterCustomerQuery(true);
 	}
@@ -637,7 +637,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testNamedParameterInListQuery() throws SQLException {
+	void namedParameterInListQuery() throws SQLException {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getInt("id")).willReturn(1, 2);
 		given(resultSet.getString("forename")).willReturn("rod", "juergen");
@@ -690,7 +690,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testNamedParameterQueryReusingParameter() throws SQLException {
+	void namedParameterQueryReusingParameter() throws SQLException {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getInt("id")).willReturn(1, 2);
 		given(resultSet.getString("forename")).willReturn("rod", "juergen");
@@ -741,7 +741,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testNamedParameterUsingInvalidQuestionMarkPlaceHolders()
+	void namedParameterUsingInvalidQuestionMarkPlaceHolders()
 			throws SQLException {
 		given(
 		connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,
@@ -777,7 +777,7 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void testUpdateCustomers() throws SQLException {
+	void updateCustomers() throws SQLException {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getInt("id")).willReturn(1, 2);
 		given(connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID,

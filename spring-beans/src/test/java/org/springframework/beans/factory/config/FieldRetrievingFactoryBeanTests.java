@@ -37,7 +37,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
 class FieldRetrievingFactoryBeanTests {
 
 	@Test
-	void testStaticField() throws Exception {
+	void staticField() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setStaticField("java.sql.Connection.TRANSACTION_SERIALIZABLE");
 		fr.afterPropertiesSet();
@@ -45,7 +45,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testStaticFieldWithWhitespace() throws Exception {
+	void staticFieldWithWhitespace() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setStaticField("  java.sql.Connection.TRANSACTION_SERIALIZABLE  ");
 		fr.afterPropertiesSet();
@@ -53,7 +53,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testStaticFieldViaClassAndFieldName() throws Exception {
+	void staticFieldViaClassAndFieldName() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetClass(Connection.class);
 		fr.setTargetField("TRANSACTION_SERIALIZABLE");
@@ -62,7 +62,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testNonStaticField() throws Exception {
+	void nonStaticField() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		PublicFieldHolder target = new PublicFieldHolder();
 		fr.setTargetObject(target);
@@ -72,7 +72,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testNothingButBeanName() throws Exception {
+	void nothingButBeanName() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setBeanName("java.sql.Connection.TRANSACTION_SERIALIZABLE");
 		fr.afterPropertiesSet();
@@ -80,7 +80,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testJustTargetField() throws Exception {
+	void justTargetField() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetField("TRANSACTION_SERIALIZABLE");
 		try {
@@ -91,7 +91,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testJustTargetClass() throws Exception {
+	void justTargetClass() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetClass(Connection.class);
 		try {
@@ -102,7 +102,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testJustTargetObject() throws Exception {
+	void justTargetObject() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setTargetObject(new PublicFieldHolder());
 		try {
@@ -113,7 +113,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testWithConstantOnClassWithPackageLevelVisibility() throws Exception {
+	void withConstantOnClassWithPackageLevelVisibility() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
 		fr.setBeanName("org.springframework.beans.testfixture.beans.PackageLevelVisibleBean.CONSTANT");
 		fr.afterPropertiesSet();
@@ -121,7 +121,7 @@ class FieldRetrievingFactoryBeanTests {
 	}
 
 	@Test
-	void testBeanNameSyntaxWithBeanFactory() {
+	void beanNameSyntaxWithBeanFactory() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				qualifiedResource(FieldRetrievingFactoryBeanTests.class, "context.xml"));

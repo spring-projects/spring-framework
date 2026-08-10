@@ -32,13 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EclipseLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	@Test
-	void testCanCastNativeEntityManagerFactoryToEclipseLinkEntityManagerFactoryImpl() {
+	void canCastNativeEntityManagerFactoryToEclipseLinkEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
 		assertThat(emfi.getNativeEntityManagerFactory().getClass().getName()).endsWith("EntityManagerFactoryImpl");
 	}
 
 	@Test
-	void testCanCastSharedEntityManagerProxyToEclipseLinkEntityManager() {
+	void canCastSharedEntityManagerProxyToEclipseLinkEntityManager() {
 		assertThat(sharedEntityManager).isInstanceOf(JpaEntityManager.class);
 		JpaEntityManager eclipselinkEntityManager = (JpaEntityManager) sharedEntityManager;
 		assertThat(eclipselinkEntityManager.getActiveSession()).isNotNull();

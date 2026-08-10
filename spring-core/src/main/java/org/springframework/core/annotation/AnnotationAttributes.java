@@ -25,6 +25,7 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -126,7 +127,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, @Nullable Object
 	AnnotationAttributes(Class<? extends Annotation> annotationType, boolean validated) {
 		Assert.notNull(annotationType, "'annotationType' must not be null");
 		this.annotationType = annotationType;
-		this.displayName = annotationType.getName();
+		this.displayName = ClassUtils.getCanonicalName(annotationType);
 		this.validated = validated;
 	}
 

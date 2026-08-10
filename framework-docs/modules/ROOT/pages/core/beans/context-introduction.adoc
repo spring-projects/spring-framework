@@ -575,7 +575,7 @@ Kotlin::
 ----
 ======
 
-NOTE: Do not define such beans to be lazy as the `ApplicationContext` will honour that and will not register the method to listen to events.
+NOTE: Do not define such beans to be lazy as the `ApplicationContext` will honor that and will not register the method to listen to events.
 
 The method signature once again declares the event type to which it listens,
 but, this time, with a flexible name and without implementing a specific listener interface.

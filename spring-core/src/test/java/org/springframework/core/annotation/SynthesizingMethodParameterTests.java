@@ -78,7 +78,7 @@ class SynthesizingMethodParameterTests {
 	}
 
 	@Test
-	void testHashCode() throws NoSuchMethodException {
+	void hashCodeBehavior() throws NoSuchMethodException {
 		assertThat(stringParameter.hashCode()).isEqualTo(stringParameter.hashCode());
 		assertThat(longParameter.hashCode()).isEqualTo(longParameter.hashCode());
 		assertThat(intReturnType.hashCode()).isEqualTo(intReturnType.hashCode());

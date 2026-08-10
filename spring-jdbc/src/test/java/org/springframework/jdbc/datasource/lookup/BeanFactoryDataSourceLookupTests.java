@@ -40,7 +40,7 @@ class BeanFactoryDataSourceLookupTests {
 
 
 	@Test
-	void testLookupSunnyDay() {
+	void lookupSunnyDay() {
 		BeanFactory beanFactory = mock();
 
 		StubDataSource expectedDataSource = new StubDataSource();
@@ -55,7 +55,7 @@ class BeanFactoryDataSourceLookupTests {
 	}
 
 	@Test
-	void testLookupWhereBeanFactoryYieldsNonDataSourceType() {
+	void lookupWhereBeanFactoryYieldsNonDataSourceType() {
 		final BeanFactory beanFactory = mock();
 
 		given(beanFactory.getBean(DATASOURCE_BEAN_NAME, DataSource.class)).willThrow(
@@ -68,7 +68,7 @@ class BeanFactoryDataSourceLookupTests {
 	}
 
 	@Test
-	void testLookupWhereBeanFactoryHasNotBeenSupplied() {
+	void lookupWhereBeanFactoryHasNotBeenSupplied() {
 		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
 		assertThatIllegalStateException().isThrownBy(() ->
 				lookup.getDataSource(DATASOURCE_BEAN_NAME));

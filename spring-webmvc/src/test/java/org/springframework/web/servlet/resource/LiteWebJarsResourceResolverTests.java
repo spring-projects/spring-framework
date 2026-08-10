@@ -26,6 +26,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -74,8 +76,8 @@ class LiteWebJarsResourceResolverTests {
 
 	@Test
 	void resolveUrlWebJarResource() {
-		String file = "underscorejs/underscore.js";
-		String expected = "underscorejs/1.8.3/underscore.js";
+		String file = "momentjs/momentjs.js";
+		String expected = "momentjs/2.29.4/momentjs.js";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
 		given(this.chain.resolveUrlPath(expected, this.locations)).willReturn(expected);
 
@@ -87,9 +89,23 @@ class LiteWebJarsResourceResolverTests {
 	}
 
 	@Test
+	void resolveUrlWebJarDirectory() {
+		String folder = "momentjs/locale/";
+		String expected = "momentjs/2.29.4/locale/";
+		given(this.chain.resolveUrlPath(folder, this.locations)).willReturn(null);
+		given(this.chain.resolveUrlPath(expected, this.locations)).willReturn(null);
+
+		String actual = this.resolver.resolveUrlPath(folder, this.locations, this.chain);
+
+		assertThat(actual).isEqualTo(expected);
+		verify(this.chain, times(1)).resolveUrlPath(folder, this.locations);
+		verify(this.chain, times(1)).resolveUrlPath(expected, this.locations);
+	}
+
+	@Test
 	void resolveUrlWebJarResourceNotFound() {
-		String file = "something/something.js";
-		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
+		String file = "momentjs/locale/unknown.js";
+		given(this.chain.resolveUrlPath(anyString(), eq(this.locations))).willReturn(null);
 
 		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
 
@@ -125,8 +141,8 @@ class LiteWebJarsResourceResolverTests {
 	@Test
 	void resolveResourceWebJar() {
 		Resource expected = mock();
-		String file = "underscorejs/underscore.js";
-		String expectedPath = "underscorejs/1.8.3/underscore.js";
+		String file = "momentjs/momentjs.js";
+		String expectedPath = "momentjs/2.29.4/momentjs.js";
 		given(this.chain.resolveResource(this.request, expectedPath, this.locations)).willReturn(expected);
 
 		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);

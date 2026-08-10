@@ -197,6 +197,10 @@ public @interface Retryable {
 	 * and {@code delay + jitter} but never below the base {@link #delay()} or
 	 * above {@link #maxDelay()}. If a multiplier is specified, it is applied
 	 * to the jitter value as well.
+	 * <p>When {@link #delay()} is {@code 0} combined with a positive jitter,
+	 * the delay never grows regardless of any configured multiplier, so the
+	 * full configured jitter is applied directly as a random delay in the range
+	 * from {@code 0} to {@code min(jitter, maxDelay)}.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
 	 * <p>The default is 0 (no jitter).

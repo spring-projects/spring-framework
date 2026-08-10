@@ -28,11 +28,12 @@ import org.jspecify.annotations.Nullable;
  * This type is used by {@link CompositeMap}.
  *
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  * @since 6.2
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-final class FilteredMap<K, V> extends AbstractMap<K, V> {
+final class FilteredMap<K, V extends @Nullable Object> extends AbstractMap<K, V> {
 
 	private final Map<K, V> delegate;
 

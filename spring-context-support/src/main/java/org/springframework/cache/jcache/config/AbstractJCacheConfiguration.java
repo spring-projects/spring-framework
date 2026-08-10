@@ -41,8 +41,7 @@ import org.springframework.context.annotation.Role;
 @Configuration(proxyBeanMethods = false)
 public abstract class AbstractJCacheConfiguration extends AbstractCachingConfiguration {
 
-	@SuppressWarnings("NullAway.Init")
-	protected Supplier<@Nullable CacheResolver> exceptionCacheResolver;
+	protected @Nullable Supplier<@Nullable CacheResolver> exceptionCacheResolver;
 
 
 	@Override

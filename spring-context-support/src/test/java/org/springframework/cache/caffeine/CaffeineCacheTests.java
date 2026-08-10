@@ -66,7 +66,7 @@ class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> 
 	}
 
 	@Test
-	void testLoadingCacheGet() {
+	void loadingCacheGet() {
 		Object value = new Object();
 		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
 				.build(key -> value));
@@ -76,7 +76,7 @@ class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> 
 	}
 
 	@Test
-	void testLoadingCacheGetWithType() {
+	void loadingCacheGetWithType() {
 		String value = "value";
 		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
 				.build(key -> value));
@@ -86,7 +86,7 @@ class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> 
 	}
 
 	@Test
-	void testLoadingCacheGetWithWrongType() {
+	void loadingCacheGetWithWrongType() {
 		String value = "value";
 		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
 				.build(key -> value));
@@ -94,7 +94,7 @@ class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> 
 	}
 
 	@Test
-	void testPutIfAbsentNullValue() {
+	void putIfAbsentNullValue() {
 		CaffeineCache cache = getCache();
 
 		Object key = new Object();

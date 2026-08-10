@@ -354,14 +354,18 @@ class OptionalNullSafetyTests {
 	}
 
 
-	record Jedi(String name) {
+	public record Jedi(String name) {
+
+		public static Jedi from(String name) {
+			return new Jedi(name);
+		}
 
 		public String salutation(String salutation) {
 			return salutation + " " + this.name;
 		}
 	}
 
-	static class Service {
+	public static class Service {
 
 		public Optional<Jedi> findJediByName(@Nullable String name) {
 			if (name == null) {

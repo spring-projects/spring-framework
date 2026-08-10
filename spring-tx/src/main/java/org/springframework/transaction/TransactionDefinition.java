@@ -211,7 +211,7 @@ public interface TransactionDefinition {
 	 * to match the values of the same constants on {@link java.sql.Connection}.
 	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
 	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
-	 * transactions. Consider switching the "validateExistingTransactions" flag to
+	 * transactions. Consider switching the "validateExistingTransaction" flag to
 	 * "true" on your transaction manager if you'd like isolation level declarations
 	 * to get rejected when participating in an existing transaction with a different
 	 * isolation level.

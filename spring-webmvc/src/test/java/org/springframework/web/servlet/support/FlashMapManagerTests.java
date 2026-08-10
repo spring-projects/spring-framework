@@ -67,7 +67,7 @@ class FlashMapManagerTests {
 	}
 
 	@Test // SPR-8779
-	public void retrieveAndUpdateMatchByOriginatingPath() {
+	void retrieveAndUpdateMatchByOriginatingPath() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/accounts");
@@ -125,7 +125,7 @@ class FlashMapManagerTests {
 	}
 
 	@Test // SPR-8798
-	public void retrieveAndUpdateMatchWithMultiValueParam() {
+	void retrieveAndUpdateMatchWithMultiValueParam() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("name", "value");
 		flashMap.addTargetRequestParam("id", "1");
@@ -255,7 +255,7 @@ class FlashMapManagerTests {
 	}
 
 	@Test // gh-23240
-	public void saveOutputFlashMapAndNormalizeEmptyTargetPath() {
+	void saveOutputFlashMapAndNormalizeEmptyTargetPath() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 
@@ -266,7 +266,7 @@ class FlashMapManagerTests {
 	}
 
 	@Test // SPR-9657, SPR-11504
-	public void saveOutputFlashMapDecodeParameters() {
+	void saveOutputFlashMapDecodeParameters() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/path");
@@ -293,7 +293,7 @@ class FlashMapManagerTests {
 	}
 
 	@Test // SPR-12569
-	public void flashAttributesWithQueryParamsWithSpace() {
+	void flashAttributesWithQueryParamsWithSpace() {
 		String encodedValue = URLEncoder.encode("1 2", StandardCharsets.UTF_8);
 
 		FlashMap flashMap = new FlashMap();
@@ -315,7 +315,7 @@ class FlashMapManagerTests {
 	}
 
 	@Test // SPR-15505
-	public void retrieveAndUpdateMatchByOriginatingPathAndQueryString() {
+	void retrieveAndUpdateMatchByOriginatingPathAndQueryString() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/accounts");

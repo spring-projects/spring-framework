@@ -18,11 +18,11 @@ package org.springframework.orm.jpa.support;
 
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -190,6 +190,13 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor,
 		PriorityOrdered, BeanFactoryAware, Serializable {
 
+	private static final @Nullable Class<? extends Annotation> PERSISTENCE_AGENT_ANNOTATION;
+
+	static {
+		PERSISTENCE_AGENT_ANNOTATION = AnnotationUtils.loadAnnotationType("jakarta.persistence.PersistenceAgent");
+	}
+
+
 	private @Nullable Object jndiEnvironment;
 
 	private boolean resourceRef = true;
@@ -199,6 +206,8 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 	private transient @Nullable Map<String, String> persistenceContexts;
 
 	private transient @Nullable Map<String, String> extendedPersistenceContexts;
+
+	private transient @Nullable Map<String, String> persistenceAgents;
 
 	private transient String defaultPersistenceUnitName = "";
 
@@ -303,6 +312,20 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 	 */
 	public void setExtendedPersistenceContexts(Map<String, String> extendedPersistenceContexts) {
 		this.extendedPersistenceContexts = extendedPersistenceContexts;
+	}
+
+	/**
+	 * Specify the persistence agent locations for EntityAgent lookups,
+	 * as a Map from persistence unit name to persistence agent JNDI name
+	 * (which needs to resolve to an EntityAgent instance).
+	 * <p>In case of no unit name specified in the annotation, the specified value
+	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
+	 * will be taken (by default, the value mapped to the empty String),
+	 * or simply the single persistence unit if there is only one.
+	 * @since 7.1
+	 */
+	public void setPersistenceAgents(@Nullable Map<String, String> persistenceAgents) {
+		this.persistenceAgents = persistenceAgents;
 	}
 
 	/**
@@ -417,7 +440,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 	}
 
 	private InjectionMetadata buildPersistenceMetadata(Class<?> clazz) {
-		if (!AnnotationUtils.isCandidateClass(clazz, Arrays.asList(PersistenceContext.class, PersistenceUnit.class))) {
+		if (!AnnotationUtils.isCandidateClass(clazz, PersistenceUnit.class)) {
 			return InjectionMetadata.EMPTY;
 		}
 
@@ -428,8 +451,9 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
-				if (field.isAnnotationPresent(PersistenceContext.class) ||
-						field.isAnnotationPresent(PersistenceUnit.class)) {
+				if (field.isAnnotationPresent(PersistenceUnit.class) ||
+						field.isAnnotationPresent(PersistenceContext.class) ||
+						(PERSISTENCE_AGENT_ANNOTATION != null && field.isAnnotationPresent(PERSISTENCE_AGENT_ANNOTATION))) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("Persistence annotations are not supported on static fields");
 					}
@@ -441,8 +465,9 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 				if (method.isBridge()) {
 					return;
 				}
-				if ((method.isAnnotationPresent(PersistenceContext.class) ||
-						method.isAnnotationPresent(PersistenceUnit.class)) &&
+				if ((method.isAnnotationPresent(PersistenceUnit.class) ||
+						method.isAnnotationPresent(PersistenceContext.class) ||
+						(PERSISTENCE_AGENT_ANNOTATION != null && method.isAnnotationPresent(PERSISTENCE_AGENT_ANNOTATION))) &&
 						method.equals(BridgeMethodResolver.getMostSpecificMethod(method, clazz))) {
 					if (Modifier.isStatic(method.getModifiers())) {
 						throw new IllegalStateException("Persistence annotations are not supported on static methods");
@@ -519,6 +544,37 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Could not obtain EntityManager [" + jndiName + "] from JNDI", ex);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Return a specified persistence context for the given unit name, as defined
+	 * through the "persistenceAgents" map.
+	 * @param unitName the name of the persistence unit
+	 * @return the corresponding EntityAgent, or {@code null} if none found
+	 * @since 7.1
+	 * @see #setPersistenceAgents
+	 */
+	private @Nullable Object getPersistenceAgent(@Nullable String unitName) {
+		Class<?> entityAgentClass = EntityManagerFactoryUtils.getEntityAgentClass();
+		if (entityAgentClass != null && this.persistenceAgents != null) {
+			String unitNameForLookup = (unitName != null ? unitName : "");
+			if (unitNameForLookup.isEmpty()) {
+				unitNameForLookup = this.defaultPersistenceUnitName;
+			}
+			String jndiName = this.persistenceAgents.get(unitNameForLookup);
+			if (jndiName == null && unitNameForLookup.isEmpty() && this.persistenceAgents.size() == 1) {
+				jndiName = this.persistenceAgents.values().iterator().next();
+			}
+			if (jndiName != null) {
+				try {
+					return lookup(jndiName, entityAgentClass);
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Could not obtain EntityAgent [" + jndiName + "] from JNDI", ex);
 				}
 			}
 		}
@@ -636,6 +692,8 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 	 */
 	private class PersistenceElement extends InjectionMetadata.InjectedElement {
 
+		private final boolean persistenceUnit;
+
 		private final String unitName;
 
 		private @Nullable PersistenceContextType type;
@@ -646,32 +704,51 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 
 		public PersistenceElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
-			PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
 			PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);
-			Class<?> resourceType = EntityManager.class;
-			if (pc != null) {
+			PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
+			Class<?> entityAgentClass = EntityManagerFactoryUtils.getEntityAgentClass();
+			Annotation pa = (PERSISTENCE_AGENT_ANNOTATION != null ?
+					ae.getAnnotation(PERSISTENCE_AGENT_ANNOTATION) : null);
+			Class<?> resourceType;
+			if (entityAgentClass != null && pa != null) {
+				if (pu != null) {
+					throw new IllegalStateException("Member may only be annotated with either " +
+							"@PersistenceAgent or @PersistenceUnit, not both: " + member);
+				}
+				resourceType = entityAgentClass;
+				this.persistenceUnit = false;
+				this.unitName = String.valueOf(AnnotationUtils.getValue(pa, "unitName"));
+				this.properties = parseProperties((PersistenceProperty[]) AnnotationUtils.getValue(pa, "properties"));
+			}
+			else if (pc != null) {
 				if (pu != null) {
 					throw new IllegalStateException("Member may only be annotated with either " +
 							"@PersistenceContext or @PersistenceUnit, not both: " + member);
 				}
-				Properties properties = null;
-				PersistenceProperty[] pps = pc.properties();
-				if (!ObjectUtils.isEmpty(pps)) {
-					properties = new Properties();
-					for (PersistenceProperty pp : pps) {
-						properties.setProperty(pp.name(), pp.value());
-					}
-				}
+				resourceType = EntityManager.class;
+				this.persistenceUnit = false;
 				this.unitName = pc.unitName();
 				this.type = pc.type();
 				this.synchronizedWithTransaction = SynchronizationType.SYNCHRONIZED.equals(pc.synchronization());
-				this.properties = properties;
+				this.properties = parseProperties(pc.properties());
 			}
 			else {
 				resourceType = EntityManagerFactory.class;
+				this.persistenceUnit = true;
 				this.unitName = pu.unitName();
 			}
 			checkResourceType(resourceType);
+		}
+
+		private static @Nullable Properties parseProperties(PersistenceProperty @Nullable [] pps) {
+			if (ObjectUtils.isEmpty(pps)) {
+				return null;
+			}
+			Properties properties = new Properties();
+			for (PersistenceProperty pp : pps) {
+				properties.setProperty(pp.name(), pp.value());
+			}
+			return properties;
 		}
 
 		/**
@@ -680,14 +757,16 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		@Override
 		protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
 			// Resolves to EntityManagerFactory or EntityManager.
-			if (this.type != null) {
+			if (this.persistenceUnit) {
+				return resolveEntityManagerFactory(requestingBeanName);
+			}
+			else if (this.type != null) {
 				return (this.type == PersistenceContextType.EXTENDED ?
 						resolveExtendedEntityManager(target, requestingBeanName) :
 						resolveEntityManager(requestingBeanName));
 			}
 			else {
-				// OK, so we need an EntityManagerFactory...
-				return resolveEntityManagerFactory(requestingBeanName);
+				return resolveEntityAgent(requestingBeanName);
 			}
 		}
 
@@ -748,6 +827,23 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 				extendedEntityManagersToClose.put(target, emp.getTargetEntityManager());
 			}
 			return em;
+		}
+
+		private Object resolveEntityAgent(@Nullable String requestingBeanName) {
+			// Obtain EntityAgent reference from JNDI?
+			Object ea = getPersistenceAgent(this.unitName);
+			if (ea == null) {
+				// No pre-built EntityManager found -> build one based on factory.
+				// Obtain EntityManagerFactory from JNDI?
+				EntityManagerFactory emf = getPersistenceUnit(this.unitName);
+				if (emf == null) {
+					// Need to search for EntityManagerFactory beans.
+					emf = findEntityManagerFactory(this.unitName, requestingBeanName);
+				}
+				// Inject a shared transactional EntityManager proxy.
+				ea = SharedEntityManagerCreator.createSharedEntityAgent(emf, this.properties);
+			}
+			return ea;
 		}
 	}
 
@@ -833,25 +929,35 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 				GeneratedMethods generatedMethods, PersistenceElement injectedElement) {
 
 			String unitName = injectedElement.unitName;
-			boolean requireEntityManager = (injectedElement.type != null);
-			if (!requireEntityManager) {
+			if (injectedElement.persistenceUnit) {
 				return CodeBlock.of(
 						"$T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
 						EntityManagerFactoryUtils.class, ListableBeanFactory.class,
 						REGISTERED_BEAN_PARAMETER, unitName);
 			}
-			String[] methodNameParts = { "get", unitName, "EntityManager" };
-			GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
-					generateGetEntityManagerMethod(method, injectedElement));
-			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
+			else if (injectedElement.type != null) {
+				if (injectedElement.type == PersistenceContextType.EXTENDED) {
+					throw new UnsupportedOperationException(
+							"PersistenceContextType.EXTENDED not supported for AOT processing");
+				}
+				String[] methodNameParts = {"get", unitName, "EntityManager"};
+				GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
+						generateGetEntityManagerMethod(method, injectedElement));
+				return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
+			}
+			else {
+				String[] methodNameParts = {"get", unitName, "EntityAgent"};
+				GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
+						generateGetEntityAgentMethod(method, injectedElement));
+				return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
+			}
 		}
 
-		@SuppressWarnings("NullAway") // Dataflow analysis limitation
 		private void generateGetEntityManagerMethod(MethodSpec.Builder method, PersistenceElement injectedElement) {
 			String unitName = injectedElement.unitName;
 			Properties properties = injectedElement.properties;
 			method.addJavadoc("Get the '$L' {@link $T}.",
-					(StringUtils.hasLength(unitName)) ? unitName : "default",
+					(StringUtils.hasLength(unitName) ? unitName : "default"),
 					EntityManager.class);
 			method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
 					javax.lang.model.element.Modifier.STATIC);
@@ -861,10 +967,8 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 					"$T entityManagerFactory = $T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
 					EntityManagerFactory.class, EntityManagerFactoryUtils.class,
 					ListableBeanFactory.class, REGISTERED_BEAN_PARAMETER, unitName);
-			boolean hasProperties = !CollectionUtils.isEmpty(properties);
-			if (hasProperties) {
-				method.addStatement("$T properties = new Properties()",
-						Properties.class);
+			if (properties != null) {
+				method.addStatement("$T properties = new Properties()", Properties.class);
 				for (String propertyName : new TreeSet<>(properties.stringPropertyNames())) {
 					method.addStatement("properties.put($S, $S)", propertyName, properties.getProperty(propertyName));
 				}
@@ -872,8 +976,37 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			method.addStatement(
 					"return $T.createSharedEntityManager(entityManagerFactory, $L, $L)",
 					SharedEntityManagerCreator.class,
-					(hasProperties) ? "properties" : null,
+					(properties != null ? "properties" : null),
 					injectedElement.synchronizedWithTransaction);
+		}
+
+		private void generateGetEntityAgentMethod(MethodSpec.Builder method, PersistenceElement injectedElement) {
+			Class<?> entityAgentClass = EntityManagerFactoryUtils.getEntityAgentClass();
+			Assert.state(entityAgentClass != null, "JPA 4.0 EntityAgent class not found");
+			String unitName = injectedElement.unitName;
+			Properties properties = injectedElement.properties;
+			method.addJavadoc("Get the '$L' {@link $T}.",
+					(StringUtils.hasLength(unitName) ? unitName : "default"),
+					entityAgentClass);
+			method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+					javax.lang.model.element.Modifier.STATIC);
+			method.returns(entityAgentClass);
+			method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+			method.addStatement(
+					"$T entityManagerFactory = $T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
+					EntityManagerFactory.class, EntityManagerFactoryUtils.class,
+					ListableBeanFactory.class, REGISTERED_BEAN_PARAMETER, unitName);
+			if (properties != null) {
+				method.addStatement("$T properties = new Properties()",
+						Properties.class);
+				for (String propertyName : new TreeSet<>(properties.stringPropertyNames())) {
+					method.addStatement("properties.put($S, $S)", propertyName, properties.getProperty(propertyName));
+				}
+			}
+			method.addStatement(
+					"return $T.createSharedEntityAgent(entityManagerFactory, $L)",
+					SharedEntityManagerCreator.class,
+					(properties != null ? "properties" : null));
 		}
 	}
 

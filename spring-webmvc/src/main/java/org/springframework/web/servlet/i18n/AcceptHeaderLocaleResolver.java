@@ -85,7 +85,7 @@ public class AcceptHeaderLocaleResolver extends AbstractLocaleResolver {
 	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
 		Locale defaultLocale = getDefaultLocale();
-		if (defaultLocale != null && request.getHeader("Accept-Language") == null) {
+		if (defaultLocale != null && !StringUtils.hasText(request.getHeader("Accept-Language"))) {
 			return defaultLocale;
 		}
 		Locale requestLocale = request.getLocale();

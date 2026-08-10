@@ -91,7 +91,7 @@ class LazyAutowiredAnnotationBeanPostProcessorTests {
 		tb.setName("tb");
 		assertThat(bean.getTestBean().getName()).isSameAs("tb");
 
-		assertThat(bean.getTestBeans() instanceof Advised).isTrue();
+		assertThat(bean.getTestBeans()).isInstanceOf(Advised.class);
 		TargetSource targetSource = ((Advised) bean.getTestBeans()).getTargetSource();
 		assertThat(targetSource.getTarget()).isSameAs(targetSource.getTarget());
 

@@ -58,14 +58,14 @@ class ComposablePointcutTests {
 
 
 	@Test
-	void testMatchAll() throws NoSuchMethodException {
+	void matchAll() throws NoSuchMethodException {
 		Pointcut pc = new ComposablePointcut();
 		assertThat(pc.getClassFilter().matches(Object.class)).isTrue();
 		assertThat(pc.getMethodMatcher().matches(Object.class.getMethod("hashCode"), Exception.class)).isTrue();
 	}
 
 	@Test
-	void testFilterByClass() {
+	void filterByClass() {
 		ComposablePointcut pc = new ComposablePointcut();
 
 		assertThat(pc.getClassFilter().matches(Object.class)).isTrue();
@@ -85,7 +85,7 @@ class ComposablePointcutTests {
 	}
 
 	@Test
-	void testUnionMethodMatcher() {
+	void unionMethodMatcher() {
 		// Matches the getAge() method in any class
 		ComposablePointcut pc = new ComposablePointcut(ClassFilter.TRUE, GET_AGE_METHOD_MATCHER);
 		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class)).isFalse();
@@ -108,7 +108,7 @@ class ComposablePointcutTests {
 	}
 
 	@Test
-	void testIntersectionMethodMatcher() {
+	void intersectionMethodMatcher() {
 		ComposablePointcut pc = new ComposablePointcut();
 		assertThat(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class)).isTrue();
 		assertThat(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
@@ -125,7 +125,7 @@ class ComposablePointcutTests {
 	}
 
 	@Test
-	void testEqualsAndHashCode() {
+	void equalsAndHashCode() {
 		ComposablePointcut pc1 = new ComposablePointcut();
 		ComposablePointcut pc2 = new ComposablePointcut();
 

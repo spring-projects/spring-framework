@@ -219,18 +219,16 @@ class MessageMethodArgumentResolverTests {
 
 	@Test // SPR-16486
 	@SuppressWarnings("removal")
-	public void resolveWithJacksonConverter() throws Exception {
+	void resolveWithJacksonConverter() throws Exception {
 		Message<String> inMessage = MessageBuilder.withPayload("{\"foo\":\"bar\"}").build();
 		MethodParameter parameter = new MethodParameter(this.method, 5);
 
 		this.resolver = new MessageMethodArgumentResolver(new MappingJackson2MessageConverter());
 		Object actual = this.resolver.resolveArgument(parameter, inMessage);
 
-		boolean condition1 = actual instanceof Message;
-		assertThat(condition1).isTrue();
+		assertThat(actual).isInstanceOf(Message.class);
 		Message<?> outMessage = (Message<?>) actual;
-		boolean condition = outMessage.getPayload() instanceof Foo;
-		assertThat(condition).isTrue();
+		assertThat(outMessage.getPayload()).isInstanceOf(Foo.class);
 		assertThat(((Foo) outMessage.getPayload()).getFoo()).isEqualTo("bar");
 	}
 

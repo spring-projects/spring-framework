@@ -401,12 +401,18 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 					changeState(this, new BodyState(), buf);
 				}
+				else {
+					changeState(this, DisposedState.INSTANCE, buf);
+				}
 			}
 			else {
 				long count = this.byteCount.addAndGet(buf.readableByteCount());
 				if (belowMaxHeaderSize(count)) {
 					this.buffers.add(buf);
 					requestBuffer();
+				}
+				else {
+					changeState(this, DisposedState.INSTANCE, buf);
 				}
 			}
 		}

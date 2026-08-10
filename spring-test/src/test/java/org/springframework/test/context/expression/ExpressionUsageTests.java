@@ -49,7 +49,7 @@ class ExpressionUsageTests {
 
 
 	@Test
-	void testSpr5906() {
+	void spr5906() {
 		// verify the property values have been evaluated as expressions
 		assertThat(props.getProperty("user.name")).isEqualTo("Dave");
 		assertThat(props.getProperty("username")).isEqualTo("Andy");
@@ -60,7 +60,7 @@ class ExpressionUsageTests {
 	}
 
 	@Test
-	void testSpr5847() {
+	void spr5847() {
 		assertThat(andy2.getName()).isEqualTo("Andy");
 		assertThat(andy.getName()).isEqualTo("Andy");
 	}

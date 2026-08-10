@@ -123,7 +123,7 @@ class JacksonJsonMessageConverterTests {
 	}
 
 	@Test  // gh-22386
-	public void fromMessageMatchingInstance() {
+	void fromMessageMatchingInstance() {
 		MyBean myBean = new MyBean();
 		JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();
 		Message<?> message = MessageBuilder.withPayload(myBean).build();
@@ -149,7 +149,7 @@ class JacksonJsonMessageConverterTests {
 	}
 
 	@Test  // SPR-16252
-	public void fromMessageToList() throws Exception {
+	void fromMessageToList() throws Exception {
 		JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();
 		String payload = "[1, 2, 3, 4, 5, 6, 7, 8, 9]";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
@@ -163,7 +163,7 @@ class JacksonJsonMessageConverterTests {
 	}
 
 	@Test  // SPR-16486
-	public void fromMessageToMessageWithPojo() throws Exception {
+	void fromMessageToMessageWithPojo() throws Exception {
 		JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();
 		String payload = "{\"string\":\"foo\"}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();

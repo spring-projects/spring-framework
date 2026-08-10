@@ -213,7 +213,7 @@
 	By default, a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
 
 	As of 5.0 this executor is also used when a controller returns a reactive type that does streaming
-	(for example, "text/event-stream" or "application/x-ndjson") for the blocking writes to the
+	(for example, "text/event-stream", "application/x-ndjson" or "application/jsonl") for the blocking writes to the
 	"jakarta.servlet.ServletOutputStream".
 
 								]]></xsd:documentation>

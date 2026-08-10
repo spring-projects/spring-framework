@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Record of an invocation of a method relevant to {@link org.springframework.aot.hint.RuntimeHints}.
@@ -181,7 +182,7 @@ public final class RecordedInvocation {
 		else {
 			Class<?> instanceType = (getInstance() instanceof Class<?> clazz) ? clazz : getInstance().getClass();
 			return "<%s> invocation of <%s> on type <%s> with arguments %s".formatted(
-					getHintType().hintClassName(), getMethodReference(), instanceType.getCanonicalName(), getArguments());
+					getHintType().hintClassName(), getMethodReference(), ClassUtils.getCanonicalName(instanceType), getArguments());
 		}
 	}
 

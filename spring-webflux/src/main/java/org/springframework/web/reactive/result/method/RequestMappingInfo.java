@@ -346,9 +346,15 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			ConsumesRequestCondition consumes, ProducesRequestCondition produces,
 			VersionRequestCondition version, RequestConditionHolder custom) {
 
-		return patterns.hashCode() * 31 + methods.hashCode() + params.hashCode() +
-				headers.hashCode() + consumes.hashCode() + produces.hashCode() +
-				version.hashCode() + custom.hashCode();
+		int result = patterns.hashCode();
+		result = 31 * result + methods.hashCode();
+		result = 31 * result + params.hashCode();
+		result = 31 * result + headers.hashCode();
+		result = 31 * result + consumes.hashCode();
+		result = 31 * result + produces.hashCode();
+		result = 31 * result + version.hashCode();
+		result = 31 * result + custom.hashCode();
+		return result;
 	}
 
 	@Override

@@ -19,6 +19,8 @@ package org.springframework.transaction.jta;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,6 +54,8 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -139,6 +143,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			"java:comp/TransactionSynchronizationRegistry";
 
 
+	// JTA 2.1 UserTransaction#begin(boolean) method available?
+	private static final @Nullable Method beginWithReadOnlyMethod =
+			ClassUtils.getMethodIfAvailable(UserTransaction.class, "begin", boolean.class);
+
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
 
 	private transient @Nullable UserTransaction userTransaction;
@@ -164,6 +172,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	private boolean autodetectTransactionSynchronizationRegistry = true;
 
 	private boolean allowCustomIsolationLevels = false;
+
+	private boolean enforceReadOnly = false;
 
 
 	/**
@@ -416,6 +426,20 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public void setAllowCustomIsolationLevels(boolean allowCustomIsolationLevels) {
 		this.allowCustomIsolationLevels = allowCustomIsolationLevels;
+	}
+
+	/**
+	 * Set whether a read-only transaction should be exposed to the JTA transaction manager,
+	 * enforcing strict read-only access to resources as per the JTA 2.1 specification.
+	 * <p>This requires JTA 2.1. The default is "false". By default, the read-only status
+	 * of a Spring transaction is just exposed to transaction synchronization (for example,
+	 * suppressing a Hibernate flush), while the JTA transaction itself will regularly commit.
+	 * Turn this flag on if your transactional XA resources are known to support the JTA 2.1
+	 * {@code ExtendedXAResource} SPI, operating in a read-only mode with eventual rollback.
+	 * @since 7.1
+	 */
+	public void setEnforceReadOnly(boolean enforceReadOnly) {
+		this.enforceReadOnly = enforceReadOnly;
 	}
 
 
@@ -858,7 +882,29 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		applyIsolationLevel(txObject, definition.getIsolationLevel());
 		int timeout = determineTimeout(definition);
 		applyTimeout(txObject, timeout);
-		txObject.getUserTransaction().begin();
+
+		if (this.enforceReadOnly && definition.isReadOnly()) {
+			if (beginWithReadOnlyMethod == null) {
+				throw new NotSupportedException("enforceReadOnly requires JTA 2.1");
+			}
+			try {
+				beginWithReadOnlyMethod.invoke(txObject.getUserTransaction(), true);
+			}
+			catch (Exception ex) {
+				if (ex instanceof InvocationTargetException ite) {
+					if (ite.getTargetException() instanceof NotSupportedException nse) {
+						throw nse;
+					}
+					if (ite.getTargetException() instanceof SystemException se) {
+						throw se;
+					}
+				}
+				ReflectionUtils.handleReflectionException(ex);
+			}
+		}
+		else {
+			txObject.getUserTransaction().begin();
+		}
 	}
 
 	/**
@@ -1007,7 +1053,14 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 				}
 				throw new UnexpectedRollbackException("JTA transaction already rolled back (probably due to a timeout)");
 			}
-			txObject.getUserTransaction().commit();
+
+			if (this.enforceReadOnly && status.isReadOnly()) {
+				// JTA 2.1 isReadOnly enforces a rollback call
+				txObject.getUserTransaction().rollback();
+			}
+			else {
+				txObject.getUserTransaction().commit();
+			}
 		}
 		catch (RollbackException ex) {
 			throw new UnexpectedRollbackException(

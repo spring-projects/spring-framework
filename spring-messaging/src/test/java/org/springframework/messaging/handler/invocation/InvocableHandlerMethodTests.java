@@ -146,7 +146,7 @@ class InvocableHandlerMethodTests {
 	}
 
 	@Test  // Based on SPR-13917 (spring-web)
-	public void invocationErrorMessage() {
+	void invocationErrorMessage() {
 		this.resolvers.addResolver(new StubArgumentResolver(double.class));
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0.0)).method();
 		assertThatIllegalStateException().isThrownBy(() ->

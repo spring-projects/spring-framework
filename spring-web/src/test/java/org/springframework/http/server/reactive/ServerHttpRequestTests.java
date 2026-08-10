@@ -72,7 +72,7 @@ class ServerHttpRequestTests {
 	}
 
 	@Test  // SPR-15140
-	public void queryParamsWithEncodedValue() throws Exception {
+	void queryParamsWithEncodedValue() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a=%20%2B+%C3%A0").getQueryParams();
 		assertThat(params).hasSize(1);
 		assertThat(params.get("a")).isEqualTo(Collections.singletonList(" + \u00e0"));
@@ -121,7 +121,7 @@ class ServerHttpRequestTests {
 	}
 
 	@Test  // SPR-16434
-	public void mutatePathWithEncodedQueryParams() throws Exception {
+	void mutatePathWithEncodedQueryParams() throws Exception {
 		ServerHttpRequest request = createRequest("/path?name=%E6%89%8E%E6%A0%B9");
 		request = request.mutate().path("/mutatedPath").build();
 
@@ -204,7 +204,7 @@ class ServerHttpRequestTests {
 	}
 
 	@Test // gh-26304
-	public void mutateDoesNotPreventAccessToNativeRequest() throws Exception {
+	void mutateDoesNotPreventAccessToNativeRequest() throws Exception {
 		ServerHttpRequest request = createRequest("/path");
 		request = request.mutate().header("key", "value").build();
 

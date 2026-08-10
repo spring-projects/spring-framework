@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base class for {@link MergedAnnotation} implementations.
@@ -215,7 +216,7 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 		T value = getAttributeValue(attributeName, type);
 		if (value == null) {
 			throw new NoSuchElementException("No attribute named '" + attributeName +
-					"' present in merged annotation " + getType().getName());
+					"' present in merged annotation " + ClassUtils.getCanonicalName(getType()));
 		}
 		return value;
 	}

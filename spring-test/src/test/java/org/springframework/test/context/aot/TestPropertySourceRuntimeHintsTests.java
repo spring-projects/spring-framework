@@ -47,7 +47,7 @@ class TestPropertySourceRuntimeHintsTests {
 
 
 	@Test
-	void testPropertySourceWithClassPathStarLocationPattern() {
+	void propertySourceWithClassPathStarLocationPattern() {
 		Class<?> testClass = ClassPathStarLocationPatternTestCase.class;
 
 		// We can effectively only assert that an exception is not thrown; however,
@@ -63,7 +63,7 @@ class TestPropertySourceRuntimeHintsTests {
 	}
 
 	@Test
-	void testPropertySourceWithWildcardLocationPattern() {
+	void propertySourceWithWildcardLocationPattern() {
 		Class<?> testClass = WildcardLocationPatternTestCase.class;
 
 		// We can effectively only assert that an exception is not thrown; however,

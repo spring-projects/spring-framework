@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ServletRequestDataBinderTests {
 
 	@Test
-	void testBindingWithNestedObjectCreation() {
+	void bindingWithNestedObjectCreation() {
 		TestBean tb = new TestBean();
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "person");
@@ -61,7 +61,7 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldPrefixCausesFieldReset() {
+	void fieldPrefixCausesFieldReset() {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
 
@@ -77,7 +77,7 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() {
+	void fieldPrefixCausesFieldResetWithIgnoreUnknownFields() {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
 		binder.setIgnoreUnknownFields(false);
@@ -94,7 +94,7 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldDefault() {
+	void fieldDefault() {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
 
@@ -110,7 +110,7 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldDefaultPreemptsFieldMarker() {
+	void fieldDefaultPreemptsFieldMarker() {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
 
@@ -131,7 +131,7 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldDefaultNonBoolean() {
+	void fieldDefaultNonBoolean() {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
 
@@ -147,7 +147,7 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testWithCommaSeparatedStringArray() {
+	void withCommaSeparatedStringArray() {
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
 
@@ -165,7 +165,7 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testBindingWithNestedObjectCreationAndWrongOrder() {
+	void bindingWithNestedObjectCreationAndWrongOrder() {
 		TestBean tb = new TestBean();
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "person");
@@ -186,7 +186,7 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testNoPrefix() {
+	void noPrefix() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("forname", "Tony");
 		request.addParameter("surname", "Blair");
@@ -197,15 +197,14 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testPrefix() {
+	void prefix() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("test_forname", "Tony");
 		request.addParameter("test_surname", "Blair");
 		request.addParameter("test_age", "" + 50);
 
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		boolean condition = !pvs.contains("forname");
-		assertThat(condition).as("Didn't find normal when given prefix").isTrue();
+		assertThat(pvs.contains("forname")).as("Didn't find normal when given prefix").isFalse();
 		assertThat(pvs.contains("test_forname")).as("Did treat prefix as normal when not given prefix").isTrue();
 
 		pvs = new ServletRequestParameterPropertyValues(request, "test");
@@ -213,22 +212,21 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
-	void testNoParameters() {
+	void noParameters() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
 		assertThat(pvs.getPropertyValues().length).as("Found no parameters").isEqualTo(0);
 	}
 
 	@Test
-	void testMultipleValuesForParameter() {
+	void multipleValuesForParameter() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		String[] original = new String[] {"Tony", "Rod"};
 		request.addParameter("forname", original);
 
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
 		assertThat(pvs.getPropertyValues().length).as("Found 1 parameter").isEqualTo(1);
-		boolean condition = pvs.getPropertyValue("forname").getValue() instanceof String[];
-		assertThat(condition).as("Found array value").isTrue();
+		assertThat(pvs.getPropertyValue("forname").getValue()).as("Found array value").isInstanceOf(String[].class);
 		String[] values = (String[]) pvs.getPropertyValue("forname").getValue();
 		assertThat(Arrays.asList(original)).as("Correct values").isEqualTo(Arrays.asList(values));
 	}
@@ -241,8 +239,7 @@ class ServletRequestDataBinderTests {
 		assertThat(pvs.contains("forname")).as("Contains forname").isTrue();
 		assertThat(pvs.contains("surname")).as("Contains surname").isTrue();
 		assertThat(pvs.contains("age")).as("Contains age").isTrue();
-		boolean condition1 = !pvs.contains("tory");
-		assertThat(condition1).as("Doesn't contain tory").isTrue();
+		assertThat(pvs.contains("tory")).as("Doesn't contain tory").isFalse();
 
 		PropertyValue[] ps = pvs.getPropertyValues();
 		Map<String, String> m = new HashMap<>();
@@ -252,9 +249,8 @@ class ServletRequestDataBinderTests {
 		for (PropertyValue element : ps) {
 			Object val = m.get(element.getName());
 			assertThat(val).as("Can't have unexpected value").isNotNull();
-			boolean condition = val instanceof String;
-			assertThat(condition).as("Val i string").isTrue();
-			assertThat(val.equals(element.getValue())).as("val matches expected").isTrue();
+			assertThat(val).as("Val i string").isInstanceOf(String.class);
+			assertThat(val).as("val matches expected").isEqualTo(element.getValue());
 			m.remove(element.getName());
 		}
 		assertThat(m.size()).as("Map size is 0").isEqualTo(0);

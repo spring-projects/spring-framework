@@ -209,7 +209,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 * @since 5.3
 	 */
 	@Test
-	public void buildMergedConfigForNestedTestClassWithInheritedConfig() {
+	void buildMergedConfigForNestedTestClassWithInheritedConfig() {
 		Class<?> testClass = OuterTestCase.NestedTestCaseWithInheritedConfig.class;
 		Class<?>[] expectedClasses = array(FooConfig.class);
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
@@ -222,7 +222,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 * @since 5.3
 	 */
 	@Test
-	public void buildMergedConfigForNestedTestClassWithMergedInheritedConfig() {
+	void buildMergedConfigForNestedTestClassWithMergedInheritedConfig() {
 		Class<?> testClass = OuterTestCase.NestedTestCaseWithMergedInheritedConfig.class;
 		Class<?>[] expectedClasses = array(FooConfig.class, BarConfig.class);
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
@@ -235,7 +235,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 * @since 5.3
 	 */
 	@Test
-	public void buildMergedConfigForNestedTestClassWithOverriddenConfig() {
+	void buildMergedConfigForNestedTestClassWithOverriddenConfig() {
 		Class<?> testClass = OuterTestCase.NestedTestCaseWithOverriddenConfig.class;
 		Class<?>[] expectedClasses = array(BarConfig.class);
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
@@ -248,7 +248,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 * @since 5.3
 	 */
 	@Test
-	public void buildMergedConfigForDoubleNestedTestClassWithInheritedOverriddenConfig() {
+	void buildMergedConfigForDoubleNestedTestClassWithInheritedOverriddenConfig() {
 		Class<?> testClass = OuterTestCase.NestedTestCaseWithOverriddenConfig.DoubleNestedTestCaseWithInheritedOverriddenConfig.class;
 		Class<?>[] expectedClasses = array(BarConfig.class);
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
@@ -261,7 +261,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 * @since 5.3
 	 */
 	@Test
-	public void buildMergedConfigForContextHierarchy() {
+	void buildMergedConfigForContextHierarchy() {
 		Class<?> testClass = ContextHierarchyOuterTestCase.class;
 		Class<?>[] expectedClasses = array(BarConfig.class);
 
@@ -280,7 +280,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 * @since 5.3
 	 */
 	@Test
-	public void buildMergedConfigForNestedTestClassWithInheritedConfigForContextHierarchy() {
+	void buildMergedConfigForNestedTestClassWithInheritedConfigForContextHierarchy() {
 		Class<?> enclosingTestClass = ContextHierarchyOuterTestCase.class;
 		Class<?> testClass = ContextHierarchyOuterTestCase.NestedTestCaseWithInheritedConfig.class;
 		Class<?>[] expectedClasses = array(BarConfig.class);
@@ -300,7 +300,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 * @since 5.3
 	 */
 	@Test
-	public void buildMergedConfigForNestedTestClassWithMergedInheritedConfigForContextHierarchy() {
+	void buildMergedConfigForNestedTestClassWithMergedInheritedConfigForContextHierarchy() {
 		Class<?> testClass = ContextHierarchyOuterTestCase.NestedTestCaseWithMergedInheritedConfig.class;
 		Class<?>[] expectedClasses = array(BarConfig.class, BazConfig.class);
 
@@ -319,7 +319,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 * @since 5.3
 	 */
 	@Test
-	public void buildMergedConfigForNestedTestClassWithOverriddenConfigForContextHierarchy() {
+	void buildMergedConfigForNestedTestClassWithOverriddenConfigForContextHierarchy() {
 		Class<?> testClass = ContextHierarchyOuterTestCase.NestedTestCaseWithOverriddenConfig.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 		assertThat(mergedConfig).as("merged config").isNotNull();

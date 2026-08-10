@@ -52,13 +52,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class MultipartControllerTests {
+class MultipartControllerTests {
 
 	private final WebTestClient testClient = MockMvcWebTestClient.bindToController(new MultipartController()).build();
 
 
 	@Test
-	public void multipartRequestWithSingleFile() {
+	void multipartRequestWithSingleFile() {
 
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
@@ -82,14 +82,14 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithSingleFileNotPresent() {
+	void multipartRequestWithSingleFileNotPresent() {
 		testClient.post().uri("/multipartfile")
 				.exchange()
 				.expectStatus().isFound();
 	}
 
 	@Test
-	public void multipartRequestWithFileArray() {
+	void multipartRequestWithFileArray() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -106,14 +106,14 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithFileArrayNoMultipart() {
+	void multipartRequestWithFileArrayNoMultipart() {
 		testClient.post().uri("/multipartfilearray")
 				.exchange()
 				.expectStatus().isFound();
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFile() {
+	void multipartRequestWithOptionalFile() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -129,7 +129,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileNotPresent() {
+	void multipartRequestWithOptionalFileNotPresent() {
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -143,7 +143,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileArray() {
+	void multipartRequestWithOptionalFileArray() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -160,7 +160,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileArrayNotPresent() {
+	void multipartRequestWithOptionalFileArrayNotPresent() {
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -174,7 +174,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileList() {
+	void multipartRequestWithOptionalFileList() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -191,7 +191,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithOptionalFileListNotPresent() {
+	void multipartRequestWithOptionalFileListNotPresent() {
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -205,7 +205,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWithServletParts() {
+	void multipartRequestWithServletParts() {
 		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
@@ -221,7 +221,7 @@ public class MultipartControllerTests {
 	}
 
 	@Test
-	public void multipartRequestWrapped() {
+	void multipartRequestWrapped() {
 		Map<String, String> json = Collections.singletonMap("name", "yeeeah");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();

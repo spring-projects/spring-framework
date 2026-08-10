@@ -35,27 +35,27 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 class CustomCollectionEditorTests {
 
 	@Test
-	void testCtorWithNullCollectionType() {
+	void ctorWithNullCollectionType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new CustomCollectionEditor(null));
 	}
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void testCtorWithNonCollectionType() {
+	void ctorWithNonCollectionType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new CustomCollectionEditor((Class) String.class));
 	}
 
 	@Test
-	void testWithCollectionTypeThatDoesNotExposeAPublicNoArgCtor() {
+	void withCollectionTypeThatDoesNotExposeAPublicNoArgCtor() {
 		CustomCollectionEditor editor = new CustomCollectionEditor(CollectionTypeWithNoNoArgCtor.class);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setValue("1"));
 	}
 
 	@Test
-	void testSunnyDaySetValue() {
+	void sunnyDaySetValue() {
 		CustomCollectionEditor editor = new CustomCollectionEditor(ArrayList.class);
 		editor.setValue(new int[] {0, 1, 2});
 		Object value = editor.getValue();
@@ -65,7 +65,7 @@ class CustomCollectionEditorTests {
 	}
 
 	@Test
-	void testWhenTargetTypeIsExactlyTheCollectionInterfaceUsesFallbackCollectionType() {
+	void whenTargetTypeIsExactlyTheCollectionInterfaceUsesFallbackCollectionType() {
 		CustomCollectionEditor editor = new CustomCollectionEditor(Collection.class);
 		editor.setValue("0, 1, 2");
 		Collection<?> value = (Collection<?>) editor.getValue();
@@ -75,7 +75,7 @@ class CustomCollectionEditorTests {
 	}
 
 	@Test
-	void testSunnyDaySetAsTextYieldsSingleValue() {
+	void sunnyDaySetAsTextYieldsSingleValue() {
 		CustomCollectionEditor editor = new CustomCollectionEditor(ArrayList.class);
 		editor.setValue("0, 1, 2");
 		Object value = editor.getValue();

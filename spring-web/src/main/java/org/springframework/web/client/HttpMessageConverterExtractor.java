@@ -43,7 +43,10 @@ import org.springframework.util.FileCopyUtils;
  * @since 3.0
  * @param <T> the data type
  * @see RestTemplate
+ * @deprecated as of 7.1 with no replacement.
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 	private final Type responseType;

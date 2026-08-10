@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MethodInvocationTests {
 
 	@Test
-	void testValidInvocation() throws Throwable {
+	void validInvocation() throws Throwable {
 		Method method = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
 		Object returnValue = new Object();
@@ -49,7 +49,7 @@ class MethodInvocationTests {
 	 * toString on target can cause failure.
 	 */
 	@Test
-	void testToStringDoesntHitTarget() throws Throwable {
+	void toStringDoesntHitTarget() throws Throwable {
 		Object target = new TestBean() {
 			@Override
 			public String toString() {

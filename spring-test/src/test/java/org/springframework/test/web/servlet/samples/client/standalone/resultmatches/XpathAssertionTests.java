@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -53,13 +54,14 @@ import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
  *
  * @author Rossen Stoyanchev
  */
-public class XpathAssertionTests {
+class XpathAssertionTests {
 
 	private static final Map<String, String> musicNamespace =
 			Collections.singletonMap("ns", "https://example.org/music/people");
 
 	private final WebTestClient testClient =
 			MockMvcWebTestClient.bindToController(new MusicController())
+					.messageConverters(new Jaxb2RootElementHttpMessageConverter())
 					.alwaysExpect(status().isOk())
 					.alwaysExpect(content().contentType(MediaType.parseMediaType("application/xml;charset=UTF-8")))
 					.configureClient()
@@ -68,7 +70,7 @@ public class XpathAssertionTests {
 
 
 	@Test
-	public void testExists() {
+	void exists() {
 		String composer = "/ns:people/composers/composer[%s]";
 		String performer = "/ns:people/performers/performer[%s]";
 
@@ -85,7 +87,7 @@ public class XpathAssertionTests {
 	}
 
 	@Test
-	public void testDoesNotExist() {
+	void doesNotExist() {
 		String composer = "/ns:people/composers/composer[%s]";
 		String performer = "/ns:people/performers/performer[%s]";
 
@@ -99,7 +101,7 @@ public class XpathAssertionTests {
 	}
 
 	@Test
-	public void testString() {
+	void string() {
 
 		String composerName = "/ns:people/composers/composer[%s]/name";
 		String performerName = "/ns:people/performers/performer[%s]/name";
@@ -119,7 +121,7 @@ public class XpathAssertionTests {
 	}
 
 	@Test
-	public void testNumber() {
+	void number() {
 		String expression = "/ns:people/composers/composer[%s]/someDouble";
 
 		testClient.get().uri("/music/people")
@@ -134,7 +136,7 @@ public class XpathAssertionTests {
 	}
 
 	@Test
-	public void testBoolean() {
+	void booleanCase() {
 		String expression = "/ns:people/performers/performer[%s]/someBoolean";
 
 		testClient.get().uri("/music/people")
@@ -145,7 +147,7 @@ public class XpathAssertionTests {
 	}
 
 	@Test
-	public void testNodeCount() {
+	void nodeCount() {
 		testClient.get().uri("/music/people")
 				.exchange()
 				.expectBody()
@@ -156,7 +158,7 @@ public class XpathAssertionTests {
 	}
 
 	@Test
-	public void testFeedWithLinefeedChars() {
+	void feedWithLinefeedChars() {
 		MockMvcWebTestClient.bindToController(new BlogFeedController()).build()
 				.get().uri("/blog.atom")
 				.accept(MediaType.APPLICATION_ATOM_XML)
@@ -230,7 +232,7 @@ public class XpathAssertionTests {
 					<feed xmlns="http://www.w3.org/2005/Atom">
 						<title>Test Feed</title>
 						<icon>https://www.example.com/favicon.ico</icon>
-					</feed>""".replaceAll("\n", "\r\n");
+					</feed>""".replace("\n", "\r\n");
 		}
 	}
 

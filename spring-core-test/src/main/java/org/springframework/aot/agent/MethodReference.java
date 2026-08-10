@@ -20,6 +20,8 @@ import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.ClassUtils;
+
 /**
  * Reference to a Java method, identified by its owner class and the method name.
  *
@@ -43,7 +45,7 @@ public final class MethodReference {
 	}
 
 	public static MethodReference of(Class<?> klass, String methodName) {
-		return new MethodReference(klass.getCanonicalName(), methodName);
+		return new MethodReference(ClassUtils.getCanonicalName(klass), methodName);
 	}
 
 	/**

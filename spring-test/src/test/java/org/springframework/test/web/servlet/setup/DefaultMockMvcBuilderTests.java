@@ -39,19 +39,19 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  * @author Sam Brannen
  * @author Stephane Nicoll
  */
-public class DefaultMockMvcBuilderTests {
+class DefaultMockMvcBuilderTests {
 
 	private final MockServletContext servletContext = new MockServletContext();
 
 	@Test
-	public void webAppContextSetupWithNullWac() {
+	void webAppContextSetupWithNullWac() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				webAppContextSetup(null))
 			.withMessage("WebApplicationContext is required");
 	}
 
 	@Test
-	public void webAppContextSetupWithNullServletContext() {
+	void webAppContextSetupWithNullServletContext() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				webAppContextSetup(new StubWebApplicationContext(null)))
 			.withMessage("WebApplicationContext must have a ServletContext");
@@ -61,7 +61,7 @@ public class DefaultMockMvcBuilderTests {
 	 * See SPR-12553 and SPR-13075.
 	 */
 	@Test
-	public void rootWacServletContainerAttributePreviouslySet() {
+	void rootWacServletContainerAttributePreviouslySet() {
 		StubWebApplicationContext child = new StubWebApplicationContext(this.servletContext);
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, child);
 
@@ -73,7 +73,7 @@ public class DefaultMockMvcBuilderTests {
 	 * See SPR-12553 and SPR-13075.
 	 */
 	@Test
-	public void rootWacServletContainerAttributePreviouslySetWithContextHierarchy() {
+	void rootWacServletContainerAttributePreviouslySetWithContextHierarchy() {
 		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
 
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, root);
@@ -90,7 +90,7 @@ public class DefaultMockMvcBuilderTests {
 	 * See SPR-12553 and SPR-13075.
 	 */
 	@Test
-	public void rootWacServletContainerAttributeNotPreviouslySet() {
+	void rootWacServletContainerAttributeNotPreviouslySet() {
 		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
 		DefaultMockMvcBuilder builder = webAppContextSetup(root);
 		WebApplicationContext wac = builder.initWebAppContext();
@@ -102,7 +102,7 @@ public class DefaultMockMvcBuilderTests {
 	 * See SPR-12553 and SPR-13075.
 	 */
 	@Test
-	public void rootWacServletContainerAttributeNotPreviouslySetWithContextHierarchy() {
+	void rootWacServletContainerAttributeNotPreviouslySetWithContextHierarchy() {
 		StaticApplicationContext ear = new StaticApplicationContext();
 		StaticWebApplicationContext root = new StaticWebApplicationContext();
 		root.setParent(ear);
@@ -124,7 +124,7 @@ public class DefaultMockMvcBuilderTests {
 	 * See /SPR-14277
 	 */
 	@Test
-	public void dispatcherServletCustomizer() {
+	void dispatcherServletCustomizer() {
 		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
 		DefaultMockMvcBuilder builder = webAppContextSetup(root);
 		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("test-id"));
@@ -136,7 +136,7 @@ public class DefaultMockMvcBuilderTests {
 	}
 
 	@Test
-	public void dispatcherServletCustomizerProcessedInOrder() {
+	void dispatcherServletCustomizerProcessedInOrder() {
 		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
 		DefaultMockMvcBuilder builder = webAppContextSetup(root);
 		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("test-id"));

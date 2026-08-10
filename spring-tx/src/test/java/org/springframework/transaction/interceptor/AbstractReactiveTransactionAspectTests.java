@@ -387,7 +387,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	}
 
 
-	public class DefaultTestBean implements TestBean {
+	public static class DefaultTestBean implements TestBean {
 
 		private String name;
 

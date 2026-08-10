@@ -123,7 +123,7 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test  // gh-22386
-	public void fromMessageMatchingInstance() {
+	void fromMessageMatchingInstance() {
 		MyBean myBean = new MyBean();
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		Message<?> message = MessageBuilder.withPayload(myBean).build();
@@ -149,7 +149,7 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test  // SPR-16252
-	public void fromMessageToList() throws Exception {
+	void fromMessageToList() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "[1, 2, 3, 4, 5, 6, 7, 8, 9]";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
@@ -163,7 +163,7 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test  // SPR-16486
-	public void fromMessageToMessageWithPojo() throws Exception {
+	void fromMessageToMessageWithPojo() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{\"string\":\"foo\"}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();

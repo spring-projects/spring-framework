@@ -17,10 +17,12 @@
 package org.springframework.test.context;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
@@ -29,7 +31,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotationCollectors;
-import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
@@ -571,14 +572,22 @@ public abstract class TestContextAnnotationUtils {
 		 * that are present or meta-present on the {@linkplain #getRootDeclaringClass()
 		 * root declaring class} of this descriptor or on any interfaces that the
 		 * root declaring class implements.
+		 * <p>Annotations are returned in the order they are discovered: annotations
+		 * on the root declaring class appear first, followed by annotations on
+		 * implemented interfaces in the order they are declared in the
+		 * {@code implements} clause.
 		 * @return the set of all merged, synthesized {@code Annotations} found,
 		 * or an empty set if none were found
 		 */
 		public Set<T> findAllLocalMergedAnnotations() {
-			SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
-			return MergedAnnotations.from(getRootDeclaringClass(), searchStrategy, RepeatableContainers.none())
-					.stream(getAnnotationType())
-					.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
+			Class<T> annotationType = getAnnotationType();
+			Stream<MergedAnnotation<T>> classAnnotations =
+					MergedAnnotations.from(this.rootDeclaringClass, SearchStrategy.DIRECT, RepeatableContainers.none())
+							.stream(annotationType);
+			Stream<MergedAnnotation<T>> interfaceAnnotations = Arrays.stream(this.rootDeclaringClass.getInterfaces())
+					.flatMap(ifc -> MergedAnnotations.from(ifc, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
+							.stream(annotationType));
+			return Stream.concat(classAnnotations, interfaceAnnotations)
 					.collect(MergedAnnotationCollectors.toAnnotationSet());
 		}
 

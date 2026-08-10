@@ -141,13 +141,13 @@ public class TestBeanInheritanceIntegrationTests {
 		}
 
 		@Test  // gh-34194, gh-34204
-		void testBeanInSubclassOverridesTestBeanInSuperclass() {
+		void beanInSubclassOverridesTestBeanInSuperclass() {
 			assertThat(ctx.getBean("enigmaBean")).as("applicationContext").hasToString("enigma in subclass");
 			assertThat(this.enigmaBean.value()).as("injection point").isEqualTo("enigma in subclass");
 		}
 
 		@Test  // gh-34194, gh-34204
-		void testBeanInNestedClassOverridesTestBeanInEnclosingClass() {
+		void beanInNestedClassOverridesTestBeanInEnclosingClass() {
 			assertThat(ctx.getBean("puzzleBean")).as("applicationContext").hasToString("puzzle in nested class");
 			assertThat(this.puzzleBean.value()).as("injection point").isEqualTo("puzzle in nested class");
 		}

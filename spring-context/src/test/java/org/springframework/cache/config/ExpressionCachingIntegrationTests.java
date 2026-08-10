@@ -35,7 +35,7 @@ class ExpressionCachingIntegrationTests {
 
 	@Test  // SPR-11692
 	@SuppressWarnings("unchecked")
-	public void expressionIsCacheBasedOnActualMethod() {
+	void expressionIsCacheBasedOnActualMethod() {
 		ConfigurableApplicationContext context =
 				new AnnotationConfigApplicationContext(SharedConfig.class, Spr11692Config.class);
 

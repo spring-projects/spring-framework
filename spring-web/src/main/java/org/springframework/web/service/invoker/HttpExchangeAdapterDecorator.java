@@ -39,7 +39,7 @@ public class HttpExchangeAdapterDecorator implements HttpExchangeAdapter {
 
 
 	/**
-	 * Return the wrapped delgate {@code HttpExchangeAdapter}.
+	 * Return the wrapped delegate {@code HttpExchangeAdapter}.
 	 */
 	public HttpExchangeAdapter getHttpExchangeAdapter() {
 		return this.delegate;

@@ -41,6 +41,10 @@ import org.springframework.util.ObjectUtils;
  * {@link jakarta.jms.BytesMessage}, a Map to a {@link jakarta.jms.MapMessage}, and
  * a Serializable object to a {@link jakarta.jms.ObjectMessage} (or vice versa).
  *
+ * <p><b>Note that this converter must only be used against trusted broker setups,
+ * with trusted packages for {@code ObjectMessage} deserialization to be configured
+ * at the broker level (for example: in the ActiveMQ setup) if necessary.</b>
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.1

@@ -823,7 +823,7 @@ class HttpEntityMethodProcessorMockTests {
 		}
 		if (lastModified != -1) {
 			assertThat(servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED)).hasSize(1);
-			assertThat((servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000)).isEqualTo((lastModified / 1000));
+			assertThat(servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000).isEqualTo((lastModified / 1000));
 		}
 	}
 

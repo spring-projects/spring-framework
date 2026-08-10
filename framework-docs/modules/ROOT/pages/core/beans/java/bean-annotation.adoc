@@ -4,10 +4,10 @@
 `@Bean` is a method-level annotation and a direct analog of the XML `<bean/>` element.
 The annotation supports some of the attributes offered by `<bean/>`, such as:
 
+* xref:core/beans/definition.adoc#beans-beanname[name]
 * xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[init-method]
 * xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[destroy-method]
 * xref:core/beans/dependencies/factory-autowire.adoc[autowiring]
-* `name`.
 
 You can use the `@Bean` annotation in a `@Configuration`-annotated or in a
 `@Component`-annotated class.
@@ -17,9 +17,10 @@ You can use the `@Bean` annotation in a `@Configuration`-annotated or in a
 == Declaring a Bean
 
 To declare a bean, you can annotate a method with the `@Bean` annotation. You use this
-method to register a bean definition within an `ApplicationContext` of the type
-specified as the method's return value. By default, the bean name is the same as
-the method name. The following example shows a `@Bean` method declaration:
+method to register a bean definition within an `ApplicationContext` of the type specified
+by the method's return type. By default, the bean name is the same as the method name
+(unless a different xref:#beans-java-customizing-bean-naming[bean name generator] is
+configured). The following example shows a `@Bean` method declaration:
 
 [tabs]
 ======
@@ -126,7 +127,7 @@ Kotlin::
 ----
 ======
 
-However, this limits the visibility for advance type prediction to the specified
+However, this limits the visibility for advanced type prediction to the specified
 interface type (`TransferService`). Then, with the full type (`TransferServiceImpl`)
 known to the container only once the affected singleton bean has been instantiated.
 Non-lazy singleton beans get instantiated according to their declaration order,
@@ -473,8 +474,15 @@ Kotlin::
 == Customizing Bean Naming
 
 By default, configuration classes use a `@Bean` method's name as the name of the
-resulting bean. This functionality can be overridden, however, with the `name` attribute,
-as the following example shows:
+resulting bean. However, as of Spring Framework 7.0, you can change this default strategy
+by configuring a custom
+{spring-framework-api}/context/annotation/ConfigurationBeanNameGenerator.html[`ConfigurationBeanNameGenerator`]
+when bootstrapping the context or configuring component scanning. For example,
+{spring-framework-api}/context/annotation/FullyQualifiedConfigurationBeanNameGenerator.html[`FullyQualifiedConfigurationBeanNameGenerator`]
+can be used to generate fully-qualified default bean names for `@Bean` methods without an
+explicit `name` attribute. For individual `@Bean` methods, the default or
+generator-derived name can be overridden with the `name` attribute, as the following
+example shows:
 
 [tabs]
 ======
@@ -505,6 +513,7 @@ Kotlin::
 ----
 ======
 
+NOTE: `@Bean("myThing")` is equivalent to `@Bean(name = "myThing")`.
 
 [[beans-java-bean-aliasing]]
 == Bean Aliasing

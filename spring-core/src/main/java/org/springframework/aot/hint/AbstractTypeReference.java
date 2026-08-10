@@ -21,7 +21,7 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Base {@link TypeReference} implementation that ensures consistent behaviour
+ * Base {@link TypeReference} implementation that ensures consistent behavior
  * for {@code equals()}, {@code hashCode()}, and {@code toString()} based on
  * the {@linkplain #getCanonicalName() canonical name}.
  *

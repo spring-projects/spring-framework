@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests for API versioning.
  * @author Rossen Stoyanchev
  */
-public class RequestMappingVersionHandlerMethodTests {
+class RequestMappingVersionHandlerMethodTests {
 
 	private DispatcherServlet dispatcherServlet;
 

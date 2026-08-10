@@ -54,7 +54,7 @@ class MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanProducedByFacto
 
 
 	@Test
-	void testSpying() {
+	void spying() {
 		assertIsSpy(exampleService);
 
 		Object spiedInstance = mockingDetails(exampleService).getMockCreationSettings().getSpiedInstance();

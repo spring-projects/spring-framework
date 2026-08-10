@@ -58,7 +58,10 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 3.0
  * @see RestTemplate#setErrorHandler
+ * @deprecated as of 7.1 in favor of {@link RestClient.ResponseSpec.ErrorHandler}
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	private @Nullable List<HttpMessageConverter<?>> messageConverters;
@@ -69,10 +72,9 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * to use to decode error content.
 	 * @since 6.0
 	 */
-	void setMessageConverters(List<HttpMessageConverter<?>> converters) {
+	protected void setMessageConverters(List<HttpMessageConverter<?>> converters) {
 		this.messageConverters = Collections.unmodifiableList(converters);
 	}
-
 
 	/**
 	 * Delegates to {@link #hasError(HttpStatusCode)} with the response status code.

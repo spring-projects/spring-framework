@@ -543,3 +543,85 @@ Kotlin::
 ----
 ======
 
+The following example demonstrates how to implement and register a custom
+`SystemPropertyOverrideActiveProfilesResolver` that allows the `spring.profiles.active`
+property (when configured as a JVM system property) to override profiles configured via
+`@ActiveProfiles`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// profiles resolved programmatically via a custom resolver that
+	// allows "spring.profiles.active" to override @ActiveProfiles
+	@ActiveProfiles(
+			resolver = SystemPropertyOverrideActiveProfilesResolver.class,
+			inheritProfiles = false)
+	class TransferServiceTest extends AbstractIntegrationTest {
+		// test body
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// profiles resolved programmatically via a custom resolver that
+	// allows "spring.profiles.active" to override @ActiveProfiles
+	@ActiveProfiles(
+			resolver = SystemPropertyOverrideActiveProfilesResolver::class,
+			inheritProfiles = false)
+	class TransferServiceTest : AbstractIntegrationTest() {
+		// test body
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",fold="-imports"]
+----
+	import org.springframework.core.env.AbstractEnvironment;
+	import org.springframework.test.context.support.DefaultActiveProfilesResolver;
+	import org.springframework.util.StringUtils;
+
+	public class SystemPropertyOverrideActiveProfilesResolver extends DefaultActiveProfilesResolver {
+
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			String profiles = System.getProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME);
+			if (StringUtils.hasText(profiles)) {
+				return StringUtils.commaDelimitedListToStringArray(
+						StringUtils.trimAllWhitespace(profiles));
+			}
+			return super.resolve(testClass);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",fold="-imports"]
+----
+	import org.springframework.core.env.AbstractEnvironment
+	import org.springframework.test.context.support.DefaultActiveProfilesResolver
+	import org.springframework.util.StringUtils
+
+	class SystemPropertyOverrideActiveProfilesResolver : DefaultActiveProfilesResolver() {
+
+		override fun resolve(testClass: Class<*>): Array<String> {
+			val profiles = System.getProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME)
+			if (StringUtils.hasText(profiles)) {
+				return StringUtils.commaDelimitedListToStringArray(
+					StringUtils.trimAllWhitespace(profiles)
+				)
+			}
+			return super.resolve(testClass)
+		}
+	}
+----
+======

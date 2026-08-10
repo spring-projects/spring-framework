@@ -41,7 +41,7 @@ class ExchangeStrategiesTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void mutate() {
+	void mutate() {
 		ExchangeStrategies strategies = ExchangeStrategies.empty().build();
 		assertThat(strategies.messageReaders()).isEmpty();
 		assertThat(strategies.messageWriters()).isEmpty();

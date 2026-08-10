@@ -149,6 +149,11 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(T t, @Nullable MediaType contentType) {
+		return t instanceof DOMSource;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
@@ -176,17 +181,29 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		try {
 			// By default, Spring will prevent the processing of external entities.
 			// This is a mitigation against XXE attacks.
-			DocumentBuilderFactory builderFactory = this.documentBuilderFactory;
-			if (builderFactory == null) {
-				builderFactory = DocumentBuilderFactory.newInstance();
-				builderFactory.setNamespaceAware(true);
-				builderFactory.setFeature(
-						"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-				builderFactory.setFeature(
-						"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
-				this.documentBuilderFactory = builderFactory;
+			DocumentBuilderFactory factory = this.documentBuilderFactory;
+			if (factory == null) {
+				factory = DocumentBuilderFactory.newInstance();
+				factory.setNamespaceAware(true);
+				try {
+					factory.setFeature(
+							"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+				}
+				catch (Exception ex) {
+					// Xerces properties not recognized/supported - ignore
+				}
+				try {
+					factory.setFeature(
+							"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+					factory.setFeature(
+							"http://xml.org/sax/features/external-parameter-entities", isProcessExternalEntities());
+				}
+				catch (Exception ex) {
+					// SAX properties not recognized/supported - ignore
+				}
+				this.documentBuilderFactory = factory;
 			}
-			DocumentBuilder builder = builderFactory.newDocumentBuilder();
+			DocumentBuilder builder = factory.newDocumentBuilder();
 			if (!isProcessExternalEntities()) {
 				builder.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 			}
@@ -212,17 +229,29 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 	private SAXSource readSAXSource(InputStream body, HttpInputMessage inputMessage) throws IOException {
 		try {
-			SAXParserFactory parserFactory = this.saxParserFactory;
-			if (parserFactory == null) {
-				parserFactory = SAXParserFactory.newInstance();
-				parserFactory.setNamespaceAware(true);
-				parserFactory.setFeature(
-						"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-				parserFactory.setFeature(
-						"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
-				this.saxParserFactory = parserFactory;
+			SAXParserFactory factory = this.saxParserFactory;
+			if (factory == null) {
+				factory = SAXParserFactory.newInstance();
+				factory.setNamespaceAware(true);
+				try {
+					factory.setFeature(
+							"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+				}
+				catch (Exception ex) {
+					// Xerces properties not recognized/supported - ignore
+				}
+				try {
+					factory.setFeature(
+							"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+					factory.setFeature(
+							"http://xml.org/sax/features/external-parameter-entities", isProcessExternalEntities());
+				}
+				catch (Exception ex) {
+					// SAX properties not recognized/supported - ignore
+				}
+				this.saxParserFactory = factory;
 			}
-			SAXParser saxParser = parserFactory.newSAXParser();
+			SAXParser saxParser = factory.newSAXParser();
 			XMLReader xmlReader = saxParser.getXMLReader();
 			if (!isProcessExternalEntities()) {
 				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
@@ -230,7 +259,11 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			byte[] bytes = StreamUtils.copyToByteArray(body);
 			return new SAXSource(xmlReader, new InputSource(new ByteArrayInputStream(bytes)));
 		}
-		catch (SAXException | ParserConfigurationException ex) {
+		catch (ParserConfigurationException ex) {
+			throw new HttpMessageNotReadableException(
+					"Could not set feature: " + ex.getMessage(), ex, inputMessage);
+		}
+		catch (SAXException ex) {
 			throw new HttpMessageNotReadableException(
 					"Could not parse document: " + ex.getMessage(), ex, inputMessage);
 		}
@@ -293,8 +326,9 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(T t) {
-		return t instanceof DOMSource;
+		return canWriteRepeatedly(t, null);
 	}
 
 

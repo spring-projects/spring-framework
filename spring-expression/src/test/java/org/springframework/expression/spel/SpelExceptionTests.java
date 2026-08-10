@@ -55,7 +55,7 @@ class SpelExceptionTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void spelExpressionMapWithVariables() {
+	void spelExpressionMapWithVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aMap['one'] eq 1");
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
@@ -94,7 +94,7 @@ class SpelExceptionTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void spelExpressionListWithVariables() {
+	void spelExpressionListWithVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aList.contains('one')");
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
@@ -116,7 +116,7 @@ class SpelExceptionTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void spelExpressionListIndexAccessWithVariables() {
+	void spelExpressionListIndexAccessWithVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aList[0] eq 'one'");
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
@@ -146,7 +146,7 @@ class SpelExceptionTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void spelExpressionArrayWithVariables() {
+	void spelExpressionArrayWithVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#anArray[0] eq 1");
 		StandardEvaluationContext ctx = new StandardEvaluationContext();

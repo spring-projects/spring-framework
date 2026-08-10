@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 /**
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  */
 class CompositeMapTests {
 
@@ -218,6 +220,17 @@ class CompositeMapTests {
 
 		Set<Map.Entry<String, String>> entries = composite.entrySet();
 		assertThat(entries).containsExactly(entry("foo", "bar"), entry("baz", "qux"));
+	}
+
+	@Test
+	void nullable() {
+		Map<String, @Nullable String> first = new HashMap<>();
+		first.put("foo", "bar");
+		Map<String, @Nullable String> second = new HashMap<>();
+		second.put("baz", null);
+		CompositeMap<String, @Nullable String> composite = new CompositeMap<>(first, second);
+
+		assertThat(composite).containsExactly(entry("foo", "bar"), entry("baz", null));
 	}
 
 	@Nested

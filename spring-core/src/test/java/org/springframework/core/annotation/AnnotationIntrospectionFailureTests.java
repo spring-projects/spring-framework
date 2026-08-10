@@ -24,11 +24,14 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.throwable;
 
 /**
  * Tests that trigger annotation introspection failures and ensure that they are
@@ -82,6 +85,38 @@ class AnnotationIntrospectionFailureTests {
 		assertThat(annotations.get(metaAnnotationClass).isPresent()).isFalse();
 		assertThat(annotations.isPresent(metaAnnotationClass)).isFalse();
 		assertThat(annotations.isPresent(annotationClass)).isFalse();
+	}
+
+	@Test  // gh-36586
+	void filteredTypeInAnnotationAttributeDoesNotThrowWhenCallingAsAnnotationAttributes() throws Exception {
+		FilteringClassLoader classLoader = new FilteringClassLoader(getClass().getClassLoader());
+		Class<?> withAnnotation = ClassUtils.forName(WithExampleAnnotation.class.getName(), classLoader);
+		Annotation annotation = withAnnotation.getAnnotations()[0];
+		MergedAnnotation<?> mergedAnnotation = MergedAnnotation.from(null, annotation);
+
+		// 0) Sanity check MergedAnnotation.getClass() behavior.
+		assertThatExceptionOfType(TypeNotPresentException.class)
+				.isThrownBy(() -> mergedAnnotation.getClass("value"))
+				.withCauseInstanceOf(ClassNotFoundException.class);
+
+		AnnotationAttributes attributes = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
+
+		// 1) Attribute should be present, even though its value is an exception.
+		assertThat(attributes).containsKey("value");
+		assertThat(attributes.get("value")).asInstanceOf(throwable(TypeNotPresentException.class))
+				.hasMessageContaining(FilteredType.class.getName())
+				.hasCauseInstanceOf(ClassNotFoundException.class);
+
+		// 2) Accessing the attribute via AnnotationAttributes.getClass() should throw an
+		// IllegalArgumentException with the TypeNotPresentException as its cause.
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> attributes.getClass("value"))
+				.withMessageMatching("""
+						Attribute 'value' for annotation \\[.+?\\] was not resolvable \
+						due to exception \\[.+?TypeNotPresentException.+?\\]""")
+				.havingCause()
+						.isExactlyInstanceOf(TypeNotPresentException.class)
+						.withMessageContaining(FilteredType.class.getName());
 	}
 
 

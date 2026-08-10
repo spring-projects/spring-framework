@@ -35,14 +35,14 @@ class NoOpCacheManagerTests {
 	private final CacheManager manager = new NoOpCacheManager();
 
 	@Test
-	void testGetCache() {
+	void getCache() {
 		Cache cache = this.manager.getCache("bucket");
 		assertThat(cache).isNotNull();
 		assertThat(this.manager.getCache("bucket")).isSameAs(cache);
 	}
 
 	@Test
-	void testNoOpCache() {
+	void noOpCache() {
 		String name = createRandomKey();
 		Cache cache = this.manager.getCache(name);
 		assertThat(cache.getName()).isEqualTo(name);
@@ -54,7 +54,7 @@ class NoOpCacheManagerTests {
 	}
 
 	@Test
-	void testCacheName() {
+	void cacheName() {
 		String name = "bucket";
 		assertThat(this.manager.getCacheNames()).doesNotContain(name);
 		this.manager.getCache(name);
@@ -62,7 +62,7 @@ class NoOpCacheManagerTests {
 	}
 
 	@Test
-	void testCacheCallable() {
+	void cacheCallable() {
 		String name = createRandomKey();
 		Cache cache = this.manager.getCache(name);
 		Object returnValue = new Object();
@@ -71,7 +71,7 @@ class NoOpCacheManagerTests {
 	}
 
 	@Test
-	void testCacheGetCallableFail() {
+	void cacheGetCallableFail() {
 		Cache cache = this.manager.getCache(createRandomKey());
 		String key = createRandomKey();
 		try {

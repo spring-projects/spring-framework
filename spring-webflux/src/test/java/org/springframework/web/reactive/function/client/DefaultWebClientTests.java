@@ -61,7 +61,7 @@ import static org.mockito.Mockito.when;
  * @author Brian Clozel
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class DefaultWebClientTests {
+class DefaultWebClientTests {
 
 	@Mock
 	private ExchangeFunction exchangeFunction;
@@ -104,7 +104,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test // gh-22705
-	public void uriBuilderWithUriTemplate() {
+	void uriBuilderWithUriTemplate() {
 		this.builder.build().get()
 				.uri("/path/{id}", builder -> builder.queryParam("q", "12").build("identifier"))
 				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
@@ -404,7 +404,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test // gh-23880
-	public void onStatusHandlersOrderIsPreserved() {
+	void onStatusHandlersOrderIsPreserved() {
 
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
@@ -454,7 +454,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test // gh-23880
-	public void onStatusHandlersDefaultHandlerIsLast() {
+	void onStatusHandlersDefaultHandlerIsLast() {
 
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
@@ -479,7 +479,7 @@ public class DefaultWebClientTests {
 	}
 
 	@Test // gh-26069
-	public void onStatusHandlersApplyForToEntityMethods() {
+	void onStatusHandlersApplyForToEntityMethods() {
 
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));

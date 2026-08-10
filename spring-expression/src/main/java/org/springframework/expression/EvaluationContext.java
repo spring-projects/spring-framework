@@ -38,6 +38,26 @@ import org.jspecify.annotations.Nullable;
  * manually.</li>
  * </ul>
  *
+ * <p><strong>WARNING</strong>: Special security considerations apply to the
+ * evaluation of SpEL expressions, particularly those obtained from an untrusted
+ * source. See the
+ * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-security"
+ * >Security Considerations</a> section of the Spring Framework reference
+ * documentation for details, as well as the class-level documentation for
+ * {@code StandardEvaluationContext} and {@code SimpleEvaluationContext}.
+ *
+ * <p>An {@code EvaluationContext} is designed to be built once and reused across
+ * many evaluations, potentially of many different {@link Expression} instances. A
+ * single {@link Expression}, in turn, may cache accessor and executor state resolved
+ * against a particular {@code EvaluationContext} configuration. Reusing an
+ * {@code Expression} across {@code EvaluationContext} instances of the same type and
+ * with equivalent configuration is supported; reusing an {@code Expression} across
+ * contexts with different security implications &mdash; for example, first against a
+ * {@code StandardEvaluationContext} and later against a
+ * {@code SimpleEvaluationContext} &mdash; is not, since cached state from the more
+ * permissive evaluation may be reused during the more restrictive one. See
+ * {@link Expression} for details.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen

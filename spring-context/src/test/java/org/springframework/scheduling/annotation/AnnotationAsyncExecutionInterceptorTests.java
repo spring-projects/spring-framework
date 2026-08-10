@@ -34,7 +34,7 @@ class AnnotationAsyncExecutionInterceptorTests {
 
 	@Test
 	@SuppressWarnings("unused")
-	public void testGetExecutorQualifier() throws SecurityException, NoSuchMethodException {
+	void getExecutorQualifier() throws SecurityException, NoSuchMethodException {
 		AnnotationAsyncExecutionInterceptor i = new AnnotationAsyncExecutionInterceptor(null);
 		{ // method level
 			class C { @Async("qMethod") void m() { } }

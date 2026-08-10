@@ -188,7 +188,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>The parameter name used for HTTP methods other then GET and POST.
+			<description>The parameter name used for HTTP methods other than GET and POST.
 			Default is '_method'.</description>
 			<name>methodParam</name>
 			<required>false</required>

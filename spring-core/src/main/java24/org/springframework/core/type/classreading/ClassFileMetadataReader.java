@@ -42,13 +42,12 @@ final class ClassFileMetadataReader implements MetadataReader {
 
 	ClassFileMetadataReader(Resource resource, @Nullable ClassLoader classLoader) throws IOException {
 		this.resource = resource;
-		this.annotationMetadata = ClassFileClassMetadata.of(parseClassModel(resource), classLoader);
+		this.annotationMetadata = ClassFileAnnotationMetadata.of(parseClassModel(resource), classLoader);
 	}
 
 	private static ClassModel parseClassModel(Resource resource) throws IOException {
-		try (InputStream is = resource.getInputStream()) {
-			byte[] bytes = is.readAllBytes();
-			return ClassFile.of().parse(bytes);
+		try (InputStream inputStream = resource.getInputStream()) {
+			return ClassFile.of().parse(inputStream.readAllBytes());
 		}
 	}
 

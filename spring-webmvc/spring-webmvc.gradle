@@ -80,5 +80,5 @@ dependencies {
 	testRuntimeOnly("org.glassfish:jakarta.el")
 	testRuntimeOnly("org.jruby:jruby")
 	testRuntimeOnly("org.python:jython-standalone")
-	testRuntimeOnly("org.webjars:underscorejs")
+	testRuntimeOnly("org.webjars:momentjs:2.29.4")
 }

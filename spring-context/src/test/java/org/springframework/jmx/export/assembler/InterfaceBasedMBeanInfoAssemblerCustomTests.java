@@ -55,7 +55,7 @@ class InterfaceBasedMBeanInfoAssemblerCustomTests extends AbstractJmxAssemblerTe
 	}
 
 	@Test
-	void testGetAgeIsReadOnly() throws Exception {
+	void getAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 

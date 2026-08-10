@@ -457,8 +457,7 @@ class ConfigurationClassPostProcessorTests {
 		pp.postProcessBeanFactory(beanFactory);
 
 		Foo foo = beanFactory.getBean(Foo.class);
-		boolean condition = foo instanceof ExtendedFoo;
-		assertThat(condition).isTrue();
+		assertThat(foo).isInstanceOf(ExtendedFoo.class);
 		Bar bar = beanFactory.getBean(Bar.class);
 		assertThat(bar.foo).isSameAs(foo);
 	}
@@ -473,8 +472,7 @@ class ConfigurationClassPostProcessorTests {
 		pp.postProcessBeanFactory(beanFactory);
 
 		Foo foo = beanFactory.getBean(Foo.class);
-		boolean condition = foo instanceof ExtendedAgainFoo;
-		assertThat(condition).isTrue();
+		assertThat(foo).isInstanceOf(ExtendedAgainFoo.class);
 		Bar bar = beanFactory.getBean(Bar.class);
 		assertThat(bar.foo).isSameAs(foo);
 	}
@@ -504,8 +502,7 @@ class ConfigurationClassPostProcessorTests {
 		pp.postProcessBeanFactory(beanFactory);
 
 		Foo foo = beanFactory.getBean(Foo.class);
-		boolean condition = foo instanceof ExtendedFoo;
-		assertThat(condition).isTrue();
+		assertThat(foo).isInstanceOf(ExtendedFoo.class);
 		Bar bar = beanFactory.getBean(Bar.class);
 		assertThat(bar.foo).isSameAs(foo);
 	}
@@ -519,8 +516,7 @@ class ConfigurationClassPostProcessorTests {
 		beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
 
 		Foo foo = beanFactory.getBean(Foo.class);
-		boolean condition = foo instanceof ExtendedFoo;
-		assertThat(condition).isTrue();
+		assertThat(foo).isInstanceOf(ExtendedFoo.class);
 		Bar bar = beanFactory.getBean(Bar.class);
 		assertThat(bar.foo).isSameAs(foo);
 	}
@@ -536,8 +532,7 @@ class ConfigurationClassPostProcessorTests {
 		pp.postProcessBeanFactory(beanFactory);
 
 		ITestBean injected = beanFactory.getBean("consumer", ScopedProxyConsumer.class).testBean;
-		boolean condition = injected instanceof ScopedObject;
-		assertThat(condition).isTrue();
+		assertThat(injected).isInstanceOf(ScopedObject.class);
 		assertThat(injected).isSameAs(beanFactory.getBean("scopedClass"));
 		assertThat(injected).isSameAs(beanFactory.getBean(ITestBean.class));
 	}

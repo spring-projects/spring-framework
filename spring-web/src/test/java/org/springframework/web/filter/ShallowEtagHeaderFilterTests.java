@@ -172,7 +172,7 @@ class ShallowEtagHeaderFilterTests {
 	}
 
 	@Test  // SPR-12960
-	public void filterWriterWithDisabledCaching() throws Exception {
+	void filterWriterWithDisabledCaching() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType(TEXT_PLAIN_VALUE);
@@ -257,7 +257,7 @@ class ShallowEtagHeaderFilterTests {
 	}
 
 	@Test // SPR-13717
-	public void filterFlushResponse() throws Exception {
+	void filterFlushResponse() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 

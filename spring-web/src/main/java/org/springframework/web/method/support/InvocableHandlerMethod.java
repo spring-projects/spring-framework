@@ -318,7 +318,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 							KType type = parameter.getType();
 							if (!(type.isMarkedNullable() && arg == null) &&
 									type.getClassifier() instanceof KClass<?> kClass &&
-									KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+									KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass)) &&
+									!JvmClassMappingKt.getJavaClass(kClass).isInstance(arg)) {
 								arg = box(kClass, arg);
 							}
 							argMap.put(parameter, arg);
@@ -339,7 +340,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			KType type = constructor.getParameters().get(0).getType();
 			if (!(type.isMarkedNullable() && arg == null) &&
 					type.getClassifier() instanceof KClass<?> parameterClass &&
-					KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(parameterClass))) {
+					KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(parameterClass)) &&
+					!JvmClassMappingKt.getJavaClass(parameterClass).isInstance(arg)) {
 				arg = box(parameterClass, arg);
 			}
 			if (!KCallablesJvm.isAccessible(constructor)) {

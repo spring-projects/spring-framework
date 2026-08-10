@@ -8,7 +8,7 @@ danger of undue coupling, because code that is meant to be used transactionally 
 almost always deployed that way anyway.
 
 NOTE: The standard `jakarta.transaction.Transactional` annotation is also supported as
-a drop-in replacement to Spring's own annotation. Please refer to the JTA documentation
+a drop-in replacement for Spring's own annotation. Please refer to the JTA documentation
 for more details.
 
 The ease-of-use afforded by the use of the `@Transactional` annotation is best
@@ -89,47 +89,16 @@ annotation in a `@Configuration` class. See the
 {spring-framework-api}/transaction/annotation/EnableTransactionManagement.html[javadoc]
 for full details.
 
-In XML configuration, the `<tx:annotation-driven/>` tag provides similar convenience:
+The following example shows the configuration needed to enable annotation-driven transaction management:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<!-- from the file 'context.xml' -->
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:aop="http://www.springframework.org/schema/aop"
-		xmlns:tx="http://www.springframework.org/schema/tx"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/tx
-			https://www.springframework.org/schema/tx/spring-tx.xsd
-			http://www.springframework.org/schema/aop
-			https://www.springframework.org/schema/aop/spring-aop.xsd">
+include-code::./AppConfig[tag=snippet,indent=0]
 
-		<!-- this is the service object that we want to make transactional -->
-		<bean id="fooService" class="x.y.service.DefaultFooService"/>
-
-		<!-- enable the configuration of transactional behavior based on annotations -->
-		<!-- a TransactionManager is still required -->
-		<tx:annotation-driven transaction-manager="txManager"/> <1>
-
-		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-			<!-- (this dependency is defined somewhere else) -->
-			<property name="dataSource" ref="dataSource"/>
-		</bean>
-
-		<!-- other <bean/> definitions here -->
-
-	</beans>
-----
-<1> The line that makes the bean instance transactional.
-
-TIP: You can omit the `transaction-manager` attribute in the `<tx:annotation-driven/>`
-tag if the bean name of the `TransactionManager` that you want to wire in has the name
-`transactionManager`. If the `TransactionManager` bean that you want to dependency-inject
-has any other name, you have to use the `transaction-manager` attribute, as in the
-preceding example.
+TIP: In programmatic configuration, the `@EnableTransactionManagement` annotation uses any
+`TransactionManager` bean in the context. In XML configuration, you can omit
+the `transaction-manager` attribute in the `<tx:annotation-driven/>` tag if the bean
+name of the `TransactionManager` that you want to wire in has the name `transactionManager`.
+If the `TransactionManager` bean has any other name, you have to use the
+`transaction-manager` attribute explicitly, as in the preceding example.
 
 Reactive transactional methods use reactive return types in contrast to imperative
 programming arrangements as the following listing shows:
@@ -234,8 +203,10 @@ on an interface, a class definition, or a method on a class. However, the mere p
 of the `@Transactional` annotation is not enough to activate the transactional behavior.
 The `@Transactional` annotation is merely metadata that can be consumed by corresponding
 runtime infrastructure which uses that metadata to configure the appropriate beans with
-transactional behavior. In the preceding example, the `<tx:annotation-driven/>` element
-switches on actual transaction management at runtime.
+transactional behavior. In the preceding examples that use programmatic configuration,
+the `@EnableTransactionManagement` annotation switches on actual transaction management
+at runtime. Whereas, in the preceding example that uses XML configuration, the
+`<tx:annotation-driven/>` element switches on actual transaction management at runtime.
 
 TIP: The Spring team recommends that you annotate methods of concrete classes with the
 `@Transactional` annotation, rather than relying on annotated methods in interfaces,

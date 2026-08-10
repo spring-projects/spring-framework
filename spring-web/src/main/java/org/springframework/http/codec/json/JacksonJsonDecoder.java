@@ -55,7 +55,8 @@ public class JacksonJsonDecoder extends AbstractJacksonDecoder<JsonMapper> {
 	private static final MimeType[] DEFAULT_JSON_MIME_TYPES = new MimeType[] {
 			MediaType.APPLICATION_JSON,
 			new MediaType("application", "*+json"),
-			MediaType.APPLICATION_NDJSON
+			MediaType.APPLICATION_NDJSON,
+			MediaType.APPLICATION_JSONL
 	};
 
 
@@ -104,9 +105,10 @@ public class JacksonJsonDecoder extends AbstractJacksonDecoder<JsonMapper> {
 		super(mapper, mimeTypes);
 	}
 
+
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return super.canDecode(elementType, mimeType) && !CharSequence.class.isAssignableFrom(elementType.toClass());
+		return (super.canDecode(elementType, mimeType) && String.class != elementType.toClass());
 	}
 
 	@Override

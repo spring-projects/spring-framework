@@ -145,7 +145,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test
-	void testParseSqlStatementWithStringContainingQuotes() {
+	void parseSqlStatementWithStringContainingQuotes() {
 		String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);

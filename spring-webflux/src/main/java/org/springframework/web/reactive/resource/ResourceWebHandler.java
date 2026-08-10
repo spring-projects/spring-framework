@@ -153,10 +153,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	public void setLocations(@Nullable List<Resource> locations) {
 		this.locationResources.clear();
 		if (locations != null) {
-			for (Resource location : locations) {
-				ResourceHandlerUtils.assertResourceLocation(location);
-				this.locationResources.add(location);
-			}
+			this.locationResources.addAll(locations);
 		}
 	}
 
@@ -373,6 +370,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			}
 		}
 
+		for (Resource location : result) {
+			ResourceHandlerUtils.assertResourceLocation(location);
+		}
+
 		if (isOptimizeLocations()) {
 			result = result.stream().filter(Resource::exists).toList();
 		}
@@ -567,8 +568,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private String locationToString(List<Resource> locations) {
 		return locations.toString()
-				.replaceAll("class path resource", "classpath")
-				.replaceAll("ServletContext resource", "ServletContext");
+				.replace("class path resource", "classpath")
+				.replace("ServletContext resource", "ServletContext");
 	}
 
 }

@@ -1146,7 +1146,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public String toString() {
-			return "!" + this.delegate.toString();
+			return "!" + this.delegate;
 		}
 	}
 

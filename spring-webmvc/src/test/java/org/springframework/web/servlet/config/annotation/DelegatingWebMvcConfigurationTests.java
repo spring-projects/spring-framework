@@ -62,7 +62,7 @@ import static org.mockito.Mockito.verify;
  * @author Rossen Stoyanchev
  */
 @ExtendWith(MockitoExtension.class)
-public class DelegatingWebMvcConfigurationTests {
+class DelegatingWebMvcConfigurationTests {
 
 	@Mock
 	private WebMvcConfigurer webMvcConfigurer;
@@ -112,8 +112,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 		assertThat(initializer).isNotNull();
 		assertThat(initializer.getConversionService()).isSameAs(conversionService.getValue());
-		boolean condition = initializer.getValidator() instanceof LocalValidatorFactoryBean;
-		assertThat(condition).isTrue();
+		assertThat(initializer.getValidator()).isInstanceOf(LocalValidatorFactoryBean.class);
 		assertThat(resolvers.getValue()).isEmpty();
 		assertThat(handlers.getValue()).isEmpty();
 		assertThat(adapter.getMessageConverters()).isEqualTo(converters.getValue());
@@ -171,12 +170,9 @@ public class DelegatingWebMvcConfigurationTests {
 		verify(webMvcConfigurer).configureHandlerExceptionResolvers(exceptionResolvers.capture());
 
 		assertThat(exceptionResolvers.getValue()).hasSize(3);
-		boolean condition2 = exceptionResolvers.getValue().get(0) instanceof ExceptionHandlerExceptionResolver;
-		assertThat(condition2).isTrue();
-		boolean condition1 = exceptionResolvers.getValue().get(1) instanceof ResponseStatusExceptionResolver;
-		assertThat(condition1).isTrue();
-		boolean condition = exceptionResolvers.getValue().get(2) instanceof DefaultHandlerExceptionResolver;
-		assertThat(condition).isTrue();
+		assertThat(exceptionResolvers.getValue().get(0)).isInstanceOf(ExceptionHandlerExceptionResolver.class);
+		assertThat(exceptionResolvers.getValue().get(1)).isInstanceOf(ResponseStatusExceptionResolver.class);
+		assertThat(exceptionResolvers.getValue().get(2)).isInstanceOf(DefaultHandlerExceptionResolver.class);
 		assertThat(converters.getValue()).isNotEmpty();
 	}
 
@@ -198,7 +194,7 @@ public class DelegatingWebMvcConfigurationTests {
 	}
 
 	@Test
-	public void addErrorResponseInterceptors() {
+	void addErrorResponseInterceptors() {
 		ErrorResponse.Interceptor interceptor = (detail, errorResponse) -> {};
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override
@@ -227,7 +223,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@SuppressWarnings("removal")
 	@Test
-	public void configurePathMatcher() {
+	void configurePathMatcher() {
 		PathMatcher pathMatcher = mock();
 		UrlPathHelper pathHelper = mock();
 
@@ -243,7 +239,7 @@ public class DelegatingWebMvcConfigurationTests {
 			}
 			@Override
 			public void addResourceHandlers(ResourceHandlerRegistry registry) {
-				registry.addResourceHandler("/resources/**").addResourceLocations("/");
+				registry.addResourceHandler("/resources/**").addResourceLocations("/static");
 			}
 		};
 
@@ -308,7 +304,7 @@ public class DelegatingWebMvcConfigurationTests {
 			}
 			@Override
 			public void addResourceHandlers(ResourceHandlerRegistry registry) {
-				registry.addResourceHandler("/resources/**").addResourceLocations("/");
+				registry.addResourceHandler("/resources/**").addResourceLocations("/static");
 			}
 		};
 

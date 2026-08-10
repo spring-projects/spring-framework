@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unchecked")
-public class HttpServiceRegistrarTests {
+class HttpServiceRegistrarTests {
 
 	private static final String ECHO_GROUP = "echo";
 

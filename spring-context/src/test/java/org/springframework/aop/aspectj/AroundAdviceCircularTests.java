@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AroundAdviceCircularTests extends AroundAdviceBindingTests {
 
 	@Test
-	void testBothBeansAreProxies() {
+	void bothBeansAreProxies() {
 		Object tb = ctx.getBean("testBean");
 		assertThat(AopUtils.isAopProxy(tb)).isTrue();
 		Object tb2 = ctx.getBean("testBean2");

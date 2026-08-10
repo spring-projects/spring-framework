@@ -35,26 +35,26 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  *
  * @author Rossen Stoyanchev
  */
-public class ViewNameAssertionTests {
+class ViewNameAssertionTests {
 
 	private MockMvc mockMvc;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.mockMvc = standaloneSetup(new SimpleController())
 				.alwaysExpect(status().isOk())
 				.build();
 	}
 
 	@Test
-	public void testEqualTo() throws Exception {
+	void hamcrestEqualTo() throws Exception {
 		this.mockMvc.perform(get("/"))
 			.andExpect(view().name("mySpecialView"))
 			.andExpect(view().name(equalTo("mySpecialView")));
 	}
 
 	@Test
-	public void testHamcrestMatcher() throws Exception {
+	void hamcrestMatcher() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(view().name(containsString("Special")));
 	}
 

@@ -100,7 +100,7 @@ class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTests {
 
 	@Test
 	@Override
-	public void count() {
+	protected void count() {
 		assertCount(24);
 	}
 

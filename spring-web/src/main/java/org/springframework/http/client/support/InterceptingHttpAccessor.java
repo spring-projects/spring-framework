@@ -42,7 +42,10 @@ import org.springframework.util.CollectionUtils;
  * @see ClientHttpRequestInterceptor
  * @see InterceptingClientHttpRequestFactory
  * @see org.springframework.web.client.RestTemplate
+ * @deprecated since 7.1 with no replacement.
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public abstract class InterceptingHttpAccessor extends HttpAccessor {
 
 	private final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();

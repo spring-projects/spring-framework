@@ -501,6 +501,11 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		}
 
 		@Override
+		public boolean canRequest() {
+			return false;
+		}
+
+		@Override
 		public void dispose() {
 			if (this.releaseOnDispose) {
 				this.content.forEach(DataBufferUtils::release);

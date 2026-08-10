@@ -51,8 +51,7 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		super(request, new MockServerHttpResponse(),
 				sessionManager != null ? sessionManager : new DefaultWebSessionManager(),
-				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(),
-				applicationContext);
+				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(), applicationContext);
 
 		this.principalMono = (principal != null) ? Mono.just(principal) : Mono.empty();
 	}
@@ -125,6 +124,8 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		private @Nullable ApplicationContext applicationContext;
 
+		private @Nullable Boolean defaultHtmlEscape;
+
 		private @Nullable Principal principal;
 
 		public Builder(MockServerHttpRequest request) {
@@ -160,6 +161,18 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		 */
 		public Builder applicationContext(ApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
+			return this;
+		}
+
+		/**
+ 		* Set the default HTML escape setting for the exchange.
+		* @param defaultHtmlEscape whether to enable default HTML escaping,
+ 		* or {@code null} if not configured
+ 		* @return this builder
+ 		* @since 7.0.6
+ 		*/
+		public Builder defaultHtmlEscape(@Nullable Boolean defaultHtmlEscape) {
+			this.defaultHtmlEscape = defaultHtmlEscape;
 			return this;
 		}
 

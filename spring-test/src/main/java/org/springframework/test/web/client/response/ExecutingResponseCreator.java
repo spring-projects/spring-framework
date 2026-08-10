@@ -32,12 +32,13 @@ import org.springframework.util.StreamUtils;
  * {@code ResponseCreator} that obtains the response by executing the request
  * through a {@link ClientHttpRequestFactory}. This is useful in scenarios with
  * multiple remote services where some need to be called rather than mocked.
- * <p>The {@code ClientHttpRequestFactory} is typically obtained from the
- * {@code RestTemplate} before it is passed to {@code MockRestServiceServer},
+ * <p>The {@code ClientHttpRequestFactory} is typically used for building the
+ * {@code RestClient} and is passed to {@code MockRestServiceServer},
  * in effect using the original factory rather than the test factory:
  * <pre><code>
- * ResponseCreator withActualResponse = new ExecutingResponseCreator(restTemplate);
- * MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
+ * RestClient.Builder restClientBuilder = RestClient.builder().requestFactory(requestFactory);
+ * ResponseCreator withActualResponse = new ExecutingResponseCreator(requestFactory);
+ * MockRestServiceServer server = MockRestServiceServer.bindTo(restClientBuilder).build();
  * //...
  * server.expect(requestTo("/foo")).andRespond(withSuccess());
  * server.expect(requestTo("/bar")).andRespond(withActualResponse);

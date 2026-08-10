@@ -32,6 +32,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -649,7 +650,7 @@ final class AnnotationTypeMapping {
 						throw new AnnotationConfigurationException(String.format(
 								"Different @AliasFor mirror values for annotation [%s]%s; attribute '%s' " +
 								"and its alias '%s' are declared with values of [%s] and [%s].",
-								getAnnotationType().getName(), on,
+								ClassUtils.getCanonicalName(getAnnotationType()), on,
 								attributes.get(result).getName(),
 								attribute.getName(),
 								ObjectUtils.nullSafeToString(lastValue),

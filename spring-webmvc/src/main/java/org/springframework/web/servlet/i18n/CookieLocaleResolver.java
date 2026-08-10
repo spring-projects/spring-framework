@@ -340,15 +340,16 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 
 		Locale locale = null;
 		TimeZone zone = null;
+		ResponseCookie cookie = this.cookie;
 		if (localeContext != null) {
 			locale = localeContext.getLocale();
 			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
 				zone = timeZoneAwareLocaleContext.getTimeZone();
 			}
 			String value = (locale != null ? toLocaleValue(locale) : "-") + (zone != null ? '/' + zone.getID() : "");
-			this.cookie = this.cookie.mutate().value(value).build();
+			cookie = this.cookie.mutate().value(value).build();
 		}
-		response.addHeader(HttpHeaders.SET_COOKIE, this.cookie.toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 		request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,
 				(locale != null ? locale : this.defaultLocaleFunction.apply(request)));
 		request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,

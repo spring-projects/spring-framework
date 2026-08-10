@@ -16,7 +16,6 @@
 
 package org.springframework.aot.agent;
 
-import org.springframework.aot.hint.JavaSerializationHint;
 import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.ResourceBundleHint;
@@ -51,7 +50,9 @@ public enum HintType {
 	/**
 	 * Java serialization hint, as described by {@link org.springframework.aot.hint.JavaSerializationHint}.
 	 */
-	JAVA_SERIALIZATION(JavaSerializationHint.class),
+	@Deprecated(since = "7.0.5", forRemoval = true)
+	@SuppressWarnings("removal")
+	JAVA_SERIALIZATION(org.springframework.aot.hint.JavaSerializationHint.class),
 
 	/**
 	 * JDK proxies hint, as described by {@link org.springframework.aot.hint.ProxyHints#jdkProxyHints()}.

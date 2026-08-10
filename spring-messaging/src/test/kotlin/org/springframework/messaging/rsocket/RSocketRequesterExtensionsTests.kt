@@ -107,35 +107,35 @@ class RSocketRequesterExtensionsTests {
 	suspend fun retrieveAndAwait() {
 		val response = "foo"
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
-		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
+		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<String>>(stringTypeRefMatcher)) } returns Mono.just("foo")
 		assertThat(retrieveSpec.retrieveAndAwait<String>()).isEqualTo(response)
 	}
 
 	@Test
 	suspend fun retrieveAndAwaitOrNull() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
-		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.empty()
+		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<String>>(stringTypeRefMatcher)) } returns Mono.empty()
 		assertThat(retrieveSpec.retrieveAndAwaitOrNull<String>()).isNull()
 	}
 
 	@Test
 	suspend fun retrieveFlow() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
-		every { retrieveSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
+		every { retrieveSpec.retrieveFlux(match<ParameterizedTypeReference<String>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
 		assertThat(retrieveSpec.retrieveFlow<String>().toList()).contains("foo", "bar")
 	}
 
 	@Test
 	fun retrieveMono() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
-		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
+		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<String>>(stringTypeRefMatcher)) } returns Mono.just("foo")
 		assertThat(retrieveSpec.retrieveMono<String>().block()).isEqualTo("foo")
 	}
 
 	@Test
 	fun retrieveFlux() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
-		every { retrieveSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
+		every { retrieveSpec.retrieveFlux(match<ParameterizedTypeReference<String>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
 		assertThat(retrieveSpec.retrieveFlux<String>().collectList().block()).contains("foo", "bar")
 	}
 }

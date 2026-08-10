@@ -159,7 +159,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				return result;
 			}
 			catch (IllegalArgumentException ex) {
-				if (factoryBean != null && !factoryMethod.getDeclaringClass().isAssignableFrom(factoryBean.getClass())) {
+				if (factoryBean != null && !factoryMethod.getDeclaringClass().isInstance(factoryBean)) {
 					throw new BeanInstantiationException(factoryMethod,
 							"Illegal factory instance for factory method '" + factoryMethod.getName() + "'; " +
 									"instance: " + factoryBean.getClass().getName(), ex);

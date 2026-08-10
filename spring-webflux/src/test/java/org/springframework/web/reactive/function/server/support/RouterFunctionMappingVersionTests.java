@@ -44,7 +44,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
  * {@link RouterFunctionMapping} integration tests for API versioning.
  * @author Rossen Stoyanchev
  */
-public class RouterFunctionMappingVersionTests {
+class RouterFunctionMappingVersionTests {
 
 	private RouterFunctionMapping mapping;
 

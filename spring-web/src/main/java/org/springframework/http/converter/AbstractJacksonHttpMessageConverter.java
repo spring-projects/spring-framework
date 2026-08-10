@@ -285,6 +285,11 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 		return this.mapperRegistrations == null || selectMapper(valueClass, mediaType) != null;
 	}
 
+	@Override
+	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
+		return true;
+	}
+
 	/**
 	 * Select an ObjectMapper to use, either the main ObjectMapper or another
 	 * if the handling for the given Class has been customized through
@@ -503,6 +508,7 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}

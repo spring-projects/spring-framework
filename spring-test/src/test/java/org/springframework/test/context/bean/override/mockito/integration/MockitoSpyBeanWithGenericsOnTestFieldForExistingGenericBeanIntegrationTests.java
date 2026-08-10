@@ -53,7 +53,7 @@ class MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanIntegrationTest
 
 
 	@Test
-	void testSpying() {
+	void spying() {
 		assertThat(caller.sayGreeting()).isEqualTo("I say Enigma 123");
 		then(service).should().greeting();
 	}

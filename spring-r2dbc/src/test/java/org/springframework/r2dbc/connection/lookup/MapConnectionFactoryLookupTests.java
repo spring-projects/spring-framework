@@ -74,7 +74,7 @@ class MapConnectionFactoryLookupTests {
 
 	@Test
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public void getConnectionFactoryWhereSuppliedMapHasNonConnectionFactoryTypeUnderSpecifiedKey() {
+	void getConnectionFactoryWhereSuppliedMapHasNonConnectionFactoryTypeUnderSpecifiedKey() {
 		Map connectionFactories = new HashMap<>();
 		connectionFactories.put(CONNECTION_FACTORY_NAME, new Object());
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup(connectionFactories);

@@ -1,0 +1,15 @@
+-----------------------------testboundary
+Content-Disposition: form-data; name="text1"
+
+a
+-----------------------------testboundary
+Content-Disposition: form-data; name="text2"
+
+b
+-----------------------------testboundary
+Content-Disposition: form-data; name="file1"; filename="a.txt"
+Content-Type: text/plain
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer iaculis metus id vestibulum nullam.
+
+-----------------------------testboundary--

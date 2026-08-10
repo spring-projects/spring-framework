@@ -533,7 +533,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 
 	@SuppressWarnings("serial")
-	private static class ViolationMessageSourceResolvable extends DefaultMessageSourceResolvable {
+	private class ViolationMessageSourceResolvable extends DefaultMessageSourceResolvable {
 
 		private final transient ConstraintViolation<Object> violation;
 
@@ -546,6 +546,11 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		public ConstraintViolation<Object> getViolation() {
 			return this.violation;
+		}
+
+		@Override
+		public boolean shouldRenderDefaultMessage() {
+			return validatorAdapter.get().requiresMessageFormat(this.violation);
 		}
 	}
 

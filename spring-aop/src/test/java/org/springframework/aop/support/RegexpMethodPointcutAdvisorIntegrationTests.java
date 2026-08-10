@@ -43,7 +43,7 @@ class RegexpMethodPointcutAdvisorIntegrationTests {
 
 
 	@Test
-	void testSinglePattern() throws Throwable {
+	void singlePattern() throws Throwable {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		ITestBean advised = (ITestBean) bf.getBean("settersAdvised");
@@ -62,7 +62,7 @@ class RegexpMethodPointcutAdvisorIntegrationTests {
 	}
 
 	@Test
-	void testMultiplePatterns() throws Throwable {
+	void multiplePatterns() throws Throwable {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		// This is a CGLIB proxy, so we can proxy it to the target class
@@ -86,7 +86,7 @@ class RegexpMethodPointcutAdvisorIntegrationTests {
 	}
 
 	@Test
-	void testSerialization() throws Throwable {
+	void serialization() throws Throwable {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		// This is a CGLIB proxy, so we can proxy it to the target class

@@ -33,13 +33,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class URLEditorTests {
 
 	@Test
-	void testCtorWithNullResourceEditor() {
+	void ctorWithNullResourceEditor() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new URLEditor(null));
 	}
 
 	@Test
-	void testStandardURI() {
+	void standardURI() {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("mailto:juergen.hoeller@interface21.com");
 		Object value = urlEditor.getValue();
@@ -49,7 +49,7 @@ class URLEditorTests {
 	}
 
 	@Test
-	void testStandardURL() {
+	void standardURL() {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("https://www.springframework.org");
 		Object value = urlEditor.getValue();
@@ -59,7 +59,7 @@ class URLEditorTests {
 	}
 
 	@Test
-	void testClasspathURL() {
+	void classpathURL() {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
@@ -71,14 +71,14 @@ class URLEditorTests {
 	}
 
 	@Test
-	void testWithNonExistentResource() {
+	void withNonExistentResource() {
 		PropertyEditor urlEditor = new URLEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening"));
 	}
 
 	@Test
-	void testSetAsTextWithNull() {
+	void setAsTextWithNull() {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText(null);
 		assertThat(urlEditor.getValue()).isNull();
@@ -86,7 +86,7 @@ class URLEditorTests {
 	}
 
 	@Test
-	void testGetAsTextReturnsEmptyStringIfValueNotSet() {
+	void getAsTextReturnsEmptyStringIfValueNotSet() {
 		PropertyEditor urlEditor = new URLEditor();
 		assertThat(urlEditor.getAsText()).isEmpty();
 	}

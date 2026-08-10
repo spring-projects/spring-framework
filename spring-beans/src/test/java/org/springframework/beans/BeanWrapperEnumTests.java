@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BeanWrapperEnumTests {
 
 	@Test
-	void testCustomEnum() {
+	void customEnum() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnum", "VALUE_1");
@@ -42,7 +42,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumWithNull() {
+	void customEnumWithNull() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnum", null);
@@ -50,7 +50,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumWithEmptyString() {
+	void customEnumWithEmptyString() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnum", "");
@@ -58,7 +58,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumArrayWithSingleValue() {
+	void customEnumArrayWithSingleValue() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumArray", "VALUE_1");
@@ -67,7 +67,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumArrayWithMultipleValues() {
+	void customEnumArrayWithMultipleValues() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumArray", new String[] {"VALUE_1", "VALUE_2"});
@@ -77,7 +77,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumArrayWithMultipleValuesAsCsv() {
+	void customEnumArrayWithMultipleValuesAsCsv() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumArray", "VALUE_1,VALUE_2");
@@ -87,7 +87,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumSetWithSingleValue() {
+	void customEnumSetWithSingleValue() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSet", "VALUE_1");
@@ -96,7 +96,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumSetWithMultipleValues() {
+	void customEnumSetWithMultipleValues() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSet", new String[] {"VALUE_1", "VALUE_2"});
@@ -106,7 +106,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumSetWithMultipleValuesAsCsv() {
+	void customEnumSetWithMultipleValuesAsCsv() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSet", "VALUE_1,VALUE_2");
@@ -116,7 +116,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testCustomEnumSetWithGetterSetterMismatch() {
+	void customEnumSetWithGetterSetterMismatch() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSetMismatch", new String[] {"VALUE_1", "VALUE_2"});
@@ -126,7 +126,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testStandardEnumSetWithMultipleValues() {
+	void standardEnumSetWithMultipleValues() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setConversionService(new DefaultConversionService());
@@ -138,7 +138,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testStandardEnumSetWithAutoGrowing() {
+	void standardEnumSetWithAutoGrowing() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setAutoGrowNestedPaths(true);
@@ -148,7 +148,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testStandardEnumMapWithMultipleValues() {
+	void standardEnumMapWithMultipleValues() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setConversionService(new DefaultConversionService());
@@ -163,7 +163,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testStandardEnumMapWithAutoGrowing() {
+	void standardEnumMapWithAutoGrowing() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setAutoGrowNestedPaths(true);
@@ -174,7 +174,7 @@ class BeanWrapperEnumTests {
 	}
 
 	@Test
-	void testNonPublicEnum() {
+	void nonPublicEnum() {
 		NonPublicEnumHolder holder = new NonPublicEnumHolder();
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("nonPublicEnum", "VALUE_1");

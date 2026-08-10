@@ -25,10 +25,11 @@ import org.jspecify.annotations.Nullable;
  * {@link CompositeMap#keySet()} and {@link CompositeMap#entrySet()}.
  *
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  * @since 6.2
  * @param <E> the type of elements maintained by this set
  */
-final class CompositeSet<E> extends CompositeCollection<E> implements Set<E> {
+final class CompositeSet<E extends @Nullable Object> extends CompositeCollection<E> implements Set<E> {
 
 	CompositeSet(Set<E> first, Set<E> second) {
 		super(first, second);

@@ -83,7 +83,7 @@ import static org.springframework.http.MediaType.parseMediaType;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "removal"})
 class RestTemplateTests {
 
 	private final ClientHttpRequestFactory requestFactory = mock();

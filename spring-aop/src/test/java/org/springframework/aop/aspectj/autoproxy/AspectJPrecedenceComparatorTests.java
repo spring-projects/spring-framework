@@ -33,6 +33,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,24 +49,21 @@ class AspectJPrecedenceComparatorTests {
 	private static final int LATE_ADVICE_DECLARATION_ORDER = 10;
 
 
-	private AspectJPrecedenceComparator comparator;
+	private final AspectJPrecedenceComparator comparator = new AspectJPrecedenceComparator();
 
-	private Method anyOldMethod;
+	private final Method anyOldMethod = ClassUtils.getMethod(MessageService.class, "getMessage");
 
-	private AspectJExpressionPointcut anyOldPointcut;
+	private final AspectJExpressionPointcut anyOldPointcut = new AspectJExpressionPointcut();
 
 
 	@BeforeEach
-	public void setUp() {
-		this.comparator = new AspectJPrecedenceComparator();
-		this.anyOldMethod = getClass().getMethods()[0];
-		this.anyOldPointcut = new AspectJExpressionPointcut();
+	void setUp() {
 		this.anyOldPointcut.setExpression("execution(* *(..))");
 	}
 
 
 	@Test
-	void testSameAspectNoAfterAdvice() {
+	void sameAspectNoAfterAdvice() {
 		Advisor advisor1 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("advisor1 sorted before advisor2").isEqualTo(-1);
@@ -76,7 +74,7 @@ class AspectJPrecedenceComparatorTests {
 	}
 
 	@Test
-	void testSameAspectAfterAdvice() {
+	void sameAspectAfterAdvice() {
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJAroundAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("advisor2 sorted before advisor1").isEqualTo(1);
@@ -87,14 +85,14 @@ class AspectJPrecedenceComparatorTests {
 	}
 
 	@Test
-	void testSameAspectOneOfEach() {
+	void sameAspectOneOfEach() {
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("advisor1 and advisor2 not comparable").isEqualTo(1);
 	}
 
 	@Test
-	void testSameAdvisorPrecedenceDifferentAspectNoAfterAdvice() {
+	void sameAdvisorPrecedenceDifferentAspectNoAfterAdvice() {
 		Advisor advisor1 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("nothing to say about order here").isEqualTo(0);
@@ -105,7 +103,7 @@ class AspectJPrecedenceComparatorTests {
 	}
 
 	@Test
-	void testSameAdvisorPrecedenceDifferentAspectAfterAdvice() {
+	void sameAdvisorPrecedenceDifferentAspectAfterAdvice() {
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJAroundAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("nothing to say about order here").isEqualTo(0);
@@ -116,7 +114,7 @@ class AspectJPrecedenceComparatorTests {
 	}
 
 	@Test
-	void testHigherAdvisorPrecedenceNoAfterAdvice() {
+	void higherAdvisorPrecedenceNoAfterAdvice() {
 		Advisor advisor1 = createSpringAOPBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER);
 		Advisor advisor2 = createAspectJBeforeAdvice(LOW_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("advisor1 sorted before advisor2").isEqualTo(-1);
@@ -127,7 +125,7 @@ class AspectJPrecedenceComparatorTests {
 	}
 
 	@Test
-	void testHigherAdvisorPrecedenceAfterAdvice() {
+	void higherAdvisorPrecedenceAfterAdvice() {
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJAroundAdvice(LOW_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("advisor1 sorted before advisor2").isEqualTo(-1);
@@ -138,7 +136,7 @@ class AspectJPrecedenceComparatorTests {
 	}
 
 	@Test
-	void testLowerAdvisorPrecedenceNoAfterAdvice() {
+	void lowerAdvisorPrecedenceNoAfterAdvice() {
 		Advisor advisor1 = createAspectJBeforeAdvice(LOW_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("advisor1 sorted after advisor2").isEqualTo(1);
@@ -149,7 +147,7 @@ class AspectJPrecedenceComparatorTests {
 	}
 
 	@Test
-	void testLowerAdvisorPrecedenceAfterAdvice() {
+	void lowerAdvisorPrecedenceAfterAdvice() {
 		Advisor advisor1 = createAspectJAfterAdvice(LOW_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJAroundAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertThat(this.comparator.compare(advisor1, advisor2)).as("advisor1 sorted after advisor2").isEqualTo(1);
@@ -207,6 +205,13 @@ class AspectJPrecedenceComparatorTests {
 		DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(this.anyOldPointcut, advice);
 		advisor.setOrder(order);
 		return advisor;
+	}
+
+	static class MessageService {
+
+		public String getMessage() {
+			return "test";
+		}
 	}
 
 }

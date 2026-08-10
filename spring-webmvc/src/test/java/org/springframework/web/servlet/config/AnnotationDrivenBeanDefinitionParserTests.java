@@ -63,7 +63,7 @@ class AnnotationDrivenBeanDefinitionParserTests {
 	private final GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 
 	@Test
-	void testMessageCodesResolver() {
+	void messageCodesResolver() {
 		loadBeanDefinitions("mvc-config-message-codes-resolver.xml");
 		RequestMappingHandlerAdapter adapter = this.appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(adapter).isNotNull();
@@ -77,7 +77,7 @@ class AnnotationDrivenBeanDefinitionParserTests {
 
 	@SuppressWarnings("removal")
 	@Test
-	public void testPathMatchingConfiguration() {
+	void pathMatchingConfiguration() {
 		loadBeanDefinitions("mvc-config-path-matching.xml");
 		RequestMappingHandlerMapping hm = this.appContext.getBean(RequestMappingHandlerMapping.class);
 		assertThat(hm).isNotNull();
@@ -87,7 +87,7 @@ class AnnotationDrivenBeanDefinitionParserTests {
 	}
 
 	@Test
-	void testMessageConverters() {
+	void messageConverters() {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
 		verifyMessageConverters(this.appContext.getBean(RequestMappingHandlerAdapter.class), true);
 		verifyMessageConverters(this.appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
@@ -96,14 +96,14 @@ class AnnotationDrivenBeanDefinitionParserTests {
 	}
 
 	@Test
-	void testMessageConvertersWithoutDefaultRegistrations() {
+	void messageConvertersWithoutDefaultRegistrations() {
 		loadBeanDefinitions("mvc-config-message-converters-defaults-off.xml");
 		verifyMessageConverters(this.appContext.getBean(RequestMappingHandlerAdapter.class), false);
 		verifyMessageConverters(this.appContext.getBean(ExceptionHandlerExceptionResolver.class), false);
 	}
 
 	@Test
-	void testArgumentResolvers() {
+	void argumentResolvers() {
 		loadBeanDefinitions("mvc-config-argument-resolvers.xml");
 		testArgumentResolvers(this.appContext.getBean(RequestMappingHandlerAdapter.class));
 		testArgumentResolvers(this.appContext.getBean(ExceptionHandlerExceptionResolver.class));
@@ -124,7 +124,7 @@ class AnnotationDrivenBeanDefinitionParserTests {
 	}
 
 	@Test
-	void testReturnValueHandlers() {
+	void returnValueHandlers() {
 		loadBeanDefinitions("mvc-config-return-value-handlers.xml");
 		testReturnValueHandlers(this.appContext.getBean(RequestMappingHandlerAdapter.class));
 		testReturnValueHandlers(this.appContext.getBean(ExceptionHandlerExceptionResolver.class));

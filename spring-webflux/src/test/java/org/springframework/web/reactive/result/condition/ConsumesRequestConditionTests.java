@@ -81,7 +81,7 @@ class ConsumesRequestConditionTests {
 	}
 
 	@Test // gh-28024
-	public void matchWithParameters() {
+	void matchWithParameters() {
 		String base = "application/hal+json";
 		ConsumesRequestCondition condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
 		MockServerWebExchange exchange = postExchange(base + ";profile=\"a\"");
@@ -121,7 +121,7 @@ class ConsumesRequestConditionTests {
 	}
 
 	@Test // gh-22010
-	public void consumesNoContent() {
+	void consumesNoContent() {
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 		condition.setBodyRequired(false);
 

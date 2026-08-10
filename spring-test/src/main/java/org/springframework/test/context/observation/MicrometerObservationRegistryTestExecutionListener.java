@@ -36,7 +36,8 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>This listener updates the {@link ObservationThreadLocalAccessor} with the
  * {@code ObservationRegistry} obtained from the test's {@link ApplicationContext},
- * if present.
+ * if the {@code ApplicationContext} is available and contains an
+ * {@code ObservationRegistry} bean.
  *
  * @author Marcin Grzejszczak
  * @author Sam Brannen
@@ -125,9 +126,10 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 	}
 
 	/**
-	 * If the test's {@link ApplicationContext} contains an {@link ObservationRegistry}
-	 * bean, this method retrieves the {@code ObservationRegistry} currently stored
-	 * in {@link ObservationThreadLocalAccessor}, saves a reference to the original
+	 * If the test's {@link ApplicationContext} is available and contains an
+	 * {@link ObservationRegistry} bean, this method retrieves the
+	 * {@code ObservationRegistry} currently stored in
+	 * {@link ObservationThreadLocalAccessor}, saves a reference to the original
 	 * registry as a {@link TestContext} attribute (to be restored in
 	 * {@link #afterTestMethod(TestContext)}), and sets the registry from the test's
 	 * {@code ApplicationContext} in {@link ObservationThreadLocalAccessor}.
@@ -136,6 +138,9 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 	 */
 	@Override
 	public void beforeTestMethod(TestContext testContext) {
+		if (!testContext.hasApplicationContext()) {
+			return;
+		}
 		testContext.getApplicationContext().getBeanProvider(ObservationRegistry.class)
 				.ifAvailable(registry -> {
 					if (logger.isDebugEnabled()) {

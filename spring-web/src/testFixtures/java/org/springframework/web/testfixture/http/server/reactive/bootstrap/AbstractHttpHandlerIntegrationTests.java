@@ -36,6 +36,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClient;
 
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
@@ -75,6 +76,8 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	protected int port;
 
+	private RestClient restClient;
+
 
 	protected void startServer(HttpServer httpServer) throws Exception {
 		this.server = httpServer;
@@ -84,6 +87,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 		// Set dynamically chosen port
 		this.port = this.server.getPort();
+		onServerStart(this.server.getPort());
 	}
 
 	@AfterEach
@@ -96,6 +100,18 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 
 	protected abstract HttpHandler createHttpHandler();
+
+	protected void onServerStart(int port) {
+		this.restClient = initRestClient(RestClient.builder().baseUrl("http://localhost:" + this.port));
+	}
+
+	protected RestClient initRestClient(RestClient.Builder builder) {
+		return builder.build();
+	}
+
+	protected RestClient getRestClient() {
+		return this.restClient;
+	}
 
 
 	/**

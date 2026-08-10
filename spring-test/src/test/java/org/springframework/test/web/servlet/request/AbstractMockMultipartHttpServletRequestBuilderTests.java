@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-public class AbstractMockMultipartHttpServletRequestBuilderTests {
+class AbstractMockMultipartHttpServletRequestBuilderTests {
 
 	private final ServletContext servletContext = new MockServletContext();
 

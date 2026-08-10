@@ -42,7 +42,6 @@ import org.springframework.util.Assert;
  * @see java.util.concurrent.ExecutorService
  * @see java.util.concurrent.Executors
  */
-@SuppressWarnings("deprecation")
 public class TaskExecutorAdapter implements AsyncTaskExecutor {
 
 	private final Executor concurrentExecutor;

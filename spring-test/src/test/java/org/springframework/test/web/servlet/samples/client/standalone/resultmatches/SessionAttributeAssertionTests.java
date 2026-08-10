@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class SessionAttributeAssertionTests {
+class SessionAttributeAssertionTests {
 
 	private final WebTestClient client =
 			MockMvcWebTestClient.bindToController(new SimpleController())

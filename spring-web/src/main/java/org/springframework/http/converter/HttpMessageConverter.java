@@ -108,4 +108,22 @@ public interface HttpMessageConverter<T> {
 	void write(T t, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException;
 
+	/**
+	 * Indicates whether this message converter can
+	 * {@linkplain #write(Object, MediaType, HttpOutputMessage) write} the
+	 * given payload multiple times.
+	 * <p>This can be used by HTTP client libraries to know whether a message can be
+	 * sent again, for example after an HTTP redirect. The default implementation
+	 * returns {@code false}. This typically returns false if the payload can be read
+	 * only once.
+	 * @param t the object t
+	 * @param contentType the content type to use when writing.
+	 * @return {@code true} if {@code t} can be written repeatedly;
+	 * {@code false} otherwise
+	 * @since 7.1
+	 */
+	default boolean canWriteRepeatedly(T t, @Nullable MediaType contentType) {
+		return false;
+	}
+
 }

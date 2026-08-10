@@ -48,13 +48,13 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @see org.springframework.test.web.servlet.result.PrintingResultHandlerTests
  */
 @Disabled
-public class PrintingResultHandlerSmokeTests {
+class PrintingResultHandlerSmokeTests {
 
 	// Not intended to be executed with the build.
 	// Comment out class-level @Disabled to see the output.
 
 	@Test
-	public void testPrint() throws Exception {
+	void printToVariousOutputs() throws Exception {
 		StringWriter writer = new StringWriter();
 
 		standaloneSetup(new SimpleController())
@@ -82,4 +82,5 @@ public class PrintingResultHandlerSmokeTests {
 			return "Hello Response";
 		}
 	}
+
 }

@@ -27,7 +27,7 @@ class ExceptionController {
 
 	// tag::narrow[]
 	@ExceptionHandler(FileSystemException::class, RemoteException::class)
-	fun handleIoException(ex: IOException): ResponseEntity<String> {
+	fun handleIOException(ex: IOException): ResponseEntity<String> {
 		return ResponseEntity.internalServerError().body(ex.message)
 	}
 	// end::narrow[]

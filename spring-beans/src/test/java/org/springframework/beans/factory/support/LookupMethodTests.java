@@ -44,7 +44,7 @@ class LookupMethodTests {
 
 
 	@Test
-	void testWithoutConstructorArg() {
+	void withoutConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		Object expected = bean.get();
@@ -52,7 +52,7 @@ class LookupMethodTests {
 	}
 
 	@Test
-	void testWithOverloadedArg() {
+	void withOverloadedArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		TestBean expected = bean.get("haha");
@@ -61,7 +61,7 @@ class LookupMethodTests {
 	}
 
 	@Test
-	void testWithOneConstructorArg() {
+	void withOneConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		TestBean expected = bean.getOneArgument("haha");
@@ -70,7 +70,7 @@ class LookupMethodTests {
 	}
 
 	@Test
-	void testWithTwoConstructorArg() {
+	void withTwoConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		TestBean expected = bean.getTwoArguments("haha", 72);
@@ -80,7 +80,7 @@ class LookupMethodTests {
 	}
 
 	@Test
-	void testWithThreeArgsShouldFail() {
+	void withThreeArgsShouldFail() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThat(bean).isNotNull();
 		assertThatExceptionOfType(AbstractMethodError.class).as("does not have a three arg constructor")
@@ -88,7 +88,7 @@ class LookupMethodTests {
 	}
 
 	@Test
-	void testWithOverriddenLookupMethod() {
+	void withOverriddenLookupMethod() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("extendedBean");
 		assertThat(bean).isNotNull();
 		TestBean expected = bean.getOneArgument("haha");
@@ -98,7 +98,7 @@ class LookupMethodTests {
 	}
 
 	@Test
-	void testWithGenericBean() {
+	void withGenericBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(NumberBean.class);
 		bd.getMethodOverrides().addOverride(new LookupOverride("getDoubleStore", null));
 		bd.getMethodOverrides().addOverride(new LookupOverride("getFloatStore", null));

@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile(org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.DEV_ENV_NAME)
+@Profile(org.springframework.core.env.Constants.DEV_ENV_NAME)
 @Configuration
 class DevConfig {
 

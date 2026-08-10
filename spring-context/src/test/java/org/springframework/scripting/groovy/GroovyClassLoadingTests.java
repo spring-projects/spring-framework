@@ -34,7 +34,7 @@ class GroovyClassLoadingTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void classLoading() throws Exception {
+	void classLoading() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
 
 		GroovyClassLoader gcl = new GroovyClassLoader();

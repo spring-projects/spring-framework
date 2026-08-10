@@ -163,7 +163,7 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 			}
 		}
 		val customEncoder = KotlinSerializationJsonEncoder(json)
-		val input = Flux<ISimpleSerializableBean>.just(
+		val input = Flux.just(
 			SimpleSerializableBean("foo"),
 			SimpleSerializableBean("bar"),
 			SimpleSerializableBean("baz")

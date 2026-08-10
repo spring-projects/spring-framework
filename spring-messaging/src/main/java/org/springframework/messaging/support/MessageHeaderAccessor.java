@@ -480,7 +480,7 @@ public class MessageHeaderAccessor {
 	 * @return the message
 	 */
 	public String getShortLogMessage(Object payload) {
-		return "headers=" + this.headers.toString() + getShortPayloadLogMessage(payload);
+		return "headers=" + this.headers + getShortPayloadLogMessage(payload);
 	}
 
 	/**
@@ -489,7 +489,7 @@ public class MessageHeaderAccessor {
 	 * @return the message
 	 */
 	public String getDetailedLogMessage(@Nullable Object payload) {
-		return "headers=" + this.headers.toString() + getDetailedPayloadLogMessage(payload);
+		return "headers=" + this.headers + getDetailedPayloadLogMessage(payload);
 	}
 
 	protected String getShortPayloadLogMessage(Object payload) {

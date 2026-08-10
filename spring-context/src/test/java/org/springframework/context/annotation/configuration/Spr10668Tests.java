@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Spr10668Tests {
 
 	@Test
-	void testSelfInjectHierarchy() {
+	void selfInjectHierarchy() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ChildConfig.class);
 		assertThat(context.getBean(MyComponent.class)).isNotNull();
 		context.close();

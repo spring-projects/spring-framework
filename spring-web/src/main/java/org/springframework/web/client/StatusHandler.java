@@ -90,7 +90,10 @@ final class StatusHandler {
 
 	/**
 	 * Create a StatusHandler from a {@link ResponseErrorHandler}.
+	 * @deprecated as of 7.1 in favor of {@link #of(Predicate, RestClient.ResponseSpec.ErrorHandler)}
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static StatusHandler fromErrorHandler(ResponseErrorHandler errorHandler) {
 		Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 
@@ -166,15 +169,14 @@ final class StatusHandler {
 
 		return resolvableType -> {
 			try {
-				HttpMessageConverterExtractor<?> extractor =
-						new HttpMessageConverterExtractor<>(resolvableType.getType(), messageConverters);
-
-				return extractor.extractData(new ClientHttpResponseDecorator(response) {
+				ClientHttpResponseDecorator responseWrapper = new ClientHttpResponseDecorator(response) {
 					@Override
 					public InputStream getBody() {
 						return new ByteArrayInputStream(body);
 					}
-				});
+				};
+				return RestClientUtils.readWithMessageConverters(responseWrapper, messageConverters,
+						resolvableType.getType(), resolvableType.resolve(Object.class), null);
 			}
 			catch (IOException ex) {
 				throw new RestClientException("Error while extracting response for type [" + resolvableType + "]", ex);

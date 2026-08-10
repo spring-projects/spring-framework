@@ -141,7 +141,7 @@ class EagerTestExecutionEventPublishingTests {
 	static class Config {
 
 		@BeforeTestClass
-		public void beforeTestClass(BeforeTestClassEvent e) {
+		void beforeTestClass(BeforeTestClassEvent e) {
 			events.add(e.getClass());
 		}
 

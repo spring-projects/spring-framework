@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.StubMvcResult;
  *
  * @author Rossen Stoyanchev
  */
-public class HeaderResultMatchersTests {
+class HeaderResultMatchersTests {
 
 	private final HeaderResultMatchers matchers = new HeaderResultMatchers();
 
@@ -43,7 +43,7 @@ public class HeaderResultMatchersTests {
 
 
 	@Test // SPR-17330
-	public void matchDateFormattedWithHttpHeaders() throws Exception {
+	void matchDateFormattedWithHttpHeaders() throws Exception {
 
 		long epochMilli = ZonedDateTime.of(2018, 10, 5, 0, 0, 0, 0, ZoneOffset.UTC).toInstant().toEpochMilli();
 		HttpHeaders headers = new HttpHeaders();

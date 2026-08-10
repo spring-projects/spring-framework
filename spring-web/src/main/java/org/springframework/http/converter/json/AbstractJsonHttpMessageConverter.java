@@ -127,6 +127,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 		catch (Exception ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
+		writer.close();
 	}
 
 

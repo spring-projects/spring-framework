@@ -67,14 +67,12 @@ class WebSessionMethodArgumentResolverTests {
 
 		param = this.testMethod.arg(Mono.class, WebSession.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertThat(actual).isNotNull();
-		assertThat(Mono.class.isAssignableFrom(actual.getClass())).isTrue();
+		assertThat(actual).isInstanceOf(Mono.class);
 		assertThat(((Mono<?>) actual).block()).isSameAs(session);
 
 		param = this.testMethod.arg(Single.class, WebSession.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertThat(actual).isNotNull();
-		assertThat(Single.class.isAssignableFrom(actual.getClass())).isTrue();
+		assertThat(actual).isInstanceOf(Single.class);
 		assertThat(((Single<?>) actual).blockingGet()).isSameAs(session);
 	}
 

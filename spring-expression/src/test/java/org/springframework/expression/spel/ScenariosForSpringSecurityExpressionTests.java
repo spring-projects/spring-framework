@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ScenariosForSpringSecurityExpressionTests extends AbstractExpressionTests {
 
 	@Test
-	void testScenario01_Roles() {
+	void roles() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		Expression expr = parser.parseRaw("hasAnyRole('MANAGER','TELLER')");
@@ -61,7 +61,7 @@ class ScenariosForSpringSecurityExpressionTests extends AbstractExpressionTests 
 	}
 
 	@Test
-	void testScenario02_ComparingNames() {
+	void comparingNames() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
@@ -96,7 +96,7 @@ class ScenariosForSpringSecurityExpressionTests extends AbstractExpressionTests 
 	}
 
 	@Test
-	void testScenario03_Arithmetic() {
+	void arithmetic() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
@@ -119,7 +119,7 @@ class ScenariosForSpringSecurityExpressionTests extends AbstractExpressionTests 
 
 	// Here i'm going to change which hasRole() executes and make it one of my own Java methods
 	@Test
-	void testScenario04_ControllingWhichMethodsRun() {
+	void controllingWhichMethodsRun() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
@@ -128,7 +128,7 @@ class ScenariosForSpringSecurityExpressionTests extends AbstractExpressionTests 
 		ctx.addMethodResolver(new MyMethodResolver()); // NEEDS TO OVERRIDE THE REFLECTION ONE - SHOW REORDERING MECHANISM
 		// Might be better with a as a variable although it would work as a property too...
 		// Variable references using a '#'
-//		SpelExpression expr = parser.parseExpression("(hasRole('SUPERVISOR') or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
+		// SpelExpression expr = parser.parseExpression("(hasRole('SUPERVISOR') or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
 		Expression expr = parser.parseRaw("(hasRole(3) or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
 
 		Boolean value = null;
@@ -137,10 +137,10 @@ class ScenariosForSpringSecurityExpressionTests extends AbstractExpressionTests 
 		value = expr.getValue(ctx,Boolean.class);
 		assertThat((boolean) value).isTrue();
 
-//			ctx.setRootObject(new Manager("Luke"));
-//			ctx.setVariable("a",1.043d);
-//			value = (Boolean)expr.getValue(ctx,Boolean.class);
-//			assertFalse(value);
+		// ctx.setRootObject(new Manager("Luke"));
+		// ctx.setVariable("a",1.043d);
+		// value = (Boolean)expr.getValue(ctx,Boolean.class);
+		// assertFalse(value);
 	}
 
 

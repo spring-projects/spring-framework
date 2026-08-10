@@ -55,7 +55,8 @@ class HttpMessageWriterViewTests {
 		assertThat(this.view.getSupportedMediaTypes()).containsExactly(
 				MediaType.APPLICATION_JSON,
 				MediaType.parseMediaType("application/*+json"),
-				MediaType.APPLICATION_NDJSON);
+				MediaType.APPLICATION_NDJSON,
+				MediaType.APPLICATION_JSONL);
 	}
 
 	@Test

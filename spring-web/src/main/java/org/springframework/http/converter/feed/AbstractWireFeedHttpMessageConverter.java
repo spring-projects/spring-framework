@@ -29,6 +29,7 @@ import com.rometools.rome.feed.WireFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.WireFeedInput;
 import com.rometools.rome.io.WireFeedOutput;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -65,6 +66,11 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 		super(supportedMediaType);
 	}
 
+
+	@Override
+	public boolean canWriteRepeatedly(T t, @Nullable MediaType contentType) {
+		return true;
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -108,6 +114,7 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(T t) {
 		return true;
 	}

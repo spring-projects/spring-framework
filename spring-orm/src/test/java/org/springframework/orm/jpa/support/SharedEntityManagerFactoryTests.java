@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verify;
 class SharedEntityManagerFactoryTests {
 
 	@Test
-	void testValidUsage() {
+	void validUsage() {
 		Object o = new Object();
 
 		EntityManager mockEm = mock();

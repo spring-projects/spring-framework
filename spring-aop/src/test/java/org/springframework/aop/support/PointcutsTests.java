@@ -120,7 +120,7 @@ class PointcutsTests {
 
 
 	@Test
-	void testTrue() {
+	void trueCase() {
 		assertThat(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_SET_AGE, TestBean.class, 6)).isTrue();
 		assertThat(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
 		assertThat(Pointcuts.matches(Pointcut.TRUE, TEST_BEAN_ABSQUATULATE, TestBean.class)).isTrue();
@@ -130,7 +130,7 @@ class PointcutsTests {
 	}
 
 	@Test
-	void testMatches() {
+	void matches() {
 		assertThat(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_SET_AGE, TestBean.class, 6)).isTrue();
 		assertThat(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_GET_AGE, TestBean.class)).isFalse();
 		assertThat(Pointcuts.matches(allClassSetterPointcut, TEST_BEAN_ABSQUATULATE, TestBean.class)).isFalse();
@@ -143,7 +143,7 @@ class PointcutsTests {
 	 * Should match all setters and getters on any class
 	 */
 	@Test
-	void testUnionOfSettersAndGetters() {
+	void unionOfSettersAndGetters() {
 		Pointcut union = Pointcuts.union(allClassGetterPointcut, allClassSetterPointcut);
 		assertThat(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, 6)).isTrue();
 		assertThat(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
@@ -151,7 +151,7 @@ class PointcutsTests {
 	}
 
 	@Test
-	void testUnionOfSpecificGetters() {
+	void unionOfSpecificGetters() {
 		Pointcut union = Pointcuts.union(allClassGetAgePointcut, allClassGetNamePointcut);
 		assertThat(Pointcuts.matches(union, TEST_BEAN_SET_AGE, TestBean.class, 6)).isFalse();
 		assertThat(Pointcuts.matches(union, TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
@@ -175,7 +175,7 @@ class PointcutsTests {
 	 * Second one matches all getters in the MyTestBean class. TestBean getters shouldn't pass.
 	 */
 	@Test
-	void testUnionOfAllSettersAndSubclassSetters() {
+	void unionOfAllSettersAndSubclassSetters() {
 		assertThat(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_SET_AGE, TestBean.class, 6)).isFalse();
 		assertThat(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_SET_AGE, MyTestBean.class, 6)).isTrue();
 		assertThat(Pointcuts.matches(myTestBeanSetterPointcut, TEST_BEAN_GET_AGE, TestBean.class)).isFalse();
@@ -193,7 +193,7 @@ class PointcutsTests {
 	 * it's the union of allClassGetAge and subclass getters
 	 */
 	@Test
-	void testIntersectionOfSpecificGettersAndSubclassGetters() {
+	void intersectionOfSpecificGettersAndSubclassGetters() {
 		assertThat(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
 		assertThat(Pointcuts.matches(allClassGetAgePointcut, TEST_BEAN_GET_AGE, MyTestBean.class)).isTrue();
 		assertThat(Pointcuts.matches(myTestBeanGetterPointcut, TEST_BEAN_GET_NAME, TestBean.class)).isFalse();
@@ -239,7 +239,7 @@ class PointcutsTests {
 	 * The intersection of these two pointcuts leaves nothing.
 	 */
 	@Test
-	void testSimpleIntersection() {
+	void simpleIntersection() {
 		Pointcut intersection = Pointcuts.intersection(allClassGetterPointcut, allClassSetterPointcut);
 		assertThat(Pointcuts.matches(intersection, TEST_BEAN_SET_AGE, TestBean.class, 6)).isFalse();
 		assertThat(Pointcuts.matches(intersection, TEST_BEAN_GET_AGE, TestBean.class)).isFalse();

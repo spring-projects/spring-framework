@@ -109,7 +109,7 @@ class InstrumentedMethodTests {
 				.onInstance(String.class).returnValue(String.class.getDeclaredConstructors()).build();
 
 		@BeforeEach
-		public void setup() throws Exception {
+		void setup() throws Exception {
 			this.stringGetConstructor = RecordedInvocation.of(InstrumentedMethod.CLASS_GETCONSTRUCTOR)
 					.onInstance(String.class).withArgument(new Class[0]).returnValue(String.class.getConstructor()).build();
 			this.stringGetDeclaredConstructor = RecordedInvocation.of(InstrumentedMethod.CLASS_GETDECLAREDCONSTRUCTOR)

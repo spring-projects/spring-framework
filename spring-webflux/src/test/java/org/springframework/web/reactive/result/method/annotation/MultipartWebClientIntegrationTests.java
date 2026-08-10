@@ -286,7 +286,7 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 		Flux<String> transferTo(@RequestPart("fileParts") Flux<FilePart> parts) {
 			return parts.concatMap(filePart -> createTempFile(filePart.filename())
 					.flatMap(tempFile -> filePart.transferTo(tempFile)
-							.then(Mono.just(tempFile.toString() + "\n"))));
+							.then(Mono.just(tempFile + "\n"))));
 		}
 
 		private Mono<Path> createTempFile(String suffix) {

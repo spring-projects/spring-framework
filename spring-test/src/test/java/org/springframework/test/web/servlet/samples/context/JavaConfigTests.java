@@ -69,7 +69,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 	@ContextConfiguration(classes = WebConfig.class)
 })
 @DisabledInAotMode("@ContextHierarchy is not supported in AOT")
-public class JavaConfigTests {
+class JavaConfigTests {
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -84,14 +84,14 @@ public class JavaConfigTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 		verifyRootWacSupport();
 		given(this.personDao.getPerson(5L)).willReturn(new Person("Joe"));
 	}
 
 	@Test
-	public void person() throws Exception {
+	void person() throws Exception {
 		this.mockMvc.perform(get("/person/5").accept(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpectAll(
@@ -103,7 +103,7 @@ public class JavaConfigTests {
 	}
 
 	@Test
-	public void andExpectAllWithOneFailure() {
+	void andExpectAllWithOneFailure() {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> this.mockMvc.perform(get("/person/5").accept(MediaType.APPLICATION_JSON))
 					.andExpectAll(
@@ -115,7 +115,7 @@ public class JavaConfigTests {
 	}
 
 	@Test
-	public void andExpectAllWithMultipleFailures() {
+	void andExpectAllWithMultipleFailures() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 			this.mockMvc.perform(get("/person/5").accept(MediaType.APPLICATION_JSON))
 				.andExpectAll(

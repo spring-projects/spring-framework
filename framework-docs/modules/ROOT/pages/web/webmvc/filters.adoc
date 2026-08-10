@@ -24,7 +24,7 @@ ignoring further handling via `FORWARD` dispatches. The filter also provides con
 over whether the `Filter` gets involved in `ASYNC` and `ERROR` dispatches.
 
 Servlet filters can be configured in `web.xml` or via Servlet annotations.
-In a Spring Boot application , you can
+In a Spring Boot application, you can
 {spring-boot-docs}/how-to/webserver.html#howto.webserver.add-servlet-filter-listener.spring-bean[declare Filter's as beans]
 and Boot will have them configured.
 
@@ -51,20 +51,29 @@ include::partial$web/forwarded-headers.adoc[]
 [[filters-forwarded-headers-non-forwardedheaderfilter]]
 === ForwardedHeaderFilter
 
-`ForwardedHeaderFilter` is a Servlet filter that modifies the request in order to
-a) change the host, port, and scheme based on `Forwarded` headers, and b) to remove those
-headers to eliminate further impact. The filter relies on wrapping the request, and
-therefore it must be ordered ahead of other filters, such as `RequestContextFilter`, that
-should work with the modified and not the original request.
+`ForwardedHeaderFilter` is a Servlet filter that modifies the request to match information
+from the standard `"Forwarded"` or `"X-Forwarded"` headers, and also removes those headers
+to eliminate further impact. The filter wraps the request and must be ordered ahead
+of other filters such as `RequestContextFilter` in order for all downstream
+handlers to see the modified request.
+
 
 [[filters-forwarded-headers-security]]
 === Security Considerations
 
-There are security considerations for forwarded headers since an application cannot know
-if the headers were added by a proxy, as intended, or by a malicious client. This is why
-a proxy at the boundary of trust should be configured to remove untrusted `Forwarded`
-headers that come from the outside. You can also configure the `ForwardedHeaderFilter`
-with `removeOnly=true`, in which case it removes but does not use the headers.
+Forwarded headers are intended to be set by trusted proxies and never allowed in from the
+outside. A proxy at the edge of trust must remove forwarded headers including both the
+standard `"Forwarded"` and `"X-Forwarded"` headers, regardless of which one they use,
+to protect applications which may check both.
+
+When creating `ForwardedHeaderFilter` you need to specify whether it should use the
+standard `"Forwarded"` or `"X-Forwarded"` headers. If needed `"X-Forwarded-Prefix"`
+must be enabled separately through a property on the filter.
+
+`ForwardedHeaderFilter` can be configured in `removeOnly` mode, in which case it removes
+forwarded headers from the request without using them.
+
+
 
 [[filters-forwarded-headers-dispatcher]]
 === Dispatcher Types

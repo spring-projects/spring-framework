@@ -56,7 +56,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class FragmentViewResolutionResultHandlerTests {
+class FragmentViewResolutionResultHandlerTests {
 
 	private static final Fragment fragment1 = Fragment.create("fragment1", Map.of("foo", "Foo"));
 

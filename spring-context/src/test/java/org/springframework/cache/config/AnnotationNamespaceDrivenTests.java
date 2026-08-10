@@ -40,7 +40,7 @@ class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests {
 	}
 
 	@Test
-	void testKeyStrategy() {
+	void keyStrategy() {
 		CacheInterceptor ci = this.ctx.getBean(
 				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
 		assertThat(ci.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator"));
@@ -67,7 +67,7 @@ class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests {
 	}
 
 	@Test
-	void testCacheErrorHandler() {
+	void cacheErrorHandler() {
 		CacheInterceptor ci = this.ctx.getBean(
 				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
 		assertThat(ci.getErrorHandler()).isSameAs(this.ctx.getBean("errorHandler", CacheErrorHandler.class));

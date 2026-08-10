@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Winch
  * @author Rossen Stoyanchev
  */
-public class MockMvcFilterDecoratorTests {
+class MockMvcFilterDecoratorTests {
 
 	private MockHttpServletRequest request;
 
@@ -54,7 +54,7 @@ public class MockMvcFilterDecoratorTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		request = new MockHttpServletRequest();
 		request.setContextPath("/context");
 		response = new MockHttpServletResponse();
@@ -64,7 +64,7 @@ public class MockMvcFilterDecoratorTests {
 
 
 	@Test
-	public void init() throws Exception {
+	void init() throws Exception {
 		FilterConfig config = new MockFilterConfig();
 		filter = new MockMvcFilterDecorator(delegate, new String[] {"/"});
 		filter.init(config);
@@ -72,133 +72,133 @@ public class MockMvcFilterDecoratorTests {
 	}
 
 	@Test
-	public void destroy() {
+	void destroy() {
 		filter = new MockMvcFilterDecorator(delegate, new String[] {"/"});
 		filter.destroy();
 		assertThat(delegate.destroy).isTrue();
 	}
 
 	@Test
-	public void matchExact() throws Exception {
+	void matchExact() throws Exception {
 		assertFilterInvoked("/test", "/test");
 	}
 
 	@Test
-	public void matchExactEmpty() throws Exception {
+	void matchExactEmpty() throws Exception {
 		assertFilterInvoked("", "");
 	}
 
 	@Test
-	public void matchPathMappingAllFolder() throws Exception {
+	void matchPathMappingAllFolder() throws Exception {
 		assertFilterInvoked("/test/this", "*");
 		assertFilterInvoked("/test/this", "/*");
 	}
 
 	@Test
-	public void matchPathMappingAll() throws Exception {
+	void matchPathMappingAll() throws Exception {
 		assertFilterInvoked("/test", "*");
 		assertFilterInvoked("/test", "/*");
 	}
 
 	@Test
-	public void matchPathMappingAllContextRoot() throws Exception {
+	void matchPathMappingAllContextRoot() throws Exception {
 		assertFilterInvoked("", "*");
 		assertFilterInvoked("", "/*");
 	}
 
 	@Test
-	public void matchPathMappingContextRootAndSlash() throws Exception {
+	void matchPathMappingContextRootAndSlash() throws Exception {
 		assertFilterInvoked("/", "*");
 		assertFilterInvoked("/", "/*");
 	}
 
 	@Test
-	public void matchPathMappingFolderPatternWithMultiFolderPath() throws Exception {
+	void matchPathMappingFolderPatternWithMultiFolderPath() throws Exception {
 		assertFilterInvoked("/test/this/here", "/test/*");
 	}
 
 	@Test
-	public void matchPathMappingFolderPattern() throws Exception {
+	void matchPathMappingFolderPattern() throws Exception {
 		assertFilterInvoked("/test/this", "/test/*");
 	}
 
 	@Test
-	public void matchPathMappingNoSuffix() throws Exception {
+	void matchPathMappingNoSuffix() throws Exception {
 		assertFilterInvoked("/test/", "/test/*");
 	}
 
 	@Test
-	public void matchPathMappingMissingSlash() throws Exception {
+	void matchPathMappingMissingSlash() throws Exception {
 		assertFilterInvoked("/test", "/test/*");
 	}
 
 	@Test
-	public void noMatchPathMappingMulti() throws Exception {
+	void noMatchPathMappingMulti() throws Exception {
 		assertFilterNotInvoked("/this/test/here", "/test/*");
 	}
 
 	@Test
-	public void noMatchPathMappingEnd() throws Exception {
+	void noMatchPathMappingEnd() throws Exception {
 		assertFilterNotInvoked("/this/test", "/test/*");
 	}
 
 	@Test
-	public void noMatchPathMappingEndSuffix() throws Exception {
+	void noMatchPathMappingEndSuffix() throws Exception {
 		assertFilterNotInvoked("/test2/", "/test/*");
 	}
 
 	@Test
-	public void noMatchPathMappingMissingSlash() throws Exception {
+	void noMatchPathMappingMissingSlash() throws Exception {
 		assertFilterNotInvoked("/test2", "/test/*");
 	}
 
 	@Test
-	public void noMatchDispatcherType() throws Exception {
+	void noMatchDispatcherType() throws Exception {
 		assertFilterNotInvoked(DispatcherType.FORWARD, DispatcherType.REQUEST, "/test", "/test");
 	}
 
 	@Test
-	public void matchExtensionMulti() throws Exception {
+	void matchExtensionMulti() throws Exception {
 		assertFilterInvoked("/test/this/here.html", "*.html");
 	}
 
 	@Test
-	public void matchExtension() throws Exception {
+	void matchExtension() throws Exception {
 		assertFilterInvoked("/test/this.html", "*.html");
 	}
 
 	@Test
-	public void matchExtensionNoPrefix() throws Exception {
+	void matchExtensionNoPrefix() throws Exception {
 		assertFilterInvoked("/.html", "*.html");
 	}
 
 	@Test
-	public void matchExtensionNoFolder() throws Exception {
+	void matchExtensionNoFolder() throws Exception {
 		assertFilterInvoked("/test.html", "*.html");
 	}
 
 	@Test
-	public void noMatchExtensionNoSlash() throws Exception {
+	void noMatchExtensionNoSlash() throws Exception {
 		assertFilterNotInvoked(".html", "*.html");
 	}
 
 	@Test
-	public void noMatchExtensionSlashEnd() throws Exception {
+	void noMatchExtensionSlashEnd() throws Exception {
 		assertFilterNotInvoked("/index.html/", "*.html");
 	}
 
 	@Test
-	public void noMatchExtensionPeriodEnd() throws Exception {
+	void noMatchExtensionPeriodEnd() throws Exception {
 		assertFilterNotInvoked("/index.html.", "*.html");
 	}
 
 	@Test
-	public void noMatchExtensionLarger() throws Exception {
+	void noMatchExtensionLarger() throws Exception {
 		assertFilterNotInvoked("/index.htm", "*.html");
 	}
 
 	@Test
-	public void noMatchInvalidPattern() throws Exception {
+	void noMatchInvalidPattern() throws Exception {
 		// pattern uses extension mapping but starts with / (treated as exact match)
 		assertFilterNotInvoked("/index.html", "/*.html");
 	}
@@ -207,37 +207,37 @@ public class MockMvcFilterDecoratorTests {
 	 * Below are tests from Table 12-1 of the Servlet Specification
 	 */
 	@Test
-	public void specPathMappingMultiFolderPattern() throws Exception {
+	void specPathMappingMultiFolderPattern() throws Exception {
 		assertFilterInvoked("/foo/bar/index.html", "/foo/bar/*");
 	}
 
 	@Test
-	public void specPathMappingMultiFolderPatternAlternate() throws Exception {
+	void specPathMappingMultiFolderPatternAlternate() throws Exception {
 		assertFilterInvoked("/foo/bar/index.bop", "/foo/bar/*");
 	}
 
 	@Test
-	public void specPathMappingNoSlash() throws Exception {
+	void specPathMappingNoSlash() throws Exception {
 		assertFilterInvoked("/baz", "/baz/*");
 	}
 
 	@Test
-	public void specPathMapping() throws Exception {
+	void specPathMapping() throws Exception {
 		assertFilterInvoked("/baz/index.html", "/baz/*");
 	}
 
 	@Test
-	public void specExactMatch() throws Exception {
+	void specExactMatch() throws Exception {
 		assertFilterInvoked("/catalog", "/catalog");
 	}
 
 	@Test
-	public void specExtensionMappingSingleFolder() throws Exception {
+	void specExtensionMappingSingleFolder() throws Exception {
 		assertFilterInvoked("/catalog/racecar.bop", "*.bop");
 	}
 
 	@Test
-	public void specExtensionMapping() throws Exception {
+	void specExtensionMapping() throws Exception {
 		assertFilterInvoked("/index.bop", "*.bop");
 	}
 

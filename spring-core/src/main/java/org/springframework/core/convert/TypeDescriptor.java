@@ -541,7 +541,7 @@ public class TypeDescriptor implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Annotation ann : getAnnotations()) {
-			builder.append('@').append(getName(ann.annotationType())).append(' ');
+			builder.append('@').append(ClassUtils.getCanonicalName(ann.annotationType())).append(' ');
 		}
 		builder.append(getResolvableType());
 		return builder.toString();
@@ -631,7 +631,7 @@ public class TypeDescriptor implements Serializable {
 	 * Create a new type descriptor as an array of the specified type.
 	 * <p>For example to create a {@code Map<String,String>[]} use:
 	 * <pre class="code">
-	 * TypeDescriptor.array(TypeDescriptor.map(Map.class, TypeDescriptor.value(String.class), TypeDescriptor.value(String.class)));
+	 * TypeDescriptor.array(TypeDescriptor.map(Map.class, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(String.class)));
 	 * </pre>
 	 * @param elementTypeDescriptor the {@link TypeDescriptor} of the array element or {@code null}
 	 * @return an array {@link TypeDescriptor} or {@code null} if {@code elementTypeDescriptor} is {@code null}
@@ -724,11 +724,6 @@ public class TypeDescriptor implements Serializable {
 	 */
 	public static @Nullable TypeDescriptor nested(Property property, int nestingLevel) {
 		return new TypeDescriptor(property).nested(nestingLevel);
-	}
-
-	private static String getName(Class<?> clazz) {
-		String canonicalName = clazz.getCanonicalName();
-		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 

@@ -24,7 +24,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -87,7 +88,7 @@ class StandardMultipartHttpServletRequestTests {
 		map.add(name, multipartFile.getResource());
 
 		MockHttpOutputMessage output = new MockHttpOutputMessage();
-		new FormHttpMessageConverter().write(map, null, output);
+		new MultipartHttpMessageConverter().write(map, null, output);
 
 		assertThat(output.getBodyAsString(StandardCharsets.UTF_8)).contains("""
 				Content-Disposition: form-data; name="file"; filename="myFile.txt"
@@ -166,6 +167,7 @@ class StandardMultipartHttpServletRequestTests {
 
 	private static StandardMultipartHttpServletRequest requestWithPart(String name, String disposition, String content) {
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
 		MockPart part = new MockPart(name, null, content.getBytes(StandardCharsets.UTF_8));
 		part.getHeaders().set("Content-Disposition", disposition);
 		request.addPart(part);

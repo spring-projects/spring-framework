@@ -338,21 +338,26 @@ include::partial$web/forwarded-headers.adoc[]
 [[webflux-forwarded-headers-transformer]]
 === ForwardedHeaderTransformer
 
-`ForwardedHeaderTransformer` is a component that modifies the host, port, and scheme of
-the request, based on forwarded headers, and then removes those headers. If you declare
-it as a bean with the name `forwardedHeaderTransformer`, it will be
+`ForwardedHeaderTransformer` is a component that modifies the request to match information
+from the standard `"Forwarded"` or `"X-Forwarded"` headers, and also removes those headers
+to eliminate further impact. If you declare it as a bean with the name
+`forwardedHeaderTransformer`, it will be
 xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[detected] and used.
-
 
 [[webflux-forwarded-headers-security]]
 === Security Considerations
 
-There are security considerations for forwarded headers since an application cannot know
-if the headers were added by a proxy, as intended, or by a malicious client. This is why
-a proxy at the boundary of trust should be configured to remove untrusted forwarded traffic coming
-from the outside. You can also configure the `ForwardedHeaderTransformer` with
-`removeOnly=true`, in which case it removes but does not use the headers.
+Forwarded headers are intended to be set by trusted proxies and never allowed in from the
+outside. A proxy at the edge of trust must remove forwarded headers including both the
+standard `"Forwarded"` and `"X-Forwarded"` headers, regardless of which one they use,
+to protect applications which may check both.
 
+When creating `ForwardedHeaderTransformer` you need to specify whether it should use the
+standard `"Forwarded"` or `"X-Forwarded"` headers. If needed `"X-Forwarded-Prefix"`
+must be enabled separately through a property on the transformer.
+
+`ForwardedHeaderTransformer`  can be configured in `removeOnly` mode, in which case it removes
+forwarded headers from the request without using them.
 
 [[webflux-filters]]
 == Filters
@@ -485,8 +490,8 @@ The `JacksonJsonEncoder` works as follows:
 * For a multi-value publisher with `application/json`, by default collect the values with
 `Flux#collectToList()` and then serialize the resulting collection.
 * For a multi-value publisher with a streaming media type such as
-`application/x-ndjson` or `application/stream+x-jackson-smile`, encode, write, and
-flush each value individually using a
+`application/jsonl`, `application/x-ndjson` or `application/stream+x-jackson-smile`,
+encode, write, and flush each value individually using a
 https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format. Other
 streaming media types may be registered with the encoder.
 * For SSE the `JacksonJsonEncoder` is invoked per event and the output is flushed to ensure
@@ -598,7 +603,7 @@ To configure all three in WebFlux, you'll need to supply a pre-configured instan
 [.small]#xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[See equivalent in the Servlet stack]#
 
 When streaming to the HTTP response (for example, `text/event-stream`,
-`application/x-ndjson`), it is important to send data periodically, in order to
+`application/jsonl`, `application/x-ndjson`), it is important to send data periodically, in order to
 reliably detect a disconnected client sooner rather than later. Such a send could be a
 comment-only, empty SSE event or any other "no-op" data that would effectively serve as
 a heartbeat.

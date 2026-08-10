@@ -32,6 +32,14 @@ import static org.springframework.test.context.TestContextAnnotationUtils.findAn
  * configured declaratively via {@link ActiveProfiles#profiles} or
  * {@link ActiveProfiles#value}.
  *
+ * <p>Note that the
+ * {@link org.springframework.core.env.AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
+ * spring.profiles.active} property (whether configured as a JVM system property
+ * or environment variable) is not taken into account by this resolver. If you need
+ * to allow {@code spring.profiles.active} to override profiles configured via
+ * {@link ActiveProfiles @ActiveProfiles}, you can implement a custom
+ * {@link ActiveProfilesResolver} and register it via {@link ActiveProfiles#resolver}.
+ *
  * @author Sam Brannen
  * @since 4.1
  * @see ActiveProfiles

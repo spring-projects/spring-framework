@@ -60,7 +60,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
-public class SimpleBrokerMessageHandlerTests {
+class SimpleBrokerMessageHandlerTests {
 
 	private SimpleBrokerMessageHandler messageHandler;
 
@@ -183,7 +183,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void startAndStopWithHeartbeatValue() {
+	void startAndStopWithHeartbeatValue() {
 		ScheduledFuture future = mock();
 		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMillis(15000)))).willReturn(future);
 

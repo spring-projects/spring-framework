@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 
 import org.htmlunit.HttpWebConnection;
@@ -79,7 +79,7 @@ class DelegatingWebConnectionTests {
 
 	@BeforeEach
 	void setup() throws Exception {
-		request = new WebRequest(new URL("http://localhost/"));
+		request = new WebRequest(URI.create("http://localhost/").toURL());
 		WebResponseData data = new WebResponseData("".getBytes(UTF_8), 200, "", Collections.emptyList());
 		expectedResponse = new WebResponse(data, request, 100L);
 		webConnection = new DelegatingWebConnection(defaultConnection,

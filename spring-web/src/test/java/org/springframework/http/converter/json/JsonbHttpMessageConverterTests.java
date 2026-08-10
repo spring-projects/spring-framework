@@ -87,7 +87,7 @@ class JsonbHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readUntyped() throws IOException {
+	void readUntyped() throws IOException {
 		String body = "{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
@@ -179,7 +179,7 @@ class JsonbHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readAndWriteGenerics() throws Exception {
+	void readAndWriteGenerics() throws Exception {
 		Field beansList = ListHolder.class.getField("listField");
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
@@ -206,7 +206,7 @@ class JsonbHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readAndWriteParameterizedType() throws Exception {
+	void readAndWriteParameterizedType() throws Exception {
 		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
@@ -232,7 +232,7 @@ class JsonbHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void writeParameterizedBaseType() throws Exception {
+	void writeParameterizedBaseType() throws Exception {
 		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<>() {};
 		ParameterizedTypeReference<List<MyBase>> baseList = new ParameterizedTypeReference<>() {};
 

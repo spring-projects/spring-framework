@@ -3,7 +3,7 @@
 
 In the previous sections, we have seen how to use MockMvc in conjunction with the raw
 HtmlUnit APIs. In this section, we use additional abstractions within the Selenium
-https://docs.seleniumhq.org/projects/webdriver/[WebDriver] to make things even easier.
+https://www.selenium.dev/documentation/webdriver/[WebDriver] to make things even easier.
 
 [[mockmvc-server-htmlunit-webdriver-why]]
 == Why WebDriver and MockMvc?
@@ -12,8 +12,8 @@ We can already use HtmlUnit and MockMvc, so why would we want to use WebDriver? 
 Selenium WebDriver provides a very elegant API that lets us easily organize our code. To
 better show how it works, we explore an example in this section.
 
-NOTE: Despite being a part of https://docs.seleniumhq.org/[Selenium], WebDriver does not
-require a Selenium Server to run your tests.
+NOTE: Despite being a part of https://www.selenium.dev/documentation/[Selenium],
+WebDriver does not require a Selenium Server to run your tests.
 
 Suppose we need to ensure that a message is created properly. The tests involve finding
 the HTML form input elements, filling them out, and making various assertions.
@@ -308,7 +308,7 @@ interested. These are of type `WebElement`. WebDriver's
 https://github.com/SeleniumHQ/selenium/wiki/PageFactory[`PageFactory`] lets us remove a
 lot of code from the HtmlUnit version of `CreateMessagePage` by automatically resolving
 each `WebElement`. The
-https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[`PageFactory#initElements(WebDriver,Class<T>)`]
+https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[`PageFactory#initElements(WebDriver,Class<T>)`]
 method automatically resolves each `WebElement` by using the field name and looking it up
 by the `id` or `name` of the element within the HTML page.
 <3> We can use the
@@ -352,7 +352,7 @@ interested. These are of type `WebElement`. WebDriver's
 https://github.com/SeleniumHQ/selenium/wiki/PageFactory[`PageFactory`] lets us remove a
 lot of code from the HtmlUnit version of `CreateMessagePage` by automatically resolving
 each `WebElement`. The
-https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[`PageFactory#initElements(WebDriver,Class<T>)`]
+https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[`PageFactory#initElements(WebDriver,Class<T>)`]
 method automatically resolves each `WebElement` by using the field name and looking it up
 by the `id` or `name` of the element within the HTML page.
 <3> We can use the

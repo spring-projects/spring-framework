@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 class JdbcDaoSupportTests {
 
 	@Test
-	void testJdbcDaoSupportWithDataSource() {
+	void jdbcDaoSupportWithDataSource() {
 		DataSource ds = mock();
 		final List<String> test = new ArrayList<>();
 		JdbcDaoSupport dao = new JdbcDaoSupport() {
@@ -53,7 +53,7 @@ class JdbcDaoSupportTests {
 	}
 
 	@Test
-	void testJdbcDaoSupportWithJdbcTemplate() {
+	void jdbcDaoSupportWithJdbcTemplate() {
 		JdbcTemplate template = new JdbcTemplate();
 		final List<String> test = new ArrayList<>();
 		JdbcDaoSupport dao = new JdbcDaoSupport() {

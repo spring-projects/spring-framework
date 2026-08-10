@@ -80,7 +80,7 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 	}
 
 	@Test // gh-30299
-	public void decodeAndCancelWithPendingChunks() {
+	void decodeAndCancelWithPendingChunks() {
 		Flux<DataBuffer> input = toDataBuffers("abc", 1, UTF_8).concatWith(Flux.never());
 		Flux<String> result = this.decoder.decode(input, TYPE, null, null);
 
@@ -149,6 +149,30 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		testDecode(input, String.class, step -> step
 				.expectNext("")
 				.expectNext("xyz")
+				.expectComplete()
+				.verify());
+	}
+
+	@Test
+	void decodePreservesCharacterBeforeLoneNewlineAfterCarriageReturn() {
+		Flux<DataBuffer> input = Flux.just(stringBuffer("a\rXY\nb"));
+
+		testDecode(input, String.class, step -> step
+				.expectNext("a\rXY")
+				.expectNext("b")
+				.expectComplete()
+				.verify());
+	}
+
+	@Test
+	void decodePreservesCharacterAcrossBuffersAfterCarriageReturn() {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("a\r"),
+				stringBuffer("Xb\n")
+		);
+
+		testDecode(input, String.class, step -> step
+				.expectNext("a\rXb")
 				.expectComplete()
 				.verify());
 	}

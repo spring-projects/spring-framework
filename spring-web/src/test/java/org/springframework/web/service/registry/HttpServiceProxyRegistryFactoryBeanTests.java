@@ -53,7 +53,7 @@ import static org.springframework.web.service.registry.HttpServiceGroup.ClientTy
  * Unit tests for {@link HttpServiceProxyRegistryFactoryBean}.
  * @author Rossen Stoyanchev
  */
-public class HttpServiceProxyRegistryFactoryBeanTests {
+class HttpServiceProxyRegistryFactoryBeanTests {
 
 	@Test
 	void twoGroups() {

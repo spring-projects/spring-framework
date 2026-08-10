@@ -16,8 +16,13 @@
 
 package org.springframework.web.accept;
 
+import java.util.List;
+import java.util.function.Predicate;
+
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.ServletRequestPathUtils;
 
@@ -28,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Unit tests for {@link PathApiVersionResolver}.
  * @author Rossen Stoyanchev
  */
-public class PathApiVersionResolverTests {
+class PathApiVersionResolverTests {
 
 	@Test
 	void resolve() {
@@ -39,6 +44,32 @@ public class PathApiVersionResolverTests {
 	@Test
 	void insufficientPathSegments() {
 		assertThatThrownBy(() -> testResolve(0, "/", "1.0")).isInstanceOf(InvalidApiVersionException.class);
+	}
+
+	@Test
+	void resolveWithVersionPathPredicate() {
+		testVersionPathPredicate("/app/1.0/path", "1.0");
+		testVersionPathPredicate("/app", null);
+		testVersionPathPredicate("/v3/api-docs", null);
+	}
+
+	private static void testVersionPathPredicate(String requestUri, String expectedVersion) {
+		Predicate<RequestPath> versionPathPredicate = path -> {
+			List<PathContainer.Element> elements = path.elements();
+			return (elements.size() > 3 &&
+					elements.get(1).value().equals("app") &&
+					elements.get(3).value().matches("\\d+\\.\\d+"));
+		};
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestUri);
+		try {
+			ServletRequestPathUtils.parseAndCache(request);
+			PathApiVersionResolver resolver = new PathApiVersionResolver(1, versionPathPredicate);
+			String actual = resolver.resolveVersion(request);
+			assertThat(actual).isEqualTo(expectedVersion);
+		}
+		finally {
+			ServletRequestPathUtils.clearParsedRequestPath(request);
+		}
 	}
 
 	private static void testResolve(int index, String requestUri, String expected) {

@@ -62,4 +62,14 @@ class JavaScriptUtilsTests {
 		assertThat(JavaScriptUtils.javaScriptEscape("<>")).isEqualTo("\\u003C\\u003E");
 	}
 
+	@Test
+	void escapeBacktick() {
+		assertThat(JavaScriptUtils.javaScriptEscape("`")).isEqualTo("\\u0060");
+	}
+
+	@Test
+	void escapeDollar() {
+		assertThat(JavaScriptUtils.javaScriptEscape("$")).isEqualTo("\\u0024");
+	}
+
 }

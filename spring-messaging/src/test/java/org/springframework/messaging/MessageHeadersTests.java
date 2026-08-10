@@ -39,13 +39,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class MessageHeadersTests {
 
 	@Test
-	void testTimestamp() {
+	void timestamp() {
 		MessageHeaders headers = new MessageHeaders(null);
 		assertThat(headers.getTimestamp()).isNotNull();
 	}
 
 	@Test
-	void testTimestampOverwritten() throws Exception {
+	void timestampOverwritten() throws Exception {
 		MessageHeaders headers1 = new MessageHeaders(null);
 		Thread.sleep(50L);
 		MessageHeaders headers2 = new MessageHeaders(headers1);
@@ -53,59 +53,59 @@ class MessageHeadersTests {
 	}
 
 	@Test
-	void testTimestampProvided() {
+	void timestampProvided() {
 		MessageHeaders headers = new MessageHeaders(null, null, 10L);
 		assertThat(headers.getTimestamp()).isEqualTo(10L);
 	}
 
 	@Test
-	void testTimestampProvidedNullValue() {
+	void timestampProvidedNullValue() {
 		Map<String, Object> input = Collections.singletonMap(MessageHeaders.TIMESTAMP, 1L);
 		MessageHeaders headers = new MessageHeaders(input, null, null);
 		assertThat(headers.getTimestamp()).isNotNull();
 	}
 
 	@Test
-	void testTimestampNone() {
+	void timestampNone() {
 		MessageHeaders headers = new MessageHeaders(null, null, -1L);
 		assertThat(headers.getTimestamp()).isNull();
 	}
 
 	@Test
-	void testIdOverwritten() {
+	void idOverwritten() {
 		MessageHeaders headers1 = new MessageHeaders(null);
 		MessageHeaders headers2 = new MessageHeaders(headers1);
 		assertThat(headers2.getId()).isNotSameAs(headers1.getId());
 	}
 
 	@Test
-	void testId() {
+	void id() {
 		MessageHeaders headers = new MessageHeaders(null);
 		assertThat(headers.getId()).isNotNull();
 	}
 
 	@Test
-	void testIdProvided() {
+	void idProvided() {
 		UUID id = new UUID(0L, 25L);
 		MessageHeaders headers = new MessageHeaders(null, id, null);
 		assertThat(headers.getId()).isEqualTo(id);
 	}
 
 	@Test
-	void testIdProvidedNullValue() {
+	void idProvidedNullValue() {
 		Map<String, Object> input = Collections.singletonMap(MessageHeaders.ID, new UUID(0L, 25L));
 		MessageHeaders headers = new MessageHeaders(input, null, null);
 		assertThat(headers.getId()).isNotNull();
 	}
 
 	@Test
-	void testIdNone() {
+	void idNone() {
 		MessageHeaders headers = new MessageHeaders(null, MessageHeaders.ID_VALUE_NONE, null);
 		assertThat(headers.getId()).isNull();
 	}
 
 	@Test
-	void testNonTypedAccessOfHeaderValue() {
+	void nonTypedAccessOfHeaderValue() {
 		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
@@ -114,7 +114,7 @@ class MessageHeadersTests {
 	}
 
 	@Test
-	void testTypedAccessOfHeaderValue() {
+	void typedAccessOfHeaderValue() {
 		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
@@ -123,7 +123,7 @@ class MessageHeadersTests {
 	}
 
 	@Test
-	void testHeaderValueAccessWithIncorrectType() {
+	void headerValueAccessWithIncorrectType() {
 		Integer value = 123;
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
@@ -133,21 +133,21 @@ class MessageHeadersTests {
 	}
 
 	@Test
-	void testNullHeaderValue() {
+	void nullHeaderValue() {
 		Map<String, Object> map = new HashMap<>();
 		MessageHeaders headers = new MessageHeaders(map);
 		assertThat(headers.get("nosuchattribute")).isNull();
 	}
 
 	@Test
-	void testNullHeaderValueWithTypedAccess() {
+	void nullHeaderValueWithTypedAccess() {
 		Map<String, Object> map = new HashMap<>();
 		MessageHeaders headers = new MessageHeaders(map);
 		assertThat(headers.get("nosuchattribute", String.class)).isNull();
 	}
 
 	@Test
-	void testHeaderKeys() {
+	void headerKeys() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("key1", "val1");
 		map.put("key2", 123);

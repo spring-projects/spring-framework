@@ -149,7 +149,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		if (JettyWebSocketSession.this.handlerCompletionSink != null) {
 			JettyWebSocketSession.this.handlerCompletionSink.tryEmitError(error);
 		}
-		getDelegate().close(StatusCode.SERVER_ERROR, error.getMessage(), Callback.NOOP);
+		getDelegate().close(StatusCode.SERVER_ERROR, null, Callback.NOOP);
 	}
 
 	void onHandleComplete() {
@@ -209,7 +209,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 							}
 
 							ByteBuffer buffer = iterator.next();
-							boolean last = iterator.hasNext();
+							boolean last = !iterator.hasNext();
 							session.sendPartialBinary(buffer, last, Callback.from(this::succeeded, this::failed));
 							return Action.SCHEDULED;
 						}

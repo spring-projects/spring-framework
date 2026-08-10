@@ -76,21 +76,22 @@ class OpenEntityManagerInViewTests {
 
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		given(factory.createEntityManager()).willReturn(manager);
 		this.request.setAsyncSupported(true);
 	}
 
 	@AfterEach
-	void tearDown() {
+	void cleanup() {
 		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
 		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 	}
 
+
 	@Test
-	void testOpenEntityManagerInViewInterceptor() {
+	void openEntityManagerInViewInterceptor() {
 		OpenEntityManagerInViewInterceptor interceptor = new OpenEntityManagerInViewInterceptor();
 		interceptor.setEntityManagerFactory(this.factory);
 
@@ -126,7 +127,7 @@ class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	void testOpenEntityManagerInViewInterceptorAsyncScenario() throws Exception {
+	void openEntityManagerInViewInterceptorAsyncScenario() throws Exception {
 
 		// Initial request thread
 
@@ -183,7 +184,7 @@ class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	void testOpenEntityManagerInViewInterceptorAsyncTimeoutScenario() throws Exception {
+	void openEntityManagerInViewInterceptorAsyncTimeoutScenario() throws Exception {
 
 		// Initial request thread
 
@@ -223,7 +224,7 @@ class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	void testOpenEntityManagerInViewInterceptorAsyncErrorScenario() throws Exception {
+	void openEntityManagerInViewInterceptorAsyncErrorScenario() throws Exception {
 
 		// Initial request thread
 
@@ -263,7 +264,7 @@ class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	void testOpenEntityManagerInViewFilter() throws Exception {
+	void openEntityManagerInViewFilter() throws Exception {
 		given(manager.isOpen()).willReturn(true);
 
 		final EntityManagerFactory factory2 = mock();
@@ -317,7 +318,7 @@ class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	void testOpenEntityManagerInViewFilterAsyncScenario() throws Exception {
+	void openEntityManagerInViewFilterAsyncScenario() throws Exception {
 		given(manager.isOpen()).willReturn(true);
 
 		final EntityManagerFactory factory2 = mock();

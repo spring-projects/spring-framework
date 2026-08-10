@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @since 4.1
  */
 @Disabled
-public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
+class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 	int count = 50000;  // number of evaluations that are timed in one run
 

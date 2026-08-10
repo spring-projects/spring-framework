@@ -208,42 +208,37 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	}
 
 	private void checkSessionLimits() {
-		if (!shouldNotSend() && this.closeLock.tryLock()) {
-			try {
-				if (getTimeSinceSendStarted() > getSendTimeLimit()) {
-					String format = "Send time %d (ms) for session '%s' exceeded the allowed limit %d";
-					String reason = String.format(format, getTimeSinceSendStarted(), getId(), getSendTimeLimit());
-					limitExceeded(reason);
-				}
-				else if (getBufferSize() > getBufferSizeLimit()) {
-					switch (this.overflowStrategy) {
-						case TERMINATE -> {
-							String format = "Buffer size %d bytes for session '%s' exceeds the allowed limit %d";
-							String reason = String.format(format, getBufferSize(), getId(), getBufferSizeLimit());
-							limitExceeded(reason);
-						}
-						case DROP -> {
-							int i = 0;
-							while (getBufferSize() > getBufferSizeLimit()) {
-								WebSocketMessage<?> message = this.buffer.poll();
-								if (message == null) {
-									break;
-								}
-								this.bufferSize.addAndGet(-message.getPayloadLength());
-								i++;
-							}
-							if (logger.isDebugEnabled()) {
-								logger.debug("Dropped " + i + " messages, buffer size: " + getBufferSize());
-							}
-						}
-						default ->
-							// Should never happen..
-							throw new IllegalStateException("Unexpected OverflowStrategy: " + this.overflowStrategy);
-					}
-				}
+		if (!shouldNotSend()) {
+			if (getTimeSinceSendStarted() > getSendTimeLimit()) {
+				String format = "Send time %d (ms) for session '%s' exceeded the allowed limit %d";
+				String reason = String.format(format, getTimeSinceSendStarted(), getId(), getSendTimeLimit());
+				limitExceeded(reason);
 			}
-			finally {
-				this.closeLock.unlock();
+			else if (getBufferSize() > getBufferSizeLimit()) {
+				switch (this.overflowStrategy) {
+					case TERMINATE -> {
+						String format = "Buffer size %d bytes for session '%s' exceeds the allowed limit %d";
+						String reason = String.format(format, getBufferSize(), getId(), getBufferSizeLimit());
+						limitExceeded(reason);
+					}
+					case DROP -> {
+						int i = 0;
+						while (getBufferSize() > getBufferSizeLimit()) {
+							WebSocketMessage<?> message = this.buffer.poll();
+							if (message == null) {
+								break;
+							}
+							this.bufferSize.addAndGet(-message.getPayloadLength());
+							i++;
+						}
+						if (logger.isDebugEnabled()) {
+							logger.debug("Dropped " + i + " messages, buffer size: " + getBufferSize());
+						}
+					}
+					default ->
+						// Should never happen..
+							throw new IllegalStateException("Unexpected OverflowStrategy: " + this.overflowStrategy);
+				}
 			}
 		}
 	}
@@ -260,20 +255,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 				if (this.closeInProgress) {
 					return;
 				}
-				if (!CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
-					try {
-						checkSessionLimits();
-					}
-					catch (SessionLimitExceededException ex) {
-						// Ignore
-					}
-					if (this.limitExceeded) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Changing close status " + status + " to SESSION_NOT_RELIABLE.");
-						}
-						status = CloseStatus.SESSION_NOT_RELIABLE;
-					}
-				}
+				status = checkSessionLimitsAndChangeStatusIfNecessary(status);
 				this.closeInProgress = true;
 				super.close(status);
 			}
@@ -281,6 +263,24 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 				this.closeLock.unlock();
 			}
 		}
+	}
+
+	private CloseStatus checkSessionLimitsAndChangeStatusIfNecessary(CloseStatus status) {
+		if (!CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
+			try {
+				checkSessionLimits();
+			}
+			catch (SessionLimitExceededException ex) {
+				// Ignore
+			}
+			if (this.limitExceeded) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Changing close status " + status + " to SESSION_NOT_RELIABLE.");
+				}
+				status = CloseStatus.SESSION_NOT_RELIABLE;
+			}
+		}
+		return status;
 	}
 
 

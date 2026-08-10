@@ -16,6 +16,7 @@
 
 package org.springframework.jndi.support;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +60,7 @@ import org.springframework.jndi.TypeMismatchNamingException;
  * in particular if BeanFactory-style type checking is required.
  *
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 2.5
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  * @see org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
@@ -130,6 +132,17 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		catch (NamingException ex) {
 			throw new BeanDefinitionStoreException("JNDI environment", name, "JNDI lookup failed", ex);
 		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		Object bean = getBean(name);
+		Type requiredType = typeReference.getType();
+		if (!ResolvableType.forType(requiredType).isInstance(bean)) {
+			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+		}
+		return (T) bean;
 	}
 
 	@Override

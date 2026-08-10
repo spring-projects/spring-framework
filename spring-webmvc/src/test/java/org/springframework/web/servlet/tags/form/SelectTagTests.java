@@ -58,9 +58,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class SelectTagTests extends AbstractFormTagTests {
+class SelectTagTests extends AbstractFormTagTests {
 
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	private static final Locale LOCALE_AT = new Locale("de", "AT");
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	private static final Locale LOCALE_NL = new Locale("nl", "NL");
 
 	private SelectTag tag;
@@ -1126,7 +1128,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
 		Attribute selectedAttr = e.attribute("selected");
 		if (selected) {
-			assertThat(selectedAttr != null && "selected".equals(selectedAttr.getValue())).isTrue();
+			assertThat(selectedAttr.getValue()).isEqualTo("selected");
 		}
 		else {
 			assertThat(selectedAttr).isNull();

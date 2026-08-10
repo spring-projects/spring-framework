@@ -40,14 +40,14 @@ import static org.mockito.Mockito.mock;
 class ThrowsAdviceInterceptorTests {
 
 	@Test
-	void testNoHandlerMethods() {
+	void noHandlerMethods() {
 		// should require one handler method at least
 		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
 				new ThrowsAdviceInterceptor(new Object()));
 	}
 
 	@Test
-	void testNotInvoked() throws Throwable {
+	void notInvoked() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		Object ret = new Object();
@@ -58,7 +58,7 @@ class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	void testNoHandlerMethodForThrowable() throws Throwable {
+	void noHandlerMethodForThrowable() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		assertThat(ti.getHandlerMethodCount()).isEqualTo(2);
@@ -70,7 +70,7 @@ class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	void testCorrectHandlerUsed() throws Throwable {
+	void correctHandlerUsed() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		FileNotFoundException ex = new FileNotFoundException();
@@ -84,7 +84,7 @@ class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	void testCorrectHandlerUsedForSubclass() throws Throwable {
+	void correctHandlerUsedForSubclass() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
@@ -97,7 +97,7 @@ class ThrowsAdviceInterceptorTests {
 	}
 
 	@Test
-	void testHandlerMethodThrowsException() throws Throwable {
+	void handlerMethodThrowsException() throws Throwable {
 		final Throwable t = new Throwable();
 
 		MyThrowsHandler th = new MyThrowsHandler() {

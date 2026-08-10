@@ -78,6 +78,17 @@ class SerializerTests {
 		assertThat(deserializer.expectedInputStream).isNotNull();
 	}
 
+	@Test  // gh-36833
+	void defaultDeserializerExposesNullClassLoaderByDefault() {
+		assertThat(new DefaultDeserializer().getClassLoader()).isNull();
+	}
+
+	@Test  // gh-36833
+	void defaultDeserializerExposesConfiguredClassLoader() {
+		ClassLoader classLoader = getClass().getClassLoader();
+		assertThat(new DefaultDeserializer(classLoader).getClassLoader()).isSameAs(classLoader);
+	}
+
 	@Test
 	void serializationDelegateWithExplicitSerializerAndDeserializer() throws IOException {
 		SerializationDelegate delegate = new SerializationDelegate(new DefaultSerializer(), new DefaultDeserializer());

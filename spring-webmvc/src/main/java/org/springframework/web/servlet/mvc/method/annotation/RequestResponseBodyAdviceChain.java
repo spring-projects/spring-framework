@@ -160,7 +160,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 				}
 				advice = adviceBean.resolveBean();
 			}
-			if (adviceType.isAssignableFrom(advice.getClass())) {
+			if (adviceType.isInstance(advice)) {
 				result.add((A) advice);
 			}
 		}

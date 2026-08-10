@@ -42,18 +42,18 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class HandlerAssertionTests {
+class HandlerAssertionTests {
 
 	private final MockMvc mockMvc = standaloneSetup(new SimpleController()).alwaysExpect(status().isOk()).build();
 
 
 	@Test
-	public void handlerType() throws Exception {
+	void handlerType() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().handlerType(SimpleController.class));
 	}
 
 	@Test
-	public void methodCallOnNonMock() {
+	void methodCallOnNonMock() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.mockMvc.perform(get("/")).andExpect(handler().methodCall("bogus")))
 			.withMessageContaining("The supplied object [bogus] is not an instance of")
@@ -62,23 +62,23 @@ public class HandlerAssertionTests {
 	}
 
 	@Test
-	public void methodCall() throws Exception {
+	void methodCall() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().methodCall(on(SimpleController.class).handle()));
 	}
 
 	@Test
-	public void methodName() throws Exception {
+	void methodName() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().methodName("handle"));
 	}
 
 	@Test
-	public void methodNameMatchers() throws Exception {
+	void methodNameMatchers() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().methodName(equalTo("handle")));
 		this.mockMvc.perform(get("/")).andExpect(handler().methodName(is(not("save"))));
 	}
 
 	@Test
-	public void method() throws Exception {
+	void method() throws Exception {
 		Method method = SimpleController.class.getMethod("handle");
 		this.mockMvc.perform(get("/")).andExpect(handler().method(method));
 	}

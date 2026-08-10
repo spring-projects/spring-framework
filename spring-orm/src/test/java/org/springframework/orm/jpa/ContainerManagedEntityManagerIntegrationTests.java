@@ -48,17 +48,17 @@ class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManage
 
 
 	@Test
-	void testExceptionTranslationWithDialectFoundOnIntroducedEntityManagerInfo() throws Exception {
+	void exceptionTranslationWithDialectFoundOnIntroducedEntityManagerInfo() throws Exception {
 		doTestExceptionTranslationWithDialectFound(((EntityManagerFactoryInfo) entityManagerFactory).getJpaDialect());
 	}
 
 	@Test
-	void testExceptionTranslationWithDialectFoundOnEntityManagerFactoryBean() throws Exception {
+	void exceptionTranslationWithDialectFoundOnEntityManagerFactoryBean() throws Exception {
 		assertThat(entityManagerFactoryBean.getJpaDialect()).as("Dialect must have been set").isNotNull();
 		doTestExceptionTranslationWithDialectFound(entityManagerFactoryBean);
 	}
 
-	protected void doTestExceptionTranslationWithDialectFound(PersistenceExceptionTranslator pet) {
+	void doTestExceptionTranslationWithDialectFound(PersistenceExceptionTranslator pet) {
 		RuntimeException in1 = new RuntimeException("in1");
 		PersistenceException in2 = new PersistenceException();
 		assertThat(pet.translateExceptionIfPossible(in1)).as("No translation here").isNull();
@@ -69,7 +69,7 @@ class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManage
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testEntityManagerProxyIsProxy() {
+	void entityManagerProxyIsProxy() {
 		EntityManager em = createContainerManagedEntityManager();
 		assertThat(Proxy.isProxyClass(em.getClass())).isTrue();
 		Query q = em.createQuery("select p from Person as p");
@@ -84,7 +84,7 @@ class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManage
 
 	// This would be legal, at least if not actually _starting_ a tx
 	@Test
-	void testEntityManagerProxyRejectsProgrammaticTxManagement() {
+	void entityManagerProxyRejectsProgrammaticTxManagement() {
 		assertThatIllegalStateException().isThrownBy(
 				createContainerManagedEntityManager()::getTransaction);
 	}
@@ -94,24 +94,24 @@ class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManage
 	 * We take the view that this is a valid no op.
 	 */
 	@Test
-	void testContainerEntityManagerProxyAllowsJoinTransactionInTransaction() {
+	void containerEntityManagerProxyAllowsJoinTransactionInTransaction() {
 		createContainerManagedEntityManager().joinTransaction();
 	}
 
 	@Test
-	void testContainerEntityManagerProxyRejectsJoinTransactionWithoutTransaction() {
+	void containerEntityManagerProxyRejectsJoinTransactionWithoutTransaction() {
 		endTransaction();
 		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(
 				createContainerManagedEntityManager()::joinTransaction);
 	}
 
 	@Test
-	void testInstantiateAndSave() {
+	void instantiateAndSave() {
 		EntityManager em = createContainerManagedEntityManager();
 		doInstantiateAndSave(em);
 	}
 
-	protected void doInstantiateAndSave(EntityManager em) {
+	private void doInstantiateAndSave(EntityManager em) {
 		assertThat(countRowsInTable(em, "person")).as("Should be no people from previous transactions").isEqualTo(0);
 		Person p = new Person();
 
@@ -124,7 +124,7 @@ class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManage
 	}
 
 	@Test
-	void testReuseInNewTransaction() {
+	void reuseInNewTransaction() {
 		EntityManager em = createContainerManagedEntityManager();
 		doInstantiateAndSave(em);
 		endTransaction();
@@ -146,7 +146,7 @@ class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManage
 	}
 
 	@Test
-	void testRollbackOccurs() {
+	void rollbackOccurs() {
 		EntityManager em = createContainerManagedEntityManager();
 		doInstantiateAndSave(em);
 		endTransaction();	// Should roll back
@@ -154,7 +154,7 @@ class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManage
 	}
 
 	@Test
-	void testCommitOccurs() {
+	void commitOccurs() {
 		EntityManager em = createContainerManagedEntityManager();
 		doInstantiateAndSave(em);
 		setComplete();

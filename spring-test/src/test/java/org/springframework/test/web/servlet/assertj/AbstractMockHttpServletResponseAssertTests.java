@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Stephane Nicoll
  */
-public class AbstractMockHttpServletResponseAssertTests {
+class AbstractMockHttpServletResponseAssertTests {
 
 	@Test
 	void bodyText() {

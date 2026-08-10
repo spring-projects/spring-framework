@@ -16,7 +16,7 @@
 
 package org.springframework.cache.aspectj;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class AspectJEnableCachingIsolatedTests {
 
+	@AutoClose
 	private ConfigurableApplicationContext ctx;
 
 
@@ -58,23 +59,16 @@ class AspectJEnableCachingIsolatedTests {
 		this.ctx = new AnnotationConfigApplicationContext(config);
 	}
 
-	@AfterEach
-	public void closeContext() {
-		if (this.ctx != null) {
-			this.ctx.close();
-		}
-	}
-
 
 	@Test
-	void testKeyStrategy() {
+	void keyStrategy() {
 		load(EnableCachingConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
 		assertThat(aspect.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator", KeyGenerator.class));
 	}
 
 	@Test
-	void testCacheErrorHandler() {
+	void cacheErrorHandler() {
 		load(EnableCachingConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
 		assertThat(aspect.getErrorHandler()).isSameAs(this.ctx.getBean("errorHandler", CacheErrorHandler.class));
@@ -129,7 +123,7 @@ class AspectJEnableCachingIsolatedTests {
 
 	@Test
 	@Disabled("AspectJ has some sort of caching that makes this one fail")
-	public void emptyConfigSupport() {
+	void emptyConfigSupport() {
 		load(EmptyConfigSupportConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
 		assertThat(aspect.getCacheResolver()).isNotNull();
@@ -284,4 +278,5 @@ class AspectJEnableCachingIsolatedTests {
 			return new NamedCacheResolver(cacheManager(), "foo");
 		}
 	}
+
 }

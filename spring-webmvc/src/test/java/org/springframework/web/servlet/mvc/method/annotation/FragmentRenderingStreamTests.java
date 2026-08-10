@@ -53,7 +53,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class FragmentRenderingStreamTests {
+class FragmentRenderingStreamTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 

@@ -154,7 +154,8 @@ public abstract class PropertyAccessorUtils {
 						PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
 				if (keyEnd != -1) {
 					String key = sb.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
-					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
+					if (key.length() > 1 && ((key.startsWith("'") && key.endsWith("'")) ||
+							(key.startsWith("\"") && key.endsWith("\"")))) {
 						sb.delete(keyStart + 1, keyStart + 2);
 						sb.delete(keyEnd - 2, keyEnd - 1);
 						keyEnd = keyEnd - 2;

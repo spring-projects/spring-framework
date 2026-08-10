@@ -202,7 +202,7 @@ class EncoderHttpMessageWriterTests {
 	}
 
 	@Test
-	public void noContentTypeWithEmptyBody() {
+	void noContentTypeWithEmptyBody() {
 		Encoder<CharSequence> encoder = CharSequenceEncoder.textPlainOnly();
 		HttpMessageWriter<CharSequence> writer = new EncoderHttpMessageWriter<>(encoder);
 		Mono<Void> writerMono = writer.write(Mono.empty(), ResolvableType.forClass(String.class),
@@ -214,7 +214,7 @@ class EncoderHttpMessageWriterTests {
 	}
 
 	@Test
-	public void zeroContentLengthWithEmptyBody() {
+	void zeroContentLengthWithEmptyBody() {
 		Encoder<CharSequence> encoder = CharSequenceEncoder.textPlainOnly();
 		HttpMessageWriter<CharSequence> writer = new EncoderHttpMessageWriter<>(encoder);
 		Mono<Void> writerMono = writer.write(Mono.empty(), ResolvableType.forClass(String.class),

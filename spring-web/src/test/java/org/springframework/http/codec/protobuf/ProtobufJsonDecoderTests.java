@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link ProtobufJsonDecoder}.
  * @author Brian Clozel
  */
-public class ProtobufJsonDecoderTests extends AbstractDecoderTests<ProtobufJsonDecoder> {
+class ProtobufJsonDecoderTests extends AbstractDecoderTests<ProtobufJsonDecoder> {
 
 	private Msg msg1 = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 

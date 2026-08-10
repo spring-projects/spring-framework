@@ -38,7 +38,7 @@ class PrototypeTargetTests {
 
 
 	@Test
-	void testPrototypeProxyWithPrototypeTarget() {
+	void prototypeProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
@@ -52,7 +52,7 @@ class PrototypeTargetTests {
 	}
 
 	@Test
-	void testSingletonProxyWithPrototypeTarget() {
+	void singletonProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);

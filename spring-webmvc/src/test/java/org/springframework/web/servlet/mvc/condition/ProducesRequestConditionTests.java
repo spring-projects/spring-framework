@@ -95,7 +95,7 @@ class ProducesRequestConditionTests {
 	}
 
 	@Test // gh-21670
-	public void matchWithParameters() {
+	void matchWithParameters() {
 		String base = "application/atom+xml";
 		ProducesRequestCondition condition = new ProducesRequestCondition(base + ";type=feed");
 		HttpServletRequest request = createRequest(base + ";type=entry");
@@ -141,7 +141,7 @@ class ProducesRequestConditionTests {
 	}
 
 	@Test // SPR-17550
-	public void matchWithNegationAndMediaTypeAllWithQualityParameter() {
+	void matchWithNegationAndMediaTypeAllWithQualityParameter() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!application/json");
 		HttpServletRequest request = createRequest(
 				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
@@ -150,7 +150,7 @@ class ProducesRequestConditionTests {
 	}
 
 	@Test // gh-22853
-	public void matchAndCompare() {
+	void matchAndCompare() {
 		ContentNegotiationManager manager = new ContentNegotiationManager(
 				new HeaderContentNegotiationStrategy(),
 				new FixedContentNegotiationStrategy(MediaType.TEXT_HTML));

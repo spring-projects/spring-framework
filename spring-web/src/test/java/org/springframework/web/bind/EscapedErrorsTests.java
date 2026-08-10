@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EscapedErrorsTests {
 
 	@Test
-	void testEscapedErrors() {
+	void escapedErrors() {
 		TestBean tb = new TestBean();
 		tb.setName("empty &");
 
@@ -85,7 +85,7 @@ class EscapedErrorsTests {
 		FieldError ageError = errors.getFieldError("age");
 		assertThat(ageError.getDefaultMessage()).as("Age error message escaped").isEqualTo("message: &lt;tag&gt;");
 		assertThat(ageError.getCode()).as("Age error code not escaped").isEqualTo("AGE_NOT_SET <tag>");
-		assertThat((Integer.valueOf(0))).as("Age value not escaped").isEqualTo(errors.getFieldValue("age"));
+		assertThat(Integer.valueOf(0)).as("Age value not escaped").isEqualTo(errors.getFieldValue("age"));
 		FieldError ageErrorInList = errors.getFieldErrors("age").get(0);
 		assertThat(ageError.getDefaultMessage()).as("Same name error in list")
 				.isEqualTo(ageErrorInList.getDefaultMessage());

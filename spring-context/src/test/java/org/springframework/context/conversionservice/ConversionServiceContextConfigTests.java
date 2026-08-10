@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConversionServiceContextConfigTests {
 
 	@Test
-	void testConfigOk() {
+	void configOk() {
 		try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("org/springframework/context/conversionservice/conversionService.xml")) {
 			TestClient client = context.getBean("testClient", TestClient.class);
 			assertThat(client.getBars()).hasSize(2);

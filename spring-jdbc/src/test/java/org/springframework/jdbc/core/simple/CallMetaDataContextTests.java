@@ -69,7 +69,7 @@ class CallMetaDataContextTests {
 
 
 	@Test
-	void testMatchParameterValuesAndSqlInOutParameters() throws Exception {
+	void matchParameterValuesAndSqlInOutParameters() throws Exception {
 		final String TABLE = "customers";
 		final String USER = "me";
 		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
@@ -94,8 +94,7 @@ class CallMetaDataContextTests {
 		assertThat(inParameters).as("Wrong number of matched in parameter values").hasSize(2);
 		assertThat(inParameters.containsKey("id")).as("in parameter value missing").isTrue();
 		assertThat(inParameters.containsKey("name")).as("in out parameter value missing").isTrue();
-		boolean condition = !inParameters.containsKey("customer_no");
-		assertThat(condition).as("out parameter value matched").isTrue();
+		assertThat(inParameters.containsKey("customer_no")).as("out parameter value matched").isFalse();
 
 		List<String> names = context.getOutParameterNames();
 		assertThat(names).as("Wrong number of out parameters").hasSize(2);

@@ -30,10 +30,10 @@ import org.springframework.web.reactive.function.server.ServerResponse;
  *
  * @author Rossen Stoyanchev
  */
-public class DefaultRouterFunctionSpecTests {
+class DefaultRouterFunctionSpecTests {
 
 	@Test
-	public void webFilter() {
+	void webFilter() {
 
 		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
 				.GET("/", request -> ServerResponse.ok().build())
@@ -55,7 +55,7 @@ public class DefaultRouterFunctionSpecTests {
 	}
 
 	@Test
-	public void exceptionHandler() {
+	void exceptionHandler() {
 
 		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
 				.GET("/error", request -> Mono.error(new IllegalStateException("boo")))

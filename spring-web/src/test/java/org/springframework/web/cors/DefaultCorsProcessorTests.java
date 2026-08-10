@@ -174,7 +174,7 @@ class DefaultCorsProcessorTests {
 	}
 
 	@Test // gh-26892
-	public void actualRequestTrailingSlashOriginMatch() throws Exception {
+	void actualRequestTrailingSlashOriginMatch() throws Exception {
 		this.request.setMethod(HttpMethod.GET.name());
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com/");
 		this.conf.addAllowedOrigin("https://domain2.com");
@@ -185,7 +185,7 @@ class DefaultCorsProcessorTests {
 	}
 
 	@Test //gh-33682
-	public void actualRequestMalformedOriginRejected() throws Exception {
+	void actualRequestMalformedOriginRejected() throws Exception {
 		this.request.setMethod(HttpMethod.GET.name());
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://*@:;");
 		this.conf.addAllowedOrigin("https://domain2.com");

@@ -401,7 +401,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 	private static AnnotationConfigApplicationContext createContext(Class<?> testClass) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>(BeanOverrideTestUtils.findHandlers(testClass));
+		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>(BeanOverrideUtils.findHandlersForFields(testClass));
 		new BeanOverrideContextCustomizer(handlers).customizeContext(context, mock(MergedContextConfiguration.class));
 		return context;
 	}

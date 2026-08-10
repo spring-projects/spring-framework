@@ -39,7 +39,7 @@ class AotContextLoaderTests {
 
 	/**
 	 * Verifies that a legacy {@link AotContextLoader} which only overrides
-	 * {@link AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * {@link AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)}
 	 * is still supported.
 	 */
 	@Test  // gh-34513
@@ -58,7 +58,7 @@ class AotContextLoaderTests {
 
 	/**
 	 * Verifies that a modern {@link AotContextLoader} which only overrides
-	 * {@link AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
+	 * {@link AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)}
 	 * is supported.
 	 */
 	@Test  // gh-34513

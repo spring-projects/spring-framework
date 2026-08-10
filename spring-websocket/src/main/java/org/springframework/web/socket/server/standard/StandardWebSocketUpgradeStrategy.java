@@ -97,7 +97,9 @@ public class StandardWebSocketUpgradeStrategy implements RequestUpgradeStrategy 
 			@Nullable Principal user, WebSocketHandler wsHandler, Map<String, Object> attrs)
 			throws HandshakeFailureException {
 
-		HttpHeaders headers = request.getHeaders();
+		// Copy request headers, as they might be pooled and recycled by
+		// the server implementation once the handshake HTTP exchange is done.
+		HttpHeaders headers = HttpHeaders.copyOf(request.getHeaders());
 		InetSocketAddress localAddr = null;
 		try {
 			localAddr = request.getLocalAddress();

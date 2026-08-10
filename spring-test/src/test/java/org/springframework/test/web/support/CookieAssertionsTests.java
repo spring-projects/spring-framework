@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.equalTo;
  * @author Rob Worsnop
  * @author Rossen Stoyanchev
  */
-public class CookieAssertionsTests {
+class CookieAssertionsTests {
 
 	private TestCookieAssertions assertions;
 

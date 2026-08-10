@@ -72,7 +72,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for AspectJ auto-proxying. Includes mixing with Spring AOP Advisors
- * to demonstrate that existing autoproxying contract is honoured.
+ * to demonstrate that existing autoproxying contract is honored.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

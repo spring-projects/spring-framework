@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -73,14 +73,14 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 
 	@Test
 	void deleteWithoutBodyDoesNotRaiseException() throws Exception {
-		HttpURLConnection connection = new TestHttpURLConnection(new URL("https://example.com"));
+		HttpURLConnection connection = new TestHttpURLConnection(URI.create("https://example.com").toURL());
 		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, "DELETE");
 		SimpleClientHttpRequest request = new SimpleClientHttpRequest(connection, 4096);
 		request.execute();
 	}
 
 	@Test  // SPR-8809
-	public void interceptor() throws Exception {
+	void interceptor() throws Exception {
 		final String headerName = "MyHeader";
 		final String headerValue = "MyValue";
 		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
@@ -106,7 +106,7 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 	}
 
 	@Test  // SPR-13225
-	public void headerWithNullValue() {
+	void headerWithNullValue() {
 		HttpURLConnection urlConnection = mock();
 		given(urlConnection.getRequestMethod()).willReturn("GET");
 

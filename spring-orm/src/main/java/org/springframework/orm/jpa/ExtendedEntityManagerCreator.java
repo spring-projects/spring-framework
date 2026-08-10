@@ -42,7 +42,6 @@ import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -174,8 +173,7 @@ public abstract class ExtendedEntityManagerCreator {
 			return createProxy(rawEntityManager, emfInfo, true, synchronizedWithTransaction);
 		}
 		else {
-			EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
-					emf.createEntityManager(properties) : emf.createEntityManager());
+			EntityManager rawEntityManager = EntityManagerFactoryUtils.createEntityManager(emf, properties);
 			return createProxy(rawEntityManager, null, null, null, null, true, synchronizedWithTransaction);
 		}
 	}

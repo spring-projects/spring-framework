@@ -24,7 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.cache.Cache;
+import org.springframework.cache.support.NullValue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,17 +43,17 @@ public abstract class AbstractCacheTests<T extends Cache> {
 
 
 	@Test
-	protected void testCacheName() {
+	void cacheName() {
 		assertThat(getCache().getName()).isEqualTo(CACHE_NAME);
 	}
 
 	@Test
-	protected void testNativeCache() {
+	void nativeCache() {
 		assertThat(getCache().getNativeCache()).isSameAs(getNativeCache());
 	}
 
 	@Test
-	protected void testCachePut() {
+	void cachePut() {
 		T cache = getCache();
 
 		String key = createRandomKey();
@@ -72,10 +74,16 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		assertThat(cache.get(key).get()).isNull();
 		assertThat(cache.get(key, String.class)).isNull();
 		assertThat(cache.get(key, Object.class)).isNull();
+
+		cache.put(key, BeanUtils.instantiateClass(NullValue.class));
+		assertThat(cache.get(key)).isNotNull();
+		assertThat(cache.get(key).get()).isNull();
+		assertThat(cache.get(key, String.class)).isNull();
+		assertThat(cache.get(key, Object.class)).isNull();
 	}
 
 	@Test
-	protected void testCachePutIfAbsent() {
+	void cachePutIfAbsent() {
 		T cache = getCache();
 
 		String key = createRandomKey();
@@ -90,7 +98,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	protected void testCacheRemove() {
+	void cacheRemove() {
 		T cache = getCache();
 
 		String key = createRandomKey();
@@ -101,7 +109,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	protected void testCacheClear() {
+	void cacheClear() {
 		T cache = getCache();
 
 		assertThat(cache.get("enescu")).isNull();
@@ -114,12 +122,12 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	protected void testCacheGetCallable() {
+	void cacheGetCallable() {
 		doTestCacheGetCallable("test");
 	}
 
 	@Test
-	protected void testCacheGetCallableWithNull() {
+	void cacheGetCallableWithNull() {
 		doTestCacheGetCallable(null);
 	}
 
@@ -135,12 +143,12 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	protected void testCacheGetCallableNotInvokedWithHit() {
+	void cacheGetCallableNotInvokedWithHit() {
 		doTestCacheGetCallableNotInvokedWithHit("existing");
 	}
 
 	@Test
-	protected void testCacheGetCallableNotInvokedWithHitNull() {
+	void cacheGetCallableNotInvokedWithHitNull() {
 		doTestCacheGetCallableNotInvokedWithHit(null);
 	}
 
@@ -157,7 +165,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	}
 
 	@Test
-	protected void testCacheGetCallableFail() {
+	void cacheGetCallableFail() {
 		T cache = getCache();
 
 		String key = createRandomKey();
@@ -179,7 +187,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	 * invocations.
 	 */
 	@Test
-	protected void testCacheGetSynchronized() throws InterruptedException {
+	void cacheGetSynchronized() throws InterruptedException {
 		T cache = getCache();
 		final AtomicInteger counter = new AtomicInteger();
 		final List<Object> results = new CopyOnWriteArrayList<>();

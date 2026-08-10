@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 3.1
  */
 @SuppressWarnings("resource")
-public class ImportAnnotationDetectionTests {
+class ImportAnnotationDetectionTests {
 
 	@Test
 	void multipleMetaImportsAreProcessed() {

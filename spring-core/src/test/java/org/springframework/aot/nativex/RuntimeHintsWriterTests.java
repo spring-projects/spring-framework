@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -65,7 +66,7 @@ class RuntimeHintsWriterTests {
 				builder.schemaMappers(schemaMappers -> schemaMappers.mapPrefix("https://www.graalvm.org/", "classpath:org/springframework/aot/nativex/"))
 		);
 		SchemaValidatorsConfig config = SchemaValidatorsConfig.builder().build();
-		JSON_SCHEMA = jsonSchemaFactory.getSchema(SchemaLocation.of("https://www.graalvm.org/reachability-metadata-schema-v1.0.0.json"), config);
+		JSON_SCHEMA = jsonSchemaFactory.getSchema(SchemaLocation.of("https://www.graalvm.org/reachability-metadata-schema-v1.2.0.json"), config);
 	}
 
 	@Nested
@@ -89,7 +90,8 @@ class RuntimeHintsWriterTests {
 					.withField("DEFAULT_CHARSET")
 					.withField("defaultCharset")
 					.withField("aScore")
-					.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ExecutableMode.INVOKE));
+					.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ExecutableMode.INVOKE)
+					.withJavaSerialization(true));
 			assertEquals("""
 				{
 					"reflection": [
@@ -110,7 +112,8 @@ class RuntimeHintsWriterTests {
 							],
 							"methods": [
 								{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
-							]
+							],
+							"serializable": true
 						}
 					]
 				}
@@ -205,6 +208,39 @@ class RuntimeHintsWriterTests {
 		}
 
 		@Test
+		void javaSerializationEnabled() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.reflection().registerType(Integer.class, builder -> builder.withJavaSerialization(true));
+
+			assertEquals("""
+				{
+					"reflection": [
+						{
+							"type": "java.lang.Integer",
+							"serializable": true
+						}
+					]
+				}
+				""", hints);
+		}
+
+		@Test
+		void javaSerializationDisabled() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.reflection().registerType(Integer.class, builder -> builder.withJavaSerialization(false));
+
+			assertEquals("""
+				{
+					"reflection": [
+						{
+							"type": "java.lang.Integer"
+						}
+					]
+				}
+				""", hints);
+		}
+
+		@Test
 		void ignoreLambda() throws JSONException {
 			Runnable anonymousRunnable = () -> {};
 			RuntimeHints hints = new RuntimeHints();
@@ -272,6 +308,74 @@ class RuntimeHintsWriterTests {
 				builder.withMethod("test", Collections.emptyList(), ExecutableMode.INVOKE);
 			});
 			assertThat(writeJson(hints)).isEqualTo(writeJson(hints2));
+		}
+
+		@Test
+		void oneLambda() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.reflection().registerLambda(Integer.class, builder -> builder.withDeclaringMethod("getCell", Integer.class, Integer.class).withInterfaces(Supplier.class));
+
+			assertEquals("""
+					{
+						"reflection": [
+							{
+								"type": {
+									"lambda": {
+										"declaringClass":  "java.lang.Integer",
+										"declaringMethod": {
+											"name": "getCell",
+											"parameterTypes": [ "java.lang.Integer", "java.lang.Integer" ]
+										},
+										"interfaces": [ "java.util.function.Supplier" ]
+									}
+								}
+							}
+						]
+					}
+					""", hints);
+		}
+
+		@Test
+		void sortLambdasByDeclaringClassAndMethods() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.reflection().registerLambda(String.class, builder -> builder.withInterfaces(Callable.class));
+			hints.reflection().registerLambda(Integer.class,
+					builder -> builder.withDeclaringMethod("def").withInterfaces(Supplier.class));
+			hints.reflection().registerLambda(Integer.class,
+					builder -> builder.withDeclaringMethod("abc").withInterfaces(Function.class));
+
+			assertEquals("""
+					{
+						"reflection": [
+							{
+								"type": {
+									"lambda": {
+										"declaringClass":  "java.lang.Integer",
+										"declaringMethod": { "name": "abc" },
+										"interfaces": [ "java.util.function.Function" ]
+									}
+								}
+							},
+							{
+								"type": {
+									"lambda": {
+										"declaringClass":  "java.lang.Integer",
+										"declaringMethod": { "name": "def" },
+										"interfaces": [ "java.util.function.Supplier" ]
+									}
+								}
+							},
+							{
+								"type": {
+									"lambda": {
+										"declaringClass":  "java.lang.String",
+										"interfaces": [ "java.util.concurrent.Callable" ]
+									}
+								}
+							}
+						]
+					}
+					""", hints);
 		}
 
 	}
@@ -409,15 +513,17 @@ class RuntimeHintsWriterTests {
 			hints.resources().registerResourceBundle("com.example.message");
 			assertEquals("""
 				{
-					"bundles": [
-						{ "name": "com.example.message"},
-						{ "name": "com.example.message2"}
+					"resources": [
+						{ "bundle": "com.example.message"},
+						{ "bundle": "com.example.message2"}
 					]
 				}""", hints);
 		}
 	}
 
 	@Nested
+	@Deprecated(forRemoval = true)
+	@SuppressWarnings("removal")
 	class SerializationHintsTests {
 
 		@Test
@@ -432,8 +538,8 @@ class RuntimeHintsWriterTests {
 			hints.serialization().registerType(TypeReference.of(String.class));
 			assertEquals("""
 				{
-					"serialization": [
-						{ "type": "java.lang.String" }
+					"reflection": [
+						{ "type": "java.lang.String", "serializable": true }
 					]
 				}
 				""", hints);
@@ -447,9 +553,9 @@ class RuntimeHintsWriterTests {
 					.registerType(TypeReference.of(String.class));
 			assertEquals("""
 				{
-					"serialization": [
-						{ "type": "java.lang.String" },
-						{ "type": "org.springframework.core.env.Environment" }
+					"reflection": [
+						{ "type": "java.lang.String", "serializable": true },
+						{ "type": "org.springframework.core.env.Environment", "serializable": true }
 					]
 				}
 				""", hints);
@@ -462,8 +568,8 @@ class RuntimeHintsWriterTests {
 					builder -> builder.onReachableType(TypeReference.of("org.example.Test")));
 			assertEquals("""
 				{
-					"serialization": [
-						{ "condition": { "typeReached": "org.example.Test" }, "type": "java.lang.String" }
+					"reflection": [
+						{ "condition": { "typeReached": "org.example.Test" }, "type": "java.lang.String", "serializable": true }
 					]
 				}
 				""", hints);
@@ -561,6 +667,27 @@ class RuntimeHintsWriterTests {
 						{
 							"type": { "proxy": ["java.util.function.Function"] },
 							"condition": { "typeReached": "org.example.Test" }
+						}
+					]
+				}
+				""", hints);
+		}
+
+		@Test
+		void shouldWriteSerializable() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.proxies().registerJdkProxy(hint -> {
+				hint.proxiedInterfaces(Function.class);
+				hint.withJavaSerialization(true);
+			});
+			assertEquals("""
+				{
+					"reflection": [
+						{
+							"type": {
+								"proxy": ["java.util.function.Function"]
+							},
+							"serializable": true
 						}
 					]
 				}

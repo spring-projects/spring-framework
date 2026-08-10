@@ -38,6 +38,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * <li>On a non-static field in an enclosing class for a {@code @Nested} test class
  * or in any class in the type hierarchy or enclosing class hierarchy above the
  * {@code @Nested} test class.</li>
+ * <li>On a parameter in the constructor for the test class.</li>
  * <li>At the type level on a test class or any superclass or implemented interface
  * in the type hierarchy above the test class.</li>
  * <li>At the type level on an enclosing class for a {@code @Nested} test class
@@ -45,15 +46,16 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * above the {@code @Nested} test class.</li>
  * </ul>
  *
- * <p>When {@code @MockitoSpyBean} is declared on a field, the bean to spy is
- * inferred from the type of the annotated field. If multiple candidates exist in
- * the {@code ApplicationContext}, a {@code @Qualifier} annotation can be declared
- * on the field to help disambiguate. In the absence of a {@code @Qualifier}
- * annotation, the name of the annotated field will be used as a <em>fallback
- * qualifier</em>. Alternatively, you can explicitly specify a bean name to spy
- * by setting the {@link #value() value} or {@link #name() name} attribute. If a
- * bean name is specified, it is required that a target bean with that name has
- * been previously registered in the application context.
+ * <p>When {@code @MockitoSpyBean} is declared on a field or parameter, the bean
+ * to spy is inferred from the type of the annotated field or parameter. If multiple
+ * candidates exist in the {@code ApplicationContext}, a {@code @Qualifier} annotation
+ * can be declared on the field or parameter to help disambiguate. In the absence
+ * of a {@code @Qualifier} annotation, the name of the annotated field or parameter
+ * will be used as a <em>fallback qualifier</em>. Alternatively, you can explicitly
+ * specify a bean name to spy by setting the {@link #value() value} or
+ * {@link #name() name} attribute. If a bean name is specified, it is required that
+ * a target bean with that name has been previously registered in the application
+ * context.
  *
  * <p>When {@code @MockitoSpyBean} is declared at the type level, the type of bean
  * (or beans) to spy must be supplied via the {@link #types() types} attribute.
@@ -100,6 +102,18 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * &#64;Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)}. Any attempt to do so will
  * fail with an exception.
  *
+ * <p><strong>WARNING</strong>: If the original bean would be wrapped in a Spring AOP
+ * proxy &mdash; for example, due to {@code @Transactional}, {@code @Cacheable}, or
+ * {@code @Retryable} &mdash; that proxy is still created around the spy, so the bean
+ * injected into the {@code ApplicationContext} is the proxy rather than the spy.
+ * Verification via Mockito's {@code verify()} API is unaffected, but stubbing via
+ * the proxy is only safe for AOP advice that does not retain state between
+ * invocations; whereas, advice that caches or otherwise memoizes the outcome of an
+ * invocation can permanently mask the spy's configured answers. See the
+ * <a href="https://docs.spring.io/spring-framework/reference/testing/annotations/integration-spring/annotation-mockitobean.html#spring-testing-annotation-beanoverriding-mockitospybean-aop-proxies"
+ * >{@code @MockitoSpyBean} and Spring AOP Proxies</a> section of the Spring Framework
+ * reference documentation for details.
+ *
  * <p>There are no restrictions on the visibility of a {@code @MockitoSpyBean} field.
  * Such fields can therefore be {@code public}, {@code protected}, package-private
  * (default visibility), or {@code private} depending on the needs or coding
@@ -123,7 +137,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * @see org.springframework.test.context.bean.override.mockito.MockitoBean @MockitoBean
  * @see org.springframework.test.context.bean.override.convention.TestBean @TestBean
  */
-@Target({ElementType.FIELD, ElementType.TYPE})
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Repeatable(MockitoSpyBeans.class)
@@ -142,9 +156,9 @@ public @interface MockitoSpyBean {
 	/**
 	 * Name of the bean to spy.
 	 * <p>If left unspecified, the bean to spy is selected according to the
-	 * configured {@link #types() types} or the annotated field's type, taking
-	 * qualifiers into account if necessary. See the {@linkplain MockitoSpyBean
-	 * class-level documentation} for details.
+	 * configured {@link #types() types} or the type of the annotated field or
+	 * parameter, taking qualifiers into account if necessary. See the
+	 * {@linkplain MockitoSpyBean class-level documentation} for details.
 	 * @see #value()
 	 */
 	@AliasFor("value")
@@ -155,7 +169,7 @@ public @interface MockitoSpyBean {
 	 * <p>Defaults to none.
 	 * <p>Each type specified will result in a spy being created and registered
 	 * with the {@code ApplicationContext}.
-	 * <p>Types must be omitted when the annotation is used on a field.
+	 * <p>Types must be omitted when the annotation is used on a field or parameter.
 	 * <p>When {@code @MockitoSpyBean} also defines a {@link #name name}, this
 	 * attribute can only contain a single value.
 	 * @return the types to spy

@@ -95,7 +95,7 @@ class CacheErrorHandlerTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void getSyncFail() {
+	void getSyncFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
 		willThrow(exception).given(this.cache).get(eq(0L), any(Callable.class));
 
@@ -106,7 +106,7 @@ class CacheErrorHandlerTests {
 	}
 
 	@Test
-	public void getCompletableFutureFail() {
+	void getCompletableFutureFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
 		willThrow(exception).given(this.cache).retrieve(eq(0L));
 
@@ -117,7 +117,7 @@ class CacheErrorHandlerTests {
 	}
 
 	@Test
-	public void getMonoFail() {
+	void getMonoFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
 		willThrow(exception).given(this.cache).retrieve(eq(0L));
 
@@ -128,7 +128,7 @@ class CacheErrorHandlerTests {
 	}
 
 	@Test
-	public void getFluxFail() {
+	void getFluxFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
 		willThrow(exception).given(this.cache).retrieve(eq(0L));
 

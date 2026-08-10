@@ -72,8 +72,8 @@ import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.smile.JacksonSmileDecoder;
 import org.springframework.http.codec.smile.JacksonSmileEncoder;
-import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
-import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.codec.xml.JacksonXmlDecoder;
+import org.springframework.http.codec.xml.JacksonXmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,7 +112,7 @@ class ServerCodecConfigurerTests {
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonSmileDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationCborDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonCborDecoder.class);
-		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jaxb2XmlDecoder.class);
+		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonXmlDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationProtobufDecoder.class);
 		assertStringDecoder(getNextDecoder(readers), false);
 	}
@@ -136,7 +136,7 @@ class ServerCodecConfigurerTests {
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonSmileEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationCborEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonCborEncoder.class);
-		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jaxb2XmlEncoder.class);
+		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonXmlEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationProtobufEncoder.class);
 		assertSseWriter(writers);
 		assertStringEncoder(getNextEncoder(writers), false);
@@ -185,7 +185,7 @@ class ServerCodecConfigurerTests {
 		assertThat(((JacksonSmileDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((KotlinSerializationCborDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((JacksonCborDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
-		assertThat(((Jaxb2XmlDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((JacksonXmlDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((KotlinSerializationProtobufDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 	}

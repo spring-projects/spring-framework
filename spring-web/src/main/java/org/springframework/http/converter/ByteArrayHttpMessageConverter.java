@@ -23,7 +23,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.util.StreamUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write byte arrays.
@@ -52,6 +51,11 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(byte[] bytes, @Nullable MediaType contentType) {
+		return true;
+	}
+
+	@Override
 	public byte[] readInternal(Class<? extends byte[]> clazz, HttpInputMessage message) throws IOException {
 		long length = message.getHeaders().getContentLength();
 		return (length >= 0 && length < Integer.MAX_VALUE ?
@@ -65,10 +69,11 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 
 	@Override
 	protected void writeInternal(byte[] bytes, HttpOutputMessage outputMessage) throws IOException {
-		StreamUtils.copy(bytes, outputMessage.getBody());
+		outputMessage.getBody().write(bytes);
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(byte[] bytes) {
 		return true;
 	}

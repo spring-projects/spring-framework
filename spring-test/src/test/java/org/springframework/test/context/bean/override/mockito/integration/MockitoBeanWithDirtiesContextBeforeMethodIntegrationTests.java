@@ -56,7 +56,7 @@ class MockitoBeanWithDirtiesContextBeforeMethodIntegrationTests {
 
 	@RepeatedTest(2)
 	@DirtiesContext(methodMode = BEFORE_METHOD)
-	void testMocking() {
+	void mocking() {
 		assertThat(service).isSameAs(autowiredService);
 
 		given(service.greeting()).willReturn("Spring");

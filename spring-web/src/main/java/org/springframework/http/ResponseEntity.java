@@ -141,6 +141,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param status the status code
 	 * @deprecated in favor of {@link #ResponseEntity(HttpHeaders, HttpStatusCode)}
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
 	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatusCode status) {
 		this(null, headers, status);
@@ -154,6 +155,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 5.3.2
 	 * @deprecated in favor of {@link #ResponseEntity(Object, HttpHeaders, int)}
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
 	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, int rawStatus) {
 		this(body, headers, HttpStatusCode.valueOf(rawStatus));

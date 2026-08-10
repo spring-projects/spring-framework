@@ -32,15 +32,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Injae Kim
  * @author Rossen Stoyanchev
  */
-public class SplittingStompEncoderTests {
+class SplittingStompEncoderTests {
 
 	private static final StompEncoder ENCODER = new StompEncoder();
 
-	public static final byte[] EMPTY_PAYLOAD = new byte[0];
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 
 	@Test
-	public void encodeFrameWithNoHeadersAndNoBody() {
+	void encodeFrameWithNoHeadersAndNoBody() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		List<byte[]> actual = splittingEncoder(null).encode(headers.getMessageHeaders(), EMPTY_PAYLOAD);
 
@@ -49,7 +49,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithNoHeadersAndNoBodySplitTwoFrames() {
+	void encodeFrameWithNoHeadersAndNoBodySplitTwoFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		List<byte[]> actual = splittingEncoder(7).encode(headers.getMessageHeaders(), EMPTY_PAYLOAD);
 
@@ -58,7 +58,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithNoHeadersAndNoBodySplitMultipleFrames() {
+	void encodeFrameWithNoHeadersAndNoBodySplitMultipleFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		List<byte[]> actual = splittingEncoder(3).encode(headers.getMessageHeaders(), EMPTY_PAYLOAD);
 
@@ -67,7 +67,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithHeaders() {
+	void encodeFrameWithHeaders() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 		headers.setAcceptVersion("1.2");
 		headers.setHost("github.org");
@@ -84,7 +84,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithHeadersSplitTwoFrames() {
+	void encodeFrameWithHeadersSplitTwoFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 		headers.setAcceptVersion("1.2");
 		headers.setHost("github.org");
@@ -98,7 +98,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithHeadersSplitMultipleFrames() {
+	void encodeFrameWithHeadersSplitMultipleFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 		headers.setAcceptVersion("1.2");
 		headers.setHost("github.org");
@@ -115,7 +115,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithHeadersThatShouldBeEscaped() {
+	void encodeFrameWithHeadersThatShouldBeEscaped() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.addNativeHeader("a:\r\n\\b", "alpha:bravo\r\n\\");
 
@@ -127,7 +127,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithHeadersThatShouldBeEscapedSplitTwoFrames() {
+	void encodeFrameWithHeadersThatShouldBeEscapedSplitTwoFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.addNativeHeader("a:\r\n\\b", "alpha:bravo\r\n\\");
 
@@ -140,7 +140,7 @@ public class SplittingStompEncoderTests {
 
 
 	@Test
-	public void encodeFrameWithHeadersThatShouldBeEscapedSplitMultipleFrames() {
+	void encodeFrameWithHeadersThatShouldBeEscapedSplitMultipleFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.addNativeHeader("a:\r\n\\b", "alpha:bravo\r\n\\");
 
@@ -153,7 +153,7 @@ public class SplittingStompEncoderTests {
 
 
 	@Test
-	public void encodeFrameWithHeadersBody() {
+	void encodeFrameWithHeadersBody() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.addNativeHeader("a", "alpha");
 
@@ -165,7 +165,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithHeadersBodySplitTwoFrames() {
+	void encodeFrameWithHeadersBodySplitTwoFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.addNativeHeader("a", "alpha");
 
@@ -177,7 +177,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithHeadersBodySplitMultipleFrames() {
+	void encodeFrameWithHeadersBodySplitMultipleFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.addNativeHeader("a", "alpha");
 
@@ -189,7 +189,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithContentLengthPresent() {
+	void encodeFrameWithContentLengthPresent() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setContentLength(12);
 
@@ -201,7 +201,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithContentLengthPresentSplitTwoFrames() {
+	void encodeFrameWithContentLengthPresentSplitTwoFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setContentLength(12);
 
@@ -213,7 +213,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void encodeFrameWithContentLengthPresentSplitMultipleFrames() {
+	void encodeFrameWithContentLengthPresentSplitMultipleFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setContentLength(12);
 
@@ -225,7 +225,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void sameLengthAndBufferSizeLimit() {
+	void sameLengthAndBufferSizeLimit() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.addNativeHeader("a", "1234");
 
@@ -237,7 +237,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void lengthAndBufferSizeLimitExactlySplitTwoFrames() {
+	void lengthAndBufferSizeLimitExactlySplitTwoFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.addNativeHeader("a", "1234");
 
@@ -249,7 +249,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void lengthAndBufferSizeLimitExactlySplitMultipleFrames() {
+	void lengthAndBufferSizeLimitExactlySplitMultipleFrames() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.addNativeHeader("a", "1234");
 
@@ -261,7 +261,7 @@ public class SplittingStompEncoderTests {
 	}
 
 	@Test
-	public void bufferSizeLimitShouldBePositive() {
+	void bufferSizeLimitShouldBePositive() {
 		assertThatThrownBy(() -> splittingEncoder(0)).isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> splittingEncoder(-1)).isInstanceOf(IllegalArgumentException.class);
 	}

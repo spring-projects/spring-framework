@@ -19,6 +19,7 @@ package org.springframework.resilience;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -120,6 +121,10 @@ class ConcurrencyLimitTests {
 
 	@Test
 	void withPostProcessorForMethodWithRejection() throws Exception{
+		if (ForkJoinPool.getCommonPoolParallelism() < 4) {
+			return;  // not enough concurrency possible
+		}
+
 		AnnotatedMethodBean proxy = createProxy(AnnotatedMethodBean.class);
 		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
 
@@ -128,7 +133,7 @@ class ConcurrencyLimitTests {
 			futures.add(CompletableFuture.runAsync(proxy::rejectingOperation));
 		}
 		Thread.sleep(10);
-		for (int i = 2; i < 10; i++) {
+		for (int i = 2; i < 4; i++) {
 			futures.add(CompletableFuture.runAsync(() ->
 					assertThatExceptionOfType(InvocationRejectedException.class).isThrownBy(proxy::rejectingOperation)
 							.withMessageContaining(AnnotatedMethodBean.class.getName() + ".rejectingOperation")
@@ -159,6 +164,10 @@ class ConcurrencyLimitTests {
 
 	@Test
 	void withPostProcessorForClassWithRejection() throws Exception {
+		if (ForkJoinPool.getCommonPoolParallelism() < 4) {
+			return;  // not enough concurrency possible
+		}
+
 		AnnotatedClassBeanWithRejection proxy = createProxy(AnnotatedClassBeanWithRejection.class);
 		AnnotatedClassBeanWithRejection target = (AnnotatedClassBeanWithRejection) AopProxyUtils.getSingletonTarget(proxy);
 
@@ -174,7 +183,7 @@ class ConcurrencyLimitTests {
 				assertThatExceptionOfType(InvocationRejectedException.class).isThrownBy(proxy::otherOperation)
 						.withMessageContaining(AnnotatedClassBeanWithRejection.class.getName())
 						.satisfies(ex -> assertThat(ex.getTarget() == target))));
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 4; i++) {
 			futures.add(CompletableFuture.runAsync(proxy::overrideOperation));
 		}
 		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

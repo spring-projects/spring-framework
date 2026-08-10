@@ -38,8 +38,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -179,17 +179,36 @@ public abstract class SharedEntityManagerCreator {
 
 	/**
 	 * Create a transactional EntityAgent proxy for the given EntityManagerFactory.
+	 * @param emf the EntityManagerFactory to obtain EntityAgents from as needed
+	 * @return a shareable transactional EntityAgent proxy
+	 * (typed to {@code Object} for compatibility with JPA 3.2; this will change
+	 * to {@code EntityAgent} once Spring establishes a JPA 4.0 minimum baseline)
+	 * @since 7.1
+	 */
+	public static Object createSharedEntityAgent(EntityManagerFactory emf) {
+		return createSharedEntityAgent(emf, null);
+	}
+
+	/**
+	 * Create a transactional EntityAgent proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to obtain EntityAgentss from as needed
 	 * @param properties the properties to be passed into the
 	 * {@code createEntityAgent} call (may be {@code null})
-	 * @param ifc the interfaces to be implemented by the EntityAgent
 	 * @return a shareable transactional EntityAgent proxy
-	 * @since 7.0.4
+	 * (typed to {@code Object} for compatibility with JPA 3.2; this will change
+	 * to {@code EntityAgent} once Spring establishes a JPA 4.0 minimum baseline)
+	 * @since 7.1
 	 */
-	static Object createSharedEntityAgent(EntityManagerFactory emf, @Nullable Map<?, ?> properties, Class<?> ifc) {
+	public static Object createSharedEntityAgent(EntityManagerFactory emf, @Nullable Map<?, ?> properties) {
 		ClassLoader cl = null;
+		Class<?> ifc = null;
 		if (emf instanceof EntityManagerFactoryInfo emfInfo) {
 			cl = emfInfo.getBeanClassLoader();
+			ifc = emfInfo.getEntityAgentInterface();
+		}
+		if (ifc == null) {
+			ifc = EntityManagerFactoryUtils.getEntityAgentClass();
+			Assert.state(ifc != null, "JPA 4.0 EntityAgent class not found");
 		}
 		return Proxy.newProxyInstance(
 				(cl != null ? cl : SharedEntityManagerCreator.class.getClassLoader()),
@@ -240,10 +259,19 @@ public abstract class SharedEntityManagerCreator {
 				Object result = method.invoke(target, args);
 				if (result instanceof Query query) {
 					if (newTarget) {
+						InvocationHandler ih = new DeferredQueryInvocationHandler(query, target);
 						Class<?>[] ifcs = cachedQueryInterfaces.computeIfAbsent(query.getClass(), key ->
 								ClassUtils.getAllInterfacesForClass(key, this.proxyClassLoader));
-						result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs,
-								new DeferredQueryInvocationHandler(query, target));
+						try {
+							result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs, ih);
+						}
+						catch (IllegalArgumentException ex) {
+							// Hibernate 8.0 NativeMutationOrSelectionQueryImpl multi-interface mismatch?
+							// Fall back to single declared interface from method signature.
+							Class<?>[] singleIfc = new Class<?>[] {method.getReturnType()};
+							cachedQueryInterfaces.put(query.getClass(), singleIfc);
+							result = Proxy.newProxyInstance(this.proxyClassLoader, singleIfc, ih);
+						}
 						close = false;
 					}
 					else {
@@ -376,9 +404,7 @@ public abstract class SharedEntityManagerCreator {
 			boolean newTarget = false;
 			if (target == null) {
 				logger.debug("Creating new EntityManager for shared EntityManager invocation");
-				target = (!CollectionUtils.isEmpty(this.properties) ?
-						this.targetFactory.createEntityManager(this.properties) :
-						this.targetFactory.createEntityManager());
+				target = EntityManagerFactoryUtils.createEntityManager(this.targetFactory, this.properties);
 				newTarget = true;
 			}
 
@@ -506,7 +532,7 @@ public abstract class SharedEntityManagerCreator {
 
 		private @Nullable Map<@Nullable Object, @Nullable Object> outputParameters;
 
-		public DeferredQueryInvocationHandler(Query target, Object entityHandler) {
+		public DeferredQueryInvocationHandler(Query target, @Nullable Object entityHandler) {
 			this.target = target;
 			this.entityHandler = entityHandler;
 		}
@@ -534,7 +560,11 @@ public abstract class SharedEntityManagerCreator {
 						return proxy;
 					}
 					else {
-						return this.target.unwrap(targetClass);
+						Object retVal = this.target.unwrap(targetClass);
+						if (retVal instanceof Query query && targetClass.isInterface()) {
+							retVal = adaptQueryProxy(proxy, query, targetClass);
+						}
+						return retVal;
 					}
 				}
 				case "getOutputParameterValue" -> {
@@ -555,14 +585,21 @@ public abstract class SharedEntityManagerCreator {
 			// Invoke method on actual Query object.
 			try {
 				Object retVal = method.invoke(this.target, args);
-				if (method.getName().equals("registerStoredProcedureParameter") && args.length == 3 &&
+				Class<?> returnType = method.getReturnType();
+				if (retVal == this.target && returnType.isInstance(proxy)) {
+					retVal = proxy;
+				}
+				else if (retVal instanceof Query query) {
+					retVal = adaptQueryProxy(proxy, query, returnType);
+				}
+				else if (method.getName().equals("registerStoredProcedureParameter") && args.length == 3 &&
 						(args[2] == ParameterMode.OUT || args[2] == ParameterMode.INOUT)) {
 					if (this.outputParameters == null) {
 						this.outputParameters = new LinkedHashMap<>();
 					}
 					this.outputParameters.put(args[0], null);
 				}
-				return (retVal == this.target ? proxy : retVal);
+				return retVal;
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
@@ -591,6 +628,14 @@ public abstract class SharedEntityManagerCreator {
 					this.entityHandler = null;
 				}
 			}
+		}
+
+		private Object adaptQueryProxy(Object proxy, Query query, Class<?> expectedType) {
+			InvocationHandler ih = this;
+			if (query != this.target) {
+				ih = new DeferredQueryInvocationHandler(query, this.entityHandler);
+			}
+			return Proxy.newProxyInstance(proxy.getClass().getClassLoader(), new Class<?>[] {expectedType}, ih);
 		}
 	}
 

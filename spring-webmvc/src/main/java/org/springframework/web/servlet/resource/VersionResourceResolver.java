@@ -177,6 +177,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		String simplePath = versionStrategy.removeVersion(requestPath, candidateVersion);
+		if (ResourceHandlerUtils.shouldIgnoreInputPath(simplePath)) {
+			return null;
+		}
 		Resource baseResource = chain.resolveResource(request, simplePath, locations);
 		if (baseResource == null) {
 			return null;

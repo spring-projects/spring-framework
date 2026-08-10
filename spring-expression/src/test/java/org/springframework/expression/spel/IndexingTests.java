@@ -849,6 +849,82 @@ class IndexingTests {
 		}
 	}
 
+	@Nested
+	class PropertyAccessorValueRefTests {  // gh-36986
+
+		private final StandardEvaluationContext context = new StandardEvaluationContext();
+
+		private final SpelExpressionParser parser = new SpelExpressionParser();
+
+		@Test
+		void readIndexDoesNotUseRemovedPropertyAccessor() {
+			Person person = new Person("Jane");
+			this.context.setVariable("person", person);
+			PropertyAccessor accessor = new UppercasingPropertyAccessor();
+			this.context.addPropertyAccessor(accessor);
+
+			Expression expression = this.parser.parseExpression("#person['name']");
+
+			// The first evaluation resolves and caches the custom accessor.
+			assertThat(expression.getValue(this.context)).isEqualTo("JANE");
+
+			// Simulate an application reconfiguring the context at runtime.
+			this.context.removePropertyAccessor(accessor);
+
+			// The removed accessor must not be reused for subsequent evaluations.
+			assertThat(expression.getValue(this.context)).isEqualTo("Jane");
+		}
+
+		@Test
+		void writeIndexDoesNotUseRemovedPropertyAccessor() {
+			Person person = new Person("Jane");
+			this.context.setVariable("person", person);
+			PropertyAccessor accessor = new UppercasingPropertyAccessor();
+			this.context.addPropertyAccessor(accessor);
+
+			Expression expression = this.parser.parseExpression("#person['name']");
+
+			// The first write resolves and caches the custom accessor.
+			expression.setValue(this.context, "Alice");
+			assertThat(person.getName()).isEqualTo("custom:Alice");
+
+			// Simulate an application reconfiguring the context at runtime.
+			this.context.removePropertyAccessor(accessor);
+
+			// The removed accessor must not be reused for subsequent writes.
+			expression.setValue(this.context, "Bob");
+			assertThat(person.getName()).isEqualTo("Bob");
+		}
+
+		private static class UppercasingPropertyAccessor implements PropertyAccessor {
+
+			@Override
+			public Class<?>[] getSpecificTargetClasses() {
+				return new Class<?>[] {Person.class};
+			}
+
+			@Override
+			public boolean canRead(EvaluationContext context, @Nullable Object target, String name) {
+				return "name".equals(name);
+			}
+
+			@Override
+			public TypedValue read(EvaluationContext context, @Nullable Object target, String name) {
+				return new TypedValue(((Person) target).getName().toUpperCase());
+			}
+
+			@Override
+			public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) {
+				return "name".equals(name);
+			}
+
+			@Override
+			public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue) {
+				((Person) target).setName("custom:" + newValue);
+			}
+		}
+	}
+
 
 	@Target({ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)

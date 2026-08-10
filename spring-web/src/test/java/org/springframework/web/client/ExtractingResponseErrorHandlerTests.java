@@ -44,7 +44,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Arjen Poutsma
  */
-@SuppressWarnings("ALL")
+@SuppressWarnings("removal")
 class ExtractingResponseErrorHandlerTests {
 
 	private ExtractingResponseErrorHandler errorHandler;

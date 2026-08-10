@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 class DataSourceUtilsTests {
 
 	@Test
-	void testConnectionNotAcquiredExceptionIsPropagated() throws SQLException {
+	void connectionNotAcquiredExceptionIsPropagated() throws SQLException {
 		DataSource dataSource = mock();
 		when(dataSource.getConnection()).thenReturn(null);
 		assertThatThrownBy(() -> DataSourceUtils.getConnection(dataSource))
@@ -47,7 +47,7 @@ class DataSourceUtilsTests {
 	}
 
 	@Test
-	void testConnectionSQLExceptionIsPropagated() throws SQLException {
+	void connectionSQLExceptionIsPropagated() throws SQLException {
 		DataSource dataSource = mock();
 		when(dataSource.getConnection()).thenThrow(new SQLException("my dummy exception"));
 		assertThatThrownBy(() -> DataSourceUtils.getConnection(dataSource))

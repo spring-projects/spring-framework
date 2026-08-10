@@ -59,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("ALL")
-public class MessageMappingMessageHandlerTests {
+class MessageMappingMessageHandlerTests {
 
 	private TestEncoderMethodReturnValueHandler returnValueHandler;
 

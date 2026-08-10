@@ -44,8 +44,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public abstract class AbstractMultipartHttpServletRequest extends HttpServletRequestWrapper
 		implements MultipartHttpServletRequest {
 
-	@SuppressWarnings("NullAway.Init")
-	private MultiValueMap<String, MultipartFile> multipartFiles;
+	private @Nullable MultiValueMap<String, MultipartFile> multipartFiles;
 
 
 	/**
@@ -140,7 +139,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 		if (this.multipartFiles == null) {
 			initializeMultipart();
 		}
-		return this.multipartFiles;
+		return (this.multipartFiles != null ? this.multipartFiles : new LinkedMultiValueMap<>(Collections.emptyMap()));
 	}
 
 	/**

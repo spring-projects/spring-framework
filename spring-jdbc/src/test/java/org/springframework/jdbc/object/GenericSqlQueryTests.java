@@ -71,19 +71,19 @@ class GenericSqlQueryTests {
 	}
 
 	@Test
-	void testCustomerQueryWithPlaceholders() throws SQLException {
+	void customerQueryWithPlaceholders() throws SQLException {
 		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithPlaceholders");
 		doTestCustomerQuery(query, false);
 	}
 
 	@Test
-	void testCustomerQueryWithNamedParameters() throws SQLException {
+	void customerQueryWithNamedParameters() throws SQLException {
 		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithNamedParameters");
 		doTestCustomerQuery(query, true);
 	}
 
 	@Test
-	void testCustomerQueryWithRowMapperInstance() throws SQLException {
+	void customerQueryWithRowMapperInstance() throws SQLException {
 		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithRowMapperBean");
 		doTestCustomerQuery(query, true);
 	}

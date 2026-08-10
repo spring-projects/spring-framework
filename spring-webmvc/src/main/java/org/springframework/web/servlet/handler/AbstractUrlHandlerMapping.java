@@ -62,7 +62,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @since 16.04.2003
  */
 @SuppressWarnings("removal")
-public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping implements MatchableHandlerMapping {
+public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private @Nullable Object rootHandler;
 
@@ -464,19 +464,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	protected void exposeUriTemplateVariables(Map<String, String> uriTemplateVariables, HttpServletRequest request) {
 		request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 	}
-
-	@SuppressWarnings("removal")
-	@Override
-	@Deprecated(since = "7.0", forRemoval = true)
-	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
-		Assert.state(getPatternParser() == null, "This HandlerMapping uses PathPatterns.");
-		String lookupPath = UrlPathHelper.getResolvedLookupPath(request);
-		if (getPathMatcher().match(pattern, lookupPath)) {
-			return new RequestMatchResult(pattern, lookupPath, getPathMatcher());
-		}
-		return null;
-	}
-
 
 	/**
 	 * Return the handler mappings as a read-only Map, with the registered path

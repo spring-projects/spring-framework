@@ -59,6 +59,11 @@ import org.springframework.util.Assert;
  * transactional receipt of messages (registering them with XA transactions),
  * see {@link DefaultMessageListenerContainer}.
  *
+ * <p><b>Note that Spring's JMS setup is designed to be used against trusted
+ * broker setups, with trusted packages for {@code ObjectMessage} deserialization
+ * to be configured at the broker level (for example: in the ActiveMQ setup).</b>
+ * Alternatively, you may configure a custom {@link #setMessageConverter converter}.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see jakarta.jms.MessageConsumer#setMessageListener

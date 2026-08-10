@@ -17,7 +17,7 @@
 package org.springframework.context.annotation.configuration.a;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.configuration.PackagePrivateBeanMethodInheritanceTests.Bar;
+import org.springframework.context.annotation.configuration.Bar;
 
 public abstract class BaseConfig {
 

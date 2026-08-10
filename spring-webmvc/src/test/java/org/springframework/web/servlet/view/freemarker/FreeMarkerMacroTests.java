@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 25.01.2005
  */
 @SuppressWarnings("deprecation")
-public class FreeMarkerMacroTests {
+class FreeMarkerMacroTests {
 
 	private static final String TEMPLATE_FILE = "test.ftl";
 
@@ -91,7 +91,7 @@ public class FreeMarkerMacroTests {
 
 
 	@Test
-	void testExposeSpringMacroHelpers() throws Exception {
+	void exposeSpringMacroHelpers() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView() {
 			@Override
 			@SuppressWarnings("rawtypes")
@@ -114,7 +114,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	void testSpringMacroRequestContextAttributeUsed() {
+	void springMacroRequestContextAttributeUsed() {
 		final String helperTool = "wrongType";
 
 		FreeMarkerView fv = new FreeMarkerView() {
@@ -139,89 +139,89 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	void testName() throws Exception {
+	void name() throws Exception {
 		assertThat(getMacroOutput("NAME")).isEqualTo("Darren");
 	}
 
 	@Test
-	void testMessage() throws Exception {
+	void message() throws Exception {
 		assertThat(getMacroOutput("MESSAGE")).isEqualTo("Howdy Mundo");
 	}
 
 	@Test
-	void testDefaultMessage() throws Exception {
+	void defaultMessage() throws Exception {
 		assertThat(getMacroOutput("DEFAULTMESSAGE")).isEqualTo("hi planet");
 	}
 
 	@Test
-	void testMessageArgs() throws Exception {
+	void messageArgs() throws Exception {
 		assertThat(getMacroOutput("MESSAGEARGS")).isEqualTo("Howdy[World]");
 	}
 
 	@Test
-	void testMessageArgsWithDefaultMessage() throws Exception {
+	void messageArgsWithDefaultMessage() throws Exception {
 		assertThat(getMacroOutput("MESSAGEARGSWITHDEFAULTMESSAGE")).isEqualTo("Hi");
 	}
 
 	@Test
-	void testUrl() throws Exception {
+	void url() throws Exception {
 		assertThat(getMacroOutput("URL")).isEqualTo("/springtest/aftercontext.html");
 	}
 
 	@Test
-	void testUrlParams() throws Exception {
+	void urlParams() throws Exception {
 		assertThat(getMacroOutput("URLPARAMS")).isEqualTo("/springtest/aftercontext/bar?spam=bucket");
 	}
 
 	@Test
-	void testForm1() throws Exception {
+	void form1() throws Exception {
 		assertThat(getMacroOutput("FORM1")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
-	void testForm2() throws Exception {
+	void form2() throws Exception {
 		assertThat(getMacroOutput("FORM2")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\" >");
 	}
 
 	@Test
-	void testForm3() throws Exception {
+	void form3() throws Exception {
 		assertThat(getMacroOutput("FORM3")).isEqualTo("<textarea id=\"name\" name=\"name\" >\nDarren</textarea>");
 	}
 
 	@Test
-	void testForm4() throws Exception {
+	void form4() throws Exception {
 		assertThat(getMacroOutput("FORM4")).isEqualTo("<textarea id=\"name\" name=\"name\" rows=10 cols=30>\nDarren</textarea>");
 	}
 
 	// TODO verify remaining output for forms 5, 6, 7, 8, and 14 (fix whitespace)
 
 	@Test
-	void testForm9() throws Exception {
+	void form9() throws Exception {
 		assertThat(getMacroOutput("FORM9")).isEqualTo("<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >");
 	}
 
 	@Test
-	void testForm10() throws Exception {
+	void form10() throws Exception {
 		assertThat(getMacroOutput("FORM10")).isEqualTo("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
-	void testForm11() throws Exception {
+	void form11() throws Exception {
 		assertThat(getMacroOutput("FORM11")).isEqualTo("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
-	void testForm12() throws Exception {
+	void form12() throws Exception {
 		assertThat(getMacroOutput("FORM12")).isEqualTo("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >");
 	}
 
 	@Test
-	void testForm13() throws Exception {
+	void form13() throws Exception {
 		assertThat(getMacroOutput("FORM13")).isEqualTo("<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >");
 	}
 
 	@Test
-	void testForm15() throws Exception {
+	void form15() throws Exception {
 		String output = getMacroOutput("FORM15");
 		assertThat(output).as("Wrong output: " + output)
 				.startsWith("<input type=\"hidden\" name=\"_name\" value=\"on\"/>");
@@ -230,7 +230,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	void testForm16() throws Exception {
+	void form16() throws Exception {
 		String output = getMacroOutput("FORM16");
 		assertThat(output).as("Wrong output: " + output)
 				.startsWith("<input type=\"hidden\" name=\"_jedi\" value=\"on\"/>");
@@ -239,12 +239,12 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
-	void testForm17() throws Exception {
+	void form17() throws Exception {
 		assertThat(getMacroOutput("FORM17")).isEqualTo("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >");
 	}
 
 	@Test
-	void testForm18() throws Exception {
+	void form18() throws Exception {
 		String output = getMacroOutput("FORM18");
 		assertThat(output).as("Wrong output: " + output)
 				.startsWith("<input type=\"hidden\" name=\"_spouses[0].jedi\" value=\"on\"/>");

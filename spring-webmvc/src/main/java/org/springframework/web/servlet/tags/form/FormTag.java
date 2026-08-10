@@ -32,7 +32,6 @@ import org.springframework.core.Conventions;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
@@ -126,7 +125,7 @@ import org.springframework.web.util.UriUtils;
  * <td><p>methodParam</p></td>
  * <td><p>false</p></td>
  * <td><p>true</p></td>
- * <td><p>The parameter name used for HTTP methods other then GET and POST.
+ * <td><p>The parameter name used for HTTP methods other than GET and POST.
  * Default is '_method'.</p></td>
  * </tr>
  * <tr class="odd-row-color">
@@ -239,6 +238,7 @@ import org.springframework.web.util.UriUtils;
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 2.0
  */
 @SuppressWarnings("serial")
@@ -719,7 +719,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	@Override
 	protected String resolveCssClass() throws JspException {
-		return ObjectUtils.getDisplayString(evaluate("cssClass", getCssClass()));
+		return getDisplayString(evaluate("cssClass", getCssClass()));
 	}
 
 	/**

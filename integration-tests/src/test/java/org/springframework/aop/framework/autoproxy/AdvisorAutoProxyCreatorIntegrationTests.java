@@ -65,7 +65,7 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	void testDefaultExclusionPrefix() {
+	void defaultExclusionPrefix() {
 		DefaultAdvisorAutoProxyCreator aapc = (DefaultAdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
 		assertThat(aapc.getAdvisorBeanNamePrefix()).isEqualTo((ADVISOR_APC_BEAN_NAME + DefaultAdvisorAutoProxyCreator.SEPARATOR));
 		assertThat(aapc.isUsePrefix()).isFalse();
@@ -75,21 +75,21 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	 * If no pointcuts match (no attrs) there should be proxying.
 	 */
 	@Test
-	void testNoProxy() {
+	void noProxy() {
 		BeanFactory bf = getBeanFactory();
 		Object o = bf.getBean("noSetters");
 		assertThat(AopUtils.isAopProxy(o)).isFalse();
 	}
 
 	@Test
-	void testTxIsProxied() {
+	void txIsProxied() {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 		assertThat(AopUtils.isAopProxy(test)).isTrue();
 	}
 
 	@Test
-	void testRegexpApplied() {
+	void regexpApplied() {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 		MethodCounter counter = (MethodCounter) bf.getBean("countingAdvice");
@@ -99,7 +99,7 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	void testTransactionAttributeOnMethod() {
+	void transactionAttributeOnMethod() {
 		BeanFactory bf = getBeanFactory();
 		ITestBean test = (ITestBean) bf.getBean("test");
 
@@ -121,7 +121,7 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	 * Should not roll back on servlet exception.
 	 */
 	@Test
-	void testRollbackRulesOnMethodCauseRollback() throws Exception {
+	void rollbackRulesOnMethodCauseRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Rollback rb = (Rollback) bf.getBean("rollback");
 
@@ -147,7 +147,7 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	void testRollbackRulesOnMethodPreventRollback() throws Exception {
+	void rollbackRulesOnMethodPreventRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 		Rollback rb = (Rollback) bf.getBean("rollback");
 
@@ -164,12 +164,11 @@ class AdvisorAutoProxyCreatorIntegrationTests {
 	}
 
 	@Test
-	void testProgrammaticRollback() {
+	void programmaticRollback() {
 		BeanFactory bf = getBeanFactory();
 
 		Object bean = bf.getBean(TXMANAGER_BEAN_NAME);
-		boolean condition = bean instanceof CallCountingTransactionManager;
-		assertThat(condition).isTrue();
+		assertThat(bean).isInstanceOf(CallCountingTransactionManager.class);
 		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 
 		Rollback rb = (Rollback) bf.getBean("rollback");

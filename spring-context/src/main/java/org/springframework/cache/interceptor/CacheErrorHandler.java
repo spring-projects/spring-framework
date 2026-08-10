@@ -16,6 +16,8 @@
 
 package org.springframework.cache.interceptor;
 
+import java.util.concurrent.Callable;
+
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.cache.Cache;
@@ -39,10 +41,17 @@ public interface CacheErrorHandler {
 	 * Handle the given runtime exception thrown by the cache provider when
 	 * retrieving an item with the specified {@code key}, possibly
 	 * rethrowing it as a fatal exception.
+	 * <p>Note that for a default {@code @Cacheable} setup, this will be called
+	 * after an initial cache access failure, whereas the subsequent put step may
+	 * independently fail and be handled in {@link #handleCachePutError} still.
+	 * However, for {@code @Cacheable(sync=true)}, there is only a combined get step
+	 * with {@code handleCacheGetError} being called in case of failure; there won't
+	 * be a separate put attempt after initial cache access failure anymore.
 	 * @param exception the exception thrown by the cache provider
 	 * @param cache the cache
 	 * @param key the key used to get the item
 	 * @see Cache#get(Object)
+	 * @see Cache#get(Object, Callable)
 	 */
 	void handleCacheGetError(RuntimeException exception, Cache cache, Object key);
 

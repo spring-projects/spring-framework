@@ -127,7 +127,7 @@ class ServletRequestMethodArgumentResolverTests {
 	}
 
 	@Test // gh-25780
-	public void annotatedPrincipal() throws Exception {
+	void annotatedPrincipal() throws Exception {
 		Principal principal = () -> "Foo";
 		servletRequest.setUserPrincipal(principal);
 		Method principalMethod = getClass().getMethod("supportedParamsWithAnnotatedPrincipal", Principal.class);

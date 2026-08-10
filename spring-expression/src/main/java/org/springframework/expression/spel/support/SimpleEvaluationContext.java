@@ -49,8 +49,8 @@ import org.springframework.expression.spel.SpelMessage;
  * should be meaningfully restricted. Examples include but are not limited to
  * data binding expressions, property-based filters, and others. To that effect,
  * {@code SimpleEvaluationContext} is tailored to support only a subset of the
- * SpEL language syntax, for example, excluding references to Java types, constructors,
- * and bean references.
+ * SpEL language syntax &mdash; for example, excluding references to Java types,
+ * constructors, and bean references.
  *
  * <p>When creating a {@code SimpleEvaluationContext} you need to choose the level of
  * support that you need for data binding in SpEL expressions:
@@ -65,9 +65,10 @@ import org.springframework.expression.spel.SpelMessage;
  * read-only access to properties via {@link DataBindingPropertyAccessor}. Similarly,
  * {@link SimpleEvaluationContext#forReadWriteDataBinding()} enables read and write access
  * to properties. Alternatively, configure custom accessors via
- * {@link SimpleEvaluationContext#forPropertyAccessors}, potentially
- * {@linkplain Builder#withAssignmentDisabled() disable assignment}, and optionally
- * activate method resolution and/or a type converter through the builder.
+ * {@link SimpleEvaluationContext#forPropertyAccessors}, consider
+ * {@linkplain Builder#withAssignmentDisabled() disabling assignment} (recommended),
+ * and optionally activate method resolution and/or a type converter through the
+ * builder.
  *
  * <p>Note that {@code SimpleEvaluationContext} is typically not configured
  * with a default root object. Instead it is meant to be created once and
@@ -86,6 +87,31 @@ import org.springframework.expression.spel.SpelMessage;
  *
  * <p>For more power and flexibility, in particular for internal configuration
  * scenarios, consider using {@link StandardEvaluationContext} instead.
+ *
+ * <p><strong>WARNING</strong>: Although {@code SimpleEvaluationContext} restricts
+ * the SpEL language to a subset of its features, that restriction is provided on
+ * a best-effort basis and does not guarantee that evaluation of an expression is
+ * safe; {@code SimpleEvaluationContext} must not be considered safe for evaluating
+ * a SpEL expression obtained from an untrusted source. This responsibility extends
+ * to property accessors: restricting a {@code SimpleEvaluationContext} to read-only
+ * data binding governs only whether <em>assignment</em> to a property is permitted
+ * and does not verify that reading a property is free of side effects. See the
+ * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-security"
+ * >Security Considerations</a> and
+ * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-object-design"
+ * >Object Design</a> sections of the Spring Framework reference documentation, as well
+ * as the class-level documentation for {@link ReflectivePropertyAccessor} and
+ * {@link DataBindingPropertyAccessor}, for details.
+ *
+ * <p>Because a parsed {@code Expression} may cache accessor and executor state
+ * resolved against a particular {@code EvaluationContext} configuration, a parsed
+ * {@code Expression} must never be evaluated first against a
+ * {@code StandardEvaluationContext} (or any other, less restrictive,
+ * {@code EvaluationContext}) and later against a {@code SimpleEvaluationContext}. If the
+ * same expression string must be evaluated under both kinds of contexts, parse it into
+ * two distinct {@code Expression} instances instead. See
+ * {@link org.springframework.expression.Expression Expression} for further details on
+ * this lifecycle contract.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller

@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.util.pattern.PathPattern;
 
@@ -41,8 +40,6 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @author Arjen Poutsma
  */
 class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests {
-
-	private final RestTemplate restTemplate = new RestTemplate();
 
 
 	@Override
@@ -64,8 +61,8 @@ class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests
 	void bar(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<String> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/foo/bar", String.class);
+		ResponseEntity<String> result = getRestClient().get().uri("http://localhost:" + port + "/foo/bar")
+				.retrieve().toEntity(String.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).isEqualTo("/foo/bar");
@@ -75,8 +72,8 @@ class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests
 	void baz(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<String> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/foo/baz", String.class);
+		ResponseEntity<String> result = getRestClient().get().uri("http://localhost:" + port + "/foo/baz")
+				.retrieve().toEntity(String.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).isEqualTo("/foo/baz");
@@ -86,8 +83,8 @@ class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests
 	void variables(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<String> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);
+		ResponseEntity<String> result = getRestClient().get().uri("http://localhost:" + port + "/1/2/3")
+				.retrieve().toEntity(String.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String body = result.getBody();
@@ -102,8 +99,8 @@ class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests
 	void parentVariables(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<String> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/1/bar", String.class);
+		ResponseEntity<String> result = getRestClient().get().uri("http://localhost:" + port + "/1/bar")
+				.retrieve().toEntity(String.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).isEqualTo("/{foo}/bar\n{foo=1}");
@@ -115,8 +112,8 @@ class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests
 	void removeFailedNestedPathVariables(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<String> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/qux/quux", String.class);
+		ResponseEntity<String> result = getRestClient().get().uri("http://localhost:" + port + "/qux/quux")
+				.retrieve().toEntity(String.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).isEqualTo("/{qux}/quux\n{qux=qux}");
@@ -128,8 +125,8 @@ class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests
 	void removeFailedPathVariablesAnd(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<String> result =
-				restTemplate.postForEntity("http://localhost:" + port + "/qux/quux", "", String.class);
+		ResponseEntity<String> result = getRestClient().post().uri("http://localhost:" + port + "/qux/quux")
+				.retrieve().toEntity(String.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).isEqualTo("{}");

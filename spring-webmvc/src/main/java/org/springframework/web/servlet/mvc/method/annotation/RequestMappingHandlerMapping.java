@@ -28,7 +28,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -55,15 +54,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.service.annotation.HttpExchange;
-import org.springframework.web.servlet.handler.MatchableHandlerMapping;
-import org.springframework.web.servlet.handler.RequestMatchResult;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Creates {@link RequestMappingInfo} instances from type-level and method-level
@@ -79,7 +75,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 @SuppressWarnings("removal")
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
-		implements MatchableHandlerMapping, EmbeddedValueResolverAware {
+		implements EmbeddedValueResolverAware {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -472,20 +468,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				}
 			}
 		}
-	}
-
-	@SuppressWarnings("removal")
-	@Deprecated(since = "7.0", forRemoval = true)
-	@Override
-	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
-		Assert.state(getPatternParser() == null, "This HandlerMapping uses PathPatterns.");
-		RequestMappingInfo info = RequestMappingInfo.paths(pattern).options(this.config).build();
-		RequestMappingInfo match = info.getMatchingCondition(request);
-		return (match != null && match.getPatternsCondition() != null ?
-				new RequestMatchResult(
-						match.getPatternsCondition().getPatterns().iterator().next(),
-						UrlPathHelper.getResolvedLookupPath(request),
-						getPathMatcher()) : null);
 	}
 
 	@Override

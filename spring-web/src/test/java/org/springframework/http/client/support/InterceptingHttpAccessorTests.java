@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Brian Clozel
  */
+@SuppressWarnings("removal")
 class InterceptingHttpAccessorTests {
 
 	@Test

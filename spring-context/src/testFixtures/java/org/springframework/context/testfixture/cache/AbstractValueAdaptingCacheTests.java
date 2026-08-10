@@ -33,13 +33,12 @@ public abstract class AbstractValueAdaptingCacheTests<T extends AbstractValueAda
 	protected abstract T getCache(boolean allowNull);
 
 	@Test
-	protected void testCachePutNullValueAllowNullFalse() {
+	protected void cachePutNullValueAllowNullFalse() {
 		T cache = getCache(false);
 		String key = createRandomKey();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				cache.put(key, null))
-			.withMessageContaining(CACHE_NAME_NO_NULL)
-			.withMessageContaining("is configured to not allow null values but null was provided");
+		assertThatIllegalArgumentException().isThrownBy(() -> cache.put(key, null))
+				.withMessageContaining(CACHE_NAME_NO_NULL)
+				.withMessageContaining("is configured to not allow null values but null was provided");
 	}
 
 }

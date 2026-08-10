@@ -12,6 +12,6 @@
 	</mvc:annotation-driven>
 
 	<mvc:view-controller path="/foo"/>
-	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/"/>
+	<mvc:resources mapping="/resources/**" location="/static, classpath:/META-INF/"/>
 
 </beans>

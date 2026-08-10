@@ -48,19 +48,19 @@ class AtAspectJAnnotationBindingTests {
 
 
 	@Test
-	void testAnnotationBindingInAroundAdvice() {
+	void annotationBindingInAroundAdvice() {
 		assertThat(testBean.doThis()).isEqualTo("this value doThis");
 		assertThat(testBean.doThat()).isEqualTo("that value doThat");
 		assertThat(testBean.doArray()).hasSize(2);
 	}
 
 	@Test
-	void testNoMatchingWithoutAnnotationPresent() {
+	void noMatchingWithoutAnnotationPresent() {
 		assertThat(testBean.doTheOther()).isEqualTo("doTheOther");
 	}
 
 	@Test
-	void testPointcutEvaluatedAgainstArray() {
+	void pointcutEvaluatedAgainstArray() {
 		ctx.getBean("arrayFactoryBean");
 	}
 

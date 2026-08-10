@@ -49,7 +49,7 @@ class NotificationPublisherTests extends AbstractMBeanServerTests {
 	private CountingNotificationListener listener = new CountingNotificationListener();
 
 	@Test
-	void testSimpleBean() throws Exception {
+	void simpleBean() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherTests.xml");
 		this.server.addNotificationListener(ObjectNameManager.getInstance("spring:type=Publisher"), listener, null,
@@ -62,7 +62,7 @@ class NotificationPublisherTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testSimpleBeanRegisteredManually() throws Exception {
+	void simpleBeanRegisteredManually() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherTests.xml");
 		MBeanExporter exporter = (MBeanExporter) ctx.getBean("exporter");
@@ -77,7 +77,7 @@ class NotificationPublisherTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testMBean() throws Exception {
+	void mBean() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherTests.xml");
 		this.server.addNotificationListener(ObjectNameManager.getInstance("spring:type=PublisherMBean"), listener,
@@ -90,7 +90,7 @@ class NotificationPublisherTests extends AbstractMBeanServerTests {
 
 	/*
 	@Test
-	void testStandardMBean() throws Exception {
+	void standardMBean() throws Exception {
 		// start the MBeanExporter
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/notificationPublisherTests.xml");
 		this.server.addNotificationListener(ObjectNameManager.getInstance("spring:type=PublisherStandardMBean"), listener, null, null);
@@ -102,7 +102,7 @@ class NotificationPublisherTests extends AbstractMBeanServerTests {
 	*/
 
 	@Test
-	void testLazyInit() throws Exception {
+	void lazyInit() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherLazyTests.xml");
 		assertThat(ctx.getBeanFactory().containsSingleton("publisher")).as("Should not have instantiated the bean yet").isFalse();

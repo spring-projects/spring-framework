@@ -16,12 +16,9 @@
 
 package org.springframework.docs.testing.mockmvc.assertj.mockmvctesterintegration
 
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.*
 import org.springframework.test.web.servlet.assertj.MockMvcTester
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 /**

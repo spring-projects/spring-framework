@@ -57,7 +57,9 @@ class InheritedAnnotationsAnnotationMetadataTests {
 
 	@Test
 	void getAnnotationTypes() {
-		assertThat(standardMetadata.getAnnotationTypes()).containsExactlyInAnyOrder(
+		// We do not use containsExactlyInAnyOrder(), because annotations
+		// must be returned in source declaration order.
+		assertThat(standardMetadata.getAnnotationTypes()).containsExactly(
 			NamedAnnotation3.class.getName(),
 			InheritedComposedAnnotation.class.getName());
 
@@ -81,11 +83,14 @@ class InheritedAnnotationsAnnotationMetadataTests {
 		Set<String> metaAnnotationTypes;
 
 		metaAnnotationTypes = standardMetadata.getMetaAnnotationTypes(InheritedComposedAnnotation.class.getName());
-		assertThat(metaAnnotationTypes).containsExactlyInAnyOrder(
-			MetaAnnotation.class.getName(),
+		// We do not use containsExactlyInAnyOrder(), because annotations
+		// must be returned in source declaration order, with local annotations
+		// before meta-annotations.
+		assertThat(metaAnnotationTypes).containsExactly(
 			NamedAnnotation1.class.getName(),
 			NamedAnnotation2.class.getName(),
-			NamedAnnotation3.class.getName());
+			NamedAnnotation3.class.getName(),
+			MetaAnnotation.class.getName());
 
 		metaAnnotationTypes = asmMetadata.getMetaAnnotationTypes(InheritedComposedAnnotation.class.getName());
 		assertThat(metaAnnotationTypes).isEmpty();
@@ -138,7 +143,10 @@ class InheritedAnnotationsAnnotationMetadataTests {
 
 		annotationAttributes = standardMetadata.getAllAnnotationAttributes(NamedAnnotation3.class.getName());
 		assertThat(annotationAttributes).containsKey("name");
-		assertThat(annotationAttributes.get("name")).containsExactlyInAnyOrder("name 3", "local");
+		// We do not use containsExactlyInAnyOrder(), because annotations
+		// must be returned in source declaration order, with local annotations
+		// before meta-annotations.
+		assertThat(annotationAttributes.get("name")).containsExactly("local", "name 3");
 
 		annotationAttributes = asmMetadata.getAllAnnotationAttributes(NamedAnnotation1.class.getName());
 		assertThat(annotationAttributes).isNull();

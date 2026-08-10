@@ -39,7 +39,7 @@ class PropertiesFactoryBeanTests {
 	private static final Resource TEST_PROPS_XML = qualifiedResource(CLASS, "test.properties.xml");
 
 	@Test
-	void testWithPropertiesFile() throws Exception {
+	void withPropertiesFile() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS);
 		pfb.afterPropertiesSet();
@@ -48,7 +48,7 @@ class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	void testWithPropertiesXmlFile() throws Exception {
+	void withPropertiesXmlFile() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS_XML);
 		pfb.afterPropertiesSet();
@@ -57,7 +57,7 @@ class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	void testWithLocalProperties() throws Exception {
+	void withLocalProperties() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		Properties localProps = new Properties();
 		localProps.setProperty("key2", "value2");
@@ -68,7 +68,7 @@ class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	void testWithPropertiesFileAndLocalProperties() throws Exception {
+	void withPropertiesFileAndLocalProperties() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS);
 		Properties localProps = new Properties();
@@ -82,7 +82,7 @@ class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	void testWithPropertiesFileAndMultipleLocalProperties() throws Exception {
+	void withPropertiesFileAndMultipleLocalProperties() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS);
 
@@ -111,7 +111,7 @@ class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	void testWithPropertiesFileAndLocalPropertiesAndLocalOverride() throws Exception {
+	void withPropertiesFileAndLocalPropertiesAndLocalOverride() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setLocation(TEST_PROPS);
 		Properties localProps = new Properties();
@@ -126,7 +126,7 @@ class PropertiesFactoryBeanTests {
 	}
 
 	@Test
-	void testWithPrototype() throws Exception {
+	void withPrototype() throws Exception {
 		PropertiesFactoryBean pfb = new PropertiesFactoryBean();
 		pfb.setSingleton(false);
 		pfb.setLocation(TEST_PROPS);

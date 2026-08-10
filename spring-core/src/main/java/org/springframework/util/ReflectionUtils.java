@@ -768,7 +768,7 @@ public abstract class ReflectionUtils {
 	public static void shallowCopyFieldState(final Object src, final Object dest) {
 		Assert.notNull(src, "Source for field copy cannot be null");
 		Assert.notNull(dest, "Destination for field copy cannot be null");
-		if (!src.getClass().isAssignableFrom(dest.getClass())) {
+		if (!src.getClass().isInstance(dest)) {
 			throw new IllegalArgumentException("Destination class [" + dest.getClass().getName() +
 					"] must be same or subclass as source class [" + src.getClass().getName() + "]");
 		}

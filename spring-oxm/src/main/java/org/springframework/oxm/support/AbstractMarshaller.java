@@ -75,6 +75,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
 			(publicId, systemId) -> new InputSource(new StringReader(""));
 
+
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -165,8 +166,22 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
 		factory.setNamespaceAware(true);
-		factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-		factory.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+		try {
+			factory.setFeature(
+					"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+		}
+		catch (Exception ex) {
+			// Xerces properties not recognized/supported - ignore
+		}
+		try {
+			factory.setFeature(
+					"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+			factory.setFeature(
+					"http://xml.org/sax/features/external-parameter-entities", isProcessExternalEntities());
+		}
+		catch (Exception ex) {
+			// SAX properties not recognized/supported - ignore
+		}
 		return factory;
 	}
 
@@ -195,17 +210,29 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * @throws ParserConfigurationException if thrown by JAXP methods
 	 */
 	protected XMLReader createXmlReader() throws SAXException, ParserConfigurationException {
-		SAXParserFactory parserFactory = this.saxParserFactory;
-		if (parserFactory == null) {
-			parserFactory = SAXParserFactory.newInstance();
-			parserFactory.setNamespaceAware(true);
-			parserFactory.setFeature(
-					"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-			parserFactory.setFeature(
-					"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
-			this.saxParserFactory = parserFactory;
+		SAXParserFactory factory = this.saxParserFactory;
+		if (factory == null) {
+			factory = SAXParserFactory.newInstance();
+			factory.setNamespaceAware(true);
+			try {
+				factory.setFeature(
+						"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			}
+			catch (Exception ex) {
+				// Xerces properties not recognized/supported - ignore
+			}
+			try {
+				factory.setFeature(
+						"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+				factory.setFeature(
+						"http://xml.org/sax/features/external-parameter-entities", isProcessExternalEntities());
+			}
+			catch (Exception ex) {
+				// SAX properties not recognized/supported - ignore
+			}
+			this.saxParserFactory = factory;
 		}
-		SAXParser saxParser = parserFactory.newSAXParser();
+		SAXParser saxParser = factory.newSAXParser();
 		XMLReader xmlReader = saxParser.getXMLReader();
 		if (!isProcessExternalEntities()) {
 			xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
@@ -456,8 +483,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 		catch (NullPointerException ex) {
 			if (!isSupportDtd()) {
 				throw new UnmarshallingFailureException("NPE while unmarshalling. " +
-						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.");
+						"This can happen due to the presence of DTD declarations, which are disabled.");
 			}
 			throw ex;
 		}

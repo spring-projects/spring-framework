@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class ViewNameAssertionTests {
+class ViewNameAssertionTests {
 
 	private final WebTestClient client =
 			MockMvcWebTestClient.bindToController(new SimpleController())
@@ -44,14 +44,14 @@ public class ViewNameAssertionTests {
 
 
 	@Test
-	public void testEqualTo() throws Exception {
+	void hamcrestEqualTo() throws Exception {
 		MockMvcWebTestClient.resultActionsFor(performRequest())
 			.andExpect(view().name("mySpecialView"))
 			.andExpect(view().name(equalTo("mySpecialView")));
 	}
 
 	@Test
-	public void testHamcrestMatcher() throws Exception {
+	void hamcrestMatcher() throws Exception {
 		MockMvcWebTestClient.resultActionsFor(performRequest())
 				.andExpect(view().name(containsString("Special")));
 	}

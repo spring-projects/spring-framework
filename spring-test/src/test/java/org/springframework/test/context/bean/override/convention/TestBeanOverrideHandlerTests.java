@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
-import org.springframework.test.context.bean.override.BeanOverrideTestUtils;
+import org.springframework.test.context.bean.override.BeanOverrideUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -44,20 +44,20 @@ class TestBeanOverrideHandlerTests {
 
 	@Test
 	void beanNameIsSetToNullIfAnnotationNameIsEmpty() {
-		List<BeanOverrideHandler> handlers = BeanOverrideTestUtils.findHandlers(SampleOneOverride.class);
+		List<BeanOverrideHandler> handlers = BeanOverrideUtils.findHandlersForFields(SampleOneOverride.class);
 		assertThat(handlers).singleElement().extracting(BeanOverrideHandler::getBeanName).isNull();
 	}
 
 	@Test
 	void beanNameIsSetToAnnotationName() {
-		List<BeanOverrideHandler> handlers = BeanOverrideTestUtils.findHandlers(SampleOneOverrideWithName.class);
+		List<BeanOverrideHandler> handlers = BeanOverrideUtils.findHandlersForFields(SampleOneOverrideWithName.class);
 		assertThat(handlers).singleElement().extracting(BeanOverrideHandler::getBeanName).isEqualTo("anotherBean");
 	}
 
 	@Test
 	void failsWithMissingMethod() {
 		assertThatIllegalStateException()
-				.isThrownBy(() -> BeanOverrideTestUtils.findHandlers(SampleMissingMethod.class))
+				.isThrownBy(() -> BeanOverrideUtils.findHandlersForFields(SampleMissingMethod.class))
 				.withMessage("No static method found named message() in %s with return type %s",
 						SampleMissingMethod.class.getName(), String.class.getName());
 	}

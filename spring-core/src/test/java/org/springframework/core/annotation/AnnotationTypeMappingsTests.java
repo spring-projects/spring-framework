@@ -102,7 +102,7 @@ class AnnotationTypeMappingsTests {
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForWithBothValueAndAttribute.class))
 				.withMessage("In @AliasFor declared on attribute 'test' in annotation [%s], attribute 'attribute' " +
 						"and its alias 'value' are present with values of 'foo' and 'bar', but only one is permitted.",
-						AliasForWithBothValueAndAttribute.class.getName());
+						AliasForWithBothValueAndAttribute.class.getCanonicalName());
 	}
 
 	@Test
@@ -111,7 +111,7 @@ class AnnotationTypeMappingsTests {
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForToSelfNonExistingAttribute.class))
 				.withMessage("@AliasFor declaration on attribute 'test' in annotation [%s] " +
 						"declares an alias for 'missing' which is not present.",
-						AliasForToSelfNonExistingAttribute.class.getName());
+						AliasForToSelfNonExistingAttribute.class.getCanonicalName());
 	}
 
 	@Test
@@ -119,8 +119,8 @@ class AnnotationTypeMappingsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForToOtherNonExistingAttribute.class))
 				.withMessage("Attribute 'test' in annotation [%s] is declared as an @AliasFor nonexistent " +
-						"attribute 'missing' in annotation [%s].", AliasForToOtherNonExistingAttribute.class.getName(),
-						AliasForToOtherNonExistingAttributeTarget.class.getName());
+						"attribute 'missing' in annotation [%s].", AliasForToOtherNonExistingAttribute.class.getCanonicalName(),
+						AliasForToOtherNonExistingAttributeTarget.class.getCanonicalName());
 	}
 
 	@Test
@@ -129,7 +129,7 @@ class AnnotationTypeMappingsTests {
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForToSelf.class))
 				.withMessage("@AliasFor declaration on attribute 'test' in annotation [%s] points to itself. " +
 						"Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
-						AliasForToSelf.class.getName());
+						AliasForToSelf.class.getCanonicalName());
 	}
 
 	@Test
@@ -147,13 +147,13 @@ class AnnotationTypeMappingsTests {
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForWithIncompatibleReturnTypes.class))
 				.withMessage("Misconfigured aliases: attribute 'test' in annotation [%s] and attribute 'test' " +
 						"in annotation [%s] must declare the same return type.",
-						AliasForWithIncompatibleReturnTypes.class.getName(),
-						AliasForWithIncompatibleReturnTypesTarget.class.getName());
+						AliasForWithIncompatibleReturnTypes.class.getCanonicalName(),
+						AliasForWithIncompatibleReturnTypesTarget.class.getCanonicalName());
 	}
 
 	@Test
 	void forAnnotationTypeWhenAliasForToSelfAnnotatedToOtherAttribute() {
-		String annotationType = AliasForToSelfAnnotatedToOtherAttribute.class.getName();
+		String annotationType = AliasForToSelfAnnotatedToOtherAttribute.class.getCanonicalName();
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForToSelfAnnotatedToOtherAttribute.class))
 				.withMessage("Attribute 'b' in annotation [%1$s] must be declared as an @AliasFor attribute 'a' in " +
@@ -167,8 +167,8 @@ class AnnotationTypeMappingsTests {
 	}
 
 	private void assertMixedImplicitAndExplicitAliases(Class<? extends Annotation> annotationType, String overriddenAttribute) {
-		String annotationName = annotationType.getName();
-		String metaAnnotationName = AliasPair.class.getName();
+		String annotationName = annotationType.getCanonicalName();
+		String metaAnnotationName = AliasPair.class.getCanonicalName();
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(annotationType))
 				.withMessage("Attribute 'b' in annotation [" + annotationName +
@@ -180,8 +180,8 @@ class AnnotationTypeMappingsTests {
 	void forAnnotationTypeWhenAliasForNonMetaAnnotated() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForNonMetaAnnotated.class))
-				.withMessage("@AliasFor declaration on attribute 'test' in annotation [" + AliasForNonMetaAnnotated.class.getName() +
-						"] declares an alias for attribute 'test' in annotation [" + AliasForNonMetaAnnotatedTarget.class.getName() +
+				.withMessage("@AliasFor declaration on attribute 'test' in annotation [" + AliasForNonMetaAnnotated.class.getCanonicalName() +
+						"] declares an alias for attribute 'test' in annotation [" + AliasForNonMetaAnnotatedTarget.class.getCanonicalName() +
 						"] which is not meta-present.");
 	}
 
@@ -189,8 +189,8 @@ class AnnotationTypeMappingsTests {
 	void forAnnotationTypeWhenAliasForSelfWithDifferentDefaults() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForSelfWithDifferentDefaults.class))
-				.withMessage("Misconfigured aliases: attribute 'a' in annotation [" + AliasForSelfWithDifferentDefaults.class.getName() +
-						"] and attribute 'b' in annotation [" + AliasForSelfWithDifferentDefaults.class.getName() +
+				.withMessage("Misconfigured aliases: attribute 'a' in annotation [" + AliasForSelfWithDifferentDefaults.class.getCanonicalName() +
+						"] and attribute 'b' in annotation [" + AliasForSelfWithDifferentDefaults.class.getCanonicalName() +
 						"] must declare the same default value.");
 	}
 
@@ -198,8 +198,8 @@ class AnnotationTypeMappingsTests {
 	void forAnnotationTypeWhenAliasForSelfWithMissingDefault() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasForSelfWithMissingDefault.class))
-				.withMessage("Misconfigured aliases: attribute 'a' in annotation [" + AliasForSelfWithMissingDefault.class.getName() +
-						"] and attribute 'b' in annotation [" + AliasForSelfWithMissingDefault.class.getName() +
+				.withMessage("Misconfigured aliases: attribute 'a' in annotation [" + AliasForSelfWithMissingDefault.class.getCanonicalName() +
+						"] and attribute 'b' in annotation [" + AliasForSelfWithMissingDefault.class.getCanonicalName() +
 						"] must declare default values.");
 	}
 
@@ -207,8 +207,8 @@ class AnnotationTypeMappingsTests {
 	void forAnnotationTypeWhenAliasWithExplicitMirrorAndDifferentDefaults() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> AnnotationTypeMappings.forAnnotationType(AliasWithExplicitMirrorAndDifferentDefaults.class))
-				.withMessage("Misconfigured aliases: attribute 'a' in annotation [" + AliasWithExplicitMirrorAndDifferentDefaults.class.getName() +
-						"] and attribute 'c' in annotation [" + AliasWithExplicitMirrorAndDifferentDefaults.class.getName() +
+				.withMessage("Misconfigured aliases: attribute 'a' in annotation [" + AliasWithExplicitMirrorAndDifferentDefaults.class.getCanonicalName() +
+						"] and attribute 'c' in annotation [" + AliasWithExplicitMirrorAndDifferentDefaults.class.getCanonicalName() +
 						"] must declare the same default value.");
 	}
 
@@ -352,8 +352,8 @@ class AnnotationTypeMappingsTests {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(AliasPair.class).get(0);
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> resolveMirrorSets(mapping, WithDifferentValueAliasPair.class, AliasPair.class))
-				.withMessage("Different @AliasFor mirror values for annotation [" + AliasPair.class.getName() + "] declared on " +
-						WithDifferentValueAliasPair.class.getName() +
+				.withMessage("Different @AliasFor mirror values for annotation [" + AliasPair.class.getCanonicalName() +
+						"] declared on " + WithDifferentValueAliasPair.class.getName() +
 						"; attribute 'a' and its alias 'b' are declared with values of [test1] and [test2].");
 	}
 

@@ -168,7 +168,7 @@ class ObjectToStringHttpMessageConverterTests {
 	}
 
 	@Test
-	void testConversionServiceRequired() {
+	void conversionServiceRequired() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ObjectToStringHttpMessageConverter(null));
 	}

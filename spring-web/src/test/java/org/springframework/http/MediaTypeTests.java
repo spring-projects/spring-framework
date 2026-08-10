@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.within;
 class MediaTypeTests {
 
 	@Test
-	void testToString() {
+	void toStringOutput() {
 		MediaType mediaType = new MediaType("text", "plain", 0.7);
 		String result = mediaType.toString();
 		assertThat(result).as("Invalid toString() returned").isEqualTo("text/plain;q=0.7");
@@ -163,7 +163,7 @@ class MediaTypeTests {
 	}
 
 	@Test  // gh-23241
-	public void parseMediaTypesWithTrailingComma() {
+	void parseMediaTypesWithTrailingComma() {
 		List<MediaType> mediaTypes = MediaType.parseMediaTypes("text/plain, text/html, ");
 		assertThat(mediaTypes).as("No media types returned").isNotNull();
 		assertThat(mediaTypes).as("Incorrect number of media types").hasSize(2);
@@ -279,7 +279,7 @@ class MediaTypeTests {
 	}
 
 	@Test
-	void testWithConversionService() {
+	void withConversionService() {
 		ConversionService conversionService = new DefaultConversionService();
 		assertThat(conversionService.canConvert(String.class, MediaType.class)).isTrue();
 		MediaType mediaType = MediaType.parseMediaType("application/xml");

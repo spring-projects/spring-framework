@@ -72,6 +72,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 
 	@Override
+	public boolean canWriteRepeatedly(Resource resource, @Nullable MediaType contentType) {
+		return !(resource instanceof InputStreamResource);
+	}
+
+	@Override
 	protected boolean supports(Class<?> clazz) {
 		return Resource.class.isAssignableFrom(clazz);
 	}
@@ -93,7 +98,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 				}
 			};
 		}
-		else if (Resource.class == clazz || ByteArrayResource.class.isAssignableFrom(clazz)) {
+		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
 			byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
 			return new ByteArrayResource(body) {
 				@Override
@@ -141,8 +146,9 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Resource resource) {
-		return !(resource instanceof InputStreamResource);
+		return canWriteRepeatedly(resource, null);
 	}
 
 
@@ -156,7 +162,6 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 			try {
 				OutputStream out = outputMessage.getBody();
 				in.transferTo(out);
-				out.flush();
 			}
 			catch (NullPointerException ignored) {
 				// see SPR-13620

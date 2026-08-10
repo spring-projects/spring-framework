@@ -149,9 +149,8 @@ class PathVariableMethodArgumentResolverTests {
 
 		StepVerifier.create(mono)
 				.consumeNextWith(value -> {
-					boolean condition = value instanceof Optional;
-					assertThat(condition).isTrue();
-					assertThat(((Optional<?>) value)).isNotPresent();
+					assertThat(value).isInstanceOf(Optional.class);
+					assertThat((Optional<?>) value).isNotPresent();
 				})
 				.expectComplete()
 				.verify();

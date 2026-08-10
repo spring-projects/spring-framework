@@ -150,7 +150,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 
 	/**
 	 * Set the filter that determines if view should be cached.
-	 * <p>Default behaviour is to cache all views.
+	 * <p>Default behavior is to cache all views.
 	 * @since 5.2
 	 */
 	public void setCacheFilter(CacheFilter cacheFilter) {

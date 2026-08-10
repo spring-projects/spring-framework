@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 class UserCredentialsDataSourceAdapterTests {
 
 	@Test
-	void testStaticCredentials() throws SQLException {
+	void staticCredentials() throws SQLException {
 		DataSource dataSource = mock();
 		Connection connection = mock();
 		given(dataSource.getConnection("user", "pw")).willReturn(connection);
@@ -47,7 +47,7 @@ class UserCredentialsDataSourceAdapterTests {
 	}
 
 	@Test
-	void testNoCredentials() throws SQLException {
+	void noCredentials() throws SQLException {
 		DataSource dataSource = mock();
 		Connection connection = mock();
 		given(dataSource.getConnection()).willReturn(connection);
@@ -57,7 +57,7 @@ class UserCredentialsDataSourceAdapterTests {
 	}
 
 	@Test
-	void testThreadBoundCredentials() throws SQLException {
+	void threadBoundCredentials() throws SQLException {
 		DataSource dataSource = mock();
 		Connection connection = mock();
 		given(dataSource.getConnection("user", "pw")).willReturn(connection);

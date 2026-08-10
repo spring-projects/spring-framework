@@ -117,7 +117,7 @@ class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	void testMessageSentToChannel() throws Exception {
+	void messageSentToChannel() throws Exception {
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -144,7 +144,7 @@ class SubscriptionMethodReturnValueHandlerTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void testHeadersPassedToMessagingTemplate() throws Exception {
+	void headersPassedToMessagingTemplate() throws Exception {
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
 		String destination = "/dest";
@@ -169,7 +169,7 @@ class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	void testJsonView() throws Exception {
+	void jsonView() throws Exception {
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -187,7 +187,8 @@ class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	void testHeaderFilterSinglePredicate() throws Exception {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	void headerFilterSinglePredicate() throws Exception {
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
 		String destination = "/dest";
@@ -216,7 +217,8 @@ class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	void testHeaderFilterMultiplePredicates() throws Exception {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	void headerFilterMultiplePredicates() throws Exception {
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
 		String destination = "/dest";

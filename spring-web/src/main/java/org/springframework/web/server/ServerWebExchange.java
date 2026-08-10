@@ -44,6 +44,12 @@ import org.springframework.util.MultiValueMap;
 public interface ServerWebExchange {
 
 	/**
+	 * HTML escape attribute, populated from the value of
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#defaultHtmlEscape(Boolean)}.
+	 */
+	String HTML_ESCAPE_ATTRIBUTE = ServerWebExchange.class.getName() + ".HTML_ESCAPE";
+
+	/**
 	 * Name of {@link #getAttributes() attribute} whose value can be used to
 	 * correlate log messages for this exchange. Use {@link #getLogPrefix()} to
 	 * obtain a consistently formatted prefix based on this attribute.

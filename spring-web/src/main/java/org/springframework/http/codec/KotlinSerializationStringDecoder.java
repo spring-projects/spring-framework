@@ -55,7 +55,7 @@ public abstract class KotlinSerializationStringDecoder<T extends StringFormat> e
 	implements Decoder<Object> {
 
 	// String decoding needed for now, see https://github.com/Kotlin/kotlinx.serialization/issues/204 for more details
-	private final StringDecoder stringDecoder = StringDecoder.allMimeTypes(StringDecoder.DEFAULT_DELIMITERS, false);
+	protected final StringDecoder stringDecoder = StringDecoder.allMimeTypes(StringDecoder.DEFAULT_DELIMITERS, false);
 
 
 	/**
@@ -158,7 +158,7 @@ public abstract class KotlinSerializationStringDecoder<T extends StringFormat> e
 		});
 	}
 
-	private CodecException processException(IllegalArgumentException ex) {
+	protected CodecException processException(IllegalArgumentException ex) {
 		return new DecodingException("Decoding error: " + ex.getMessage(), ex);
 	}
 

@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 class FailFastProblemReporterTests {
 
 	@Test
-	void testError() {
+	void error() {
 		FailFastProblemReporter reporter = new FailFastProblemReporter();
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
 				reporter.error(new Problem("VGER", new Location(new DescriptiveResource("here")),
@@ -43,7 +43,7 @@ class FailFastProblemReporterTests {
 	}
 
 	@Test
-	void testWarn() {
+	void warn() {
 		Problem problem = new Problem("VGER", new Location(new DescriptiveResource("here")),
 				null, new IllegalArgumentException());
 

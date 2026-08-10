@@ -34,7 +34,7 @@ class ServletRequestUtilsTests {
 
 
 	@Test
-	void testIntParameter() throws ServletRequestBindingException {
+	void intParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
@@ -57,7 +57,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testIntParameters() throws ServletRequestBindingException {
+	void intParameters() throws ServletRequestBindingException {
 		request.addParameter("param", "1", "2", "3");
 
 		request.addParameter("param2", "1");
@@ -76,7 +76,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testLongParameter() throws ServletRequestBindingException {
+	void longParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
@@ -99,7 +99,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testLongParameters() throws ServletRequestBindingException {
+	void longParameters() throws ServletRequestBindingException {
 		request.setParameter("param", "1", "2", "3");
 
 		request.setParameter("param2", "0");
@@ -123,7 +123,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testFloatParameter() throws ServletRequestBindingException {
+	void floatParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5.5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
@@ -146,7 +146,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testFloatParameters() throws ServletRequestBindingException {
+	void floatParameters() throws ServletRequestBindingException {
 		request.addParameter("param", "1.5", "2.5", "3");
 
 		request.addParameter("param2", "1.5");
@@ -161,7 +161,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testDoubleParameter() throws ServletRequestBindingException {
+	void doubleParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5.5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
@@ -184,7 +184,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testDoubleParameters() throws ServletRequestBindingException {
+	void doubleParameters() throws ServletRequestBindingException {
 		request.addParameter("param", "1.5", "2.5", "3");
 
 		request.addParameter("param2", "1.5");
@@ -198,14 +198,14 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testBooleanParameter() throws ServletRequestBindingException {
+	void booleanParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "true");
 		request.addParameter("param2", "e");
 		request.addParameter("param4", "yes");
 		request.addParameter("param5", "1");
 		request.addParameter("paramEmpty", "");
 
-		assertThat(ServletRequestUtils.getBooleanParameter(request, "param1").equals(Boolean.TRUE)).isTrue();
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param1")).isEqualTo(Boolean.TRUE);
 		assertThat(ServletRequestUtils.getBooleanParameter(request, "param1", false)).isTrue();
 		assertThat(ServletRequestUtils.getRequiredBooleanParameter(request, "param1")).isTrue();
 
@@ -226,7 +226,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testBooleanParameters() throws ServletRequestBindingException {
+	void booleanParameters() throws ServletRequestBindingException {
 		request.addParameter("param", "true", "yes", "off", "1", "bogus");
 
 		request.addParameter("param2", "false");
@@ -249,7 +249,7 @@ class ServletRequestUtilsTests {
 	}
 
 	@Test
-	void testStringParameter() throws ServletRequestBindingException {
+	void stringParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "str");
 		request.addParameter("paramEmpty", "");
 

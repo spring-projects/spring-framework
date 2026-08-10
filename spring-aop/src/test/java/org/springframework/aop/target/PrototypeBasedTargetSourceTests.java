@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PrototypeBasedTargetSourceTests {
 
 	@Test
-	void testSerializability() throws Exception {
+	void serializability() throws Exception {
 		MutablePropertyValues tsPvs = new MutablePropertyValues();
 		tsPvs.add("targetBeanName", "person");
 		RootBeanDefinition tsBd = new RootBeanDefinition(TestTargetSource.class);

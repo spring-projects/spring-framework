@@ -79,7 +79,7 @@ class ParameterContentTypeResolverTests {
 	}
 
 	@Test // SPR-13747
-	public void resolveKeyIsCaseInsensitive() {
+	void resolveKeyIsCaseInsensitive() {
 		ServerWebExchange exchange = createExchange("JSoN");
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(mapping);

@@ -52,5 +52,5 @@ import org.junit.platform.suite.api.Suite;
 	key = ClassOrderer.DEFAULT_ORDER_PROPERTY_NAME,
 	value = "org.junit.jupiter.api.ClassOrderer$ClassName"
 )
-public class ContextCacheTestSuite {
+class ContextCacheTestSuite {
 }

@@ -45,7 +45,7 @@ class H2DatabaseClientContextIntegrationTests extends H2DatabaseClientIntegratio
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		context.close();
 		assertThatExceptionOfType(R2dbcNonTransientResourceException.class).isThrownBy(
 				() -> connectionFactory.create().block());

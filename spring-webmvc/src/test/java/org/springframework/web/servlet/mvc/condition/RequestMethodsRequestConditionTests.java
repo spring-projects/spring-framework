@@ -85,7 +85,7 @@ class RequestMethodsRequestConditionTests {
 	}
 
 	@Test // SPR-14410
-	public void getMatchingConditionWithHttpOptionsInErrorDispatch() {
+	void getMatchingConditionWithHttpOptionsInErrorDispatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/path");
 		request.setDispatcherType(DispatcherType.ERROR);
 

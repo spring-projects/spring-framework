@@ -106,6 +106,7 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Mono<MultiValueMap<String, Part>> readMono(ResolvableType elementType,
 			ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
@@ -115,6 +116,9 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 
 		return this.partReader.read(elementType, inputMessage, allHints)
 				.collectMultimap(Part::name)
+				.doOnDiscard(Map.class, map ->
+						((Map<String, Collection<Part>>) map).values()
+								.forEach(parts -> parts.forEach(part -> part.delete().subscribe())))
 				.doOnNext(map ->
 					LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Parsed " +
 							(isEnableLoggingRequestDetails() ?

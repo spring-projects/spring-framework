@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ErrorMessageTests {
 
 	@Test
-	void testToString() {
+	void toStringOutput() {
 		ErrorMessage em = new ErrorMessage(new RuntimeException("foo"));
 		String emString = em.toString();
 		assertThat(emString).doesNotContain("original");

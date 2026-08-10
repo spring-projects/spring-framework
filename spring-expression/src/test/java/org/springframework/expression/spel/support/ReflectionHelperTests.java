@@ -186,11 +186,11 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 		// Passing (Super) on call to (Sub[]) is not a match
 		checkMatchVarargs(new Class<?>[] {Super.class}, new Class<?>[] {Sub[].class}, tc, null);
 
-		checkMatchVarargs(new Class<?>[] {Unconvertable.class, String.class}, new Class<?>[] {Sub.class, Super[].class}, tc, null);
+		checkMatchVarargs(new Class<?>[] {Unconvertible.class, String.class}, new Class<?>[] {Sub.class, Super[].class}, tc, null);
 
 		checkMatchVarargs(new Class<?>[] {Integer.class, Integer.class, String.class}, new Class<?>[] {String.class, String.class, Super[].class}, tc, null);
 
-		checkMatchVarargs(new Class<?>[] {Unconvertable.class, String.class}, new Class<?>[] {Sub.class, Super[].class}, tc, null);
+		checkMatchVarargs(new Class<?>[] {Unconvertible.class, String.class}, new Class<?>[] {Sub.class, Super[].class}, tc, null);
 
 		checkMatchVarargs(new Class<?>[] {Integer.class, Integer.class, String.class}, new Class<?>[] {String.class, String.class, Super[].class}, tc, null);
 
@@ -519,7 +519,7 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 	}
 
 
-	static class Unconvertable {
+	static class Unconvertible {
 	}
 
 

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -194,30 +195,31 @@ public abstract class YamlProcessor {
 	}
 
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
-		int count = 0;
+		AtomicInteger count = new AtomicInteger();
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loading from YAML: " + resource);
 			}
-			try (Reader reader = new UnicodeReader(resource.getInputStream())) {
+			resource.consumeContent(inputStream -> {
+				Reader reader = new UnicodeReader(inputStream);
 				for (Object object : yaml.loadAll(reader)) {
 					if (object != null && process(asMap(object), callback)) {
-						count++;
+						count.incrementAndGet();
 						if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
 							break;
 						}
 					}
 				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
+					logger.debug("Loaded " + count + " document" + (count.get() > 1 ? "s" : "") +
 							" from YAML resource: " + resource);
 				}
-			}
+			});
 		}
 		catch (IOException ex) {
 			handleProcessError(resource, ex);
 		}
-		return (count > 0);
+		return (count.get() > 0);
 	}
 
 	private void handleProcessError(Resource resource, IOException ex) {
@@ -249,7 +251,7 @@ public abstract class YamlProcessor {
 			}
 			else {
 				// It has to be a map key in this case
-				result.put("[" + key.toString() + "]", value);
+				result.put("[" + key + "]", value);
 			}
 		});
 		return result;

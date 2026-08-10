@@ -30,7 +30,7 @@ import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer.MockRestServiceServerBuilder;
 import org.springframework.test.web.client.response.ExecutingResponseCreator;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -49,65 +49,72 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class MockRestServiceServerTests {
 
-	private final RestTemplate restTemplate = new RestTemplate();
+	private final RestClient.Builder clientBuilder = RestClient.builder();
 
 
 	@Test
 	void buildMultipleTimes() {
-		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.restTemplate);
+		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.clientBuilder);
 
 		MockRestServiceServer server = builder.build();
+		RestClient restClient = this.clientBuilder.build();
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/foo", Void.class);
+		restClient.get().uri("/foo").retrieve().toBodilessEntity();
 		server.verify();
 
 		server = builder.ignoreExpectOrder(true).build();
+		restClient = this.clientBuilder.build();
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/bar", Void.class);
-		this.restTemplate.getForObject("/foo", Void.class);
+		restClient.get().uri("/bar").retrieve().toBodilessEntity();
+		restClient.get().uri("/foo").retrieve().toBodilessEntity();
 		server.verify();
 
 		server = builder.build();
+		restClient = this.clientBuilder.build();
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/bar", Void.class);
+		restClient.get().uri("/bar").retrieve().toBodilessEntity();
 		server.verify();
 	}
 
 	@Test
 	void exactExpectOrder() {
-		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.clientBuilder)
 				.ignoreExpectOrder(false).build();
+		RestClient restClient = this.clientBuilder.build();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				this.restTemplate.getForObject("/bar", Void.class));
+				restClient.get().uri("/bar").retrieve().toBodilessEntity());
 	}
 
 	@Test
 	void ignoreExpectOrder() {
-		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.clientBuilder)
 				.ignoreExpectOrder(true).build();
+		RestClient restClient = this.clientBuilder.build();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/bar", Void.class);
-		this.restTemplate.getForObject("/foo", Void.class);
+		restClient.get().uri("/bar").retrieve().toBodilessEntity();
+		restClient.get().uri("/foo").retrieve().toBodilessEntity();
 		server.verify();
 	}
 
 	@Test
 	void executingResponseCreator() {
-		RestTemplate restTemplate = createEchoRestTemplate();
-		ExecutingResponseCreator withActualCall = new ExecutingResponseCreator(restTemplate.getRequestFactory());
+		ClientHttpRequestFactory clientRequestFactory = createEchoClientRequestFactory();
+		ExecutingResponseCreator withActualCall = new ExecutingResponseCreator(clientRequestFactory);
+		this.clientBuilder.requestFactory(clientRequestFactory);
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.clientBuilder).build();
+		RestClient restClient = this.clientBuilder.build();
 
-		MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
 		server.expect(requestTo("/profile")).andRespond(withSuccess());
 		server.expect(requestTo("/quoteOfTheDay")).andRespond(withActualCall);
 
-		var response1 = restTemplate.getForEntity("/profile", String.class);
-		var response2 = restTemplate.getForEntity("/quoteOfTheDay", String.class);
+		var response1 = restClient.get().uri("/profile").retrieve().toEntity(String.class);
+		var response2 = restClient.get().uri("/quoteOfTheDay").retrieve().toEntity(String.class);
 		server.verify();
 
 		assertThat(response1.getStatusCode().value()).isEqualTo(200);
@@ -116,8 +123,8 @@ class MockRestServiceServerTests {
 		assertThat(response2.getBody()).isEqualTo("echo from /quoteOfTheDay");
 	}
 
-	private static RestTemplate createEchoRestTemplate() {
-		ClientHttpRequestFactory requestFactory = (uri, httpMethod) -> {
+	private static ClientHttpRequestFactory createEchoClientRequestFactory() {
+		return (uri, httpMethod) -> {
 			MockClientHttpRequest request = new MockClientHttpRequest(httpMethod, uri);
 			ClientHttpResponse response = new MockClientHttpResponse(
 					("echo from " + uri.getPath()).getBytes(StandardCharsets.UTF_8),
@@ -126,61 +133,64 @@ class MockRestServiceServerTests {
 			request.setResponse(response);
 			return request;
 		};
-		return new RestTemplate(requestFactory);
 	}
 
 	@Test
 	void resetAndReuseServer() {
-		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.clientBuilder).build();
+		RestClient restClient = this.clientBuilder.build();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/foo", Void.class);
+		restClient.get().uri("/foo").retrieve().toBodilessEntity();
 		server.verify();
 		server.reset();
 
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/bar", Void.class);
+		restClient.get().uri("/bar").retrieve().toBodilessEntity();
 		server.verify();
 	}
 
 	@Test
 	void resetAndReuseServerWithUnorderedExpectationManager() {
-		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.clientBuilder)
 				.ignoreExpectOrder(true).build();
+		RestClient restClient = this.clientBuilder.build();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/foo", Void.class);
+		restClient.get().uri("/foo").retrieve().toBodilessEntity();
 		server.verify();
 		server.reset();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/bar", Void.class);
-		this.restTemplate.getForObject("/foo", Void.class);
+		restClient.get().uri("/bar").retrieve().toBodilessEntity();
+		restClient.get().uri("/foo").retrieve().toBodilessEntity();
 		server.verify();
 	}
 
 	@Test  // gh-24486
 	void resetClearsRequestFailures() {
-		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.clientBuilder).build();
+		RestClient restClient = this.clientBuilder.build();
 		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
-		this.restTemplate.postForEntity("/remoteurl", null, String.class);
+		restClient.post().uri("/remoteurl").retrieve().body(String.class);
 		server.verify();
 
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> this.restTemplate.postForEntity("/remoteurl", null, String.class))
+				.isThrownBy(() -> restClient.post().uri("/remoteurl").retrieve().body(String.class))
 				.withMessageStartingWith("No further requests expected");
 
 		server.reset();
 
 		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
-		this.restTemplate.postForEntity("/remoteurl", null, String.class);
+		restClient.post().uri("/remoteurl").retrieve().body(String.class);
 		server.verify();
 	}
 
 	@Test  // SPR-16132
 	void followUpRequestAfterFailure() {
-		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.clientBuilder).build();
+		RestClient restClient = this.clientBuilder.build();
 
 		server.expect(requestTo("/some-service/some-endpoint"))
 				.andRespond(request -> { throw new SocketException("pseudo network error"); });
@@ -189,11 +199,11 @@ class MockRestServiceServerTests {
 				.andExpect(method(POST)).andRespond(withSuccess());
 
 		try {
-			this.restTemplate.getForEntity("/some-service/some-endpoint", String.class);
+			restClient.get().uri("/some-service/some-endpoint").retrieve().body(String.class);
 			fail("Expected exception");
 		}
 		catch (Exception ex) {
-			this.restTemplate.postForEntity("/reporting-service/report-error", ex.toString(), String.class);
+			restClient.post().uri("/reporting-service/report-error").retrieve().body(String.class);
 		}
 
 		server.verify();
@@ -201,12 +211,13 @@ class MockRestServiceServerTests {
 
 	@Test  // gh-21799
 	void verifyShouldFailIfRequestsFailed() {
-		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.clientBuilder).build();
 		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
+		RestClient restClient = this.clientBuilder.build();
 
-		this.restTemplate.postForEntity("/remoteurl", null, String.class);
+		restClient.post().uri("/remoteurl").retrieve().body(String.class);
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> this.restTemplate.postForEntity("/remoteurl", null, String.class))
+				.isThrownBy(() -> restClient.post().uri("/remoteurl").retrieve().body(String.class))
 				.withMessageStartingWith("No further requests expected");
 
 		assertThatExceptionOfType(AssertionError.class)
@@ -216,24 +227,26 @@ class MockRestServiceServerTests {
 
 	@Test
 	void verifyWithTimeout() {
-		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.restTemplate);
+		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.clientBuilder);
 
 		MockRestServiceServer server1 = builder.build();
+		RestClient restClient = this.clientBuilder.build();
 		server1.expect(requestTo("/foo")).andRespond(withSuccess());
 		server1.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/foo", Void.class);
+		restClient.get().uri("/foo").retrieve().toBodilessEntity();
 
 		assertThatThrownBy(() -> server1.verify(Duration.ofMillis(100))).hasMessage("""
 				Further request(s) expected leaving 1 unsatisfied expectation(s).
 				1 request(s) executed:
-				GET /foo, headers: [Accept:"application/json, application/*+json"]
+				GET /foo
 				""");
 
 		MockRestServiceServer server2 = builder.build();
+		restClient = this.clientBuilder.build();
 		server2.expect(requestTo("/foo")).andRespond(withSuccess());
 		server2.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/foo", Void.class);
-		this.restTemplate.getForObject("/bar", Void.class);
+		restClient.get().uri("/foo").retrieve().toBodilessEntity();
+		restClient.get().uri("/bar").retrieve().toBodilessEntity();
 
 		server2.verify(Duration.ofMillis(100));
 	}

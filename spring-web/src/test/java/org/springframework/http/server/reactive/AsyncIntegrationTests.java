@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.URI;
 import java.time.Duration;
 
 import reactor.core.publisher.Flux;
@@ -25,9 +24,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -51,8 +48,7 @@ class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void basicTest(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + port);
-		ResponseEntity<String> response = new RestTemplate().exchange(RequestEntity.get(url).build(), String.class);
+		ResponseEntity<String> response = getRestClient().get().retrieve().toEntity(String.class);
 
 		assertThat(response.getBody()).isEqualTo("hello");
 	}

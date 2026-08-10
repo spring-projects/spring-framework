@@ -79,6 +79,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -516,11 +517,11 @@ class DefaultListableBeanFactoryTests {
 		String[] names = lbf.getBeanDefinitionNames();
 		assertThat(names != lbf.getBeanDefinitionNames()).isTrue();
 		assertThat(names.length == 1).as("Array length == 1").isTrue();
-		assertThat(names[0].equals("test")).as("0th element == test").isTrue();
+		assertThat(names[0]).as("0th element == test").isEqualTo("test");
 
 		TestBean tb = (TestBean) lbf.getBean("test");
 		assertThat(tb != null).as("Test is non null").isTrue();
-		assertThat("Tony".equals(tb.getName())).as("Test bean name is Tony").isTrue();
+		assertThat("Tony").as("Test bean name is Tony").isEqualTo(tb.getName());
 		assertThat(tb.getAge() == 48).as("Test bean age is 48").isTrue();
 	}
 
@@ -1680,6 +1681,29 @@ class DefaultListableBeanFactoryTests {
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(() ->
 				lbf.getBean(TestBean.class));
+	}
+
+	@Test
+	void getBeanByNameWithTypeReference() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(StringTemplate.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NumberTemplate.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+
+		Template<String> stringTemplate = lbf.getBean("bd1", new ParameterizedTypeReference<>() {});
+		Template<Number> numberTemplate = lbf.getBean("bd2", new ParameterizedTypeReference<>() {});
+
+		assertThat(stringTemplate).isInstanceOf(StringTemplate.class);
+		assertThat(numberTemplate).isInstanceOf(NumberTemplate.class);
+
+		assertThatExceptionOfType(BeanNotOfRequiredTypeException.class)
+				.isThrownBy(() -> lbf.getBean("bd2", new ParameterizedTypeReference<Template<String>>() {}))
+				.satisfies(ex -> {
+					assertThat(ex.getBeanName()).isEqualTo("bd2");
+					assertThat(ex.getRequiredType()).isEqualTo(Template.class);
+					assertThat(ex.getActualType()).isEqualTo(NumberTemplate.class);
+					assertThat(ex.getGenericRequiredType().toString()).endsWith("Template<java.lang.String>");
+				});
 	}
 
 	@Test
@@ -3870,6 +3894,18 @@ class DefaultListableBeanFactoryTests {
 		public Class<?> getObjectType() {
 			return TestBean.class;
 		}
+	}
+
+	private static class Template<T> {
+
+	}
+
+	private static class StringTemplate extends Template<String> {
+
+	}
+
+	private static class NumberTemplate extends Template<Number> {
+
 	}
 
 }

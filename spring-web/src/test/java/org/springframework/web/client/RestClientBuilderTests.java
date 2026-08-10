@@ -33,7 +33,7 @@ import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,9 +47,9 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Sebastien Deleuze
  * @author Nicklas Wiegandt
  */
-public class RestClientBuilderTests {
+class RestClientBuilderTests {
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "removal"})
 	@Test
 	void createFromRestTemplate() {
 		JettyClientHttpRequestFactory requestFactory = new JettyClientHttpRequestFactory();
@@ -90,6 +90,7 @@ public class RestClientBuilderTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void defaultUriBuilderFactory() {
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -154,7 +155,7 @@ public class RestClientBuilderTests {
 
 		assertThat(fieldValue("messageConverters", restClient))
 				.asInstanceOf(InstanceOfAssertFactories.LIST)
-				.hasExactlyElementsOfTypes(StringHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
+				.hasExactlyElementsOfTypes(StringHttpMessageConverter.class, MultipartHttpMessageConverter.class);
 	}
 
 	@Test

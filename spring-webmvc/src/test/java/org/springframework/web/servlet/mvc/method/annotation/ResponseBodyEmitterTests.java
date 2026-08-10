@@ -46,7 +46,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Brian Clozel
  */
 @ExtendWith(MockitoExtension.class)
-public class ResponseBodyEmitterTests {
+class ResponseBodyEmitterTests {
 
 	@Mock
 	private ResponseBodyEmitter.Handler handler;

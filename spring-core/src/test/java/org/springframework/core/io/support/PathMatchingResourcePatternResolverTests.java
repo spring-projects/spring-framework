@@ -21,6 +21,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.net.JarURLConnection;
 import java.net.URISyntaxException;
@@ -54,7 +56,9 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.testfixture.ide.IdeUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
@@ -101,6 +105,50 @@ class PathMatchingResourcePatternResolverTests {
 
 
 	@Nested
+	class ClassPathAll {
+
+		@Test
+		void getResourcesVsGetResource() throws IOException {
+			StringBuilder content1 = new StringBuilder(200000);
+			long length1 = 0;
+			Resource[] resources1 = resolver.getResources("classpath*:META-INF/MANIFEST.MF");
+			for (Resource resource : resources1) {
+				assertThat(resource.exists()).as("%s exists", resource).isTrue();
+				assertThat(resource.isReadable()).as("%s is readable", resource).isTrue();
+				if (!IdeUtils.runningInEclipse()) {
+					assertThat(resource.isFile()).as("%s is a file", resource).isFalse();
+				}
+				length1 += resource.contentLength();
+				resource.consumeContent(inputStream ->
+						content1.append(FileCopyUtils.copyToString(new InputStreamReader(inputStream))));
+			}
+			String content = content1.toString();
+
+			StringBuilder content2 = new StringBuilder(200000);
+			Resource resource2 = resolver.getResource("classpath*:META-INF/MANIFEST.MF");
+			assertThat(resource2.exists()).isTrue();
+			assertThat(resource2.isReadable()).isTrue();
+			assertThat(resource2.isFile()).isFalse();
+			resource2.consumeContent(inputStream ->
+					content2.append(FileCopyUtils.copyToString(new InputStreamReader(inputStream))));
+			assertThat(content.contentEquals(content2)).isTrue();
+			assertThat(resource2.contentLength()).isEqualTo(length1);
+
+			String content3 = FileCopyUtils.copyToString(new InputStreamReader(resource2.getInputStream()));
+			assertThat(content.contentEquals(content3)).isTrue();
+
+			String content4 = new EncodedResource(resource2).getContentAsString();
+			assertThat(content.contentEquals(content4)).isTrue();
+
+			StringWriter content5 = new StringWriter(200000);
+			EncodedResource resource5 = new EncodedResource(resource2);
+			resource5.consumeContent(reader -> FileCopyUtils.copy(reader, content5));
+			assertThat(content.contentEquals(content5.getBuffer())).isTrue();
+		}
+	}
+
+
+	@Nested
 	class FileSystemResources {
 
 		@Test
@@ -130,6 +178,7 @@ class PathMatchingResourcePatternResolverTests {
 		}
 
 		@Test
+		@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 		void encodedHashtagInPath() throws IOException {
 			Path rootDir = Paths.get("src/test/resources/custom%23root").toAbsolutePath();
 			URL root = new URL("file:" + rootDir + "/");
@@ -441,6 +490,7 @@ class PathMatchingResourcePatternResolverTests {
 					copyClasses(LogFactory.class, "commons-logging");
 		}
 
+		@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 		private String copyClasses(Class<?> sourceClass, String destinationName) throws URISyntaxException, IOException {
 			Path destination = this.temp.resolve(destinationName);
 			String resourcePath = ClassUtils.convertClassNameToResourcePath(

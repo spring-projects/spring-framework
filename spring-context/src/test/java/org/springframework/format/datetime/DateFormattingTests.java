@@ -83,7 +83,7 @@ class DateFormattingTests {
 
 
 	@Test
-	void testBindLong() {
+	void bindLong() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("millis", "1256961600");
 		binder.bind(propertyValues);
@@ -92,7 +92,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindLongAnnotated() {
+	void bindLongAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleMillis", "10/31/09");
 		binder.bind(propertyValues);
@@ -101,7 +101,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindCalendarAnnotated() {
+	void bindCalendarAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleCalendar", "10/31/09");
 		binder.bind(propertyValues);
@@ -110,7 +110,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateAnnotated() {
+	void bindDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleDate", "10/31/09");
 		binder.bind(propertyValues);
@@ -152,7 +152,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateArray() {
+	void bindDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleDate", new String[]{"10/31/09 12:00 PM"});
 		binder.bind(propertyValues);
@@ -160,7 +160,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateAnnotatedWithError() {
+	void bindDateAnnotatedWithError() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleDate", "Oct X31, 2009");
 		binder.bind(propertyValues);
@@ -170,7 +170,7 @@ class DateFormattingTests {
 
 	@Test
 	@Disabled
-	void testBindDateAnnotatedWithFallbackError() {
+	void bindDateAnnotatedWithFallbackError() {
 		// TODO This currently passes because the Date(String) constructor fallback is used
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleDate", "Oct 031, 2009");
@@ -180,7 +180,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateTimePatternAnnotated() {
+	void bindDateTimePatternAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternDate", "10/31/09 1:05");
 		binder.bind(propertyValues);
@@ -189,7 +189,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateTimePatternAnnotatedWithGlobalFormat() {
+	void bindDateTimePatternAnnotatedWithGlobalFormat() {
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
 		DateFormatter dateFormatter = new DateFormatter();
 		dateFormatter.setIso(ISO.DATE_TIME);
@@ -204,7 +204,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateTimePatternAnnotatedWithOverflow() {
+	void bindDateTimePatternAnnotatedWithOverflow() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternDate", "02/29/09 12:00 PM");
 		binder.bind(propertyValues);
@@ -212,7 +212,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindISODate() {
+	void bindISODate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDate", "2009-10-31");
 		binder.bind(propertyValues);
@@ -221,7 +221,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindISOTime() {
+	void bindISOTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoTime", "12:00:00.000-05:00");
 		binder.bind(propertyValues);
@@ -230,7 +230,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindISODateTime() {
+	void bindISODateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDateTime", "2009-10-31T12:00:00.000-08:00");
 		binder.bind(propertyValues);
@@ -239,7 +239,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindNestedDateAnnotated() {
+	void bindNestedDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("children[0].styleDate", "10/31/09");
 		binder.bind(propertyValues);

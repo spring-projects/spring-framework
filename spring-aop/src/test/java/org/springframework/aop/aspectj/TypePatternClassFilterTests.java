@@ -97,7 +97,7 @@ class TypePatternClassFilterTests {
 	}
 
 	@Test
-	void testEquals() {
+	void equals() {
 		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
 		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
 		TypePatternClassFilter filter3 = new TypePatternClassFilter("org.springframework.tests.*");
@@ -107,7 +107,7 @@ class TypePatternClassFilterTests {
 	}
 
 	@Test
-	void testHashCode() {
+	void hashCodeBehavior() {
 		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
 		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
 		TypePatternClassFilter filter3 = new TypePatternClassFilter("org.springframework.tests.*");
@@ -117,7 +117,7 @@ class TypePatternClassFilterTests {
 	}
 
 	@Test
-	void testToString() {
+	void toStringOutput() {
 		TypePatternClassFilter filter1 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
 		TypePatternClassFilter filter2 = new TypePatternClassFilter("org.springframework.beans.testfixture.beans.*");
 

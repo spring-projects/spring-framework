@@ -1,0 +1,36 @@
+[[webflux-data-binding]]
+= Data Binding
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webmvc/mvc-data-binding.adoc[See equivalent in the Servlet stack]#
+
+Data binding is a mechanism that binds string parameters onto an object graph with type conversion.
+It is a core mechanism of the Spring Framework that helps with application configuration.
+In web applications it makes it easy to access query parameters and form data through richly typed objects rather than through maps of string values.
+
+To learn more about the data binding mechanism, including constructor and setter binding, property name syntax, type conversion,
+and more, see xref:core/validation/data-binding.adoc[Data binding] in the Core Technologies section.
+
+For annotated controllers, data binding applies to a
+xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[@ModelAttribute] method argument.
+For functional endpoints, use the `bind` method of xref:web/webflux-functional.adoc#webflux-fn-request[ServerRequest].
+
+TIP: For browser applications with annotated controllers, you can use
+xref:web/webflux/controller/ann-modelattrib-methods.adoc[@ModelAttribute methods]
+to initialize additional model attributes for use in rendered views.
+
+Each request uses a separate `WebDataBinder` instance.
+For annotated controllers, this instance can be customized through
+xref:web/webflux/controller/ann-initbinder.adoc[@InitBinder methods] within a controller, or
+across controllers through xref:web/webmvc/mvc-controller/ann-advice.adoc[Controller Advice].
+For functional endpoints, use overloaded `ServerRequest.bind` methods.
+
+
+
+
+[[webflux-data-binding-design]]
+== Model Design
+[.small]#xref:web/webmvc/mvc-data-binding.adoc#mvc-data-binding-design[See equivalent in the Servlet stack]#
+
+include::partial$web/web-data-binding-model-design.adoc[]
+

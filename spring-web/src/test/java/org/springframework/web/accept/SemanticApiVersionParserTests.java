@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Unit tests for {@link SemanticApiVersionParser}.
  * @author Rossen Stoyanchev
  */
-public class SemanticApiVersionParserTests {
+class SemanticApiVersionParserTests {
 
 	private final SemanticApiVersionParser parser = new SemanticApiVersionParser();
 

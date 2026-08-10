@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
  */
-public class ImportHttpServiceRegistrarTests {
+class ImportHttpServiceRegistrarTests {
 
 	private static final String ECHO_GROUP = "echo";
 

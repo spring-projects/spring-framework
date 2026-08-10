@@ -7,10 +7,9 @@ jobs:
     name: Build Pull Request
     if: ${{ github.repository == 'spring-projects/spring-framework' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Build
         id: build
         uses: ./.github/actions/build
@@ -19,7 +18,7 @@ jobs:
         uses: ./.github/actions/print-jvm-thread-dumps
       - name: Upload Build Reports
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-reports
           path: '**/build/reports/'

@@ -396,8 +396,7 @@ class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object actualValue = resolver.resolveArgument(optionalMultipartFileList, null, webRequest, null);
-		boolean condition1 = actualValue instanceof Optional;
-		assertThat(condition1).isTrue();
+		assertThat(actualValue).isInstanceOf(Optional.class);
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(Collections.singletonList(expected));
 
 		actualValue = resolver.resolveArgument(optionalMultipartFileList, null, webRequest, null);
@@ -439,8 +438,7 @@ class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
-		boolean condition1 = actualValue instanceof Optional;
-		assertThat(condition1).isTrue();
+		assertThat(actualValue).isInstanceOf(Optional.class);
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(expected);
 
 		actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
@@ -484,8 +482,7 @@ class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object actualValue = resolver.resolveArgument(optionalPartList, null, webRequest, null);
-		boolean condition1 = actualValue instanceof Optional;
-		assertThat(condition1).isTrue();
+		assertThat(actualValue).isInstanceOf(Optional.class);
 		assertThat(((Optional<?>) actualValue).get()).as("Invalid result").isEqualTo(Collections.singletonList(expected));
 
 		actualValue = resolver.resolveArgument(optionalPartList, null, webRequest, null);

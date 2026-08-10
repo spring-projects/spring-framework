@@ -41,7 +41,7 @@ class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityMana
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testEntityManagerProxyIsProxy() {
+	void entityManagerProxyIsProxy() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		assertThat(Proxy.isProxyClass(em.getClass())).isTrue();
 		Query q = em.createQuery("select p from Person as p");
@@ -54,20 +54,20 @@ class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityMana
 	}
 
 	@Test
-	void testEntityManagerProxyAcceptsProgrammaticTxJoining() {
+	void entityManagerProxyAcceptsProgrammaticTxJoining() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 	}
 
 	@Test
-	void testInstantiateAndSave() {
+	void instantiateAndSave() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 		doInstantiateAndSave(em);
 	}
 
 	@Test
-	void testCannotFlushWithoutGettingTransaction() {
+	void cannotFlushWithoutGettingTransaction() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(() ->
 				doInstantiateAndSave(em));
@@ -80,8 +80,8 @@ class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityMana
 		setComplete();
 	}
 
-	protected void doInstantiateAndSave(EntityManager em) {
-		testStateClean();
+	void doInstantiateAndSave(EntityManager em) {
+		stateClean();
 		Person p = new Person();
 
 		p.setFirstName("Tony");
@@ -93,12 +93,12 @@ class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityMana
 	}
 
 	@Test
-	void testStateClean() {
+	void stateClean() {
 		assertThat(countRowsInTable("person")).as("Should be no people from previous transactions").isEqualTo(0);
 	}
 
 	@Test
-	void testReuseInNewTransaction() {
+	void reuseInNewTransaction() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 
@@ -134,7 +134,7 @@ class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityMana
 	}
 
 	@Test
-	void testRollbackOccurs() {
+	void rollbackOccurs() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 		doInstantiateAndSave(em);
@@ -143,7 +143,7 @@ class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityMana
 	}
 
 	@Test
-	void testCommitOccurs() {
+	void commitOccurs() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		em.joinTransaction();
 		doInstantiateAndSave(em);

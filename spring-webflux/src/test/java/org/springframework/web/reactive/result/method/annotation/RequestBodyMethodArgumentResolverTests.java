@@ -109,7 +109,7 @@ class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test // SPR-15758
-	public void emptyBodyWithoutContentType() {
+	void emptyBodyWithoutContentType() {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(Map.class);
 		String body = resolveValueWithEmptyBody(param);
 
@@ -118,7 +118,7 @@ class RequestBodyMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void emptyBodyWithMono() {
+	void emptyBodyWithMono() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Mono.class, String.class);
 		StepVerifier.create((Mono<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
@@ -134,7 +134,7 @@ class RequestBodyMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void emptyBodyWithFlux() {
+	void emptyBodyWithFlux() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Flux.class, String.class);
 		StepVerifier.create((Flux<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
@@ -217,7 +217,7 @@ class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test // gh-29565
-	public void invalidContentType() {
+	void invalidContentType() {
 		MethodParameter parameter = this.testMethod.annot(requestBody()).arg(String.class);
 
 		ServerWebExchange exchange = MockServerWebExchange.from(
@@ -233,9 +233,7 @@ class RequestBodyMethodArgumentResolverTests {
 		Mono<Object> result = this.resolver.readBody(param, true, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
-		assertThat(value).isNotNull();
-		assertThat(param.getParameterType().isAssignableFrom(value.getClass()))
-				.as("Unexpected return value type: " + value).isTrue();
+		assertThat(value).isInstanceOf(param.getParameterType());
 
 		//no inspection unchecked
 		return (T) value;
@@ -248,8 +246,7 @@ class RequestBodyMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		if (value != null) {
-			assertThat(param.getParameterType().isAssignableFrom(value.getClass()))
-					.as("Unexpected parameter type: " + value).isTrue();
+			assertThat(value).isInstanceOf(param.getParameterType());
 		}
 
 		//no inspection unchecked

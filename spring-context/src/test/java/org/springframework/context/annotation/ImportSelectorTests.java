@@ -64,7 +64,7 @@ import static org.mockito.Mockito.spy;
  * @author Stephane Nicoll
  */
 @SuppressWarnings("resource")
-public class ImportSelectorTests {
+class ImportSelectorTests {
 
 	static Map<Class<?>, String> importFrom = new HashMap<>();
 

@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 class ButtonTagTests extends AbstractFormTagTests {
 
@@ -56,6 +57,20 @@ class ButtonTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "type", "submit");
 		assertContainsAttribute(output, "value", "My Button");
 		assertAttributeNotPresent(output, "disabled");
+	}
+
+	@Test
+	void value() throws Exception {
+		this.tag.setValue("\"My Button\"");
+
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.EVAL_BODY_INCLUDE);
+		assertThat(this.tag.doEndTag()).isEqualTo(Tag.EVAL_PAGE);
+
+		String output = getOutput();
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "value", "&quot;My Button&quot;");
 	}
 
 	@Test

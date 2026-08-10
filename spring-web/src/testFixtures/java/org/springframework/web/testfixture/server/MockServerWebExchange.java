@@ -42,7 +42,7 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 	private MockServerWebExchange(MockServerHttpRequest request, WebSessionManager sessionManager) {
 		super(request, new MockServerHttpResponse(), sessionManager,
-				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
+				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(), null);
 	}
 
 

@@ -18,8 +18,11 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
@@ -54,6 +57,24 @@ class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 				Invalid annotation passed to MockitoBeanOverrideProcessor: \
 				expected either @MockitoBean or @MockitoSpyBean on field %s.%s"""
 					.formatted(field.getDeclaringClass().getName(), field.getName()));
+	}
+
+	@Override
+	public @Nullable BeanOverrideHandler createHandler(Annotation overrideAnnotation, Class<?> testClass, Parameter parameter) {
+		if (overrideAnnotation instanceof MockitoBean mockitoBean) {
+			Assert.state(mockitoBean.types().length == 0,
+					"The @MockitoBean 'types' attribute must be omitted when declared on a parameter");
+			return new MockitoBeanOverrideHandler(parameter, ResolvableType.forParameter(parameter), mockitoBean);
+		}
+		else if (overrideAnnotation instanceof MockitoSpyBean mockitoSpyBean) {
+			Assert.state(mockitoSpyBean.types().length == 0,
+					"The @MockitoSpyBean 'types' attribute must be omitted when declared on a parameter");
+			return new MockitoSpyBeanOverrideHandler(parameter, ResolvableType.forParameter(parameter), mockitoSpyBean);
+		}
+		throw new IllegalStateException("""
+				Invalid annotation passed to MockitoBeanOverrideProcessor: \
+				expected either @MockitoBean or @MockitoSpyBean on parameter '%s' in constructor %s"""
+					.formatted(parameter.getName(), parameter.getDeclaringExecutable().getName()));
 	}
 
 	@Override

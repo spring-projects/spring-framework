@@ -82,7 +82,7 @@ class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCacheCache>
 	}
 
 	@Test
-	void testPutIfAbsentNullValue() {
+	void putIfAbsentNullValue() {
 		JCacheCache cache = getCache(true);
 
 		String key = createRandomKey();

@@ -510,7 +510,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	}
 
 	@Override
-	public List<String> remove(Object key) {
+	public @Nullable List<String> remove(Object key) {
 		return this.headers.remove(key);
 	}
 

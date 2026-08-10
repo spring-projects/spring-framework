@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
@@ -50,13 +51,13 @@ class RequestContextTests {
 	}
 
 	@Test
-	void testGetContextUrl() {
+	void getContextUrl() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		assertThat(context.getContextUrl("bar")).isEqualTo("/foo/bar");
 	}
 
 	@Test
-	void testGetContextUrlWithMap() {
+	void getContextUrlWithMap() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
@@ -65,12 +66,30 @@ class RequestContextTests {
 	}
 
 	@Test
-	void testGetContextUrlWithMapEscaping() {
+	void getContextUrlWithMapEscaping() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar baz");
 		map.put("spam", "&bucket=");
 		assertThat(context.getContextUrl("{foo}?spam={spam}", map)).isEqualTo("/foo/bar%20baz?spam=%26bucket%3D");
+	}
+
+	@Test
+	void defaultHtmlEscapeNotConfigured() {
+		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
+		assertThat(context.getDefaultHtmlEscape()).isNull();
+		assertThat(context.isDefaultHtmlEscape()).isFalse();
+	}
+	@Test
+	void defaultHtmlEscape() {
+		MockServerWebExchange exchange = MockServerWebExchange.builder(
+				MockServerHttpRequest.get("/foo/path").contextPath("/foo")).build();
+
+		exchange.getAttributes().put(ServerWebExchange.HTML_ESCAPE_ATTRIBUTE, true);
+
+		RequestContext context = new RequestContext(exchange, this.model, this.applicationContext);
+		assertThat(context.getDefaultHtmlEscape()).isTrue();
+		assertThat(context.isDefaultHtmlEscape()).isTrue();
 	}
 
 }

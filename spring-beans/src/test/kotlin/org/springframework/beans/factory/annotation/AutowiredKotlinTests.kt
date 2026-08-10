@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.BeanCreationException
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.beans.factory.support.RootBeanDefinition
-import org.springframework.beans.testfixture.beans.Colour
+import org.springframework.beans.testfixture.beans.Color
 import org.springframework.beans.testfixture.beans.TestBean
 
 /**
@@ -129,13 +129,13 @@ class AutowiredKotlinTests {
 		bf.registerBeanDefinition("bean", bd)
 		val tb = TestBean()
 		bf.registerSingleton("testBean", tb)
-		val colour = Colour.BLUE
-		bf.registerSingleton("colour", colour)
+		val color = Color.BLUE
+		bf.registerSingleton("color", color)
 
 		val kb = bf.getBean("bean", KotlinBeanWithAutowiredSecondaryConstructor::class.java)
 		assertThat(kb.injectedFromConstructor).isSameAs(tb)
 		assertThat(kb.optional).isEqualTo("bar")
-		assertThat(kb.injectedFromSecondaryConstructor).isSameAs(colour)
+		assertThat(kb.injectedFromSecondaryConstructor).isSameAs(color)
 	}
 
 	@Test  // SPR-16012
@@ -193,8 +193,8 @@ class AutowiredKotlinTests {
 		bf.registerBeanDefinition("bean", bd)
 		val tb = TestBean()
 		bf.registerSingleton("testBean", tb)
-		val colour = Colour.BLUE
-		bf.registerSingleton("colour", colour)
+		val color = Color.BLUE
+		bf.registerSingleton("color", color)
 
 		assertThatExceptionOfType(BeanCreationException::class.java).isThrownBy {
 			bf.getBean("bean", KotlinBeanWithSecondaryConstructor::class.java)
@@ -246,12 +246,12 @@ class AutowiredKotlinTests {
 			val optional: String = "foo",
 			val injectedFromConstructor: TestBean
 	) {
-		@Autowired constructor(injectedFromSecondaryConstructor: Colour, injectedFromConstructor: TestBean,
+		@Autowired constructor(injectedFromSecondaryConstructor: Color, injectedFromConstructor: TestBean,
 							   optional: String = "bar") : this(optional, injectedFromConstructor) {
 			this.injectedFromSecondaryConstructor = injectedFromSecondaryConstructor
 		}
 
-		var injectedFromSecondaryConstructor: Colour? = null
+		var injectedFromSecondaryConstructor: Color? = null
 	}
 
 	@Suppress("unused")
@@ -268,12 +268,12 @@ class AutowiredKotlinTests {
 			val optional: String = "foo",
 			val injectedFromConstructor: TestBean
 	) {
-		constructor(injectedFromSecondaryConstructor: Colour, injectedFromConstructor: TestBean,
+		constructor(injectedFromSecondaryConstructor: Color, injectedFromConstructor: TestBean,
 					optional: String = "bar") : this(optional, injectedFromConstructor) {
 			this.injectedFromSecondaryConstructor = injectedFromSecondaryConstructor
 		}
 
-		var injectedFromSecondaryConstructor: Colour? = null
+		var injectedFromSecondaryConstructor: Color? = null
 	}
 
 }

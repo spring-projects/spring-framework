@@ -59,7 +59,7 @@ public abstract class AbstractUnmarshallerTests<U extends Unmarshaller> {
 					"<tns:flight><tns:number>42</tns:number></tns:flight></tns:flights>";
 
 	@BeforeEach
-	public final void setUp() throws Exception {
+	final void setUp() throws Exception {
 		unmarshaller = createUnmarshaller();
 	}
 

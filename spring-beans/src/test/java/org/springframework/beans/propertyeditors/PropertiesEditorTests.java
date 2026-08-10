@@ -42,7 +42,7 @@ class PropertiesEditorTests {
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
 		assertThat(p.entrySet().size()).as("contains one entry").isEqualTo(1);
-		assertThat(p.get("foo").equals("bar")).as("foo=bar").isTrue();
+		assertThat(p.get("foo")).as("foo=bar").isEqualTo("bar");
 	}
 
 	@Test
@@ -53,8 +53,8 @@ class PropertiesEditorTests {
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
 		assertThat(p.entrySet().size()).as("contains two entries").isEqualTo(2);
-		assertThat(p.get("foo").equals("bar with whitespace")).as("foo=bar with whitespace").isTrue();
-		assertThat(p.get("me").equals("mi")).as("me=mi").isTrue();
+		assertThat(p.get("foo")).as("foo=bar with whitespace").isEqualTo("bar with whitespace");
+		assertThat(p.get("me")).as("me=mi").isEqualTo("mi");
 	}
 
 	@Test
@@ -67,9 +67,9 @@ class PropertiesEditorTests {
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
 		assertThat(p.entrySet().size()).as("contains two entries").isEqualTo(3);
-		assertThat(p.get("foo").equals("bar")).as("foo=bar").isTrue();
-		assertThat(p.get("me").equals("mi")).as("me=mi").isTrue();
-		assertThat(p.get("x").equals("y=z")).as("x='y=z'").isTrue();
+		assertThat(p.get("foo")).as("foo=bar").isEqualTo("bar");
+		assertThat(p.get("me")).as("me=mi").isEqualTo("mi");
+		assertThat(p.get("x")).as("x='y=z'").isEqualTo("y=z");
 	}
 
 	@Test
@@ -79,9 +79,9 @@ class PropertiesEditorTests {
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
 		assertThat(p.entrySet().size()).as("contains two entries").isEqualTo(3);
-		assertThat(p.get("foo").equals("bar")).as("foo=bar").isTrue();
-		assertThat(p.get("me").equals("mi")).as("me=mi").isTrue();
-		assertThat(p.get("x").equals("")).as("x='y=z'").isTrue();
+		assertThat(p.get("foo")).as("foo=bar").isEqualTo("bar");
+		assertThat(p.get("me")).as("me=mi").isEqualTo("mi");
+		assertThat(p.get("x")).as("x='y=z'").isEqualTo("");
 	}
 
 	@Test
@@ -91,8 +91,8 @@ class PropertiesEditorTests {
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
 		assertThat(p.entrySet().size()).as("contains three entries").isEqualTo(3);
-		assertThat(p.get("foo").equals("")).as("foo is empty").isTrue();
-		assertThat(p.get("me").equals("mi")).as("me=mi").isTrue();
+		assertThat(p.get("foo")).as("foo is empty").isEqualTo("");
+		assertThat(p.get("me")).as("me=mi").isEqualTo("mi");
 	}
 
 	/**
@@ -112,8 +112,8 @@ class PropertiesEditorTests {
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
 		assertThat(p.entrySet().size()).as("contains three entries").isEqualTo(3);
-		assertThat(p.get("foo").equals("bar")).as("foo is bar").isTrue();
-		assertThat(p.get("me").equals("mi")).as("me=mi").isTrue();
+		assertThat(p.get("foo")).as("foo is bar").isEqualTo("bar");
+		assertThat(p.get("me")).as("me=mi").isEqualTo("mi");
 	}
 
 	/**

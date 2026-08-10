@@ -823,7 +823,7 @@ public abstract class AnnotatedElementUtils {
 		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, repeatableContainers);
 	}
 
-	private static @Nullable MultiValueMap<String, Object> nullIfEmpty(MultiValueMap<String, Object> map) {
+	private static @Nullable MultiValueMap<String, @Nullable Object> nullIfEmpty(MultiValueMap<String, @Nullable Object> map) {
 		return (map.isEmpty() ? null : map);
 	}
 

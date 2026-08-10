@@ -142,6 +142,9 @@ provides two alternative ways to verify the response:
 1. xref:resttestclient-workflow[Built-in Assertions] extend the request workflow with a chain of expectations
 2. xref:resttestclient-assertj[AssertJ Integration] to verify the response via `assertThat()` statements
 
+TIP: See the xref:integration/rest-clients.adoc#rest-message-conversion[HTTP Message Conversion]
+section for examples on how to prepare a request with any content, including form data and multipart data.
+
 
 
 [[resttestclient.workflow]]
@@ -211,6 +214,16 @@ include-code::./JsonTests[tag=jsonBody,indent=0]
 To verify JSON content with https://github.com/jayway/JsonPath[JSONPath]:
 
 include-code::./JsonTests[tag=jsonPath,indent=0]
+
+
+[[resttestclient.multipart]]
+==== Multipart Content
+
+When testing endpoints that return multipart responses, you can decode the body to a
+`MultiValueMap<String, Part>` and assert individual parts using the `FormFieldPart`
+and `FilePart` subtypes.
+
+include-code::./MultipartTests[tag=multipart,indent=0]
 
 
 [[resttestclient.assertj]]

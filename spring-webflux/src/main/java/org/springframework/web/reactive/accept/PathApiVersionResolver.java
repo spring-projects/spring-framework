@@ -16,7 +16,12 @@
 
 package org.springframework.web.reactive.accept;
 
+import java.util.function.Predicate;
+
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.util.Assert;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.server.ServerWebExchange;
@@ -24,17 +29,23 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * {@link ApiVersionResolver} that extract the version from a path segment.
  *
- * <p>Note that this resolver will either resolve the version from the specified
- * path segment, or raise an {@link InvalidApiVersionException}, e.g. if there
- * are not enough path segments. It never returns {@code null}, and therefore
- * cannot yield to other resolvers.
+ * <p>If the resolver is created with a path index only, it will always return
+ * a version, or raise an {@link InvalidApiVersionException}, but never
+ * return {@code null}.
+ *
+ * <p>The resolver can also be created with an additional
+ * {@code Predicate<RequestPath>} that provides more flexibility in deciding
+ * whether a given path is versioned or not, possibly resolving to {@code null}.
  *
  * @author Rossen Stoyanchev
+ * @author Martin Mois
  * @since 7.0
  */
 public class PathApiVersionResolver implements ApiVersionResolver {
 
 	private final int pathSegmentIndex;
+
+	private @Nullable Predicate<RequestPath> versionPathPredicate;
 
 
 	/**
@@ -47,16 +58,34 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 		this.pathSegmentIndex = pathSegmentIndex;
 	}
 
+	/**
+	 * Constructor variant of {@link #PathApiVersionResolver(int)} with an
+	 * additional {@code Predicate<RequestPath>} to help determine whether
+	 * a given path is versioned (true) or not (false).
+	 */
+	public PathApiVersionResolver(int pathSegmentIndex, Predicate<RequestPath> versionPathPredicate) {
+		this(pathSegmentIndex);
+		this.versionPathPredicate = versionPathPredicate;
+	}
+
 
 	@Override
-	public String resolveVersion(ServerWebExchange exchange) {
+	public @Nullable String resolveVersion(ServerWebExchange exchange) {
 		int i = 0;
-		for (PathContainer.Element e : exchange.getRequest().getPath().pathWithinApplication().elements()) {
+		RequestPath path = exchange.getRequest().getPath();
+		if (!isVersionedPath(path)) {
+			return null;
+		}
+		for (PathContainer.Element e : path.pathWithinApplication().elements()) {
 			if (e instanceof PathContainer.PathSegment && i++ == this.pathSegmentIndex) {
 				return e.value();
 			}
 		}
 		throw new InvalidApiVersionException("No path segment at index " + this.pathSegmentIndex);
+	}
+
+	private boolean isVersionedPath(RequestPath path) {
+		return (this.versionPathPredicate == null || this.versionPathPredicate.test(path));
 	}
 
 }

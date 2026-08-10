@@ -29,7 +29,6 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.rsocket.Payload;
 import io.rsocket.metadata.WellKnownMimeType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -56,23 +55,15 @@ class DefaultRSocketRequesterTests {
 	private static final Duration MILLIS_10 = Duration.ofMillis(10);
 
 
-	private TestRSocket rsocket;
-
-	private RSocketRequester requester;
-
 	private final RSocketStrategies strategies = RSocketStrategies.create();
 
+	private final TestRSocket rsocket = new TestRSocket();
 
-	@BeforeEach
-	void setUp() {
-		this.rsocket = new TestRSocket();
-		this.requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
-	}
+	private final RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
 
 
 	@Test
 	void sendMono() {
-
 		// data(Object)
 		testSendMono(spec -> spec.data("bodyA"), "bodyA");
 		testSendMono(spec -> spec.data(Mono.delay(MILLIS_10).map(l -> "bodyA")), "bodyA");
@@ -141,8 +132,7 @@ class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	void testSendWithAsyncMetadata() {
-
+	void sendWithAsyncMetadata() {
 		MimeType compositeMimeType =
 				MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
 

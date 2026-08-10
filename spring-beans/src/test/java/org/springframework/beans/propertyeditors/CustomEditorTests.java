@@ -187,11 +187,11 @@ class CustomEditorTests {
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 
 		bw.setPropertyValue("bool1", "true");
-		assertThat(Boolean.TRUE.equals(bw.getPropertyValue("bool1"))).as("Correct bool1 value").isTrue();
+		assertThat(bw.getPropertyValue("bool1")).as("Correct bool1 value").isEqualTo(Boolean.TRUE);
 		assertThat(tb.isBool1()).as("Correct bool1 value").isTrue();
 
 		bw.setPropertyValue("bool1", "false");
-		assertThat(Boolean.FALSE.equals(bw.getPropertyValue("bool1"))).as("Correct bool1 value").isTrue();
+		assertThat(bw.getPropertyValue("bool1")).as("Correct bool1 value").isEqualTo(Boolean.FALSE);
 		assertThat(tb.isBool1()).as("Correct bool1 value").isFalse();
 
 		bw.setPropertyValue("bool1", "  true  ");
@@ -228,11 +228,11 @@ class CustomEditorTests {
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 
 		bw.setPropertyValue("bool2", "true");
-		assertThat(Boolean.TRUE.equals(bw.getPropertyValue("bool2"))).as("Correct bool2 value").isTrue();
+		assertThat(bw.getPropertyValue("bool2")).as("Correct bool2 value").isEqualTo(Boolean.TRUE);
 		assertThat(tb.getBool2().booleanValue()).as("Correct bool2 value").isTrue();
 
 		bw.setPropertyValue("bool2", "false");
-		assertThat(Boolean.FALSE.equals(bw.getPropertyValue("bool2"))).as("Correct bool2 value").isTrue();
+		assertThat(bw.getPropertyValue("bool2")).as("Correct bool2 value").isEqualTo(Boolean.FALSE);
 		assertThat(tb.getBool2()).as("Correct bool2 value").isFalse();
 
 		bw.setPropertyValue("bool2", "on");
@@ -264,11 +264,11 @@ class CustomEditorTests {
 		bw.registerCustomEditor(Boolean.class, new CustomBooleanEditor(true));
 
 		bw.setPropertyValue("bool2", "true");
-		assertThat(Boolean.TRUE.equals(bw.getPropertyValue("bool2"))).as("Correct bool2 value").isTrue();
+		assertThat(bw.getPropertyValue("bool2")).as("Correct bool2 value").isEqualTo(Boolean.TRUE);
 		assertThat(tb.getBool2().booleanValue()).as("Correct bool2 value").isTrue();
 
 		bw.setPropertyValue("bool2", "false");
-		assertThat(Boolean.FALSE.equals(bw.getPropertyValue("bool2"))).as("Correct bool2 value").isTrue();
+		assertThat(bw.getPropertyValue("bool2")).as("Correct bool2 value").isEqualTo(Boolean.FALSE);
 		assertThat(tb.getBool2()).as("Correct bool2 value").isFalse();
 
 		bw.setPropertyValue("bool2", "on");
@@ -429,10 +429,10 @@ class CustomEditorTests {
 
 		bw.setPropertyValue("long1", "5");
 		bw.setPropertyValue("long2", "6");
-		assertThat(Long.valueOf("5").equals(bw.getPropertyValue("long1"))).as("Correct long1 value").isTrue();
+		assertThat(Long.valueOf("5")).as("Correct long1 value").isEqualTo(bw.getPropertyValue("long1"));
 		assertThat(tb.getLong1()).as("Correct long1 value").isEqualTo(5);
-		assertThat(Long.valueOf("6").equals(bw.getPropertyValue("long2"))).as("Correct long2 value").isTrue();
-		assertThat(Long.valueOf("6").equals(tb.getLong2())).as("Correct long2 value").isTrue();
+		assertThat(Long.valueOf("6")).as("Correct long2 value").isEqualTo(bw.getPropertyValue("long2"));
+		assertThat(Long.valueOf("6")).as("Correct long2 value").isEqualTo(tb.getLong2());
 
 		bw.setPropertyValue("long2", "");
 		assertThat(bw.getPropertyValue("long2")).as("Correct long2 value").isNull();

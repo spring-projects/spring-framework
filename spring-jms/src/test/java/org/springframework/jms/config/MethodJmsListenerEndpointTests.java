@@ -474,7 +474,7 @@ class MethodJmsListenerEndpointTests {
 
 	private Method getListenerMethod(String methodName, Class<?>... parameterTypes) {
 		Method method = ReflectionUtils.findMethod(JmsEndpointSampleBean.class, methodName, parameterTypes);
-		assertThat(("no method found with name " + methodName + " and parameters " + Arrays.toString(parameterTypes))).isNotNull();
+		assertThat("no method found with name " + methodName + " and parameters " + Arrays.toString(parameterTypes)).isNotNull();
 		return method;
 	}
 

@@ -25,31 +25,31 @@ import org.junit.jupiter.api.Test;
  * @author Sam Brannen
  * @since 4.2
  */
-public class HostRequestMatcherTests extends AbstractWebRequestMatcherTests {
+class HostRequestMatcherTests extends AbstractWebRequestMatcherTests {
 
 	@Test
-	public void localhost() throws Exception {
+	void localhost() throws Exception {
 		WebRequestMatcher matcher = new HostRequestMatcher("localhost");
 		assertMatches(matcher, "http://localhost/jquery-1.11.0.min.js");
 		assertDoesNotMatch(matcher, "http://company.example/jquery-1.11.0.min.js");
 	}
 
 	@Test
-	public void multipleHosts() throws Exception {
+	void multipleHosts() throws Exception {
 		WebRequestMatcher matcher = new HostRequestMatcher("localhost", "example.com");
 		assertMatches(matcher, "http://localhost/jquery-1.11.0.min.js");
 		assertMatches(matcher, "https://example.com/jquery-1.11.0.min.js");
 	}
 
 	@Test
-	public void specificPort() throws Exception {
+	void specificPort() throws Exception {
 		WebRequestMatcher matcher = new HostRequestMatcher("localhost:8080");
 		assertMatches(matcher, "http://localhost:8080/jquery-1.11.0.min.js");
 		assertDoesNotMatch(matcher, "http://localhost:9090/jquery-1.11.0.min.js");
 	}
 
 	@Test
-	public void defaultHttpPort() throws Exception {
+	void defaultHttpPort() throws Exception {
 		WebRequestMatcher matcher = new HostRequestMatcher("localhost:80");
 		assertMatches(matcher, "http://localhost:80/jquery-1.11.0.min.js");
 		assertMatches(matcher, "http://localhost/jquery-1.11.0.min.js");
@@ -58,7 +58,7 @@ public class HostRequestMatcherTests extends AbstractWebRequestMatcherTests {
 	}
 
 	@Test
-	public void defaultHttpsPort() throws Exception {
+	void defaultHttpsPort() throws Exception {
 		WebRequestMatcher matcher = new HostRequestMatcher("localhost:443");
 		assertMatches(matcher, "https://localhost:443/jquery-1.11.0.min.js");
 		assertMatches(matcher, "https://localhost/jquery-1.11.0.min.js");

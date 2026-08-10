@@ -61,12 +61,13 @@ public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFi
 	 */
 	@Override
 	protected long getNextKey() throws DataAccessException {
-		Connection con = DataSourceUtils.getConnection(getDataSource());
+		DataSource dataSource = obtainDataSource();
+		Connection con = DataSourceUtils.getConnection(dataSource);
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
 			stmt = con.createStatement();
-			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
+			DataSourceUtils.applyTransactionTimeout(stmt, dataSource);
 			rs = stmt.executeQuery(getSequenceQuery());
 			if (rs.next()) {
 				return rs.getLong(1);
@@ -81,7 +82,7 @@ public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFi
 		finally {
 			JdbcUtils.closeResultSet(rs);
 			JdbcUtils.closeStatement(stmt);
-			DataSourceUtils.releaseConnection(con, getDataSource());
+			DataSourceUtils.releaseConnection(con, dataSource);
 		}
 	}
 

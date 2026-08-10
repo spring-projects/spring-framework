@@ -59,7 +59,7 @@ import org.springframework.web.context.ContextLoader;
  * <p>Since JSR-356 only allows Encoder/Decoder to be registered by type, instances
  * of this class are therefore managed by the WebSocket runtime, and do not need to
  * be registered as Spring Beans. They can, however, by injected with Spring-managed
- * dependencies via {@link Autowired @Autowire}.
+ * dependencies via {@link Autowired @Autowired}.
  *
  * <p>Converters to convert between the {@link #getType() type} and {@code String} or
  * {@code ByteBuffer} should be registered.

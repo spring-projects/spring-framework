@@ -415,7 +415,7 @@ class UrlTagTests extends AbstractTagTests {
 	}
 
 	@Test  // SPR-11401
-	public void replaceUriTemplateParamsTemplateWithPathSegment() throws JspException {
+	void replaceUriTemplateParamsTemplateWithPathSegment() throws JspException {
 		List<Param> params = new ArrayList<>();
 		Set<String> usedParams = new HashSet<>();
 

@@ -37,9 +37,12 @@ public interface ConfigurationBeanNameGenerator extends BeanNameGenerator {
 
 	/**
 	 * Derive a default bean name for the given {@link Bean @Bean} method,
-	 * providing the {@link Bean#name() name} attribute specified.
+	 * taking into account the specified {@link Bean#name() name} attribute.
+	 * <p>As of 7.1, the original {@code @Bean} name (typically the method name)
+	 * will be registered as an alias if that name has not been taken already.
 	 * @param beanMethod the method metadata for the {@link Bean @Bean} method
-	 * @param beanName the {@link Bean#name() name} attribute or {@code null} if non is specified
+	 * @param beanName the {@link Bean#name() name} attribute or {@code null}
+	 * if none is specified
 	 * @return the default bean name to use
 	 */
 	String deriveBeanName(MethodMetadata beanMethod, @Nullable String beanName);

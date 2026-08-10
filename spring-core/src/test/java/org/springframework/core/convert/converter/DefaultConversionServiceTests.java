@@ -44,6 +44,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -58,6 +59,7 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.unit.DataSize;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -75,6 +77,8 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author YeongJae Min
+ * @author Yanming Zhou
  */
 class DefaultConversionServiceTests {
 
@@ -229,6 +233,53 @@ class DefaultConversionServiceTests {
 	@Test
 	void stringToNumberEmptyString() {
 		assertThat(conversionService.convert("", Number.class)).isNull();
+	}
+
+	@Test  // gh-36830
+	void stringToDataSizeWithInvalidString() {
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert("10WB", DataSize.class))
+				.havingRootCause()
+					.isInstanceOf(IllegalArgumentException.class)
+					.withMessage("Unknown data unit suffix 'WB'");
+	}
+
+	@Test  // gh-36830
+	void stringToDataSizeWithEmptyString() {
+		assertThat(conversionService.convert("", DataSize.class)).isNull();
+	}
+
+	@Test  // gh-36830
+	void stringToDataSize() {
+		assertThat(conversionService.convert("10", DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert("10B", DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert("+10KB", DataSize.class)).isEqualTo(DataSize.ofKilobytes(10));
+		assertThat(conversionService.convert("-10MB", DataSize.class)).isEqualTo(DataSize.ofMegabytes(-10));
+	}
+
+	@Test  // gh-36830
+	void numberToDataSizeConversionRejectsNumberWithFractionalPart() {
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(-10.5, DataSize.class))
+				.havingRootCause()
+					.isInstanceOf(IllegalArgumentException.class)
+					.withMessage("'-10.5' is not a valid data size");
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(new BigDecimal("10.5"), DataSize.class))
+				.havingRootCause()
+					.isInstanceOf(IllegalArgumentException.class)
+					.withMessage("'10.5' is not a valid data size");
+	}
+
+	@Test  // gh-36830
+	void numberToDataSize() {
+		assertThat(conversionService.convert(10, DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert(10.0, DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert(-10L, DataSize.class)).isEqualTo(DataSize.ofBytes(-10));
+		assertThat(conversionService.convert(-10.0, DataSize.class)).isEqualTo(DataSize.ofBytes(-10));
+		assertThat(conversionService.convert(new BigDecimal("10"), DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert(new BigDecimal("10.0"), DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert(new AtomicInteger(1000), DataSize.class)).isEqualTo(DataSize.ofBytes(1000));
 	}
 
 	@Test
@@ -969,7 +1020,7 @@ class DefaultConversionServiceTests {
 			MethodParameter parameter = new MethodParameter(method, 0);
 			TypeDescriptor descriptor = new TypeDescriptor(parameter);
 			Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
-			assertThat(((Optional<List<Integer>>) actual)).contains(List.of(1, 2, 3));
+			assertThat((Optional<List<Integer>>) actual).contains(List.of(1, 2, 3));
 		}
 
 		@Test
@@ -1195,7 +1246,7 @@ class DefaultConversionServiceTests {
 	}
 
 
-	public class ColorConverter implements Converter<String, Color> {
+	public static class ColorConverter implements Converter<String, Color> {
 
 		@Override
 		public Color convert(String source) {

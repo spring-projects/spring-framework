@@ -84,8 +84,8 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 			return "";
 		}
 		StringJoiner sj = new StringJoiner(",");
-		for (Class<?> klass : classes) {
-			sj.add(ClassUtils.getQualifiedName(klass));
+		for (Class<?> clazz : classes) {
+			sj.add(clazz.getTypeName());
 		}
 		return sj.toString();
 	}

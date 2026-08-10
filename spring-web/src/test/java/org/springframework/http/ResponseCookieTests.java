@@ -83,7 +83,7 @@ class ResponseCookieTests {
 	}
 
 	@Test // gh-24663
-	public void domainWithEmptyDoubleQuotes() {
+	void domainWithEmptyDoubleQuotes() {
 
 		Arrays.asList("\"\"", "\t\"\" ", " \" \t \"\t")
 				.forEach(domain -> {

@@ -63,7 +63,7 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 
 	public Jackson2JsonEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
-		setStreamingMediaTypes(Arrays.asList(MediaType.APPLICATION_NDJSON));
+		setStreamingMediaTypes(Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_JSONL));
 		this.ssePrettyPrinter = initSsePrettyPrinter();
 	}
 

@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dave Syer
  */
 @SuppressWarnings("resource")
-public class ScriptingDefaultsTests {
+class ScriptingDefaultsTests {
 
 	private static final String CONFIG =
 		"org/springframework/scripting/config/scriptingDefaultsTests.xml";

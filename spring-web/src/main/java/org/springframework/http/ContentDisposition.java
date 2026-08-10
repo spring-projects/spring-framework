@@ -19,9 +19,9 @@ package org.springframework.http;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.BitSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
@@ -44,6 +44,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @author Sergey Tsypanov
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc6266">RFC 6266</a>
@@ -59,21 +60,7 @@ public final class ContentDisposition {
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
 
-	private static final BitSet PRINTABLE = new BitSet(256);
-
 	private static final HexFormat HEX_FORMAT = HexFormat.of().withUpperCase();
-
-
-	static {
-		// RFC 2045, Section 6.7, and RFC 2047, Section 4.2
-		for (int i=33; i<= 126; i++) {
-			PRINTABLE.set(i);
-		}
-		PRINTABLE.set(34, false); // "
-		PRINTABLE.set(61, false); // =
-		PRINTABLE.set(63, false); // ?
-		PRINTABLE.set(95, false); // _
-	}
 
 
 	private final @Nullable String type;
@@ -185,19 +172,19 @@ public final class ContentDisposition {
 			sb.append(this.type);
 		}
 		if (this.name != null) {
-			sb.append("; name=\"");
-			sb.append(this.name).append('\"');
+			sb.append("; name=\"").append(this.name).append('\"');
 		}
 		if (this.filename != null) {
 			if (this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
-				sb.append("; filename=\"");
-				sb.append(encodeQuotedPairs(this.filename)).append('\"');
+				sb.append("; filename=\"")
+						.append(encodeQuotedPairs(this.filename))
+						.append('\"');
 			}
 			else {
-				sb.append("; filename=\"");
-				sb.append(encodeQuotedPrintableFilename(this.filename, this.charset)).append('\"');
-				sb.append("; filename*=");
-				sb.append(encodeRfc5987Filename(this.filename, this.charset));
+				sb.append("; filename=\"")
+						.append(transliterateToAscii(encodeQuotedPairs(this.filename)))
+						.append("\"; filename*=")
+						.append(encodeRfc5987Filename(this.filename, this.charset));
 			}
 		}
 		return sb.toString();
@@ -446,44 +433,74 @@ public final class ContentDisposition {
 		return StreamUtils.copyToString(baos, charset);
 	}
 
-	/**
-	 * Encode the given header field param as described in RFC 2047.
-	 * @param filename the filename
-	 * @param charset the charset for the filename
-	 * @return the encoded header field param
-	 * @see <a href="https://tools.ietf.org/html/rfc2047">RFC 2047</a>
-	 */
-	private static String encodeQuotedPrintableFilename(String filename, Charset charset) {
-		Assert.notNull(filename, "'filename' must not be null");
-		Assert.notNull(charset, "'charset' must not be null");
-
-		byte[] source = filename.getBytes(charset);
-		StringBuilder sb = new StringBuilder(source.length << 1);
-		sb.append("=?");
-		sb.append(charset.name());
-		sb.append("?Q?");
-		for (byte b : source) {
-			if (b == 32) { // RFC 2047, section 4.2, rule (2)
-				sb.append('_');
-			}
-			else if (isPrintable(b)) {
-				sb.append((char) b);
+	private static String transliterateToAscii(String input) {
+		StringBuilder sb = new StringBuilder(input.length() + 16);
+		for (int i = 0; i < input.length();) {
+			int codePoint = input.codePointAt(i);
+			i += Character.charCount(codePoint);
+			if (codePoint <= 127) {
+				sb.append((char) codePoint);
 			}
 			else {
-				sb.append('=');
-				HEX_FORMAT.toHexDigits(sb, b);
+				switch (codePoint) {
+					case 'ä':
+						sb.append("ae");
+						break;
+					case 'ö':
+						sb.append("oe");
+						break;
+					case 'ü':
+						sb.append("ue");
+						break;
+					case 'Ä':
+						sb.append("Ae");
+						break;
+					case 'Ö':
+						sb.append("Oe");
+						break;
+					case 'Ü':
+						sb.append("Ue");
+						break;
+					case 'ß':
+						sb.append("ss");
+						break;
+					case 'æ':
+						sb.append("ae");
+						break;
+					case 'Æ':
+						sb.append("AE");
+						break;
+					case 'œ':
+						sb.append("oe");
+						break;
+					case 'Œ':
+						sb.append("OE");
+						break;
+					default:
+						String cpStr = new String(Character.toChars(codePoint));
+						// decompose accented characters into two separate parts
+						String normalized = Normalizer.normalize(cpStr, Normalizer.Form.NFD);
+						for (int j = 0; j < normalized.length(); ) {
+							int ncp = normalized.codePointAt(j);
+							j += Character.charCount(ncp);
+							if (ncp <= 127) {
+								sb.append((char) ncp);
+							}
+							else {
+								int type = Character.getType(ncp);
+								// do not write fallback character for accents
+								if (type != Character.NON_SPACING_MARK &&
+										type != Character.COMBINING_SPACING_MARK &&
+										type != Character.ENCLOSING_MARK) {
+									sb.append('_');
+								}
+							}
+						}
+						break;
+				}
 			}
 		}
-		sb.append("?=");
 		return sb.toString();
-	}
-
-	private static boolean isPrintable(byte c) {
-		int b = c;
-		if (b < 0) {
-			b = 256 + b;
-		}
-		return PRINTABLE.get(b);
 	}
 
 	private static String encodeQuotedPairs(String filename) {

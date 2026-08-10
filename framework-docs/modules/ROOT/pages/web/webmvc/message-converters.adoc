@@ -23,13 +23,17 @@ For all converters, a default media type is used, but you can override it by set
 By default, this converter supports all text media types(`text/{asterisk}`) and writes with a `Content-Type` of `text/plain`.
 
 | `FormHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write form data from the HTTP request and response.
+| An `HttpMessageConverter` implementation that can read and write URL encoded forms.
 By default, this converter reads and writes the `application/x-www-form-urlencoded` media type.
 Form data is read from and written into a `MultiValueMap<String, String>`.
-The converter can also write (but not read) multipart data read from a `MultiValueMap<String, Object>`.
-By default, `multipart/form-data` is supported.
-Additional multipart subtypes can be supported for writing form data.
-Consult the javadoc for `FormHttpMessageConverter` for further details.
+`Map<String, String>` is also supported, but multiple values under the same key will be ignored.
+
+| `MultipartHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write multipart messages.
+`MultiValueMap<String, Object>` can be written to multipart messages, converting each part independently using
+the configured message converters. Multipart messages can be read into `MultiValueMap<String, Part>`, each value
+being a `Part` or one of its subtypes (`FormFieldPart` and `FilePart`).
+By default, `multipart/form-data` is supported. Additional multipart subtypes can be supported for writing form data.
 
 | `ByteArrayHttpMessageConverter`
 | An `HttpMessageConverter` implementation that can read and write byte arrays from the HTTP request and response.

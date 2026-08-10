@@ -435,6 +435,36 @@ class ReflectionHintsPredicatesTests {
 
 	}
 
+	@Nested
+	class JavaSerialization {
+
+		@Test
+		void javaSerializationMatchesRegisteredClass() {
+			runtimeHints.reflection().registerJavaSerialization(SampleClass.class);
+			assertPredicateMatches(reflection.onJavaSerialization(SampleClass.class, true));
+		}
+
+		@Test
+		void javaSerializationMatchesRegisteredTypeReference() {
+			runtimeHints.reflection().registerType(TypeReference.of(SampleClass.class),
+					type -> type.withJavaSerialization(false));
+			assertPredicateMatches(reflection.onJavaSerialization(TypeReference.of(SampleClass.class), false));
+		}
+
+		@Test
+		void javaSerializationDoesNotMatchOnMissingType() {
+			runtimeHints.reflection().registerJavaSerialization(SampleClass.class);
+			assertPredicateDoesNotMatch(reflection.onJavaSerialization(Integer.class, true));
+		}
+
+		@Test
+		void javaSerializationDoesNotMatchOnInvalidSerializationFlag() {
+			runtimeHints.reflection().registerJavaSerialization(SampleClass.class);
+			assertPredicateDoesNotMatch(reflection.onJavaSerialization(SampleClass.class, false));
+		}
+
+	}
+
 	private void assertPredicateMatches(Predicate<RuntimeHints> predicate) {
 		assertThat(predicate).accepts(this.runtimeHints);
 	}

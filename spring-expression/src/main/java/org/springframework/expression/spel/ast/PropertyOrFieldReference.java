@@ -70,7 +70,15 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	private final String name;
 
-	private @Nullable String originalPrimitiveExitTypeDescriptor;
+	private volatile @Nullable String originalPrimitiveExitTypeDescriptor;
+
+	/**
+	 * Tracks whether an {@link Optional} was unwrapped in
+	 * {@link #readProperty(TypedValue, EvaluationContext, String)} using the
+	 * null-safe operator and therefore needs to be unwrapped in a compiled expression.
+	 * @since 7.1
+	 */
+	private volatile boolean unwrapOptional;
 
 	private volatile @Nullable PropertyAccessor cachedReadAccessor;
 
@@ -102,14 +110,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	@Override
 	public ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		return new AccessorValueRef(this, state.getActiveContextObject(), state.getEvaluationContext(),
+		return new AccessorValueRef(this, state.getActiveContextObject(), state, state.getEvaluationContext(),
 				state.getConfiguration().isAutoGrowNullReferences());
 	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		TypedValue tv = getValueInternal(state.getActiveContextObject(), state.getEvaluationContext(),
-				state.getConfiguration().isAutoGrowNullReferences());
+		TypedValue tv = getValueInternal(state, state.getActiveContextObject(),
+				state.getEvaluationContext(), state.getConfiguration().isAutoGrowNullReferences());
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
 		if (accessorToUse instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
 			setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
@@ -117,10 +125,10 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		return tv;
 	}
 
-	private TypedValue getValueInternal(TypedValue contextObject, EvaluationContext evalContext,
-			boolean isAutoGrowNullReferences) throws EvaluationException {
+	private TypedValue getValueInternal(ExpressionState state, TypedValue contextObject,
+			EvaluationContext evalContext, boolean isAutoGrowNullReferences) throws EvaluationException {
 
-		TypedValue result = readProperty(contextObject, evalContext, this.name);
+		TypedValue result = readProperty(state, contextObject, evalContext, this.name);
 
 		// Dynamically create the objects if the user has requested that optional behavior
 		if (result.getValue() == null && isAutoGrowNullReferences &&
@@ -130,16 +138,18 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			// Create a new collection or map ready for the indexer
 			if (List.class == resultDescriptor.getType()) {
 				if (isWritableProperty(this.name, contextObject, evalContext)) {
+					state.trackOperation();
 					List<?> newList = new ArrayList<>();
-					writeProperty(contextObject, evalContext, this.name, newList);
-					result = readProperty(contextObject, evalContext, this.name);
+					writeProperty(state, contextObject, evalContext, this.name, newList);
+					result = readProperty(state, contextObject, evalContext, this.name);
 				}
 			}
 			else if (Map.class == resultDescriptor.getType()) {
 				if (isWritableProperty(this.name,contextObject, evalContext)) {
+					state.trackOperation();
 					Map<?,?> newMap = new HashMap<>();
-					writeProperty(contextObject, evalContext, this.name, newMap);
-					result = readProperty(contextObject, evalContext, this.name);
+					writeProperty(state, contextObject, evalContext, this.name, newMap);
+					result = readProperty(state, contextObject, evalContext, this.name);
 				}
 			}
 			else {
@@ -147,9 +157,10 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				try {
 					if (isWritableProperty(this.name,contextObject, evalContext)) {
 						Class<?> clazz = resultDescriptor.getType();
+						state.trackOperation();
 						Object newObject = ReflectionUtils.accessibleConstructor(clazz).newInstance();
-						writeProperty(contextObject, evalContext, this.name, newObject);
-						result = readProperty(contextObject, evalContext, this.name);
+						writeProperty(state, contextObject, evalContext, this.name, newObject);
+						result = readProperty(state, contextObject, evalContext, this.name);
 					}
 				}
 				catch (InvocationTargetException ex) {
@@ -170,7 +181,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			throws EvaluationException {
 
 		TypedValue typedValue = valueSupplier.get();
-		writeProperty(state.getActiveContextObject(), state.getEvaluationContext(), this.name, typedValue.getValue());
+		writeProperty(state, state.getActiveContextObject(), state.getEvaluationContext(), this.name, typedValue.getValue());
 		return typedValue;
 	}
 
@@ -189,13 +200,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	 * @return the value of the property
 	 * @throws EvaluationException if any problem accessing the property, or if it cannot be found
 	 */
-	private TypedValue readProperty(TypedValue contextObject, EvaluationContext evalContext, String name)
-			throws EvaluationException {
+	private TypedValue readProperty(ExpressionState state, TypedValue contextObject,
+			EvaluationContext evalContext, String name) throws EvaluationException {
 
 		final Object originalTarget = contextObject.getValue();
 		Object target = originalTarget;
 		Optional<?> fallbackOptionalTarget = null;
 		boolean isEmptyOptional = false;
+		this.unwrapOptional = false;
 
 		if (isNullSafe()) {
 			if (target == null) {
@@ -205,6 +217,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				if (optional.isPresent()) {
 					target = optional.get();
 					fallbackOptionalTarget = optional;
+					this.unwrapOptional = true;
 				}
 				else {
 					isEmptyOptional = true;
@@ -216,6 +229,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		if (accessorToUse != null) {
 			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
 				try {
+					state.trackOperation();
 					return accessorToUse.read(evalContext, target, name);
 				}
 				catch (Exception ex) {
@@ -240,6 +254,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 								evalContext, target, name);
 					}
 					this.cachedReadAccessor = accessor;
+					state.trackOperation();
 					return accessor.read(evalContext, target, name);
 				}
 				// Second, attempt to find the property on the original Optional instance.
@@ -249,11 +264,18 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 								evalContext, fallbackOptionalTarget, name);
 					}
 					this.cachedReadAccessor = accessor;
+					// If we end up using a property on the original Optional instance,
+					// we don't need to unwrap the Optional in the compiled expression.
+					this.unwrapOptional = false;
+					state.trackOperation();
 					return accessor.read(evalContext, fallbackOptionalTarget, name);
 				}
 			}
 		}
 		catch (Exception ex) {
+			if (ex instanceof SpelEvaluationException see) {
+				throw see;
+			}
 			throw new SpelEvaluationException(ex, SpelMessage.EXCEPTION_DURING_PROPERTY_READ, name, ex.getMessage());
 		}
 
@@ -273,9 +295,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 	}
 
-	private void writeProperty(
-			TypedValue contextObject, EvaluationContext evalContext, String name, @Nullable Object newValue)
-			throws EvaluationException {
+	private void writeProperty(ExpressionState state, TypedValue contextObject, EvaluationContext evalContext,
+			String name, @Nullable Object newValue) throws EvaluationException {
 
 		Object target = contextObject.getValue();
 		if (target == null) {
@@ -290,6 +311,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		if (accessorToUse != null) {
 			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
 				try {
+					state.trackOperation();
 					accessorToUse.write(evalContext, target, name, newValue);
 					return;
 				}
@@ -307,6 +329,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			for (PropertyAccessor accessor : accessorsToTry) {
 				if (accessor.canWrite(evalContext, target, name)) {
 					this.cachedWriteAccessor = accessor;
+					state.trackOperation();
 					accessor.write(evalContext, target, name, newValue);
 					return;
 				}
@@ -357,6 +380,9 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		Label skipIfNull = null;
 		if (isNullSafe()) {
+			if (this.unwrapOptional) {
+				CodeFlow.insertOptionalUnwrapIfNecessary(mv, cf.lastDescriptor());
+			}
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
@@ -400,15 +426,18 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		private final TypedValue contextObject;
 
+		private final ExpressionState expressionState;
+
 		private final EvaluationContext evalContext;
 
 		private final boolean autoGrowNullReferences;
 
 		public AccessorValueRef(PropertyOrFieldReference propertyOrFieldReference, TypedValue activeContextObject,
-				EvaluationContext evalContext, boolean autoGrowNullReferences) {
+				ExpressionState expressionState, EvaluationContext evalContext, boolean autoGrowNullReferences) {
 
 			this.ref = propertyOrFieldReference;
 			this.contextObject = activeContextObject;
+			this.expressionState = expressionState;
 			this.evalContext = evalContext;
 			this.autoGrowNullReferences = autoGrowNullReferences;
 		}
@@ -416,7 +445,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		@Override
 		public TypedValue getValue() {
 			TypedValue value =
-					this.ref.getValueInternal(this.contextObject, this.evalContext, this.autoGrowNullReferences);
+					this.ref.getValueInternal(this.expressionState, this.contextObject, this.evalContext, this.autoGrowNullReferences);
 			if (this.ref.cachedReadAccessor instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
 				this.ref.setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
 			}
@@ -425,7 +454,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		@Override
 		public void setValue(@Nullable Object newValue) {
-			this.ref.writeProperty(this.contextObject, this.evalContext, this.ref.name, newValue);
+			this.ref.writeProperty(this.expressionState, this.contextObject, this.evalContext, this.ref.name, newValue);
 		}
 
 		@Override

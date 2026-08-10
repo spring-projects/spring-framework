@@ -194,7 +194,7 @@ class CorsUrlHandlerMappingTests {
 		}
 	}
 
-	public class CustomCorsConfigurationSource implements CorsConfigurationSource {
+	public static class CustomCorsConfigurationSource implements CorsConfigurationSource {
 
 		@Override
 		public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {

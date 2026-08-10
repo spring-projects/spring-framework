@@ -267,8 +267,8 @@ class StompSubProtocolHandlerTests {
 
 		assertThat(this.session.getSentMessages()).hasSize(1);
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
-		assertThat(((String) textMessage.getPayload())).contains("destination:/user/queue/foo\n");
-		assertThat(((String) textMessage.getPayload())).doesNotContain(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
+		assertThat((String) textMessage.getPayload()).contains("destination:/user/queue/foo\n");
+		assertThat((String) textMessage.getPayload()).doesNotContain(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 	}
 
 	// SPR-12475

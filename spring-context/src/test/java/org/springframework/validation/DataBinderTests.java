@@ -113,7 +113,7 @@ class DataBinderTests {
 		Map<?, ?> map = binder.getBindingResult().getModel();
 		assertThat(map).as("There is one element in map").hasSize(2);
 		TestBean tb = (TestBean) map.get("person");
-		assertThat(tb.equals(rod)).as("Same object").isTrue();
+		assertThat(tb).as("Same object").isEqualTo(rod);
 
 		BindingResult other = new DataBinder(rod, "person").getBindingResult();
 		assertThat(binder.getBindingResult()).isEqualTo(other);
@@ -715,25 +715,27 @@ class DataBinderTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void bindingWithDisallowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
-		binder.setDisallowedFields(" ", "\t", "favouriteColour", null, "age");
+		binder.setDisallowedFields(" ", "\t", "favoriteColor", null, "age");
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
 		pvs.add("age", "32x");
-		pvs.add("favouriteColour", "BLUE");
+		pvs.add("favoriteColor", "BLUE");
 
 		binder.bind(pvs);
 		binder.close();
 
 		assertThat(rod.getName()).as("changed name correctly").isEqualTo("Rod");
 		assertThat(rod.getAge()).as("did not change age").isZero();
-		assertThat(rod.getFavouriteColour()).as("did not change favourite colour").isNull();
-		assertThat(binder.getBindingResult().getSuppressedFields()).containsExactlyInAnyOrder("age", "favouriteColour");
+		assertThat(rod.getFavoriteColor()).as("did not change favorite color").isNull();
+		assertThat(binder.getBindingResult().getSuppressedFields()).containsExactlyInAnyOrder("age", "favoriteColor");
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void bindingWithAllowedAndDisallowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -752,6 +754,7 @@ class DataBinderTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void bindingWithOverlappingAllowedAndDisallowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -793,10 +796,11 @@ class DataBinderTests {
 		Map<?,?> m = binder.getBindingResult().getModel();
 		assertThat(m).as("There is one element in map").hasSize(2);
 		TestBean tb = (TestBean) m.get("person");
-		assertThat(tb.equals(rod)).as("Same object").isTrue();
+		assertThat(tb).as("Same object").isEqualTo(rod);
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void bindingWithAllowedAndDisallowedMapFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -1854,8 +1858,12 @@ class DataBinderTests {
 
 		FieldError ageError = errors.getFieldError("age");
 		assertThat(ageError.getCode()).isEqualTo("typeMismatch");
+		assertThat(ageError.isBindingFailure()).isTrue();
+		assertThat(ageError.shouldRenderDefaultMessage()).isFalse();
 		FieldError nameError = errors.getFieldError("name");
 		assertThat(nameError.getCode()).isEqualTo("badName");
+		assertThat(nameError.isBindingFailure()).isFalse();
+		assertThat(nameError.shouldRenderDefaultMessage()).isTrue();
 	}
 
 	@Test

@@ -1,0 +1,38 @@
+name: Release
+on:
+  push:
+    tags:
+      - v7.1.[0-9]+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+jobs:
+  trigger-docs-build:
+    name: Trigger Docs Build
+    permissions:
+      actions: write
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Determine Version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Run Deploy Docs Workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-docs.yml --repo ${{ github.repository }} -r docs-build -f build-refname=${{ github.ref_name }}
+  create-github-release:
+    name: Create GitHub Release
+    needs:
+      - trigger-docs-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v6
+      - name: Create GitHub Release
+        uses: ./.github/actions/create-github-release
+        with:
+          commercial: ${{ vars.COMMERCIAL }}
+          latest: true
+          milestone: ${{ needs.trigger-docs-build.outputs.version }}
+          token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}

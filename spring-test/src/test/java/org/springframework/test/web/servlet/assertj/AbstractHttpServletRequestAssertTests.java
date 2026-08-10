@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Stephane Nicoll
  */
-public class AbstractHttpServletRequestAssertTests {
+class AbstractHttpServletRequestAssertTests {
 
 	@Nested
 	class AttributesTests {

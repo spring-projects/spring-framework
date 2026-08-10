@@ -119,7 +119,7 @@ class ContextPathCompositeHandlerTests {
 	}
 
 	@Test // SPR-17144
-	public void notFoundWithCommitAction() {
+	void notFoundWithCommitAction() {
 
 		AtomicBoolean commitInvoked = new AtomicBoolean();
 

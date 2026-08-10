@@ -18,6 +18,8 @@ package org.springframework.jdbc.support.incrementer;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.Assert;
@@ -34,14 +36,12 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldMaxValueIncrementer, InitializingBean {
 
-	@SuppressWarnings("NullAway.Init")
-	private DataSource dataSource;
+	private @Nullable DataSource dataSource;
 
 	/** The name of the sequence/table containing the sequence. */
-	@SuppressWarnings("NullAway.Init")
-	private String incrementerName;
+	private @Nullable String incrementerName;
 
-	/** The length to which a string result should be pre-pended with zeroes. */
+	/** The length to which a string result should be prepended with zeroes. */
 	protected int paddingLength = 0;
 
 
@@ -69,34 +69,46 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/**
 	 * Set the data source to retrieve the value from.
 	 */
-	public void setDataSource(DataSource dataSource) {
+	public void setDataSource(@Nullable DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
 	/**
 	 * Return the data source to retrieve the value from.
 	 */
-	public DataSource getDataSource() {
+	public @Nullable DataSource getDataSource() {
 		return this.dataSource;
+	}
+
+	/**
+	 * Obtain the {@code DataSource} for actual use.
+	 * @return the DataSource (never {@code null})
+	 * @throws IllegalStateException in case of no DataSource set
+	 * @since 7.1
+	 */
+	protected DataSource obtainDataSource() {
+		DataSource dataSource = getDataSource();
+		Assert.state(dataSource != null, "No DataSource set");
+		return dataSource;
 	}
 
 	/**
 	 * Set the name of the sequence/table.
 	 */
-	public void setIncrementerName(String incrementerName) {
+	public void setIncrementerName(@Nullable String incrementerName) {
 		this.incrementerName = incrementerName;
 	}
 
 	/**
 	 * Return the name of the sequence/table.
 	 */
-	public String getIncrementerName() {
+	public @Nullable String getIncrementerName() {
 		return this.incrementerName;
 	}
 
 	/**
 	 * Set the padding length, i.e. the length to which a string result
-	 * should be pre-pended with zeroes.
+	 * should be prepended with zeroes.
 	 */
 	public void setPaddingLength(int paddingLength) {
 		this.paddingLength = paddingLength;

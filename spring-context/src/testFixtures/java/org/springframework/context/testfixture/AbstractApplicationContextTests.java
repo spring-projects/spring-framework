@@ -93,8 +93,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		assertThat(aca.getApplicationContext()).as("has had context set").isSameAs(applicationContext);
 		Object aca2 = applicationContext.getBean("aca-prototype");
 		assertThat(aca).as("NOT Same instance").isNotSameAs(aca2);
-		boolean condition = !applicationContext.isSingleton("aca-prototype");
-		assertThat(condition).as("Says is prototype").isTrue();
+		assertThat(applicationContext.isSingleton("aca-prototype")).as("Says is prototype").isFalse();
 	}
 
 	@Test
@@ -110,26 +109,25 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	@Test
 	protected void overrideWorked() {
 		TestBean rod = (TestBean) applicationContext.getParent().getBean("rod");
-		assertThat(rod.getName().equals("Roderick")).as("Parent's name differs").isTrue();
+		assertThat(rod.getName()).as("Parent's name differs").isEqualTo("Roderick");
 	}
 
 	@Test
 	protected void grandparentDefinitionFound() {
 		TestBean dad = (TestBean) applicationContext.getBean("father");
-		assertThat(dad.getName().equals("Albert")).as("Dad has correct name").isTrue();
+		assertThat(dad.getName()).as("Dad has correct name").isEqualTo("Albert");
 	}
 
 	@Test
 	protected void grandparentTypedDefinitionFound() {
 		TestBean dad = applicationContext.getBean("father", TestBean.class);
-		assertThat(dad.getName().equals("Albert")).as("Dad has correct name").isTrue();
+		assertThat(dad.getName()).as("Dad has correct name").isEqualTo("Albert");
 	}
 
 	@Test
 	protected void closeTriggersDestroy() {
 		LifecycleBean lb = (LifecycleBean) applicationContext.getBean("lifecycle");
-		boolean condition = !lb.isDestroyed();
-		assertThat(condition).as("Not destroyed").isTrue();
+		assertThat(lb.isDestroyed()).as("Not destroyed").isFalse();
 		applicationContext.close();
 		if (applicationContext.getParent() != null) {
 			((ConfigurableApplicationContext) applicationContext.getParent()).close();

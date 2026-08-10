@@ -260,7 +260,7 @@ public class ReflectionHintsPredicates {
 	}
 
 	/**
-	 * Return a predicate that checks whether an invocation hint is registered for the field.
+	 * Return a predicate that checks whether a reflective field access hint is registered for the field.
 	 * This looks up a field on the given type with the expected name, if present.
 	 * @param className the name of the class holding the field
 	 * @param fieldName the field name
@@ -287,7 +287,8 @@ public class ReflectionHintsPredicates {
 	}
 
 	/**
-	 * Return a predicate that checks whether an invocation hint is registered for the given field.
+	 * Return a predicate that checks whether a reflective field access hint is
+	 * registered for the given field.
 	 * @param field the field
 	 * @return the {@link RuntimeHints} predicate
 	 * @since 7.0
@@ -295,6 +296,32 @@ public class ReflectionHintsPredicates {
 	public Predicate<RuntimeHints> onFieldAccess(Field field) {
 		Assert.notNull(field, "'field' must not be null");
 		return new FieldHintPredicate(field);
+	}
+
+	/**
+	 * Return a predicate that checks whether Java serialization is configured
+	 * for the type according to the given flag.
+	 * @param type the type to check
+	 * @param javaSerialization whether the type is expected to be registered for Java serialization
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0.6
+	 */
+	public Predicate<RuntimeHints> onJavaSerialization(Class<?> type, boolean javaSerialization) {
+		Assert.notNull(type, "'type' must not be null");
+		return new JavaSerializationHintPredicate(TypeReference.of(type), javaSerialization);
+	}
+
+	/**
+	 * Return a predicate that checks whether Java serialization is configured
+	 * for the type according to the given flag.
+	 * @param typeReference the type reference to check
+	 * @param javaSerialization whether the type is expected to be registered for Java serialization
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0.6
+	 */
+	public Predicate<RuntimeHints> onJavaSerialization(TypeReference typeReference, boolean javaSerialization) {
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		return new JavaSerializationHintPredicate(typeReference, javaSerialization);
 	}
 
 
@@ -506,6 +533,28 @@ public class ReflectionHintsPredicates {
 		private boolean exactMatch(TypeHint typeHint) {
 			return typeHint.fields().anyMatch(fieldHint ->
 					this.field.getName().equals(fieldHint.getName()));
+		}
+	}
+
+
+	public static class JavaSerializationHintPredicate implements Predicate<RuntimeHints> {
+
+		private final TypeReference typeReference;
+
+		private final boolean javaSerialization;
+
+		JavaSerializationHintPredicate(TypeReference typeReference, boolean javaSerialization) {
+			this.typeReference = typeReference;
+			this.javaSerialization = javaSerialization;
+		}
+
+		@Override
+		public boolean test(RuntimeHints runtimeHints) {
+			TypeHint typeHint = runtimeHints.reflection().getTypeHint(this.typeReference);
+			if (typeHint == null) {
+				return false;
+			}
+			return typeHint.hasJavaSerialization() == this.javaSerialization;
 		}
 	}
 

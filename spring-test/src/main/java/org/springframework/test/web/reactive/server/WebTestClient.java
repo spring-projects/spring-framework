@@ -900,13 +900,13 @@ public interface WebTestClient {
 		 * List-specific assertions.
 		 * @param elementType the expected List element type
 		 */
-		<E> ListBodySpec<E> expectBodyList(Class<E> elementType);
+		<E extends @Nullable Object> ListBodySpec<E> expectBodyList(Class<E> elementType);
 
 		/**
 		 * Alternative to {@link #expectBodyList(Class)} that accepts information
 		 * about a target type with generics.
 		 */
-		<E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType);
+		<E extends @Nullable Object> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType);
 
 		/**
 		 * Consume and decode the response body to {@code byte[]} and then apply

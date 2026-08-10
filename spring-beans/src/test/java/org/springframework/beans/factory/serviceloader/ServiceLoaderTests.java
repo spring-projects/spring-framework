@@ -28,7 +28,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 /**
  * @author Juergen Hoeller
@@ -38,11 +38,11 @@ class ServiceLoaderTests {
 
 	@BeforeAll
 	static void assumeDocumentBuilderFactoryCanBeLoaded() {
-		assumeTrue(ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext());
+		assumeThat(ServiceLoader.load(DocumentBuilderFactory.class).iterator()).hasNext();
 	}
 
 	@Test
-	void testServiceLoaderFactoryBean() {
+	void serviceLoaderFactoryBean() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceLoaderFactoryBean.class);
 		bd.getPropertyValues().add("serviceType", DocumentBuilderFactory.class.getName());
@@ -52,7 +52,7 @@ class ServiceLoaderTests {
 	}
 
 	@Test
-	void testServiceFactoryBean() {
+	void serviceFactoryBean() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceFactoryBean.class);
 		bd.getPropertyValues().add("serviceType", DocumentBuilderFactory.class.getName());
@@ -61,7 +61,7 @@ class ServiceLoaderTests {
 	}
 
 	@Test
-	void testServiceListFactoryBean() {
+	void serviceListFactoryBean() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceListFactoryBean.class);
 		bd.getPropertyValues().add("serviceType", DocumentBuilderFactory.class.getName());

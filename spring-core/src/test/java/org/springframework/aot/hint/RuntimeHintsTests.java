@@ -53,6 +53,8 @@ class RuntimeHintsTests {
 	}
 
 	@Test
+	@Deprecated
+	@SuppressWarnings("removal")
 	void javaSerializationHintWithClass() {
 		this.hints.serialization().registerType(String.class);
 		assertThat(this.hints.serialization().javaSerializationHints().map(JavaSerializationHint::getType))

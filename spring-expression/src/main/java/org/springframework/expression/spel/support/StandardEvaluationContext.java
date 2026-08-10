@@ -64,6 +64,23 @@ import org.springframework.util.Assert;
  * consider using {@link SimpleEvaluationContext} instead which allows for
  * opting into several SpEL features as needed by specific use cases.
  *
+ * <p><strong>WARNING</strong>: {@code StandardEvaluationContext} exposes the
+ * complete SpEL language, backed by reflection, and must <strong>never</strong>
+ * be used to evaluate a SpEL expression obtained from an untrusted source. See
+ * the
+ * <a href="https://docs.spring.io/spring-framework/reference/core/expressions/evaluation.html#expressions-evaluation-context-security"
+ * >Security Considerations</a> section of the Spring Framework reference
+ * documentation for details, including the definition of a "trusted" source.
+ *
+ * <p>Because a parsed {@code Expression} may cache accessor and executor state
+ * resolved against a particular {@code EvaluationContext} configuration, a parsed
+ * {@code Expression} must never be evaluated first against a
+ * {@code StandardEvaluationContext} and later against a {@code SimpleEvaluationContext}
+ * (or any other, more restrictive {@code EvaluationContext}). If the same expression
+ * string must be evaluated under both kinds of contexts, parse it into two distinct
+ * {@code Expression} instances instead. See {@link org.springframework.expression.Expression
+ * Expression} for further details on this lifecycle contract.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen

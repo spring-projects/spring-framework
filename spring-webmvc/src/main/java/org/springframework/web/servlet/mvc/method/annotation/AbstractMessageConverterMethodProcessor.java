@@ -272,12 +272,11 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 						"No converter found for return value of type: " + valueType);
 			}
 
-			List<MediaType> compatibleMediaTypes = new ArrayList<>();
-			determineCompatibleMediaTypes(acceptableTypes, producibleTypes, compatibleMediaTypes);
+			List<MediaType> compatibleMediaTypes = determineCompatibleMediaTypes(acceptableTypes, producibleTypes);
 
 			// For ProblemDetail, fall back on RFC 9457 format
 			if (compatibleMediaTypes.isEmpty() && ProblemDetail.class.isAssignableFrom(valueType)) {
-				determineCompatibleMediaTypes(PROBLEM_MEDIA_TYPES, producibleTypes, compatibleMediaTypes);
+				compatibleMediaTypes = determineCompatibleMediaTypes(PROBLEM_MEDIA_TYPES, producibleTypes);
 			}
 
 			if (compatibleMediaTypes.isEmpty()) {
@@ -452,16 +451,18 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		return this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
 	}
 
-	private void determineCompatibleMediaTypes(
-			List<MediaType> acceptableTypes, List<MediaType> producibleTypes, List<MediaType> mediaTypesToUse) {
+	private List<MediaType> determineCompatibleMediaTypes(
+			List<MediaType> acceptableTypes, List<MediaType> producibleTypes) {
 
+		Set<MediaType> compatibleTypes = new LinkedHashSet<>();
 		for (MediaType requestedType : acceptableTypes) {
 			for (MediaType producibleType : producibleTypes) {
 				if (requestedType.isCompatibleWith(producibleType)) {
-					mediaTypesToUse.add(getMostSpecificMediaType(requestedType, producibleType));
+					compatibleTypes.add(getMostSpecificMediaType(requestedType, producibleType));
 				}
 			}
 		}
+		return new ArrayList<>(compatibleTypes);
 	}
 
 	/**

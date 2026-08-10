@@ -270,11 +270,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Specify the limit for array and collection auto-growing.
+	 * Specify the limit for array and collection/set/list auto-growing.
 	 * <p>Default is 256, preventing OutOfMemoryErrors in case of large indexes.
 	 * Raise this limit if your auto-growing needs are unusually high.
-	 * <p>Used for setter/field injection via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor binding via {@link #construct}.
+	 * <p>Used for setter injection - and as of 7.1 also for field injection -
+	 * via {@link #bind(PropertyValues)}; not applicable to map properties and
+	 * not to constructor binding via {@link #construct} either.
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowCollectionLimit
 	 */
@@ -325,6 +326,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/**
 	 * Initialize direct field access for this DataBinder,
 	 * as alternative to the default bean property access.
+	 * <p><b>NOTE: This is an advanced option for trusted scenarios.</b>
+	 * Do not use direct field access for data binding from untrusted sources.
 	 * @see #initBeanPropertyAccess()
 	 * @see #createDirectFieldBindingResult()
 	 */
@@ -341,7 +344,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
 		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
-				getObjectName(), isAutoGrowNestedPaths());
+				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
 
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
@@ -508,12 +511,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * account.
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
-	 * <p>Alternatively, specify a list of <i>disallowed</i> field patterns.
 	 * <p>Used for binding to fields with {@link #bind(PropertyValues)}, and not
 	 * applicable to constructor binding via {@link #construct},
 	 * which uses only the values it needs.
 	 * @param allowedFields array of allowed field patterns
-	 * @see #setDisallowedFields
 	 * @see #isAllowed(String)
 	 */
 	public void setAllowedFields(String @Nullable ... allowedFields) {
@@ -551,7 +552,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @param disallowedFields array of disallowed field patterns
 	 * @see #setAllowedFields
 	 * @see #isAllowed(String)
+	 * @deprecated as of 7.1 as it is fragile and easy to get out of sync with the
+	 * actual properties over time. Please use constructor binding, a model object
+	 * designed for the expected inputs, or {@link #setAllowedFields} instead.
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public void setDisallowedFields(String @Nullable ... disallowedFields) {
 		if (disallowedFields == null) {
 			this.disallowedFields = null;
@@ -568,8 +573,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/**
 	 * Return the field patterns that should <i>not</i> be allowed for binding.
 	 * @return array of disallowed field patterns
-	 * @see #setDisallowedFields(String...)
+	 * @deprecated as of 7.1 together with {@link #setDisallowedFields(String...)}
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public String @Nullable [] getDisallowedFields() {
 		return this.disallowedFields;
 	}
@@ -1279,7 +1285,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @param field the field to check
 	 * @return {@code true} if the field is allowed
 	 * @see #setAllowedFields
-	 * @see #setDisallowedFields
 	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isAllowed(String field) {

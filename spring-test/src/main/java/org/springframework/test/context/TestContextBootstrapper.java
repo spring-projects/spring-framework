@@ -45,7 +45,7 @@ import java.util.List;
  * <p>Concrete implementations must provide a {@code public} no-args constructor.
  *
  * <p><strong>WARNING</strong>: this SPI will likely change in the future in
- * order to accommodate new requirements. Implementers are therefore strongly encouraged
+ * order to accommodate new requirements. Implementors are therefore strongly encouraged
  * <strong>not</strong> to implement this interface directly but rather to <em>extend</em>
  * {@link org.springframework.test.context.support.AbstractTestContextBootstrapper
  * AbstractTestContextBootstrapper} or one of its concrete subclasses instead.

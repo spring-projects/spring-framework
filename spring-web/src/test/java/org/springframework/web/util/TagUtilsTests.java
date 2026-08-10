@@ -129,7 +129,7 @@ class TagUtilsTests {
 	}
 
 	@Test
-	void testAssertHasAncestorOfTypeDoesNotThrowExceptionOnPass() {
+	void assertHasAncestorOfTypeDoesNotThrowExceptionOnPass() {
 		Tag a = new TagA();
 		Tag b = new TagB();
 		Tag c = new TagC();

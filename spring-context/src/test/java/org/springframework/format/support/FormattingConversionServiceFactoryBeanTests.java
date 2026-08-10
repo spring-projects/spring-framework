@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class FormattingConversionServiceFactoryBeanTests {
 
 	@Test
-	void testDefaultFormattersOn() throws Exception {
+	void defaultFormattersOn() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
 		FormattingConversionService fcs = factory.getObject();
@@ -68,7 +68,7 @@ class FormattingConversionServiceFactoryBeanTests {
 	}
 
 	@Test
-	void testDefaultFormattersOff() throws Exception {
+	void defaultFormattersOff() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.setRegisterDefaultFormatters(false);
 		factory.afterPropertiesSet();
@@ -81,7 +81,7 @@ class FormattingConversionServiceFactoryBeanTests {
 	}
 
 	@Test
-	void testCustomFormatter() throws Exception {
+	void customFormatter() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		Set<Object> formatters = new HashSet<>();
 		formatters.add(new TestBeanFormatter());
@@ -102,7 +102,7 @@ class FormattingConversionServiceFactoryBeanTests {
 	}
 
 	@Test
-	void testFormatterRegistrar() {
+	void formatterRegistrar() {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		Set<FormatterRegistrar> registrars = new HashSet<>();
 		registrars.add(new TestFormatterRegistrar());
@@ -116,7 +116,7 @@ class FormattingConversionServiceFactoryBeanTests {
 	}
 
 	@Test
-	void testInvalidFormatter() {
+	void invalidFormatter() {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		Set<Object> formatters = new HashSet<>();
 		formatters.add(new Object());

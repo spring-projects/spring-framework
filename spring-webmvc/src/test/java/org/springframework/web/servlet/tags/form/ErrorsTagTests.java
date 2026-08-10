@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Jeremy Grelle
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ErrorsTagTests extends AbstractFormTagTests {
+class ErrorsTagTests extends AbstractFormTagTests {
 
 	private static final String COMMAND_NAME = "testBean";
 
@@ -346,8 +346,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
-		boolean condition = getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE) instanceof List;
-		assertThat(condition).isTrue();
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isInstanceOf(List.class);
 		String bodyContent = "Foo";
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();
@@ -367,8 +366,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
-		boolean condition = getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE) instanceof List;
-		assertThat(condition).isTrue();
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isInstanceOf(List.class);
 		String bodyContent = "Foo";
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();

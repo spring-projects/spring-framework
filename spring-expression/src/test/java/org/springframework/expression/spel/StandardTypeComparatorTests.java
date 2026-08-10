@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StandardTypeComparatorTests {
 
 	@Test
-	void testPrimitives() throws EvaluationException {
+	void primitives() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
 		// primitive int
 		assertThat(comparator.compare(1, 2)).isNegative();
@@ -64,7 +64,7 @@ class StandardTypeComparatorTests {
 	}
 
 	@Test
-	void testNonPrimitiveNumbers() throws EvaluationException {
+	void nonPrimitiveNumbers() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
 
 		BigDecimal bdOne = new BigDecimal("1");
@@ -93,7 +93,7 @@ class StandardTypeComparatorTests {
 	}
 
 	@Test
-	void testNulls() throws EvaluationException {
+	void nulls() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
 		assertThat(comparator.compare(null, "abc")).isNegative();
 		assertThat(comparator.compare(null, null)).isZero();
@@ -101,7 +101,7 @@ class StandardTypeComparatorTests {
 	}
 
 	@Test
-	void testObjects() throws EvaluationException {
+	void objects() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
 		assertThat(comparator.compare("a", "a")).isZero();
 		assertThat(comparator.compare("a", "b")).isNegative();
@@ -109,7 +109,7 @@ class StandardTypeComparatorTests {
 	}
 
 	@Test
-	void testCanCompare() throws EvaluationException {
+	void canCompare() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
 		assertThat(comparator.canCompare(null, 1)).isTrue();
 		assertThat(comparator.canCompare(1, null)).isTrue();

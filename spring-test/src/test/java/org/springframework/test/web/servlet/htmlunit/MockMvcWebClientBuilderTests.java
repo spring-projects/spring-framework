@@ -17,7 +17,7 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -114,17 +114,17 @@ class MockMvcWebClientBuilderTests {
 	}
 
 	private WebResponse getResponse(WebClient client, String url) throws IOException {
-		return createResponse(client, new WebRequest(new URL(url)));
+		return createResponse(client, new WebRequest(URI.create(url).toURL()));
 	}
 
 	private WebResponse postResponse(WebClient client, String url, String body) throws IOException {
-		WebRequest request = new WebRequest(new URL(url), HttpMethod.POST);
+		WebRequest request = new WebRequest(URI.create(url).toURL(), HttpMethod.POST);
 		request.setRequestBody(body);
 		return createResponse(client, request);
 	}
 
 	private WebResponse deleteResponse(WebClient client, String url) throws IOException {
-		return createResponse(client, new WebRequest(new URL(url), HttpMethod.DELETE));
+		return createResponse(client, new WebRequest(URI.create(url).toURL(), HttpMethod.DELETE));
 	}
 
 	private WebResponse createResponse(WebClient client, WebRequest request) throws IOException {

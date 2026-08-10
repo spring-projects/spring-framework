@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -32,6 +33,7 @@ import org.springframework.util.ObjectUtils;
  * configuration methods and corresponding semantic definitions.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.3
  * @see ResourceBundleMessageSource
  * @see ReloadableResourceBundleMessageSource
@@ -40,7 +42,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 
 	private final Set<String> basenameSet = new LinkedHashSet<>(4);
 
-	private @Nullable String defaultEncoding;
+	private @Nullable Charset defaultCharset;
 
 	private boolean fallbackToSystemLocale = true;
 
@@ -53,7 +55,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Set a single basename, following the basic ResourceBundle convention
 	 * of not specifying file extension or language codes. The resource location
 	 * format is up to the specific {@code MessageSource} implementation.
-	 * <p>Regular and XMl properties files are supported: for example, "messages" will find
+	 * <p>Regular and XML properties files are supported: for example, "messages" will find
 	 * a "messages.properties", "messages_en.properties" etc arrangement as well
 	 * as "messages.xml", "messages_en.xml" etc.
 	 * @param basename the single basename
@@ -118,24 +120,51 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 
 	/**
 	 * Set the default charset to use for parsing properties files.
-	 * Used if no file-specific charset is specified for a file.
+	 * <p>Used if no file-specific charset is specified for a file.
 	 * <p>The effective default is the {@code java.util.Properties}
 	 * default encoding: ISO-8859-1. A {@code null} value indicates
 	 * the platform default encoding.
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param defaultEncoding the default charset
+	 * @see #setDefaultCharset(Charset)
 	 */
 	public void setDefaultEncoding(@Nullable String defaultEncoding) {
-		this.defaultEncoding = defaultEncoding;
+		this.defaultCharset = (defaultEncoding != null ? Charset.forName(defaultEncoding) : null);
 	}
 
 	/**
 	 * Return the default charset to use for parsing properties files, if any.
 	 * @since 4.3
+	 * @see #getDefaultCharset()
 	 */
 	protected @Nullable String getDefaultEncoding() {
-		return this.defaultEncoding;
+		return (this.defaultCharset != null ? this.defaultCharset.name() : null);
 	}
+
+	/**
+	 * Set the default {@link Charset} to use for parsing properties files.
+	 * <p>Used if no file-specific charset is specified for a file.
+	 * <p>The effective default is the {@code java.util.Properties}
+	 * default encoding: ISO-8859-1. A {@code null} value indicates
+	 * the platform default encoding.
+	 * <p>Only applies to classic properties files, not to XML files.
+	 * @param defaultCharset the default charset
+	 * @since 7.0.6
+	 * @see #setDefaultEncoding(String)
+	 */
+	public void setDefaultCharset(@Nullable Charset defaultCharset) {
+		this.defaultCharset = defaultCharset;
+	}
+
+	/**
+	 * Return the default charset to use for parsing properties files, if any.
+	 * @since 7.0.6
+	 * @see #setDefaultCharset(Charset)
+	 */
+	protected @Nullable Charset getDefaultCharset() {
+		return this.defaultCharset;
+	}
+
 
 	/**
 	 * Set whether to fall back to the system Locale if no files for a specific

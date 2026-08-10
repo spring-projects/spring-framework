@@ -16,7 +16,6 @@
 
 package org.springframework.web.util;
 
-import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -27,6 +26,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Utility methods to assist with identifying and logging exceptions that
@@ -48,7 +48,7 @@ public class DisconnectedClientHelper {
 			Set.of("AbortedException", "ClientAbortException",
 					"EOFException", "EofException", "AsyncRequestNotUsableException");
 
-	private static final Set<Class<?>> EXCLUDED_EXCEPTION_TYPES = new LinkedHashSet<>(4);
+	private static final Set<Class<?>> EXCLUDED_EXCEPTION_TYPES = CollectionUtils.newLinkedHashSet(4);
 
 	static {
 		addExcludedExceptionType("org.springframework.web.client.RestClientException");

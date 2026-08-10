@@ -43,7 +43,7 @@ class ValidationUtilsTests {
 
 
 	@Test
-	void testInvokeValidatorWithNullValidator() {
+	void invokeValidatorWithNullValidator() {
 		TestBean tb = new TestBean();
 		Errors errors = new SimpleErrors(tb);
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -51,14 +51,14 @@ class ValidationUtilsTests {
 	}
 
 	@Test
-	void testInvokeValidatorWithNullErrors() {
+	void invokeValidatorWithNullErrors() {
 		TestBean tb = new TestBean();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ValidationUtils.invokeValidator(emptyValidator, tb, null));
 	}
 
 	@Test
-	void testInvokeValidatorSunnyDay() {
+	void invokeValidatorSunnyDay() {
 		TestBean tb = new TestBean();
 		Errors errors = new SimpleErrors(tb);
 		ValidationUtils.invokeValidator(emptyValidator, tb, errors);
@@ -67,7 +67,7 @@ class ValidationUtilsTests {
 	}
 
 	@Test
-	void testValidationUtilsSunnyDay() {
+	void validationUtilsSunnyDay() {
 		TestBean tb = new TestBean("");
 
 		tb.setName(" ");
@@ -83,7 +83,7 @@ class ValidationUtilsTests {
 	}
 
 	@Test
-	void testValidationUtilsNull() {
+	void validationUtilsNull() {
 		TestBean tb = new TestBean();
 		Errors errors = emptyValidator.validateObject(tb);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
@@ -95,7 +95,7 @@ class ValidationUtilsTests {
 	}
 
 	@Test
-	void testValidationUtilsEmpty() {
+	void validationUtilsEmpty() {
 		TestBean tb = new TestBean("");
 		Errors errors = emptyValidator.validateObject(tb);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
@@ -107,7 +107,7 @@ class ValidationUtilsTests {
 	}
 
 	@Test
-	void testValidationUtilsEmptyVariants() {
+	void validationUtilsEmptyVariants() {
 		TestBean tb = new TestBean();
 
 		Errors errors = new SimpleErrors(tb);
@@ -125,7 +125,7 @@ class ValidationUtilsTests {
 	}
 
 	@Test
-	void testValidationUtilsEmptyOrWhitespace() {
+	void validationUtilsEmptyOrWhitespace() {
 		TestBean tb = new TestBean();
 
 		// Test null
@@ -152,7 +152,7 @@ class ValidationUtilsTests {
 	}
 
 	@Test
-	void testValidationUtilsEmptyOrWhitespaceVariants() {
+	void validationUtilsEmptyOrWhitespaceVariants() {
 		TestBean tb = new TestBean();
 		tb.setName(" ");
 

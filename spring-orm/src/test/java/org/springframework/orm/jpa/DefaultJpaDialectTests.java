@@ -42,7 +42,7 @@ class DefaultJpaDialectTests {
 
 
 	@Test
-	void testDefaultBeginTransaction() throws Exception {
+	void defaultBeginTransaction() throws Exception {
 		TransactionDefinition definition = new DefaultTransactionDefinition();
 		EntityManager entityManager = mock();
 		EntityTransaction entityTx = mock();
@@ -52,7 +52,7 @@ class DefaultJpaDialectTests {
 	}
 
 	@Test
-	void testCustomIsolationLevel() {
+	void customIsolationLevel() {
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
 
@@ -61,7 +61,7 @@ class DefaultJpaDialectTests {
 	}
 
 	@Test
-	void testTranslateException() {
+	void translateException() {
 		PersistenceException ex = new OptimisticLockException();
 		assertThat(dialect.translateExceptionIfPossible(ex))
 				.isInstanceOf(JpaOptimisticLockingFailureException.class).hasCause(ex);

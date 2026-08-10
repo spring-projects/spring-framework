@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class FileEditorTests {
 
 	@Test
-	void testClasspathFileName() {
+	void classpathFileName() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".class");
@@ -45,14 +45,14 @@ class FileEditorTests {
 	}
 
 	@Test
-	void testWithNonExistentResource() {
+	void withNonExistentResource() {
 		PropertyEditor fileEditor = new FileEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				fileEditor.setAsText("classpath:no_way_this_file_is_found.doc"));
 	}
 
 	@Test
-	void testWithNonExistentFile() {
+	void withNonExistentFile() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("file:no_way_this_file_is_found.doc");
 		Object value = fileEditor.getValue();
@@ -62,7 +62,7 @@ class FileEditorTests {
 	}
 
 	@Test
-	void testAbsoluteFileName() {
+	void absoluteFileName() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("/no_way_this_file_is_found.doc");
 		Object value = fileEditor.getValue();
@@ -72,7 +72,7 @@ class FileEditorTests {
 	}
 
 	@Test
-	void testCurrentDirectory() {
+	void currentDirectory() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("file:.");
 		Object value = fileEditor.getValue();
@@ -82,7 +82,7 @@ class FileEditorTests {
 	}
 
 	@Test
-	void testUnqualifiedFileNameFound() {
+	void unqualifiedFileNameFound() {
 		PropertyEditor fileEditor = new FileEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".class";
@@ -96,7 +96,7 @@ class FileEditorTests {
 	}
 
 	@Test
-	void testUnqualifiedFileNameNotFound() {
+	void unqualifiedFileNameNotFound() {
 		PropertyEditor fileEditor = new FileEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".clazz";

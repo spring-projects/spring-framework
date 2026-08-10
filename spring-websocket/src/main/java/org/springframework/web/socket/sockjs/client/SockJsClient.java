@@ -94,7 +94,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * <p>If the list includes an {@link XhrTransport} (or more specifically an
 	 * implementation of {@link InfoReceiver}) the instance is used to initialize
 	 * the {@link #setInfoReceiver(InfoReceiver) infoReceiver} property, or
-	 * otherwise is defaulted to {@link RestTemplateXhrTransport}.
+	 * otherwise is defaulted to {@link RestClientXhrTransport}.
 	 * @param transports the (non-empty) list of transports to use
 	 */
 	@SuppressWarnings("removal")
@@ -116,7 +116,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 				return infoReceiver;
 			}
 		}
-		return new RestTemplateXhrTransport();
+		return new RestClientXhrTransport();
 	}
 
 
@@ -148,7 +148,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 * <p>If the list of transports provided to the constructor contained an
 	 * {@link XhrTransport} or an implementation of {@link InfoReceiver} that
 	 * instance would have been used to initialize this property, or otherwise
-	 * it defaults to {@link RestTemplateXhrTransport}.
+	 * it defaults to {@link RestClientXhrTransport}.
 	 * @param infoReceiver the transport to use for the SockJS "Info" request
 	 */
 	public void setInfoReceiver(InfoReceiver infoReceiver) {

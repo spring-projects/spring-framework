@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.server.RequestPath;
 import org.springframework.util.Assert;
 import org.springframework.web.accept.ApiVersionDeprecationHandler;
 import org.springframework.web.accept.ApiVersionParser;
@@ -100,11 +101,26 @@ public class ApiVersionConfigurer {
 	 * Add resolver to extract the version from a path segment.
 	 * <p>Note that this resolver never returns {@code null}, and therefore
 	 * cannot yield to other resolvers, see {@link PathApiVersionResolver}.
-	 * @param index the index of the path segment to check; e.g. for URL's like
+	 * @param index the index of the path segment to check; e.g. for URLs like
 	 * {@code "/{version}/..."} use index 0, for {@code "/api/{version}/..."} index 1.
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {
 		this.versionResolvers.add(new PathApiVersionResolver(index));
+		return this;
+	}
+
+	/**
+	 * Variant of {@link #usePathSegment(int)} with a {@code Predicate<RequestPath>}
+	 * to determine whether a given path is versioned, providing additional
+	 * flexibility, and the option to resolve the version to {@code null}.
+	 * @param index the index of the path segment to check; e.g. for URL's like
+	 * {@code "/{version}/..."} use index 0, for {@code "/api/{version}/..."} index 1.
+	 * @param versionPathPredicate used to decide if a path is versioned (true)
+	 * or not (false).
+	 * @since 7.0.6
+	 */
+	public ApiVersionConfigurer usePathSegment(int index, Predicate<RequestPath> versionPathPredicate) {
+		this.versionResolvers.add(new PathApiVersionResolver(index, versionPathPredicate));
 		return this;
 	}
 
@@ -189,8 +205,9 @@ public class ApiVersionConfigurer {
 	 * {@link #addSupportedVersions} and {@link #detectSupportedVersions}.
 	 * @param predicate the predicate to use
 	 */
-	public void setSupportedVersionPredicate(@Nullable Predicate<Comparable<?>> predicate) {
+	public ApiVersionConfigurer setSupportedVersionPredicate(@Nullable Predicate<Comparable<?>> predicate) {
 		this.supportedVersionPredicate = predicate;
+		return this;
 	}
 
 	/**

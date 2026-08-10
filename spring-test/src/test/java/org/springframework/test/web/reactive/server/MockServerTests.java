@@ -37,11 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test scenarios involving a mock server.
  * @author Rossen Stoyanchev
  */
-public class MockServerTests {
-
+class MockServerTests {
 
 	@Test // SPR-15674 (in comments)
-	public void mutateDoesNotCreateNewSession() {
+	void mutateDoesNotCreateNewSession() {
 
 		WebTestClient client = WebTestClient
 				.bindToWebHandler(exchange -> {
@@ -76,7 +75,7 @@ public class MockServerTests {
 	}
 
 	@Test // SPR-16059
-	public void mutateDoesCopy() {
+	void mutateDoesCopy() {
 
 		WebTestClient.Builder builder = WebTestClient
 				.bindToWebHandler(exchange -> exchange.getResponse().setComplete())
@@ -113,7 +112,7 @@ public class MockServerTests {
 	}
 
 	@Test // SPR-16124
-	public void exchangeResultHasCookieHeaders() {
+	void exchangeResultHasCookieHeaders() {
 
 		ExchangeResult result = WebTestClient
 				.bindToWebHandler(exchange -> {
@@ -138,7 +137,7 @@ public class MockServerTests {
 	}
 
 	@Test
-	public void responseBodyContentWithFluxExchangeResult() {
+	void responseBodyContentWithFluxExchangeResult() {
 
 		FluxExchangeResult<String> result = WebTestClient
 				.bindToWebHandler(exchange -> {

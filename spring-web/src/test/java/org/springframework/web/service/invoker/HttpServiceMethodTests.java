@@ -262,7 +262,7 @@ class HttpServiceMethodTests {
 				);
 	}
 
-	protected void verifyReactorClientInvocation(String methodName, @Nullable ParameterizedTypeReference<?> expectedBodyType) {
+	void verifyReactorClientInvocation(String methodName, @Nullable ParameterizedTypeReference<?> expectedBodyType) {
 		assertThat(this.reactorClient.getInvokedMethodName()).isEqualTo(methodName);
 		assertThat(this.reactorClient.getBodyType()).isEqualTo(expectedBodyType);
 	}

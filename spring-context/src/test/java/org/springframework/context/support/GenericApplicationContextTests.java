@@ -30,6 +30,7 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
@@ -41,12 +42,17 @@ import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostP
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.testfixture.beans.factory.CircularBeanRegistrar;
+import org.springframework.context.testfixture.beans.factory.ConditionalBeanRegistrar;
 import org.springframework.context.testfixture.beans.factory.ImportAwareBeanRegistrar;
+import org.springframework.context.testfixture.beans.factory.OverridingBeanRegistrar;
 import org.springframework.context.testfixture.beans.factory.SampleBeanRegistrar;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -638,11 +644,45 @@ class GenericApplicationContextTests {
 	}
 
 	@Test
+	void beanRegistrarWithCircularReference() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.register(new CircularBeanRegistrar());
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(context::refresh)
+				.withRootCauseInstanceOf(BeanCurrentlyInCreationException.class);
+	}
+
+	@Test
+	void beanRegistrarWithDefinitionOverride() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.setAllowBeanDefinitionOverriding(false);
+		context.register(new OverridingBeanRegistrar());
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class).isThrownBy(context::refresh);
+	}
+
+	@Test
 	void importAwareBeanRegistrar() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.register(new ImportAwareBeanRegistrar());
 		context.refresh();
 		assertThat(context.getBean(ImportAwareBeanRegistrar.ClassNameHolder.class).className()).isNull();
+	}
+
+	@Test
+	void beanRegistrarWithConditionNotMet() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.register(new ConditionalBeanRegistrar());
+		context.refresh();
+		assertThat(context.containsBean("myTestBean")).isFalse();
+	}
+
+	@Test
+	void beanRegistrarWithConditionMet() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.register(new ConditionalBeanRegistrar());
+		context.registerBean("testBean", TestBean.class);
+		context.refresh();
+		assertThat(context.containsBean("myTestBean")).isTrue();
+		assertThat(context.getBean("myTestBean")).isInstanceOf(TestBean.class);
 	}
 
 

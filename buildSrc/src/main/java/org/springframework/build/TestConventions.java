@@ -71,7 +71,7 @@ class TestConventions {
 				"junit.platform.discovery.issue.severity.critical", "INFO"
 		));
 		if (project.hasProperty("testGroups")) {
-			test.systemProperty("testGroups", project.getProperties().get("testGroups"));
+			test.systemProperty("testGroups", project.findProperty("testGroups"));
 		}
 		test.jvmArgs(
 				"--add-opens=java.base/java.lang=ALL-UNNAMED",
@@ -82,7 +82,7 @@ class TestConventions {
 
 	private void configureByteBuddyAgent(Project project) {
 		if (project.hasProperty("byteBuddyVersion")) {
-			String byteBuddyVersion = (String) project.getProperties().get("byteBuddyVersion");
+			String byteBuddyVersion = (String) project.findProperty("byteBuddyVersion");
 			Configuration byteBuddyAgentConfig = project.getConfigurations().create("byteBuddyAgentConfig");
 			byteBuddyAgentConfig.setTransitive(false);
 			Dependency byteBuddyAgent = project.getDependencies().create("net.bytebuddy:byte-buddy-agent:" + byteBuddyVersion);

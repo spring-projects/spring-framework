@@ -110,24 +110,24 @@ class NamedParameterJdbcTemplateTests {
 
 
 	@Test
-	void testNullDataSourceProvidedToCtor() {
+	void nullDataSourceProvidedToCtor() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new NamedParameterJdbcTemplate((DataSource) null));
 	}
 
 	@Test
-	void testNullJdbcTemplateProvidedToCtor() {
+	void nullJdbcTemplateProvidedToCtor() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 		new NamedParameterJdbcTemplate((JdbcOperations) null));
 	}
 
 	@Test
-	void testTemplateConfiguration() {
+	void templateConfiguration() {
 		assertThat(namedParameterTemplate.getJdbcTemplate().getDataSource()).isSameAs(dataSource);
 	}
 
 	@Test
-	void testExecute() throws SQLException {
+	void execute() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		params.put("perfId", 1);
@@ -149,7 +149,7 @@ class NamedParameterJdbcTemplateTests {
 
 	@Disabled("SPR-16340")
 	@Test
-	void testExecuteArray() throws SQLException {
+	void executeArray() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		List<Integer> typeIds = Arrays.asList(1, 2, 3);
@@ -174,7 +174,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testExecuteWithTypedParameters() throws SQLException {
+	void executeWithTypedParameters() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		params.put("perfId", new SqlParameterValue(Types.DECIMAL, 1));
@@ -195,7 +195,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testExecuteNoParameters() throws SQLException {
+	void executeNoParameters() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		Object result = namedParameterTemplate.execute(SELECT_NO_PARAMETERS,
@@ -212,7 +212,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testQueryWithResultSetExtractor() throws SQLException {
+	void queryWithResultSetExtractor() throws SQLException {
 		given(resultSet.next()).willReturn(true);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -239,7 +239,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testQueryWithResultSetExtractorNoParameters() throws SQLException {
+	void queryWithResultSetExtractorNoParameters() throws SQLException {
 		given(resultSet.next()).willReturn(true);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -262,7 +262,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testQueryWithRowCallbackHandler() throws SQLException {
+	void queryWithRowCallbackHandler() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -289,7 +289,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testQueryWithRowCallbackHandlerNoParameters() throws SQLException {
+	void queryWithRowCallbackHandlerNoParameters() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -312,7 +312,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testQueryWithRowMapper() throws SQLException {
+	void queryWithRowMapper() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -339,7 +339,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testQueryWithRowMapperNoParameters() throws SQLException {
+	void queryWithRowMapperNoParameters() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -362,7 +362,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testQueryForObjectWithRowMapper() throws SQLException {
+	void queryForObjectWithRowMapper() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -389,7 +389,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testQueryForStreamWithRowMapper() throws SQLException {
+	void queryForStreamWithRowMapper() throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -422,7 +422,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testUpdate() throws SQLException {
+	void update() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		params.put("perfId", 1);
@@ -438,7 +438,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testUpdateWithTypedParameters() throws SQLException {
+	void updateWithTypedParameters() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		params.put("perfId", new SqlParameterValue(Types.DECIMAL, 1));
@@ -454,7 +454,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testBatchUpdateWithPlainMap() throws Exception {
+	void batchUpdateWithPlainMap() throws Exception {
 		@SuppressWarnings("unchecked")
 		final Map<String, Integer>[] ids = new Map[2];
 		ids[0] = Collections.singletonMap("id", 100);
@@ -479,7 +479,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testBatchUpdateWithEmptyMap() {
+	void batchUpdateWithEmptyMap() {
 		@SuppressWarnings("unchecked")
 		final Map<String, Integer>[] ids = new Map[0];
 		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
@@ -490,7 +490,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testBatchUpdateWithSqlParameterSource() throws Exception {
+	void batchUpdateWithSqlParameterSource() throws Exception {
 		SqlParameterSource[] ids = new SqlParameterSource[2];
 		ids[0] = new MapSqlParameterSource("id", 100);
 		ids[1] = new MapSqlParameterSource("id", 200);
@@ -514,7 +514,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testBatchUpdateWithInClause() throws Exception {
+	void batchUpdateWithInClause() throws Exception {
 		@SuppressWarnings("unchecked")
 		Map<String, Object>[] parameters = new Map[3];
 		parameters[0] = Collections.singletonMap("ids", Arrays.asList(1, 2));
@@ -554,7 +554,7 @@ class NamedParameterJdbcTemplateTests {
 	}
 
 	@Test
-	void testBatchUpdateWithSqlParameterSourcePlusTypeInfo() throws Exception {
+	void batchUpdateWithSqlParameterSourcePlusTypeInfo() throws Exception {
 		SqlParameterSource[] ids = new SqlParameterSource[3];
 		ids[0] = new MapSqlParameterSource().addValue("id", null, Types.NULL);
 		ids[1] = new MapSqlParameterSource().addValue("id", 100, Types.NUMERIC);

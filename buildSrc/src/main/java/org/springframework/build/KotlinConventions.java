@@ -54,7 +54,7 @@ public class KotlinConventions {
 					"-Xjsr305=strict", // For dependencies using JSR 305
 					"-opt-in=kotlin.RequiresOptIn",
 					"-Xjdk-release=17", // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
-					"-Xannotation-default-target=param-property" // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
+					"-Xannotation-default-target=param-property" // Preferred behavior, default with Kotlin language version set to 2.4+, see https://youtrack.jetbrains.com/issue/KT-73255
 			);
 		});
 	}

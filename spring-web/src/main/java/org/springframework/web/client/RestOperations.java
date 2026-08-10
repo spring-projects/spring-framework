@@ -39,7 +39,10 @@ import org.springframework.http.ResponseEntity;
  * @author Juergen Hoeller
  * @since 3.0
  * @see RestTemplate
+ * @deprecated as of 7.1, in favor of {@link RestClient}.
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public interface RestOperations {
 
 	// GET

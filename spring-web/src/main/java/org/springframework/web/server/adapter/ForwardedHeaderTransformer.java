@@ -18,7 +18,6 @@ package org.springframework.web.server.adapter;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
@@ -32,12 +31,11 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ForwardedHeaderUtils;
-import org.springframework.web.util.UriComponents;
 
 /**
- * Extract values from "Forwarded" and "X-Forwarded-*" headers to override
- * the request URI (i.e. {@link ServerHttpRequest#getURI()}) so it reflects
- * the client-originated protocol and address.
+ * Extract values from the standard "Forwarded" header or the "X-Forwarded-*"
+ * alternative headers  to override the request information to reflect the
+ * originating client's perspective.
  *
  * <p>An instance of this class is typically declared as a bean with the name
  * "forwardedHeaderTransformer" and detected by
@@ -45,13 +43,22 @@ import org.springframework.web.util.UriComponents;
  * can also be registered directly via
  * {@link WebHttpHandlerBuilder#forwardedHeaderTransformer(ForwardedHeaderTransformer)}.
  *
- * <p>There are security considerations for forwarded headers since an application
- * cannot know if the headers were added by a proxy, as intended, or by a malicious
- * client. This is why a proxy at the boundary of trust should be configured to
- * remove untrusted Forwarded headers that come from the outside.
+ * <p>An application cannot know if forwarded headers were added by a
+ * trusted proxy or by a malicious client. It is imperative that a proxy at the
+ * edge of trust is configured to drop forwarded headers from the outside,
+ * including both the standard "Forwarded" header and the "X-Forwarded-*"
+ * alternative headers.
  *
- * <p>You can also configure the ForwardedHeaderFilter with {@link #setRemoveOnly removeOnly},
- * in which case it removes but does not use the headers.
+ * <p>Proxies are typically configured to support either the standard "Forwarded"
+ * header or the "X-Forwarded-*" header. Accordingly, an application must indicate
+ * which of the two alternatives it expects through a constructor argument.
+ * The "X-Forwarded-Prefix" needs to be enabled separately if needed.
+ *
+ * <p>Support for "X-Forwarded-Prefix" is enabled separately via
+ * {@link #setUseForwardedPrefix}.
+ *
+ * <p>You can configure this transformer in {@link #setRemoveOnly removeOnly} mode,
+ * in which case it hides the headers without using them.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -67,17 +74,59 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-Proto");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Host");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Port");
-		FORWARDED_HEADER_NAMES.add("X-Forwarded-Proto");
-		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
-		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-For");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 	}
 
 
+	private final @Nullable Boolean useStandardHeader;
+
+	private boolean useForwardedPrefix;
+
 	private boolean removeOnly;
 
+
+	/**
+	 * A default constructor with the historic behavior so far, which is to check
+	 * both the standard "Forwarded" header and the "X-Forwarded-*" alternative
+	 * headers in that order, also with "X-Forwarded-Prefix" enabled by default.
+	 * <p>This behavior depends on proxies being configured correctly
+	 * to clear both standard "Forwarded" and "X-Forwarded-*" header values coming
+	 * from the outside. Going forward, applications must explicitly declare which
+	 * forwarded headers are expected.
+	 * @deprecated as of 7.1, in favor of {@link #ForwardedHeaderTransformer(boolean)}
+	 */
+	@Deprecated(since = "7.1", forRemoval = true)
+	public ForwardedHeaderTransformer() {
+		this.useStandardHeader = null;
+		this.useForwardedPrefix = true;
+	}
+
+	/**
+	 * Create an instance of the transformer and specify whether it should use the
+	 * standard "Forwarded" header or the "X-Forwarded-*" alternative headers.
+	 * <p>"X-Forwarded-Prefix" is enabled separately via {@link #setUseForwardedPrefix}.
+	 * @param useStandardHeader whether to use the standard "Forwarded" header
+	 * (true), or the "X-Forwarded-*" alternative headers (false).
+	 * @since 6.1.29
+	 */
+	public ForwardedHeaderTransformer(boolean useStandardHeader) {
+		this.useStandardHeader = useStandardHeader;
+	}
+
+
+	/**
+	 * Enable use of "X-Forwarded-Prefix" to determine the context path.
+	 * <p>By default, this is set to "false" in which case the header is ignored.
+	 * @since 6.1.29
+	 */
+	public void setUseForwardedPrefix(boolean useForwardedPrefix) {
+		this.useForwardedPrefix = useForwardedPrefix;
+	}
 
 	/**
 	 * Enable mode in which any "Forwarded" or "X-Forwarded-*" headers are
@@ -103,44 +152,40 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	 */
 	@Override
 	public ServerHttpRequest apply(ServerHttpRequest request) {
-		if (hasForwardedHeaders(request)) {
-			ServerHttpRequest.Builder builder = request.mutate();
-			if (!this.removeOnly) {
-				URI originalUri = request.getURI();
-				HttpHeaders headers = request.getHeaders();
-				URI uri = adaptFromForwardedHeaders(originalUri, headers);
-				builder.uri(uri);
+		if (!hasForwardedHeaders(request)) {
+			return request;
+		}
+		ServerHttpRequest.Builder builder = request.mutate();
+		if (!this.removeOnly) {
+			URI originalUri = request.getURI();
+			HttpHeaders headers = request.getHeaders();
+			InetSocketAddress remoteAddress = request.getRemoteAddress();
+			InetSocketAddress localAddress = request.getLocalAddress();
+
+			ForwardedHeaderUtils.ForwardedInfo info = getForwardedInfo(
+					this.useStandardHeader, originalUri, headers, remoteAddress, localAddress);
+
+			URI uri = info.uri();
+			builder.uri(uri);
+			if (this.useForwardedPrefix) {
 				String prefix = getForwardedPrefix(request);
 				if (prefix != null) {
 					builder.path(prefix + uri.getRawPath());
 					builder.contextPath(prefix);
 				}
-				InetSocketAddress remoteAddress = request.getRemoteAddress();
-				remoteAddress = ForwardedHeaderUtils.parseForwardedFor(originalUri, headers, remoteAddress);
-				if (remoteAddress != null) {
-					builder.remoteAddress(remoteAddress);
-				}
-				InetSocketAddress localAddress = request.getLocalAddress();
-				localAddress = ForwardedHeaderUtils.parseForwardedBy(originalUri, headers, localAddress);
-				if (localAddress != null) {
-					builder.localAddress(localAddress);
-				}
 			}
-			removeForwardedHeaders(builder);
-			request = builder.build();
+			remoteAddress = info.forAddress();
+			if (remoteAddress != null) {
+				builder.remoteAddress(remoteAddress);
+			}
+			localAddress = info.byAddress();
+			if (localAddress != null) {
+				builder.localAddress(localAddress);
+			}
 		}
+		removeForwardedHeaders(builder);
+		request = builder.build();
 		return request;
-	}
-
-	private static URI adaptFromForwardedHeaders(URI uri, HttpHeaders headers) {
-		// GH-30137: assume URI is encoded, but avoid build(true) for more lenient handling
-		UriComponents components = ForwardedHeaderUtils.adaptFromForwardedHeaders(uri, headers).build();
-		try {
-			return new URI(components.toUriString());
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not create URI object: " + ex.getMessage(), ex);
-		}
 	}
 
 	/**
@@ -148,13 +193,30 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	 * @param request the request
 	 */
 	protected boolean hasForwardedHeaders(ServerHttpRequest request) {
-		HttpHeaders headers = request.getHeaders();
-		for (String headerName : FORWARDED_HEADER_NAMES) {
-			if (headers.containsHeader(headerName)) {
+		for (String name : FORWARDED_HEADER_NAMES) {
+			if (request.getHeaders().containsHeader(name)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	@SuppressWarnings("removal")
+	private static ForwardedHeaderUtils.ForwardedInfo getForwardedInfo(
+			@Nullable Boolean useStandardHeader, URI uri, HttpHeaders headers,
+			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
+
+		if (useStandardHeader == null) {
+			return new ForwardedHeaderUtils.ForwardedInfo(
+					ForwardedHeaderUtils.adaptFromForwardedHeaders(uri, headers),
+					ForwardedHeaderUtils.parseForwardedFor(uri, headers, remoteAddress),
+					ForwardedHeaderUtils.parseForwardedBy(uri, headers, localAddress));
+		}
+		else {
+			return (useStandardHeader ?
+					ForwardedHeaderUtils.parseStandardHeader(uri, headers, remoteAddress, localAddress) :
+					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, remoteAddress, localAddress));
+		}
 	}
 
 	private void removeForwardedHeaders(ServerHttpRequest.Builder builder) {

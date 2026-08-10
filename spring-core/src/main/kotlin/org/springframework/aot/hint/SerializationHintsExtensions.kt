@@ -25,5 +25,7 @@ import java.io.Serializable
  * @author Sebastien Deleuze
  * @since 6.0.5
  */
+@Suppress("removal", "DEPRECATION")
+@Deprecated(level = DeprecationLevel.WARNING, message = "Use ReflectionHints")
 inline fun <reified T : Serializable> SerializationHints.registerType(noinline serializationHint: (JavaSerializationHint.Builder) -> Unit = {}) =
 	registerType(T::class.java, serializationHint::invoke)

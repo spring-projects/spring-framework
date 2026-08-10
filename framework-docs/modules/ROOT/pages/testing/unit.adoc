@@ -99,6 +99,11 @@ mock to configure expectations on it and perform verifications. For Spring's cor
 utilities, see {spring-framework-api}/aop/support/AopUtils.html[`AopUtils`] and
 {spring-framework-api}/aop/framework/AopProxyUtils.html[`AopProxyUtils`].
 
+TIP: For guidance on using `AopTestUtils` together with `@MockitoSpyBean` when the spied
+bean is wrapped in a Spring AOP proxy, see
+xref:testing/annotations/integration-spring/annotation-mockitobean.adoc#spring-testing-annotation-beanoverriding-mockitospybean-aop-proxies[`@MockitoSpyBean`
+and Spring AOP Proxies].
+
 {spring-framework-api}/test/util/ReflectionTestUtils.html[`ReflectionTestUtils`] is a
 collection of reflection-based utility methods. You can use these methods in testing
 scenarios where you need to change the value of a constant, set a non-`public` field,

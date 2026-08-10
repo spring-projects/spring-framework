@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.resource.ResourceHandlerUtils;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -158,14 +159,13 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 */
 	public void setResourceLoaderPath(String resourceLoaderPath) {
 		String[] paths = StringUtils.commaDelimitedListToStringArray(resourceLoaderPath);
-		this.resourceLoaderPaths = new String[paths.length + 1];
-		this.resourceLoaderPaths[0] = "";
+		this.resourceLoaderPaths = new String[paths.length];
 		for (int i = 0; i < paths.length; i++) {
 			String path = paths[i];
 			if (!path.endsWith("/") && !path.endsWith(":")) {
 				path = path + "/";
 			}
-			this.resourceLoaderPaths[i + 1] = path;
+			this.resourceLoaderPaths[i] = path;
 		}
 	}
 
@@ -293,11 +293,26 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	}
 
 	protected @Nullable Resource getResource(String location) {
-		if (this.resourceLoaderPaths != null) {
+		String normalizedLocation = ResourceHandlerUtils.normalizeInputPath(location);
+		if (this.resourceLoaderPaths != null && !ResourceHandlerUtils.shouldIgnoreInputPath(normalizedLocation)) {
+			ApplicationContext context = obtainApplicationContext();
 			for (String path : this.resourceLoaderPaths) {
-				Resource resource = obtainApplicationContext().getResource(path + location);
-				if (resource.exists()) {
-					return resource;
+				Resource resource = context.getResource(path + normalizedLocation);
+				try {
+					if (resource.exists() && ResourceHandlerUtils.isResourceUnderLocation(context.getResource(path), resource)) {
+						return resource;
+					}
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						String error = "Skip location [" + normalizedLocation + "] due to error";
+						if (logger.isTraceEnabled()) {
+							logger.trace(error, ex);
+						}
+						else {
+							logger.debug(error + ": " + ex.getMessage());
+						}
+					}
 				}
 			}
 		}

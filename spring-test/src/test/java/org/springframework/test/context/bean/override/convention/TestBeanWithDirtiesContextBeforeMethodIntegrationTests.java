@@ -59,7 +59,7 @@ class TestBeanWithDirtiesContextBeforeMethodIntegrationTests {
 
 	@RepeatedTest(2)
 	@DirtiesContext(methodMode = BEFORE_METHOD)
-	void testOverride() {
+	void override() {
 		assertThat(service).isSameAs(autowiredService);
 
 		given(service.greeting()).willReturn("Spring");

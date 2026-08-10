@@ -34,7 +34,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
 class ExposeInvocationInterceptorTests {
 
 	@Test
-	void testXmlConfig() {
+	void xmlConfig() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				qualifiedResource(ExposeInvocationInterceptorTests.class, "context.xml"));

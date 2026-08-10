@@ -372,7 +372,7 @@ class SelectionAndProjectionTests {
 	/**
 	 * Simulates a custom {@link Iterable} which is itself not a {@link Collection}.
 	 */
-	class Counter implements Iterable<Integer> {
+	static class Counter implements Iterable<Integer> {
 
 		private final List<Integer> list = new ArrayList<>();
 

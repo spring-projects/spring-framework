@@ -35,7 +35,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 class Spr12526Tests {
 
 	@Test
-	void testInjection() {
+	void injection() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(TestContext.class);
 		CustomCondition condition = ctx.getBean(CustomCondition.class);
 

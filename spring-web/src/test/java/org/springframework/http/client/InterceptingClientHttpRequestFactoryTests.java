@@ -19,7 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -192,7 +191,7 @@ class InterceptingClientHttpRequestFactoryTests {
 		ClientHttpRequest request = requestFactory.createRequest(URI.create("https://example.com"), HttpMethod.GET);
 		request.execute();
 
-		assertThat(Arrays.equals(changedBody, requestMock.getBodyAsBytes())).isTrue();
+		assertThat(requestMock.getBodyAsBytes()).isEqualTo(changedBody);
 		assertThat(requestMock.getHeaders().getContentLength()).isEqualTo(changedBody.length);
 	}
 

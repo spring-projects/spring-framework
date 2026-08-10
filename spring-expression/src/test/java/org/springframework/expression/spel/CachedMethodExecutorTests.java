@@ -39,7 +39,7 @@ class CachedMethodExecutorTests {
 
 
 	@Test
-	void testCachedExecutionForParameters() {
+	void cachedExecutionForParameters() {
 		Expression expression = this.parser.parseExpression("echo(#var)");
 
 		assertMethodExecution(expression, 42, "int: 42");
@@ -49,7 +49,7 @@ class CachedMethodExecutorTests {
 	}
 
 	@Test
-	void testCachedExecutionForTarget() {
+	void cachedExecutionForTarget() {
 		Expression expression = this.parser.parseExpression("#var.echo(42)");
 
 		assertMethodExecution(expression, new RootObject(), "int: 42");

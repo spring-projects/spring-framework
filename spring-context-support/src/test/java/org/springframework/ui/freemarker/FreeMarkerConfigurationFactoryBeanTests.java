@@ -62,7 +62,7 @@ class FreeMarkerConfigurationFactoryBeanTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void freeMarkerConfigurationFactoryBeanWithNonFileResourceLoaderPath() throws Exception {
+	void freeMarkerConfigurationFactoryBeanWithNonFileResourceLoaderPath() throws Exception {
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		Properties settings = new Properties();
 		settings.setProperty("localized_lookup", "false");
@@ -88,7 +88,7 @@ class FreeMarkerConfigurationFactoryBeanTests {
 	}
 
 	@Test  // SPR-12448
-	public void freeMarkerConfigurationAsBean() {
+	void freeMarkerConfigurationAsBean() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		RootBeanDefinition loaderDef = new RootBeanDefinition(SpringTemplateLoader.class);
 		loaderDef.getConstructorArgumentValues().addGenericArgumentValue(new DefaultResourceLoader());

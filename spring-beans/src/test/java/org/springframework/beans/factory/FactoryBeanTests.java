@@ -48,7 +48,7 @@ class FactoryBeanTests {
 
 
 	@Test
-	void testFactoryBeanReturnsNull() {
+	void factoryBeanReturnsNull() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(RETURNS_NULL_CONTEXT);
 
@@ -56,7 +56,7 @@ class FactoryBeanTests {
 	}
 
 	@Test
-	void testFactoryBeansWithAutowiring() {
+	void factoryBeansWithAutowiring() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(WITH_AUTOWIRING_CONTEXT);
 
@@ -77,7 +77,7 @@ class FactoryBeanTests {
 	}
 
 	@Test
-	void testFactoryBeansWithIntermediateFactoryBeanAutowiringFailure() {
+	void factoryBeansWithIntermediateFactoryBeanAutowiringFailure() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(WITH_AUTOWIRING_CONTEXT);
 
@@ -92,21 +92,21 @@ class FactoryBeanTests {
 	}
 
 	@Test
-	void testAbstractFactoryBeanViaAnnotation() {
+	void abstractFactoryBeanViaAnnotation() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(ABSTRACT_CONTEXT);
 		factory.getBeansWithAnnotation(Component.class);
 	}
 
 	@Test
-	void testAbstractFactoryBeanViaType() {
+	void abstractFactoryBeanViaType() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(ABSTRACT_CONTEXT);
 		factory.getBeansOfType(AbstractFactoryBean.class);
 	}
 
 	@Test
-	void testCircularReferenceWithPostProcessor() {
+	void circularReferenceWithPostProcessor() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(CIRCULAR_CONTEXT);
 

@@ -70,7 +70,7 @@ class NumberFormattingTests {
 
 
 	@Test
-	void testDefaultNumberFormatting() {
+	void defaultNumberFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("numberDefault", "3,339.12");
 		binder.bind(propertyValues);
@@ -79,7 +79,7 @@ class NumberFormattingTests {
 	}
 
 	@Test
-	void testDefaultNumberFormattingAnnotated() {
+	void defaultNumberFormattingAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("numberDefaultAnnotated", "3,339.12");
 		binder.bind(propertyValues);
@@ -88,7 +88,7 @@ class NumberFormattingTests {
 	}
 
 	@Test
-	void testCurrencyFormatting() {
+	void currencyFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("currency", "$3,339.12");
 		binder.bind(propertyValues);
@@ -97,7 +97,7 @@ class NumberFormattingTests {
 	}
 
 	@Test
-	void testPercentFormatting() {
+	void percentFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("percent", "53%");
 		binder.bind(propertyValues);
@@ -106,7 +106,7 @@ class NumberFormattingTests {
 	}
 
 	@Test
-	void testPatternFormatting() {
+	void patternFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("pattern", "1,25.00");
 		binder.bind(propertyValues);
@@ -115,7 +115,7 @@ class NumberFormattingTests {
 	}
 
 	@Test
-	void testPatternArrayFormatting() {
+	void patternArrayFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternArray", new String[] { "1,25.00", "2,35.00" });
 		binder.bind(propertyValues);
@@ -133,7 +133,7 @@ class NumberFormattingTests {
 	}
 
 	@Test
-	void testPatternListFormatting() {
+	void patternListFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternList", new String[] { "1,25.00", "2,35.00" });
 		binder.bind(propertyValues);
@@ -151,7 +151,7 @@ class NumberFormattingTests {
 	}
 
 	@Test
-	void testPatternList2FormattingListElement() {
+	void patternList2FormattingListElement() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternList2[0]", "1,25.00");
 		propertyValues.add("patternList2[1]", "2,35.00");
@@ -162,7 +162,7 @@ class NumberFormattingTests {
 	}
 
 	@Test
-	void testPatternList2FormattingList() {
+	void patternList2FormattingList() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternList2[0]", "1,25.00");
 		propertyValues.add("patternList2[1]", "2,35.00");

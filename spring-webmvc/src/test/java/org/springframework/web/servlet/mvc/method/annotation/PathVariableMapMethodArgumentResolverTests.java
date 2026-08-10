@@ -89,7 +89,7 @@ class PathVariableMapMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void resolveArgumentNoUriVars() throws Exception {
+	void resolveArgumentNoUriVars() throws Exception {
 		Map<String, String> map = (Map<String, String>) resolver.resolveArgument(paramMap, mavContainer, webRequest, null);
 
 		assertThat(map).isEqualTo(Collections.emptyMap());

@@ -148,7 +148,9 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		if (this.client instanceof Lifecycle lifecycle) {
 			lifecycle.stop();
 		}
-		this.server.stop();
+		if (this.server != null) {
+			this.server.stop();
+		}
 	}
 
 

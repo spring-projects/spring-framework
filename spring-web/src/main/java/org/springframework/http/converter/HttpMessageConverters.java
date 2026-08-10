@@ -115,6 +115,14 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 		T withStringConverter(HttpMessageConverter<?> stringMessageConverter);
 
 		/**
+		 * Override the default {@code HttpMessageConverter} for URL encoded forms.
+		 * @param formMessageConverter the converter instance to use
+		 * @since 7.1
+		 * @see FormHttpMessageConverter
+		 */
+		T withFormConverter(HttpMessageConverter<?> formMessageConverter);
+
+		/**
 		 * Override the default String {@code HttpMessageConverter}
 		 * with any converter supporting the Kotlin Serialization conversion for JSON.
 		 * @param kotlinSerializationConverter the converter instance to use

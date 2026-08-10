@@ -78,26 +78,26 @@ class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	@Override
 	@Test
 	@Disabled("Multi cache manager support to be added")
-	public void testCustomCacheManager() {
+	protected void customCacheManager() {
 	}
 
 	@Test
-	void testEvictWithTransaction() {
+	void evictWithTransaction() {
 		txTemplate.executeWithoutResult(s -> testEvict(this.cs, false));
 	}
 
 	@Test
-	void testEvictEarlyWithTransaction() {
+	void evictEarlyWithTransaction() {
 		txTemplate.executeWithoutResult(s -> testEvictEarly(this.cs));
 	}
 
 	@Test
-	void testEvictAllWithTransaction() {
+	void evictAllWithTransaction() {
 		txTemplate.executeWithoutResult(s -> testEvictAll(this.cs, false));
 	}
 
 	@Test
-	void testEvictAllEarlyWithTransaction() {
+	void evictAllEarlyWithTransaction() {
 		txTemplate.executeWithoutResult(s -> testEvictAllEarly(this.cs));
 	}
 

@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile(org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.PROD_ENV_NAME)
+@Profile(org.springframework.core.env.Constants.PROD_ENV_NAME)
 @Configuration
 class ProdConfig {
 

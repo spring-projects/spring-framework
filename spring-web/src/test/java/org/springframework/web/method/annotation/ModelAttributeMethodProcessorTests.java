@@ -247,7 +247,7 @@ class ModelAttributeMethodProcessorTests {
 	}
 
 	@Test  // SPR-9378
-	public void resolveArgumentOrdering() throws Exception {
+	void resolveArgumentOrdering() throws Exception {
 		String name = "testBean";
 		Object testBean = new TestBean(name);
 		this.container.addAttribute(name, testBean);
@@ -282,7 +282,7 @@ class ModelAttributeMethodProcessorTests {
 	}
 
 	@Test  // gh-25182
-	public void resolveConstructorListArgumentFromCommaSeparatedRequestParameter() throws Exception {
+	void resolveConstructorListArgumentFromCommaSeparatedRequestParameter() throws Exception {
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest();
 		mockRequest.addParameter("listOfStrings", "1,2");
 		ServletWebRequest requestWithParam = new ServletWebRequest(mockRequest);

@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -211,7 +212,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Specify which {@link org.springframework.beans.factory.parsing.ProblemReporter} to use.
 	 * <p>The default implementation is {@link org.springframework.beans.factory.parsing.FailFastProblemReporter}
-	 * which exhibits fail fast behaviour. External tools can provide an alternative implementation
+	 * which exhibits fail fast behavior. External tools can provide an alternative implementation
 	 * that collates errors and warnings for display in the tool UI.
 	 */
 	public void setProblemReporter(@Nullable ProblemReporter problemReporter) {
@@ -337,12 +338,16 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
 
-		try (InputStream inputStream = encodedResource.getResource().getInputStream()) {
-			InputSource inputSource = new InputSource(inputStream);
-			if (encodedResource.getEncoding() != null) {
-				inputSource.setEncoding(encodedResource.getEncoding());
-			}
-			return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
+		try {
+			AtomicInteger count = new AtomicInteger();
+			encodedResource.getResource().consumeContent(inputStream -> {
+				InputSource inputSource = new InputSource(inputStream);
+				if (encodedResource.getEncoding() != null) {
+					inputSource.setEncoding(encodedResource.getEncoding());
+				}
+				count.addAndGet(doLoadBeanDefinitions(inputSource, encodedResource.getResource()));
+			});
+			return count.get();
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException(

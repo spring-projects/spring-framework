@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link MediaTypeParamApiVersionResolver}.
  * @author Rossen Stoyanchev
  */
-public class MediaTypeParamApiVersionResolverTests {
+class MediaTypeParamApiVersionResolverTests {
 
 	private final MediaType mediaType = MediaType.parseMediaType("application/x.abc+json");
 

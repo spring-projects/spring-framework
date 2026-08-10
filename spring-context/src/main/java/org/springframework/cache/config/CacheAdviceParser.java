@@ -222,7 +222,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 			if (StringUtils.hasText(builder.getKey()) && StringUtils.hasText(builder.getKeyGenerator())) {
 				throw new IllegalStateException("Invalid cache advice configuration on '" +
-						element.toString() + "'. Both 'key' and 'keyGenerator' attributes have been set. " +
+						element + "'. Both 'key' and 'keyGenerator' attributes have been set. " +
 						"These attributes are mutually exclusive: either set the SpEL expression used to" +
 						"compute the key at runtime or set the name of the KeyGenerator bean to use.");
 			}

@@ -1,4 +1,4 @@
-# Contributing  to the Spring Framework
+# Contributing to the Spring Framework
 
 First off, thank you for taking the time to contribute! :+1: :tada: 
 

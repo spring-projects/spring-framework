@@ -66,7 +66,7 @@ class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 	}
 
 	@Test
-	void testSupermanIsReadOnly() throws Exception {
+	void supermanIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute("Superman");
 
@@ -78,7 +78,7 @@ class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2754
 	 */
 	@Test
-	void testIsNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {
+	void isNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {
 		final String beanKey = "myTestBean";
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
 		Properties ignored = new Properties();

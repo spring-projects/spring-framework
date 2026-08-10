@@ -68,7 +68,7 @@ class DefaultUserDestinationResolverTests {
 	}
 
 	@Test // SPR-14044
-	public void handleSubscribeForDestinationWithoutLeadingSlash() {
+	void handleSubscribeForDestinationWithoutLeadingSlash() {
 		this.resolver.setRemoveLeadingSlash(true);
 
 		TestPrincipal user = new TestPrincipal("joe");
@@ -81,7 +81,7 @@ class DefaultUserDestinationResolverTests {
 	}
 
 	@Test // SPR-11325
-	public void handleSubscribeOneUserMultipleSessions() {
+	void handleSubscribeOneUserMultipleSessions() {
 
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"), new TestSimpSession("456"));
@@ -107,7 +107,7 @@ class DefaultUserDestinationResolverTests {
 	}
 
 	@Test // gh-23836
-	public void handleSubscribeInvalidUserName() {
+	void handleSubscribeInvalidUserName() {
 		TestPrincipal user = new TestPrincipal("joe%2F");
 		String sourceDestination = "/user/queue/foo";
 
@@ -138,7 +138,7 @@ class DefaultUserDestinationResolverTests {
 	}
 
 	@Test // SPR-14044
-	public void handleMessageForDestinationWithDotSeparator() {
+	void handleMessageForDestinationWithDotSeparator() {
 		this.resolver.setRemoveLeadingSlash(true);
 
 		TestPrincipal user = new TestPrincipal("joe");
@@ -151,7 +151,7 @@ class DefaultUserDestinationResolverTests {
 	}
 
 	@Test // SPR-12444
-	public void handleMessageToOtherUser() {
+	void handleMessageToOtherUser() {
 
 		TestSimpUser otherSimpUser = new TestSimpUser("anna");
 		otherSimpUser.addSessions(new TestSimpSession("456"));

@@ -28,13 +28,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class JndiTemplateEditorTests {
 
 	@Test
-	void testNullIsIllegalArgument() {
+	void nullIsIllegalArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new JndiTemplateEditor().setAsText(null));
 	}
 
 	@Test
-	void testEmptyStringMeansNullEnvironment() {
+	void emptyStringMeansNullEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		je.setAsText("");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
@@ -42,7 +42,7 @@ class JndiTemplateEditorTests {
 	}
 
 	@Test
-	void testCustomEnvironment() {
+	void customEnvironment() {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		// These properties are meaningless for JNDI, but we don't worry about that:
 		// the underlying JNDI implementation will throw exceptions when the user tries

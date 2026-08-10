@@ -52,7 +52,7 @@ class EntityManagerFactoryUtilsTests {
 	 * 'org.springframework.orm.jpa.EntityManagerFactoryUtils.doGetEntityManager(EntityManagerFactory)'
 	 */
 	@Test
-	void testDoGetEntityManager() {
+	void doGetEntityManager() {
 		// test null assertion
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				EntityManagerFactoryUtils.doGetTransactionalEntityManager(null, null));
@@ -64,7 +64,7 @@ class EntityManagerFactoryUtilsTests {
 	}
 
 	@Test
-	void testDoGetEntityManagerWithTx() {
+	void doGetEntityManagerWithTx() {
 		try {
 			EntityManagerFactory factory = mock();
 			EntityManager manager = mock();
@@ -84,7 +84,7 @@ class EntityManagerFactoryUtilsTests {
 	}
 
 	@Test
-	void testTranslatesIllegalStateException() {
+	void translatesIllegalStateException() {
 		IllegalStateException ise = new IllegalStateException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ise);
 		assertThat(dex.getCause()).isSameAs(ise);
@@ -92,7 +92,7 @@ class EntityManagerFactoryUtilsTests {
 	}
 
 	@Test
-	void testTranslatesIllegalArgumentException() {
+	void translatesIllegalArgumentException() {
 		IllegalArgumentException iae = new IllegalArgumentException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(iae);
 		assertThat(dex.getCause()).isSameAs(iae);
@@ -103,7 +103,7 @@ class EntityManagerFactoryUtilsTests {
 	 * We do not convert unknown exceptions. They may result from user code.
 	 */
 	@Test
-	void testDoesNotTranslateUnfamiliarException() {
+	void doesNotTranslateUnfamiliarException() {
 		UnsupportedOperationException userRuntimeException = new UnsupportedOperationException();
 		assertThat(EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(userRuntimeException)).as("Exception should not be wrapped").isNull();
 	}
@@ -114,7 +114,7 @@ class EntityManagerFactoryUtilsTests {
 	 */
 	@Test
 	@SuppressWarnings("serial")
-	public void testConvertJpaPersistenceException() {
+	void convertJpaPersistenceException() {
 		EntityNotFoundException entityNotFound = new EntityNotFoundException();
 		assertThat(EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(entityNotFound).getClass()).isSameAs(JpaObjectRetrievalFailureException.class);
 

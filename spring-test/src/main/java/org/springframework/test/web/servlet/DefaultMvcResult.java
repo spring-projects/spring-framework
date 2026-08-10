@@ -153,6 +153,7 @@ class DefaultMvcResult implements MvcResult {
 			return this.asyncDispatchLatch.await(timeout, TimeUnit.MILLISECONDS);
 		}
 		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
 			return false;
 		}
 	}

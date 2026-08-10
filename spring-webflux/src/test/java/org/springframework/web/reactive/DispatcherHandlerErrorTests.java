@@ -72,7 +72,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "ThrowableInstanceNeverThrown"})
-public class DispatcherHandlerErrorTests {
+class DispatcherHandlerErrorTests {
 
 	private static final IllegalStateException EXCEPTION = new IllegalStateException("boo");
 
@@ -211,12 +211,12 @@ public class DispatcherHandlerErrorTests {
 	static class TestConfig {
 
 		@Bean
-		public RequestMappingHandlerMapping handlerMapping() {
+		RequestMappingHandlerMapping handlerMapping() {
 			return new RequestMappingHandlerMapping();
 		}
 
 		@Bean
-		public RequestMappingHandlerAdapter handlerAdapter() {
+		RequestMappingHandlerAdapter handlerAdapter() {
 			return new RequestMappingHandlerAdapter();
 		}
 
@@ -228,7 +228,7 @@ public class DispatcherHandlerErrorTests {
 		}
 
 		@Bean
-		public TestController testController() {
+		public TestController controller() {
 			return new TestController();
 		}
 	}

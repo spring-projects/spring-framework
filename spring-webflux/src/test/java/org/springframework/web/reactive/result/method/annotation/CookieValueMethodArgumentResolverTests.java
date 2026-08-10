@@ -113,8 +113,7 @@ class CookieValueMethodArgumentResolverTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		Object result = this.resolver.resolveArgument(this.cookieStringParameter, this.bindingContext, exchange).block();
 
-		boolean condition = result instanceof String;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(String.class);
 		assertThat(result).isEqualTo("bar");
 	}
 

@@ -27,10 +27,12 @@ import java.util.stream.Stream;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.parallel.Execution;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
@@ -47,6 +49,7 @@ import org.springframework.test.context.event.TestContextEvent;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 /**
@@ -67,9 +70,9 @@ class ParallelApplicationEventsIntegrationTests {
 
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
 				.selectors(selectClass(testClass))//
-				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
-				.configurationParameter("junit.jupiter.execution.parallel.mode.default", "concurrent")//
-				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
+				.configurationParameter(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true")//
+				.configurationParameter(Constants.PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME, "10")//
+				.configurationParameter(Execution.DEFAULT_EXECUTION_MODE_PROPERTY_NAME, CONCURRENT.name())//
 				.execute();
 
 		// extract the messages from failed TextExecutionResults
@@ -89,8 +92,8 @@ class ParallelApplicationEventsIntegrationTests {
 		Class<?> testClass = TestInstancePerMethodTestCase.class;
 		Events testEvents = EngineTestKit.engine("junit-jupiter")//
 				.selectors(selectClass(testClass))//
-				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
-				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
+				.configurationParameter(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true")//
+				.configurationParameter(Constants.PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME, "10")//
 				.execute()//
 				.testEvents();
 		// list failed events in case of test errors to get a sense of which tests failed

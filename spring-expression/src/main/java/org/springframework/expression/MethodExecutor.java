@@ -32,6 +32,12 @@ import org.jspecify.annotations.Nullable;
  * {@link AccessException} which signals to the infrastructure to go back to the
  * resolvers to ask for a new one.
  *
+ * <p>A cached {@code MethodExecutor} is valid only for the {@link EvaluationContext}
+ * configuration &mdash; in particular, the registered {@link MethodResolver
+ * MethodResolvers} &mdash; under which it was resolved. See {@link Expression} for the
+ * resulting contract on reusing a parsed expression across different
+ * {@code EvaluationContext} instances.
+ *
  * @author Andy Clement
  * @author Sam Brannen
  * @since 3.0

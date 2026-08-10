@@ -17,7 +17,7 @@
 package org.springframework.expression;
 
 /**
- * Implementers of this interface are expected to be able to locate types.
+ * Implementors of this interface are expected to be able to locate types.
  *
  * <p>They may use a custom {@link ClassLoader} and/or deal with common package
  * prefixes (for example, {@code java.lang}) however they wish.

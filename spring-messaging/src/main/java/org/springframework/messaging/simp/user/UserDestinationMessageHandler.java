@@ -38,6 +38,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.broker.OrderedMessageChannelDecorator;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
@@ -333,8 +334,9 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 			SimpMessageHeaderAccessor accessor =
 					MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
 			Assert.state(accessor != null, "No SimpMessageHeaderAccessor");
-			if (accessor.getSessionId() == null) {
-				// Our own broadcast
+			if (accessor.getSessionId() == null ||
+					!accessor.getSessionId().equals(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID)) {
+				// Our own or not a broadcast
 				return null;
 			}
 			destination = accessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);

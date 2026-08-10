@@ -38,7 +38,7 @@ class HibernateJpaDialectTests {
 
 
 	@Test
-	void testTranslateException() {
+	void translateException() {
 		// Plain JPA exception
 		RuntimeException ex = new OptimisticLockException();
 		assertThat(dialect.translateExceptionIfPossible(ex))

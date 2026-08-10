@@ -54,7 +54,7 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 	}
 
 	private void findBeanOverrideHandlers(Class<?> testClass, @Nullable String contextName, Set<BeanOverrideHandler> handlers) {
-		BeanOverrideHandler.findAllHandlers(testClass).stream()
+		BeanOverrideUtils.findAllHandlers(testClass).stream()
 				// If a handler does not specify a context name, it always gets applied.
 				// Otherwise, the handler's context name must match the current context name.
 				.filter(handler -> handler.getContextName().isEmpty() || handler.getContextName().equals(contextName))

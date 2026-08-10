@@ -61,6 +61,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.PreFlightRequestHandler;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -76,8 +77,8 @@ import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
+import org.springframework.web.servlet.handler.DefaultPreFlightRequestHandler;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
@@ -884,7 +885,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Override this method to add custom {@link HttpMessageConverter messsage converters}
+	 * Override this method to add custom {@link HttpMessageConverter message converters}
 	 * to use with the {@link RequestMappingHandlerAdapter} and the
 	 * {@link ExceptionHandlerExceptionResolver}.
 	 * <p>Adding converters to the list turns off the default converters that would
@@ -1161,11 +1162,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected void addCorsMappings(CorsRegistry registry) {
 	}
 
-	@SuppressWarnings("removal")
 	@Bean
 	@Lazy
-	public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
-		return new HandlerMappingIntrospector();
+	public PreFlightRequestHandler mvcPreFlightRequestHandler() {
+		return new DefaultPreFlightRequestHandler();
 	}
 
 	@Bean

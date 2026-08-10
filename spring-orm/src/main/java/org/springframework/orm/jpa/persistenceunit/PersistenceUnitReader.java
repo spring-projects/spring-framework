@@ -115,20 +115,11 @@ final class PersistenceUnitReader {
 
 
 	/**
-	 * Parse and build all persistence unit infos defined in the specified XML file(s).
-	 * @param persistenceXmlLocation the resource location (can be a pattern)
-	 * @return the resulting PersistenceUnitInfo instances
-	 */
-	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
-		return readPersistenceUnitInfos(new String[] {persistenceXmlLocation});
-	}
-
-	/**
 	 * Parse and build all persistence unit infos defined in the given XML files.
 	 * @param persistenceXmlLocations the resource locations (can be patterns)
 	 * @return the resulting PersistenceUnitInfo instances
 	 */
-	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String[] persistenceXmlLocations) {
+	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String... persistenceXmlLocations) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
 		List<SpringPersistenceUnitInfo> infos = new ArrayList<>(1);
 		String resourceLocation = null;

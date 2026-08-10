@@ -80,18 +80,18 @@ class ScriptFactoryPostProcessorTests {
 
 
 	@Test
-	void testDoesNothingWhenPostProcessingNonScriptFactoryTypeBeforeInstantiation() {
+	void doesNothingWhenPostProcessingNonScriptFactoryTypeBeforeInstantiation() {
 		assertThat(new ScriptFactoryPostProcessor().postProcessBeforeInstantiation(getClass(), "a.bean")).isNull();
 	}
 
 	@Test
-	void testThrowsExceptionIfGivenNonAbstractBeanFactoryImplementation() {
+	void throwsExceptionIfGivenNonAbstractBeanFactoryImplementation() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				new ScriptFactoryPostProcessor().setBeanFactory(mock()));
 	}
 
 	@Test
-	void testChangeScriptWithRefreshableBeanFunctionality() {
+	void changeScriptWithRefreshableBeanFunctionality() {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 
@@ -102,7 +102,7 @@ class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
-		// cool; now let's change the script and check the refresh behaviour...
+		// cool; now let's change the script and check the refresh behavior...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
@@ -112,7 +112,7 @@ class ScriptFactoryPostProcessorTests {
 	}
 
 	@Test
-	void testChangeScriptWithNoRefreshableBeanFunctionality() {
+	void changeScriptWithNoRefreshableBeanFunctionality() {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(false);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 
@@ -123,7 +123,7 @@ class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
-		// cool; now let's change the script and check the refresh behaviour...
+		// cool; now let's change the script and check the refresh behavior...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
@@ -132,7 +132,7 @@ class ScriptFactoryPostProcessorTests {
 	}
 
 	@Test
-	void testRefreshedScriptReferencePropagatesToCollaborators() {
+	void refreshedScriptReferencePropagatesToCollaborators() {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultMessengerService.class);
@@ -147,7 +147,7 @@ class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
-		// cool; now let's change the script and check the refresh behaviour...
+		// cool; now let's change the script and check the refresh behavior...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
@@ -161,7 +161,7 @@ class ScriptFactoryPostProcessorTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testReferencesAcrossAContainerHierarchy() {
+	void referencesAcrossAContainerHierarchy() {
 		GenericApplicationContext businessContext = new GenericApplicationContext();
 		businessContext.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
 		businessContext.refresh();
@@ -178,13 +178,13 @@ class ScriptFactoryPostProcessorTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testScriptHavingAReferenceToAnotherBean() {
+	void scriptHavingAReferenceToAnotherBean() {
 		// just tests that the (singleton) script-backed bean is able to be instantiated with references to its collaborators
 		new ClassPathXmlApplicationContext("org/springframework/scripting/support/groovyReferences.xml");
 	}
 
 	@Test
-	void testForRefreshedScriptHavingErrorPickedUpOnFirstCall() {
+	void forRefreshedScriptHavingErrorPickedUpOnFirstCall() {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultMessengerService.class);
@@ -199,7 +199,7 @@ class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
-		// cool; now let's change the script and check the refresh behaviour...
+		// cool; now let's change the script and check the refresh behavior...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		// needs The Sundays compiler; must NOT throw any exception here...
@@ -211,7 +211,7 @@ class ScriptFactoryPostProcessorTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testPrototypeScriptedBean() {
+	void prototypeScriptedBean() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
 

@@ -16,12 +16,12 @@
 
 package org.springframework.http.converter.support;
 
-import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverters;
+import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 
 /**
- * Extension of {@link org.springframework.http.converter.FormHttpMessageConverter},
+ * Extension of {@link MultipartHttpMessageConverter},
  * adding support for XML, JSON, Smile, CBOR, Protobuf and Yaml based parts when
  * related libraries are present in the classpath.
  *
@@ -29,17 +29,18 @@ import org.springframework.http.converter.HttpMessageConverters;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 3.2
+ * @deprecated since 7.1 in favor of {@link MultipartHttpMessageConverter}.
  */
-public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConverter {
+@Deprecated(since = "7.1", forRemoval = true)
+public class AllEncompassingFormHttpMessageConverter extends MultipartHttpMessageConverter {
 
 
 	/**
 	 * Create a new {@link AllEncompassingFormHttpMessageConverter} instance
 	 * that will auto-detect part converters.
 	 */
-	@SuppressWarnings("removal")
 	public AllEncompassingFormHttpMessageConverter() {
-		HttpMessageConverters.forClient().registerDefaults().build().forEach(this::addPartConverter);
+		super(HttpMessageConverters.forClient().registerDefaults().build());
 	}
 
 	/**
@@ -49,7 +50,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 	 * @since 7.0
 	 */
 	public AllEncompassingFormHttpMessageConverter(Iterable<HttpMessageConverter<?>> converters) {
-		converters.forEach(this::addPartConverter);
+		super(converters);
 	}
 
 }

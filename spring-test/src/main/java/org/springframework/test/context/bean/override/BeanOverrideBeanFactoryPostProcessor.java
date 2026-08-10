@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.bean.override;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -54,7 +54,9 @@ import org.springframework.util.Assert;
  * {@linkplain BeanOverrideStrategy override strategy}. The bean override instance
  * is created, if necessary, and the related infrastructure is updated to allow
  * the bean override instance to be injected into the corresponding
- * {@linkplain BeanOverrideHandler#getField() field} of the test class.
+ * {@linkplain BeanOverrideHandler#getField() field} of the test class or
+ * {@linkplain BeanOverrideHandler#getParameter() parameter} of the test class
+ * constructor.
  *
  * <p>This processor does not work against a particular test class but rather
  * only prepares the bean factory for the identified, unique set of bean overrides.
@@ -113,7 +115,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		Assert.state(!BeanFactoryUtils.isFactoryDereference(beanName), () -> """
 				Unable to override bean '%s'%s: a FactoryBean cannot be overridden. \
 				To override the bean created by the FactoryBean, remove the '&' prefix."""
-					.formatted(beanName, forField(handler.getField())));
+					.formatted(beanName, forDescription(handler)));
 
 		switch (handler.getStrategy()) {
 			case REPLACE -> replaceOrCreateBean(beanFactory, handler, generatedBeanNames, true);
@@ -175,12 +177,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 				setQualifiedElement(existingBeanDefinition, handler);
 			}
 			else if (requireExistingBean) {
-				Field field = handler.getField();
 				throw new IllegalStateException("""
 						Unable to replace bean: there is no bean with name '%s' and type %s%s. \
 						If the bean is defined in a @Bean method, make sure the return type is the \
 						most specific type possible (for example, the concrete implementation type)."""
-							.formatted(beanName, handler.getBeanType(), requiredByField(field)));
+							.formatted(beanName, handler.getBeanType(), requiredByDescription(handler)));
 			}
 			// 4) We are creating a bean by-name with the provided beanName.
 		}
@@ -253,13 +254,12 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	 */
 	private void wrapBean(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler) {
 		String beanName = handler.getBeanName();
-		Field field = handler.getField();
 		ResolvableType beanType = handler.getBeanType();
 
 		if (beanName == null) {
 			// We are wrapping an existing bean by-type.
 			Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, handler, true);
-			String uniqueCandidate = determineUniqueCandidate(beanFactory, candidateNames, beanType, field);
+			String uniqueCandidate = determineUniqueCandidate(beanFactory, candidateNames, beanType, handler);
 			if (uniqueCandidate != null) {
 				beanName = uniqueCandidate;
 			}
@@ -271,11 +271,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 							there are no beans of type %s%s. \
 							If the bean is defined in a @Bean method, make sure the return type is the \
 							most specific type possible (for example, the concrete implementation type)."""
-								.formatted(beanType, requiredByField(field));
+								.formatted(beanType, requiredByDescription(handler));
 				}
 				else {
 					message += "found %d beans of type %s%s: %s"
-							.formatted(candidateCount, beanType, requiredByField(field), candidateNames);
+							.formatted(candidateCount, beanType, requiredByDescription(handler), candidateNames);
 				}
 				throw new IllegalStateException(message);
 			}
@@ -289,7 +289,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 						Unable to wrap bean: there is no bean with name '%s' and type %s%s. \
 						If the bean is defined in a @Bean method, make sure the return type is the \
 						most specific type possible (for example, the concrete implementation type)."""
-							.formatted(beanName, beanType, requiredByField(field)));
+							.formatted(beanName, beanType, requiredByDescription(handler)));
 			}
 		}
 
@@ -301,11 +301,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private static @Nullable String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, BeanOverrideHandler handler,
 			boolean requireExistingBean) {
 
-		Field field = handler.getField();
 		ResolvableType beanType = handler.getBeanType();
 
 		Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, handler, true);
-		String uniqueCandidate = determineUniqueCandidate(beanFactory, candidateNames, beanType, field);
+		String uniqueCandidate = determineUniqueCandidate(beanFactory, candidateNames, beanType, handler);
 		if (uniqueCandidate != null) {
 			return uniqueCandidate;
 		}
@@ -317,20 +316,19 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 						Unable to override bean: there are no beans of type %s%s. \
 						If the bean is defined in a @Bean method, make sure the return type is the \
 						most specific type possible (for example, the concrete implementation type)."""
-							.formatted(beanType, requiredByField(field)));
+							.formatted(beanType, requiredByDescription(handler)));
 			}
 			return null;
 		}
 
 		throw new IllegalStateException(
 				"Unable to select a bean to override: found %d beans of type %s%s: %s"
-					.formatted(candidateCount, beanType, requiredByField(field), candidateNames));
+					.formatted(candidateCount, beanType, requiredByDescription(handler), candidateNames));
 	}
 
 	private static Set<String> getExistingBeanNamesByType(ConfigurableListableBeanFactory beanFactory,
 			BeanOverrideHandler handler, boolean checkAutowiredCandidate) {
 
-		Field field = handler.getField();
 		ResolvableType resolvableType = handler.getBeanType();
 		Class<?> type = resolvableType.toClass();
 
@@ -348,9 +346,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 
 		// Filter out non-matching autowire candidates.
-		if (field != null && checkAutowiredCandidate) {
-			DependencyDescriptor descriptor = new DependencyDescriptor(field, true);
-			beanNames.removeIf(beanName -> !beanFactory.isAutowireCandidate(beanName, descriptor));
+		if (checkAutowiredCandidate) {
+			DependencyDescriptor descriptor = handler.fieldOrParameterDependencyDescriptor();
+			if (descriptor != null) {
+				beanNames.removeIf(beanName -> !beanFactory.isAutowireCandidate(beanName, descriptor));
+			}
 		}
 		// Filter out scoped proxy targets.
 		beanNames.removeIf(ScopedProxyUtils::isScopedTarget);
@@ -361,13 +361,14 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	/**
 	 * Determine the unique candidate in the given set of bean names.
 	 * <p>Honors both <em>primary</em> and <em>fallback</em> semantics, and
-	 * otherwise matches against the field name as a <em>fallback qualifier</em>.
+	 * otherwise matches against the field name or parameter name as a <em>fallback
+	 * qualifier</em>.
 	 * @return the name of the unique candidate, or {@code null} if none found
 	 * @since 6.2.3
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#determineAutowireCandidate
 	 */
 	private static @Nullable String determineUniqueCandidate(ConfigurableListableBeanFactory beanFactory,
-			Set<String> candidateNames, ResolvableType beanType, @Nullable Field field) {
+			Set<String> candidateNames, ResolvableType beanType, BeanOverrideHandler handler) {
 
 		// Step 0: none or only one
 		int candidateCount = candidateNames.size();
@@ -384,12 +385,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			return primaryCandidate;
 		}
 
-		// Step 2: use the field name as a fallback qualifier
-		if (field != null) {
-			String fieldName = field.getName();
-			if (candidateNames.contains(fieldName)) {
-				return fieldName;
-			}
+		// Step 2: use the field name or parameter name as a fallback qualifier
+		String fieldOrPropertyName = handler.fieldOrParameterName();
+		if (fieldOrPropertyName != null && candidateNames.contains(fieldOrPropertyName)) {
+			return fieldOrPropertyName;
 		}
 
 		return null;
@@ -445,8 +444,9 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	 * whose {@linkplain RootBeanDefinition#getTargetType() target type} and
 	 * {@linkplain RootBeanDefinition#getQualifiedElement() qualified element} are
 	 * the {@linkplain BeanOverrideHandler#getBeanType() bean type} and
-	 * the {@linkplain BeanOverrideHandler#getField() field} of the {@code BeanOverrideHandler},
-	 * respectively.
+	 * the {@linkplain BeanOverrideHandler#getField() field} or
+	 * {@linkplain BeanOverrideHandler#getParameter() parameter} of the
+	 * {@code BeanOverrideHandler}, respectively.
 	 * <p>The returned bean definition should <strong>not</strong> be used to create
 	 * a bean instance but rather only for the purpose of having suitable bean
 	 * definition metadata available in the {@code BeanFactory} &mdash; for example,
@@ -462,15 +462,16 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	/**
 	 * Set the {@linkplain RootBeanDefinition#setQualifiedElement(java.lang.reflect.AnnotatedElement)
 	 * qualified element} in the supplied {@link BeanDefinition} to the
-	 * {@linkplain BeanOverrideHandler#getField() field} of the supplied
+	 * {@linkplain BeanOverrideHandler#getField() field} or
+	 * {@linkplain BeanOverrideHandler#getParameter() parameter} of the supplied
 	 * {@code BeanOverrideHandler}.
 	 * <p>This is necessary for proper autowiring candidate resolution.
 	 * @since 6.2.6
 	 */
 	private static void setQualifiedElement(BeanDefinition beanDefinition, BeanOverrideHandler handler) {
-		Field field = handler.getField();
-		if (field != null && beanDefinition instanceof RootBeanDefinition rbd) {
-			rbd.setQualifiedElement(field);
+		AnnotatedElement fieldOrParameter = handler.fieldOrParameter();
+		if (fieldOrParameter != null && beanDefinition instanceof RootBeanDefinition rbd) {
+			rbd.setQualifiedElement(fieldOrParameter);
 		}
 	}
 
@@ -500,19 +501,14 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		dlbf.destroySingleton(beanName);
 	}
 
-	private static String forField(@Nullable Field field) {
-		if (field == null) {
-			return "";
-		}
-		return " for field '%s.%s'".formatted(field.getDeclaringClass().getSimpleName(), field.getName());
+	private static String forDescription(BeanOverrideHandler handler) {
+		String description = handler.fieldOrParameterDescription();
+		return (description != null ? " for " + description : "");
 	}
 
-	private static String requiredByField(@Nullable Field field) {
-		if (field == null) {
-			return "";
-		}
-		return " (as required by field '%s.%s')".formatted(
-				field.getDeclaringClass().getSimpleName(), field.getName());
+	private static String requiredByDescription(BeanOverrideHandler handler) {
+		String description = handler.fieldOrParameterDescription();
+		return (description != null ? " (as required by %s)".formatted(description) : "");
 	}
 
 }

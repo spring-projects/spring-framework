@@ -71,6 +71,8 @@ public class ReactiveAdapterRegistry {
 
 	private static final boolean MUTINY_PRESENT;
 
+	private static final boolean CONTEXT_PROPAGATION_PRESENT;
+
 	static {
 		ClassLoader classLoader = ReactiveAdapterRegistry.class.getClassLoader();
 		REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent("org.reactivestreams.Publisher", classLoader);
@@ -78,6 +80,7 @@ public class ReactiveAdapterRegistry {
 		RXJAVA_3_PRESENT = ClassUtils.isPresent("io.reactivex.rxjava3.core.Flowable", classLoader);
 		COROUTINES_REACTOR_PRESENT = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader);
 		MUTINY_PRESENT = ClassUtils.isPresent("io.smallrye.mutiny.Multi", classLoader);
+		CONTEXT_PROPAGATION_PRESENT = ClassUtils.isPresent("io.micrometer.context.ContextSnapshotFactory", classLoader);
 	}
 
 	private final List<ReactiveAdapter> adapters = new ArrayList<>();
@@ -356,7 +359,9 @@ public class ReactiveAdapterRegistry {
 
 			registry.registerReactiveType(
 					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, kotlinx.coroutines.flow.FlowKt::emptyFlow),
-					source -> kotlinx.coroutines.reactor.ReactorFlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source),
+					CONTEXT_PROPAGATION_PRESENT ?
+							source -> kotlinx.coroutines.reactor.ReactorFlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source, new PropagationContextElement()) :
+							source -> kotlinx.coroutines.reactor.ReactorFlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source),
 					kotlinx.coroutines.reactive.ReactiveFlowKt::asFlow);
 		}
 	}

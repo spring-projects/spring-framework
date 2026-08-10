@@ -82,7 +82,7 @@ class R2dbcTransactionManagerTests {
 
 
 	@Test
-	void testSimpleTransaction() {
+	void simpleTransaction() {
 		when(connectionMock.isAutoCommit()).thenReturn(false);
 		AtomicInteger commits = new AtomicInteger();
 		when(connectionMock.commitTransaction()).thenReturn(
@@ -114,7 +114,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testBeginFails() {
+	void beginFails() {
 		reset(connectionFactoryMock);
 		when(connectionFactoryMock.create()).thenReturn(
 				Mono.error(new R2dbcBadGrammarException("fail")));
@@ -222,7 +222,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testCommitFails() {
+	void commitFails() {
 		when(connectionMock.isAutoCommit()).thenReturn(false);
 		when(connectionMock.commitTransaction()).thenReturn(Mono.defer(() ->
 				Mono.error(new R2dbcBadGrammarException("Commit should fail"))));
@@ -246,7 +246,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testRollback() {
+	void rollback() {
 		when(connectionMock.isAutoCommit()).thenReturn(false);
 		AtomicInteger commits = new AtomicInteger();
 		when(connectionMock.commitTransaction()).thenReturn(
@@ -274,7 +274,7 @@ class R2dbcTransactionManagerTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void testRollbackFails() {
+	void rollbackFails() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.defer(() ->
 				Mono.error(new R2dbcBadGrammarException("Commit should fail"))), Mono.empty());
 
@@ -296,7 +296,7 @@ class R2dbcTransactionManagerTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void testConnectionReleasedWhenRollbackFails() {
+	void connectionReleasedWhenRollbackFails() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.defer(() ->
 				Mono.error(new R2dbcBadGrammarException("Rollback should fail"))), Mono.empty());
 		when(connectionMock.setTransactionIsolationLevel(any())).thenReturn(Mono.empty());
@@ -318,7 +318,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testCommitAndRollbackFails() {
+	void commitAndRollbackFails() {
 		when(connectionMock.isAutoCommit()).thenReturn(false);
 		when(connectionMock.commitTransaction()).thenReturn(Mono.defer(() ->
 				Mono.error(new R2dbcBadGrammarException("Commit should fail"))));
@@ -343,7 +343,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testTransactionSetRollbackOnly() {
+	void transactionSetRollbackOnly() {
 		when(connectionMock.isAutoCommit()).thenReturn(false);
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
 		TestTransactionSynchronization sync = new TestTransactionSynchronization(
@@ -380,7 +380,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testPropagationNeverWithExistingTransaction() {
+	void propagationNeverWithExistingTransaction() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -407,7 +407,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testPropagationNestedWithExistingTransaction() {
+	void propagationNestedWithExistingTransaction() {
 		when(connectionMock.createSavepoint(anyString())).thenReturn(Mono.empty());
 		when(connectionMock.rollbackTransactionToSavepoint(anyString())).thenReturn(Mono.empty());
 		when(connectionMock.releaseSavepoint(anyString())).thenReturn(Mono.empty());
@@ -535,7 +535,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testPropagationSupportsAndNested() {
+	void propagationSupportsAndNested() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -562,7 +562,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testPropagationSupportsAndNestedWithRollback() {
+	void propagationSupportsAndNestedWithRollback() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -592,7 +592,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testPropagationSupportsAndRequiresNew() {
+	void propagationSupportsAndRequiresNew() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -619,7 +619,7 @@ class R2dbcTransactionManagerTests {
 	}
 
 	@Test
-	void testPropagationSupportsAndRequiresNewWithRollback() {
+	void propagationSupportsAndRequiresNewWithRollback() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();

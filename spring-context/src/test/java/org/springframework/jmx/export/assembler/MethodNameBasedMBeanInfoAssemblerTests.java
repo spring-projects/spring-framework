@@ -57,7 +57,7 @@ class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 	}
 
 	@Test
-	void testGetAgeIsReadOnly() throws Exception {
+	void getAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
@@ -66,7 +66,7 @@ class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 	}
 
 	@Test
-	void testSetNameParameterIsNamed() throws Exception {
+	void setNameParameterIsNamed() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
 		MBeanOperationInfo operationSetAge = info.getOperation("setName");

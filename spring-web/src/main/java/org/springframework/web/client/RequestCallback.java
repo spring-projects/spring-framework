@@ -18,6 +18,7 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.function.Consumer;
 
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.client.ClientHttpRequest;
@@ -37,8 +38,11 @@ import org.springframework.http.client.ClientHttpRequest;
  * @author Arjen Poutsma
  * @since 3.0
  * @see RestTemplate#execute
+ * @deprecated as of 7.1 in favor of {@link RestClient.RequestBodySpec#httpRequest(Consumer)}.
  */
 @FunctionalInterface
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public interface RequestCallback {
 
 	/**

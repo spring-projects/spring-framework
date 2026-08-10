@@ -45,7 +45,7 @@ import static org.springframework.web.servlet.function.RequestPredicates.version
  * {@link RouterFunctionMapping} integration tests for API versioning.
  * @author Rossen Stoyanchev
  */
-public class RouterFunctionMappingVersionTests {
+class RouterFunctionMappingVersionTests {
 
 	private final MockServletContext servletContext = new MockServletContext();
 

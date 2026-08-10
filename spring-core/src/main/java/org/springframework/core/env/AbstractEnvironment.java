@@ -327,7 +327,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * Return the set of default profiles explicitly set via
 	 * {@link #setDefaultProfiles(String...)}, or if the current set of default profiles
 	 * consists only of {@linkplain #getReservedDefaultProfiles() reserved default
-	 * profiles}, then check for the presence of {@link #doGetActiveProfilesProperty()}
+	 * profiles}, then check for the presence of {@link #doGetDefaultProfilesProperty()}
 	 * and assign its value (if any) to the set of default profiles.
 	 * @see #AbstractEnvironment()
 	 * @see #getDefaultProfiles()

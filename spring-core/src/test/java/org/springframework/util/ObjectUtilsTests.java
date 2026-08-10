@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.URI;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -991,10 +990,10 @@ class ObjectUtilsTests {
 		@Test
 		void nullSafeConciseToStringForURL() throws Exception {
 			String url = "https://www.example.com/?foo=1&bar=2&baz=3";
-			assertThat(ObjectUtils.nullSafeConciseToString(new URL(url))).isEqualTo(url);
+			assertThat(ObjectUtils.nullSafeConciseToString(URI.create(url).toURL())).isEqualTo(url);
 
 			url += "&qux=" + "4".repeat(60);
-			assertThat(ObjectUtils.nullSafeConciseToString(new URL(url)))
+			assertThat(ObjectUtils.nullSafeConciseToString(URI.create(url).toURL()))
 					.hasSize(truncatedLength)
 					.startsWith(url.subSequence(0, 100))
 					.endsWith(truncated);

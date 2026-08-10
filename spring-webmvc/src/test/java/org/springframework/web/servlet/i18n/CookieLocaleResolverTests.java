@@ -141,6 +141,7 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void setAndResolveLocale() {
 		resolver.setLocale(request, response, new Locale("nl", ""));
 
@@ -161,6 +162,7 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void setAndResolveLocaleContext() {
 		resolver.setLocaleContext(request, response, new SimpleLocaleContext(new Locale("nl", "")));
 
@@ -176,6 +178,7 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void setAndResolveLocaleContextWithTimeZone() {
 		resolver.setLocaleContext(request, response,
 				new SimpleTimeZoneAwareLocaleContext(new Locale("nl", ""), TimeZone.getTimeZone("GMT+1")));
@@ -209,6 +212,7 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void setAndResolveLocaleWithCountry() {
 		resolver.setLocale(request, response, new Locale("de", "AT"));
 
@@ -231,6 +235,7 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void setAndResolveLocaleWithCountryAsLegacyJava() {
 		resolver.setLanguageTagCompliant(false);
 		resolver.setLocale(request, response, new Locale("de", "AT"));
@@ -254,6 +259,7 @@ class CookieLocaleResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void customCookie() {
 		resolver = new CookieLocaleResolver("LanguageKoek");
 		resolver.setCookieDomain(".springframework.org");

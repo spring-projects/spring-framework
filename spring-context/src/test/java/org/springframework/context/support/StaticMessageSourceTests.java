@@ -57,14 +57,14 @@ class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 	@Test
 	@Override
-	public void count() {
+	protected void count() {
 		assertCount(15);
 	}
 
 	@Test
 	@Override
 	@Disabled("Do nothing here since super is looking for errorCodes we do NOT have in the Context")
-	public void messageSource() throws NoSuchMessageException {
+	protected void messageSource() throws NoSuchMessageException {
 	}
 
 	@Test

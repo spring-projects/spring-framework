@@ -194,11 +194,11 @@ class ReactiveTypeHandler {
 	}
 
 	/**
-	 * Attempts to find a concrete {@code MediaType} that can be streamed (as json separated
-	 * by newlines in the response body). This method considers two concrete types
-	 * {@code APPLICATION_NDJSON} and {@code APPLICATION_STREAM_JSON}) as well as any
-	 * subtype of application that has the {@code +x-ndjson} suffix. In the later case,
-	 * the media type MUST be concrete for it to be considered.
+	 * Attempts to find a concrete {@code MediaType} that can be streamed (as JSON payloads
+	 * separated by newlines in the response body). This method considers {@code APPLICATION_JSONL},
+	 * {@code APPLICATION_NDJSON}, and any subtype of application
+	 * that has the {@code +x-ndjson} suffix. In the latter case, the media type MUST be
+	 * concrete for it to be considered.
 	 *
 	 * <p>For example {@code application/vnd.myapp+x-ndjson} is considered a streaming type
 	 * while {@code application/*+x-ndjson} isn't.
@@ -222,6 +222,9 @@ class ReactiveTypeHandler {
 			}
 			else if (MediaType.APPLICATION_NDJSON.includes(acceptedType)) {
 				return MediaType.APPLICATION_NDJSON;
+			}
+			else if (MediaType.APPLICATION_JSONL.includes(acceptedType)) {
+				return MediaType.APPLICATION_JSONL;
 			}
 		}
 		return null; // not a concrete streaming type
@@ -576,11 +579,11 @@ class ReactiveTypeHandler {
 
 		@SuppressWarnings("ReactiveStreamsUnusedPublisher")
 		public Object writeReactorContext(Object returnValue) {
-			if (Mono.class.isAssignableFrom(returnValue.getClass())) {
+			if (returnValue instanceof Mono) {
 				ContextSnapshot snapshot = this.snapshotFactory.captureAll();
 				return ((Mono<?>) returnValue).contextWrite(snapshot::updateContext);
 			}
-			else if (Flux.class.isAssignableFrom(returnValue.getClass())) {
+			else if (returnValue instanceof Flux) {
 				ContextSnapshot snapshot = this.snapshotFactory.captureAll();
 				return ((Flux<?>) returnValue).contextWrite(snapshot::updateContext);
 			}

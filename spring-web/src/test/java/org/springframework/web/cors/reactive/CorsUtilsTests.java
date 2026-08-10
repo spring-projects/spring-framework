@@ -67,7 +67,7 @@ class CorsUtilsTests {
 	}
 
 	@Test  // SPR-16262
-	public void isSameOriginWithXForwardedHeaders() {
+	void isSameOriginWithXForwardedHeaders() {
 		String server = "mydomain1.example";
 		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.example");
 		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.example");
@@ -78,7 +78,7 @@ class CorsUtilsTests {
 	}
 
 	@Test  // SPR-16262
-	public void isSameOriginWithForwardedHeader() {
+	void isSameOriginWithForwardedHeader() {
 		String server = "mydomain1.example";
 		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.example");
 		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.example");
@@ -89,7 +89,7 @@ class CorsUtilsTests {
 	}
 
 	@Test  // SPR-16362
-	public void isSameOriginWithDifferentSchemes() {
+	void isSameOriginWithDifferentSchemes() {
 		MockServerHttpRequest request = MockServerHttpRequest
 				.get("http://mydomain1.example")
 				.header(HttpHeaders.ORIGIN, "https://mydomain1.example")
@@ -116,7 +116,7 @@ class CorsUtilsTests {
 			builder.header("X-Forwarded-Port", String.valueOf(forwardedPort));
 		}
 
-		ServerHttpRequest request = adaptFromForwardedHeaders(builder);
+		ServerHttpRequest request = adaptFromForwardedHeaders(builder, false);
 		assertThat(CorsUtils.isCorsRequest(request)).isFalse();
 	}
 
@@ -132,14 +132,16 @@ class CorsUtilsTests {
 				.header("Forwarded", forwardedHeader)
 				.header(HttpHeaders.ORIGIN, originHeader);
 
-		ServerHttpRequest request = adaptFromForwardedHeaders(builder);
+		ServerHttpRequest request = adaptFromForwardedHeaders(builder, true);
 		assertThat(CorsUtils.isCorsRequest(request)).isFalse();
 	}
 
 	// SPR-16668
-	private ServerHttpRequest adaptFromForwardedHeaders(MockServerHttpRequest.BaseBuilder<?> builder) {
+	private ServerHttpRequest adaptFromForwardedHeaders(
+			MockServerHttpRequest.BaseBuilder<?> builder, boolean useStandardForwardedHeader) {
+
 		MockServerWebExchange exchange = MockServerWebExchange.from(builder);
-		return new ForwardedHeaderTransformer().apply(exchange.getRequest());
+		return new ForwardedHeaderTransformer(useStandardForwardedHeader).apply(exchange.getRequest());
 	}
 
 }

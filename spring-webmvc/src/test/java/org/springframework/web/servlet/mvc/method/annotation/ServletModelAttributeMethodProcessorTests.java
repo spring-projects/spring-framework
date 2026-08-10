@@ -108,7 +108,7 @@ class ServletModelAttributeMethodProcessorTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void createAttributeUriTemplateVarWithOptional() throws Exception {
+	void createAttributeUriTemplateVarWithOptional() throws Exception {
 		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("testBean3", "Patty");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
@@ -143,7 +143,7 @@ class ServletModelAttributeMethodProcessorTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void createAttributeRequestParameterWithOptional() throws Exception {
+	void createAttributeRequestParameterWithOptional() throws Exception {
 		request.addParameter("testBean3", "Patty");
 
 		Optional<TestBean> testBean = (Optional<TestBean>) processor.resolveArgument(
@@ -154,7 +154,7 @@ class ServletModelAttributeMethodProcessorTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void attributesAsNullValues() throws Exception {
+	void attributesAsNullValues() throws Exception {
 		request.addParameter("name", "Patty");
 
 		mavContainer.getModel().put("testBean1", null);
@@ -174,7 +174,7 @@ class ServletModelAttributeMethodProcessorTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void attributesAsOptionalEmpty() throws Exception {
+	void attributesAsOptionalEmpty() throws Exception {
 		request.addParameter("name", "Patty");
 
 		mavContainer.getModel().put("testBean1", Optional.empty());

@@ -5,7 +5,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/" />
+    <mvc:resources mapping="/resources/**" location="/static, classpath:/META-INF/" />
 
     <mvc:annotation-driven>
         <mvc:path-matching

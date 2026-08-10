@@ -188,7 +188,7 @@ the content negotiation during the error handling phase will decide which conten
 | `View`
 | A `View` instance to use for rendering together with the implicit model -- determined
   through command objects and `@ModelAttribute` methods. The handler method may also
-  programmatically enrich the model by declaring a `Model` argument (descried earlier).
+  programmatically enrich the model by declaring a `Model` argument (described earlier).
 
 | `java.util.Map`, `org.springframework.ui.Model`
 | Attributes to be added to the implicit model with the view name implicitly determined

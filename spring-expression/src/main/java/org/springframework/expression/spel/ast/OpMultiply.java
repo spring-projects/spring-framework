@@ -82,6 +82,7 @@ public class OpMultiply extends Operator {
 		Object rightOperand = getRightOperand().getValueInternal(state).getValue();
 
 		if (leftOperand instanceof Number leftNumber && rightOperand instanceof Number rightNumber) {
+			state.trackOperation();
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
@@ -116,6 +117,7 @@ public class OpMultiply extends Operator {
 
 		if (leftOperand instanceof String text && rightOperand instanceof Integer count) {
 			checkRepeatedTextSize(text, count);
+			state.trackOperation();
 			return new TypedValue(text.repeat(count));
 		}
 
@@ -127,9 +129,9 @@ public class OpMultiply extends Operator {
 			throw new SpelEvaluationException(getStartPosition(),
 					SpelMessage.NEGATIVE_REPEATED_TEXT_COUNT, count);
 		}
-		int result = text.length() * count;
+		long result = (long) text.length() * (long) count;
 		if (result < 0 || result > MAX_REPEATED_TEXT_SIZE) {
-			throw new SpelEvaluationException(getStartPosition(),
+			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.MAX_REPEATED_TEXT_SIZE_EXCEEDED, MAX_REPEATED_TEXT_SIZE);
 		}
 	}

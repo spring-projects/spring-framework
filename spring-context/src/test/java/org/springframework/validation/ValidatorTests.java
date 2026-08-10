@@ -28,14 +28,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ValidatorTests {
 
 	@Test
-	void testSupportsForInstanceOf() {
+	void supportsForInstanceOf() {
 		Validator validator = Validator.forInstanceOf(TestBean.class, (testBean, errors) -> {});
 		assertThat(validator.supports(TestBean.class)).isTrue();
 		assertThat(validator.supports(TestBeanSubclass.class)).isTrue();
 	}
 
 	@Test
-	void testSupportsForType() {
+	void supportsForType() {
 		Validator validator = Validator.forType(TestBean.class, (testBean, errors) -> {});
 		assertThat(validator.supports(TestBean.class)).isTrue();
 		assertThat(validator.supports(TestBeanSubclass.class)).isFalse();

@@ -110,6 +110,7 @@ public class HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @deprecated in favor of {@link #HttpEntity(HttpHeaders)}
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
 	public HttpEntity(MultiValueMap<String, String> headers) {
 		this(null, headers);

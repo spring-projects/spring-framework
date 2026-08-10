@@ -40,6 +40,8 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 
 	private boolean autoGrowNestedPaths = false;
 
+	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
+
 	boolean suppressNotWritablePropertyException = false;
 
 
@@ -61,6 +63,16 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	@Override
 	public boolean isAutoGrowNestedPaths() {
 		return this.autoGrowNestedPaths;
+	}
+
+	@Override
+	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
+		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
+	}
+
+	@Override
+	public int getAutoGrowCollectionLimit() {
+		return this.autoGrowCollectionLimit;
 	}
 
 

@@ -81,7 +81,8 @@ public abstract class Jackson2CodecSupport {
 	private static final List<MimeType> defaultMimeTypes = List.of(
 			MediaType.APPLICATION_JSON,
 			new MediaType("application", "*+json"),
-			MediaType.APPLICATION_NDJSON);
+			MediaType.APPLICATION_NDJSON,
+			MediaType.APPLICATION_JSONL);
 
 
 	protected final Log logger = HttpLogging.forLogName(getClass());

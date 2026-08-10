@@ -29,7 +29,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +36,6 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.config.EnableWebFlux;
@@ -60,8 +58,6 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  */
 class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private final RestTemplate restTemplate = new RestTemplate();
-
 
 	@Override
 	protected HttpHandler createHttpHandler() {
@@ -76,8 +72,8 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	void mono(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<Person> result =
-				this.restTemplate.getForEntity("http://localhost:" + this.port + "/mono", Person.class);
+		ResponseEntity<Person> result = getRestClient().get().uri("http://localhost:" + this.port + "/mono")
+				.retrieve().toEntity(Person.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody().getName()).isEqualTo("John");
@@ -87,10 +83,8 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	void flux(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<>() {};
-		ResponseEntity<List<Person>> result =
-				this.restTemplate
-						.exchange("http://localhost:" + this.port + "/flux", HttpMethod.GET, null, reference);
+		ResponseEntity<List<Person>> result = getRestClient().get().uri("http://localhost:" + this.port + "/flux")
+				.retrieve().toEntity(new ParameterizedTypeReference<>() {});
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		List<Person> body = result.getBody();
@@ -103,8 +97,8 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	void controller(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<Person> result =
-				this.restTemplate.getForEntity("http://localhost:" + this.port + "/controller", Person.class);
+		ResponseEntity<Person> result = getRestClient().get().uri("http://localhost:" + this.port + "/controller")
+				.retrieve().toEntity(Person.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody().getName()).isEqualTo("John");
@@ -114,9 +108,8 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	void attributes(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<String> result =
-				this.restTemplate
-						.getForEntity("http://localhost:" + this.port + "/attributes/bar", String.class);
+		ResponseEntity<String> result = getRestClient().get().uri("http://localhost:" + this.port + "/attributes/bar")
+				.retrieve().toEntity(String.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
@@ -125,8 +118,8 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	void nested(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		ResponseEntity<String> result = this.restTemplate
-				.getForEntity("http://localhost:" + this.port + "/foo/bar", String.class);
+		ResponseEntity<String> result = getRestClient().get().uri("http://localhost:" + this.port + "/foo/bar")
+				.retrieve().toEntity(String.class);
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}

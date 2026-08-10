@@ -34,8 +34,10 @@ import org.springframework.aot.hint.annotation.Reflective;
  * fields, it is expected that the composed annotation is meta-annotated with
  * {@link Target @Target(ElementType.FIELD)}. However, certain bean override
  * annotations may be declared with an additional {@code ElementType.TYPE} target
- * for use at the type level, as is the case for {@code @MockitoBean} which can
- * be declared on a field, test class, or test interface.
+ * for use at the type level. Similarly, as of Spring Framework 7.1, certain bean
+ * override annotations may be declared with an additional {@code ElementType.PARAMETER}
+ * target for use on constructor parameters. For example, {@code @MockitoBean} can
+ * be declared on a field, constructor parameter, test class, or test interface.
  *
  * <p>For concrete examples of such composed annotations, see
  * {@link org.springframework.test.context.bean.override.convention.TestBean @TestBean},

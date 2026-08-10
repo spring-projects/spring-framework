@@ -74,7 +74,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	/** Static evaluation context to reuse. */
 	private static final EvaluationContext messageEvalContext =
-			SimpleEvaluationContext.forPropertyAccessors(new SimpMessageHeaderPropertyAccessor()).build();
+			SimpleEvaluationContext.forPropertyAccessors(new SimpMessageHeaderPropertyAccessor())
+					.withAssignmentDisabled().build();
 
 
 	private PathMatcher pathMatcher = new AntPathMatcher();

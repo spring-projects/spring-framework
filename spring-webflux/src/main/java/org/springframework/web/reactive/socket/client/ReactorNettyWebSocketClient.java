@@ -51,10 +51,6 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	private final Supplier<WebsocketClientSpec.Builder> specBuilderSupplier;
 
-	private @Nullable Integer maxFramePayloadLength;
-
-	private @Nullable Boolean handlePing;
-
 
 	/**
 	 * Default constructor.
@@ -102,19 +98,13 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	 * @since 5.3
 	 */
 	public WebsocketClientSpec getWebsocketClientSpec() {
-		return buildSpec(null);
+		return buildWebSocketClientSpec(null);
 	}
 
-	private WebsocketClientSpec buildSpec(@Nullable String protocols) {
+	private WebsocketClientSpec buildWebSocketClientSpec(@Nullable String protocols) {
 		WebsocketClientSpec.Builder builder = this.specBuilderSupplier.get();
 		if (StringUtils.hasText(protocols)) {
 			builder.protocols(protocols);
-		}
-		if (this.maxFramePayloadLength != null) {
-			builder.maxFramePayloadLength(this.maxFramePayloadLength);
-		}
-		if (this.handlePing != null) {
-			builder.handlePing(this.handlePing);
 		}
 		return builder.build();
 	}
@@ -127,16 +117,18 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		String protocols = StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols());
+		WebsocketClientSpec clientSpec = buildWebSocketClientSpec(protocols);
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
-				.websocket(buildSpec(protocols))
+				.websocket(clientSpec)
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);
 					String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
 					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(outbound.alloc());
-					WebSocketSession session = new ReactorNettyWebSocketSession(inbound, outbound, info, factory);
+					WebSocketSession session = new ReactorNettyWebSocketSession(
+							inbound, outbound, info, factory, clientSpec.maxFramePayloadLength());
 					if (logger.isDebugEnabled()) {
 						logger.debug("Started session '" + session.getId() + "' for " + url);
 					}

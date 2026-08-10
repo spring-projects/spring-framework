@@ -16,20 +16,27 @@
 
 package org.springframework.web.accept;
 
+import java.util.function.Predicate;
+
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.util.Assert;
 import org.springframework.web.util.ServletRequestPathUtils;
 
+
 /**
  * {@link ApiVersionResolver} that extract the version from a path segment.
  *
- * <p>Note that this resolver will either resolve the version from the specified
- * path segment, or raise an {@link InvalidApiVersionException}, e.g. if there
- * are not enough path segments. It never returns {@code null}, and therefore
- * cannot yield to other resolvers.
+ * <p>If the resolver is created with a path index only, it will always return
+ * a version, or raise an {@link InvalidApiVersionException}, but never
+ * return {@code null}.
+ *
+ * <p>The resolver can also be created with an additional
+ * {@code Predicate<RequestPath>} that provides more flexibility in deciding
+ * whether a given path is versioned or not, possibly resolving to {@code null}.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
@@ -37,6 +44,8 @@ import org.springframework.web.util.ServletRequestPathUtils;
 public class PathApiVersionResolver implements ApiVersionResolver {
 
 	private final int pathSegmentIndex;
+
+	private @Nullable Predicate<RequestPath> versionPathPredicate;
 
 
 	/**
@@ -49,13 +58,22 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 		this.pathSegmentIndex = pathSegmentIndex;
 	}
 
+	/**
+	 * Constructor variant of {@link #PathApiVersionResolver(int)} with an
+	 * additional {@code Predicate<RequestPath>} to help determine whether
+	 * a given path is versioned (true) or not (false).
+	 */
+	public PathApiVersionResolver(int pathSegmentIndex, Predicate<RequestPath> versionPathPredicate) {
+		this(pathSegmentIndex);
+		this.versionPathPredicate = versionPathPredicate;
+	}
 
 	@Override
-	public String resolveVersion(HttpServletRequest request) {
-		if (!ServletRequestPathUtils.hasParsedRequestPath(request)) {
-			throw new IllegalStateException("Expected parsed request path");
-		}
+	public @Nullable String resolveVersion(HttpServletRequest request) {
 		RequestPath path = ServletRequestPathUtils.getParsedRequestPath(request);
+		if (!isVersionedPath(path)) {
+			return null;
+		}
 		int i = 0;
 		for (PathContainer.Element element : path.pathWithinApplication().elements()) {
 			if (element instanceof PathContainer.PathSegment && i++ == this.pathSegmentIndex) {
@@ -63,6 +81,10 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 			}
 		}
 		throw new InvalidApiVersionException("No path segment at index " + this.pathSegmentIndex);
+	}
+
+	private boolean isVersionedPath(RequestPath path) {
+		return (this.versionPathPredicate == null || this.versionPathPredicate.test(path));
 	}
 
 }

@@ -94,6 +94,12 @@ public abstract class ClassUtils {
 	/** The ".class" file suffix. */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
+	/**
+	 * The ".package-info" suffix for package class names.
+	 * @since 7.0.8
+	 */
+	public static final String PACKAGE_INFO_SUFFIX = ".package-info";
+
 	/** Precomputed value for the combination of private, static and final modifiers. */
 	private static final int NON_OVERRIDABLE_MODIFIER = Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL;
 
@@ -1126,10 +1132,25 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Return the {@linkplain Class#getCanonicalName() canonical name} of the given
+	 * class, or the {@linkplain Class#getTypeName() type name} of the class if the
+	 * canonical name does not exist.
+	 * @param clazz the class
+	 * @return the canonical name of the class, or the type name as a fallback
+	 * @since 7.1
+	 */
+	public static String getCanonicalName(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		String canonicalName = clazz.getCanonicalName();
+		return (canonicalName != null ? canonicalName : clazz.getTypeName());
+	}
+
+	/**
 	 * Return the qualified name of the given class: usually simply
 	 * the class name, but component type class name + "[]" for arrays.
 	 * @param clazz the class
 	 * @return the qualified name of the class
+	 * @see Class#getTypeName()
 	 */
 	public static String getQualifiedName(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");

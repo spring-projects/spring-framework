@@ -182,7 +182,7 @@ class ResourceRegionHttpMessageConverterTests {
 	}
 
 	@Test // SPR-15041
-	public void applicationOctetStreamDefaultContentType() throws Exception {
+	void applicationOctetStreamDefaultContentType() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		ClassPathResource body = mock();
 		given(body.getFilename()).willReturn("spring.dat");

@@ -67,7 +67,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	@Test
 	@Override
-	public void canDecode() {
+	protected void canDecode() {
 		assertThat(this.decoder.canDecode(forClass(Msg.class), null)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_PROTOBUF)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.parseMediaType("application/vnd.example.public.v1+x-protobuf"))).isTrue();
@@ -78,7 +78,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	@Test
 	@Override
-	public void decodeToMono() {
+	protected void decodeToMono() {
 		Mono<DataBuffer> input = dataBuffer(this.testMsg1);
 
 		testDecodeToMonoAll(input, Msg.class, step -> step
@@ -107,7 +107,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 	@Test
 	@Override
 	@SuppressWarnings("deprecation")
-	public void decode() {
+	protected void decode() {
 		Flux<DataBuffer> input = Flux.just(this.testMsg1, this.testMsg2)
 				.flatMap(msg -> Mono.defer(() -> {
 					DataBuffer buffer = this.bufferFactory.allocateBuffer();
@@ -129,7 +129,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void decodeSplitChunks() {
+	void decodeSplitChunks() {
 		Flux<DataBuffer> input = Flux.just(this.testMsg1, this.testMsg2)
 				.flatMap(msg -> Mono.defer(() -> {
 					DataBuffer buffer = this.bufferFactory.allocateBuffer();
@@ -161,7 +161,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	@Test  // SPR-17429
 	@SuppressWarnings("deprecation")
-	public void decodeSplitMessageSize() {
+	void decodeSplitMessageSize() {
 		this.decoder.setMaxMessageSize(100009);
 		Msg bigMessage = Msg.newBuilder().setFoo("azertyuiop".repeat(10000))
 				.setBlah(secondMsg2).build();
@@ -197,7 +197,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void decodeMergedChunks() throws IOException {
+	void decodeMergedChunks() throws IOException {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer();
 		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
 		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());

@@ -27,6 +27,23 @@ import org.springframework.core.convert.TypeDescriptor;
  *
  * <p>Provides a common abstraction for expression evaluation.
  *
+ * <p>An {@code Expression} is intended to be parsed once and evaluated repeatedly,
+ * potentially against different root objects and different {@link EvaluationContext}
+ * instances. For performance, an {@code Expression} implementation may internally
+ * cache the specific accessor or executor &mdash; for example, a
+ * {@code PropertyAccessor}, {@code IndexAccessor}, {@code MethodExecutor}, or
+ * {@code ConstructorExecutor} &mdash; that satisfied a previous evaluation, in order
+ * to avoid repeatedly asking every candidate registered with the context. Reusing a
+ * parsed {@code Expression} across {@code EvaluationContext} instances of the same
+ * type and with equivalent configuration is supported; however, reusing a parsed
+ * {@code Expression} across contexts with different security implications &mdash; for
+ * example, first against a {@code StandardEvaluationContext} and later against a
+ * {@code SimpleEvaluationContext} &mdash; is not supported, since cached state from a
+ * more permissive evaluation may be reused during a subsequent, more restrictive
+ * evaluation. If the same expression string must be evaluated under contexts with
+ * different security implications, parse it into distinct {@code Expression}
+ * instances, one per context.
+ *
  * @author Keith Donald
  * @author Andy Clement
  * @author Juergen Hoeller

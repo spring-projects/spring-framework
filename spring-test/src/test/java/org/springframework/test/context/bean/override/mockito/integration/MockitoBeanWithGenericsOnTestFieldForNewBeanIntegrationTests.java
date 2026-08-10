@@ -52,7 +52,7 @@ class MockitoBeanWithGenericsOnTestFieldForNewBeanIntegrationTests {
 
 
 	@Test
-	void testMocking() {
+	void mocking() {
 		given(stringService.greeting()).willReturn("Hello");
 		given(integerService.greeting()).willReturn(42);
 		assertThat(caller.sayGreeting()).isEqualTo("I say Hello 42");

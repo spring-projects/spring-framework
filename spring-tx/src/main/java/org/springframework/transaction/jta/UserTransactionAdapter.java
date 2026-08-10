@@ -16,15 +16,22 @@
 
 package org.springframework.transaction.jta;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import jakarta.transaction.HeuristicMixedException;
 import jakarta.transaction.HeuristicRollbackException;
 import jakarta.transaction.NotSupportedException;
 import jakarta.transaction.RollbackException;
 import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.UserTransaction;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Adapter for a JTA UserTransaction handle, taking a JTA
@@ -40,10 +47,21 @@ import org.springframework.util.Assert;
  * <p>Used internally by Spring's {@link JtaTransactionManager} for certain
  * scenarios. Not intended for direct use in application code.
  *
+ * <p>As of Spring Framework 7.1, this adapter supports the JTA 2.1
+ * read-only methods as well.
+ *
  * @author Juergen Hoeller
  * @since 1.1.5
  */
 public class UserTransactionAdapter implements UserTransaction {
+
+	// JTA 2.1 TransactionManager#begin(boolean) method available?
+	private static final @Nullable Method beginWithReadOnlyMethod =
+			ClassUtils.getMethodIfAvailable(TransactionManager.class, "begin", boolean.class);
+
+	// JTA 2.1 Transaction#begin(boolean) method available?
+	private static final @Nullable Method isReadOnlyMethod =
+			ClassUtils.getMethodIfAvailable(Transaction.class, "isReadOnly");
 
 	private final TransactionManager transactionManager;
 
@@ -75,10 +93,41 @@ public class UserTransactionAdapter implements UserTransaction {
 		this.transactionManager.begin();
 	}
 
+	/**
+	 * JTA 2.1 begin(boolean) method.
+	 * @since 7.1
+	 */
+	// @Override - on JTA 2.1
+	public void begin(boolean isReadOnly) throws NotSupportedException, SystemException {
+		if (beginWithReadOnlyMethod == null) {
+			if (isReadOnly) {
+				throw new NotSupportedException("begin(true) requires JTA 2.1");
+			}
+			this.transactionManager.begin();
+			return;
+		}
+
+		try {
+			beginWithReadOnlyMethod.invoke(this.transactionManager, isReadOnly);
+		}
+		catch (Exception ex) {
+			if (ex instanceof InvocationTargetException ite) {
+				if (ite.getTargetException() instanceof NotSupportedException nse) {
+					throw nse;
+				}
+				if (ite.getTargetException() instanceof SystemException se) {
+					throw se;
+				}
+			}
+			ReflectionUtils.handleReflectionException(ex);
+		}
+	}
+
 	@Override
 	public void commit()
 			throws RollbackException, HeuristicMixedException, HeuristicRollbackException,
 			SecurityException, SystemException {
+
 		this.transactionManager.commit();
 	}
 
@@ -95,6 +144,29 @@ public class UserTransactionAdapter implements UserTransaction {
 	@Override
 	public int getStatus() throws SystemException {
 		return this.transactionManager.getStatus();
+	}
+
+	/**
+	 * JTA 2.1 isReadOnly() method.
+	 * @since 7.1
+	 */
+	// @Override - on JTA 2.1
+	public boolean isReadOnly() throws SystemException {
+		if (isReadOnlyMethod != null) {
+			Transaction transaction = this.transactionManager.getTransaction();
+			try {
+				return (Boolean) isReadOnlyMethod.invoke(transaction);
+			}
+			catch (Exception ex) {
+				if (ex instanceof InvocationTargetException ite &&
+						ite.getTargetException() instanceof SystemException se) {
+					throw se;
+				}
+				ReflectionUtils.handleReflectionException(ex);
+			}
+		}
+
+		return false;
 	}
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,6 +65,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 06.01.2003
  * @see DefaultListableBeanFactory
  */
@@ -144,6 +146,17 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		}
 
 		if (requiredType != null && !requiredType.isInstance(bean)) {
+			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+		}
+		return (T) bean;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		Object bean = getBean(name);
+		Type requiredType = typeReference.getType();
+		if (!ResolvableType.forType(requiredType).isInstance(bean)) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 		}
 		return (T) bean;

@@ -56,7 +56,7 @@ class ListenerReadPublisherTests {
 	}
 
 	@Test // SPR-17410
-	public void discardDataOnError() {
+	void discardDataOnError() {
 
 		this.subscriber.getSubscription().request(2);
 		this.publisher.onDataAvailable();
@@ -67,7 +67,7 @@ class ListenerReadPublisherTests {
 	}
 
 	@Test // SPR-17410
-	public void discardDataOnCancel() {
+	void discardDataOnCancel() {
 
 		this.subscriber.getSubscription().request(2);
 		this.subscriber.setCancelOnNext(true);

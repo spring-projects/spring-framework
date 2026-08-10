@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.function.IOConsumer;
 
 /**
  * Interface for a resource descriptor that abstracts from the actual
@@ -154,6 +155,26 @@ public interface Resource extends InputStreamSource {
 	 */
 	default ReadableByteChannel readableChannel() throws IOException {
 		return Channels.newChannel(getInputStream());
+	}
+
+	/**
+	 * Process the contents of this resource through the given consumer callback.
+	 * <p>The given consumer will be invoked a single time by default - but may
+	 * also be invoked multiple times in case of a multi-content resource handle,
+	 * for example returned from a
+	 * {@link ResourceLoader#getResource getResource("classpath*:...")} call.
+	 * While {@link #getInputStream()} returns a merged sequence of content
+	 * in such a case, this method performs one callback per file content.
+	 * @param consumer a consumer for each InputStream
+	 * @throws IOException in case of general resolution/reading failures
+	 * @since 7.1
+	 * @see #getInputStream()
+	 * @see ResourceLoader#CLASSPATH_ALL_URL_PREFIX
+	 */
+	default void consumeContent(IOConsumer<InputStream> consumer) throws IOException {
+		try (InputStream inputStream = getInputStream()) {
+			consumer.accept(inputStream);
+		}
 	}
 
 	/**

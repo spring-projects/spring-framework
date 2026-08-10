@@ -917,6 +917,14 @@ public abstract class DataBufferUtils {
 			super(delimiter);
 			Assert.isTrue(delimiter.length == 2, "Expected a 2-byte delimiter");
 		}
+
+		@Override
+		public boolean match(byte b) {
+			if (getMatches() > 0 && b != delimiter()[getMatches()]) {
+				setMatches(0);
+			}
+			return super.match(b);
+		}
 	}
 
 
@@ -1138,9 +1146,11 @@ public abstract class DataBufferUtils {
 		protected void hookOnNext(DataBuffer dataBuffer) {
 			try {
 				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
-					ByteBuffer byteBuffer = iterator.next();
-					while (byteBuffer.hasRemaining()) {
-						this.channel.write(byteBuffer);
+					while (iterator.hasNext()) {
+						ByteBuffer byteBuffer = iterator.next();
+						while (byteBuffer.hasRemaining()) {
+							this.channel.write(byteBuffer);
+						}
 					}
 				}
 				this.sink.next(dataBuffer);
@@ -1213,6 +1223,11 @@ public abstract class DataBufferUtils {
 					failed(ex, attachment);
 				}
 			}
+			else {
+				iterator.close();
+				this.sink.next(dataBuffer);
+				request(1);
+			}
 		}
 
 		@Override
@@ -1236,7 +1251,6 @@ public abstract class DataBufferUtils {
 		@Override
 		public void completed(Integer written, Attachment attachment) {
 			DataBuffer.ByteBufferIterator iterator = attachment.iterator();
-			iterator.close();
 
 			long pos = this.position.addAndGet(written);
 			ByteBuffer byteBuffer = attachment.byteBuffer();
@@ -1246,9 +1260,11 @@ public abstract class DataBufferUtils {
 			}
 			else if (iterator.hasNext()) {
 				ByteBuffer next = iterator.next();
-				this.channel.write(next, pos, attachment, this);
+				Attachment nextAttachment = new Attachment(next, attachment.dataBuffer(), iterator);
+				this.channel.write(next, pos, nextAttachment, this);
 			}
 			else {
+				iterator.close();
 				this.sink.next(attachment.dataBuffer());
 				this.writing.set(false);
 

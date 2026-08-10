@@ -61,7 +61,7 @@ class CacheOperationExpressionEvaluatorTests {
 
 
 	@Test
-	void testMultipleCachingSource() {
+	void multipleCachingSource() {
 		Collection<CacheOperation> ops = getOps("multipleCaching");
 		assertThat(ops).hasSize(2);
 		Iterator<CacheOperation> it = ops.iterator();
@@ -76,7 +76,7 @@ class CacheOperationExpressionEvaluatorTests {
 	}
 
 	@Test
-	void testMultipleCachingEval() {
+	void multipleCachingEval() {
 		AnnotatedClass target = new AnnotatedClass();
 		Method method = ReflectionUtils.findMethod(
 				AnnotatedClass.class, "multipleCaching", Object.class, Object.class);

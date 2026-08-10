@@ -49,10 +49,9 @@ This strategy resolves the API version from a request. The WebFlux config provid
 options to resolve from a header, query parameter, media type parameter,
 or from the URL path. You can also use a custom `ApiVersionResolver`.
 
-NOTE: The path resolver always resolves the version from the specified path segment, or
-raises `InvalidApiVersionException` otherwise, and therefore it cannot yield to other
-resolvers.
-
+The path resolver selects the version from a path segment specified by index, or
+raises `InvalidApiVersionException`, and therefore never results in `null` (no version)
+unless it is configured with a `Predicate<RequestPath>` to determine if a path is versioned.
 
 
 

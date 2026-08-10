@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION", "REMOVAL")
+
 package org.springframework.web.client
 
 import org.springframework.core.ParameterizedTypeReference

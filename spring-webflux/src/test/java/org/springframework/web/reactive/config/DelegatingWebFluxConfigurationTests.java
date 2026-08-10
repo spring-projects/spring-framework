@@ -56,7 +56,7 @@ import static org.mockito.Mockito.verify;
  * @author Brian Clozel
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class DelegatingWebFluxConfigurationTests {
+class DelegatingWebFluxConfigurationTests {
 
 	@Mock
 	private WebFluxConfigurer webFluxConfigurer;
@@ -114,8 +114,7 @@ public class DelegatingWebFluxConfigurationTests {
 		verify(webFluxConfigurer).configureArgumentResolvers(any());
 
 		assertThat(initializer).isNotNull();
-		boolean condition = initializer.getValidator() instanceof LocalValidatorFactoryBean;
-		assertThat(condition).isTrue();
+		assertThat(initializer.getValidator()).isInstanceOf(LocalValidatorFactoryBean.class);
 		assertThat(initializer.getConversionService()).isSameAs(formatterRegistry.getValue());
 		assertThat(codecsConfigurer.getValue().getReaders()).hasSize(16);
 	}

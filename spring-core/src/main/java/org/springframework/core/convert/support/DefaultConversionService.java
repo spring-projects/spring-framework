@@ -142,6 +142,9 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverterFactory(new StringToNumberConverterFactory());
 		converterRegistry.addConverter(Number.class, String.class, new ObjectToStringConverter());
 
+		converterRegistry.addConverter(new StringToDataSizeConverter());
+		converterRegistry.addConverter(new NumberToDataSizeConverter());
+
 		converterRegistry.addConverter(new StringToCharacterConverter());
 		converterRegistry.addConverter(Character.class, String.class, new ObjectToStringConverter());
 

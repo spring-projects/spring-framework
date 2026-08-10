@@ -34,10 +34,10 @@ import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
 import org.springframework.http.converter.smile.JacksonSmileHttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
@@ -76,39 +76,39 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 	abstract static class DefaultBuilder {
 
-		private static final boolean JACKSON_PRESENT;
+		static final boolean JACKSON_PRESENT;
 
-		private static final boolean JACKSON_2_PRESENT;
+		static final boolean JACKSON_2_PRESENT;
 
-		private static final boolean GSON_PRESENT;
+		static final boolean GSON_PRESENT;
 
-		private static final boolean JSONB_PRESENT;
+		static final boolean JSONB_PRESENT;
 
-		private static final boolean KOTLIN_SERIALIZATION_JSON_PRESENT;
+		static final boolean KOTLIN_SERIALIZATION_JSON_PRESENT;
 
-		private static final boolean JACKSON_XML_PRESENT;
+		static final boolean JACKSON_XML_PRESENT;
 
-		private static final boolean JACKSON_2_XML_PRESENT;
+		static final boolean JACKSON_2_XML_PRESENT;
 
-		private static final boolean JAXB_2_PRESENT;
+		static final boolean JAXB_2_PRESENT;
 
-		private static final boolean JACKSON_SMILE_PRESENT;
+		static final boolean JACKSON_SMILE_PRESENT;
 
-		private static final boolean JACKSON_2_SMILE_PRESENT;
+		static final boolean JACKSON_2_SMILE_PRESENT;
 
-		private static final boolean JACKSON_CBOR_PRESENT;
+		static final boolean JACKSON_CBOR_PRESENT;
 
-		private static final boolean JACKSON_2_CBOR_PRESENT;
+		static final boolean JACKSON_2_CBOR_PRESENT;
 
-		private static final boolean KOTLIN_SERIALIZATION_CBOR_PRESENT;
+		static final boolean KOTLIN_SERIALIZATION_CBOR_PRESENT;
 
-		private static final boolean JACKSON_YAML_PRESENT;
+		static final boolean JACKSON_YAML_PRESENT;
 
-		private static final boolean JACKSON_2_YAML_PRESENT;
+		static final boolean JACKSON_2_YAML_PRESENT;
 
-		private static final boolean KOTLIN_SERIALIZATION_PROTOBUF_PRESENT;
+		static final boolean KOTLIN_SERIALIZATION_PROTOBUF_PRESENT;
 
-		private static final boolean ROME_PRESENT;
+		static final boolean ROME_PRESENT;
 
 		boolean registerDefaults;
 
@@ -119,6 +119,8 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Nullable HttpMessageConverter<?> resourceConverter;
 
 		@Nullable HttpMessageConverter<?> resourceRegionConverter;
+
+		@Nullable HttpMessageConverter<?> formConverter;
 
 		@Nullable Consumer<HttpMessageConverter<?>> configurer;
 
@@ -173,6 +175,11 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		void setStringConverter(HttpMessageConverter<?> stringConverter) {
 			checkConverterSupports(stringConverter, MediaType.TEXT_PLAIN);
 			this.stringConverter = stringConverter;
+		}
+
+		public void setFormConverter(HttpMessageConverter<?> formConverter) {
+			checkConverterSupports(formConverter, MediaType.APPLICATION_FORM_URLENCODED);
+			this.formConverter = formConverter;
 		}
 
 		void setKotlinSerializationJsonConverter(HttpMessageConverter<?> kotlinJsonConverter) {
@@ -241,6 +248,9 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			if (this.stringConverter != null) {
 				converters.add(this.stringConverter);
 			}
+			if (this.formConverter != null) {
+				converters.add(this.formConverter);
+			}
 			return converters;
 		}
 
@@ -288,6 +298,9 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 			if (this.stringConverter == null) {
 				this.stringConverter = new StringHttpMessageConverter();
+			}
+			if (this.formConverter == null) {
+				this.formConverter = new FormHttpMessageConverter();
 			}
 			if (this.kotlinJsonConverter == null) {
 				if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
@@ -402,6 +415,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		@Override
+		public ClientBuilder withFormConverter(HttpMessageConverter<?> formMessageConverter) {
+			setFormConverter(formMessageConverter);
+			return this;
+		}
+
+		@Override
 		public ClientBuilder withKotlinSerializationJsonConverter(HttpMessageConverter<?> kotlinSerializationJsonConverter) {
 			setKotlinSerializationJsonConverter(kotlinSerializationJsonConverter);
 			return this;
@@ -462,6 +481,23 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		@Override
+		void detectMessageConverters() {
+			super.detectMessageConverters();
+			// client-specific detection behavior
+			if (this.xmlConverter == null) {
+				if (JACKSON_XML_PRESENT) {
+					this.xmlConverter = new JacksonXmlHttpMessageConverter();
+				}
+				else if (JACKSON_2_XML_PRESENT) {
+					this.xmlConverter = new MappingJackson2XmlHttpMessageConverter();
+				}
+				else if (JAXB_2_PRESENT) {
+					this.xmlConverter = new Jaxb2RootElementHttpMessageConverter();
+				}
+			}
+		}
+
+		@Override
 		public HttpMessageConverters build() {
 			if (this.registerDefaults) {
 				this.resourceConverter = new ResourceHttpMessageConverter(false);
@@ -469,19 +505,20 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			}
 			List<HttpMessageConverter<?>> partConverters = new ArrayList<>(this.getCustomConverters());
 			List<HttpMessageConverter<?>> allConverters = new ArrayList<>(this.getCustomConverters());
-			if (this.registerDefaults) {
+			allConverters.addAll(this.getBaseConverters());
+			if (this.resourceConverter != null) {
+				allConverters.add(this.resourceConverter);
+			}
+			if (!this.getCoreConverters().isEmpty()) {
+				// use separate instances of base converters for multipart
+				partConverters.addAll(List.of(new ByteArrayHttpMessageConverter(),
+						new StringHttpMessageConverter(), new ResourceHttpMessageConverter()));
 				partConverters.addAll(this.getCoreConverters());
-				allConverters.addAll(this.getBaseConverters());
-				if (this.resourceConverter != null) {
-					allConverters.add(this.resourceConverter);
-				}
 			}
 			if (!partConverters.isEmpty() || !allConverters.isEmpty()) {
-				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
+				allConverters.add(new MultipartHttpMessageConverter(partConverters));
 			}
-			if (this.registerDefaults) {
-				allConverters.addAll(this.getCoreConverters());
-			}
+			allConverters.addAll(this.getCoreConverters());
 			if (this.convertersListConfigurer != null) {
 				this.convertersListConfigurer.accept(allConverters);
 			}
@@ -510,6 +547,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public ServerBuilder withStringConverter(HttpMessageConverter<?> stringConverter) {
 			setStringConverter(stringConverter);
+			return this;
+		}
+
+		@Override
+		public ServerBuilder withFormConverter(HttpMessageConverter<?> formMessageConverter) {
+			setFormConverter(formMessageConverter);
 			return this;
 		}
 
@@ -574,6 +617,20 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		@Override
+		void detectMessageConverters() {
+			super.detectMessageConverters();
+			// server-specific detection behavior
+			if (this.xmlConverter == null) {
+				if (JACKSON_XML_PRESENT) {
+					this.xmlConverter = new JacksonXmlHttpMessageConverter();
+				}
+				else if (JACKSON_2_XML_PRESENT) {
+					this.xmlConverter = new MappingJackson2XmlHttpMessageConverter();
+				}
+			}
+		}
+
+		@Override
 		public HttpMessageConverters build() {
 			if (this.registerDefaults) {
 				this.resourceConverter = new ResourceHttpMessageConverter();
@@ -582,22 +639,23 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			}
 			List<HttpMessageConverter<?>> partConverters = new ArrayList<>(this.getCustomConverters());
 			List<HttpMessageConverter<?>> allConverters = new ArrayList<>(this.getCustomConverters());
-			if (this.registerDefaults) {
+			allConverters.addAll(this.getBaseConverters());
+			if (this.resourceConverter != null) {
+				allConverters.add(this.resourceConverter);
+			}
+			if (this.resourceRegionConverter != null) {
+				allConverters.add(this.resourceRegionConverter);
+			}
+			if (!this.getCoreConverters().isEmpty()) {
+				// use separate instances of base converters for multipart
+				partConverters.addAll(List.of(new ByteArrayHttpMessageConverter(),
+						new StringHttpMessageConverter(), new ResourceHttpMessageConverter()));
 				partConverters.addAll(this.getCoreConverters());
-				allConverters.addAll(this.getBaseConverters());
-				if (this.resourceConverter != null) {
-					allConverters.add(this.resourceConverter);
-				}
-				if (this.resourceRegionConverter != null) {
-					allConverters.add(this.resourceRegionConverter);
-				}
 			}
 			if (!partConverters.isEmpty() || !allConverters.isEmpty()) {
-				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
+				allConverters.add(new MultipartHttpMessageConverter(partConverters));
 			}
-			if (this.registerDefaults) {
-				allConverters.addAll(this.getCoreConverters());
-			}
+			allConverters.addAll(this.getCoreConverters());
 			if (this.convertersListConfigurer != null) {
 				this.convertersListConfigurer.accept(allConverters);
 			}

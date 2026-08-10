@@ -56,7 +56,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 
 
 	@BeforeEach
-	public final void setUp() throws Exception {
+	final void setUp() throws Exception {
 		// set up a writer for the tag content to be written to
 		this.writer = new StringWriter();
 

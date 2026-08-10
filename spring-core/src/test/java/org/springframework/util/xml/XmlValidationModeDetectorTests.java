@@ -44,7 +44,8 @@ class XmlValidationModeDetectorTests {
 		"dtdWithTrailingComment.xml",
 		"dtdWithTrailingCommentAcrossMultipleLines.xml",
 		"dtdWithCommentOnNextLine.xml",
-		"dtdWithMultipleComments.xml"
+		"dtdWithMultipleComments.xml",
+		"dtdWithDoctypeInMultiLineCommentBody.xml"
 	})
 	void dtdDetection(String fileName) throws Exception {
 		assertValidationMode(fileName, VALIDATION_DTD);
@@ -55,7 +56,9 @@ class XmlValidationModeDetectorTests {
 		"xsdWithNoComments.xml",
 		"xsdWithMultipleComments.xml",
 		"xsdWithDoctypeInComment.xml",
-		"xsdWithDoctypeInOpenCommentWithAdditionalCommentOnSameLine.xml"
+		"xsdWithDoctypeInOpenCommentWithAdditionalCommentOnSameLine.xml",
+		"xsdWithDoctypeInMultiLineCommentBody.xml",
+		"xsdWithMultipleDoctypesInMultiLineCommentBody.xml"
 	})
 	void xsdDetection(String fileName) throws Exception {
 		assertValidationMode(fileName, VALIDATION_XSD);

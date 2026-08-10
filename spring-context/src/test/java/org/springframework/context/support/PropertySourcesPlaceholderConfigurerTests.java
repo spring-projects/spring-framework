@@ -241,7 +241,7 @@ class PropertySourcesPlaceholderConfigurerTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void explicitPropertySourcesExcludesLocalProperties() {
+	void explicitPropertySourcesExcludesLocalProperties() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -294,7 +294,7 @@ class PropertySourcesPlaceholderConfigurerTests {
 
 	@Test
 	// https://github.com/spring-projects/spring-framework/issues/27947
-	public void ignoreUnresolvablePlaceholdersInAtValueAnnotation__falseIsDefault() {
+	void ignoreUnresolvablePlaceholdersInAtValueAnnotation__falseIsDefault() {
 		MockPropertySource mockPropertySource = new MockPropertySource("test");
 		mockPropertySource.setProperty("my.key", "${enigma}");
 		@SuppressWarnings("resource")
@@ -311,7 +311,7 @@ class PropertySourcesPlaceholderConfigurerTests {
 
 	@Test
 	// https://github.com/spring-projects/spring-framework/issues/27947
-	public void ignoreUnresolvablePlaceholdersInAtValueAnnotation_true() {
+	void ignoreUnresolvablePlaceholdersInAtValueAnnotation_true() {
 		MockPropertySource mockPropertySource = new MockPropertySource("test");
 		mockPropertySource.setProperty("my.key", "${enigma}");
 		@SuppressWarnings("resource")
@@ -326,7 +326,7 @@ class PropertySourcesPlaceholderConfigurerTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void nestedUnresolvablePlaceholder() {
+	void nestedUnresolvablePlaceholder() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)
@@ -343,7 +343,7 @@ class PropertySourcesPlaceholderConfigurerTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void ignoredNestedUnresolvablePlaceholder() {
+	void ignoredNestedUnresolvablePlaceholder() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
 				genericBeanDefinition(TestBean.class)

@@ -71,7 +71,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testEventClassWithPayloadType() {
+	void eventClassWithPayloadType() {
 		ConfigurableApplicationContext ac = new AnnotationConfigApplicationContext(NumberHolderListener.class);
 
 		PayloadApplicationEvent<NumberHolder<Integer>> event = new PayloadApplicationEvent<>(this,
@@ -83,7 +83,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testEventClassWithPayloadTypeOnParentContext() {
+	void eventClassWithPayloadTypeOnParentContext() {
 		ConfigurableApplicationContext parent = new AnnotationConfigApplicationContext(NumberHolderListener.class);
 		ConfigurableApplicationContext ac = new GenericApplicationContext(parent);
 		ac.refresh();
@@ -98,7 +98,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testPayloadObjectWithPayloadType() {
+	void payloadObjectWithPayloadType() {
 		final NumberHolder<Integer> payload = new NumberHolder<>(42);
 
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(NumberHolderListener.class) {
@@ -116,7 +116,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testPayloadObjectWithPayloadTypeOnParentContext() {
+	void payloadObjectWithPayloadTypeOnParentContext() {
 		final NumberHolder<Integer> payload = new NumberHolder<>(42);
 
 		ConfigurableApplicationContext parent = new AnnotationConfigApplicationContext(NumberHolderListener.class);
@@ -137,7 +137,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testEventClassWithInterface() {
+	void eventClassWithInterface() {
 		ConfigurableApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
 
 		AuditablePayloadEvent<String> event = new AuditablePayloadEvent<>(this, "xyz");
@@ -148,7 +148,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testEventClassWithInterfaceOnParentContext() {
+	void eventClassWithInterfaceOnParentContext() {
 		ConfigurableApplicationContext parent = new AnnotationConfigApplicationContext(AuditableListener.class);
 		ConfigurableApplicationContext ac = new GenericApplicationContext(parent);
 		ac.refresh();
@@ -162,7 +162,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testProgrammaticEventListener() {
+	void programmaticEventListener() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
 		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (PayloadApplicationEvent::getPayload);
@@ -180,7 +180,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testProgrammaticEventListenerOnParentContext() {
+	void programmaticEventListenerOnParentContext() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
 		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (PayloadApplicationEvent::getPayload);
@@ -201,7 +201,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testProgrammaticPayloadListener() {
+	void programmaticPayloadListener() {
 		List<String> events = new ArrayList<>();
 		ApplicationListener<PayloadApplicationEvent<String>> listener = ApplicationListener.forPayload(events::add);
 		ApplicationListener<PayloadApplicationEvent<Integer>> mismatch = ApplicationListener.forPayload(Integer::intValue);
@@ -219,7 +219,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testProgrammaticPayloadListenerOnParentContext() {
+	void programmaticPayloadListenerOnParentContext() {
 		List<String> events = new ArrayList<>();
 		ApplicationListener<PayloadApplicationEvent<String>> listener = ApplicationListener.forPayload(events::add);
 		ApplicationListener<PayloadApplicationEvent<Integer>> mismatch = ApplicationListener.forPayload(Integer::intValue);
@@ -240,7 +240,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testPlainPayloadListener() {
+	void plainPayloadListener() {
 		ConfigurableApplicationContext ac = new AnnotationConfigApplicationContext(PlainPayloadListener.class);
 
 		String payload = "xyz";
@@ -251,7 +251,7 @@ class PayloadApplicationEventTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testPlainPayloadListenerOnParentContext() {
+	void plainPayloadListenerOnParentContext() {
 		ConfigurableApplicationContext parent = new AnnotationConfigApplicationContext(PlainPayloadListener.class);
 		ConfigurableApplicationContext ac = new GenericApplicationContext(parent);
 		ac.refresh();

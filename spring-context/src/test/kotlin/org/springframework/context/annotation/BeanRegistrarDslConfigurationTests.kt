@@ -84,7 +84,13 @@ class BeanRegistrarDslConfigurationTests {
 		assertThat(context.getBeanProvider<Bar>().singleOrNull()).isNotNull
 	}
 
+	@Test
+	fun containsBean() {
+		AnnotationConfigApplicationContext(ContainsBeanRegistrarKotlinConfiguration::class.java)
+	}
+
 	class Foo
+
 	data class Bar(val foo: Foo)
 	data class Baz(val message: String = "")
 	class Init  : InitializingBean {
@@ -144,5 +150,19 @@ class BeanRegistrarDslConfigurationTests {
 
 	private class ChainedBeanRegistrar : BeanRegistrarDsl({
 		register(SampleBeanRegistrar())
+	})
+
+	@Configuration
+	@Import(ContainsBeanRegistrar::class)
+	internal class ContainsBeanRegistrarKotlinConfiguration
+
+	private class ContainsBeanRegistrar : BeanRegistrarDsl({
+		assertThat(containsBean("foo")).isFalse()
+		assertThat(containsBean(Foo::class)).isFalse()
+		assertThat(containsBean<Foo>()).isFalse()
+		registerBean<Foo>("foo")
+		assertThat(containsBean("foo")).isTrue()
+		assertThat(containsBean(Foo::class)).isTrue()
+		assertThat(containsBean<Foo>()).isTrue()
 	})
 }

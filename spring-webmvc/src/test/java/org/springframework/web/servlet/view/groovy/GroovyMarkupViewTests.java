@@ -131,6 +131,7 @@ class GroovyMarkupViewTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void renderI18nTemplate() throws Exception {
 		Map<String, Object> model = Map.of("name", "Spring");
 		MockHttpServletResponse response = renderViewWithModel("i18n.tpl", model, Locale.FRANCE);

@@ -34,7 +34,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
  * Unit tests for {@link StandardApiVersionDeprecationHandler}.
  * @author Rossen Stoyanchev
  */
-public class StandardApiVersionDeprecationHandlerTests {
+class StandardApiVersionDeprecationHandlerTests {
 
 	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
 

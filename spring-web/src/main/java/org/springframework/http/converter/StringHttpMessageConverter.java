@@ -90,6 +90,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(String s, @Nullable MediaType contentType) {
+		return true;
+	}
+
+	@Override
 	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		long length = inputMessage.getHeaders().getContentLength();
@@ -161,6 +166,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(String s) {
 		return true;
 	}

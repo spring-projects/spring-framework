@@ -214,12 +214,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		else {
 			emitter = this.reactiveHandler.handleValue(returnValue, returnType, contentType, mavContainer, webRequest);
 			if (emitter == null) {
-				// We're not streaming; write headers without committing response
-				outputMessage.getHeaders().forEach((headerName, headerValues) -> {
-					for (String headerValue : headerValues) {
-						response.addHeader(headerName, headerValue);
-					}
-				});
+				// reactive but not streaming, e.g. Mono or aggregated Flux
 				return;
 			}
 		}

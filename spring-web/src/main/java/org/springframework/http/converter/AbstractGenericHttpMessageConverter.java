@@ -117,7 +117,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 				}
 				@Override
 				public boolean repeatable() {
-					return supportsRepeatableWrites(t);
+					return canWriteRepeatedly(t, contentType);
 				}
 			});
 		}

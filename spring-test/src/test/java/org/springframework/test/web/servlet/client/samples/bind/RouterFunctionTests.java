@@ -55,7 +55,7 @@ class RouterFunctionTests {
 	}
 
 	@Test
-	void testEntityExchangeResult() {
+	void entityExchangeResult() {
 		EntityExchangeResult<byte[]> result = this.testClient.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()

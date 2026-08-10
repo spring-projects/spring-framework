@@ -40,12 +40,12 @@ class MutablePropertyValuesTests {
 		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
 		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
 		pvs.addPropertyValue(new PropertyValue("age", "50"));
-		doTestTony(pvs);
+		assertPropertyValuesForTony(pvs);
 
 		MutablePropertyValues deepCopy = new MutablePropertyValues(pvs);
-		doTestTony(deepCopy);
+		assertPropertyValuesForTony(deepCopy);
 		deepCopy.setPropertyValueAt(new PropertyValue("name", "Gordon"), 0);
-		doTestTony(pvs);
+		assertPropertyValuesForTony(pvs);
 		assertThat(deepCopy.getPropertyValue("name").getValue()).isEqualTo("Gordon");
 	}
 
@@ -55,7 +55,7 @@ class MutablePropertyValuesTests {
 		pvs.addPropertyValue(new PropertyValue("forname", "Tony"));
 		pvs.addPropertyValue(new PropertyValue("surname", "Blair"));
 		pvs.addPropertyValue(new PropertyValue("age", "50"));
-		doTestTony(pvs);
+		assertPropertyValuesForTony(pvs);
 		PropertyValue addedPv = new PropertyValue("rod", "Rod");
 		pvs.addPropertyValue(addedPv);
 		assertThat(pvs.getPropertyValue("rod")).isEqualTo(addedPv);
@@ -149,7 +149,7 @@ class MutablePropertyValuesTests {
 	/**
 	 * Must contain: forname=Tony surname=Blair age=50
 	 */
-	protected void doTestTony(PropertyValues pvs) {
+	private static void assertPropertyValuesForTony(PropertyValues pvs) {
 		PropertyValue[] propertyValues = pvs.getPropertyValues();
 
 		assertThat(propertyValues).hasSize(3);

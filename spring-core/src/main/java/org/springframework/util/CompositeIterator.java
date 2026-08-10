@@ -21,6 +21,8 @@ import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Composite iterator that combines multiple other iterators,
  * as registered via {@link #add(Iterator)}.
@@ -30,10 +32,11 @@ import java.util.Set;
  *
  * @author Erwin Vervaet
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 3.0
  * @param <E> the element type
  */
-public class CompositeIterator<E> implements Iterator<E> {
+public class CompositeIterator<E extends @Nullable Object> implements Iterator<E> {
 
 	private final Set<Iterator<E>> iterators = new LinkedHashSet<>();
 

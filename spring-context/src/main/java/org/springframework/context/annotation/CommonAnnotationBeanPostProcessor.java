@@ -152,12 +152,12 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(2);
 
 	static {
-		JAKARTA_RESOURCE_TYPE = loadAnnotationType("jakarta.annotation.Resource");
+		JAKARTA_RESOURCE_TYPE = AnnotationUtils.loadAnnotationType("jakarta.annotation.Resource");
 		if (JAKARTA_RESOURCE_TYPE != null) {
 			resourceAnnotationTypes.add(JAKARTA_RESOURCE_TYPE);
 		}
 
-		EJB_ANNOTATION_TYPE = loadAnnotationType("jakarta.ejb.EJB");
+		EJB_ANNOTATION_TYPE = AnnotationUtils.loadAnnotationType("jakarta.ejb.EJB");
 		if (EJB_ANNOTATION_TYPE != null) {
 			resourceAnnotationTypes.add(EJB_ANNOTATION_TYPE);
 		}
@@ -191,8 +191,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		setOrder(Ordered.LOWEST_PRECEDENCE - 3);
 
 		// Jakarta EE 9 set of annotations in jakarta.annotation package
-		addInitAnnotationType(loadAnnotationType("jakarta.annotation.PostConstruct"));
-		addDestroyAnnotationType(loadAnnotationType("jakarta.annotation.PreDestroy"));
+		addInitAnnotationType(AnnotationUtils.loadAnnotationType("jakarta.annotation.PostConstruct"));
+		addDestroyAnnotationType(AnnotationUtils.loadAnnotationType("jakarta.annotation.PreDestroy"));
 
 		// java.naming module present on JDK 9+?
 		if (JNDI_PRESENT) {
@@ -575,18 +575,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
-	@SuppressWarnings("unchecked")
-	private static @Nullable Class<? extends Annotation> loadAnnotationType(String name) {
-		try {
-			return (Class<? extends Annotation>)
-					ClassUtils.forName(name, CommonAnnotationBeanPostProcessor.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			return null;
-		}
-	}
-
-
 	/**
 	 * Class representing generic injection information about an annotated field
 	 * or setter method, supporting @Resource and related annotations.
@@ -783,16 +771,13 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					});
 			GeneratedMethod generateMethod = generatedClass.getMethods().add("apply", method -> {
 				method.addJavadoc("Apply resource autowiring.");
-				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
-						javax.lang.model.element.Modifier.STATIC);
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC, javax.lang.model.element.Modifier.STATIC);
 				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
 				method.addParameter(this.target, INSTANCE_PARAMETER);
 				method.returns(this.target);
-				method.addCode(generateMethodCode(generatedClass.getName(),
-						generationContext.getRuntimeHints()));
+				method.addCode(generateMethodCode(generatedClass.getName(), generationContext.getRuntimeHints()));
 			});
 			beanRegistrationCode.addInstancePostProcessor(generateMethod.toMethodReference());
-
 			registerHints(generationContext.getRuntimeHints());
 		}
 

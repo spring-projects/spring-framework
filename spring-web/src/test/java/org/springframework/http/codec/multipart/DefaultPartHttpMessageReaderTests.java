@@ -28,7 +28,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,9 +44,9 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.MediaType;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 
@@ -60,9 +59,12 @@ import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
+ * Tests for {@link DefaultPartHttpMessageReader}.
+ *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
-class DefaultPartHttpMessageReaderTests {
+class DefaultPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 	private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer iaculis metus id vestibulum nullam.";
 
@@ -70,7 +72,6 @@ class DefaultPartHttpMessageReaderTests {
 
 	private static final int BUFFER_SIZE = 64;
 
-	private static final DataBufferFactory bufferFactory = new NettyDataBufferFactory(new PooledByteBufAllocator());
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void canRead(DefaultPartHttpMessageReader reader) {
@@ -80,7 +81,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void simple(DefaultPartHttpMessageReader reader) throws InterruptedException {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
+				"simple.multipart", "simple-boundary");
 
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
@@ -98,7 +99,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void noHeaders(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("no-header.multipart", getClass()), "boundary");
+				"no-header.multipart", "boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
 			StepVerifier.create(result)
@@ -112,7 +113,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void noEndBoundary(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("no-end-boundary.multipart", getClass()), "boundary");
+				"no-end-boundary.multipart", "boundary");
 
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
@@ -128,7 +129,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void garbage(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("garbage-1.multipart", getClass()), "boundary");
+				"garbage-1.multipart", "boundary");
 
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
@@ -140,7 +141,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void noEndHeader(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("no-end-header.multipart", getClass()), "boundary");
+				"no-end-header.multipart", "boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
 		StepVerifier.create(result)
@@ -151,7 +152,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void noEndBody(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("no-end-body.multipart", getClass()), "boundary");
+				"no-end-body.multipart", "boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
 		StepVerifier.create(result)
@@ -162,10 +163,10 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void cancelPart(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
+				"simple.multipart", "simple-boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
-		StepVerifier.create(result, 1)
+		StepVerifier.create(result)
 				.consumeNextWith(part -> part.content().subscribe(DataBufferUtils::release))
 				.thenCancel()
 				.verify();
@@ -174,7 +175,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void cancelBody(DefaultPartHttpMessageReader reader) throws Exception {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
+				"simple.multipart", "simple-boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
 		CountDownLatch latch = new CountDownLatch(1);
@@ -191,7 +192,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void cancelBodyThenPart(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
+				"simple.multipart", "simple-boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
 		StepVerifier.create(result, 1)
@@ -202,26 +203,26 @@ class DefaultPartHttpMessageReaderTests {
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void firefox(DefaultPartHttpMessageReader reader) throws InterruptedException {
-		testBrowser(reader, new ClassPathResource("firefox.multipart", getClass()),
+		testBrowser(reader, "firefox.multipart",
 				"---------------------------18399284482060392383840973206");
 	}
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void chrome(DefaultPartHttpMessageReader reader) throws InterruptedException {
-		testBrowser(reader, new ClassPathResource("chrome.multipart", getClass()),
+		testBrowser(reader, "chrome.multipart",
 				"----WebKitFormBoundaryEveBLvRT65n21fwU");
 	}
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void safari(DefaultPartHttpMessageReader reader) throws InterruptedException {
-		testBrowser(reader, new ClassPathResource("safari.multipart", getClass()),
+		testBrowser(reader, "safari.multipart",
 				"----WebKitFormBoundaryG8fJ50opQOML0oGD");
 	}
 
 	@Test
 	void tooManyParts() throws InterruptedException {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
+				"files.multipart", "----WebKitFormBoundaryG8fJ50opQOML0oGD");
 
 		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
 		reader.setMaxParts(1);
@@ -230,8 +231,7 @@ class DefaultPartHttpMessageReaderTests {
 
 		CountDownLatch latch = new CountDownLatch(1);
 		StepVerifier.create(result)
-				.consumeNextWith(part -> testPart(part, null,
-						"This is implicitly typed plain ASCII text.\r\nIt does NOT end with a linebreak.", latch)).as("Part 1")
+				.consumeNextWith(part -> testBrowserFile(part, "file2", "a.txt", LOREM_IPSUM, latch)).as("Part 1")
 				.expectError(DecodingException.class)
 				.verify();
 
@@ -241,7 +241,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void quotedBoundary(DefaultPartHttpMessageReader reader) throws InterruptedException {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("simple.multipart", getClass()), "\"simple-boundary\"");
+				"simple.multipart", "\"simple-boundary\"");
 
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
@@ -259,7 +259,7 @@ class DefaultPartHttpMessageReaderTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void utf8Headers(DefaultPartHttpMessageReader reader) throws InterruptedException {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("utf8.multipart", getClass()), "\"simple-boundary\"");
+				"utf8.multipart", "\"simple-boundary\"");
 
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
@@ -276,9 +276,9 @@ class DefaultPartHttpMessageReaderTests {
 
 	// gh-27612
 	@Test
-	void exceedHeaderLimit() throws InterruptedException {
+	void largeBufferForHeaderDoesNotExceedLimit() throws InterruptedException {
 		Flux<DataBuffer> body = DataBufferUtils
-				.readByteChannel((new ClassPathResource("files.multipart", getClass()))::readableChannel, bufferFactory, 282);
+				.readByteChannel(new ClassPathResource("/org/springframework/http/multipart/files.multipart")::readableChannel, bufferFactory, 282);
 
 		MediaType contentType = new MediaType("multipart", "form-data", singletonMap("boundary", "----WebKitFormBoundaryG8fJ50opQOML0oGD"));
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
@@ -300,10 +300,23 @@ class DefaultPartHttpMessageReaderTests {
 		latch.await();
 	}
 
+	@Test
+	void exceedHeaderLimit() {
+		MockServerHttpRequest request = createRequest("files.multipart", "\"----WebKitFormBoundaryG8fJ50opQOML0oGD\"");
+
+		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
+		reader.setMaxHeadersSize(80);
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		StepVerifier.create(result)
+				.expectError(DataBufferLimitException.class)
+				.verify();
+	}
+
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void emptyLastPart(DefaultPartHttpMessageReader reader) throws InterruptedException {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("empty-part.multipart", getClass()), "LiG0chJ0k7YtLt-FzTklYFgz50i88xJCW5jD");
+				"empty-part.multipart", "LiG0chJ0k7YtLt-FzTklYFgz50i88xJCW5jD");
 
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
@@ -317,10 +330,10 @@ class DefaultPartHttpMessageReaderTests {
 	}
 
 
-	private void testBrowser(DefaultPartHttpMessageReader reader, Resource resource, String boundary)
+	private void testBrowser(DefaultPartHttpMessageReader reader, String fileName, String boundary)
 			throws InterruptedException {
 
-		MockServerHttpRequest request = createRequest(resource, boundary);
+		MockServerHttpRequest request = createRequest(fileName, boundary);
 
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 		CountDownLatch latch = new CountDownLatch(3);
@@ -334,7 +347,8 @@ class DefaultPartHttpMessageReaderTests {
 		latch.await();
 	}
 
-	private MockServerHttpRequest createRequest(Resource resource, String boundary) {
+	private MockServerHttpRequest createRequest(String fileName, String boundary) {
+		Resource resource = new ClassPathResource("/org/springframework/http/multipart/" + fileName);
 		Flux<DataBuffer> body = DataBufferUtils
 				.readByteChannel(resource::readableChannel, bufferFactory, BUFFER_SIZE);
 

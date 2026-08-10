@@ -18,16 +18,23 @@ package org.springframework.web.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
@@ -36,6 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link DefaultRestClient}.
@@ -43,6 +52,11 @@ import static org.mockito.Mockito.mock;
  * @author Sebastien Deleuze
  */
 class DefaultRestClientTests {
+
+	private static final String URL = "https://example.com";
+
+	public static final String BODY = "Hello World";
+
 
 	private final ClientHttpRequestFactory requestFactory = mock();
 
@@ -63,57 +77,72 @@ class DefaultRestClientTests {
 
 	@Test
 	void requiredBodyWithClass() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
-		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
 
-		String result = this.client.get()
-				.uri("https://example.org")
-				.retrieve()
-				.requiredBody(String.class);
+		String result = this.client.get().uri(URL).retrieve().requiredBody(String.class);
 
-		assertThat(result).isEqualTo("Hello World");
+		assertThat(result).isEqualTo(BODY);
 	}
 
 	@Test
 	void requiredBodyWithClassAndNullBody() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
 		mockEmptyResponseBody();
 
 		assertThatIllegalStateException().isThrownBy(() ->
-				this.client.get()
-						.uri("https://example.org")
-						.retrieve()
-						.requiredBody(String.class)
+				this.client.get().uri(URL).retrieve().requiredBody(String.class)
 		);
 	}
 
 	@Test
 	void requiredBodyWithParameterizedTypeReference() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
-		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
 
-		String result = this.client.get()
-				.uri("https://example.org")
-				.retrieve()
+		String result = this.client.get().uri(URL).retrieve()
 				.requiredBody(new ParameterizedTypeReference<>() {});
 
-		assertThat(result).isEqualTo("Hello World");
+		assertThat(result).isEqualTo(BODY);
 	}
 
 	@Test
 	void requiredBodyWithParameterizedTypeReferenceAndNullBody() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
 		mockEmptyResponseBody();
 
 		assertThatIllegalStateException().isThrownBy(() ->
-				this.client.get()
-						.uri("https://example.org")
-						.retrieve()
+				this.client.get().uri(URL).retrieve()
 						.requiredBody(new ParameterizedTypeReference<String>() {})
+		);
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("streamResponseBodies")
+	void streamingBody(String typeName, Consumer<RestClient> clientConsumer) throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody(BODY, MediaType.APPLICATION_OCTET_STREAM);
+
+		clientConsumer.accept(this.client);
+
+		verify(this.response, times(0)).close();
+	}
+
+	static Stream<Arguments> streamResponseBodies() {
+		return Stream.of(
+				Arguments.of("InputStream", (Consumer<RestClient>) client -> {
+					InputStream result = client.get().uri(URL).retrieve().requiredBody(InputStream.class);
+					assertThat(result).isInstanceOf(InputStream.class);
+				}),
+				Arguments.of("ResponseEntity<Inpustream>", (Consumer<RestClient>) client -> {
+					ResponseEntity<InputStream> result = client.get().uri(URL).retrieve().toEntity(InputStream.class);
+					assertThat(result).isInstanceOf(ResponseEntity.class);
+				})
 		);
 	}
 

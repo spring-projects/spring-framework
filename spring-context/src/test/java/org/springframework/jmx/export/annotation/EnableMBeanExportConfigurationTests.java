@@ -63,7 +63,7 @@ class EnableMBeanExportConfigurationTests {
 
 
 	@Test
-	void testLazyNaming() throws Exception {
+	void lazyNaming() throws Exception {
 		load(LazyNamingConfiguration.class);
 		validateAnnotationTestBean();
 	}
@@ -73,14 +73,14 @@ class EnableMBeanExportConfigurationTests {
 	}
 
 	@Test
-	void testOnlyTargetClassIsExposed() throws Exception {
+	void onlyTargetClassIsExposed() throws Exception {
 		load(ProxyConfiguration.class);
 		validateAnnotationTestBean();
 	}
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testPackagePrivateExtensionCantBeExposed() {
+	void packagePrivateExtensionCantBeExposed() {
 		assertThatExceptionOfType(InvalidMetadataException.class).isThrownBy(() ->
 				new AnnotationConfigApplicationContext(PackagePrivateConfiguration.class))
 			.withMessageContaining(PackagePrivateTestBean.class.getName())
@@ -89,7 +89,7 @@ class EnableMBeanExportConfigurationTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testPackagePrivateImplementationCantBeExposed() {
+	void packagePrivateImplementationCantBeExposed() {
 		assertThatExceptionOfType(InvalidMetadataException.class).isThrownBy(() ->
 				new AnnotationConfigApplicationContext(PackagePrivateInterfaceImplementationConfiguration.class))
 			.withMessageContaining(PackagePrivateAnnotationTestBean.class.getName())
@@ -97,13 +97,13 @@ class EnableMBeanExportConfigurationTests {
 	}
 
 	@Test
-	void testPackagePrivateClassExtensionCanBeExposed() throws Exception {
+	void packagePrivateClassExtensionCanBeExposed() throws Exception {
 		load(PackagePrivateExtensionConfiguration.class);
 		validateAnnotationTestBean();
 	}
 
 	@Test
-	void testPlaceholderBased() throws Exception {
+	void placeholderBased() throws Exception {
 		MockEnvironment env = new MockEnvironment();
 		env.setProperty("serverName", "server");
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -115,7 +115,7 @@ class EnableMBeanExportConfigurationTests {
 	}
 
 	@Test
-	void testLazyAssembling() throws Exception {
+	void lazyAssembling() throws Exception {
 		System.setProperty("domain", "bean");
 		load(LazyAssemblingConfiguration.class);
 		try {
@@ -132,7 +132,7 @@ class EnableMBeanExportConfigurationTests {
 	}
 
 	@Test
-	void testComponentScan() throws Exception {
+	void componentScan() throws Exception {
 		load(ComponentScanConfiguration.class);
 		MBeanServer server = (MBeanServer) this.ctx.getBean("server");
 		validateMBeanAttribute(server, "bean:name=testBean4", null);

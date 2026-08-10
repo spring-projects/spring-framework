@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Tests for {@link MockitoSpyBean @MockitoSpyBean}.
+ * Tests for {@link MockitoSpyBean @MockitoSpyBean} error scenarios.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
@@ -113,33 +113,85 @@ class MockitoSpyBeanConfigurationErrorTests {
 						to spy on a scoped proxy, which is not supported.""");
 	}
 
+	@Test  // gh-36096
+	void contextCustomizerCannotBeCreatedWithNoSuchBeanNameOnConstructorParameter() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBean("present", String.class, () -> "example");
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByNameSingleLookupOnConstructorParameter.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("""
+						Unable to wrap bean: there is no bean with name 'beanToSpy' and type \
+						java.lang.String (as required by parameter 'example' in constructor for %s). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""",
+						ByNameSingleLookupOnConstructorParameter.class.getName());
+	}
+
+	@Test  // gh-36096
+	void contextCustomizerCannotBeCreatedWithNoSuchBeanTypeOnConstructorParameter() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByTypeSingleLookupOnConstructorParameter.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("""
+						Unable to select a bean to wrap: there are no beans of type java.lang.String \
+						(as required by parameter 'example' in constructor for %s). \
+						If the bean is defined in a @Bean method, make sure the return type is the most \
+						specific type possible (for example, the concrete implementation type).""",
+						ByTypeSingleLookupOnConstructorParameter.class.getName());
+	}
+
+	@Test  // gh-36096
+	void contextCustomizerCannotBeCreatedWithTooManyBeansOfThatTypeOnConstructorParameter() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBean("bean1", String.class, () -> "example1");
+		context.registerBean("bean2", String.class, () -> "example2");
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByTypeSingleLookupOnConstructorParameter.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("""
+						Unable to select a bean to wrap: found 2 beans of type java.lang.String \
+						(as required by parameter 'example' in constructor for %s): %s""",
+						ByTypeSingleLookupOnConstructorParameter.class.getName(),
+						List.of("bean1", "bean2"));
+	}
+
 
 	static class ByTypeSingleLookup {
 
 		@MockitoSpyBean
 		String example;
-
 	}
 
 	static class ByNameSingleLookup {
 
 		@MockitoSpyBean("beanToSpy")
 		String example;
+	}
 
+	static class ByTypeSingleLookupOnConstructorParameter {
+
+		ByTypeSingleLookupOnConstructorParameter(@MockitoSpyBean String example) {
+		}
+	}
+
+	static class ByNameSingleLookupOnConstructorParameter {
+
+		ByNameSingleLookupOnConstructorParameter(@MockitoSpyBean("beanToSpy") String example) {
+		}
 	}
 
 	static class ScopedProxyTestCase {
 
 		@MockitoSpyBean
 		MyScopedProxy myScopedProxy;
-
 	}
 
 	static class SelfInjectionScopedProxyTestCase {
 
 		@MockitoSpyBean
 		MySelfInjectionScopedProxy mySelfInjectionScopedProxy;
-
 	}
 
 	@Component("myScopedProxy")

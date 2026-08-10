@@ -132,6 +132,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @author Yanming Zhou
  * @since January 21, 2001
  * @see #refreshBeanFactory
  * @see #getBeanFactory
@@ -795,7 +796,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
-		// (for example, through an @Bean method registered by ConfigurationClassPostProcessor)
+		// (for example, through a @Bean method registered by ConfigurationClassPostProcessor)
 		if (!NativeDetector.inNativeImage() && beanFactory.getTempClassLoader() == null &&
 				beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
 			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
@@ -1303,6 +1304,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBean(name, requiredType);
+	}
+
+	@Override
+	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBean(name, typeReference);
 	}
 
 	@Override

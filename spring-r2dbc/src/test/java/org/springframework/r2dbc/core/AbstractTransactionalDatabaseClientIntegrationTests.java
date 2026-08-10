@@ -19,7 +19,7 @@ package org.springframework.r2dbc.core;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.Result;
 import org.assertj.core.api.Condition;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -48,6 +48,7 @@ abstract class AbstractTransactionalDatabaseClientIntegrationTests {
 
 	private ConnectionFactory connectionFactory;
 
+	@AutoClose
 	AnnotationConfigApplicationContext context;
 
 	DatabaseClient databaseClient;
@@ -58,7 +59,7 @@ abstract class AbstractTransactionalDatabaseClientIntegrationTests {
 
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		connectionFactory = createConnectionFactory();
 
 		context = new AnnotationConfigApplicationContext();
@@ -76,11 +77,6 @@ abstract class AbstractTransactionalDatabaseClientIntegrationTests {
 		databaseClient = DatabaseClient.create(connectionFactory);
 		transactionManager = new R2dbcTransactionManager(connectionFactory);
 		rxtx = TransactionalOperator.create(transactionManager);
-	}
-
-	@AfterEach
-	public void tearDown() {
-		context.close();
 	}
 
 

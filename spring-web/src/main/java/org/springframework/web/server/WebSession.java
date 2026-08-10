@@ -101,20 +101,6 @@ public interface WebSession {
 	boolean isStarted();
 
 	/**
-	 * Generate a new id for the session and update the underlying session
-	 * storage to reflect the new id. After a successful call {@link #getId()}
-	 * reflects the new session id.
-	 * @return completion notification (success or error)
-	 */
-	Mono<Void> changeSessionId();
-
-	/**
-	 * Invalidate the current session and clear session storage.
-	 * @return completion notification (success or error)
-	 */
-	Mono<Void> invalidate();
-
-	/**
 	 * Save the session through the {@code WebSessionStore} as follows:
 	 * <ul>
 	 * <li>If the session is new (i.e. created but never persisted), it must have
@@ -130,6 +116,20 @@ public interface WebSession {
 	 * @return {@code Mono} to indicate completion with success or error
 	 */
 	Mono<Void> save();
+
+	/**
+	 * Generate a new id for the session and update the underlying session
+	 * storage to reflect the new id. After a successful call {@link #getId()}
+	 * reflects the new session id.
+	 * @return completion notification (success or error)
+	 */
+	Mono<Void> changeSessionId();
+
+	/**
+	 * Invalidate the current session and clear session storage.
+	 * @return completion notification (success or error)
+	 */
+	Mono<Void> invalidate();
 
 	/**
 	 * Return {@code true} if the session expired after {@link #getMaxIdleTime()

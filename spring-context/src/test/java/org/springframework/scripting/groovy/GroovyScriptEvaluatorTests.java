@@ -36,21 +36,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GroovyScriptEvaluatorTests {
 
 	@Test
-	void testGroovyScriptFromString() {
+	void groovyScriptFromString() {
 		ScriptEvaluator evaluator = new GroovyScriptEvaluator();
 		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2"));
 		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
-	void testGroovyScriptFromFile() {
+	void groovyScriptFromFile() {
 		ScriptEvaluator evaluator = new GroovyScriptEvaluator();
 		Object result = evaluator.evaluate(new ResourceScriptSource(new ClassPathResource("simple.groovy", getClass())));
 		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
-	void testGroovyScriptWithArguments() {
+	void groovyScriptWithArguments() {
 		ScriptEvaluator evaluator = new GroovyScriptEvaluator();
 		Map<String, Object> arguments = new HashMap<>();
 		arguments.put("a", 3);
@@ -60,7 +60,7 @@ class GroovyScriptEvaluatorTests {
 	}
 
 	@Test
-	void testGroovyScriptWithCompilerConfiguration() {
+	void groovyScriptWithCompilerConfiguration() {
 		GroovyScriptEvaluator evaluator = new GroovyScriptEvaluator();
 		MyBytecodeProcessor processor = new MyBytecodeProcessor();
 		evaluator.getCompilerConfiguration().setBytecodePostprocessor(processor);
@@ -70,7 +70,7 @@ class GroovyScriptEvaluatorTests {
 	}
 
 	@Test
-	void testGroovyScriptWithImportCustomizer() {
+	void groovyScriptWithImportCustomizer() {
 		GroovyScriptEvaluator evaluator = new GroovyScriptEvaluator();
 		ImportCustomizer importCustomizer = new ImportCustomizer();
 		importCustomizer.addStarImports("org.springframework.util");
@@ -80,7 +80,7 @@ class GroovyScriptEvaluatorTests {
 	}
 
 	@Test
-	void testGroovyScriptFromStringUsingJsr223() {
+	void groovyScriptFromStringUsingJsr223() {
 		StandardScriptEvaluator evaluator = new StandardScriptEvaluator();
 		evaluator.setLanguage("Groovy");
 		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2"));
@@ -88,14 +88,14 @@ class GroovyScriptEvaluatorTests {
 	}
 
 	@Test
-	void testGroovyScriptFromFileUsingJsr223() {
+	void groovyScriptFromFileUsingJsr223() {
 		ScriptEvaluator evaluator = new StandardScriptEvaluator();
 		Object result = evaluator.evaluate(new ResourceScriptSource(new ClassPathResource("simple.groovy", getClass())));
 		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
-	void testGroovyScriptWithArgumentsUsingJsr223() {
+	void groovyScriptWithArgumentsUsingJsr223() {
 		StandardScriptEvaluator evaluator = new StandardScriptEvaluator();
 		evaluator.setLanguage("Groovy");
 		Map<String, Object> arguments = new HashMap<>();

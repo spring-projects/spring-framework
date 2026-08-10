@@ -90,7 +90,8 @@ public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 				.switchIfEmpty(Mono.defer(() -> {
 					String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
 					if (webJarResourcePath != null) {
-						return chain.resolveUrlPath(webJarResourcePath, locations);
+						Mono<String> fallback = (webJarResourcePath.endsWith("/")) ? Mono.just(webJarResourcePath) : Mono.empty();
+						return chain.resolveUrlPath(webJarResourcePath, locations).switchIfEmpty(fallback);
 					}
 					else {
 						return Mono.empty();

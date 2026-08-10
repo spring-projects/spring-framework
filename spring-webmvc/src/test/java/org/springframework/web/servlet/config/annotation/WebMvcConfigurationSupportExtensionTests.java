@@ -39,7 +39,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
@@ -213,7 +213,7 @@ class WebMvcConfigurationSupportExtensionTests {
 		assertThat(converters).hasSize(3);
 		assertThat(converters.get(0).getClass()).isEqualTo(StringHttpMessageConverter.class);
 		assertThat(converters.get(1).getClass()).isEqualTo(JacksonJsonHttpMessageConverter.class);
-		assertThat(converters.get(2).getClass()).isEqualTo(AllEncompassingFormHttpMessageConverter.class);
+		assertThat(converters.get(2).getClass()).isEqualTo(MultipartHttpMessageConverter.class);
 		JsonMapper jsonMapper = ((JacksonJsonHttpMessageConverter) converters.get(1)).getMapper();
 		assertThat(jsonMapper.deserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
 		assertThat(jsonMapper.deserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
@@ -263,7 +263,7 @@ class WebMvcConfigurationSupportExtensionTests {
 	}
 
 	@Test
-	public void contentNegotiation() throws Exception {
+	void contentNegotiation() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 

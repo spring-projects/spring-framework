@@ -65,6 +65,7 @@ import org.springframework.web.context.support.ServletContextResourcePatternReso
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 3.2
  */
 class StubWebApplicationContext implements WebApplicationContext {
@@ -166,6 +167,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return this.beanFactory.getBean(name, requiredType);
+	}
+
+	@Override
+	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		return this.beanFactory.getBean(name, typeReference);
 	}
 
 	@Override

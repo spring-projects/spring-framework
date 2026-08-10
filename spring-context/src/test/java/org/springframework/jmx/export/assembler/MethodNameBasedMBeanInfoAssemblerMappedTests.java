@@ -36,7 +36,7 @@ class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerT
 
 
 	@Test
-	void testGetAgeIsReadOnly() throws Exception {
+	void getAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
@@ -45,7 +45,7 @@ class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerT
 	}
 
 	@Test
-	void testWithFallThrough() throws Exception {
+	void withFallThrough() throws Exception {
 		MethodNameBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "add,myOperation,getName,setName,getAge");
 		assembler.setManagedMethods("getNickName", "setNickName");
@@ -57,7 +57,7 @@ class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerT
 	}
 
 	@Test
-	void testNickNameIsExposed() throws Exception {
+	void nickNameIsExposed() throws Exception {
 		ModelMBeanInfo inf = (ModelMBeanInfo) getMBeanInfo();
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
 

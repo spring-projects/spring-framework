@@ -129,7 +129,7 @@ class ScriptUtilsTests {
 
 	@Test
 	void readAndSplitScriptContainingCommentsWithWindowsLineEnding() throws Exception {
-		String script = readScript("test-data-with-comments.sql").replaceAll("\n", "\r\n");
+		String script = readScript("test-data-with-comments.sql").replace("\n", "\r\n");
 		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 

@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 class DelegatingFilterProxyTests {
 
 	@Test
-	void testDelegatingFilterProxy() throws ServletException, IOException {
+	void delegatingFilterProxy() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -74,7 +74,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyAndCustomContextAttribute() throws ServletException, IOException {
+	void delegatingFilterProxyAndCustomContextAttribute() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -103,7 +103,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyWithFilterDelegateInstance() throws ServletException, IOException {
+	void delegatingFilterProxyWithFilterDelegateInstance() throws ServletException, IOException {
 		MockFilter targetFilter = new MockFilter();
 
 		DelegatingFilterProxy filterProxy = new DelegatingFilterProxy(targetFilter);
@@ -121,7 +121,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyWithTargetBeanName() throws ServletException, IOException {
+	void delegatingFilterProxyWithTargetBeanName() throws ServletException, IOException {
 		MockServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -147,7 +147,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyWithTargetBeanNameAndNotYetRefreshedApplicationContext()
+	void delegatingFilterProxyWithTargetBeanNameAndNotYetRefreshedApplicationContext()
 			throws ServletException, IOException {
 
 		MockServletContext sc = new MockServletContext();
@@ -175,7 +175,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyWithTargetBeanNameAndNoApplicationContext()
+	void delegatingFilterProxyWithTargetBeanNameAndNoApplicationContext()
 			throws ServletException {
 
 		MockServletContext sc = new MockServletContext();
@@ -190,7 +190,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyWithFilterName() throws ServletException, IOException {
+	void delegatingFilterProxyWithFilterName() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -217,7 +217,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyWithLazyContextStartup() throws ServletException, IOException {
+	void delegatingFilterProxyWithLazyContextStartup() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 
 		MockFilterConfig proxyConfig = new MockFilterConfig(sc);
@@ -245,7 +245,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyWithTargetFilterLifecycle() throws ServletException, IOException {
+	void delegatingFilterProxyWithTargetFilterLifecycle() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -275,7 +275,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyWithFrameworkServletContext() throws ServletException, IOException {
+	void delegatingFilterProxyWithFrameworkServletContext() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -302,7 +302,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyInjectedPreferred() throws ServletException, IOException {
+	void delegatingFilterProxyInjectedPreferred() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -331,7 +331,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyNotInjectedWacServletAttrPreferred()
+	void delegatingFilterProxyNotInjectedWacServletAttrPreferred()
 			throws ServletException, IOException {
 
 		ServletContext sc = new MockServletContext();
@@ -367,7 +367,7 @@ class DelegatingFilterProxyTests {
 	}
 
 	@Test
-	void testDelegatingFilterProxyNotInjectedWithRootPreferred() throws ServletException, IOException {
+	void delegatingFilterProxyNotInjectedWithRootPreferred() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);

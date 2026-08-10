@@ -31,17 +31,17 @@ import org.springframework.expression.spel.support.StandardTypeConverter;
 class BooleanExpressionTests extends AbstractExpressionTests {
 
 	@Test
-	void testBooleanTrue() {
+	void booleanTrue() {
 		evaluate("true", Boolean.TRUE, Boolean.class);
 	}
 
 	@Test
-	void testBooleanFalse() {
+	void booleanFalse() {
 		evaluate("false", Boolean.FALSE, Boolean.class);
 	}
 
 	@Test
-	void testOr() {
+	void or() {
 		evaluate("false or false", Boolean.FALSE, Boolean.class);
 		evaluate("false or true", Boolean.TRUE, Boolean.class);
 		evaluate("true or false", Boolean.TRUE, Boolean.class);
@@ -49,7 +49,7 @@ class BooleanExpressionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testAnd() {
+	void and() {
 		evaluate("false and false", Boolean.FALSE, Boolean.class);
 		evaluate("false and true", Boolean.FALSE, Boolean.class);
 		evaluate("true and false", Boolean.FALSE, Boolean.class);
@@ -57,7 +57,7 @@ class BooleanExpressionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testNot() {
+	void not() {
 		evaluate("!false", Boolean.TRUE, Boolean.class);
 		evaluate("!true", Boolean.FALSE, Boolean.class);
 
@@ -66,21 +66,21 @@ class BooleanExpressionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testCombinations01() {
+	void combinations01() {
 		evaluate("false and false or true", Boolean.TRUE, Boolean.class);
 		evaluate("true and false or true", Boolean.TRUE, Boolean.class);
 		evaluate("true and false or false", Boolean.FALSE, Boolean.class);
 	}
 
 	@Test
-	void testWritability() {
+	void writability() {
 		evaluate("true and true", Boolean.TRUE, Boolean.class, false);
 		evaluate("true or true", Boolean.TRUE, Boolean.class, false);
 		evaluate("!false", Boolean.TRUE, Boolean.class, false);
 	}
 
 	@Test
-	void testBooleanErrors01() {
+	void booleanErrors01() {
 		evaluateAndCheckError("1.0 or false", SpelMessage.TYPE_CONVERSION_ERROR, 0);
 		evaluateAndCheckError("false or 39.4", SpelMessage.TYPE_CONVERSION_ERROR, 9);
 		evaluateAndCheckError("true and 'hello'", SpelMessage.TYPE_CONVERSION_ERROR, 9);
@@ -90,7 +90,7 @@ class BooleanExpressionTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testConvertAndHandleNull() { // SPR-9445
+	void convertAndHandleNull() { // SPR-9445
 		// without null conversion
 		evaluateAndCheckError("null or true", SpelMessage.TYPE_CONVERSION_ERROR, 0, "null", "boolean");
 		evaluateAndCheckError("null and true", SpelMessage.TYPE_CONVERSION_ERROR, 0, "null", "boolean");

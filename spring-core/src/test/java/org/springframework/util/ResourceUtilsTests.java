@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ResourceUtilsTests {
 
 	@Test
+	@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 	void isJarURL() throws Exception {
 		assertThat(ResourceUtils.isJarURL(new URL("jar:file:myjar.jar!/mypath"))).isTrue();
 		assertThat(ResourceUtils.isJarURL(new URL(null, "zip:file:myjar.jar!/mypath", new DummyURLStreamHandler()))).isTrue();
@@ -40,6 +41,7 @@ class ResourceUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 	void extractJarFileURL() throws Exception {
 		assertThat(ResourceUtils.extractJarFileURL(new URL("jar:file:myjar.jar!/mypath"))).isEqualTo(new URL("file:myjar.jar"));
 		assertThat(ResourceUtils.extractJarFileURL(new URL(null, "jar:myjar.jar!/mypath", new DummyURLStreamHandler()))).isEqualTo(new URL("file:/myjar.jar"));
@@ -53,6 +55,7 @@ class ResourceUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 	void extractArchiveURL() throws Exception {
 		assertThat(ResourceUtils.extractArchiveURL(new URL("jar:file:myjar.jar!/mypath"))).isEqualTo(new URL("file:myjar.jar"));
 		assertThat(ResourceUtils.extractArchiveURL(new URL(null, "jar:myjar.jar!/mypath", new DummyURLStreamHandler()))).isEqualTo(new URL("file:/myjar.jar"));

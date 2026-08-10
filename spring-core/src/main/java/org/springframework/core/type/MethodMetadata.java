@@ -54,6 +54,7 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 	/**
 	 * Get the fully-qualified name of the underlying method's declared return type.
 	 * @since 4.2
+	 * @see Class#getTypeName()
 	 */
 	String getReturnTypeName();
 

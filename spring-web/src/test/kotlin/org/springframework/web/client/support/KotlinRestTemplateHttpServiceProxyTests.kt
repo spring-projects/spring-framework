@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.service.annotation.PostExchange
@@ -46,6 +45,7 @@ import java.util.*
  *
  * @author Olga Maciaszek-Sharma
  */
+@Suppress("REMOVAL", "DEPRECATION")
 class KotlinRestTemplateHttpServiceProxyTests {
 
 	private lateinit var server: MockWebServer
@@ -65,7 +65,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
 	}
 
 	private fun initTestService(): TestService {
-		val restTemplate = RestTemplate()
+		val restTemplate = org.springframework.web.client.RestTemplate()
 		restTemplate.uriTemplateHandler = DefaultUriBuilderFactory(server.url("/").toString())
 		return HttpServiceProxyFactory.builder()
 				.exchangeAdapter(RestTemplateAdapter.create(restTemplate))

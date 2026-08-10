@@ -90,7 +90,7 @@ class ScriptUtilsTests {
 	}
 
 	@Test  // SPR-13218
-	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() {
+	void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() {
 		String statement1 = "select '1' as \"Dogbert's owner's\" from dual";
 		String statement2 = "select '2' as \"Dilbert's\" from dual";
 
@@ -103,7 +103,7 @@ class ScriptUtilsTests {
 	}
 
 	@Test  // SPR-11560
-	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() {
+	void readAndSplitScriptWithMultipleNewlinesAsSeparator() {
 		String script = readScript("db-test-data-multi-newline.sql");
 		List<String> statements = splitSqlScript(script, "\n\n");
 
@@ -121,7 +121,7 @@ class ScriptUtilsTests {
 
 	@Test
 	void readAndSplitScriptContainingCommentsWithWindowsLineEnding() {
-		String script = readScript("test-data-with-comments.sql").replaceAll("\n", "\r\n");
+		String script = readScript("test-data-with-comments.sql").replace("\n", "\r\n");
 		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
@@ -145,7 +145,7 @@ class ScriptUtilsTests {
 	}
 
 	@Test  // SPR-10330
-	public void readAndSplitScriptContainingCommentsWithLeadingTabs() {
+	void readAndSplitScriptContainingCommentsWithLeadingTabs() {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
 		List<String> statements = splitSqlScript(script, ";");
 
@@ -157,7 +157,7 @@ class ScriptUtilsTests {
 	}
 
 	@Test  // SPR-9531
-	public void readAndSplitScriptContainingMultiLineComments() {
+	void readAndSplitScriptContainingMultiLineComments() {
 		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = splitSqlScript(script, ";");
 
@@ -216,7 +216,7 @@ class ScriptUtilsTests {
 		~/* double " quotes */\n insert into colors(color_num) values(42);~                | ;      | true
 		~/* double \\" quotes */\n insert into colors(color_num) values(42);~              | ;      | true
 		""")
-	public void containsStatementSeparator(String script, String delimiter, boolean expected) {
+	void containsStatementSeparator(String script, String delimiter, boolean expected) {
 		boolean contains = ScriptUtils.containsStatementSeparator(null, script, delimiter,
 				DEFAULT_COMMENT_PREFIXES, DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 

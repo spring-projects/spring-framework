@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PassThroughSourceExtractorTests {
 
 	@Test
-	void testPassThroughContract() {
+	void passThroughContract() {
 		Object source = new Object();
 		Object extractedSource = new PassThroughSourceExtractor().extractSource(source, null);
 		assertThat(extractedSource).as("The contract of PassThroughSourceExtractor states that the supplied " +
@@ -37,7 +37,7 @@ class PassThroughSourceExtractorTests {
 	}
 
 	@Test
-	void testPassThroughContractEvenWithNull() {
+	void passThroughContractEvenWithNull() {
 		Object extractedSource = new PassThroughSourceExtractor().extractSource(null, null);
 		assertThat(extractedSource).as("The contract of PassThroughSourceExtractor states that the supplied " +
 				"source object *must* be returned as-is (even if null)").isNull();

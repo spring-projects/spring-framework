@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -44,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class XmlContentAssertionTests {
+class XmlContentAssertionTests {
 
 	private static final String PEOPLE_XML =
 			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
@@ -58,6 +59,7 @@ public class XmlContentAssertionTests {
 
 	private final WebTestClient testClient =
 			MockMvcWebTestClient.bindToController(new MusicController())
+					.messageConverters(new Jaxb2RootElementHttpMessageConverter())
 					.alwaysExpect(status().isOk())
 					.alwaysExpect(content().contentType(MediaType.parseMediaType("application/xml;charset=UTF-8")))
 					.configureClient()
@@ -66,14 +68,14 @@ public class XmlContentAssertionTests {
 
 
 	@Test
-	public void testXmlEqualTo() {
+	void xmlEqualTo() {
 		testClient.get().uri("/music/people")
 				.exchange()
 				.expectBody().xml(PEOPLE_XML);
 	}
 
 	@Test
-	public void testNodeHamcrestMatcher() {
+	void nodeHamcrestMatcher() {
 		testClient.get().uri("/music/people")
 				.exchange()
 				.expectBody().xpath("/people/composers/composer[1]").exists();

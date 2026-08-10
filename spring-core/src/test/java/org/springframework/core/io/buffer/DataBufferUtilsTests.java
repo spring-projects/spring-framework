@@ -339,6 +339,27 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	void writeWritableByteChannelWithJoinedBuffer(DataBufferFactory bufferFactory) throws Exception {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer joined = bufferFactory.join(List.of(foo, bar));
+
+		WritableByteChannel channel = Files.newByteChannel(tempFile, StandardOpenOption.WRITE);
+
+		Flux<DataBuffer> writeResult = DataBufferUtils.write(Flux.just(joined), channel);
+		StepVerifier.create(writeResult)
+				.consumeNextWith(stringConsumer("foobar"))
+				.verifyComplete();
+
+		String result = String.join("", Files.readAllLines(tempFile));
+
+		assertThat(result).isEqualTo("foobar");
+		channel.close();
+	}
+
+	@ParameterizedDataBufferAllocatingTest
 	void writeWritableByteChannelErrorInFlux(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
@@ -443,6 +464,27 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		String result = String.join("", Files.readAllLines(tempFile));
 
 		assertThat(result).isEqualTo("foobarbazqux");
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void writeAsynchronousFileChannelWithJoinedBuffer(DataBufferFactory bufferFactory) throws Exception {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer joined = bufferFactory.join(List.of(foo, bar));
+
+		AsynchronousFileChannel channel = AsynchronousFileChannel.open(tempFile, StandardOpenOption.WRITE);
+
+		Flux<DataBuffer> writeResult = DataBufferUtils.write(Flux.just(joined), channel);
+		StepVerifier.create(writeResult)
+				.consumeNextWith(stringConsumer("foobar"))
+				.verifyComplete();
+
+		String result = String.join("", Files.readAllLines(tempFile));
+
+		assertThat(result).isEqualTo("foobar");
+		channel.close();
 	}
 
 	@ParameterizedDataBufferAllocatingTest
@@ -1279,6 +1321,48 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		assertThat(endIndex).isEqualTo(-1);
 
 		release(foo);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void matcherDoesNotMatchAcrossNonContiguousDelimiterBytes(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = stringBuffer("a\rXY\nb");
+
+		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int result = matcher.match(buffer);
+		assertThat(result).isEqualTo(-1);
+
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void matcherMatchesContiguousTwoByteDelimiter(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = stringBuffer("a\r\nb");
+
+		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int result = matcher.match(buffer);
+		assertThat(result).isEqualTo(2);
+
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void matcherDoesNotMatchAfterRepeatedFirstDelimiterByte(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = stringBuffer("a\r\rX\nb");
+
+		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int result = matcher.match(buffer);
+		assertThat(result).isEqualTo(-1);
+
+		release(buffer);
 	}
 
 	@ParameterizedDataBufferAllocatingTest

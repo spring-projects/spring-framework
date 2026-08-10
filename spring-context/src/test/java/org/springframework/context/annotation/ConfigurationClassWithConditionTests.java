@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("resource")
-public class ConfigurationClassWithConditionTests {
+class ConfigurationClassWithConditionTests {
 
 	@Test
 	void conditionalOnMissingBeanMatch() {

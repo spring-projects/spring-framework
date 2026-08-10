@@ -30,8 +30,9 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents a WebSocket extension as defined in the RFC 6455.
- * WebSocket extensions add protocol features to the WebSocket protocol. The extensions
+ * Represents a WebSocket extension as defined in RFC 6455.
+ *
+ * <p>WebSocket extensions add protocol features to the WebSocket protocol. The extensions
  * used within a session are negotiated during the handshake phase as follows:
  * <ul>
  * <li>the client may ask for specific extensions in the HTTP handshake request</li>
@@ -39,10 +40,10 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * <p>WebSocket Extension HTTP headers may include parameters and follow
- * <a href="https://tools.ietf.org/html/rfc7230#section-3.2">RFC 7230 section 3.2</a></p>
+ * <a href="https://tools.ietf.org/html/rfc7230#section-3.2">RFC 7230 section 3.2</a>
  *
- * <p>Note that the order of extensions in HTTP headers defines their order of execution,
- * for example, extensions "foo, bar" will be executed as "bar(foo(message))".</p>
+ * <p>Note that the order of extensions in HTTP headers defines their order of execution &mdash;
+ * for example, extensions "foo, bar" will be executed as "bar(foo(message))".
  *
  * @author Brian Clozel
  * @author Juergen Hoeller
@@ -103,11 +104,8 @@ public class WebSocketExtension {
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !WebSocketExtension.class.isAssignableFrom(other.getClass())) {
-			return false;
-		}
-		WebSocketExtension otherExt = (WebSocketExtension) other;
-		return (this.name.equals(otherExt.name) && this.parameters.equals(otherExt.parameters));
+		return (other instanceof WebSocketExtension that &&
+				this.name.equals(that.name) && this.parameters.equals(that.parameters));
 	}
 
 	@Override

@@ -56,7 +56,7 @@ class MockitoSpyBeanWithMultipleExistingBeansAndOnePrimaryIntegrationTests {
 
 
 	@Test
-	void testSpying() {
+	void spying() {
 		assertIsSpy(spy);
 		assertMockName(spy, "two");
 

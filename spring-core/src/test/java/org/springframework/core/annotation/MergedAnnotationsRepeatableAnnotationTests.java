@@ -282,16 +282,16 @@ class MergedAnnotationsRepeatableAnnotationTests {
 	private void nonRepeatableRequirements(Exception ex) {
 		assertThat(ex)
 				.hasMessageStartingWith("Annotation type must be a repeatable annotation")
-				.hasMessageContaining("failed to resolve container type for", NonRepeatable.class.getName());
+				.hasMessageContaining("failed to resolve container type for", NonRepeatable.class.getCanonicalName());
 	}
 
 	private void missingValueAttributeRequirements(Exception ex) {
 		assertThat(ex)
 				.hasMessageStartingWith("Invalid declaration of container type")
 				.hasMessageContaining(
-						ContainerMissingValueAttribute.class.getName(),
+						ContainerMissingValueAttribute.class.getCanonicalName(),
 						"for repeatable annotation",
-						InvalidRepeatable.class.getName())
+						InvalidRepeatable.class.getCanonicalName())
 				.hasCauseInstanceOf(NoSuchMethodException.class);
 	}
 
@@ -299,18 +299,18 @@ class MergedAnnotationsRepeatableAnnotationTests {
 		assertThat(ex)
 				.hasMessageStartingWith("Container type")
 				.hasMessageContaining(
-						ContainerWithNonArrayValueAttribute.class.getName(),
+						ContainerWithNonArrayValueAttribute.class.getCanonicalName(),
 						"must declare a 'value' attribute for an array of type",
-						InvalidRepeatable.class.getName());
+						InvalidRepeatable.class.getCanonicalName());
 	}
 
 	private void wrongComponentTypeRequirements(Exception ex) {
 		assertThat(ex)
 				.hasMessageStartingWith("Container type")
 				.hasMessageContaining(
-						ContainerWithArrayValueAttributeButWrongComponentType.class.getName(),
+						ContainerWithArrayValueAttributeButWrongComponentType.class.getCanonicalName(),
 						"must declare a 'value' attribute for an array of type",
-						InvalidRepeatable.class.getName());
+						InvalidRepeatable.class.getCanonicalName());
 	}
 
 	private static ThrowableTypeAssert<AnnotationConfigurationException> assertThatAnnotationConfigurationException() {

@@ -28,10 +28,11 @@ import org.jspecify.annotations.Nullable;
  * exposed through {@link CompositeMap#values()}.
  *
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  * @since 6.2
  * @param <E> the type of elements maintained by this collection
  */
-class CompositeCollection<E> implements Collection<E> {
+class CompositeCollection<E extends @Nullable Object> implements Collection<E> {
 
 	private final Collection<E> first;
 

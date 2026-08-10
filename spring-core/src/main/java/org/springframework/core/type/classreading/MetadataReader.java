@@ -22,7 +22,8 @@ import org.springframework.core.type.ClassMetadata;
 
 /**
  * Simple facade for accessing class metadata,
- * as read by an ASM {@link org.springframework.asm.ClassReader}.
+ * as read by an ASM {@link org.springframework.asm.ClassReader} or the
+ * {@code java.lang.classfile.ClassFile} API on Java 24 and higher.
  *
  * @author Juergen Hoeller
  * @since 2.5

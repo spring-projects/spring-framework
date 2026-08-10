@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Phillip Webb
  */
 @ExtendWith(MockitoExtension.class)
-public class ExecutorSubscribableChannelTests {
+class ExecutorSubscribableChannelTests {
 
 	private ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
 

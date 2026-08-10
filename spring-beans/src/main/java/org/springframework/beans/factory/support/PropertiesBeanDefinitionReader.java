@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -256,14 +255,14 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 		Properties props = new Properties();
 		try {
-			try (InputStream is = encodedResource.getResource().getInputStream()) {
+			encodedResource.getResource().consumeContent(is -> {
 				if (encodedResource.getEncoding() != null) {
 					getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
 				}
 				else {
 					getPropertiesPersister().load(props, is);
 				}
-			}
+			});
 
 			int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
 			if (logger.isDebugEnabled()) {

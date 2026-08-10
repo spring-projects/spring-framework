@@ -264,11 +264,18 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 			}
 			else if (method.getName().equals("getAllClassNames")) {
 				// JPA 4.0 letting the container perform the scanning
-				if (excludeUnlistedClasses()) {
-					return getManagedClassNames();  // typically coming from Spring default persistence unit
+				if (excludeUnlistedClasses()) {  // typically coming from Spring default persistence unit
+					List<String> mergedClassesAndPackages =
+							new ArrayList<>(getManagedClassNames().size() + getManagedPackages().size());
+					mergedClassesAndPackages.addAll(getManagedClassNames());
+					for (String managedPackage : getManagedPackages()) {
+						mergedClassesAndPackages.add(managedPackage + ClassUtils.PACKAGE_INFO_SUFFIX);
+					}
+					return mergedClassesAndPackages;
 				}
 				throw new UnsupportedOperationException(
-						"JPA 4.0 getAllClassNames only supported with exclude-unlisted-classes");
+						"JPA 4.0 getAllClassNames only supported with Spring-configured packagesToScan or " +
+								"with completely listed managed classes plus exclude-unlisted-classes=true");
 			}
 
 			// Regular methods to be delegated to SpringPersistenceUnitInfo

@@ -16,18 +16,17 @@
 
 package org.springframework.test.web.client.samples.matchers;
 
-import java.net.URI;
 import java.util.Arrays;
-import java.util.Collections;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
@@ -64,10 +63,16 @@ class JsonPathRequestMatchersIntegrationTests {
 	}
 
 
-	private final RestTemplate restTemplate =
-			new RestTemplate(Collections.singletonList(new JacksonJsonHttpMessageConverter()));
+	private RestClient restClient;
 
-	private final MockRestServiceServer mockServer = MockRestServiceServer.createServer(this.restTemplate);
+	private MockRestServiceServer mockServer;
+
+	@BeforeEach
+	void setup() {
+		RestClient.Builder clientBuilder = RestClient.builder();
+		this.mockServer = MockRestServiceServer.createServer(clientBuilder);
+		this.restClient = clientBuilder.build();
+	}
 
 
 	@Test
@@ -179,7 +184,8 @@ class JsonPathRequestMatchersIntegrationTests {
 	}
 
 	private void executeAndVerify() {
-		this.restTemplate.put(URI.create("/composers"), people);
+		this.restClient.put().uri("/composers").contentType(MediaType.APPLICATION_JSON)
+				.body(people).retrieve().toBodilessEntity();
 		this.mockServer.verify();
 	}
 

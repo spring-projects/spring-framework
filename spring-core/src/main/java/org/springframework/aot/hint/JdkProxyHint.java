@@ -37,10 +37,13 @@ public final class JdkProxyHint implements ConditionalHint {
 
 	private final @Nullable TypeReference reachableType;
 
+	private final boolean javaSerialization;
+
 
 	private JdkProxyHint(Builder builder) {
 		this.proxiedInterfaces = List.copyOf(builder.proxiedInterfaces);
 		this.reachableType = builder.reachableType;
+		this.javaSerialization = builder.javaSerialization;
 	}
 
 	/**
@@ -75,11 +78,21 @@ public final class JdkProxyHint implements ConditionalHint {
 		return this.reachableType;
 	}
 
+	/**
+	 * Return whether this hint registers the proxy for Java serialization.
+	 * @return whether the proxy is registered for Java serialization
+	 * @since 7.0.6
+	 */
+	public boolean hasJavaSerialization() {
+		return this.javaSerialization;
+	}
+
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof JdkProxyHint that &&
 				this.proxiedInterfaces.equals(that.proxiedInterfaces) &&
-				Objects.equals(this.reachableType, that.reachableType)));
+				Objects.equals(this.reachableType, that.reachableType) &&
+				Objects.equals(this.javaSerialization, that.javaSerialization)));
 	}
 
 	@Override
@@ -96,6 +109,8 @@ public final class JdkProxyHint implements ConditionalHint {
 		private final LinkedList<TypeReference> proxiedInterfaces;
 
 		private @Nullable TypeReference reachableType;
+
+		private boolean javaSerialization;
 
 		Builder() {
 			this.proxiedInterfaces = new LinkedList<>();
@@ -128,6 +143,17 @@ public final class JdkProxyHint implements ConditionalHint {
 		 */
 		public Builder onReachableType(TypeReference reachableType) {
 			this.reachableType = reachableType;
+			return this;
+		}
+
+		/**
+		 * Specify if this proxy should be registered for Java serialization.
+		 * @param javaSerialization whether to register this proxy for Java serialization
+		 * @return {@code this}, to facilitate method chaining
+		 * @since 7.0.6
+		 */
+		public Builder withJavaSerialization(boolean javaSerialization) {
+			this.javaSerialization = javaSerialization;
 			return this;
 		}
 

@@ -29,19 +29,19 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class PropertyEntryTests {
 
 	@Test
-	void testCtorBailsOnNullPropertyNameArgument() {
+	void ctorBailsOnNullPropertyNameArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new PropertyEntry(null));
 	}
 
 	@Test
-	void testCtorBailsOnEmptyPropertyNameArgument() {
+	void ctorBailsOnEmptyPropertyNameArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new PropertyEntry(""));
 	}
 
 	@Test
-	void testCtorBailsOnWhitespacedPropertyNameArgument() {
+	void ctorBailsOnWhitespacedPropertyNameArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new PropertyEntry("\t   "));
 	}

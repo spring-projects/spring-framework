@@ -73,6 +73,27 @@ Java::
 ----
 <1> Mark a field for overriding the bean with type `CustomService`.
 <2> The result of this static method will be used as the instance and injected into the field.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	class OverrideBeanTests {
+		@TestBean // <1>
+		lateinit var customService: CustomService
+
+		// test case body...
+
+		companion object {
+			@JvmStatic
+			fun customService(): CustomService { // <2>
+				return MyFakeCustomService()
+			}
+		}
+	}
+----
+<1> Mark a field for overriding the bean with type `CustomService`.
+<2> The result of this static method will be used as the instance and injected into the field.
 ======
 
 In the example above, we are overriding the bean with type `CustomService`. If more than
@@ -96,6 +117,28 @@ Java::
 
 		static CustomService createCustomService() { // <2>
 			return new MyFakeCustomService();
+		}
+	}
+----
+<1> Mark a field for overriding the bean with name `service`, and specify that the
+    factory method is named `createCustomService`.
+<2> The result of this static method will be used as the instance and injected into the field.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	class OverrideBeanTests {
+		@TestBean(name = "service", methodName = "createCustomService") // <1>
+		lateinit var customService: CustomService
+
+		// test case body...
+
+		companion object {
+			@JvmStatic
+			fun createCustomService(): CustomService { // <2>
+				return MyFakeCustomService()
+			}
 		}
 	}
 ----
@@ -127,4 +170,16 @@ be treated as a `singleton`.
 Similarly, when overriding a bean created by a `FactoryBean`, the `FactoryBean` will be
 replaced with a singleton bean corresponding to the value returned from the `@TestBean`
 factory method.
+====
+
+[NOTE]
+====
+`@TestBean` uses the `REPLACE` or `REPLACE_OR_CREATE`
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-strategy[strategy
+for bean overrides], which registers the value returned from the factory method directly
+as the bean, bypassing the container's normal bean post-processing. Consequently, none of
+the Spring AOP advice that would otherwise apply to the original bean (for example,
+`@Transactional`, `@Cacheable`, or `@Retryable`) is present on the override instance. See
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-aop-proxies[Bean
+Overrides and Spring AOP Proxies] for details.
 ====

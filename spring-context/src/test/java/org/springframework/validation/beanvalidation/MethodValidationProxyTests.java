@@ -66,7 +66,7 @@ class MethodValidationProxyTests {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	@SuppressWarnings("unchecked")
-	void testMethodValidationInterceptor(boolean adaptViolations) {
+	void methodValidationInterceptor(boolean adaptViolations) {
 		MyValidBean bean = new MyValidBean();
 		ProxyFactory factory = new ProxyFactory(bean);
 		factory.addAdvice(adaptViolations ?
@@ -80,7 +80,7 @@ class MethodValidationProxyTests {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	@SuppressWarnings("unchecked")
-	void testMethodValidationPostProcessor(boolean adaptViolations) {
+	void methodValidationPostProcessor(boolean adaptViolations) {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBean(MethodValidationPostProcessor.class, adaptViolations ?
 				() -> {
@@ -101,7 +101,7 @@ class MethodValidationProxyTests {
 
 	@Test  // gh-29782
 	@SuppressWarnings("unchecked")
-	public void testMethodValidationPostProcessorForInterfaceOnlyProxy() {
+	void methodValidationPostProcessorForInterfaceOnlyProxy() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(MethodValidationPostProcessor.class);
 		context.registerBean(MyValidInterface.class, () ->
@@ -125,17 +125,17 @@ class MethodValidationProxyTests {
 	}
 
 	@Test
-	void testLazyValidatorForMethodValidation() {
+	void lazyValidatorForMethodValidation() {
 		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfig.class);
 	}
 
 	@Test
-	void testLazyValidatorForMethodValidationWithProxyTargetClass() {
+	void lazyValidatorForMethodValidationWithProxyTargetClass() {
 		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfigWithProxyTargetClass.class);
 	}
 
 	@Test
-	void testLazyValidatorForMethodValidationWithValidatorProvider() {
+	void lazyValidatorForMethodValidationWithValidatorProvider() {
 		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfigWithValidatorProvider.class);
 	}
 

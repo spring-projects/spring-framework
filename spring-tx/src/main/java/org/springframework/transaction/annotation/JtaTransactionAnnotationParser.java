@@ -78,8 +78,8 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 		}
 		rbta.setRollbackRules(rollbackRules);
 
-		if (attributes.containsKey("readOnly")) {  // JTA 2.1
-			rbta.setReadOnly(attributes.getBoolean("readOnly"));
+		if (attributes.containsKey("isReadOnly")) {  // JTA 2.1
+			rbta.setReadOnly(attributes.getBoolean("isReadOnly"));
 		}
 
 		return rbta;

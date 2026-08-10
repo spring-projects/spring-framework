@@ -36,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
  * @author Stephane Nicoll
  */
 @SpringJUnitConfig(JtaTransactionAspectsTests.Config.class)
-public class JtaTransactionAspectsTests {
+class JtaTransactionAspectsTests {
 
 	@Autowired
 	private CallCountingTransactionManager txManager;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.txManager.clear();
 	}
 

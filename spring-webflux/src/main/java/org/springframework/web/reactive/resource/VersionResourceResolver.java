@@ -180,6 +180,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		String simplePath = versionStrategy.removeVersion(requestPath, candidate);
+		if (ResourceHandlerUtils.shouldIgnoreInputPath(simplePath)) {
+			return Mono.empty();
+		}
 		return chain.resolveResource(exchange, simplePath, locations)
 				.filterWhen(resource -> versionStrategy.getResourceVersion(resource)
 						.map(actual -> {

@@ -40,7 +40,7 @@ class ThreadLocalTargetSourceTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
 				qualifiedResource(ThreadLocalTargetSourceTests.class, "context.xml"));
@@ -60,7 +60,7 @@ class ThreadLocalTargetSourceTests {
 	 * with one another.
 	 */
 	@Test
-	void testUseDifferentManagedInstancesInSameThread() {
+	void useDifferentManagedInstancesInSameThread() {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertThat(apartment.getCount()).isEqualTo(INITIAL_COUNT);
 		apartment.doWork();
@@ -72,7 +72,7 @@ class ThreadLocalTargetSourceTests {
 	}
 
 	@Test
-	void testReuseInSameThread() {
+	void reuseInSameThread() {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertThat(apartment.getCount()).isEqualTo(INITIAL_COUNT);
 		apartment.doWork();
@@ -86,7 +86,7 @@ class ThreadLocalTargetSourceTests {
 	 * Relies on introduction.
 	 */
 	@Test
-	void testCanGetStatsViaMixin() {
+	void canGetStatsViaMixin() {
 		ThreadLocalTargetSourceStats stats = (ThreadLocalTargetSourceStats) beanFactory.getBean("apartment");
 		// +1 because creating target for stats call counts
 		assertThat(stats.getInvocationCount()).isEqualTo(1);
@@ -104,7 +104,7 @@ class ThreadLocalTargetSourceTests {
 	}
 
 	@Test
-	void testNewThreadHasOwnInstance() throws InterruptedException {
+	void newThreadHasOwnInstance() throws InterruptedException {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertThat(apartment.getCount()).isEqualTo(INITIAL_COUNT);
 		apartment.doWork();
@@ -144,7 +144,7 @@ class ThreadLocalTargetSourceTests {
 	 * Test for SPR-1442. Destroyed target should re-associated with thread and not throw NPE.
 	 */
 	@Test
-	void testReuseDestroyedTarget() {
+	void reuseDestroyedTarget() {
 		ThreadLocalTargetSource source = (ThreadLocalTargetSource)this.beanFactory.getBean("threadLocalTs");
 
 		// try first time

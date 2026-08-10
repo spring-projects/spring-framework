@@ -56,9 +56,9 @@ public abstract class AbstractBeanFactoryTests {
 		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
 		TestBean roderick = (TestBean) getBeanFactory().getBean("roderick");
 		assertThat(rod).as("not == ").isNotSameAs(roderick);
-		assertThat(rod.getName().equals("Rod")).as("rod.name is Rod").isTrue();
+		assertThat(rod.getName()).as("rod.name is Rod").isEqualTo("Rod");
 		assertThat(rod.getAge()).as("rod.age is 31").isEqualTo(31);
-		assertThat(roderick.getName().equals("Roderick")).as("roderick.name is Roderick").isTrue();
+		assertThat(roderick.getName()).as("roderick.name is Roderick").isEqualTo("Roderick");
 		assertThat(roderick.getAge()).as("roderick.age was inherited").isEqualTo(rod.getAge());
 	}
 
@@ -90,15 +90,14 @@ public abstract class AbstractBeanFactoryTests {
 		// The dummy business method will throw an exception if the
 		// necessary callbacks weren't invoked in the right order.
 		lb.businessMethod();
-		boolean condition = !lb.isDestroyed();
-		assertThat(condition).as("Not destroyed").isTrue();
+		assertThat(lb.isDestroyed()).as("Not destroyed").isFalse();
 	}
 
 	@Test
 	protected void findsValidInstance() {
 		Object o = getBeanFactory().getBean("rod");
 		assertThat(o).isInstanceOfSatisfying(TestBean.class, rod -> {
-			assertThat(rod.getName().equals("Rod")).as("rod.name is Rod").isTrue();
+			assertThat(rod.getName()).as("rod.name is Rod").isEqualTo("Rod");
 			assertThat(rod.getAge()).as("rod.age is 31").isEqualTo(31);
 		});
 	}
@@ -156,13 +155,12 @@ public abstract class AbstractBeanFactoryTests {
 		TestBean tb1 = (TestBean) getBeanFactory().getBean("kathy");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("kathy");
 		assertThat(tb1).as("ref equal DOES NOT apply").isNotSameAs(tb2);
-		assertThat(tb1.equals(tb2)).as("object equal true").isTrue();
+		assertThat(tb1).as("object equal true").isEqualTo(tb2);
 		tb1.setAge(1);
 		tb2.setAge(2);
 		assertThat(tb1.getAge()).as("1 age independent = 1").isEqualTo(1);
 		assertThat(tb2.getAge()).as("2 age independent = 2").isEqualTo(2);
-		boolean condition = !tb1.equals(tb2);
-		assertThat(condition).as("object equal now false").isTrue();
+		assertThat(tb1).as("object equal now false").isNotEqualTo(tb2);
 	}
 
 	@Test
@@ -192,7 +190,7 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	protected void grandparentDefinitionFoundInBeanFactory() {
 		TestBean dad = (TestBean) getBeanFactory().getBean("father");
-		assertThat(dad.getName().equals("Albert")).as("Dad has correct name").isTrue();
+		assertThat(dad.getName()).as("Dad has correct name").isEqualTo("Albert");
 	}
 
 	@Test
@@ -200,7 +198,7 @@ public abstract class AbstractBeanFactoryTests {
 		assertThat(getBeanFactory().isSingleton("&singletonFactory")).isTrue();
 		assertThat(getBeanFactory().isSingleton("singletonFactory")).isTrue();
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
-		assertThat(tb.getName().equals(DummyFactory.SINGLETON_NAME)).as("Singleton from factory has correct name, not " + tb.getName()).isTrue();
+		assertThat(tb.getName()).as("Singleton from factory has correct name, not " + tb.getName()).isEqualTo(DummyFactory.SINGLETON_NAME);
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("singletonFactory");
 		assertThat(tb).as("Singleton references ==").isSameAs(tb2);

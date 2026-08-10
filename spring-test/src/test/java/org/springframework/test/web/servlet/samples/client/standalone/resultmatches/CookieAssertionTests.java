@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class CookieAssertionTests {
+class CookieAssertionTests {
 
 	private static final String COOKIE_NAME = CookieLocaleResolver.DEFAULT_COOKIE_NAME;
 
@@ -47,7 +47,7 @@ public class CookieAssertionTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		CookieLocaleResolver localeResolver = new CookieLocaleResolver();
 		localeResolver.setCookieDomain("domain");
 		localeResolver.setCookieHttpOnly(true);
@@ -64,55 +64,55 @@ public class CookieAssertionTests {
 
 
 	@Test
-	public void testExists() {
+	void exists() {
 		client.get().uri("/").exchange().expectCookie().exists(COOKIE_NAME);
 	}
 
 	@Test
-	public void testNotExists() {
+	void notExists() {
 		client.get().uri("/").exchange().expectCookie().doesNotExist("unknownCookie");
 	}
 
 	@Test
-	public void testEqualTo() {
+	void hamcrestEqualTo() {
 		client.get().uri("/").exchange().expectCookie().valueEquals(COOKIE_NAME, "en-US");
 		client.get().uri("/").exchange().expectCookie()
 				.value(COOKIE_NAME, v -> MatcherAssert.assertThat(v, equalTo("en-US")));
 	}
 
 	@Test
-	public void testMatcher() {
+	void matcher() {
 		client.get().uri("/").exchange().expectCookie()
 				.value(COOKIE_NAME, v -> MatcherAssert.assertThat(v, startsWith("en-US")));
 	}
 
 	@Test
-	public void testMaxAge() {
+	void maxAge() {
 		client.get().uri("/").exchange().expectCookie().maxAge(COOKIE_NAME, Duration.ofSeconds(-1));
 	}
 
 	@Test
-	public void testDomain() {
+	void domain() {
 		client.get().uri("/").exchange().expectCookie().domain(COOKIE_NAME, "domain");
 	}
 
 	@Test
-	public void testPath() {
+	void path() {
 		client.get().uri("/").exchange().expectCookie().path(COOKIE_NAME, "/");
 	}
 
 	@Test
-	public void testSecured() {
+	void secured() {
 		client.get().uri("/").exchange().expectCookie().secure(COOKIE_NAME, false);
 	}
 
 	@Test
-	public void testHttpOnly() {
+	void httpOnly() {
 		client.get().uri("/").exchange().expectCookie().httpOnly(COOKIE_NAME, true);
 	}
 
 	@Test
-	public void testSameSite() {
+	void sameSite() {
 		client.get().uri("/").exchange().expectCookie().sameSite(COOKIE_NAME, "Strict");
 	}
 

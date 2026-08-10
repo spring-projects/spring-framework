@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class BeanValidationPostProcessorTests {
 
 	@Test
-	void testNotNullConstraint() {
+	void notNullConstraint() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		ac.registerBeanDefinition("capp", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
@@ -52,7 +52,7 @@ class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	void testNotNullConstraintSatisfied() {
+	void notNullConstraintSatisfied() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		ac.registerBeanDefinition("capp", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
@@ -64,7 +64,7 @@ class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	void testNotNullConstraintAfterInitialization() {
+	void notNullConstraintAfterInitialization() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		RootBeanDefinition bvpp = new RootBeanDefinition(BeanValidationPostProcessor.class);
 		bvpp.getPropertyValues().add("afterInitialization", true);
@@ -76,7 +76,7 @@ class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	void testNotNullConstraintAfterInitializationWithProxy() {
+	void notNullConstraintAfterInitializationWithProxy() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		RootBeanDefinition bvpp = new RootBeanDefinition(BeanValidationPostProcessor.class);
 		bvpp.getPropertyValues().add("afterInitialization", true);
@@ -90,7 +90,7 @@ class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	void testSizeConstraint() {
+	void sizeConstraint() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		RootBeanDefinition bd = new RootBeanDefinition(NotNullConstrainedBean.class);
@@ -105,7 +105,7 @@ class BeanValidationPostProcessorTests {
 	}
 
 	@Test
-	void testSizeConstraintSatisfied() {
+	void sizeConstraintSatisfied() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		RootBeanDefinition bd = new RootBeanDefinition(NotNullConstrainedBean.class);

@@ -46,19 +46,19 @@ class JacksonXmlEncoderTests extends AbstractLeakCheckingTests {
 
 
 	@Test
-	protected void canEncode() {
+	void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, MediaType.TEXT_XML)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, new MediaType("application", "soap+xml"))).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, null)).isTrue();
-		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isFalse();
 		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isTrue();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_JSON)).isFalse();
 	}
 
 	@Test
-	protected void encode() {
+	void encode() {
 		Pojo value = new Pojo("foo", "bar");
 		DataBuffer result = encoder.encodeValue(value, this.bufferFactory, ResolvableType.forClass(Pojo.class),
 				MediaType.APPLICATION_XML, null);

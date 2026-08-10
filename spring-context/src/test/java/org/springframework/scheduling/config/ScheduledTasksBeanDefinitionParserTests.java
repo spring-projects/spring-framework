@@ -39,7 +39,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.type;
  * @author Chris Beams
  */
 @SuppressWarnings("unchecked")
-public class ScheduledTasksBeanDefinitionParserTests {
+class ScheduledTasksBeanDefinitionParserTests {
 
 	private ApplicationContext context;
 

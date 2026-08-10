@@ -27,7 +27,7 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
+import org.opentest4j.TestAbortedException;
 
 import org.springframework.core.testfixture.net.TestSocketUtils;
 
@@ -58,8 +58,8 @@ class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 		}
 		catch (BindException ex) {
 			runTests = false;
-			Assumptions.abort("Skipping remote JMX tests because binding to local port [" +
-					this.servicePort + "] failed: " + ex.getMessage());
+			throw new TestAbortedException("Skipping remote JMX tests because binding to local port [%s] failed: %s"
+					.formatted(this.servicePort, ex.getMessage()));
 		}
 	}
 

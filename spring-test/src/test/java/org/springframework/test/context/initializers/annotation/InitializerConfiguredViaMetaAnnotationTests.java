@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(SpringExtension.class)
 @ComposedContextConfiguration(BarConfig.class)
-public class InitializerConfiguredViaMetaAnnotationTests {
+class InitializerConfiguredViaMetaAnnotationTests {
 
 	@Autowired
 	String foo;
@@ -66,7 +66,7 @@ public class InitializerConfiguredViaMetaAnnotationTests {
 
 
 	@Test
-	public void beansFromInitializerAndComposedAnnotation() {
+	void beansFromInitializerAndComposedAnnotation() {
 		assertThat(strings).hasSize(2);
 		assertThat(foo).isEqualTo("foo");
 		assertThat(bar).isEqualTo("bar");

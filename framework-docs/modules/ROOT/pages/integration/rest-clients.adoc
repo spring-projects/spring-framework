@@ -402,6 +402,27 @@ To serialize only a subset of the object properties, you can specify a {baeldung
 		.toBodilessEntity();
 ----
 
+==== URL encoded Forms
+
+URL encoded forms, using the `"application/x-www-form-urlencoded"` media type, are useful for sending String key/values over the wire.
+This is supported by the `FormHttpMessageConverter`, if the application uses a `MultiValueMap<String, String>` as source instance
+or a target type.
+
+For example:
+
+[source,java,indent=0,subs="verbatim"]
+----
+    MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("project", "Spring Framework");
+    form.add("module", "spring-web");
+    ResponseEntity<Void> response = this.restClient.post()
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(form)
+            .retrieve()
+            .toBodilessEntity();
+----
+
+
 ==== Multipart
 
 To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for part content with headers.
@@ -419,18 +440,70 @@ For example:
 	headers.setContentType(MediaType.APPLICATION_XML);
 	parts.add("xmlPart", new HttpEntity<>(myBean, headers));
 	
-	// send using RestClient.post or RestTemplate.postForEntity
+    ResponseEntity<Void> response = this.restClient.post()
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(parts)
+            .retrieve()
+            .toBodilessEntity();
 ----
 
 In most cases, you do not have to specify the `Content-Type` for each part.
 The content type is determined automatically based on the `HttpMessageConverter` chosen to serialize it or, in the case of a `Resource`, based on the file extension.
 If necessary, you can explicitly provide the `MediaType` with an `HttpEntity` wrapper.
 
-Once the `MultiValueMap` is ready, you can use it as the body of a `POST` request, using `RestClient.post().body(parts)` (or `RestTemplate.postForObject`).
+The `Content-Type` is set to `multipart/form-data` by the `MultipartHttpMessageConverter`.
+As seen in the previous section, `MultiValueMap` types can also be used for URL encoded forms.
+It is preferable to explicitly set the media type in the `Content-Type` or `Accept` HTTP request headers to ensure that the expected
+message converter is used.
 
-If the `MultiValueMap` contains at least one non-`String` value, the `Content-Type` is set to `multipart/form-data` by the `FormHttpMessageConverter`.
-If the `MultiValueMap` has `String` values, the `Content-Type` defaults to `application/x-www-form-urlencoded`.
-If necessary the `Content-Type` may also be set explicitly.
+`RestClient` can also receive multipart responses.
+To decode a multipart response body, use a `ParameterizedTypeReference<MultiValueMap<String, Part>>`.
+The decoded map contains `Part` instances where `FormFieldPart` represents form field values
+and `FilePart` represents file parts with a `filename()` and a `transferTo()` method.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	MultiValueMap<String, Part> result = this.restClient.get()
+			.uri("https://example.com/upload")
+			.accept(MediaType.MULTIPART_FORM_DATA)
+			.retrieve()
+			.body(new ParameterizedTypeReference<>() {});
+
+	Part field = result.getFirst("fieldPart");
+	if (field instanceof FormFieldPart formField) {
+		String fieldValue = formField.value();
+	}
+	Part file = result.getFirst("filePart");
+	if (file instanceof FilePart filePart) {
+		filePart.transferTo(Path.of("/tmp/" + filePart.filename()));
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	val result = this.restClient.get()
+			.uri("https://example.com/upload")
+			.accept(MediaType.MULTIPART_FORM_DATA)
+			.retrieve()
+			.body(object : ParameterizedTypeReference<MultiValueMap<String, Part>>() {})
+
+	val field = result?.getFirst("fieldPart")
+	if (field is FormFieldPart) {
+		val fieldValue = field.value()
+	}
+	val file = result?.getFirst("filePart")
+	if (file is FilePart) {
+		file.transferTo(Path.of("/tmp/" + file.filename()))
+	}
+----
+======
+
 
 [[rest-request-factories]]
 === Client Request Factories
@@ -1179,7 +1252,7 @@ built-in decorators to suppress 404 exceptions and return a `ResponseEntity` wit
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// For RestClient
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(restCqlientAdapter)
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(restClientAdapter)
 			.exchangeAdapterDecorator(NotFoundRestClientAdapterDecorator::new)
 			.build();
 

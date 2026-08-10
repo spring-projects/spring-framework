@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  * @author Arnaud Cogoluègnes
  */
 @SpringJUnitWebConfig
-public class HttpOptionsTests {
+class HttpOptionsTests {
 
 	private final WebApplicationContext wac;
 

@@ -143,7 +143,7 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	 * @see #PARTICIPATE_SUFFIX
 	 */
 	protected String getParticipateAttributeName() {
-		return obtainEntityManagerFactory().toString() + PARTICIPATE_SUFFIX;
+		return obtainEntityManagerFactory() + PARTICIPATE_SUFFIX;
 	}
 
 

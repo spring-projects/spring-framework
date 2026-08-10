@@ -42,8 +42,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	@SuppressWarnings("NullAway.Init")
-	protected Object targetObject;
+	protected @Nullable Object targetObject;
 
 	private long refreshCheckDelay = -1;
 
@@ -66,11 +65,11 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 
 
 	@Override
-	public synchronized Class<?> getTargetClass() {
+	public synchronized @Nullable Class<?> getTargetClass() {
 		if (this.targetObject == null) {
 			refresh();
 		}
-		return this.targetObject.getClass();
+		return (this.targetObject != null ? this.targetObject.getClass() : null);
 	}
 
 	@Override

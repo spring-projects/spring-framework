@@ -132,7 +132,7 @@ public abstract class StringUtils {
 	 */
 	@Contract("null -> false")
 	public static boolean hasLength(@Nullable CharSequence str) {
-		return (str != null && !str.isEmpty());  // as of JDK 15
+		return (str != null && !str.isEmpty());
 	}
 
 	/**
@@ -956,6 +956,7 @@ public abstract class StringUtils {
 			String country = tokens[1];
 			validateLocalePart(country);
 			String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
+			validateLocalePart(variant);
 			return new Locale(language, country, variant);
 		}
 

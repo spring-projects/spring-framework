@@ -59,8 +59,6 @@ public final class PersistenceManagedTypesScanner {
 
 	private static final String CLASS_RESOURCE_PATTERN = "/**/*.class";
 
-	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
-
 	private static final String IGNORE_CLASSFORMAT_PROPERTY_NAME = "spring.classformat.ignore";
 
 	private static final boolean shouldIgnoreClassFormatException =
@@ -148,7 +146,11 @@ public final class PersistenceManagedTypesScanner {
 				try {
 					MetadataReader reader = factory.getMetadataReader(resource);
 					String className = reader.getClassMetadata().getClassName();
-					if (matchesEntityTypeFilter(reader, factory) && this.managedClassNameFilter.matches(className)) {
+					if (className.endsWith(ClassUtils.PACKAGE_INFO_SUFFIX)) {
+						scanResult.managedPackages.add(className.substring(0,
+								className.length() - ClassUtils.PACKAGE_INFO_SUFFIX.length()));
+					}
+					else if (matchesEntityTypeFilter(reader, factory) && this.managedClassNameFilter.matches(className)) {
 						scanResult.managedClassNames.add(className);
 						if (scanResult.persistenceUnitRootUrl == null) {
 							URL url = resource.getURL();
@@ -156,10 +158,6 @@ public final class PersistenceManagedTypesScanner {
 								scanResult.persistenceUnitRootUrl = ResourceUtils.extractJarFileURL(url);
 							}
 						}
-					}
-					if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
-						scanResult.managedPackages.add(className.substring(0,
-								className.length() - PACKAGE_INFO_SUFFIX.length()));
 					}
 				}
 				catch (FileNotFoundException ex) {

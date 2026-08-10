@@ -36,9 +36,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -293,7 +295,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
-		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
+		this.messageConverters.add(new FormHttpMessageConverter());
+		this.messageConverters.add(new MultipartHttpMessageConverter(HttpMessageConverters.forServer()
+				.registerDefaults().build()));
 	}
 
 	private void initExceptionHandlerAdviceCache() {

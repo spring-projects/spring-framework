@@ -54,6 +54,6 @@ class ConcurrentOperationExecutor : Ordered {
 				lockFailureException = ex
 			}
 		} while (numAttempts <= this.maxRetries)
-		throw lockFailureException!!
+		throw lockFailureException
 	}
 } // end::snippet[]

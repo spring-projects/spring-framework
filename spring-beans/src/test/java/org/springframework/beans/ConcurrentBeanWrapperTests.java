@@ -45,12 +45,12 @@ class ConcurrentBeanWrapperTests {
 	private Throwable ex = null;
 
 	@RepeatedTest(100)
-	void testSingleThread() {
+	void singleThread() {
 		performSet();
 	}
 
 	@Test
-	void testConcurrent() {
+	void concurrent() {
 		for (int i = 0; i < 10; i++) {
 			TestRun run = new TestRun(this);
 			set.add(run);

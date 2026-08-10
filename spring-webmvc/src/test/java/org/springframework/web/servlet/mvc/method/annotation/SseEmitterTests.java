@@ -22,14 +22,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.http.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
 
 
@@ -105,12 +110,24 @@ class SseEmitterTests {
 		this.handler.assertWriteCount(1);
 	}
 
-	@Test
-	void sendEventWithMultiline() throws Exception {
-		this.emitter.send(event().data("foo\nbar\nbaz"));
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("newLineCharacters")
+	void sendEventWithMultiline(String newLineChars, String description) throws Exception {
+		this.emitter.send(event().data("foo" + newLineChars + "bar" + newLineChars + "baz"));
 		this.handler.assertSentObjectCount(3);
 		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo\ndata:bar\ndata:baz");
+		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
+	}
+
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("newLineCharacters")
+	void sendEventWithMultilineWithMediaType(String newLineChars, String description) throws Exception {
+		this.emitter.send(event().data("foo" + newLineChars + "bar" + newLineChars + "baz", MediaType.TEXT_PLAIN));
+		this.handler.assertSentObjectCount(3);
+		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
+		this.handler.assertObject(1, "foo\ndata:bar\ndata:baz", MediaType.TEXT_PLAIN);
 		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
 		this.handler.assertWriteCount(1);
 	}
@@ -135,6 +152,39 @@ class SseEmitterTests {
 		this.handler.assertObject(3, "bar");
 		this.handler.assertObject(4, "\nevent:test\nretry:5000\nid:1\n\n", TEXT_PLAIN_UTF8);
 		this.handler.assertWriteCount(1);
+	}
+
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("newLineCharacters")
+	void rejectInvalidId(String newLineChars, String description) {
+		assertThatIllegalArgumentException().isThrownBy(() -> this.emitter
+				.send(event().id("first" + newLineChars + "second")));
+	}
+
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("newLineCharacters")
+	void rejectInvalidName(String newLineChars, String description) {
+		assertThatIllegalArgumentException().isThrownBy(() -> this.emitter
+				.send(event().name("first" + newLineChars + "second")));
+	}
+
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("newLineCharacters")
+	void supportMultiLineComments(String newLineChars, String description) throws Exception {
+		this.emitter.send(event().comment("foo" + newLineChars + "bar" + newLineChars + "baz").data("payload"));
+		this.handler.assertSentObjectCount(3);
+		this.handler.assertObject(0, ":foo\n:bar\n:baz\ndata:", TEXT_PLAIN_UTF8);
+		this.handler.assertObject(1, "payload");
+		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
+	}
+
+	private static Stream<Arguments> newLineCharacters() {
+		return Stream.of(
+				Arguments.of("\n", "LF"),
+				Arguments.of("\r", "CR"),
+				Arguments.of("\r\n", "CRLF")
+		);
 	}
 
 

@@ -26,26 +26,26 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Craig Walls
  */
-public class FlashAttributeResultMatchersTests {
+class FlashAttributeResultMatchersTests {
 
 	@Test
-	public void attributeExists() throws Exception {
+	void attributeExists() throws Exception {
 		new FlashAttributeResultMatchers().attributeExists("good").match(getStubMvcResult());
 	}
 
 	@Test
-	public void attributeExists_DoesNotExist() {
+	void attributeExists_DoesNotExist() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new FlashAttributeResultMatchers().attributeExists("bad").match(getStubMvcResult()));
 	}
 
 	@Test
-	public void attribute() throws Exception {
+	void attribute() throws Exception {
 		new FlashAttributeResultMatchers().attribute("good", "good").match(getStubMvcResult());
 	}
 
 	@Test
-	public void attribute_incorrectValue() {
+	void attribute_incorrectValue() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new FlashAttributeResultMatchers().attribute("good", "not good").match(getStubMvcResult()));
 	}

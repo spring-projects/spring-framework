@@ -210,6 +210,19 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_NDJSON_VALUE = "application/x-ndjson";
 
 	/**
+	 * Media type for {@code application/jsonl} (JSON Lines).
+	 * @since 7.1
+	 * @see <a href="https://jsonlines.org/">JSON Lines</a>
+	 */
+	public static final MediaType APPLICATION_JSONL;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_JSONL}.
+	 * @since 7.1
+	 */
+	public static final String APPLICATION_JSONL_VALUE = "application/jsonl";
+
+	/**
 	 * Media type for {@code application/xhtml+xml}.
 	 */
 	public static final MediaType APPLICATION_XHTML_XML;
@@ -372,6 +385,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_GRAPHQL_RESPONSE = new MediaType("application", "graphql-response+json");
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_NDJSON = new MediaType("application", "x-ndjson");
+		APPLICATION_JSONL = new MediaType("application", "jsonl");
 		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
 		APPLICATION_PDF = new MediaType("application", "pdf");
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
@@ -687,12 +701,20 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		// Avoid using java.util.stream.Stream in hot paths
-		List<String> tokenizedTypes = MimeTypeUtils.tokenize(mediaTypes);
-		List<MediaType> result = new ArrayList<>(tokenizedTypes.size());
-		for (String type : tokenizedTypes) {
-			if (StringUtils.hasText(type)) {
-				result.add(parseMediaType(type));
+		List<MimeType> mimeTypes;
+		try {
+			mimeTypes = MimeTypeUtils.parseMimeTypes(mediaTypes);
+		}
+		catch (InvalidMimeTypeException ex) {
+			throw new InvalidMediaTypeException(ex);
+		}
+		List<MediaType> result = new ArrayList<>(mimeTypes.size());
+		for (MimeType mimeType : mimeTypes) {
+			try {
+				result.add(new MediaType(mimeType));
+			}
+			catch (IllegalArgumentException ex) {
+				throw new InvalidMediaTypeException(mimeType.toString(), ex.getMessage());
 			}
 		}
 		return result;

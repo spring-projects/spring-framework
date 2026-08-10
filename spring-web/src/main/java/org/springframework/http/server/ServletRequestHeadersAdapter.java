@@ -305,12 +305,13 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 			if (this.overrideMap == null) {
 				return this.delegate.size();
 			}
-			Set<String> set = new LinkedHashSet<>();
+			int size = this.overrideMap.size();
 			for (String name : this.delegate.keySet()) {
-				set.add(name.toLowerCase(Locale.ROOT));
+				if (!this.overrideMap.containsKey(name)) {
+					size++;
+				}
 			}
-			this.overrideMap.keySet().forEach(key -> set.add(key.toLowerCase(Locale.ROOT)));
-			return set.size();
+			return size;
 		}
 
 		@Override
@@ -375,7 +376,12 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 		@Override
 		public Set<String> keySet() {
 			if (this.overrideMap != null) {
-				Set<String> set = new LinkedHashSet<>(this.delegate.keySet());
+				Set<String> set = new LinkedHashSet<>();
+				for (String name : this.delegate.keySet()) {
+					if (!this.overrideMap.containsKey(name)) {
+						set.add(name);
+					}
+				}
 				set.addAll(this.overrideMap.keySet());
 				return set;
 			}

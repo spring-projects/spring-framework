@@ -61,7 +61,7 @@ public abstract class ModelAndViewAssert {
 			fail("Model attribute with name '" + modelName + "' is null");
 		}
 		assertTrue("Model attribute is not of expected type '" + expectedType.getName() + "' but rather of type '" +
-				obj.getClass().getName() + "'", expectedType.isAssignableFrom(obj.getClass()));
+				obj.getClass().getName() + "'", expectedType.isInstance(obj));
 		return (T) obj;
 	}
 

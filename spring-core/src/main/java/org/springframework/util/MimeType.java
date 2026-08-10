@@ -24,7 +24,6 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
@@ -107,6 +106,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	private transient @Nullable Charset resolvedCharset;
 
 	private volatile @Nullable String toStringValue;
+
+	private volatile int hash;
 
 
 	/**
@@ -208,6 +209,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		this.parameters = other.parameters;
 		this.resolvedCharset = other.resolvedCharset;
 		this.toStringValue = other.toStringValue;
+		this.hash = other.hash;
 	}
 
 	/**
@@ -255,8 +257,29 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		return ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")));
 	}
 
+	/**
+	 * Unquote the given string, resolving any quoted-pair escapes it might
+	 * contain (for example, {@code "1\"2"} becomes {@code 1"2}) in the process.
+	 * <p>Returns the given string as-is if it is not a quoted string.
+	 */
 	protected String unquote(String s) {
-		return (isQuotedString(s) ? s.substring(1, s.length() - 1) : s);
+		if (!isQuotedString(s)) {
+			return s;
+		}
+		String inner = s.substring(1, s.length() - 1);
+		if (inner.indexOf('\\') == -1) {
+			return inner;
+		}
+		StringBuilder sb = new StringBuilder(inner.length());
+		for (int i = 0; i < inner.length(); i++) {
+			char c = inner.charAt(i);
+			if (c == '\\' && i + 1 < inner.length()) {
+				i++;
+				c = inner.charAt(i);
+			}
+			sb.append(c);
+		}
+		return sb.toString();
 	}
 
 	/**
@@ -463,7 +486,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Determine if the parameters in this {@code MimeType} and the supplied
 	 * {@code MimeType} are equal, performing case-insensitive comparisons
-	 * for {@link Charset Charsets}.
+	 * for {@link Charset Charsets} and disregarding quoting of parameter
+	 * values, so that, for example, {@code spring="framework"} and
+	 * {@code spring=framework} are considered equal.
 	 * @since 4.2
 	 */
 	private boolean parametersAreEqual(MimeType other) {
@@ -481,7 +506,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 					return false;
 				}
 			}
-			else if (!ObjectUtils.nullSafeEquals(entry.getValue(), other.parameters.get(key))) {
+			else if (!ObjectUtils.nullSafeEquals(unquote(entry.getValue()), unquote(other.parameters.get(key)))) {
 				return false;
 			}
 		}
@@ -491,9 +516,28 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	@Override
 	public int hashCode() {
-		int result = this.type.hashCode();
-		result = 31 * result + this.subtype.hashCode();
-		result = 31 * result + this.parameters.hashCode();
+		int result = this.hash;
+		if (result == 0) {
+			result = this.type.hashCode();
+			result = 31 * result + this.subtype.hashCode();
+			result = 31 * result + parametersHashCode();
+			this.hash = result;
+		}
+		return result;
+	}
+
+	/**
+	 * Compute a hash code for the parameters map, consistent with
+	 * {@link #parametersAreEqual}: normalizing {@link Charset Charsets} and
+	 * disregarding quoting of parameter values.
+	 */
+	private int parametersHashCode() {
+		int result = 0;
+		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
+			String key = entry.getKey();
+			Object value = (PARAM_CHARSET.equals(key) ? getCharset() : unquote(entry.getValue()));
+			result += key.hashCode() ^ ObjectUtils.nullSafeHashCode(value);
+		}
 		return result;
 	}
 
@@ -581,7 +625,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 				if (otherValue == null) {
 					otherValue = "";
 				}
-				comp = thisValue.compareTo(otherValue);
+				comp = unquote(thisValue).compareTo(unquote(otherValue));
 				if (comp != 0) {
 					return comp;
 				}
@@ -693,12 +737,6 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 */
 	public static MimeType valueOf(String value) {
 		return MimeTypeUtils.parseMimeType(value);
-	}
-
-	private static Map<String, String> addCharsetParameter(Charset charset, Map<String, String> parameters) {
-		Map<String, String> map = new LinkedHashMap<>(parameters);
-		map.put(PARAM_CHARSET, charset.name());
-		return map;
 	}
 
 }

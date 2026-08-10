@@ -61,7 +61,7 @@ class ObjectFactoryCreatingFactoryBeanTests {
 
 
 	@Test
-	void testFactoryOperation() {
+	void factoryOperation() {
 		FactoryTestBean testBean = beanFactory.getBean("factoryTestBean", FactoryTestBean.class);
 		ObjectFactory<?> objectFactory = testBean.getObjectFactory();
 
@@ -71,7 +71,7 @@ class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	void testFactorySerialization() throws Exception {
+	void factorySerialization() throws Exception {
 		FactoryTestBean testBean = beanFactory.getBean("factoryTestBean", FactoryTestBean.class);
 		ObjectFactory<?> objectFactory = testBean.getObjectFactory();
 
@@ -83,7 +83,7 @@ class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	void testProviderOperation() {
+	void providerOperation() {
 		ProviderTestBean testBean = beanFactory.getBean("providerTestBean", ProviderTestBean.class);
 		Provider<?> provider = testBean.getProvider();
 
@@ -93,7 +93,7 @@ class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	void testProviderSerialization() throws Exception {
+	void providerSerialization() throws Exception {
 		ProviderTestBean testBean = beanFactory.getBean("providerTestBean", ProviderTestBean.class);
 		Provider<?> provider = testBean.getProvider();
 
@@ -105,7 +105,7 @@ class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	void testDoesNotComplainWhenTargetBeanNameRefersToSingleton() throws Exception {
+	void doesNotComplainWhenTargetBeanNameRefersToSingleton() throws Exception {
 		final String targetBeanName = "singleton";
 		final String expectedSingleton = "Alicia Keys";
 
@@ -122,14 +122,14 @@ class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	void testWhenTargetBeanNameIsNull() {
+	void whenTargetBeanNameIsNull() {
 		assertThatIllegalArgumentException().as(
 				"'targetBeanName' property not set").isThrownBy(
 						new ObjectFactoryCreatingFactoryBean()::afterPropertiesSet);
 	}
 
 	@Test
-	void testWhenTargetBeanNameIsEmptyString() {
+	void whenTargetBeanNameIsEmptyString() {
 		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
 		factory.setTargetBeanName("");
 		assertThatIllegalArgumentException().as(
@@ -138,7 +138,7 @@ class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	void testWhenTargetBeanNameIsWhitespacedString() {
+	void whenTargetBeanNameIsWhitespacedString() {
 		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
 		factory.setTargetBeanName("  \t");
 		assertThatIllegalArgumentException().as(
@@ -147,7 +147,7 @@ class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	void testEnsureOFBFBReportsThatItActuallyCreatesObjectFactoryInstances() {
+	void ensureOFBFBReportsThatItActuallyCreatesObjectFactoryInstances() {
 		assertThat(new ObjectFactoryCreatingFactoryBean().getObjectType()).as("Must be reporting that it creates ObjectFactory instances (as per class contract).").isEqualTo(ObjectFactory.class);
 	}
 

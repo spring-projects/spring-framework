@@ -43,7 +43,7 @@ class DefaultMultipartHttpServletRequestTests {
 
 
 	@Test // SPR-16590
-	public void parameterValues() {
+	void parameterValues() {
 
 		this.multipartParams.put("key", new String[] {"p"});
 		this.queryParams.add("key", "q");
@@ -54,7 +54,7 @@ class DefaultMultipartHttpServletRequestTests {
 	}
 
 	@Test // SPR-16590
-	public void parameterMap() {
+	void parameterMap() {
 
 		this.multipartParams.put("key1", new String[] {"p1"});
 		this.multipartParams.put("key2", new String[] {"p2"});

@@ -18,6 +18,8 @@ package org.springframework.jdbc.support.incrementer;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -31,7 +33,7 @@ import org.springframework.util.Assert;
 public abstract class AbstractColumnMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 
 	/** The name of the column for this sequence. */
-	private String columnName;
+	private @Nullable String columnName;
 
 	/** The number of keys buffered in a cache. */
 	private int cacheSize = 1;
@@ -43,7 +45,6 @@ public abstract class AbstractColumnMaxValueIncrementer extends AbstractDataFiel
 	 * @see #setIncrementerName
 	 * @see #setColumnName
 	 */
-	@SuppressWarnings("NullAway.Init")
 	public AbstractColumnMaxValueIncrementer() {
 	}
 
@@ -63,14 +64,14 @@ public abstract class AbstractColumnMaxValueIncrementer extends AbstractDataFiel
 	/**
 	 * Set the name of the column in the sequence table.
 	 */
-	public void setColumnName(String columnName) {
+	public void setColumnName(@Nullable String columnName) {
 		this.columnName = columnName;
 	}
 
 	/**
 	 * Return the name of the column in the sequence table.
 	 */
-	public String getColumnName() {
+	public @Nullable String getColumnName() {
 		return this.columnName;
 	}
 

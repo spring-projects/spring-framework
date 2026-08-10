@@ -95,7 +95,7 @@ public abstract class TagUtils {
 		}
 		Tag ancestor = tag.getParent();
 		while (ancestor != null) {
-			if (ancestorTagClass.isAssignableFrom(ancestor.getClass())) {
+			if (ancestorTagClass.isInstance(ancestor)) {
 				return true;
 			}
 			ancestor = ancestor.getParent();

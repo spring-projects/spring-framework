@@ -73,6 +73,11 @@ import org.springframework.messaging.core.MessagePostProcessor;
  *     .receive();
  * </pre>
  *
+ * <p><b>Note that Spring's JMS setup is designed to be used against trusted
+ * broker setups, with trusted packages for {@code ObjectMessage} deserialization
+ * to be configured at the broker level (for example: in the ActiveMQ setup).</b>
+ * Alternatively, you may configure a custom {@link Builder#messageConverter converter}.
+ *
  * @author Juergen Hoeller
  * @author Brian Clozel
  * @since 7.0

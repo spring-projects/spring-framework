@@ -27,4 +27,5 @@ with the `CustomAutowireConfigurer`
 
 When multiple beans qualify as autowire candidates, the determination of a "`primary`" is
 as follows: If exactly one bean definition among the candidates has a `primary`
-attribute set to `true`, it is selected.
+attribute set to `true`, it is selected. For annotation-based configuration, see
+xref:core/beans/annotation-config/autowired-primary.adoc[Fine-tuning with `@Primary` or `@Fallback`].

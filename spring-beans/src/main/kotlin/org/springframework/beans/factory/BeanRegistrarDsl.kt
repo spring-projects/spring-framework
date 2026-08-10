@@ -18,8 +18,8 @@ package org.springframework.beans.factory
 
 import org.springframework.beans.factory.BeanRegistry.SupplierContext
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.core.ResolvableType
 import org.springframework.core.env.Environment
+import kotlin.reflect.KClass
 
 /**
  * Contract for registering programmatically beans.
@@ -363,6 +363,28 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 		}
 		return registry.registerBean(object: ParameterizedTypeReference<T>() {}, customizer)
 	}
+
+	/**
+	 * Determine whether a bean of the given name is already registered.
+	 * @param name the name of the bean
+	 * @since 7.1
+	 */
+	fun containsBean(name: String): Boolean = registry.containsBean(name)
+
+	/**
+	 * Determine whether a bean of the given type is already registered.
+	 * @param beanType the type of the bean
+	 * @since 7.1
+	 */
+	fun containsBean(beanType: KClass<*>): Boolean = registry.containsBean(beanType.java)
+
+	/**
+	 * Determine whether a bean of the given type is already registered.
+	 * @param T the type of the bean
+	 * @since 7.1
+	 */
+	inline fun <reified T : Any> containsBean(): Boolean =
+		registry.containsBean(object: ParameterizedTypeReference<T>() {})
 
 
 	/**

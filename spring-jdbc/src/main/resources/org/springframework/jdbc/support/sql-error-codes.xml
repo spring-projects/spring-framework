@@ -209,7 +209,7 @@
 			<value>1205,3572</value>
 		</property>
 		<property name="deadlockLoserCodes">
-			<value>1213</value>
+			<value>149,1213</value>
 		</property>
 	</bean>
 

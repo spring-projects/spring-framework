@@ -38,7 +38,7 @@ class PagedListHolderTests {
 
 	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testPagedListHolder() {
+	void pagedListHolder() {
 		TestBean tb1 = new TestBean();
 		tb1.setName("eva");
 		tb1.setAge(25);

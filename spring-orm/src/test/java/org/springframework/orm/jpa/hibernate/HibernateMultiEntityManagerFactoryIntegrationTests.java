@@ -47,7 +47,7 @@ class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContain
 
 	@Override
 	@Test
-	protected void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
+	protected void entityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		assertThat(this.entityManagerFactory).isInstanceOf(EntityManagerFactoryInfo.class);
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) this.entityManagerFactory;
 		assertThat(emfi.getPersistenceUnitName()).isEqualTo("Drivers");
@@ -56,7 +56,7 @@ class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContain
 	}
 
 	@Test
-	void testEntityManagerFactory2() {
+	void entityManagerFactory2() {
 		EntityManager em = this.entityManagerFactory2.createEntityManager();
 		try {
 			assertThatIllegalArgumentException().isThrownBy(() ->

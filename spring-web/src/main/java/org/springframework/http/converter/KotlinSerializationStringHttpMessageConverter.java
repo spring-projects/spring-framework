@@ -98,7 +98,6 @@ public abstract class KotlinSerializationStringHttpMessageConverter<T extends St
 			String s = format.encodeToString(serializer, object);
 			Charset charset = charset(outputMessage.getHeaders().getContentType());
 			outputMessage.getBody().write(s.getBytes(charset));
-			outputMessage.getBody().flush();
 		}
 		catch (SerializationException ex) {
 			throw new HttpMessageNotWritableException("Could not write " + format + ": " + ex.getMessage(), ex);

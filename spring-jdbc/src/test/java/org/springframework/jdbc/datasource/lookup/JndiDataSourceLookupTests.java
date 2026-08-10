@@ -33,7 +33,7 @@ class JndiDataSourceLookupTests {
 	private static final String DATA_SOURCE_NAME = "Love is like a stove, burns you when it's hot";
 
 	@Test
-	void testSunnyDay() {
+	void sunnyDay() {
 		final DataSource expectedDataSource = new StubDataSource();
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
@@ -48,7 +48,7 @@ class JndiDataSourceLookupTests {
 	}
 
 	@Test
-	void testNoDataSourceAtJndiLocation() {
+	void noDataSourceAtJndiLocation() {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
 			protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {

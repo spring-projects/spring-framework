@@ -49,7 +49,7 @@ import java.beans.PropertyDescriptor;
 public interface BeanWrapper extends ConfigurablePropertyAccessor {
 
 	/**
-	 * Specify a limit for array and collection auto-growing.
+	 * Specify a limit for array and collection/set/list auto-growing.
 	 * <p>Default is unlimited on a plain BeanWrapper.
 	 * @since 4.1
 	 */

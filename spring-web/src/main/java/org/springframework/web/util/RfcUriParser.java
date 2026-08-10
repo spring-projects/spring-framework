@@ -24,9 +24,10 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
- * Parser for URI's based on RFC 3986 syntax.
+ * Parser for URIs based on RFC 3986 syntax.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
@@ -178,7 +179,7 @@ abstract class RfcUriParser {
 						parser.capturePath().advanceTo(QUERY, i + 1);
 						break;
 					case '#':
-						parser.capturePath().advanceTo(FRAGMENT);
+						parser.capturePath().advanceTo(FRAGMENT, i + 1);
 						break;
 				}
 			}
@@ -241,11 +242,15 @@ abstract class RfcUriParser {
 						parser.index(++i);
 						parser.captureHost();
 						if (parser.hasNext()) {
-							if (parser.charAtIndex() == ':') {
+							char next = parser.charAtIndex();
+							if (next == ':') {
 								parser.advanceTo(PORT, i + 1);
 							}
-							else {
+							else if (next == '/') {
 								parser.advanceTo(PATH, i);
+							}
+							else {
+								fail(parser, "Bad authority");
 							}
 						}
 						break;
@@ -541,7 +546,8 @@ abstract class RfcUriParser {
 
 		public InternalParser capturePort() {
 			verify(this.openCurlyBracketCount == 0, this, "Bad authority");
-			this.port = captureComponent("port");
+			String value = captureComponent("port");
+			this.port = (StringUtils.hasText(value) ? value : null);
 			return this;
 		}
 

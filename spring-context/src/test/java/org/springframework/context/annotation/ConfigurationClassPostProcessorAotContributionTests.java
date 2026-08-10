@@ -83,7 +83,7 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  */
-public class ConfigurationClassPostProcessorAotContributionTests {
+class ConfigurationClassPostProcessorAotContributionTests {
 
 	private final TestGenerationContext generationContext = new TestGenerationContext();
 
@@ -466,7 +466,7 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 	}
 
 	@Nested
-	public class BeanRegistrarTests {
+	class BeanRegistrarTests {
 
 		@Test
 		void applyToWhenHasDefaultConstructor() throws NoSuchMethodException {

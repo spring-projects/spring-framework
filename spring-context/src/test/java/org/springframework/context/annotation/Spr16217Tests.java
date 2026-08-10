@@ -27,7 +27,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 class Spr16217Tests {
 
 	@Test
-	public void baseConfigurationIsIncludedWhenFirstSuperclassReferenceIsSkippedInRegisterBeanPhase() {
+	void baseConfigurationIsIncludedWhenFirstSuperclassReferenceIsSkippedInRegisterBeanPhase() {
 		try (AnnotationConfigApplicationContext context =
 					new AnnotationConfigApplicationContext(RegisterBeanPhaseImportingConfiguration.class)) {
 			context.getBean("someBean");

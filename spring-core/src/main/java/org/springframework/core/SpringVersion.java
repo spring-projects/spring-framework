@@ -38,13 +38,27 @@ public final class SpringVersion {
 
 
 	/**
-	 * Return the full version string of the present Spring codebase,
+	 * Return the "major.minor.patch" version string of the present Spring codebase,
 	 * or {@code null} if it cannot be determined.
 	 * @see Package#getImplementationVersion()
 	 */
 	public static @Nullable String getVersion() {
 		Package pkg = SpringVersion.class.getPackage();
-		return (pkg != null ? pkg.getImplementationVersion() : null);
+		String version = (pkg != null ? pkg.getImplementationVersion() : null);
+		if (version != null) {
+			int idx = version.indexOf('.');  // after major
+			if (idx != -1) {
+				idx = version.indexOf('.', idx + 1);  // after minor
+				if (idx != -1) {
+					idx = version.indexOf('.', idx + 1);  // after patch
+					if (idx != -1) {
+						// Ignore anything beyond "major.minor.patch"
+						version = version.substring(0, idx);
+					}
+				}
+			}
+		}
+		return version;
 	}
 
 }

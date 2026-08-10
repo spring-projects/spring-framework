@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class PathEditorTests {
 
 	@Test
-	void testClasspathPathName() {
+	void classpathPathName() {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".class");
@@ -46,14 +46,14 @@ class PathEditorTests {
 	}
 
 	@Test
-	void testWithNonExistentResource() {
+	void withNonExistentResource() {
 		PropertyEditor pathEditor = new PathEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				pathEditor.setAsText("classpath:/no_way_this_file_is_found.doc"));
 	}
 
 	@Test
-	void testWithNonExistentPath() {
+	void withNonExistentPath() {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("file:/no_way_this_file_is_found.doc");
 		Object value = pathEditor.getValue();
@@ -63,7 +63,7 @@ class PathEditorTests {
 	}
 
 	@Test
-	void testAbsolutePath() {
+	void absolutePath() {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("/no_way_this_file_is_found.doc");
 		Object value = pathEditor.getValue();
@@ -73,7 +73,7 @@ class PathEditorTests {
 	}
 
 	@Test
-	void testWindowsAbsolutePath() {
+	void windowsAbsolutePath() {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("C:\\no_way_this_file_is_found.doc");
 		Object value = pathEditor.getValue();
@@ -83,7 +83,7 @@ class PathEditorTests {
 	}
 
 	@Test
-	void testWindowsAbsoluteFilePath() {
+	void windowsAbsoluteFilePath() {
 		PropertyEditor pathEditor = new PathEditor();
 		try {
 			pathEditor.setAsText("file://C:\\no_way_this_file_is_found.doc");
@@ -100,7 +100,7 @@ class PathEditorTests {
 	}
 
 	@Test
-	void testCurrentDirectory() {
+	void currentDirectory() {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("file:.");
 		Object value = pathEditor.getValue();
@@ -110,7 +110,7 @@ class PathEditorTests {
 	}
 
 	@Test
-	void testUnqualifiedPathNameFound() {
+	void unqualifiedPathNameFound() {
 		PropertyEditor pathEditor = new PathEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".class";
@@ -128,7 +128,7 @@ class PathEditorTests {
 	}
 
 	@Test
-	void testUnqualifiedPathNameNotFound() {
+	void unqualifiedPathNameNotFound() {
 		PropertyEditor pathEditor = new PathEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
 				ClassUtils.getShortName(getClass()) + ".clazz";

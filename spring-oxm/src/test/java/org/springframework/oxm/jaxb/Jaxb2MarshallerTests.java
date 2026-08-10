@@ -152,7 +152,7 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 	}
 
 	@Test
-	void testInvalidContextPath() {
+	void invalidContextPath() {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath("ab");
 		assertThatExceptionOfType(UncategorizedMappingException.class).isThrownBy(marshaller::afterPropertiesSet);

@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CompositeFilterTests {
 
 	@Test
-	void testCompositeFilter() throws ServletException, IOException {
+	void compositeFilter() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
 		MockFilter targetFilter = new MockFilter();
 		MockFilterConfig proxyConfig = new MockFilterConfig(sc);

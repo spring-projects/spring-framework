@@ -41,7 +41,7 @@ class JndiDestinationResolverTests {
 
 
 	@Test
-	void testHitsCacheSecondTimeThrough() throws Exception {
+	void hitsCacheSecondTimeThrough() throws Exception {
 
 		Session session = mock();
 
@@ -52,7 +52,7 @@ class JndiDestinationResolverTests {
 	}
 
 	@Test
-	void testDoesNotUseCacheIfCachingIsTurnedOff() throws Exception {
+	void doesNotUseCacheIfCachingIsTurnedOff() throws Exception {
 
 		Session session = mock();
 
@@ -71,7 +71,7 @@ class JndiDestinationResolverTests {
 	}
 
 	@Test
-	void testDelegatesToFallbackIfNotResolvedInJndi() throws Exception {
+	void delegatesToFallbackIfNotResolvedInJndi() throws Exception {
 		Session session = mock();
 
 		DestinationResolver dynamicResolver = mock();
@@ -93,7 +93,7 @@ class JndiDestinationResolverTests {
 	}
 
 	@Test
-	void testDoesNotDelegateToFallbackIfNotResolvedInJndi() {
+	void doesNotDelegateToFallbackIfNotResolvedInJndi() {
 		final Session session = mock();
 		DestinationResolver dynamicResolver = mock();
 

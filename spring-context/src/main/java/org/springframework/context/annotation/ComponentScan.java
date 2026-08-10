@@ -109,14 +109,18 @@ public @interface ComponentScan {
 	/**
 	 * The {@link BeanNameGenerator} class to be used for naming detected components
 	 * within the Spring container.
-	 * <p>The default value of the {@link BeanNameGenerator} interface itself indicates
+	 * <p>The default value of the {@code BeanNameGenerator} interface itself indicates
 	 * that the scanner used to process this {@code @ComponentScan} annotation should
 	 * use its inherited bean name generator, for example, the default
 	 * {@link AnnotationBeanNameGenerator} or any custom instance supplied to the
-	 * application context at bootstrap time.
+	 * application context at bootstrap time. If a {@link ConfigurationBeanNameGenerator}
+	 * is used (such as {@link FullyQualifiedConfigurationBeanNameGenerator}), it
+	 * also affects the default names for {@link Bean @Bean} methods in
+	 * {@link Configuration @Configuration} classes.
 	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)
 	 * @see AnnotationBeanNameGenerator
 	 * @see FullyQualifiedAnnotationBeanNameGenerator
+	 * @see FullyQualifiedConfigurationBeanNameGenerator
 	 */
 	Class<? extends BeanNameGenerator> nameGenerator() default BeanNameGenerator.class;
 

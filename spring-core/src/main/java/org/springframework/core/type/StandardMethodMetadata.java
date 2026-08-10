@@ -103,7 +103,7 @@ public class StandardMethodMetadata implements MethodMetadata {
 
 	@Override
 	public String getReturnTypeName() {
-		return this.introspectedMethod.getReturnType().getName();
+		return this.introspectedMethod.getReturnType().getTypeName();
 	}
 
 	@Override

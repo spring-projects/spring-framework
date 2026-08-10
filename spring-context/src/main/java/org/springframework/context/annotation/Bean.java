@@ -35,48 +35,47 @@ import org.springframework.core.annotation.AliasFor;
  * example:
  *
  * <pre class="code">
- *     &#064;Bean
- *     public MyBean myBean() {
- *         // instantiate and configure MyBean obj
- *         return obj;
- *     }
- * </pre>
+ * &#064;Bean
+ * public MyBean myBean() {
+ *     // instantiate and configure MyBean obj
+ *     return obj;
+ * }</pre>
  *
  * <h3>Bean Names</h3>
  *
  * <p>While a {@link #name} attribute is available, the default strategy for
  * determining the name of a bean is to use the name of the {@code @Bean} method.
- * This is convenient and intuitive, but if explicit naming is desired, the
- * {@code name} attribute (or its alias {@code value}) may be used. Also note
- * that {@code name} accepts an array of Strings, allowing for multiple names
- * (i.e. a primary bean name plus one or more aliases) for a single bean.
+ * This default can be overridden by configuring a {@link ConfigurationBeanNameGenerator}
+ * &mdash; for example, {@link FullyQualifiedConfigurationBeanNameGenerator} for
+ * fully-qualified names. If explicit naming is desired for an individual bean, the
+ * {@code name} attribute (or its alias {@link #value}) may be used. Also note that
+ * {@code name} accepts an array of Strings, allowing for multiple names (i.e., a
+ * primary bean name plus one or more aliases) for a single bean.
  *
  * <pre class="code">
- *     &#064;Bean({"b1", "b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
- *     public MyBean myBean() {
- *         // instantiate and configure MyBean obj
- *         return obj;
- *     }
- * </pre>
+ * &#064;Bean({"b1", "b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
+ * public MyBean myBean() {
+ *     // instantiate and configure MyBean obj
+ *     return obj;
+ * }</pre>
  *
- * <h3>Profile, Scope, Lazy, DependsOn, Primary, Order</h3>
+ * <h3>Profile, Scope, Lazy, DependsOn, Primary, Fallback, Order</h3>
  *
  * <p>Note that the {@code @Bean} annotation does not provide attributes for profile,
- * scope, lazy, depends-on or primary. Rather, it should be used in conjunction with
- * {@link Scope @Scope}, {@link Lazy @Lazy}, {@link DependsOn @DependsOn} and
+ * scope, lazy, depends-on, or primary. Rather, it should be used in conjunction with
+ * {@link Scope @Scope}, {@link Lazy @Lazy}, {@link DependsOn @DependsOn}, and
  * {@link Primary @Primary} annotations to declare those semantics. For example:
  *
  * <pre class="code">
- *     &#064;Bean
- *     &#064;Profile("production")
- *     &#064;Scope("prototype")
- *     public MyBean myBean() {
- *         // instantiate and configure MyBean obj
- *         return obj;
- *     }
- * </pre>
+ * &#064;Bean
+ * &#064;Profile("production")
+ * &#064;Scope("prototype")
+ * public MyBean myBean() {
+ *     // instantiate and configure MyBean obj
+ *     return obj;
+ * }</pre>
  *
- * The semantics of the above-mentioned annotations match their use at the component
+ * The semantics of the aforementioned annotations match their use at the component
  * class level: {@code @Profile} allows for selective inclusion of certain beans.
  * {@code @Scope} changes the bean's scope from singleton to the specified scope.
  * {@code @Lazy} only has an actual effect in case of the default singleton scope.
@@ -85,6 +84,9 @@ import org.springframework.core.annotation.AliasFor;
  * through direct references, which is typically helpful for singleton startup.
  * {@code @Primary} is a mechanism to resolve ambiguity at the injection point level
  * if a single target component needs to be injected but several beans match by type.
+ * {@link Fallback @Fallback} marks a bean as a fallback candidate in such scenarios;
+ * if all beans but one among multiple matching candidates are marked as fallback, the
+ * remaining bean will be selected.
  *
  * <p>Additionally, {@code @Bean} methods may also declare qualifier annotations
  * and {@link org.springframework.core.annotation.Order @Order} values, to be
@@ -100,8 +102,8 @@ import org.springframework.core.annotation.AliasFor;
  * orthogonal concern determined by dependency relationships and {@code @DependsOn}
  * declarations as mentioned above. Also, {@link jakarta.annotation.Priority} is not
  * available at this level since it cannot be declared on methods; its semantics can
- * be modeled through {@code @Order} values in combination with {@code @Primary} on
- * a single bean per type.
+ * be modeled through {@code @Order} values in combination with {@code @Primary} or
+ * {@code @Fallback} on a single bean per type.
  *
  * <h3>{@code @Bean} Methods in {@code @Configuration} Classes</h3>
  *
@@ -119,17 +121,17 @@ import org.springframework.core.annotation.AliasFor;
  * &#064;Configuration
  * public class AppConfig {
  *
- *     &#064;Bean
- *     public FooService fooService() {
- *         return new FooService(fooRepository());
- *     }
+ *    &#064;Bean
+ *    public FooService fooService() {
+ *        return new FooService(fooRepository());
+ *    }
  *
- *     &#064;Bean
- *     public FooRepository fooRepository() {
- *         return new JdbcFooRepository(dataSource());
- *     }
+ *    &#064;Bean
+ *    public FooRepository fooRepository() {
+ *        return new JdbcFooRepository(dataSource());
+ *    }
  *
- *     // ...
+ *    // ...
  * }</pre>
  *
  * <h3>{@code @Bean} <em>Lite</em> Mode</h3>
@@ -158,20 +160,21 @@ import org.springframework.core.annotation.AliasFor;
  * <pre class="code">
  * &#064;Component
  * public class Calculator {
- *     public int sum(int a, int b) {
- *         return a+b;
- *     }
+ *    public int sum(int a, int b) {
+ *        return a+b;
+ *    }
  *
- *     &#064;Bean
- *     public MyBean myBean() {
- *         return new MyBean();
- *     }
+ *    &#064;Bean
+ *    public MyBean myBean() {
+ *        return new MyBean();
+ *    }
  * }</pre>
  *
  * <h3>Bootstrapping</h3>
  *
- * <p>See the @{@link Configuration} javadoc for further details including how to bootstrap
- * the container using {@link AnnotationConfigApplicationContext} and friends.
+ * <p>See the {@link Configuration @Configuration} javadoc for further details
+ * including how to bootstrap the container using
+ * {@link AnnotationConfigApplicationContext} and friends.
  *
  * <h3>{@code BeanFactoryPostProcessor}-returning {@code @Bean} methods</h3>
  *
@@ -183,19 +186,43 @@ import org.springframework.core.annotation.AliasFor;
  * lifecycle issues, mark {@code BFPP}-returning {@code @Bean} methods as {@code static}. For example:
  *
  * <pre class="code">
- *     &#064;Bean
- *     public static PropertySourcesPlaceholderConfigurer pspc() {
- *         // instantiate, configure and return pspc ...
- *     }
- * </pre>
+ * &#064;Bean
+ * public static PropertySourcesPlaceholderConfigurer pspc() {
+ *     // instantiate, configure and return pspc ...
+ * }</pre>
  *
  * By marking this method as {@code static}, it can be invoked without causing instantiation of its
- * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
+ * declaring {@code @Configuration} class, thus avoiding the aforementioned lifecycle conflicts.
  * Note however that {@code static} {@code @Bean} methods will not be enhanced for scoping and AOP
  * semantics as mentioned above. This works out in {@code BFPP} cases, as they are not typically
  * referenced by other {@code @Bean} methods. As a reminder, an INFO-level log message will be
  * issued for any non-static {@code @Bean} methods having a return type assignable to
  * {@code BeanFactoryPostProcessor}.
+ *
+ * <h3>{@code BeanPostProcessor}-returning {@code @Bean} methods</h3>
+ *
+ * <p>Similarly, special consideration must be taken for {@code @Bean} methods that return Spring
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor BeanPostProcessor}
+ * ({@code BPP}) types. Because {@code BPP} objects must be instantiated early in the container
+ * lifecycle, a non-static {@code @Bean} method that returns a {@code BPP} will cause eager
+ * initialization of its declaring {@code @Configuration} class, which can make other beans in the
+ * {@code @Configuration} class (as well as dependencies of those beans) ineligible for full
+ * post-processing. To avoid these lifecycle issues, mark {@code BPP}-returning {@code @Bean}
+ * methods as {@code static}. For example:
+ *
+ * <pre class="code">
+ * &#064;Bean
+ * public static MyBeanPostProcessor myBeanPostProcessor() {
+ *     return new MyBeanPostProcessor();
+ * }</pre>
+ *
+ * By marking this method as {@code static}, it can be invoked without causing instantiation of its
+ * declaring {@code @Configuration} class. Furthermore, the method should ideally not declare any
+ * dependencies so that the container does not need to instantiate other beans to create the
+ * post-processor, which would make those beans ineligible for post-processing as well. For any such
+ * bean, you should see a WARN-level log message similar to the following: "Bean 'someBean' of type
+ * [org.example.SomeType] is not eligible for getting processed by all BeanPostProcessors (for example:
+ * not eligible for auto-proxying)".
  *
  * @author Rod Johnson
  * @author Costin Leau
@@ -208,9 +235,13 @@ import org.springframework.core.annotation.AliasFor;
  * @see DependsOn
  * @see Lazy
  * @see Primary
+ * @see Fallback
  * @see org.springframework.stereotype.Component
  * @see org.springframework.beans.factory.annotation.Autowired
  * @see org.springframework.beans.factory.annotation.Value
+ * @see FullyQualifiedConfigurationBeanNameGenerator
+ * @see AnnotationConfigApplicationContext#setBeanNameGenerator
+ * @see ComponentScan#nameGenerator()
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -229,10 +260,11 @@ public @interface Bean {
 
 	/**
 	 * The name of this bean, or if several names, a primary bean name plus aliases.
-	 * <p>If left unspecified, the name of the bean is the name of the annotated method.
-	 * If specified, the method name is ignored.
+	 * <p>See the "Bean Names" section in the {@linkplain Bean class-level documentation}
+	 * for details on how the bean name is determined if this attribute is left
+	 * unspecified.
 	 * <p>The bean name and aliases may also be configured via the {@link #value}
-	 * attribute if no other attributes are declared.
+	 * attribute.
 	 * @see #value
 	 */
 	@AliasFor("value")

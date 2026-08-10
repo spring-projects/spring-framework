@@ -29,7 +29,10 @@ import org.springframework.util.Assert;
  *
  * @author Stephane Nicoll
  * @since 6.0
+ * @deprecated in favor of {@link ReflectionHintsPredicates}
  */
+@Deprecated(since = "7.0.6", forRemoval = true)
+@SuppressWarnings("removal")
 public class SerializationHintsPredicates {
 
 	SerializationHintsPredicates() {

@@ -121,6 +121,11 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
+		return true;
+	}
+
+	@Override
 	public final Object read(ResolvableType type, HttpInputMessage inputMessage, @Nullable Map<String, Object> hints)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -194,6 +199,7 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Object object) {
 		return true;
 	}
