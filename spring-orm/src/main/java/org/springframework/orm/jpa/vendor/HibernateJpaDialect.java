@@ -47,7 +47,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Hibernate.
- * Compatible with Hibernate ORM 7.x and 8.x.
+ * Compatible with Hibernate ORM 7.0-7.4 and 8.0.
  *
  * @author Juergen Hoeller
  * @author Costin Leau

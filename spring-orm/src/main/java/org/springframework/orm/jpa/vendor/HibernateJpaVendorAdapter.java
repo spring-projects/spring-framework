@@ -50,7 +50,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate.
- * Compatible with Hibernate ORM 7.x and 8.x.
+ * Compatible with Hibernate ORM 7.0-7.4 and 8.0.
  *
  * <p>Exposes Hibernate's persistence provider and Hibernate's Session as extended
  * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common

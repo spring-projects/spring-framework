@@ -61,9 +61,9 @@ import org.springframework.core.type.filter.TypeFilter;
  * {@link FactoryBean} that creates a Hibernate {@link SessionFactory}. This is the usual
  * way to set up a shared Hibernate SessionFactory in a Spring application context; the
  * SessionFactory can then be passed to data access objects via dependency injection.
+ * Compatible with Hibernate ORM 7.0-7.4 and 8.0.
  *
- * <p>Compatible with Hibernate ORM 7.x, as of Spring Framework 7.0.
- * This Hibernate-specific {@code LocalSessionFactoryBean} can be an immediate alternative
+ * <p>This Hibernate-specific {@code LocalSessionFactoryBean} can be an immediate alternative
  * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for
  * common JPA purposes: The Hibernate {@code SessionFactory} will natively expose the JPA
  * {@code EntityManagerFactory} interface as well, and Hibernate {@code BeanContainer}
