@@ -35,7 +35,8 @@ import org.springframework.util.Assert;
  * @since 5.3
  * @see jakarta.json.bind.Jsonb
  * @see jakarta.json.bind.JsonbBuilder
- * @see #setJsonb
+ * @see #JsonbMessageConverter(Jsonb)
+ * @see #JsonbMessageConverter(JsonbConfig)
  */
 public class JsonbMessageConverter extends AbstractJsonMessageConverter {
 

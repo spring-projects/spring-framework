@@ -328,11 +328,11 @@ public abstract class EntityManagerFactoryUtils {
 			}
 		}
 		else if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-			// Indicate that we can't obtain a transactional EntityManager.
+			// Indicate that we can't obtain a transactional EntityAgent.
 			return null;
 		}
 
-		// Create a new EntityManager for use within the current transaction.
+		// Create a new EntityAgent for use within the current transaction.
 		logger.debug("Opening JPA EntityAgent");
 		Object entityAgent = null;
 		if (emHolder != null && emf instanceof EntityManagerFactoryInfo info &&

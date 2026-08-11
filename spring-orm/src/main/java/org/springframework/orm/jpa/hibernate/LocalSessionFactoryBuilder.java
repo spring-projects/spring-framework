@@ -74,14 +74,14 @@ import org.springframework.util.ClassUtils;
  * A Spring-provided extension of the standard Hibernate {@link Configuration} class,
  * adding {@link SpringSessionContext} as a default and providing convenient ways
  * to specify a JDBC {@link DataSource} and an application class loader.
+ * Compatible with Hibernate ORM 7.0-7.4 and 8.0.
  *
  * <p>This is designed for programmatic use, for example, in {@code @Bean} factory methods;
  * consider using {@link LocalSessionFactoryBean} for XML bean definition files.
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate ORM 7.x, as of Spring Framework 7.0.
- * This Hibernate-specific factory builder can also be a convenient way to set up
+ * <p>This Hibernate-specific factory builder can also be a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
  *
