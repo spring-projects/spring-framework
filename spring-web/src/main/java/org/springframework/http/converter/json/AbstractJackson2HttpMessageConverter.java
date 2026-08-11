@@ -579,4 +579,5 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}
+
 }

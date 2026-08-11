@@ -146,4 +146,5 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}
+
 }

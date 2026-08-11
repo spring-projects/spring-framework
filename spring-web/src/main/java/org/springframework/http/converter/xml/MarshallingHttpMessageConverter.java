@@ -146,4 +146,5 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}
+
 }

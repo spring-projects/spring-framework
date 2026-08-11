@@ -118,4 +118,5 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 	protected boolean supportsRepeatableWrites(T t) {
 		return true;
 	}
+
 }
