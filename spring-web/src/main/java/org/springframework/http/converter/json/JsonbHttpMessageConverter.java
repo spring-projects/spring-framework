@@ -41,7 +41,8 @@ import org.springframework.util.Assert;
  * @since 5.0
  * @see jakarta.json.bind.Jsonb
  * @see jakarta.json.bind.JsonbBuilder
- * @see #setJsonb
+ * @see #JsonbHttpMessageConverter(Jsonb)
+ * @see #JsonbHttpMessageConverter(JsonbConfig)
  */
 public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 
@@ -114,4 +115,5 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}
+
 }

@@ -197,4 +197,5 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	protected boolean supportsRepeatableWrites(Object object) {
 		return true;
 	}
+
 }

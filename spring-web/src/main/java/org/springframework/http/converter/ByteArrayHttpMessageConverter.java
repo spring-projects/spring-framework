@@ -71,4 +71,5 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	protected boolean supportsRepeatableWrites(byte[] bytes) {
 		return true;
 	}
+
 }
