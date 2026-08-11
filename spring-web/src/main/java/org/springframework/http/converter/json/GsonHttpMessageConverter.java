@@ -87,10 +87,6 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 		return this.gson;
 	}
 
-	@Override
-	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
-		return true;
-	}
 
 	@Override
 	protected Object readInternal(Type resolvedType, Reader reader) throws Exception {
@@ -110,6 +106,11 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 		else {
 			getGson().toJson(object, writer);
 		}
+	}
+
+	@Override
+	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
+		return true;
 	}
 
 	@Override

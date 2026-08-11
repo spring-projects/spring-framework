@@ -90,11 +90,6 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
-	public boolean canWriteRepeatedly(String s, @Nullable MediaType contentType) {
-		return true;
-	}
-
-	@Override
 	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		long length = inputMessage.getHeaders().getContentLength();
@@ -104,11 +99,14 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
-	protected Long getContentLength(String str, @Nullable MediaType contentType) {
-		Charset charset = getContentTypeCharset(contentType);
-		return (long) str.getBytes(charset).length;
+	protected void writeInternal(String str, HttpOutputMessage outputMessage) throws IOException {
+		HttpHeaders headers = outputMessage.getHeaders();
+		if (this.writeAcceptCharset && headers.get(HttpHeaders.ACCEPT_CHARSET) == null) {
+			headers.setAcceptCharset(getAcceptedCharsets());
+		}
+		Charset charset = getContentTypeCharset(headers.getContentType());
+		outputMessage.getBody().write(str.getBytes(charset));
 	}
-
 
 	@Override
 	protected void addDefaultHeaders(HttpHeaders headers, String s, @Nullable MediaType type) throws IOException {
@@ -123,15 +121,10 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
-	protected void writeInternal(String str, HttpOutputMessage outputMessage) throws IOException {
-		HttpHeaders headers = outputMessage.getHeaders();
-		if (this.writeAcceptCharset && headers.get(HttpHeaders.ACCEPT_CHARSET) == null) {
-			headers.setAcceptCharset(getAcceptedCharsets());
-		}
-		Charset charset = getContentTypeCharset(headers.getContentType());
-		outputMessage.getBody().write(str.getBytes(charset));
+	protected Long getContentLength(String str, @Nullable MediaType contentType) {
+		Charset charset = getContentTypeCharset(contentType);
+		return (long) str.getBytes(charset).length;
 	}
-
 
 	/**
 	 * Return the list of supported {@link Charset Charsets}.
@@ -163,6 +156,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		Charset charset = getDefaultCharset();
 		Assert.state(charset != null, "No default charset");
 		return charset;
+	}
+
+	@Override
+	public boolean canWriteRepeatedly(String s, @Nullable MediaType contentType) {
+		return true;
 	}
 
 	@Override

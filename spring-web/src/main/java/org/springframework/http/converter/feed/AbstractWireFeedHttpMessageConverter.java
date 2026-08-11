@@ -68,11 +68,6 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 
 
 	@Override
-	public boolean canWriteRepeatedly(T t, @Nullable MediaType contentType) {
-		return true;
-	}
-
-	@Override
 	@SuppressWarnings("unchecked")
 	protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
@@ -111,6 +106,11 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 		catch (FeedException ex) {
 			throw new HttpMessageNotWritableException("Could not write WireFeed: " + ex.getMessage(), ex);
 		}
+	}
+
+	@Override
+	public boolean canWriteRepeatedly(T t, @Nullable MediaType contentType) {
+		return true;
 	}
 
 	@Override

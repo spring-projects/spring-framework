@@ -72,11 +72,6 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 
 	@Override
-	public boolean canWriteRepeatedly(Resource resource, @Nullable MediaType contentType) {
-		return !(resource instanceof InputStreamResource);
-	}
-
-	@Override
 	protected boolean supports(Class<?> clazz) {
 		return Resource.class.isAssignableFrom(clazz);
 	}
@@ -143,6 +138,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		}
 		long contentLength = resource.contentLength();
 		return (contentLength < 0 ? null : contentLength);
+	}
+
+	@Override
+	public boolean canWriteRepeatedly(Resource resource, @Nullable MediaType contentType) {
+		return !(resource instanceof InputStreamResource);
 	}
 
 	@Override

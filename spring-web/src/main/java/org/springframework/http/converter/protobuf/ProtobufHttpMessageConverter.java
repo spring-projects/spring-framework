@@ -98,12 +98,12 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	private static final boolean PROTOBUF_JSON_FORMAT_PRESENT =
 			ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", ProtobufHttpMessageConverter.class.getClassLoader());
 
+
 	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
+	private final ProtobufHttpMessageConverter.@Nullable ProtobufFormatDelegate protobufFormatDelegate;
 
 	final ExtensionRegistry extensionRegistry;
-
-	private final ProtobufHttpMessageConverter.@Nullable ProtobufFormatDelegate protobufFormatDelegate;
 
 
 	/**
@@ -120,12 +120,6 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	public ProtobufHttpMessageConverter(ExtensionRegistry extensionRegistry) {
 		this(null, extensionRegistry);
-	}
-
-
-	@Override
-	public boolean canWriteRepeatedly(Message message, @Nullable MediaType contentType) {
-		return true;
 	}
 
 	/**
@@ -258,6 +252,11 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	private void setProtoHeader(HttpOutputMessage response, Message message) {
 		response.getHeaders().set(X_PROTOBUF_SCHEMA_HEADER, message.getDescriptorForType().getFile().getName());
 		response.getHeaders().set(X_PROTOBUF_MESSAGE_HEADER, message.getDescriptorForType().getFullName());
+	}
+
+	@Override
+	public boolean canWriteRepeatedly(Message message, @Nullable MediaType contentType) {
+		return true;
 	}
 
 	@Override

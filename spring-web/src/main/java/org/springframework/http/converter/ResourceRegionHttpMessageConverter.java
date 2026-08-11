@@ -122,6 +122,16 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
+	@SuppressWarnings("removal")
+	protected boolean supportsRepeatableWrites(Object object) {
+		return canWriteRepeatedly(object, null);
+	}
+
+	private boolean supportsRepeatableWrites(ResourceRegion region) {
+		return !(region.getResource() instanceof InputStreamResource);
+	}
+
+	@Override
 	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
@@ -154,16 +164,6 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 			}
 		}
 		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
-	}
-
-	@Override
-	@SuppressWarnings("removal")
-	protected boolean supportsRepeatableWrites(Object object) {
-		return canWriteRepeatedly(object, null);
-	}
-
-	private boolean supportsRepeatableWrites(ResourceRegion region) {
-		return !(region.getResource() instanceof InputStreamResource);
 	}
 
 

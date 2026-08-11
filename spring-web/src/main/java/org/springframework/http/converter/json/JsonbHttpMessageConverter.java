@@ -96,10 +96,6 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 		return this.jsonb;
 	}
 
-	@Override
-	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
-		return true;
-	}
 
 	@Override
 	protected Object readInternal(Type resolvedType, Reader reader) throws Exception {
@@ -114,6 +110,11 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 		else {
 			getJsonb().toJson(object, writer);
 		}
+	}
+
+	@Override
+	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
+		return true;
 	}
 
 	@Override

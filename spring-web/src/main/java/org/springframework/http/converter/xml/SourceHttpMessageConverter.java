@@ -149,11 +149,6 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	}
 
 	@Override
-	public boolean canWriteRepeatedly(T t, @Nullable MediaType contentType) {
-		return t instanceof DOMSource;
-	}
-
-	@Override
 	@SuppressWarnings("unchecked")
 	protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
@@ -323,6 +318,11 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 	private void transform(Source source, Result result) throws TransformerException {
 		this.transformerFactory.newTransformer().transform(source, result);
+	}
+
+	@Override
+	public boolean canWriteRepeatedly(T t, @Nullable MediaType contentType) {
+		return (t instanceof DOMSource);
 	}
 
 	@Override
