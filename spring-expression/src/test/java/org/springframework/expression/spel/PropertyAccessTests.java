@@ -312,6 +312,21 @@ class PropertyAccessTests extends AbstractExpressionTests {
 			.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS);
 	}
 
+	@Test
+	void propertyAccessorUtilizesKnownPropertyName() {
+		StandardEvaluationContext context = new StandardEvaluationContext(new Inventor("Nikola Tesla"));
+		Expression expression = parser.parseExpression("name");
+
+		// This triggers ReflectivePropertyAccessor getter resolution and caching (reads)
+		Object value = expression.getValue(context);
+		assertThat(value).isEqualTo("Nikola Tesla");
+
+		// This triggers ReflectivePropertyAccessor setter resolution and caching (writes)
+		assertThat(expression.isWritable(context)).isTrue();
+		expression.setValue(context, "New Name");
+		assertThat(expression.getValue(context)).isEqualTo("New Name");
+	}
+
 
 	private ThrowableTypeAssert<SpelEvaluationException> assertThatSpelEvaluationException() {
 		return assertThatExceptionOfType(SpelEvaluationException.class);
