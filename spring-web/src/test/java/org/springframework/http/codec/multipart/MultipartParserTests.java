@@ -25,6 +25,8 @@ import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -67,6 +69,45 @@ class MultipartParserTests extends AbstractLeakCheckingTests {
 		subscriber.cancel();
 
 		assertThat(received).singleElement().isInstanceOf(MultipartParser.HeadersToken.class);
+	}
+
+	@Test  // gh-37115
+	void cancelWhileEmittingBodyTokensKeepsEmittedBuffersAllocated() {
+		byte[] boundary = "simple-boundary".getBytes(UTF_8);
+		String content = "--simple-boundary\r\nContent-Type: text/plain\r\n\r\n" +
+				"a".repeat(1024) + "\r\n" +
+				"--simple-boundary\r\nContent-Type: text/plain\r\n\r\n" +
+				"b".repeat(1024) + "\r\n--simple-boundary--\r\n";
+		byte[] bytes = content.getBytes(UTF_8);
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+		buffer.write(bytes);
+
+		Flux<MultipartParser.Token> tokens = MultipartParser.parse(Flux.just(buffer), boundary, 8192, UTF_8);
+
+		List<DataBuffer> receivedBuffers = new ArrayList<>();
+		BaseSubscriber<MultipartParser.Token> subscriber = new BaseSubscriber<>() {
+			@Override
+			protected void hookOnSubscribe(Subscription subscription) {
+				request(Long.MAX_VALUE);
+			}
+			@Override
+			protected void hookOnNext(MultipartParser.Token token) {
+				if (token instanceof MultipartParser.BodyToken bodyToken) {
+					receivedBuffers.add(bodyToken.buffer());
+					cancel();
+				}
+			}
+		};
+		tokens.subscribe(subscriber);
+
+		// The cancellation above arrives while the parser emits its queued body buffers.
+		// Ownership of an emitted buffer belongs to the sink, so the parser must not
+		// release it on disposal: with Netty, body buffers are slices of the inbound
+		// buffer, and releasing one twice releases the inbound buffer prematurely.
+		assertThat(receivedBuffers).isNotEmpty();
+		assertThat(receivedBuffers).allSatisfy(received ->
+				assertThat(((PooledDataBuffer) received).isAllocated()).isTrue());
+		receivedBuffers.forEach(DataBufferUtils::release);
 	}
 
 }
