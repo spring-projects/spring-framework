@@ -106,13 +106,49 @@ the override.
   original bean (`@Transactional`, `@Cacheable`, `@Retryable`, method security, and so
   on) is present.
 * Overrides that use the `WRAP` strategy (such as `@MockitoSpyBean`) capture an early
-  reference to the original bean and wrap it before the rest of the container's
-  post-processors — including the one responsible for creating AOP proxies — have run.
-  Consequently, if the original bean would have been proxied, that proxy is still
-  created, but with the override instance as its target rather than the original bean.
-  The bean that ends up in the `ApplicationContext`, and that is injected into
-  collaborating beans and test classes, is therefore a proxy wrapping the override
-  instance, not the bare override instance itself.
+  reference to the original bean and use it to create the override instance, before the
+  rest of the container's post-processors — including the one responsible for creating
+  AOP proxies — have run. Consequently, if the original bean would have been proxied,
+  that proxy is still created, but it now wraps the override instance instead of the
+  original bean. The bean that ends up in the `ApplicationContext`, and that is injected
+  into collaborating beans and test classes, is therefore the AOP proxy, with the
+  override instance as its target — not the bare override instance itself.
+
+The following diagrams illustrate the resulting shape of the bean for each strategy, from
+the perspective of a caller invoking a method on the injected bean.
+
+With the `REPLACE` or `REPLACE_OR_CREATE` strategy, there is no AOP proxy at all: the
+caller invokes the override instance directly.
+
+[source]
+----
+caller
+  │
+  ▼
+[ override instance ]
+----
+
+With the `WRAP` strategy, any AOP proxy that would normally have wrapped the original
+bean is still created, but now wraps the override instance instead:
+
+[source]
+----
+caller
+  │
+  ▼
+[ AOP proxy ]          (for example, retry, caching, or transaction advice)
+  │
+  │  delegates to its target
+  ▼
+[ override instance ]  (for example, a Mockito spy created by @MockitoSpyBean)
+----
+
+For a `WRAP`-based override such as `@MockitoSpyBean`, the "wrapping" performed by the
+AOP proxy is unrelated to the manner in which the resulting Mockito spy itself "wraps"
+the original bean instance it was created from. The proxy shown above determines which
+object a caller actually invokes, whereas the spy's relationship to the original
+instance only determines what happens when an unstubbed method is invoked on the spy: it
+falls through to that instance's real behavior.
 
 This distinction has practical consequences when combining bean overrides with Mockito's
 stubbing and verification APIs. See
