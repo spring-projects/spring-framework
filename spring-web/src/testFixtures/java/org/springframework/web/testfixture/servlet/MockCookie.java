@@ -132,7 +132,7 @@ public class MockCookie extends Cookie {
 	 * @return the created cookie
 	 */
 	public static MockCookie parse(String setCookieHeader) {
-		Assert.hasText(setCookieHeader, "Set-Cookie header must not be null or empty");
+		Assert.notNull(setCookieHeader, "Set-Cookie header must not be null");
 		String[] cookieParts = setCookieHeader.split("\\s*=\\s*", 2);
 		Assert.isTrue(cookieParts.length == 2, () -> "Invalid Set-Cookie header '" + setCookieHeader + "'");
 
