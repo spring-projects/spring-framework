@@ -22,7 +22,6 @@ import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -115,10 +114,16 @@ class MockCookieTests {
 		assertThat(cookie.getValue()).isEqualTo(value);
 	}
 
+	@Test
+	void parseNullHeader() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> MockCookie.parse(null))
+			.withMessageContaining("Set-Cookie header must not be null or empty");
+	}
+
 	@ParameterizedTest
-	@NullAndEmptySource
-	@ValueSource(strings = "  ")
-	void parseNullOrEmptyHeader(String header) {
+	@ValueSource(strings = {"", "  "})
+	void parseEmptyHeader(String header) {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> MockCookie.parse(header))
 			.withMessageContaining("Set-Cookie header must not be null or empty");
