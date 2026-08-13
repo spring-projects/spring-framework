@@ -360,6 +360,17 @@ class ContentDispositionTests {
 							.build()
 							.toString());
 		}
+
+		@Test
+		void formatAndParseWithNameWithQuotes() {
+			ContentDisposition cd = ContentDisposition.formData()
+					.name("foo\"bar\\baz")
+					.build();
+			assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\\\"bar\\\\baz\"");
+
+			ContentDisposition parsed = ContentDisposition.parse("form-data; name=\"foo\\\"bar\\\\baz\"");
+			assertThat(parsed.getName()).isEqualTo("foo\"bar\\baz");
+		}
 	}
 
 }
