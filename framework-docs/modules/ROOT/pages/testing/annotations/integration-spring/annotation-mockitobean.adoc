@@ -78,13 +78,14 @@ xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overrid
 Overrides and Spring AOP Proxies] for details.
 
 The `@MockitoSpyBean` annotation uses the `WRAP`
-xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-strategy[strategy],
-and the original instance is wrapped in a Mockito spy. This strategy requires that
-exactly one candidate bean exists. In contrast to `@MockitoBean`, if the original bean
-would have been wrapped in a Spring AOP proxy, that proxy is still created around the spy.
-See
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-strategy[strategy]:
+an early instance of the original bean is captured and used to create a Mockito spy.
+This strategy requires that exactly one candidate bean exists. In contrast to
+`@MockitoBean`, if the original bean would have been wrapped in a Spring AOP proxy, that
+proxy is still created — but it now wraps the spy instead of the original bean. See
 <<spring-testing-annotation-beanoverriding-mockitospybean-aop-proxies,`@MockitoSpyBean` and Spring AOP Proxies>>
-for the consequences this has for stubbing and verification.
+for a diagram and further details on the consequences this has for stubbing and
+verification.
 
 [TIP]
 ====
