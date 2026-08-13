@@ -15,6 +15,7 @@ The Spring Framework provides the following choices for making calls to REST end
 `RestClient` is a synchronous HTTP client that provides a fluent API to perform requests.
 It serves as an abstraction over HTTP libraries, and handles conversion of HTTP request and response content to and from higher level Java objects.
 
+[[rest-restclient.create]]
 === Create a `RestClient`
 
 `RestClient` has static `create` shortcut methods.
@@ -32,48 +33,7 @@ Once created, a `RestClient` is safe to use in multiple threads.
 
 The below shows how to create or build a `RestClient`:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim"]
-----
-	RestClient defaultClient = RestClient.create();
-	
-	RestClient customClient = RestClient.builder()
-		.requestFactory(new HttpComponentsClientHttpRequestFactory())
-		.messageConverters(converters -> converters.add(new MyCustomMessageConverter()))
-		.baseUrl("https://example.com")
-		.defaultUriVariables(Map.of("variable", "foo"))
-		.defaultHeader("My-Header", "Foo")
-		.defaultCookie("My-Cookie", "Bar")
-		.defaultVersion("1.2")
-		.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
-		.requestInterceptor(myCustomInterceptor)
-		.requestInitializer(myCustomInitializer)
-		.build();
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim"]
-----
-	val defaultClient = RestClient.create()
-	
-	val customClient = RestClient.builder()
-		.requestFactory(HttpComponentsClientHttpRequestFactory())
-		.messageConverters { converters -> converters.add(MyCustomMessageConverter()) }
-		.baseUrl("https://example.com")
-		.defaultUriVariables(mapOf("variable" to "foo"))
-		.defaultHeader("My-Header", "Foo")
-		.defaultCookie("My-Cookie", "Bar")
-        .defaultVersion("1.2")
-        .apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
-		.requestInterceptor(myCustomInterceptor)
-		.requestInitializer(myCustomInitializer)
-		.build()
-----
-======
+include-code::./RestClientCreation[tag=snippet,indent=0]
 
 === Use the `RestClient`
 
@@ -390,17 +350,7 @@ xref:web/webmvc/message-converters.adoc#message-converters[See the supported HTT
 
 To serialize only a subset of the object properties, you can specify a {baeldung-blog}/jackson-json-view-annotation[Jackson JSON View], as the following example shows:
 
-[source,java,indent=0,subs="verbatim"]
-----
-	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
-	value.setSerializationView(User.WithoutPasswordView.class);
-	
-	ResponseEntity<Void> response = restClient.post() // or RestTemplate.postForEntity
-		.contentType(APPLICATION_JSON)
-		.body(value)
-		.retrieve()
-		.toBodilessEntity();
-----
+include-code::./../restmessageconversion/RestClientMessageConversion[tag=jsonview,indent=0]
 
 ==== URL encoded Forms
 
@@ -410,17 +360,7 @@ or a target type.
 
 For example:
 
-[source,java,indent=0,subs="verbatim"]
-----
-    MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-    form.add("project", "Spring Framework");
-    form.add("module", "spring-web");
-    ResponseEntity<Void> response = this.restClient.post()
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(form)
-            .retrieve()
-            .toBodilessEntity();
-----
+include-code::./../restmessageconversion/RestClientMessageConversion[tag=urlencodedform,indent=0]
 
 
 ==== Multipart
@@ -428,24 +368,7 @@ For example:
 To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for part content with headers.
 For example:
 
-[source,java,indent=0,subs="verbatim"]
-----
-	MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-	
-	parts.add("fieldPart", "fieldValue");
-	parts.add("filePart", new FileSystemResource("...logo.png"));
-	parts.add("jsonPart", new Person("Jason"));
-	
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_XML);
-	parts.add("xmlPart", new HttpEntity<>(myBean, headers));
-	
-    ResponseEntity<Void> response = this.restClient.post()
-            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(parts)
-            .retrieve()
-            .toBodilessEntity();
-----
+include-code::./../restmessageconversion/RestClientMessageConversion[tag=multipartrequest,indent=0]
 
 In most cases, you do not have to specify the `Content-Type` for each part.
 The content type is determined automatically based on the `HttpMessageConverter` chosen to serialize it or, in the case of a `Resource`, based on the file extension.
@@ -461,48 +384,7 @@ To decode a multipart response body, use a `ParameterizedTypeReference<MultiValu
 The decoded map contains `Part` instances where `FormFieldPart` represents form field values
 and `FilePart` represents file parts with a `filename()` and a `transferTo()` method.
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim"]
-----
-	MultiValueMap<String, Part> result = this.restClient.get()
-			.uri("https://example.com/upload")
-			.accept(MediaType.MULTIPART_FORM_DATA)
-			.retrieve()
-			.body(new ParameterizedTypeReference<>() {});
-
-	Part field = result.getFirst("fieldPart");
-	if (field instanceof FormFieldPart formField) {
-		String fieldValue = formField.value();
-	}
-	Part file = result.getFirst("filePart");
-	if (file instanceof FilePart filePart) {
-		filePart.transferTo(Path.of("/tmp/" + filePart.filename()));
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim"]
-----
-	val result = this.restClient.get()
-			.uri("https://example.com/upload")
-			.accept(MediaType.MULTIPART_FORM_DATA)
-			.retrieve()
-			.body(object : ParameterizedTypeReference<MultiValueMap<String, Part>>() {})
-
-	val field = result?.getFirst("fieldPart")
-	if (field is FormFieldPart) {
-		val fieldValue = field.value()
-	}
-	val file = result?.getFirst("filePart")
-	if (file is FilePart) {
-		file.transferTo(Path.of("/tmp/" + file.filename()))
-	}
-----
-======
+include-code::./../restmessageconversion/RestClientMessageConversion[tag=multipartresponse,indent=0]
 
 
 [[rest-request-factories]]
