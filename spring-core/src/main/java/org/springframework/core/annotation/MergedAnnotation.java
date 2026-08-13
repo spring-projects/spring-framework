@@ -513,6 +513,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * it has not already been synthesized and one of the following is true.
 	 * <ul>
 	 * <li>The annotation declares attributes annotated with {@link AliasFor @AliasFor}.</li>
+	 * <li>The annotation is used as a meta-annotation, and one of its attributes
+	 * is overridden via an {@link AliasFor @AliasFor} declaration in a composed
+	 * annotation somewhere in the annotation hierarchy.</li>
 	 * <li>The annotation declares attributes that are annotations or arrays of
 	 * annotations that are themselves synthesizable.</li>
 	 * </ul>

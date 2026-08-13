@@ -275,6 +275,17 @@ final class AnnotationTypeMapping {
 			return true;
 		}
 
+		// Does an attribute value need to be resolved from a different annotation
+		// in the meta-annotation hierarchy? This can happen when an attribute is
+		// overridden via @AliasFor further up a multi-level annotation hierarchy
+		// whose root annotation does not redeclare the target attribute itself,
+		// in which case the override cannot be tracked via aliasMappings/aliasedBy.
+		for (int i = 0; i < this.annotationValueSource.length; i++) {
+			if (this.annotationValueSource[i] != null && this.annotationValueSource[i] != this) {
+				return true;
+			}
+		}
+
 		// Has nested annotations or arrays of annotations that are synthesizable?
 		if (getAttributes().hasNestedAnnotation()) {
 			AttributeMethods attributeMethods = getAttributes();
