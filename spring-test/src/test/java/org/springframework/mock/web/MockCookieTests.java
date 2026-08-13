@@ -121,13 +121,11 @@ class MockCookieTests {
 			.withMessageContaining("Set-Cookie header must not be null or empty");
 	}
 
-	@Test
-	void parseEmptyHeader() {
+	@ParameterizedTest
+	@ValueSource(strings = {"", "  "})
+	void parseEmptyHeader(String header) {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> MockCookie.parse(""))
-			.withMessageContaining("Set-Cookie header must not be null or empty");
-		assertThatIllegalArgumentException()
-			.isThrownBy(() -> MockCookie.parse("  "))
+			.isThrownBy(() -> MockCookie.parse(header))
 			.withMessageContaining("Set-Cookie header must not be null or empty");
 	}
 
