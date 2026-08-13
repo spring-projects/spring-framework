@@ -174,6 +174,12 @@ class MimeTypeTests {
 					.hasMessageContaining("Invalid mime type \"text/plain;dupe=\"1\";dupe=\"2\"\": duplicate parameter 'dupe=\"2\"'");
 		}
 
+		@Test
+		void valueOfDuplicateParameterWithDifferentCase() {
+			assertThatThrownBy(() -> MimeType.valueOf("text/plain;dupe=\"1\";DUPE=\"2\"")).isInstanceOf(InvalidMimeTypeException.class)
+					.hasMessageContaining("Invalid mime type \"text/plain;dupe=\"1\";DUPE=\"2\"\": duplicate parameter 'DUPE=\"2\"'");
+		}
+
 	}
 
 
