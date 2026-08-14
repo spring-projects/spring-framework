@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link Property} name resolution.
@@ -47,8 +48,28 @@ class PropertyTests {
 
 	@Test
 	void resolveNameForSetter() throws Exception {
-		Method setter = TestBean.class.getMethod("setName", String.class);
-		assertThat(new Property(TestBean.class, null, setter).getName()).isEqualTo("name");
+		assertThat(writeProperty("setName").getName()).isEqualTo("name");
+	}
+
+	@Test  // no "set" token at all: rejected before and after this change
+	void rejectNonSetterWriteMethod() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> writeProperty("updateName"))
+				.withMessage("Not a setter method");
+	}
+
+	@Test  // "set" embedded mid-name: formerly accepted and resolved to "x"
+	void rejectWriteMethodEmbeddingSetInName() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> writeProperty("offsetX"))
+				.withMessage("Not a setter method");
+	}
+
+	@Test  // "set" at the end of the name: formerly accepted and resolved to ""
+	void rejectWriteMethodEndingWithSetToken() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> writeProperty("upset"))
+				.withMessage("Not a setter method");
 	}
 
 	@Test  // record component accessor whose name embeds the "get" prefix
@@ -127,6 +148,11 @@ class PropertyTests {
 		return new Property(objectType, readMethod, null);
 	}
 
+	private static Property writeProperty(String writeMethodName) throws Exception {
+		Method writeMethod = TestBean.class.getMethod(writeMethodName, String.class);
+		return new Property(TestBean.class, null, writeMethod);
+	}
+
 
 	@SuppressWarnings("unused")
 	static class TestBean {
@@ -144,6 +170,15 @@ class PropertyTests {
 		}
 
 		public void setName(String name) {
+		}
+
+		public void updateName(String name) {
+		}
+
+		public void offsetX(String value) {
+		}
+
+		public void upset(String value) {
 		}
 	}
 
