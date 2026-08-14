@@ -150,12 +150,11 @@ public final class Property {
 			return StringUtils.uncapitalize(this.readMethod.getName().substring(index));
 		}
 		else if (this.writeMethod != null) {
-			int index = this.writeMethod.getName().indexOf("set");
-			if (index == -1) {
+			String methodName = this.writeMethod.getName();
+			if (!methodName.startsWith("set")) {
 				throw new IllegalArgumentException("Not a setter method");
 			}
-			index += 3;
-			return StringUtils.uncapitalize(this.writeMethod.getName().substring(index));
+			return StringUtils.uncapitalize(methodName.substring(3));
 		}
 		else {
 			throw new IllegalStateException("Property is neither readable nor writable");
