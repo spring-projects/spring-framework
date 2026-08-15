@@ -46,6 +46,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Greg Taube
  * @since 5.2
  * @see AnnotationTypeMapping
  */
@@ -178,7 +179,7 @@ final class AnnotationTypeMappings {
 	 * @return type mappings for the annotation type
 	 */
 	static AnnotationTypeMappings forAnnotationType(Class<? extends Annotation> annotationType) {
-		return forAnnotationType(annotationType, new HashSet<>());
+		return forAnnotationType(annotationType, RepeatableContainers.standardRepeatables(), AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -208,7 +209,15 @@ final class AnnotationTypeMappings {
 	static AnnotationTypeMappings forAnnotationType(Class<? extends Annotation> annotationType,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
-		return forAnnotationType(annotationType, repeatableContainers, annotationFilter, new HashSet<>());
+		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
+			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		}
+		if (repeatableContainers == RepeatableContainers.none()) {
+			return noRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		}
+		return new AnnotationTypeMappings(repeatableContainers, annotationFilter, annotationType, new HashSet<>());
 	}
 
 	/**
@@ -275,6 +284,17 @@ final class AnnotationTypeMappings {
 		 * @return a new or existing {@link AnnotationTypeMappings} instance
 		 */
 		AnnotationTypeMappings get(Class<? extends Annotation> annotationType,
+				Set<Class<? extends Annotation>> visitedAnnotationTypes) {
+
+			return getOrCreate(annotationType, visitedAnnotationTypes);
+		}
+
+		AnnotationTypeMappings get(Class<? extends Annotation> annotationType) {
+			AnnotationTypeMappings result = this.mappings.get(annotationType);
+			return (result != null ? result : getOrCreate(annotationType, new HashSet<>()));
+		}
+
+		private AnnotationTypeMappings getOrCreate(Class<? extends Annotation> annotationType,
 				Set<Class<? extends Annotation>> visitedAnnotationTypes) {
 
 			AnnotationTypeMappings result = this.mappings.get(annotationType);
