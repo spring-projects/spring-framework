@@ -30,11 +30,13 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.LifecycleBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.ResolvableType;
 
 /**
  * Benchmark for retrieving various bean types from the {@link DefaultListableBeanFactory}.
  *
  * @author Brian Clozel
+ * @author Greg Taube
  */
 @BenchmarkMode(Mode.Throughput)
 public class DefaultListableBeanFactoryBenchmark {
@@ -133,10 +135,39 @@ public class DefaultListableBeanFactoryBenchmark {
 		return state.beanFactory.getBean(B.class);
 	}
 
+	@State(Scope.Benchmark)
+	public static class GenericTypeLookupState extends Shared {
+
+		public ResolvableType type;
+
+		@Setup
+		public void setup() {
+			this.beanFactory = new DefaultListableBeanFactory();
+			this.beanFactory.registerBeanDefinition("generic", new RootBeanDefinition(StringGenericType.class));
+			for (int i = 0; i < 1000; i++) {
+				this.beanFactory.registerBeanDefinition("a" + i, new RootBeanDefinition(A.class));
+			}
+			this.beanFactory.freezeConfiguration();
+			this.type = ResolvableType.forClassWithGenerics(GenericType.class, String.class);
+			this.beanFactory.getBeanNamesForType(this.type);
+		}
+	}
+
+	@Benchmark
+	public Object genericTypeLookup(GenericTypeLookupState state) {
+		return state.beanFactory.getBeanNamesForType(state.type);
+	}
+
 	static class A {
 	}
 
 	static class B {
+	}
+
+	interface GenericType<T> {
+	}
+
+	static class StringGenericType implements GenericType<String> {
 	}
 
 }

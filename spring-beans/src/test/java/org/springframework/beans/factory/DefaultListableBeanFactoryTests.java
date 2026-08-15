@@ -115,6 +115,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Yanming Zhou
+ * @author Greg Taube
  */
 class DefaultListableBeanFactoryTests {
 
@@ -3263,6 +3264,53 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.getBeanNamesForType(Object.class)).containsExactly(StringUtils.addStringToArray(allBeanNames, "bd3"));
 	}
 
+	@Test
+	void cachesBeanNamesForGenericType() {
+		lbf.registerBeanDefinition("cityRepository", new RootBeanDefinition(CityRepository.class));
+		lbf.freezeConfiguration();
+
+		ResolvableType repositoryType = ResolvableType.forClassWithGenerics(Repository.class, City.class, Long.class);
+		String[] beanNames = lbf.getBeanNamesForType(repositoryType);
+
+		assertThat(lbf.getBeanNamesForType(repositoryType)).isSameAs(beanNames);
+
+		lbf.registerSingleton("testBean", new TestBean());
+		assertThat(lbf.getBeanNamesForType(repositoryType)).isSameAs(beanNames);
+
+		lbf.registerSingleton("anotherCityRepository", new CityRepository());
+		assertThat(lbf.getBeanNamesForType(repositoryType)).containsExactly("cityRepository", "anotherCityRepository")
+				.isNotSameAs(beanNames);
+	}
+
+	@Test
+	void cachesSingletonBeanNamesForGenericType() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(CityRepository.class);
+		beanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		lbf.registerBeanDefinition("cityRepository", beanDefinition);
+		lbf.freezeConfiguration();
+
+		ResolvableType repositoryType = ResolvableType.forClassWithGenerics(Repository.class, City.class, Long.class);
+		String[] beanNames = lbf.getBeanNamesForType(repositoryType, false, true);
+
+		assertThat(lbf.getBeanNamesForType(repositoryType, false, true)).isSameAs(beanNames);
+
+		lbf.registerSingleton("anotherCityRepository", new CityRepository());
+		assertThat(lbf.getBeanNamesForType(repositoryType, false, true)).containsExactly("anotherCityRepository")
+				.isNotSameAs(beanNames);
+	}
+
+	@Test
+	void cachesBeanNamesForRecursiveGenericType() {
+		lbf.registerBeanDefinition("recursive", new RootBeanDefinition(RecursiveImpl.class));
+		lbf.freezeConfiguration();
+
+		ResolvableType recursiveType = ResolvableType.forClass(Recursive.class);
+		String[] beanNames = lbf.getBeanNamesForType(recursiveType);
+
+		assertThat(beanNames).containsExactly("recursive");
+		assertThat(lbf.getBeanNamesForType(recursiveType)).isSameAs(beanNames);
+	}
+
 
 	private int registerBeanDefinitions(Properties p) {
 		return registerBeanDefinitions(p, null);
@@ -3567,6 +3615,14 @@ class DefaultListableBeanFactoryTests {
 	public record City(String name) {}
 
 	public static class CityRepository implements Repository<City, Long> {}
+
+
+	public interface Recursive<T extends Recursive<T>> {
+	}
+
+
+	public static class RecursiveImpl implements Recursive<RecursiveImpl> {
+	}
 
 
 	public static class LazyInitFactory implements FactoryBean<Object> {
