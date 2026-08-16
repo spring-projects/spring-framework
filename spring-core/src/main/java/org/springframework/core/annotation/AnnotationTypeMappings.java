@@ -209,13 +209,9 @@ final class AnnotationTypeMappings {
 	static AnnotationTypeMappings forAnnotationType(Class<? extends Annotation> annotationType,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
-		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
-			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
-					key -> new Cache(repeatableContainers, key)).get(annotationType);
-		}
-		if (repeatableContainers == RepeatableContainers.none()) {
-			return noRepeatablesCache.computeIfAbsent(annotationFilter,
-					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		Cache cache = getCache(repeatableContainers, annotationFilter);
+		if (cache != null) {
+			return cache.get(annotationType);
 		}
 		return new AnnotationTypeMappings(repeatableContainers, annotationFilter, annotationType, new HashSet<>());
 	}
@@ -236,16 +232,26 @@ final class AnnotationTypeMappings {
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter,
 			Set<Class<? extends Annotation>> visitedAnnotationTypes) {
 
-		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
-			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
-					key -> new Cache(repeatableContainers, key)).get(annotationType, visitedAnnotationTypes);
-		}
-		if (repeatableContainers == RepeatableContainers.none()) {
-			return noRepeatablesCache.computeIfAbsent(annotationFilter,
-					key -> new Cache(repeatableContainers, key)).get(annotationType, visitedAnnotationTypes);
+		Cache cache = getCache(repeatableContainers, annotationFilter);
+		if (cache != null) {
+			return cache.get(annotationType, visitedAnnotationTypes);
 		}
 		return new AnnotationTypeMappings(repeatableContainers, annotationFilter, annotationType,
 				visitedAnnotationTypes);
+	}
+
+	private static @Nullable Cache getCache(
+			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
+
+		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
+			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key));
+		}
+		if (repeatableContainers == RepeatableContainers.none()) {
+			return noRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key));
+		}
+		return null;
 	}
 
 	static void clearCache() {
