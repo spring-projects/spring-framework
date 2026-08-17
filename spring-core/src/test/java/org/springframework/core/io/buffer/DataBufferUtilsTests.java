@@ -64,6 +64,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -199,6 +200,66 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 				.consumeNextWith(stringConsumer("foo"))
 				.expectError(IOException.class)
 				.verify(Duration.ofSeconds(3));
+	}
+
+	@Test  // gh-37143
+	@SuppressWarnings("deprecation") // PooledByteBufAllocator no longer supports tinyCacheSize.
+	void readAsynchronousFileChannelReadThrowsSynchronously() {
+		// Use a dedicated allocator rather than a shared one from
+		// ParameterizedDataBufferAllocatingTest, since this test deliberately
+		// triggers a buffer leak and must not pollute the allocation counters
+		// that other tests rely on.
+		PooledByteBufAllocator allocator = new PooledByteBufAllocator(true, 1, 1, 4096, 4, 0, 0, 0, true);
+		super.bufferFactory = new NettyDataBufferFactory(allocator);
+
+		// On some JDK/Netty combinations (e.g. Windows + JDK 25 + Netty 4.2), the
+		// AsynchronousFileChannel#read(ByteBuffer, long, A, CompletionHandler) call
+		// itself throws instead of invoking CompletionHandler#failed asynchronously.
+		AsynchronousFileChannel channel = mock();
+		willThrow(new UnsupportedOperationException("simulated synchronous failure"))
+				.given(channel).read(any(), anyLong(), any(), any());
+
+		Flux<DataBuffer> result =
+				DataBufferUtils.readAsynchronousFileChannel(() -> channel, super.bufferFactory, 3);
+
+		StepVerifier.create(result)
+				.expectError(UnsupportedOperationException.class)
+				.verify(Duration.ofSeconds(3));
+	}
+
+	@Test  // gh-37143
+	void readAsynchronousFileChannelReadThrowsSynchronouslyFromCompletionThread() throws Exception {
+		super.bufferFactory = new DefaultDataBufferFactory();
+
+		// Real AsynchronousFileChannel implementations invoke the CompletionHandler on a
+		// separate thread, not the calling thread. If a subsequent read (triggered
+		// recursively from within ReadCompletionHandler#completed on that other thread)
+		// throws synchronously, the exception never reaches the original Flux.create
+		// request() call stack, and thus never reaches the FluxSink.
+		var executor = Executors.newSingleThreadExecutor();
+		try {
+			AsynchronousFileChannel channel = mock();
+			willAnswer(invocation -> {
+				ByteBuffer byteBuffer = invocation.getArgument(0);
+				byteBuffer.put("foo".getBytes(StandardCharsets.UTF_8));
+				Object attachment = invocation.getArgument(2);
+				CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
+				executor.submit(() -> completionHandler.completed(3, attachment));
+				return null;
+			}).willThrow(new UnsupportedOperationException("simulated synchronous failure"))
+			.given(channel).read(any(), anyLong(), any(), any());
+
+			Flux<DataBuffer> result =
+					DataBufferUtils.readAsynchronousFileChannel(() -> channel, super.bufferFactory, 3);
+
+			StepVerifier.create(result)
+					.consumeNextWith(stringConsumer("foo"))
+					.expectError(UnsupportedOperationException.class)
+					.verify(Duration.ofSeconds(3));
+		}
+		finally {
+			executor.shutdown();
+		}
 	}
 
 	@ParameterizedDataBufferAllocatingTest
