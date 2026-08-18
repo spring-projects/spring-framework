@@ -91,6 +91,15 @@ class DefaultServerHttpRequestBuilderTests {
 		return mock;
 	}
 
+	@org.junit.jupiter.api.Test
+	void contextPathNullable() {
+		ServerHttpRequest request = MockServerHttpRequest.get("/foo/bar").contextPath("/foo").build();
+		assertThat(request.getPath().contextPath().value()).isEqualTo("/foo");
+
+		ServerHttpRequest mutated = request.mutate().contextPath(null).build();
+		assertThat(mutated.getPath().contextPath().value()).isEmpty();
+	}
+
 	static Arguments initHeader(String description, MultiValueMap<String, String> headerMap) {
 		headerMap.add("CaseInsensitive", "unmodified");
 		return argumentSet(description, headerMap, true);
@@ -111,3 +120,4 @@ class DefaultServerHttpRequestBuilderTests {
 	}
 
 }
+
