@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.config;
 
+import java.time.ZoneId;
 import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.mock;
  * @author Tobias Montagna-Hay
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Vedran Pavic
  * @since 4.2
  */
 class ScheduledTaskRegistrarTests {
@@ -79,6 +81,12 @@ class ScheduledTaskRegistrarTests {
 	@Test
 	void addCronTaskWithValidExpression() {
 		this.taskRegistrar.addCronTask(no_op, "* * * * * ?");
+		assertThat(this.taskRegistrar.getCronTaskList()).hasSize(1);
+	}
+
+	@Test
+	void addCronTaskWithValidExpressionAndZoneId() {
+		this.taskRegistrar.addCronTask(no_op, "* * * * * ?", ZoneId.of("Europe/London"));
 		assertThat(this.taskRegistrar.getCronTaskList()).hasSize(1);
 	}
 
