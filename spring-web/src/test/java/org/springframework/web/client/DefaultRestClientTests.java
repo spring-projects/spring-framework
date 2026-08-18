@@ -40,6 +40,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -147,6 +148,49 @@ class DefaultRestClientTests {
 	}
 
 
+	/**
+	 * Regression test for <a href="https://github.com/spring-projects/spring-framework/issues/37078">gh-37078</a>.
+	 * An IOException (e.g. SocketTimeoutException) that occurs while reading the response body
+	 * must be rethrown as a {@link ResourceAccessException} — not masked as a generic
+	 * {@code RestClientException} with a misleading content-type error message.
+	 */
+	@Test
+	void ioExceptionDuringBodyReadIsRewrappedAsResourceAccessException() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+		responseHeaders.setContentLength(42L);
+		given(this.response.getHeaders()).willReturn(responseHeaders);
+
+		// Simulate a SocketTimeoutException thrown during response body read
+		java.net.SocketTimeoutException timeout = new java.net.SocketTimeoutException("Read timed out");
+		given(this.response.getBody()).willThrow(timeout);
+
+		assertThatExceptionOfType(ResourceAccessException.class)
+				.isThrownBy(() -> this.client.get().uri(URL).retrieve().body(String.class))
+				.withCauseInstanceOf(java.net.SocketTimeoutException.class)
+				.withMessageContaining("I/O error while reading response");
+	}
+
+	/**
+	 * Complementary test: a genuine deserialization failure (content-type mismatch or
+	 * {@link org.springframework.http.converter.HttpMessageNotReadableException}) must
+	 * still surface as a {@link RestClientException} with the content-type diagnostic.
+	 */
+	@Test
+	void deserializationFailureKeepsContentTypeDiagnosticMessage() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		// Body is plain text but client requests JSON deserialization into a non-String type
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
+
+		assertThatExceptionOfType(UnknownContentTypeException.class)
+				.isThrownBy(() -> this.client.get().uri(URL).retrieve().body(java.util.List.class));
+	}
+
+
 	private void mockSentRequest(HttpMethod method, String uri) throws IOException {
 		given(this.requestFactory.createRequest(URI.create(uri), method)).willReturn(this.request);
 		given(this.request.getHeaders()).willReturn(new HttpHeaders());
@@ -176,3 +220,4 @@ class DefaultRestClientTests {
 	}
 
 }
+
