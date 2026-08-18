@@ -44,6 +44,7 @@ import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.Exceptions;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -1070,7 +1071,14 @@ public abstract class DataBufferUtils {
 			Assert.state(iterator.hasNext(), "No ByteBuffer available");
 			ByteBuffer byteBuffer = iterator.next();
 			Attachment attachment = new Attachment(dataBuffer, iterator);
-			this.channel.read(byteBuffer, this.position.get(), attachment, this);
+			try {
+				this.channel.read(byteBuffer, this.position.get(), attachment, this);
+			}
+			catch (Throwable ex) {
+				Exceptions.throwIfFatal(ex);
+				// If the exception escapes, route it to the failure handler
+				failed(ex, attachment);
+			}
 		}
 
 		@Override
