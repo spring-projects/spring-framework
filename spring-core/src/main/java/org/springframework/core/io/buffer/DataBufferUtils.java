@@ -1223,13 +1223,7 @@ public abstract class DataBufferUtils {
 				long pos = this.position.get();
 				Attachment attachment = new Attachment(byteBuffer, dataBuffer, iterator);
 				this.writing.set(true);
-				try {
-					this.channel.write(byteBuffer, pos, attachment, this);
-				}
-				catch (RuntimeException ex) {
-					// If the exception escapes, route it to the failure handler
-					failed(ex, attachment);
-				}
+				write(byteBuffer, pos, attachment);
 			}
 			else {
 				iterator.close();
@@ -1264,12 +1258,12 @@ public abstract class DataBufferUtils {
 			ByteBuffer byteBuffer = attachment.byteBuffer();
 
 			if (byteBuffer.hasRemaining()) {
-				this.channel.write(byteBuffer, pos, attachment, this);
+				write(byteBuffer, pos, attachment);
 			}
 			else if (iterator.hasNext()) {
 				ByteBuffer next = iterator.next();
 				Attachment nextAttachment = new Attachment(next, attachment.dataBuffer(), iterator);
-				this.channel.write(next, pos, nextAttachment, this);
+				write(next, pos, nextAttachment);
 			}
 			else {
 				iterator.close();
@@ -1286,6 +1280,17 @@ public abstract class DataBufferUtils {
 				else {
 					request(1);
 				}
+			}
+		}
+
+		private void write(ByteBuffer byteBuffer, long pos, Attachment attachment) {
+			try {
+				this.channel.write(byteBuffer, pos, attachment, this);
+			}
+			catch (Throwable ex) {
+				Exceptions.throwIfFatal(ex);
+				// If the exception escapes, route it to the failure handler
+				failed(ex, attachment);
 			}
 		}
 

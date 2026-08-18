@@ -611,6 +611,65 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		channel.close();
 	}
 
+	@Test  // gh-37145
+	void writeAsynchronousFileChannelWriteThrowsErrorSynchronously() {
+		super.bufferFactory = new DefaultDataBufferFactory();
+
+		DataBuffer foo = stringBuffer("foo");
+		Flux<DataBuffer> flux = Flux.just(foo);
+
+		// Since AssertionError is not a JVM-fatal exception, Exceptions.throwIfFatal()
+		// lets it through to the failure handler.
+		AsynchronousFileChannel channel = mock();
+		willThrow(new AssertionError("simulated synchronous failure"))
+				.given(channel).write(any(), anyLong(), any(), any());
+
+		Flux<DataBuffer> writeResult = DataBufferUtils.write(flux, channel);
+
+		StepVerifier.create(writeResult)
+				.consumeNextWith(stringConsumer("foo"))
+				.expectError(AssertionError.class)
+				.verify(Duration.ofSeconds(3));
+	}
+
+	@Test  // gh-37145
+	void writeAsynchronousFileChannelWriteThrowsErrorSynchronouslyFromCompletionThread() {
+		super.bufferFactory = new DefaultDataBufferFactory();
+
+		DataBuffer foo = stringBuffer("foo");
+		Flux<DataBuffer> flux = Flux.just(foo);
+
+		// Real AsynchronousFileChannel implementations invoke the CompletionHandler on a
+		// separate thread, not the calling thread. If the OS only writes part of the
+		// buffer, WriteCompletionHandler#completed recursively calls channel.write(...)
+		// again for the remainder - on that other thread, not the original caller.
+		var executor = Executors.newSingleThreadExecutor();
+		try {
+			AsynchronousFileChannel channel = mock();
+			willAnswer(invocation -> {
+				ByteBuffer buffer = invocation.getArgument(0);
+				Object attachment = invocation.getArgument(2);
+				CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
+				// Simulate a partial write (1 of 3 bytes) so that completed() has to
+				// recursively write the remainder.
+				buffer.position(buffer.position() + 1);
+				executor.submit(() -> completionHandler.completed(1, attachment));
+				return null;
+			}).willThrow(new AssertionError("simulated synchronous failure"))
+			.given(channel).write(any(), anyLong(), any(), any());
+
+			Flux<DataBuffer> writeResult = DataBufferUtils.write(flux, channel);
+
+			StepVerifier.create(writeResult)
+					.consumeNextWith(stringConsumer("foo"))
+					.expectError(AssertionError.class)
+					.verify(Duration.ofSeconds(3));
+		}
+		finally {
+			executor.shutdown();
+		}
+	}
+
 	@ParameterizedDataBufferAllocatingTest
 	void writeAsynchronousFileChannelCanceled(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
