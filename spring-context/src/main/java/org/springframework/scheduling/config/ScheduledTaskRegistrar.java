@@ -303,6 +303,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * and time zone.
 	 * <p>This method will not register the task if the {@code expression} is
 	 * equal to {@link #CRON_DISABLED}.
+	 * @since 7.1
 	 * @see CronTask
 	 */
 	public void addCronTask(Runnable task, String expression, ZoneId zoneId) {

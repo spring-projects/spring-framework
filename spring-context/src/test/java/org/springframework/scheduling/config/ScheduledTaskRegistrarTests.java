@@ -84,7 +84,7 @@ class ScheduledTaskRegistrarTests {
 		assertThat(this.taskRegistrar.getCronTaskList()).hasSize(1);
 	}
 
-	@Test
+	@Test  // gh-36556
 	void addCronTaskWithValidExpressionAndZoneId() {
 		this.taskRegistrar.addCronTask(no_op, "* * * * * ?", ZoneId.of("Europe/London"));
 		assertThat(this.taskRegistrar.getCronTaskList()).hasSize(1);
@@ -97,9 +97,23 @@ class ScheduledTaskRegistrarTests {
 			.withMessage("Cron expression must consist of 6 fields (found 3 in \"* * *\")");
 	}
 
+	@Test  // gh-36556
+	void addCronTaskWithInvalidExpressionAndZoneId() {
+		ZoneId zoneId = ZoneId.of("Europe/London");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> this.taskRegistrar.addCronTask(no_op, "* * *", zoneId))
+			.withMessage("Cron expression must consist of 6 fields (found 3 in \"* * *\")");
+	}
+
 	@Test
 	void addCronTaskWithDisabledExpression() {
 		this.taskRegistrar.addCronTask(no_op, ScheduledTaskRegistrar.CRON_DISABLED);
+		assertThat(this.taskRegistrar.getCronTaskList()).isEmpty();
+	}
+
+	@Test  // gh-36556
+	void addCronTaskWithDisabledExpressionAndZoneId() {
+		this.taskRegistrar.addCronTask(no_op, ScheduledTaskRegistrar.CRON_DISABLED, ZoneId.of("Europe/London"));
 		assertThat(this.taskRegistrar.getCronTaskList()).isEmpty();
 	}
 
