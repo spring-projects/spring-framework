@@ -659,7 +659,7 @@ whether to decode the request path nor whether to remove semicolon content for
 path matching purposes.
 
 Spring WebFlux also does not support suffix pattern matching, unlike in Spring MVC, where we
-are also xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-suffix-pattern-match[recommend] moving away from
+are also xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-rfd[recommend] moving away from
 reliance on it.
 ====
 
