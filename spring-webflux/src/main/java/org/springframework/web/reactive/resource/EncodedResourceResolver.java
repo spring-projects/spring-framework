@@ -44,8 +44,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Resolver that delegates to the chain, and if a resource is found, it then
- * attempts to find an encoded (for example, gzip, brotli) variant that is acceptable
- * based on the "Accept-Encoding" request header.
+ * attempts to find an encoded (for example, gzip, brotli, zstd) variant that is
+ * acceptable based on the "Accept-Encoding" request header.
  *
  * <p>The list of supported {@link #setContentCodings(List) contentCodings} can
  * be configured, in order of preference, and each coding must be associated
@@ -56,6 +56,7 @@ import org.springframework.web.server.ServerWebExchange;
  * ensure the version calculation is not impacted by the encoding.
  *
  * @author Rossen Stoyanchev
+ * @author Toshiaki Maki
  * @since 5.1
  */
 public class EncodedResourceResolver extends AbstractResourceResolver {
@@ -63,7 +64,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	/**
 	 * The default content codings.
 	 */
-	public static final List<String> DEFAULT_CODINGS = Arrays.asList("br", "gzip");
+	public static final List<String> DEFAULT_CODINGS = Arrays.asList("zstd", "br", "gzip");
 
 
 	private final List<String> contentCodings = new ArrayList<>(DEFAULT_CODINGS);
@@ -74,6 +75,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	public EncodedResourceResolver() {
 		this.extensions.put("gzip", ".gz");
 		this.extensions.put("br", ".br");
+		this.extensions.put("zstd", ".zst");
 	}
 
 
@@ -87,7 +89,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	 * customizations to the list of codings here should be matched by
 	 * customizations to the same list in {@link CachingResourceResolver} to
 	 * ensure encoded variants of a resource are cached under separate keys.
-	 * <p>By default this property is set to {@literal ["br", "gzip"]}.
+	 * <p>By default this property is set to {@literal ["zstd", "br", "gzip"]}.
 	 * @param codings one or more supported content codings
 	 */
 	public void setContentCodings(List<String> codings) {
@@ -106,8 +108,8 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	/**
 	 * Configure mappings from content codings to file extensions. A dot "."
 	 * will be prepended in front of the extension value if not present.
-	 * <p>By default this is configured with {@literal ["br" -> ".br"]} and
-	 * {@literal ["gzip" -> ".gz"]}.
+	 * <p>By default this is configured with {@literal ["zstd" -> ".zst"]},
+	 * {@literal ["br" -> ".br"]} and {@literal ["gzip" -> ".gz"]}.
 	 * @param extensions the extensions to use.
 	 * @see #registerExtension(String, String)
 	 */
