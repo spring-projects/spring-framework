@@ -64,7 +64,7 @@ class ProtobufJsonEncoderTests extends AbstractEncoderTests<ProtobufJsonEncoder>
 	protected void canEncode() throws Exception {
 		assertThat(this.encoder.canEncode(forClass(Msg.class), null)).isFalse();
 		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_JSON)).isTrue();
-		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_NDJSON)).isFalse();
+		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_NDJSON)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Object.class), MediaType.APPLICATION_JSON)).isFalse();
 	}
 
