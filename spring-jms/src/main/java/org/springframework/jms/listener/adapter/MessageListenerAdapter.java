@@ -106,9 +106,9 @@ import org.springframework.util.ObjectUtils;
  *    String handleMessage(String text);
  * }</pre>
  *
- * For further examples and discussion please do refer to the Spring
- * reference documentation which describes this class (and it's attendant
- * XML configuration) in detail.
+ * <p>For further examples and discussion, please refer to the Spring reference
+ * documentation which describes this class (and its corresponding configuration)
+ * in detail.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -219,7 +219,7 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 		String methodName = getListenerMethodName(message, convertedMessage);
 
 		// Invoke the handler method with appropriate arguments.
-		Object[] listenerArguments = buildListenerArguments(convertedMessage);
+		@Nullable Object[] listenerArguments = buildListenerArguments(convertedMessage);
 		Object result = invokeListenerMethod(methodName, listenerArguments);
 		if (result != null) {
 			handleResult(result, message, session);
@@ -247,12 +247,12 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * default listener method, if any.
 	 * @param originalMessage the JMS request message
 	 * @param extractedMessage the converted JMS request message,
-	 * to be passed into the listener method as argument
+	 * to be passed into the listener method as an argument
 	 * @return the name of the listener method (never {@code null})
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setDefaultListenerMethod
 	 */
-	protected String getListenerMethodName(Message originalMessage, Object extractedMessage) throws JMSException {
+	protected String getListenerMethodName(Message originalMessage, @Nullable Object extractedMessage) throws JMSException {
 		return getDefaultListenerMethod();
 	}
 
@@ -260,31 +260,34 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * Build an array of arguments to be passed into the target listener method.
 	 * Allows for multiple method arguments to be built from a single message object.
 	 * <p>The default implementation builds an array with the given message object
-	 * as sole element. This means that the extracted message will always be passed
+	 * as its sole element. This means that the extracted message will always be passed
 	 * into a <i>single</i> method argument, even if it is an array, with the target
 	 * method having a corresponding single argument of the array's type declared.
 	 * <p>This can be overridden to treat special message content such as arrays
 	 * differently, for example passing in each element of the message array
-	 * as distinct method argument.
-	 * @param extractedMessage the content of the message
+	 * as a distinct method argument.
+	 * @param extractedMessage the content of the message, which may be
+	 * {@code null} if the message had no body
 	 * @return the array of arguments to be passed into the
 	 * listener method (each element of the array corresponding
-	 * to a distinct method argument)
+	 * to a distinct method argument); an element may be {@code null}
+	 * if the corresponding extracted message content was {@code null}
 	 */
-	protected Object[] buildListenerArguments(Object extractedMessage) {
+	protected @Nullable Object[] buildListenerArguments(@Nullable Object extractedMessage) {
 		return new Object[] {extractedMessage};
 	}
 
 	/**
 	 * Invoke the specified listener method.
 	 * @param methodName the name of the listener method
-	 * @param arguments the message arguments to be passed in
+	 * @param arguments the message arguments to be passed in (an element
+	 * may be {@code null})
 	 * @return the result returned from the listener method
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #getListenerMethodName
 	 * @see #buildListenerArguments
 	 */
-	protected @Nullable Object invokeListenerMethod(String methodName, Object[] arguments) throws JMSException {
+	protected @Nullable Object invokeListenerMethod(String methodName, @Nullable Object[] arguments) throws JMSException {
 		try {
 			MethodInvoker methodInvoker = new MethodInvoker();
 			methodInvoker.setTargetObject(getDelegate());

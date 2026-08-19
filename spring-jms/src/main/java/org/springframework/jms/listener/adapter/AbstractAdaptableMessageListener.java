@@ -235,10 +235,10 @@ public abstract class AbstractAdaptableMessageListener
 	 * Extract the message body from the given JMS message.
 	 * @param message the JMS {@code Message}
 	 * @return the content of the message, to be passed into the listener method
-	 * as an argument
+	 * as an argument, or {@code null} if the message has no body
 	 * @throws MessageConversionException if the message could not be extracted
 	 */
-	protected Object extractMessage(Message message) {
+	protected @Nullable Object extractMessage(Message message) {
 		try {
 			MessageConverter converter = getMessageConverter();
 			if (converter != null) {
@@ -462,7 +462,7 @@ public abstract class AbstractAdaptableMessageListener
 		}
 
 		@Override
-		protected Object extractPayload(Message message) throws JMSException {
+		protected @Nullable Object extractPayload(Message message) throws JMSException {
 			Object payload = extractMessage(message);
 			if (message instanceof BytesMessage bytesMessage) {
 				try {
@@ -531,6 +531,10 @@ public abstract class AbstractAdaptableMessageListener
 				Object payload = extractPayload(this.message);
 				if (payload instanceof org.springframework.messaging.Message springMessage) {
 					return springMessage.getPayload();
+				}
+				if (payload == null) {
+					throw new MessageConversionException(
+							"Cannot convert JMS message with no body to a Message with a payload: " + this.message);
 				}
 				return payload;
 			}

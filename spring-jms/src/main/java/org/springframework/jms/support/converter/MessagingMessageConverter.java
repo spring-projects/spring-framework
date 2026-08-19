@@ -117,6 +117,9 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	public Object fromMessage(jakarta.jms.Message message) throws JMSException, MessageConversionException {
 		Map<String, Object> mappedHeaders = extractHeaders(message);
 		Object convertedObject = extractPayload(message);
+		if (convertedObject == null) {
+			throw new MessageConversionException("Cannot convert JMS message with no body to a Message with a payload");
+		}
 		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message springMessage ?
 				MessageBuilder.fromMessage(springMessage) : MessageBuilder.withPayload(convertedObject));
 		return builder.copyHeadersIfAbsent(mappedHeaders).build();
@@ -124,8 +127,9 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 
 	/**
 	 * Extract the payload of the specified {@link jakarta.jms.Message}.
+	 * @return the extracted payload, or {@code null} if the message has no body
 	 */
-	protected Object extractPayload(jakarta.jms.Message message) throws JMSException {
+	protected @Nullable Object extractPayload(jakarta.jms.Message message) throws JMSException {
 		return this.payloadConverter.fromMessage(message);
 	}
 

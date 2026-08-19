@@ -19,6 +19,7 @@ package org.springframework.jms.support.converter;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy interface that specifies a converter between Java objects and JMS messages.
@@ -48,10 +49,12 @@ public interface MessageConverter {
 	/**
 	 * Convert from a JMS Message to a Java object.
 	 * @param message the message to convert
-	 * @return the converted Java object
+	 * @return the converted Java object, or {@code null} if the message has no
+	 * body (for example, a {@link jakarta.jms.TextMessage} or
+	 * {@link jakarta.jms.ObjectMessage} whose body was never set)
 	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 * @throws MessageConversionException in case of conversion failure
 	 */
-	Object fromMessage(Message message) throws JMSException, MessageConversionException;
+	@Nullable Object fromMessage(Message message) throws JMSException, MessageConversionException;
 
 }

@@ -28,6 +28,7 @@ import jakarta.jms.Message;
 import jakarta.jms.ObjectMessage;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.ObjectUtils;
 
@@ -91,13 +92,15 @@ public class SimpleMessageConverter implements MessageConverter {
 	 * ByteMessage back to a byte array, a MapMessage back to a Map,
 	 * and an ObjectMessage back to a Serializable object. Returns
 	 * the plain Message object in case of an unknown message type.
+	 * <p>Note that a {@code TextMessage} or {@code ObjectMessage} whose body was
+	 * never set is converted to {@code null}, per the JMS specification.
 	 * @see #extractStringFromMessage
 	 * @see #extractByteArrayFromMessage
 	 * @see #extractMapFromMessage
 	 * @see #extractSerializableFromMessage
 	 */
 	@Override
-	public Object fromMessage(Message message) throws JMSException, MessageConversionException {
+	public @Nullable Object fromMessage(Message message) throws JMSException, MessageConversionException {
 		if (message instanceof TextMessage textMessage) {
 			return extractStringFromMessage(textMessage);
 		}
@@ -179,10 +182,10 @@ public class SimpleMessageConverter implements MessageConverter {
 	/**
 	 * Extract a String from the given TextMessage.
 	 * @param message the message to convert
-	 * @return the resulting String
+	 * @return the resulting String, or {@code null} if the message body was never set
 	 * @throws JMSException if thrown by JMS methods
 	 */
-	protected String extractStringFromMessage(TextMessage message) throws JMSException {
+	protected @Nullable String extractStringFromMessage(TextMessage message) throws JMSException {
 		return message.getText();
 	}
 
@@ -218,10 +221,11 @@ public class SimpleMessageConverter implements MessageConverter {
 	/**
 	 * Extract a Serializable object from the given {@link ObjectMessage}.
 	 * @param message the message to convert
-	 * @return the resulting Serializable object
+	 * @return the resulting Serializable object, or {@code null} if the message body
+	 * was never set
 	 * @throws JMSException if thrown by JMS methods
 	 */
-	protected Serializable extractSerializableFromMessage(ObjectMessage message) throws JMSException {
+	protected @Nullable Serializable extractSerializableFromMessage(ObjectMessage message) throws JMSException {
 		return message.getObject();
 	}
 

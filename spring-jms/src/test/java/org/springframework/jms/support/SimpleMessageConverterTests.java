@@ -64,6 +64,15 @@ class SimpleMessageConverterTests {
 		assertThat(converter.fromMessage(msg)).isEqualTo(content);
 	}
 
+	@Test  // gh-37148
+	void stringConversionForMessageWithNoTextReturnsNull() throws JMSException {
+		TextMessage message = mock();
+		given(message.getText()).willReturn(null);
+
+		SimpleMessageConverter converter = new SimpleMessageConverter();
+		assertThat(converter.fromMessage(message)).isNull();
+	}
+
 	@Test
 	void byteArrayConversion() throws JMSException {
 		Session session = mock();
@@ -119,6 +128,15 @@ class SimpleMessageConverterTests {
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
 		assertThat(converter.fromMessage(msg)).isEqualTo(content);
+	}
+
+	@Test  // gh-37148
+	void serializableConversionForMessageWithNoObjectReturnsNull() throws JMSException {
+		ObjectMessage message = mock();
+		given(message.getObject()).willReturn(null);
+
+		SimpleMessageConverter converter = new SimpleMessageConverter();
+		assertThat(converter.fromMessage(message)).isNull();
 	}
 
 	@Test
