@@ -37,6 +37,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -400,6 +401,29 @@ class ModelAttributeMethodArgumentResolverTests {
 
 	// TODO: SPR-15871, SPR-15542
 
+	@Test
+	void protectedMethodsCanBeOverridden() {
+		// Test that validateIfApplicable and isBindExceptionRequired can be overridden
+		CustomModelAttributeMethodArgumentResolver resolver = new CustomModelAttributeMethodArgumentResolver(
+				ReactiveAdapterRegistry.getSharedInstance(), false);
+		assertThat(resolver.validateIfApplicableCalled).isFalse();
+		assertThat(resolver.isBindExceptionRequiredCalled).isFalse();
+
+		MethodParameter parameter = this.testMethod.annotPresent(ModelAttribute.class).arg(Pojo.class);
+		
+		// Use invalid data to trigger validation errors, which will call isBindExceptionRequired
+		try {
+			resolver.resolveArgument(parameter, this.bindContext, postForm("name=Robert&age=invalid"))
+					.block(Duration.ZERO);
+		}
+		catch (WebExchangeBindException ex) {
+			// Expected - validation error
+		}
+
+		assertThat(resolver.validateIfApplicableCalled).isTrue();
+		assertThat(resolver.isBindExceptionRequiredCalled).isTrue();
+	}
+
 
 	private ModelAttributeMethodArgumentResolver createResolver() {
 		return new ModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance(), false);
@@ -516,7 +540,7 @@ class ModelAttributeMethodArgumentResolverTests {
 		}
 
 		public int getAge() {
-			return this.age;
+			return age;
 		}
 
 		public int getCount() {
@@ -525,6 +549,32 @@ class ModelAttributeMethodArgumentResolverTests {
 
 		public void setCount(int count) {
 			this.count = count;
+		}
+	}
+
+
+	/**
+	 * Custom resolver that overrides protected methods to verify they can be extended.
+	 */
+	private static class CustomModelAttributeMethodArgumentResolver extends ModelAttributeMethodArgumentResolver {
+
+		boolean validateIfApplicableCalled = false;
+		boolean isBindExceptionRequiredCalled = false;
+
+		public CustomModelAttributeMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry, boolean useDefaultResolution) {
+			super(adapterRegistry, useDefaultResolution);
+		}
+
+		@Override
+		protected void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter, ServerWebExchange exchange) {
+			this.validateIfApplicableCalled = true;
+			super.validateIfApplicable(binder, parameter, exchange);
+		}
+
+		@Override
+		protected boolean isBindExceptionRequired(MethodParameter parameter) {
+			this.isBindExceptionRequiredCalled = true;
+			return super.isBindExceptionRequired(parameter);
 		}
 	}
 

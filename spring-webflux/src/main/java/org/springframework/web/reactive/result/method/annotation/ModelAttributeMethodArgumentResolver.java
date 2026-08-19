@@ -144,7 +144,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 									return adapter.fromPublisher(mono);
 								}
 								else {
-									if (errors.hasErrors() && !hasErrorsArgument(parameter)) {
+									if (errors.hasErrors() && isBindExceptionRequired(parameter)) {
 										throw new WebExchangeBindException(parameter, errors);
 									}
 									return attribute;
@@ -219,13 +219,30 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		return binder.bind(exchange);
 	}
 
-	private boolean hasErrorsArgument(MethodParameter parameter) {
+	/**
+	 * Whether to raise a fatal bind exception on validation errors.
+	 * @param parameter the method parameter declaration
+	 * @return {@code true} if the next method parameter is not of type {@link Errors}
+	 * @since 6.2
+	 */
+	protected boolean isBindExceptionRequired(MethodParameter parameter) {
 		int i = parameter.getParameterIndex();
 		Class<?>[] paramTypes = parameter.getExecutable().getParameterTypes();
-		return (paramTypes.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
+		return !(paramTypes.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 	}
 
-	private void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter, ServerWebExchange exchange) {
+	/**
+	 * Validate the model attribute if applicable.
+	 * <p>The default implementation checks for {@code @jakarta.validation.Valid},
+	 * Spring's {@link org.springframework.validation.annotation.Validated},
+	 * and custom annotations whose name starts with "Valid".
+	 * @param binder the DataBinder to be used
+	 * @param parameter the method parameter declaration
+	 * @param exchange the current exchange
+	 * @see WebExchangeDataBinder#validate(Object...)
+	 * @see org.springframework.validation.SmartValidator#validate(Object, Errors, Object...)
+	 */
+	protected void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter, ServerWebExchange exchange) {
 		LocaleContext localeContext = null;
 		try {
 			for (Annotation ann : parameter.getParameterAnnotations()) {
