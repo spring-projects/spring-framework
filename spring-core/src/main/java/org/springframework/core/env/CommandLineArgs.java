@@ -46,11 +46,9 @@ class CommandLineArgs {
 	 * without an associated value &mdash; for example, "--foo" vs. "--foo=bar".
 	 */
 	public void addOptionArg(String optionName, @Nullable String optionValue) {
-		if (!this.optionArgs.containsKey(optionName)) {
-			this.optionArgs.put(optionName, new ArrayList<>());
-		}
+		List<String> values = this.optionArgs.computeIfAbsent(optionName, key -> new ArrayList<>());
 		if (optionValue != null) {
-			this.optionArgs.get(optionName).add(optionValue);
+			values.add(optionValue);
 		}
 	}
 
