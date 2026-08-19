@@ -18,7 +18,6 @@ package org.springframework.build.architecture;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.EvaluationResult;
 import java.io.File;
 import java.io.IOException;
@@ -44,12 +43,6 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 
-import static org.springframework.build.architecture.ArchitectureRules.allPackagesShouldBeFreeOfTangles;
-import static org.springframework.build.architecture.ArchitectureRules.classesShouldNotImportForbiddenTypes;
-import static org.springframework.build.architecture.ArchitectureRules.javaClassesShouldNotImportKotlinAnnotations;
-import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToLowerCaseWithoutLocale;
-import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToUpperCaseWithoutLocale;
-
 /**
  * {@link Task} that checks for architecture problems.
  *
@@ -63,12 +56,11 @@ public abstract class ArchitectureCheck extends DefaultTask {
 	public ArchitectureCheck() {
 		getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir(getName()));
 		getProhibitObjectsRequireNonNull().convention(true);
-		getRules().addAll(classesShouldNotImportForbiddenTypes(),
-				javaClassesShouldNotImportKotlinAnnotations(),
-				allPackagesShouldBeFreeOfTangles(),
-				noClassesShouldCallStringToLowerCaseWithoutLocale(),
-				noClassesShouldCallStringToUpperCaseWithoutLocale());
-		getRuleDescriptions().set(getRules().map((rules) -> rules.stream().map(ArchRule::getDescription).toList()));
+		getRules().addAll(ArchitectureRules.CLASSES_SHOULD_NOT_IMPORT_FORBIDDEN_TYPES,
+				ArchitectureRules.JAVA_CLASSES_SHOULD_NOT_IMPORT_KOTLIN_ANNOTATIONS,
+				ArchitectureRules.ALL_PACKAGES_SHOULD_BE_FREE_OF_TANGLES,
+				ArchitectureRules.NO_CLASSES_SHOULD_CALL_STRING_TO_LOWER_CASE_WITHOUT_LOCALE,
+				ArchitectureRules.NO_CLASSES_SHOULD_CALL_STRING_TO_UPPER_CASE_WITHOUT_LOCALE);
 	}
 
 	@TaskAction
@@ -77,6 +69,7 @@ public abstract class ArchitectureCheck extends DefaultTask {
 				.importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
 		List<EvaluationResult> violations = getRules().get()
 				.stream()
+				.map(ArchitectureRules::archRule)
 				.map((rule) -> rule.evaluate(javaClasses))
 				.filter(EvaluationResult::hasViolation)
 				.toList();
@@ -122,14 +115,9 @@ public abstract class ArchitectureCheck extends DefaultTask {
 	@OutputDirectory
 	public abstract DirectoryProperty getOutputDirectory();
 
-	@Internal
-	public abstract ListProperty<ArchRule> getRules();
+	@Input
+	public abstract ListProperty<ArchitectureRules> getRules();
 
 	@Internal
 	public abstract Property<Boolean> getProhibitObjectsRequireNonNull();
-
-	@Input
-	// The rules themselves can't be an input as they aren't serializable so we use
-	// their descriptions instead
-	abstract ListProperty<String> getRuleDescriptions();
 }
