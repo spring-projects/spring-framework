@@ -161,7 +161,7 @@ public class ProtobufJsonDecoder implements Decoder<Message> {
 	 * Create a new {@code Message.Builder} instance for the given class.
 	 * <p>This method uses a ConcurrentHashMap for caching method lookups.
 	 */
-	private static Message.Builder getMessageBuilder(Class<?> clazz) throws Exception {
+	protected static Message.Builder getMessageBuilder(Class<?> clazz) throws Exception {
 		Method method = methodCache.get(clazz);
 		if (method == null) {
 			method = clazz.getMethod("newBuilder");
