@@ -81,6 +81,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.TailOrdered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -1529,6 +1530,43 @@ class DefaultListableBeanFactoryTests {
 		Object spouse = lbf.getBean("spouse1");
 		assertThat(bean.getSpouse1()).isSameAs(spouse);
 		assertThat(bean.getSpouse2()).isNull();
+	}
+
+	@Test
+	void ordering() {
+		GenericBeanDefinition bd1 = new GenericBeanDefinition();
+		bd1.setBeanClass(TestBean.class);
+		bd1.setPropertyValues(new MutablePropertyValues(List.of(new PropertyValue("name", "lowest"))));
+		bd1.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.LOWEST_PRECEDENCE);
+		lbf.registerBeanDefinition("bean1", bd1);
+		GenericBeanDefinition bd2 = new GenericBeanDefinition();
+		bd2.setBeanClass(DerivedTestBean.class);
+		bd2.setPropertyValues(new MutablePropertyValues(List.of(new PropertyValue("name", "highest"))));
+		bd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.HIGHEST_PRECEDENCE);
+		bd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		lbf.registerBeanDefinition("bean2", bd2);
+		GenericBeanDefinition bd3 = new GenericBeanDefinition();
+		bd3.setBeanClass(HighestTailPrecedenceTestBean.class);
+		bd3.setPropertyValues(new MutablePropertyValues(List.of(new PropertyValue("name", "highestTail"))));
+		lbf.registerBeanDefinition("bean3", bd3);
+		GenericBeanDefinition bd4 = new GenericBeanDefinition();
+		bd4.setBeanClass(LowestTailPrecedenceTestBean.class);
+		bd4.setPropertyValues(new MutablePropertyValues(List.of(new PropertyValue("name", "lowestTail"))));
+		lbf.registerBeanDefinition("bean4", bd4);
+
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
+				.containsExactly("highest", "lowest", "highestTail", "lowestTail");
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(clazz -> !DerivedTestBean.class.isAssignableFrom(clazz))
+				.map(TestBean::getName)).containsExactly("lowest", "highestTail", "lowestTail");
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED).map(TestBean::getName))
+				.containsExactly("highest", "lowest", "highestTail", "lowestTail");
+		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED, false).map(TestBean::getName))
+				.containsExactly("lowest", "highestTail", "lowestTail");
+
+		assertThat(lbf.getOrder("bean1")).isEqualTo(Ordered.LOWEST_PRECEDENCE);
+		assertThat(lbf.getOrder("bean2")).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
+		assertThat(lbf.getOrder("bean3")).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
+		assertThat(lbf.getOrder("bean4")).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
@@ -3893,6 +3931,24 @@ class DefaultListableBeanFactoryTests {
 		@Override
 		public Class<?> getObjectType() {
 			return TestBean.class;
+		}
+	}
+
+
+	private static class LowestTailPrecedenceTestBean extends TestBean implements TailOrdered {
+
+		@Override
+		public int getOrder() {
+			return Ordered.LOWEST_PRECEDENCE;
+		}
+	}
+
+
+	private static class HighestTailPrecedenceTestBean extends TestBean implements TailOrdered {
+
+		@Override
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
 		}
 	}
 
