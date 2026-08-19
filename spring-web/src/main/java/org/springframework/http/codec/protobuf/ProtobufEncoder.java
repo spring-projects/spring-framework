@@ -54,6 +54,7 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @since 5.1
+ * @see ProtobufHttpMessageWriter
  * @see ProtobufDecoder
  */
 public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessageEncoder<Message> {

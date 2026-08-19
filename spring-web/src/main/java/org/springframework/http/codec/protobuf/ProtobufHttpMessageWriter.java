@@ -96,6 +96,19 @@ public class ProtobufHttpMessageWriter extends EncoderHttpMessageWriter<Message>
 	}
 
 	/**
+	 * Create a new {@code Message.Builder} instance for the given class.
+	 * <p>This method uses a ConcurrentHashMap for caching method lookups.
+	 */
+	protected static Message.Builder getMessageBuilder(Class<?> clazz) throws Exception {
+		Method method = methodCache.get(clazz);
+		if (method == null) {
+			method = clazz.getMethod("newBuilder");
+			methodCache.put(clazz, method);
+		}
+		return (Message.Builder) method.invoke(clazz);
+	}
+
+	/**
 	 * Return the {@code MediaType} to use when the input Publisher is multivalued.
 	 * @since 7.0
 	 */
@@ -116,19 +129,6 @@ public class ProtobufHttpMessageWriter extends EncoderHttpMessageWriter<Message>
 	 * @since 7.0
 	 */
 	protected void extendHeaders(ReactiveHttpOutputMessage message, Map<String, Object> hints) {
-	}
-
-	/**
-	 * Create a new {@code Message.Builder} instance for the given class.
-	 * <p>This method uses a ConcurrentHashMap for caching method lookups.
-	 */
-	private static Message.Builder getMessageBuilder(Class<?> clazz) throws Exception {
-		Method method = methodCache.get(clazz);
-		if (method == null) {
-			method = clazz.getMethod("newBuilder");
-			methodCache.put(clazz, method);
-		}
-		return (Message.Builder) method.invoke(clazz);
 	}
 
 }
