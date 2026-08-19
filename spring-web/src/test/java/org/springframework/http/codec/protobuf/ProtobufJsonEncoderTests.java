@@ -43,15 +43,21 @@ import static org.springframework.core.ResolvableType.forClass;
  */
 class ProtobufJsonEncoderTests extends AbstractEncoderTests<ProtobufJsonEncoder> {
 
-	private Msg msg1 =
-			Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
+	private Msg msg1 = Msg.newBuilder()
+			.setFoo("Foo")
+			.setBlah(SecondMsg.newBuilder().setBlah(123).build())
+			.build();
 
-	private Msg msg2 =
-			Msg.newBuilder().setFoo("Bar").setBlah(SecondMsg.newBuilder().setBlah(456).build()).build();
+	private Msg msg2 = Msg.newBuilder()
+			.setFoo("Bar")
+			.setBlah(SecondMsg.newBuilder().setBlah(456).build())
+			.build();
+
 
 	public ProtobufJsonEncoderTests() {
 		super(new ProtobufJsonEncoder(JsonFormat.printer().omittingInsignificantWhitespace()));
 	}
+
 
 	@Override
 	@Test
@@ -69,7 +75,7 @@ class ProtobufJsonEncoderTests extends AbstractEncoderTests<ProtobufJsonEncoder>
 		ResolvableType inputType = forClass(Msg.class);
 
 		testEncode(input, inputType, MediaType.APPLICATION_JSON, null, step -> step
-				.assertNext(dataBuffer -> assertBufferEqualsJson(dataBuffer, "{\"foo\":\"Foo\",\"blah\":{\"blah\":123}}"))
+				.assertNext(buffer -> assertBufferEqualsJson(buffer, "{\"foo\":\"Foo\",\"blah\":{\"blah\":123}}"))
 				.verifyComplete());
 		testEncodeError(input, inputType, MediaType.APPLICATION_JSON, null);
 		testEncodeCancel(input, inputType, MediaType.APPLICATION_JSON, null);
@@ -91,9 +97,9 @@ class ProtobufJsonEncoderTests extends AbstractEncoderTests<ProtobufJsonEncoder>
 		ResolvableType inputType = forClass(Msg.class);
 
 		testEncode(input, inputType, MediaType.APPLICATION_JSON, null, step -> step
-				.assertNext(dataBuffer -> assertBufferEqualsJson(dataBuffer, "[{\"foo\":\"Foo\",\"blah\":{\"blah\":123}}"))
-				.assertNext(dataBuffer -> assertBufferEqualsJson(dataBuffer, ",{\"foo\":\"Bar\",\"blah\":{\"blah\":456}}"))
-				.assertNext(dataBuffer -> assertBufferEqualsJson(dataBuffer, "]"))
+				.assertNext(buffer -> assertBufferEqualsJson(buffer, "[{\"foo\":\"Foo\",\"blah\":{\"blah\":123}}"))
+				.assertNext(buffer -> assertBufferEqualsJson(buffer, ",{\"foo\":\"Bar\",\"blah\":{\"blah\":456}}"))
+				.assertNext(buffer -> assertBufferEqualsJson(buffer, "]"))
 				.verifyComplete());
 	}
 
