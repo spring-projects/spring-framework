@@ -134,6 +134,16 @@ public class RequestContext {
 
 	/**
 	 * Change the current locale to the specified one.
+	 * <p><strong>Note:</strong> Unlike the Spring MVC counterpart, this method only
+	 * updates the locale within the scope of the current {@code RequestContext} instance
+	 * for view rendering purposes. It does <em>not</em> delegate to a
+	 * {@link org.springframework.web.server.i18n.LocaleContextResolver} and the change
+	 * is not persisted beyond the current rendering cycle. For a durable locale change
+	 * across requests in WebFlux, configure a
+	 * {@link org.springframework.web.server.i18n.LocaleContextResolver} and update it
+	 * from a {@link org.springframework.web.server.WebFilter} or handler method instead.
+	 * @param locale the new locale
+	 * @see #changeLocale(java.util.Locale, java.util.TimeZone)
 	 */
 	public void changeLocale(Locale locale) {
 		this.locale = locale;
@@ -141,6 +151,14 @@ public class RequestContext {
 
 	/**
 	 * Change the current locale to the specified locale and time zone context.
+	 * <p><strong>Note:</strong> Unlike the Spring MVC counterpart, this method only
+	 * updates the locale and time zone within the scope of the current
+	 * {@code RequestContext} instance for view rendering purposes. It does <em>not</em>
+	 * delegate to a {@link org.springframework.web.server.i18n.LocaleContextResolver}
+	 * and the change is not persisted beyond the current rendering cycle.
+	 * @param locale the new locale
+	 * @param timeZone the new time zone
+	 * @see #changeLocale(java.util.Locale)
 	 */
 	public void changeLocale(Locale locale, TimeZone timeZone) {
 		this.locale = locale;

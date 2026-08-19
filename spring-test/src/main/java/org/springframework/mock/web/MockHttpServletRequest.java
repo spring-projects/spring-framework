@@ -251,7 +251,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private @Nullable HttpSession session;
 
-	private boolean requestedSessionIdValid = true;
+	private @Nullable Boolean requestedSessionIdValid;
 
 	private boolean requestedSessionIdFromCookie = true;
 
@@ -1346,13 +1346,37 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.session.getId();
 	}
 
+	/**
+	 * Set the flag returned by {@link #isRequestedSessionIdValid()}.
+	 * <p>If not explicitly set, the flag is computed dynamically to follow the
+	 * {@link jakarta.servlet.http.HttpServletRequest#isRequestedSessionIdValid()} contract:
+	 * {@code false} when no session ID was submitted ({@link #getRequestedSessionId()} is
+	 * {@code null}), and {@code false} after {@link #changeSessionId()} invalidates the
+	 * originally-requested ID.
+	 */
 	public void setRequestedSessionIdValid(boolean requestedSessionIdValid) {
 		this.requestedSessionIdValid = requestedSessionIdValid;
 	}
 
+	/**
+	 * Returns whether the requested session ID is still valid in the current session context.
+	 * <p>If {@link #setRequestedSessionIdValid} has been called explicitly, the value set
+	 * there is returned. Otherwise this method follows the Servlet specification contract:
+	 * returns {@code false} when the client did not submit any session ID (i.e.,
+	 * {@link #getRequestedSessionId()} is {@code null}), and returns {@code false} if the
+	 * session ID submitted by the client no longer matches the current session (e.g., after
+	 * {@link #changeSessionId()} was called). Returns {@code true} when a session exists and
+	 * the submitted session ID matches the current session ID.
+	 */
 	@Override
 	public boolean isRequestedSessionIdValid() {
-		return this.requestedSessionIdValid;
+		if (this.requestedSessionIdValid != null) {
+			return this.requestedSessionIdValid;
+		}
+		if (this.requestedSessionId == null) {
+			return false;
+		}
+		return (this.session != null && this.requestedSessionId.equals(this.session.getId()));
 	}
 
 	public void setRequestedSessionIdFromCookie(boolean requestedSessionIdFromCookie) {
