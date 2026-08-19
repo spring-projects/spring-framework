@@ -174,18 +174,6 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	}
 
 	/**
-	 * Use merge methods on {@link Message.Builder} to read a single message
-	 * from the given {@code DataBuffer}.
-	 * @since 7.0
-	 */
-	protected void merge(DataBuffer dataBuffer, Message.Builder builder) throws IOException {
-		ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
-		dataBuffer.toByteBuffer(byteBuffer);
-		builder.mergeFrom(CodedInputStream.newInstance(byteBuffer), this.extensionRegistry);
-	}
-
-
-	/**
 	 * Create a new {@code Message.Builder} instance for the given class.
 	 * <p>This method uses a ConcurrentHashMap for caching method lookups.
 	 */
@@ -196,6 +184,17 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 			methodCache.put(clazz, method);
 		}
 		return (Message.Builder) method.invoke(clazz);
+	}
+
+	/**
+	 * Use merge methods on {@link Message.Builder} to read a single message
+	 * from the given {@code DataBuffer}.
+	 * @since 7.0
+	 */
+	protected void merge(DataBuffer dataBuffer, Message.Builder builder) throws IOException {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+		dataBuffer.toByteBuffer(byteBuffer);
+		builder.mergeFrom(CodedInputStream.newInstance(byteBuffer), this.extensionRegistry);
 	}
 
 	@Override
