@@ -182,6 +182,20 @@ abstract class AbstractCacheAnnotationTests {
 		assertThat(r2).isNotSameAs(r1);
 	}
 
+	protected void testEvictImmediate(CacheableService<?> service) {
+		Cache cache = this.cm.getCache("testCache");
+
+		Object o1 = new Object();
+		cache.putIfAbsent(o1, -1L);
+		Object r1 = service.cache(o1);
+
+		service.evictImmediate(o1);
+		assertThat(cache.get(o1)).isNull();
+
+		Object r2 = service.cache(o1);
+		assertThat(r2).isNotSameAs(r1);
+	}
+
 	protected void testEvictException(CacheableService<?> service) {
 		Object o1 = new Object();
 		Object r1 = service.cache(o1);
@@ -272,6 +286,28 @@ abstract class AbstractCacheAnnotationTests {
 		catch (Exception ex) {
 			// expected
 		}
+		assertThat(cache.get(o1)).isNull();
+		assertThat(cache.get(o2)).isNull();
+
+		Object r3 = service.cache(o1);
+		Object r4 = service.cache(o2);
+		assertThat(r3).isNotSameAs(r1);
+		assertThat(r4).isNotSameAs(r2);
+	}
+
+	protected void testEvictAllImmediate(CacheableService<?> service) {
+		Cache cache = this.cm.getCache("testCache");
+
+		Object o1 = new Object();
+		Object o2 = new Object();
+		cache.putIfAbsent(o1, -1L);
+		cache.putIfAbsent(o2, -2L);
+
+		Object r1 = service.cache(o1);
+		Object r2 = service.cache(o2);
+		assertThat(r2).isNotSameAs(r1);
+
+		service.evictAllImmediate(new Object());
 		assertThat(cache.get(o1)).isNull();
 		assertThat(cache.get(o2)).isNull();
 
@@ -587,6 +623,11 @@ abstract class AbstractCacheAnnotationTests {
 	}
 
 	@Test
+	void evictImmediate() {
+		testEvictImmediate(this.cs);
+	}
+
+	@Test
 	void evictWithException() {
 		testEvictException(this.cs);
 	}
@@ -599,6 +640,11 @@ abstract class AbstractCacheAnnotationTests {
 	@Test
 	void evictAllEarly() {
 		testEvictAllEarly(this.cs);
+	}
+
+	@Test
+	void evictAllImmediate() {
+		testEvictAllImmediate(this.cs);
 	}
 
 	@Test
@@ -657,8 +703,18 @@ abstract class AbstractCacheAnnotationTests {
 	}
 
 	@Test
+	void classEvictImmediate() {
+		testEvictImmediate(this.ccs);
+	}
+
+	@Test
 	void classEvictAll() {
 		testEvictAll(this.ccs, true);
+	}
+
+	@Test
+	void classEvictAllImmediate() {
+		testEvictAllImmediate(this.ccs);
 	}
 
 	@Test
