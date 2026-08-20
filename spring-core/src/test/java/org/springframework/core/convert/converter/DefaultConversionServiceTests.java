@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -1012,6 +1013,72 @@ class DefaultConversionServiceTests {
 
 		private static final TypeDescriptor rawOptionalType = TypeDescriptor.valueOf(Optional.class);
 
+		@SuppressWarnings("unused")
+		private Optional<?> unboundedWildcardOptional;
+
+		@SuppressWarnings("unused")
+		private Optional<? extends Number> boundedWildcardOptional;
+
+
+		@Test  // raw Optional: no element type information, so the converter remains permissive
+		void canConvertRawOptionalRemainsPermissive() {
+			assertThat(conversionService.canConvert(rawOptionalType, TypeDescriptor.valueOf(LocalDate.class))).isTrue();
+		}
+
+		@Test  // Optional<?>: the Object upper bound resolves to null, so the converter remains permissive
+		void canConvertOptionalWithUnboundedWildcardRemainsPermissive() throws Exception {
+			TypeDescriptor unboundedWildcardOptionalType = optionalTypeFor("unboundedWildcardOptional");
+			assertThat(conversionService.canConvert(unboundedWildcardOptionalType, TypeDescriptor.valueOf(LocalDate.class))).isTrue();
+		}
+
+		@Test  // Optional<T> with an unresolved type variable also remains permissive
+		void canConvertOptionalWithUnresolvedTypeVariableRemainsPermissive() throws Exception {
+			TypeDescriptor typeVariableOptionalType =
+					new TypeDescriptor(TypeVariableHolder.class.getDeclaredField("typeVariableOptional"));
+			assertThat(conversionService.canConvert(typeVariableOptionalType, TypeDescriptor.valueOf(LocalDate.class))).isTrue();
+		}
+
+		@Test  // Optional<? extends Number>: applicability is decided against the Number upper bound
+		void canConvertOptionalWithBoundedWildcardReflectsUpperBound() throws Exception {
+			TypeDescriptor boundedWildcardOptionalType = optionalTypeFor("boundedWildcardOptional");
+			TypeDescriptor localDateType = TypeDescriptor.valueOf(LocalDate.class);
+
+			assertThat(conversionService.canConvert(boundedWildcardOptionalType, TypeDescriptor.valueOf(String.class))).isTrue();
+			assertThat(conversionService.convert(Optional.of(42), boundedWildcardOptionalType,
+					TypeDescriptor.valueOf(String.class))).isEqualTo("42");
+			assertThat(conversionService.canConvert(boundedWildcardOptionalType, localDateType)).isFalse();
+			assertThatExceptionOfType(ConverterNotFoundException.class)
+					.isThrownBy(() -> conversionService.convert(Optional.of(42), boundedWildcardOptionalType, localDateType));
+		}
+
+		private static TypeDescriptor optionalTypeFor(String fieldName) throws Exception {
+			return new TypeDescriptor(OptionalConversionTests.class.getDeclaredField(fieldName));
+		}
+
+		@SuppressWarnings("unused")
+		private static class TypeVariableHolder<T> {
+
+			Optional<T> typeVariableOptional;
+		}
+
+		@Test
+		void canConvertOptionalToObjectReflectsContainedElementType() {
+			TypeDescriptor integerOptionalType =
+					new TypeDescriptor(ResolvableType.forClassWithGenerics(Optional.class, Integer.class), null, null);
+			TypeDescriptor localDateType = TypeDescriptor.valueOf(LocalDate.class);
+
+			// Integer -> String is convertible
+			assertThat(conversionService.canConvert(integerOptionalType, TypeDescriptor.valueOf(String.class))).isTrue();
+
+			// Integer -> LocalDate is not convertible, so canConvert must not over-report...
+			assertThat(conversionService.canConvert(integerOptionalType, localDateType)).isFalse();
+			// ...and must stay consistent with convert(): no converter is selected
+			assertThatExceptionOfType(ConverterNotFoundException.class)
+					.isThrownBy(() -> conversionService.convert(Optional.of(42), integerOptionalType, localDateType));
+
+			// An Optional with an unknown element type remains permissive
+			assertThat(conversionService.canConvert(rawOptionalType, localDateType)).isTrue();
+		}
 
 		@Test
 		@SuppressWarnings("unchecked")
