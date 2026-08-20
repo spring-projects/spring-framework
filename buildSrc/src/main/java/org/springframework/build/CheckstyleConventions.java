@@ -17,6 +17,9 @@
 package org.springframework.build;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -35,6 +38,7 @@ import org.gradle.api.plugins.quality.CheckstylePlugin;
  * {@link Plugin} that applies conventions for checkstyle.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 public class CheckstyleConventions {
 
@@ -67,6 +71,7 @@ public class CheckstyleConventions {
 		noHttp.getSource().exclude("**/test-output/**", "**/.settings/**", "**/.classpath",
 				"**/.project", "**/.gradle/**", "**/node_modules/**", "**/spring-jcl/**", "buildSrc/build/**",
 				".claude/**");
+		excludeGitIgnoredPaths(project, noHttp);
 		List<String> buildFolders = List.of("bin", "build", "out");
 		project.allprojects(subproject -> {
 			Path rootPath = project.getRootDir().toPath();
@@ -76,6 +81,50 @@ public class CheckstyleConventions {
 				noHttp.getSource().exclude(innerBuildDir + File.separator + "**");
 			}
 		});
+	}
+
+	/**
+	 * Additionally exclude everything matched by the root {@code .gitignore} file,
+	 * so that new ignored paths (build output, IDE metadata, local git worktrees,
+	 * etc.) are automatically kept out of nohttp scanning without having to
+	 * remember to mirror every {@code .gitignore} change here as well.
+	 * <p>Negated patterns (lines starting with {@code !}) are not supported and are
+	 * simply skipped, since there is no useful Ant-glob equivalent for them here.
+	 */
+	private static void excludeGitIgnoredPaths(Project project, NoHttpExtension noHttp) {
+		File gitignore = project.getRootProject().file(".gitignore");
+		if (!gitignore.exists()) {
+			return;
+		}
+		try {
+			for (String line : Files.readAllLines(gitignore.toPath())) {
+				String pattern = line.strip();
+				if (pattern.isEmpty() || pattern.startsWith("#") || pattern.startsWith("!")) {
+					continue;
+				}
+				boolean directoryOnly = pattern.endsWith("/");
+				if (directoryOnly) {
+					pattern = pattern.substring(0, pattern.length() - 1);
+				}
+				// A '/' anywhere but a (now removed) trailing position anchors the
+				// pattern to the repository root; otherwise it matches at any depth.
+				boolean anchored = pattern.contains("/");
+				if (pattern.startsWith("/")) {
+					pattern = pattern.substring(1);
+				}
+				String rootPattern = anchored ? pattern : "**/" + pattern;
+				if (directoryOnly) {
+					noHttp.getSource().exclude(rootPattern + "/**");
+				}
+				else {
+					// The pattern may match either a file or a directory, so exclude both.
+					noHttp.getSource().exclude(rootPattern, rootPattern + "/**");
+				}
+			}
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException("Failed to read .gitignore for nohttp exclusions", ex);
+		}
 	}
 
 }
