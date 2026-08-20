@@ -188,6 +188,9 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 			if (this.maxPartSize == -1) {
 				maxSize = this.maxInMemorySize;
 			}
+			else if (this.maxInMemorySize == -1) {
+				maxSize = (int) Math.min(Integer.MAX_VALUE, this.maxPartSize);
+			}
 			else {
 				// maxInMemorySize is an int, so we can safely cast the long result of Math.min
 				maxSize = (int) Math.min(this.maxInMemorySize, this.maxPartSize);

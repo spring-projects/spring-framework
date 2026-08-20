@@ -66,6 +66,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.view.FragmentsRendering;
+import org.springframework.web.util.SseUtils;
 
 /**
  * Handler for return values of type:
@@ -476,8 +477,9 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		public byte[] getFragmentContent() {
 			this.writer.flush();
 			String content = this.outputStream.toString(this.charset);
-			content = content.replace("\n", "\ndata:");
-			return content.getBytes(this.charset);
+			StringBuilder fragment = new StringBuilder();
+			SseUtils.appendFieldValue("data", content, fragment);
+			return fragment.toString().getBytes(this.charset);
 		}
 	}
 

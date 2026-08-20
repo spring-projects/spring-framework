@@ -308,6 +308,9 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 				throws IOException {
 
 			String location = trimTrailingSlash(request.getRequestURI());
+			if (location.length() > 2 && location.startsWith("//")) {
+				location = (location.charAt(2) != '/' ? location.substring(1) : location);
+			}
 			if (StringUtils.hasText(request.getQueryString())) {
 				location += "?" + request.getQueryString();
 			}

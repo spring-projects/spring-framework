@@ -212,6 +212,47 @@ class SseServerResponseTests {
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 
+	@Test
+	void sendStringWithCarriageReturn() throws Exception {
+		String body = "line1\rline2\r\nline3";
+		ServerResponse response = ServerResponse.sse(sse -> {
+			try {
+				sse.send(body);
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
+		});
+
+		ServerResponse.Context context = Collections::emptyList;
+
+		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
+		assertThat(mav).isNull();
+
+		String expected = "data:line1\ndata:line2\ndata:line3\n\n";
+		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
+	}
+
+	@Test
+	void commentWithCarriageReturn() throws Exception {
+		ServerResponse response = ServerResponse.sse(sse -> {
+			try {
+				sse.comment("line1\rline2").send();
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
+		});
+
+		ServerResponse.Context context = Collections::emptyList;
+
+		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
+		assertThat(mav).isNull();
+
+		String expected = ":line1\n:line2\n\n";
+		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
+	}
+
 	@Test // gh-34608
 	void sendHeartbeat() throws Exception {
 		ServerResponse response = ServerResponse.sse(sse -> {

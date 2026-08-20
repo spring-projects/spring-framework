@@ -145,12 +145,16 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		XmlEventDecoder.ReceivedByteTracker byteTracker =
+				new XmlEventDecoder.ReceivedByteTracker(this.maxInMemorySize);
+
 		Flux<XMLEvent> xmlEventFlux = this.xmlEventDecoder.decode(
-				inputStream, ResolvableType.forClass(XMLEvent.class), mimeType, hints);
+				inputStream, ResolvableType.forClass(XMLEvent.class), mimeType,
+				Hints.merge(hints, XmlEventDecoder.BYTE_TRACKER_HINT, byteTracker));
 
 		Class<?> outputClass = elementType.toClass();
 		Set<QName> typeNames = Jaxb2Helper.toQNames(outputClass);
-		Flux<List<XMLEvent>> splitEvents = Jaxb2Helper.split(xmlEventFlux, typeNames);
+		Flux<List<XMLEvent>> splitEvents = Jaxb2Helper.split(xmlEventFlux, typeNames, byteTracker);
 
 		return splitEvents.map(events -> {
 			Object value = unmarshal(events, outputClass);

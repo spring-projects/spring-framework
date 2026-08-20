@@ -185,4 +185,26 @@ public interface EvaluationContext {
 		return true;
 	}
 
+	/**
+	 * Determine if compilation is supported within expressions evaluated by this evaluation
+	 * context.
+	 * <p>This flag is orthogonal to whether compilation has been enabled via
+	 * {@link org.springframework.expression.spel.SpelParserConfiguration} or the
+	 * {@value org.springframework.expression.spel.SpelParserConfiguration#SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME}
+	 * system property. Both must permit compilation for a given expression to be compiled.
+	 * <p>If this method returns {@code false}, the SpEL compiler will not compile
+	 * expressions evaluated within this context, regardless of the compiler mode
+	 * configured in the associated {@code SpelParserConfiguration} or system property.
+	 * Furthermore, if a compiled form of the expression already exists, it will not be
+	 * used; instead, interpreted evaluation will be performed.
+	 * <p>By default, this method returns {@code true}. Concrete implementations may override
+	 * this <em>default</em> method to indicate that compilation is not supported.
+	 * @return {@code true} if compilation is supported; {@code false} otherwise
+	 * @since 7.0.9
+	 * @see org.springframework.expression.spel.support.SimpleEvaluationContext.Builder#withCompilationSupported()
+	 */
+	default boolean isCompilationSupported() {
+		return true;
+	}
+
 }

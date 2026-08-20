@@ -17,12 +17,14 @@
 package org.springframework.web.filter.reactive;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -59,20 +61,23 @@ class UrlHandlerFilterTests {
 	}
 
 	@Test
-	void redirect() {
-		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
-		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").redirect(status).build();
+	void redirect() throws URISyntaxException {
+		testRedirect("/**", new URI(null, null, "/path/123/", "foo=bar", null), "/path/123?foo=bar");
+		// no way to create java.net.URI with leading slashes
+	}
 
-		String path = "/path/123";
-		String queryString = "foo=bar";
-		MockServerHttpRequest original = MockServerHttpRequest.get(path + "/?" + queryString).build();
-		ServerWebExchange exchange = MockServerWebExchange.from(original);
+	private static void testRedirect(String pattern, URI uri, String location) {
+		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status).build();
+
+		MockServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, uri).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertThatThrownBy(() -> invokeFilter(filter, exchange))
 				.hasMessageContaining("No argument value was captured");
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(status);
-		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(URI.create(path + "?" + queryString));
+		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(URI.create(location));
 	}
 
 	@Test

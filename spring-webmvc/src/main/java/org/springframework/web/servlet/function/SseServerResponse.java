@@ -42,6 +42,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.SseUtils;
 
 /**
  * Implementation of {@link ServerResponse} for sending
@@ -149,33 +150,35 @@ final class SseServerResponse extends AbstractServerResponse {
 		@Override
 		public SseBuilder id(String id) {
 			Assert.hasLength(id, "Id must not be empty");
-			return field("id", id);
+			SseUtils.assertNoLineSeparator(id);
+			this.builder.append("id:").append(id).append('\n');
+			return this;
 		}
 
 		@Override
 		public SseBuilder event(String eventName) {
 			Assert.hasLength(eventName, "Name must not be empty");
-			return field("event", eventName);
+			SseUtils.assertNoLineSeparator(eventName);
+			this.builder.append("event:").append(eventName).append('\n');
+			return this;
 		}
 
 		@Override
 		public SseBuilder retry(Duration duration) {
 			Assert.notNull(duration, "Duration must not be null");
-			String millis = Long.toString(duration.toMillis());
-			return field("retry", millis);
+			this.builder.append("retry:").append(duration.toMillis()).append('\n');
+			return this;
 		}
 
 		@Override
 		public SseBuilder comment(String comment) {
-			String[] lines = comment.split("\n");
-			for (String line : lines) {
-				field("", line);
-			}
-			return this;
+			return field("", comment);
 		}
 
 		private SseBuilder field(String name, String value) {
-			this.builder.append(name).append(':').append(value).append('\n');
+			this.builder.append(name).append(':');
+			SseUtils.appendFieldValue(name, value, this.builder);
+			this.builder.append('\n');
 			return this;
 		}
 
@@ -191,10 +194,7 @@ final class SseServerResponse extends AbstractServerResponse {
 		}
 
 		private void writeString(String string) throws IOException {
-			String[] lines = string.split("\n");
-			for (String line : lines) {
-				field("data", line);
-			}
+			field("data", string);
 			this.send();
 		}
 
