@@ -52,6 +52,9 @@ atlassian-ide-plugin.xml
 # VS Code
 .vscode/
 
+# Claude artifacts
+.claude/*
+
 cached-antora-playbook.yml
 
 node_modules

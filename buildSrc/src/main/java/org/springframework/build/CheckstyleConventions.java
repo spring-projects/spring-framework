@@ -48,7 +48,8 @@ public class CheckstyleConventions {
 				configureNoHttpPlugin(project);
 			}
 			project.getPlugins().apply(CheckstylePlugin.class);
-			project.getTasks().withType(Checkstyle.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
+			project.getTasks().withType(Checkstyle.class).forEach(checkstyle -> checkstyle.getMaxHeapSize()
+					.set("checkstyleNohttp".equals(checkstyle.getName()) ? "1536m" : "1g"));
 			CheckstyleExtension checkstyle = project.getExtensions().getByType(CheckstyleExtension.class);
 			checkstyle.setToolVersion("13.10.0");
 			checkstyle.getConfigDirectory().set(project.getRootProject().file("src/checkstyle"));
