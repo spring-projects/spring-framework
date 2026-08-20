@@ -150,10 +150,12 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 
 	private final boolean assignmentEnabled;
 
+	private final boolean compilationSupported;
+
 
 	private SimpleEvaluationContext(List<PropertyAccessor> propertyAccessors, List<IndexAccessor> indexAccessors,
 			List<MethodResolver> resolvers, @Nullable TypeConverter converter, @Nullable TypedValue rootObject,
-			boolean assignmentEnabled) {
+			boolean assignmentEnabled, boolean compilationSupported) {
 
 		this.propertyAccessors = propertyAccessors;
 		this.indexAccessors = indexAccessors;
@@ -161,6 +163,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 		this.typeConverter = (converter != null ? converter : new StandardTypeConverter());
 		this.rootObject = (rootObject != null ? rootObject : TypedValue.NULL);
 		this.assignmentEnabled = assignmentEnabled;
+		this.compilationSupported = compilationSupported;
 	}
 
 
@@ -303,6 +306,19 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	}
 
 	/**
+	 * Determine if compilation is supported within expressions evaluated by this evaluation
+	 * context.
+	 * <p>By default, compilation is not supported in {@code SimpleEvaluationContext}.
+	 * @return {@code true} if compilation is supported; {@code false} otherwise
+	 * @since 7.0.9
+	 * @see Builder#withCompilationSupported()
+	 */
+	@Override
+	public boolean isCompilationSupported() {
+		return this.compilationSupported;
+	}
+
+	/**
 	 * Create a {@code SimpleEvaluationContext} for the specified {@link PropertyAccessor}
 	 * delegates: typically a custom {@code PropertyAccessor} specific to a use case &mdash;
 	 * for example, for attribute resolution in a custom data structure &mdash; potentially
@@ -375,6 +391,8 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 
 		private boolean assignmentEnabled = true;
 
+		private boolean compilationSupported = false;
+
 
 		private Builder(PropertyAccessor... accessors) {
 			this.propertyAccessors = Arrays.asList(accessors);
@@ -388,6 +406,22 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 		 */
 		public Builder withAssignmentDisabled() {
 			this.assignmentEnabled = false;
+			return this;
+		}
+
+		/**
+		 * Indicate that compilation is supported within expressions evaluated by this
+		 * evaluation context.
+		 * <p>By default, compilation is not supported in {@code SimpleEvaluationContext}.
+		 * Call this method to opt in to compilation &mdash; for example, when evaluating
+		 * trusted expressions where performance is critical.
+		 * <p><strong>WARNING</strong>: Opting in to compilation for expressions from
+		 * untrusted sources removes the safety guards supported in interpreted mode.
+		 * @since 7.0.9
+		 * @see SimpleEvaluationContext#isCompilationSupported()
+		 */
+		public Builder withCompilationSupported() {
+			this.compilationSupported = true;
 			return this;
 		}
 
@@ -480,7 +514,8 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 
 		public SimpleEvaluationContext build() {
 			return new SimpleEvaluationContext(this.propertyAccessors, this.indexAccessors,
-					this.resolvers, this.typeConverter, this.rootObject, this.assignmentEnabled);
+					this.resolvers, this.typeConverter, this.rootObject,
+					this.assignmentEnabled, this.compilationSupported);
 		}
 
 	}

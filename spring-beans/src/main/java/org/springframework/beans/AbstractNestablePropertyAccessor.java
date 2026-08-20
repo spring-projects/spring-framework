@@ -649,6 +649,11 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					else if (value instanceof List list) {
 						int index = Integer.parseInt(key);
 						growCollectionIfNecessary(list, index, indexedPropertyName.toString(), ph, i + 1);
+						if (index < 0 || index >= list.size()) {
+							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+									"Cannot get element with index " + index + " from List of size " +
+									list.size() + ", accessed using property path '" + propertyName + "'");
+						}
 						value = list.get(index);
 					}
 					else if (value instanceof Map map) {

@@ -22,8 +22,10 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -34,6 +36,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -73,6 +76,24 @@ class UrlFilenameViewControllerTests {
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
 		assertThat(mv.getModel()).isEmpty();
+	}
+
+	@PathPatternsParameterizedTest
+	void withRedirectPrefix(Function<String, MockHttpServletRequest> requestFactory) {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/redirect:index");
+		assertThatExceptionOfType(ResponseStatusException.class)
+				.isThrownBy(() -> controller.handleRequest(request, new MockHttpServletResponse()))
+				.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+	}
+
+	@PathPatternsParameterizedTest
+	void withForwardPrefix(Function<String, MockHttpServletRequest> requestFactory) {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/forward:index");
+		assertThatExceptionOfType(ResponseStatusException.class)
+				.isThrownBy(() -> controller.handleRequest(request, new MockHttpServletResponse()))
+				.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
 	}
 
 	@PathPatternsParameterizedTest

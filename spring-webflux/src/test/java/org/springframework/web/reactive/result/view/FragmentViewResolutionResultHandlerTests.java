@@ -120,6 +120,21 @@ class FragmentViewResolutionResultHandlerTests {
 	}
 
 	@Test
+	void escapeViewFragment() {
+		Fragment fragment = Fragment.create("fragment1", Map.of("foo", "Foo\n and Bar"));
+		testSse(Flux.just(fragment),
+				on(Handler.class).resolveReturnType(Flux.class, Fragment.class),
+				"""
+				event:fragment1
+				data:<p>
+				data:	Hello Foo
+				data: and Bar
+				data:</p>
+
+				""");
+	}
+
+	@Test
 	void renderServerSentEventFragmentStream() {
 
 		ServerSentEvent<Fragment> event1 = ServerSentEvent.builder(fragment1).id("id1").event("event1").build();

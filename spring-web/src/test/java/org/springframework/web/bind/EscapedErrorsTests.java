@@ -94,4 +94,25 @@ class EscapedErrorsTests {
 		assertThat(ageError2.getCode()).as("Age error 2 code not escaped").isEqualTo("AGE_NOT_32 <tag>");
 	}
 
+	@Test
+	void noArgFieldErrorAccessorsEscapeRejectedValueAndMessage() {
+		TestBean tb = new TestBean();
+		tb.setName("<script>alert(1)</script>");
+
+		Errors errors = new EscapedErrors(new BindException(tb, "tb"));
+		errors.rejectValue("name", "NAME_INVALID", null, "message: <tag>");
+
+		FieldError fieldError = errors.getFieldError();
+		assertThat(fieldError.getDefaultMessage()).as("No-arg getFieldError() message escaped")
+				.isEqualTo("message: &lt;tag&gt;");
+		assertThat(fieldError.getRejectedValue()).as("No-arg getFieldError() rejected value escaped")
+				.isEqualTo("&lt;script&gt;alert(1)&lt;/script&gt;");
+
+		FieldError fieldErrorInList = errors.getFieldErrors().get(0);
+		assertThat(fieldErrorInList.getDefaultMessage()).as("No-arg getFieldErrors() message escaped")
+				.isEqualTo("message: &lt;tag&gt;");
+		assertThat(fieldErrorInList.getRejectedValue()).as("No-arg getFieldErrors() rejected value escaped")
+				.isEqualTo("&lt;script&gt;alert(1)&lt;/script&gt;");
+	}
+
 }

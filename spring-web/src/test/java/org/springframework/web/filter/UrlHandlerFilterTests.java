@@ -74,11 +74,16 @@ class UrlHandlerFilterTests {
 
 	@Test
 	void redirect() throws Exception {
-		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
-		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").redirect(status).build();
+		testRedirect("/**", "/path/123/", "/path/123");
+		testRedirect("/**", "//path/123/", "/path/123");
+		testRedirect("/**", "///path/123/", "///path/123");
+	}
 
-		String path = "/path/123";
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", path + "/");
+	private void testRedirect(String pattern, String path, String location) throws Exception {
+		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status).build();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		MockFilterChain chain = new MockFilterChain();
 
@@ -89,7 +94,7 @@ class UrlHandlerFilterTests {
 
 		assertThat(chain.getRequest()).isNull();
 		assertThat(response.getStatus()).isEqualTo(status.value());
-		assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo(path + "?" + queryString);
+		assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo(location + "?" + queryString);
 		assertThat(response.isCommitted()).isTrue();
 	}
 

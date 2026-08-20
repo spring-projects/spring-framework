@@ -38,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -1475,9 +1476,14 @@ public abstract class RouterFunctions {
 				addAttributes(exchange, request);
 				return this.routerFunction.route(request)
 						.switchIfEmpty(createNotFoundError())
-						.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
-						.flatMap(response -> wrapException(() -> response.writeTo(exchange,
-								new HandlerStrategiesResponseContext(this.strategies))));
+						.flatMap(handlerFunction -> wrapException(() -> {
+							if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+								return handlePreFlightRequest();
+							}
+							return handlerFunction.handle(request);
+						}))
+						.flatMap(response -> wrapException(() ->
+								response.writeTo(exchange, new HandlerStrategiesResponseContext(this.strategies))));
 			});
 		}
 
@@ -1498,5 +1504,11 @@ public abstract class RouterFunctions {
 				return Mono.error(ex);
 			}
 		}
+
+		@SuppressWarnings("unchecked")
+		private static <T extends ServerResponse> Mono<T> handlePreFlightRequest() {
+			return (Mono<T>) ServerResponse.status(HttpStatus.FORBIDDEN).build();
+		}
 	}
+
 }
