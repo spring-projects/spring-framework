@@ -279,8 +279,8 @@ xref:web/webflux-webclient.adoc[WebClient] and `WebTestClient` have
 the same API up to the point of the call to `exchange()`. After that, `WebTestClient`
 provides two alternative ways to verify the response:
 
-1. xref:webtestclient-workflow[Built-in Assertions] extend the request workflow with a chain of expectations
-2. xref:webtestclient-assertj[AssertJ Integration] to verify the response via `assertThat()` statements
+1. <<webtestclient-workflow,Built-in Assertions>> extend the request workflow with a chain of expectations
+2. <<webtestclient-assertj,AssertJ Integration>> to verify the response via `assertThat()` statements
 
 TIP: See the xref:web/webflux-webclient/client-body.adoc[WebClient] documentation for
 examples on how to prepare a request with any content including form data,
@@ -356,7 +356,7 @@ You can then choose to decode the response body through one of the following:
 
 * `expectBody(Class<T>)`: Decode to single object.
 * `expectBodyList(Class<T>)`: Decode and collect objects to `List<T>`.
-* `expectBody()`: Decode to `byte[]` for xref:testing/webtestclient.adoc#webtestclient-json[JSON Content] or an empty body.
+* `expectBody()`: Decode to `byte[]` for <<webtestclient-json,JSON Content>> or an empty body.
 
 And perform assertions on the resulting higher level Object(s):
 

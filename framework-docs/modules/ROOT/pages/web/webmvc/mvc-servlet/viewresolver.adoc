@@ -41,7 +41,7 @@ The following table provides more details on the `ViewResolver` hierarchy:
 
 | `ContentNegotiatingViewResolver`
 | Implementation of the `ViewResolver` interface that resolves a view based on the
-  request file name or `Accept` header. See xref:web/webmvc/mvc-servlet/viewresolver.adoc#mvc-multiple-representations[Content Negotiation].
+  request file name or `Accept` header. See <<mvc-multiple-representations,Content Negotiation>>.
 
 | `BeanNameViewResolver`
 | Implementation of the `ViewResolver` interface that interprets a view name as a

@@ -167,7 +167,7 @@ unsure what benefits to look for, start by learning about how non-blocking I/O w
 Spring WebFlux is supported on Tomcat, Jetty, Servlet containers, as well as on
 non-Servlet runtimes such as Netty. All servers are adapted to a low-level,
 xref:web/webflux/reactive-spring.adoc#webflux-httphandler[common API] so that higher-level
-xref:web/webflux/new-framework.adoc#webflux-programming-models[programming models] can be supported across servers.
+<<webflux-programming-models,programming models>> can be supported across servers.
 
 Spring WebFlux does not have built-in support to start or stop a server. However, it is
 easy to xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[assemble] an application from Spring configuration and
@@ -269,7 +269,7 @@ of their own.
 === Configuring
 
 The Spring Framework does not provide support for starting and stopping
-xref:web/webflux/new-framework.adoc#webflux-server-choice[servers]. To configure the threading model for a server,
+<<webflux-server-choice,servers>>. To configure the threading model for a server,
 you need to use server-specific configuration APIs, or, if you use Spring Boot,
 check the Spring Boot configuration options for each server. You can
 xref:web/webflux-webclient/client-builder.adoc[configure] the `WebClient` directly.

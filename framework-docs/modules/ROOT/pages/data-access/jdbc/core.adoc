@@ -4,14 +4,14 @@
 This section covers how to use the JDBC core classes to control basic JDBC processing,
 including error handling. It includes the following topics:
 
-* xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate[Using `JdbcTemplate`]
-* xref:data-access/jdbc/core.adoc#jdbc-NamedParameterJdbcTemplate[Using `NamedParameterJdbcTemplate`]
-* xref:data-access/jdbc/core.adoc#jdbc-JdbcClient[Unified JDBC Query/Update Operations: `JdbcClient`]
-* xref:data-access/jdbc/core.adoc#jdbc-SQLExceptionTranslator[Using `SQLExceptionTranslator`]
-* xref:data-access/jdbc/core.adoc#jdbc-statements-executing[Running Statements]
-* xref:data-access/jdbc/core.adoc#jdbc-statements-querying[Running Queries]
-* xref:data-access/jdbc/core.adoc#jdbc-updates[Updating the Database]
-* xref:data-access/jdbc/core.adoc#jdbc-auto-generated-keys[Retrieving Auto-generated Keys]
+* <<jdbc-JdbcTemplate,Using `JdbcTemplate`>>
+* <<jdbc-NamedParameterJdbcTemplate,Using `NamedParameterJdbcTemplate`>>
+* <<jdbc-JdbcClient,Unified JDBC Query/Update Operations: `JdbcClient`>>
+* <<jdbc-SQLExceptionTranslator,Using `SQLExceptionTranslator`>>
+* <<jdbc-statements-executing,Running Statements>>
+* <<jdbc-statements-querying,Running Queries>>
+* <<jdbc-updates,Updating the Database>>
+* <<jdbc-auto-generated-keys,Retrieving Auto-generated Keys>>
 
 
 [[jdbc-JdbcTemplate]]
@@ -349,7 +349,7 @@ The `JdbcTemplate` is stateful, in that it maintains a reference to a `DataSourc
 this state is not conversational state.
 
 A common practice when using the `JdbcTemplate` class (and the associated
-xref:data-access/jdbc/core.adoc#jdbc-NamedParameterJdbcTemplate[`NamedParameterJdbcTemplate`] class) is to
+<<jdbc-NamedParameterJdbcTemplate,`NamedParameterJdbcTemplate`>> class) is to
 configure a `DataSource` in your Spring configuration file and then dependency-inject
 that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is created in
 the setter for the `DataSource` or in the constructor. This leads to DAOs that resemble the following:
@@ -574,7 +574,7 @@ functionality that is present only in the `JdbcTemplate` class, you can use the
 `getJdbcOperations()` method to access the wrapped `JdbcTemplate` through the
 `JdbcOperations` interface.
 
-See also xref:data-access/jdbc/core.adoc#jdbc-jdbctemplate-idioms[`JdbcTemplate` Best Practices]
+See also <<jdbc-jdbctemplate-idioms,`JdbcTemplate` Best Practices>>
 for guidelines on using the `NamedParameterJdbcTemplate` class in the context of an application.
 
 

@@ -193,7 +193,7 @@ XML configuration file represents a logical layer or module in your architecture
 
 You can use the `ClassPathXmlApplicationContext` constructor to load bean definitions from
 XML fragments. This constructor takes multiple `Resource` locations, as was shown in the
-xref:core/beans/basics.adoc#beans-factory-xml[previous section]. Alternatively,
+<<beans-factory-xml,previous section>>. Alternatively,
 use one or more occurrences of the `<import/>` element to load bean definitions from
 another file or files. The following example shows how to do so:
 

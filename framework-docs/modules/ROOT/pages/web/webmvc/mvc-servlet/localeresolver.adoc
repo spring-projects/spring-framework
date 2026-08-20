@@ -19,11 +19,11 @@ Locale resolvers and interceptors are defined in the
 context in the normal way. The following selection of locale resolvers is included in
 Spring.
 
-* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-timezone[Time Zone]
-* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-localeresolver-acceptheader[Header Resolver]
-* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-localeresolver-cookie[Cookie Resolver]
-* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-localeresolver-session[Session Resolver]
-* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-localeresolver-interceptor[Locale Interceptor]
+* <<mvc-timezone,Time Zone>>
+* <<mvc-localeresolver-acceptheader,Header Resolver>>
+* <<mvc-localeresolver-cookie,Cookie Resolver>>
+* <<mvc-localeresolver-session,Session Resolver>>
+* <<mvc-localeresolver-interceptor,Locale Interceptor>>
 
 
 [[mvc-timezone]]

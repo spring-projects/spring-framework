@@ -39,9 +39,9 @@ for further details on all supported options.
 This section covers how to select one of the three embedded databases that Spring
 supports. It includes the following topics:
 
-* xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-using-HSQL[Using HSQL]
-* xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-using-H2[Using H2]
-* xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-using-Derby[Using Derby]
+* <<jdbc-embedded-database-using-HSQL,Using HSQL>>
+* <<jdbc-embedded-database-using-H2,Using H2>>
+* <<jdbc-embedded-database-using-Derby,Using Derby>>
 
 [[jdbc-embedded-database-using-HSQL]]
 === Using HSQL
@@ -143,7 +143,7 @@ can be useful for one-offs when the embedded database does not need to be reused
 classes. However, if you wish to create an embedded database that is shared within a test suite,
 consider using the xref:testing/testcontext-framework.adoc[Spring TestContext Framework] and
 configuring the embedded database as a bean in the Spring `ApplicationContext` as described
-in xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database[Creating an Embedded Database].
+in <<jdbc-embedded-database,Creating an Embedded Database>>.
 The following listing shows the test template:
 
 [tabs]

@@ -25,7 +25,7 @@ There are also HTTP method specific shortcut variants of `@RequestMapping`:
 * `@PatchMapping`
 
 The shortcuts are
-xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-composed[Custom Annotations]
+<<mvc-ann-requestmapping-composed,Custom Annotations>>
 that are provided because, arguably, most controller methods should be mapped to a specific
 HTTP method versus using `@RequestMapping`, which, by default, matches to all HTTP methods.
 A `@RequestMapping` is still needed at the class level to express shared mappings.
@@ -405,10 +405,9 @@ Kotlin::
 <1> Testing whether `myHeader` equals `myValue`.
 ======
 
-TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is better to use
-xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-consumes[consumes]
-and xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-produces[produces]
-instead.
+TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is
+better to use <<mvc-ann-requestmapping-consumes,consumes>> and
+<<mvc-ann-requestmapping-produces,produces>> instead.
 
 
 [[mvc-ann-requestmapping-version]]
@@ -521,7 +520,7 @@ is not necessary in the common case.
 
 [[mvc-ann-requestmapping-composed]]
 == Custom Annotations
-[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-head-options[See equivalent in the Reactive stack]#
+[.small]#<<mvc-ann-requestmapping-head-options,See equivalent in the Reactive stack>>#
 
 Spring MVC supports the use of xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[composed annotations]
 for request mapping. Those are annotations that are themselves meta-annotated with
@@ -648,4 +647,4 @@ xref:web/webmvc/mvc-controller/ann-methods/arguments.adoc[@RequestMapping].
 `@HttpExchange` also supports a `headers()` parameter which accepts `"name=value"`-like
 pairs like in `@RequestMapping(headers={})` on the client side. On the server side,
 this extends to the full syntax that
-xref:#mvc-ann-requestmapping-params-and-headers[`@RequestMapping`] supports.
+<<mvc-ann-requestmapping-params-and-headers,`@RequestMapping`>> supports.

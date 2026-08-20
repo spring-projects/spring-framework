@@ -29,9 +29,9 @@ for testing in MockMvc and `WebTestClient`.
 This is the central strategy for API versioning that holds all configured preferences
 related to versioning. It does the following:
 
-- Resolves versions from the requests via xref:#mvc-versioning-resolver[ApiVersionResolver]
-- Parses raw version values into `Comparable<?>` with an xref:#mvc-versioning-parser[ApiVersionParser]
-- xref:#mvc-versioning-validation[Validates] request versions
+- Resolves versions from the requests via <<mvc-versioning-resolver,ApiVersionResolver>>
+- Parses raw version values into `Comparable<?>` with an <<mvc-versioning-parser,ApiVersionParser>>
+- <<mvc-versioning-validation,Validates>> request versions
 - Sends deprecation hints in the responses
 
 `ApiVersionStrategy` helps to map requests to `@RequestMapping` controller methods,

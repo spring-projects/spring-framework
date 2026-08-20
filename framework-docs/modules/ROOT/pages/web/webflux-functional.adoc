@@ -110,7 +110,7 @@ through one of the built-in xref:web/webflux/reactive-spring.adoc#webflux-httpha
 * `RouterFunctions.toHttpHandler(RouterFunction)`
 * `RouterFunctions.toHttpHandler(RouterFunction, HandlerStrategies)`
 
-Most applications can run through the WebFlux Java configuration, see xref:web/webflux-functional.adoc#webflux-fn-running[Running a Server].
+Most applications can run through the WebFlux Java configuration, see <<webflux-fn-running,Running a Server>>.
 
 
 [[webflux-fn-handler-functions]]
@@ -369,7 +369,7 @@ parameter, though which additional constraints can be expressed.
 
 You can write your own `RequestPredicate`, but the `RequestPredicates` utility class
 offers built-in options for common needs for matching based on the HTTP method, request
-path, headers, xref:#api-version[API version], and more.
+path, headers, <<api-version,API version>>, and more.
 
 The following example uses an `Accept` header, request predicate:
 
@@ -496,7 +496,7 @@ Router functions support matching by API version.
 
 First, enable API versioning in the
 xref:web/webflux/config.adoc#webflux-config-api-version[WebFlux Config], and then you can
-use the `version` xref:#webflux-fn-predicates[predicate] as follows:
+use the `version` <<webflux-fn-predicates,predicate>> as follows:
 
 [tabs]
 ======

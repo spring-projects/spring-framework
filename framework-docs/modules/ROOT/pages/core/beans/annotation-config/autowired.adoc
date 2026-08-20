@@ -43,7 +43,7 @@ An `@Autowired` annotation on such a constructor is not necessary if the target 
 defines only one constructor. However, if several constructors are available and there is
 no primary or default constructor, at least one of the constructors must be annotated
 with `@Autowired` in order to instruct the container which one to use. See the discussion
-on xref:core/beans/annotation-config/autowired.adoc#beans-autowired-annotation-constructor-resolution[constructor resolution]
+on <<beans-autowired-annotation-constructor-resolution,constructor resolution>>
 for details.
 ====
 

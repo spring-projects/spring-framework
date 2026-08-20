@@ -3,8 +3,8 @@
 
 The {spring-framework-api}/core/env/Environment.html[`Environment`] interface
 is an abstraction integrated in the container that models two key
-aspects of the application environment: xref:core/beans/environment.adoc#beans-definition-profiles[profiles]
-and xref:core/beans/environment.adoc#beans-property-source-abstraction[properties].
+aspects of the application environment: <<beans-definition-profiles,profiles>>
+and <<beans-property-source-abstraction,properties>>.
 
 A profile is a named, logical group of bean definitions to be registered with the
 container only if the given profile is active. Beans may be assigned to a profile
@@ -473,7 +473,7 @@ Kotlin::
 In addition, you can also declaratively activate profiles through the
 `spring.profiles.active` property, which may be specified through system environment
 variables, JVM system properties, servlet context parameters in `web.xml`, or even as an
-entry in JNDI (see xref:core/beans/environment.adoc#beans-property-source-abstraction[`PropertySource` Abstraction]). In integration tests, active
+entry in JNDI (see <<beans-property-source-abstraction,`PropertySource` Abstraction>>). In integration tests, active
 profiles can be declared by using the `@ActiveProfiles` annotation in the `spring-test`
 module (see xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[context configuration with environment profiles]
 ).
@@ -553,7 +553,7 @@ Kotlin::
 ----
 ======
 
-If xref:#beans-definition-profiles-enable[no profile is active], the `dataSource` is
+If <<beans-definition-profiles-enable,no profile is active>>, the `dataSource` is
 created. You can see this as a way to provide a default definition for one or more
 beans. If any profile is enabled, the default profile does not apply.
 

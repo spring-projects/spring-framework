@@ -195,7 +195,7 @@ Kotlin::
 ----
 ======
 
-As explained in xref:testing/testcontext-framework/tx.adoc#testcontext-tx-rollback-and-commit-behavior[Transaction Rollback and Commit Behavior],
+As explained in <<testcontext-tx-rollback-and-commit-behavior,Transaction Rollback and Commit Behavior>>,
 there is no need to clean up the database after the `createUser()` method runs,
 since any changes made to the database are automatically rolled back by the
 `TransactionalTestExecutionListener`.
@@ -598,7 +598,7 @@ Kotlin::
 .Testing ORM entity lifecycle callbacks
 [NOTE]
 =====
-Similar to the note about avoiding xref:testing/testcontext-framework/tx.adoc#testcontext-tx-false-positives[false positives]
+Similar to the note about avoiding <<testcontext-tx-false-positives,false positives>>
 when testing ORM code, if your application makes use of entity lifecycle callbacks (also
 known as entity listeners), make sure to flush the underlying unit of work within test
 methods that run that code. Failing to _flush_ or _clear_ the underlying unit of work can

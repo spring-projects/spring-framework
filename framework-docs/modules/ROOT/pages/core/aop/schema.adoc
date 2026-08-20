@@ -204,7 +204,7 @@ Before advice runs before a matched method execution. It is declared inside an
 ----
 
 In the example above, `dataAccessOperation` is the `id` of a _named pointcut_ defined at
-the top (`<aop:config>`) level (see xref:core/aop/schema.adoc#aop-schema-pointcuts[Declaring a Pointcut]).
+the top (`<aop:config>`) level (see <<aop-schema-pointcuts,Declaring a Pointcut>>).
 
 NOTE: As we noted in the discussion of the @AspectJ style, using _named pointcuts_ can
 significantly improve the readability of your code. See xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions] for

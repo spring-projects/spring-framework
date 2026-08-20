@@ -24,8 +24,8 @@ in a number of places:
 
 * {spring-framework-api}/web/servlet/mvc/WebContentInterceptor.html[`WebContentInterceptor`]
 * {spring-framework-api}/web/servlet/support/WebContentGenerator.html[`WebContentGenerator`]
-* xref:web/webmvc/mvc-caching.adoc#mvc-caching-etag-lastmodified[Controllers]
-* xref:web/webmvc/mvc-caching.adoc#mvc-caching-static-resources[Static Resources]
+* <<mvc-caching-etag-lastmodified,Controllers>>
+* <<mvc-caching-static-resources,Static Resources>>
 
 While {rfc-site}/rfc7234#section-5.2.2[RFC 7234] describes all possible
 directives for the `Cache-Control` response header, the `CacheControl` type takes a

@@ -19,7 +19,7 @@ You can use the `@Bean` annotation in a `@Configuration`-annotated or in a
 To declare a bean, you can annotate a method with the `@Bean` annotation. You use this
 method to register a bean definition within an `ApplicationContext` of the type specified
 by the method's return type. By default, the bean name is the same as the method name
-(unless a different xref:#beans-java-customizing-bean-naming[bean name generator] is
+(unless a different <<beans-java-customizing-bean-naming,bean name generator>> is
 configured). The following example shows a `@Bean` method declaration:
 
 [tabs]

@@ -5,10 +5,10 @@ The `spring-web` module contains the following foundational support for reactive
 applications:
 
 * For server request processing there are two levels of support.
-** xref:web/webflux/reactive-spring.adoc#webflux-httphandler[HttpHandler]: Basic contract for HTTP request handling with
+** <<webflux-httphandler,HttpHandler>>: Basic contract for HTTP request handling with
 non-blocking I/O and Reactive Streams back pressure, along with adapters for Reactor Netty,
 Tomcat, Jetty, and any Servlet container.
-** xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API]: Slightly higher level, general-purpose web API for
+** <<webflux-web-handler-api,`WebHandler` API>>: Slightly higher level, general-purpose web API for
 request handling, on top of which concrete programming models such as annotated
 controllers and functional endpoints are built.
 * For the client side, there is a basic `ClientHttpConnector` contract to perform HTTP
@@ -18,7 +18,7 @@ https://github.com/jetty-project/jetty-reactive-httpclient[Jetty HttpClient]
 and https://hc.apache.org/[Apache HttpComponents].
 The higher level xref:web/webflux-webclient.adoc[WebClient] used in applications
 builds on this basic contract.
-* For client and server, xref:web/webflux/reactive-spring.adoc#webflux-codecs[codecs] for serialization and
+* For client and server, <<webflux-codecs,codecs>> for serialization and
 deserialization of HTTP request and response content.
 
 
@@ -188,14 +188,14 @@ to adapt `HttpHandler` to a `Servlet` via `ServletHttpHandlerAdapter`.
 == `WebHandler` API
 
 The `org.springframework.web.server` package builds on the
-xref:web/webflux/reactive-spring.adoc#webflux-httphandler[`HttpHandler`] contract
+<<webflux-httphandler,`HttpHandler`>> contract
 to provide a general-purpose web API for processing requests through a chain of multiple
 {spring-framework-api}/web/server/WebExceptionHandler.html[`WebExceptionHandler`], multiple
 {spring-framework-api}/web/server/WebFilter.html[`WebFilter`], and a single
 {spring-framework-api}/web/server/WebHandler.html[`WebHandler`] component. The chain can
 be put together with `WebHttpHandlerBuilder` by simply pointing to a Spring
 `ApplicationContext` where components are
-xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[auto-detected], and/or by registering components
+<<webflux-web-handler-api-special-beans,auto-detected>>, and/or by registering components
 with the builder.
 
 While `HttpHandler` has a simple goal to abstract the use of different HTTP servers, the
@@ -223,13 +223,13 @@ Spring ApplicationContext, or that can be registered directly with it:
 | `WebExceptionHandler`
 | 0..N
 | Provide handling for exceptions from the chain of `WebFilter` instances and the target
-  `WebHandler`. For more details, see xref:web/webflux/reactive-spring.adoc#webflux-exception-handler[Exceptions].
+  `WebHandler`. For more details, see <<webflux-exception-handler,Exceptions>>.
 
 | <any>
 | `WebFilter`
 | 0..N
 | Apply interception style logic to before and after the rest of the filter chain and
-  the target `WebHandler`. For more details, see xref:web/webflux/reactive-spring.adoc#webflux-filters[Filters].
+  the target `WebHandler`. For more details, see <<webflux-filters,Filters>>.
 
 | `webHandler`
 | `WebHandler`
@@ -287,7 +287,7 @@ Kotlin::
 The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse form data
 (`application/x-www-form-urlencoded`) into a `MultiValueMap`. By default,
 `FormHttpMessageReader` is configured for use by the `ServerCodecConfigurer` bean
-(see the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[Web Handler API]).
+(see the <<webflux-web-handler-api,Web Handler API>>).
 
 
 [[webflux-multipart]]
@@ -321,7 +321,7 @@ dependencies.
 Alternatively, the `SynchronossPartHttpMessageReader` can be used, which is based on the
 https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] library.
 Both are configured through the `ServerCodecConfigurer` bean
-(see the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[Web Handler API]).
+(see the <<webflux-web-handler-api,Web Handler API>>).
 
 To parse multipart data in streaming fashion, you can use the `Flux<PartEvent>` returned from the
 `PartEventHttpMessageReader` instead of using `@RequestPart`, as that  implies `Map`-like access
@@ -342,7 +342,7 @@ include::partial$web/forwarded-headers.adoc[]
 from the standard `"Forwarded"` or `"X-Forwarded"` headers, and also removes those headers
 to eliminate further impact. If you declare it as a bean with the name
 `forwardedHeaderTransformer`, it will be
-xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[detected] and used.
+<<webflux-web-handler-api-special-beans,detected>> and used.
 
 [[webflux-forwarded-headers-security]]
 === Security Considerations
@@ -363,7 +363,7 @@ forwarded headers from the request without using them.
 == Filters
 [.small]#xref:web/webmvc/filters.adoc[See equivalent in the Servlet stack]#
 
-In the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API], you can use a `WebFilter` to apply interception-style
+In the <<webflux-web-handler-api,`WebHandler` API>>, you can use a `WebFilter` to apply interception-style
 logic before and after the rest of the processing chain of filters and the target
 `WebHandler`. When using the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config], registering a `WebFilter` is as simple
 as declaring it as a Spring bean and (optionally) expressing precedence by using `@Order` on
@@ -408,7 +408,7 @@ not map when trailing slash handling applies; use `@RequestMapping` (no path att
 == Exceptions
 [.small]#xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc#mvc-ann-customer-servlet-container-error-page[See equivalent in the Servlet stack]#
 
-In the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API], you can use a `WebExceptionHandler` to handle
+In the <<webflux-web-handler-api,`WebHandler` API>>, you can use a `WebExceptionHandler` to handle
 exceptions from the chain of `WebFilter` instances and the target `WebHandler`. When using the
 xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config], registering a `WebExceptionHandler` is as simple as declaring it as a
 Spring bean and (optionally) expressing precedence by using `@Order` on the bean declaration or
@@ -515,8 +515,8 @@ encode a `Mono<List<String>>`.
 On the server side where form content often needs to be accessed from multiple places,
 `ServerWebExchange` provides a dedicated `getFormData()` method that parses the content
 through `FormHttpMessageReader` and then caches the result for repeated access.
-See xref:web/webflux/reactive-spring.adoc#webflux-form-data[Form Data] in the
-xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] section.
+See <<webflux-form-data,Form Data>> in the
+<<webflux-web-handler-api,`WebHandler` API>> section.
 
 Once `getFormData()` is used, the original raw content can no longer be read from the
 request body. For this reason, applications are expected to go through `ServerWebExchange`
@@ -537,8 +537,8 @@ For more information about the `DefaultPartHttpMessageReader`, refer to the
 On the server side where multipart form content may need to be accessed from multiple
 places, `ServerWebExchange` provides a dedicated `getMultipartData()` method that parses
 the content through `MultipartHttpMessageReader` and then caches the result for repeated access.
-See xref:web/webflux/reactive-spring.adoc#webflux-multipart[Multipart Data] in the
-xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] section.
+See <<webflux-multipart,Multipart Data>> in the
+<<webflux-web-handler-api,`WebHandler` API>> section.
 
 Once `getMultipartData()` is used, the original raw content can no longer be read from the
 request body. For this reason applications have to consistently use `getMultipartData()`
@@ -590,7 +590,7 @@ set all codecs, see xref:web/webflux/config.adoc#webflux-config-message-codecs[H
 all codecs can be changed in
 xref:web/webflux-webclient/client-builder.adoc#webflux-client-builder-maxinmemorysize[WebClient.Builder].
 
-For xref:web/webflux/reactive-spring.adoc#webflux-codecs-multipart[Multipart parsing] the `maxInMemorySize` property limits
+For <<webflux-codecs-multipart,Multipart parsing>> the `maxInMemorySize` property limits
 the size of non-file parts. For file parts, it determines the threshold at which the part
 is written to disk. For file parts written to disk, there is an additional
 `maxDiskUsagePerPart` property to limit the amount of disk space per part. There is also
@@ -737,8 +737,8 @@ or specific behaviors that are not supported by the default codecs.
 
 Some configuration options expressed by developers are enforced on default codecs.
 Custom codecs might want to get a chance to align with those preferences,
-like xref:web/webflux/reactive-spring.adoc#webflux-codecs-limits[enforcing buffering limits]
-or xref:web/webflux/reactive-spring.adoc#webflux-logging-sensitive-data[logging sensitive data].
+like <<webflux-codecs-limits,enforcing buffering limits>>
+or <<webflux-logging-sensitive-data,logging sensitive data>>.
 
 The following example shows how to do so for client-side requests:
 

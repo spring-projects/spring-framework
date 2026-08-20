@@ -24,7 +24,7 @@ Applying such optimizations early implies the following restrictions:
 * As we cannot rely on the instance, make sure that the bean type is as precise as
 possible.
 
-TIP: See also the xref:core/aot.adoc#aot.bestpractices[] section.
+TIP: See also the <<aot.bestpractices>> section.
 
 When these restrictions are in place, it becomes possible to perform ahead-of-time processing at build time and generate additional assets.
 A Spring AOT processed application typically generates:

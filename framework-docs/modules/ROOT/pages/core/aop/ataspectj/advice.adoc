@@ -394,7 +394,7 @@ execution-only semantics. You only need to be aware of this difference if you co
 `@AspectJ` aspects written for Spring and use `proceed` with arguments with the AspectJ
 compiler and weaver. There is a way to write such aspects that is 100% compatible across
 both Spring AOP and AspectJ, and this is discussed in the
-xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-proceeding-with-the-call[following section on advice parameters].
+<<aop-ataspectj-advice-proceeding-with-the-call,following section on advice parameters>>.
 ====
 
 The value returned by the around advice is the return value seen by the caller of the
@@ -722,7 +722,7 @@ of determining parameter names, an exception will be thrown.
 
 `AspectJAnnotationParameterNameDiscoverer` :: Uses parameter names that have been explicitly
   specified by the user via the `argNames` attribute in the corresponding advice or
-  pointcut annotation. See xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params-names-explicit[Explicit Argument Names] for details.
+  pointcut annotation. See <<aop-ataspectj-advice-params-names-explicit,Explicit Argument Names>> for details.
 `KotlinReflectionParameterNameDiscoverer` :: Uses Kotlin reflection APIs to determine
   parameter names. This discoverer is only used if such APIs are present on the classpath.
 `StandardReflectionParameterNameDiscoverer` :: Uses the standard `java.lang.reflect.Parameter`
