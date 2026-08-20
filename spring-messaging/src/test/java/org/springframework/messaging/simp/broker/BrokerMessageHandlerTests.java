@@ -16,12 +16,15 @@
 
 package org.springframework.messaging.simp.broker;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -30,9 +33,13 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler}.
@@ -113,6 +120,22 @@ class BrokerMessageHandlerTests {
 	}
 
 	@Test
+	void publishBrokerAvailabilityEventsLogStringMessages() {
+		Log logger = mock();
+		when(logger.isInfoEnabled()).thenReturn(true);
+		this.handler.setLogger(logger);
+
+		this.handler.publishBrokerAvailableEvent();
+		this.handler.publishBrokerUnavailableEvent();
+
+		ArgumentCaptor<Object> messageCaptor = ArgumentCaptor.forClass(Object.class);
+		verify(logger, times(2)).info(messageCaptor.capture());
+		assertThat(messageCaptor.getAllValues()).containsExactly(
+				"BrokerAvailabilityEvent[available=true, " + this.handler + "]",
+				"BrokerAvailabilityEvent[available=false, " + this.handler + "]");
+	}
+
+	@Test
 	void checkDestination() {
 		TestBrokerMessageHandler theHandler = new TestBrokerMessageHandler("/topic");
 		theHandler.start();
@@ -166,6 +189,13 @@ class BrokerMessageHandlerTests {
 			super(mock(), mock(), mock(), Arrays.asList(destinationPrefixes));
 
 			setApplicationEventPublisher(this);
+		}
+
+		void setLogger(Log logger) {
+			Field field = ReflectionUtils.findField(AbstractBrokerMessageHandler.class, "logger");
+			assertThat(field).isNotNull();
+			ReflectionUtils.makeAccessible(field);
+			ReflectionUtils.setField(field, this, logger);
 		}
 
 		@Override

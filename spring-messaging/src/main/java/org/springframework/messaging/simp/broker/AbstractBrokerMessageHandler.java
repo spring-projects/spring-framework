@@ -334,7 +334,7 @@ public abstract class AbstractBrokerMessageHandler
 		boolean shouldPublish = this.brokerAvailable.compareAndSet(false, true);
 		if (this.eventPublisher != null && shouldPublish) {
 			if (logger.isInfoEnabled()) {
-				logger.info(this.availableEvent);
+				logger.info(this.availableEvent.toString());
 			}
 			this.eventPublisher.publishEvent(this.availableEvent);
 		}
@@ -344,7 +344,7 @@ public abstract class AbstractBrokerMessageHandler
 		boolean shouldPublish = this.brokerAvailable.compareAndSet(true, false);
 		if (this.eventPublisher != null && shouldPublish) {
 			if (logger.isInfoEnabled()) {
-				logger.info(this.notAvailableEvent);
+				logger.info(this.notAvailableEvent.toString());
 			}
 			this.eventPublisher.publishEvent(this.notAvailableEvent);
 		}
