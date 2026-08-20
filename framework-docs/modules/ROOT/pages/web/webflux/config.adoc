@@ -454,7 +454,7 @@ Kotlin::
 
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
 			val resolver: ViewResolver = ...
-			registry.viewResolver(resolver
+			registry.viewResolver(resolver)
 		}
 	}
 ----
