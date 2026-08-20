@@ -48,6 +48,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class AnnotationTypeMappingsTests {
 
 	@Test
+	void forAnnotationTypeWhenCalledTwiceReturnsCachedInstance() {
+		AnnotationTypeMappings first = AnnotationTypeMappings.forAnnotationType(SimpleAnnotation.class);
+		AnnotationTypeMappings second = AnnotationTypeMappings.forAnnotationType(SimpleAnnotation.class);
+		assertThat(second).isSameAs(first);
+	}
+
+	@Test
 	void forAnnotationTypeWhenNoMetaAnnotationsReturnsMappings() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(SimpleAnnotation.class);
 		assertThat(mappings.size()).isEqualTo(1);
