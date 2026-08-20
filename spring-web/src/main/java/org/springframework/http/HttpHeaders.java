@@ -125,17 +125,16 @@ public class HttpHeaders implements Serializable {
 	 */
 	public static final String ACCEPT_PATCH = "Accept-Patch";
 	/**
-	 * The HTTP {@code Accept-Ranges} header field name.
-	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.3">Section 5.3.5 of RFC 7233</a>
-	 */
-	public static final String ACCEPT_RANGES = "Accept-Ranges";
-
-	/**
 	 * The HTTP {@code Accept-Query} header field name.
 	 * @since 7.1
 	 * @see <a href="https://www.rfc-editor.org/rfc/rfc10008.html#section-3">Section 3 of RFC 10008</a>
 	 */
 	public static final String ACCEPT_QUERY = "Accept-Query";
+	/**
+	 * The HTTP {@code Accept-Ranges} header field name.
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.3">Section 5.3.5 of RFC 7233</a>
+	 */
+	public static final String ACCEPT_RANGES = "Accept-Ranges";
 	/**
 	 * The CORS {@code Access-Control-Allow-Credentials} response header field name.
 	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>

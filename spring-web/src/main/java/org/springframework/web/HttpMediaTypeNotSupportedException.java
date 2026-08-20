@@ -132,7 +132,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 		if (HttpMethod.PATCH.equals(this.httpMethod)) {
 			headers.setAcceptPatch(getSupportedMediaTypes());
 		}
-		if (HttpMethod.QUERY.equals(this.httpMethod)) {
+		else if (HttpMethod.QUERY.equals(this.httpMethod)) {
 			headers.setAcceptQuery(getSupportedMediaTypes());
 		}
 		return headers;
