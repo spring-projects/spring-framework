@@ -27,10 +27,10 @@ The following table describes these properties:
 | Property| Explained in...
 
 | Class
-| xref:core/beans/definition.adoc#beans-factory-class[Instantiating Beans]
+| <<beans-factory-class,Instantiating Beans>>
 
 | Name
-| xref:core/beans/definition.adoc#beans-beanname[Naming Beans]
+| <<beans-beanname,Naming Beans>>
 
 | Scope
 | xref:core/beans/factory-scopes.adoc[Bean Scopes]
@@ -205,7 +205,7 @@ If you use XML-based configuration metadata, you specify the type (or class) of 
 that is to be instantiated in the `class` attribute of the `<bean/>` element. This
 `class` attribute (which, internally, is a `Class` property on a `BeanDefinition`
 instance) is usually mandatory. (For exceptions, see
-xref:core/beans/definition.adoc#beans-factory-class-instance-factory-method[Instantiation by Using an Instance Factory Method]
+<<beans-factory-class-instance-factory-method,Instantiation by Using an Instance Factory Method>>
 and xref:core/beans/child-bean-definitions.adoc[Bean Definition Inheritance].)
 You can use the `Class` property in one of two ways:
 
@@ -344,7 +344,7 @@ overloads of the `mock` method. Choose the most specific variant of `mock` possi
 [[beans-factory-class-instance-factory-method]]
 === Instantiation by Using an Instance Factory Method
 
-Similar to instantiation through a xref:core/beans/definition.adoc#beans-factory-class-static-factory-method[static factory method]
+Similar to instantiation through a <<beans-factory-class-static-factory-method,static factory method>>
 , instantiation with an instance factory method invokes a non-static
 method of an existing bean from the container to create a new bean. To use this
 mechanism, leave the `class` attribute empty and, in the `factory-bean` attribute,
@@ -467,8 +467,8 @@ See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies a
 
 NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
 Spring container and that creates objects through an
-xref:core/beans/definition.adoc#beans-factory-class-instance-factory-method[instance] or
-xref:core/beans/definition.adoc#beans-factory-class-static-factory-method[static] factory method. By contrast,
+<<beans-factory-class-instance-factory-method,instance>> or
+<<beans-factory-class-static-factory-method,static>> factory method. By contrast,
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
 xref:core/beans/factory-extension.adoc#beans-factory-extension-factorybean[`FactoryBean`] implementation class.
 

@@ -612,9 +612,9 @@ only 3ms using the compiled version of the expression.
 
 The compiler is not turned on by default, but you can turn it on in either of two
 different ways. You can turn it on by using the parser configuration process
-(xref:core/expressions/evaluation.adoc#expressions-parser-configuration[discussed
-earlier]) or by using a Spring property when SpEL usage is embedded inside another
-component. This section discusses both of these options.
+(<<expressions-parser-configuration,discussed earlier>>) or by using a Spring property
+when SpEL usage is embedded inside another component. This section discusses both of
+these options.
 
 The compiler can operate in one of three modes, which are captured in the
 `org.springframework.expression.spel.SpelCompilerMode` enum. The modes are as follows.

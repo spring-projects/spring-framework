@@ -20,7 +20,7 @@ Spring configuration in a WebFlux application typically contains:
 
 * `DispatcherHandler` with the bean name `webHandler`
 * `WebFilter` and `WebExceptionHandler` beans
-* xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[`DispatcherHandler` special beans]
+* <<webflux-special-bean-types,`DispatcherHandler` special beans>>
 * Others
 
 The configuration is given to `WebHttpHandlerBuilder` to build the processing chain,
@@ -86,7 +86,7 @@ in the Web Handler API).
 
 | `HandlerResultHandler`
 | Process the result from the handler invocation and finalize the response.
-  See xref:web/webflux/dispatcher-handler.adoc#webflux-resulthandling[Result Handling].
+  See <<webflux-resulthandling,Result Handling>>.
 
 |===
 
@@ -97,9 +97,9 @@ in the Web Handler API).
 
 Applications can declare the infrastructure beans (listed under
 xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[Web Handler API] and
-xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[`DispatcherHandler`])
+<<webflux-special-bean-types,`DispatcherHandler`>>)
 that are required to process requests. However, in most cases, the
-xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config]
+<<webflux-framework-config,WebFlux Config>>
 is the best starting point. It declares the required beans and provides a higher-level
 configuration callback API to customize it.
 
@@ -127,7 +127,7 @@ The return value from the invocation of a handler, through a `HandlerAdapter`, i
 as a `HandlerResult`, along with some additional context, and passed to the first
 `HandlerResultHandler` that claims support for it. The following table shows the available
 `HandlerResultHandler` implementations, all of which are declared in the
-xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config]:
+<<webflux-framework-config,WebFlux Config>>:
 
 [cols="1,2,1", options="header"]
 |===
@@ -151,7 +151,7 @@ xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config
   {spring-framework-api}/web/reactive/result/view/Rendering.html[Rendering],
   or any other `Object` is treated as a model attribute.
 
-  See also xref:web/webflux/dispatcher-handler.adoc#webflux-viewresolution[View Resolution].
+  See also <<webflux-viewresolution,View Resolution>>.
 | `Integer.MAX_VALUE`
 
 |===
@@ -183,7 +183,7 @@ xref:web/webflux/reactive-spring.adoc#webflux-exception-handler[Exceptions] in t
 
 View resolution enables rendering to a browser with an HTML template and a model without
 tying you to a specific view technology. In Spring WebFlux, view resolution is
-supported through a dedicated xref:web/webflux/dispatcher-handler.adoc#webflux-resulthandling[HandlerResultHandler]
+supported through a dedicated <<webflux-resulthandling,HandlerResultHandler>>
 that uses `ViewResolver` instances to map a String (representing a logical view name) to
 a `View` instance. The `View` is then used to render the response.
 

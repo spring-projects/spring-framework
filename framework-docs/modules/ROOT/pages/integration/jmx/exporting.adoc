@@ -33,7 +33,7 @@ the export happens or disable automatic registration by setting the `autoStartup
 [[jmx-exporting-mbeanserver]]
 == Creating an MBeanServer
 
-The configuration shown in the xref:integration/jmx/exporting.adoc[preceding section] assumes that the
+The configuration shown in the <<jmx-exporting,preceding section>> assumes that the
 application is running in an environment that has one (and only one) `MBeanServer`
 already running. In this case, Spring tries to locate the running `MBeanServer` and
 register your beans with that server (if any). This behavior is useful when your

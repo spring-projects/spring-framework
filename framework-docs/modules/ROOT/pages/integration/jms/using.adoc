@@ -206,8 +206,8 @@ boilerplate JMS infrastructure concerns to the framework.
 There are two standard JMS message listener containers packaged with Spring, each with
 its specialized feature set.
 
-* xref:integration/jms/using.adoc#jms-mdp-simple[`SimpleMessageListenerContainer`]
-* xref:integration/jms/using.adoc#jms-mdp-default[`DefaultMessageListenerContainer`]
+* <<jms-mdp-simple,`SimpleMessageListenerContainer`>>
+* <<jms-mdp-default,`DefaultMessageListenerContainer`>>
 
 [[jms-mdp-simple]]
 === Using `SimpleMessageListenerContainer`
@@ -258,7 +258,7 @@ a simple `BackOff` implementation retries every five seconds. You can specify
 a custom `BackOff` implementation for more fine-grained recovery options. See
 {spring-framework-api}/util/backoff/ExponentialBackOff.html[`ExponentialBackOff`] for an example.
 
-NOTE: Like its sibling (xref:integration/jms/using.adoc#jms-mdp-simple[`SimpleMessageListenerContainer`]),
+NOTE: Like its sibling (<<jms-mdp-simple,`SimpleMessageListenerContainer`>>),
 `DefaultMessageListenerContainer` supports native JMS transactions and allows for
 customizing the acknowledgment mode. If feasible for your scenario, This is strongly
 recommended over externally managed transactions -- that is, if you can live with

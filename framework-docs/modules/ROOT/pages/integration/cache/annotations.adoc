@@ -98,7 +98,7 @@ through its `key` attribute. You can use xref:core/expressions.adoc[SpEL] to pic
 arguments of interest (or their nested properties), perform operations, or even
 invoke arbitrary methods without having to write any code or implement any interface.
 This is the recommended approach over the
-xref:integration/cache/annotations.adoc#cache-annotations-cacheable-default-key[default generator],
+<<cache-annotations-cacheable-default-key,default generator>>,
 since methods tend to be quite different in signatures as the code base grows. While the
 default strategy might work for some methods, it rarely works for all methods.
 
@@ -160,7 +160,7 @@ For applications that work with several cache managers, you can set the
 <1> Specifying `anotherCacheManager`.
 
 You can also replace the `CacheResolver` entirely in a fashion similar to that of
-replacing xref:integration/cache/annotations.adoc#cache-annotations-cacheable-key[key generation].
+replacing <<cache-annotations-cacheable-key,key generation>>.
 The resolution is requested for every cache operation, letting the implementation
 actually resolve the caches to use based on runtime arguments. The following example
 shows how to specify a `CacheResolver`:
@@ -684,5 +684,5 @@ preceding code:
 
 Even though `@SlowService` is not a Spring annotation, the container automatically picks
 up its declaration at runtime and understands its meaning. Note that, as mentioned
-xref:integration/cache/annotations.adoc#cache-annotation-enable[earlier],
+<<cache-annotation-enable,earlier>>,
 annotation-driven behavior needs to be enabled.

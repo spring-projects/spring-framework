@@ -5,13 +5,13 @@ The following annotations are supported when used in conjunction with the
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
 and the JUnit Jupiter testing framework:
 
-* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`]
-* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitconfig[`@SpringJUnitConfig`]
-* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitwebconfig[`@SpringJUnitWebConfig`]
-* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[`@TestConstructor`]
-* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[`@NestedTestConfiguration`]
-* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-enabledif[`@EnabledIf`]
-* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-disabledif[`@DisabledIf`]
+* <<integration-testing-annotations-springextensionconfig,`@SpringExtensionConfig`>>
+* <<integration-testing-annotations-junit-jupiter-springjunitconfig,`@SpringJUnitConfig`>>
+* <<integration-testing-annotations-junit-jupiter-springjunitwebconfig,`@SpringJUnitWebConfig`>>
+* <<integration-testing-annotations-testconstructor,`@TestConstructor`>>
+* <<integration-testing-annotations-nestedtestconfiguration,`@NestedTestConfiguration`>>
+* <<integration-testing-annotations-junit-jupiter-enabledif,`@EnabledIf`>>
+* <<integration-testing-annotations-junit-jupiter-disabledif,`@DisabledIf`>>
 * xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[`@DisabledInAotMode`]
 
 
@@ -59,7 +59,7 @@ Consequently, there is no need to declare this annotation on a test class that d
 contain `@Nested` test classes.
 
 In addition,
-xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[`@NestedTestConfiguration`]
+<<integration-testing-annotations-nestedtestconfiguration,`@NestedTestConfiguration`>>
 does not apply to this annotation. `@SpringExtensionConfig` will always be detected
 within a `@Nested` test class hierarchy, effectively disregarding any
 `@NestedTestConfiguration(OVERRIDE)` declarations.
@@ -291,7 +291,7 @@ following annotations.
 * xref:testing/annotations/integration-spring/annotation-sql.adoc[`@Sql`]
 * xref:testing/annotations/integration-spring/annotation-sqlconfig.adoc[`@SqlConfig`]
 * xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode`]
-* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[`@TestConstructor`]
+* <<integration-testing-annotations-testconstructor,`@TestConstructor`>>
 
 NOTE: The use of `@NestedTestConfiguration` typically only makes sense in conjunction
 with `@Nested` test classes in JUnit Jupiter; however, there may be other testing

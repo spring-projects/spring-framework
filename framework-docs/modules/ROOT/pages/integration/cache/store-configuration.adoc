@@ -29,7 +29,7 @@ or eviction contracts.
 == Ehcache-based Cache
 
 Ehcache 3.x is fully JSR-107 compliant and no dedicated support is required for it. See
-xref:integration/cache/store-configuration.adoc#cache-store-configuration-jsr107[JSR-107 Cache] for details.
+<<cache-store-configuration-jsr107,JSR-107 Cache>> for details.
 
 
 [[cache-store-configuration-caffeine]]

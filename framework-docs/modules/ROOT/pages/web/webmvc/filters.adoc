@@ -8,11 +8,11 @@ before and after the rest of the processing chain of filters and the target `Ser
 
 The `spring-web` module has a number of built-in `Filter` implementations:
 
-* xref:web/webmvc/filters.adoc#filters-http-put[Form Data]
-* xref:web/webmvc/filters.adoc#filters-forwarded-headers[Forwarded Headers]
-* xref:web/webmvc/filters.adoc#filters-shallow-etag[Shallow ETag]
-* xref:web/webmvc/filters.adoc#filters-cors[CORS]
-* xref:web/webmvc/filters.adoc#filters.url-handler[URL Handler]
+* <<filters-http-put,Form Data>>
+* <<filters-forwarded-headers,Forwarded Headers>>
+* <<filters-shallow-etag,Shallow ETag>>
+* <<filters-cors,CORS>>
+* <<filters.url-handler,URL Handler>>
 
 There are also base class implementations for use in Spring applications:
 

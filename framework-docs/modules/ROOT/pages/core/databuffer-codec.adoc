@@ -8,10 +8,10 @@ Jetty uses pooled byte buffers with a callback to be released, and so on.
 The `spring-core` module provides a set of abstractions to work with various byte buffer
 APIs as follows:
 
-* xref:core/databuffer-codec.adoc#databuffers-factory[`DataBufferFactory`] abstracts the creation of a data buffer.
-* xref:core/databuffer-codec.adoc#databuffers-buffer[`DataBuffer`] represents a byte buffer, which may be
-xref:core/databuffer-codec.adoc#databuffers-buffer-pooled[pooled].
-* xref:core/databuffer-codec.adoc#databuffers-utils[`DataBufferUtils`] offers utility methods for data buffers.
+* <<databuffers-factory,`DataBufferFactory`>> abstracts the creation of a data buffer.
+* <<databuffers-buffer,`DataBuffer`>> represents a byte buffer, which may be
+<<databuffers-buffer-pooled,pooled>>.
+* <<databuffers-utils,`DataBufferUtils`>> offers utility methods for data buffers.
 * <<Codecs>> decode or encode data buffer streams into higher level objects.
 
 
@@ -41,7 +41,7 @@ Below is a partial list of benefits:
 * Read and write with independent positions, i.e. not requiring a call to `flip()` to
 alternate between read and write.
 * Capacity expanded on demand as with `java.lang.StringBuilder`.
-* Pooled buffers and reference counting via xref:core/databuffer-codec.adoc#databuffers-buffer-pooled[`PooledDataBuffer`].
+* Pooled buffers and reference counting via <<databuffers-buffer-pooled,`PooledDataBuffer`>>.
 * View a buffer as `java.nio.ByteBuffer`, `InputStream`, or `OutputStream`.
 * Determine the index, or the last index, for a given byte.
 
@@ -101,7 +101,7 @@ xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] in the WebFlux sect
 == Using `DataBuffer`
 
 When working with data buffers, special care must be taken to ensure buffers are released
-since they may be xref:core/databuffer-codec.adoc#databuffers-buffer-pooled[pooled]. We'll use codecs to illustrate
+since they may be <<databuffers-buffer-pooled,pooled>>. We'll use codecs to illustrate
 how that works but the concepts apply more generally. Let's see what codecs must do
 internally to manage data buffers.
 

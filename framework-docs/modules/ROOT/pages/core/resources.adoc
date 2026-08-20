@@ -4,14 +4,14 @@
 This chapter covers how Spring handles resources and how you can work with resources in
 Spring. It includes the following topics:
 
-* xref:core/resources.adoc#resources-introduction[Introduction]
-* xref:core/resources.adoc#resources-resource[The `Resource` Interface]
-* xref:core/resources.adoc#resources-implementations[Built-in `Resource` Implementations]
-* xref:core/resources.adoc#resources-resourceloader[The `ResourceLoader` Interface]
-* xref:core/resources.adoc#resources-resourcepatternresolver[The `ResourcePatternResolver` Interface]
-* xref:core/resources.adoc#resources-resourceloaderaware[The `ResourceLoaderAware` Interface]
-* xref:core/resources.adoc#resources-as-dependencies[Resources as Dependencies]
-* xref:core/resources.adoc#resources-app-ctx[Application Contexts and Resource Paths]
+* <<resources-introduction,Introduction>>
+* <<resources-resource,The `Resource` Interface>>
+* <<resources-implementations,Built-in `Resource` Implementations>>
+* <<resources-resourceloader,The `ResourceLoader` Interface>>
+* <<resources-resourcepatternresolver,The `ResourcePatternResolver` Interface>>
+* <<resources-resourceloaderaware,The `ResourceLoaderAware` Interface>>
+* <<resources-as-dependencies,Resources as Dependencies>>
+* <<resources-app-ctx,Application Contexts and Resource Paths>>
 
 
 [[resources-introduction]]
@@ -126,13 +126,13 @@ For example, a `UrlResource` wraps a URL and uses the wrapped `URL` to do its wo
 
 Spring includes several built-in `Resource` implementations:
 
-* xref:core/resources.adoc#resources-implementations-urlresource[`UrlResource`]
-* xref:core/resources.adoc#resources-implementations-classpathresource[`ClassPathResource`]
-* xref:core/resources.adoc#resources-implementations-filesystemresource[`FileSystemResource`]
-* xref:core/resources.adoc#resources-implementations-pathresource[`PathResource`]
-* xref:core/resources.adoc#resources-implementations-servletcontextresource[`ServletContextResource`]
-* xref:core/resources.adoc#resources-implementations-inputstreamresource[`InputStreamResource`]
-* xref:core/resources.adoc#resources-implementations-bytearrayresource[`ByteArrayResource`]
+* <<resources-implementations-urlresource,`UrlResource`>>
+* <<resources-implementations-classpathresource,`ClassPathResource`>>
+* <<resources-implementations-filesystemresource,`FileSystemResource`>>
+* <<resources-implementations-pathresource,`PathResource`>>
+* <<resources-implementations-servletcontextresource,`ServletContextResource`>>
+* <<resources-implementations-inputstreamresource,`InputStreamResource`>>
+* <<resources-implementations-bytearrayresource,`ByteArrayResource`>>
 
 For a complete list of `Resource` implementations available in Spring, consult the
 "All Known Implementing Classes" section of the
@@ -350,7 +350,7 @@ objects:
 
 | file:
 | `\file:///data/config.xml`
-| Loaded as a `URL` from the filesystem. See also xref:core/resources.adoc#resources-filesystemresource-caveats[`FileSystemResource` Caveats].
+| Loaded as a `URL` from the filesystem. See also <<resources-filesystemresource-caveats,`FileSystemResource` Caveats>>.
 
 | https:
 | `\https://myserver/logo.png`
@@ -384,11 +384,11 @@ for all matching resources from the class path. Note that the resource location 
 expected to be a path without placeholders in this case -- for example,
 `classpath*:/config/beans.xml`. JAR files or different directories in the class path can
 contain multiple files with the same path and the same name. See
-xref:core/resources.adoc#resources-app-ctx-wildcards-in-resource-paths[Wildcards in Application Context Constructor Resource Paths] and its subsections for further details
+<<resources-app-ctx-wildcards-in-resource-paths,Wildcards in Application Context Constructor Resource Paths>> and its subsections for further details
 on wildcard support with the `classpath*:` resource prefix.
 
 A passed-in `ResourceLoader` (for example, one supplied via
-xref:core/resources.adoc#resources-resourceloaderaware[`ResourceLoaderAware`] semantics) can be checked whether
+<<resources-resourceloaderaware,`ResourceLoaderAware`>> semantics) can be checked whether
 it implements this extended interface too.
 
 `PathMatchingResourcePatternResolver` is a standalone implementation that is usable
@@ -452,7 +452,7 @@ For more information, see xref:core/beans/annotation-config/autowired.adoc[Using
 
 NOTE: To load one or more `Resource` objects for a resource path that contains wildcards
 or makes use of the special `classpath*:` resource prefix, consider having an instance of
-xref:core/resources.adoc#resources-resourcepatternresolver[`ResourcePatternResolver`] autowired into your
+<<resources-resourcepatternresolver,`ResourcePatternResolver`>> autowired into your
 application components instead of `ResourceLoader`.
 
 

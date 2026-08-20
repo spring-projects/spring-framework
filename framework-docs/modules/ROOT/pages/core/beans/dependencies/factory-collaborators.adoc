@@ -17,8 +17,8 @@ to test, particularly when the dependencies are on interfaces or abstract base c
 which allow for stub or mock implementations to be used in unit tests.
 
 DI exists in two major variants:
-xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[Constructor-based dependency injection]
-and xref:core/beans/dependencies/factory-collaborators.adoc#beans-setter-injection[Setter-based dependency injection].
+<<beans-constructor-injection,Constructor-based dependency injection>>
+and <<beans-setter-injection,Setter-based dependency injection>>.
 
 
 [[beans-constructor-injection]]

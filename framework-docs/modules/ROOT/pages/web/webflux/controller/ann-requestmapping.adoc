@@ -24,7 +24,7 @@ There are also HTTP method specific shortcut variants of `@RequestMapping`:
 * `@DeleteMapping`
 * `@PatchMapping`
 
-The preceding annotations are xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-composed[Custom Annotations] that are provided
+The preceding annotations are <<webflux-ann-requestmapping-composed,Custom Annotations>> that are provided
 because, arguably, most controller methods should be mapped to a specific HTTP method versus
 using `@RequestMapping`, which, by default, matches to all HTTP methods. At the same time, a
 `@RequestMapping` is still needed at the class level to express shared mappings.

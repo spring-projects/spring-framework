@@ -479,7 +479,7 @@ returned `out` parameters.
 Earlier in this chapter, we described how parameters are deduced from metadata, but you can declare them
 explicitly if you wish. You can do so by creating and configuring `SimpleJdbcCall` with
 the `declareParameters` method, which takes a variable number of `SqlParameter` objects
-as input. See the xref:data-access/jdbc/simple.adoc#jdbc-params[next section] for details on how to define an `SqlParameter`.
+as input. See the <<jdbc-params,next section>> for details on how to define an `SqlParameter`.
 
 NOTE: Explicit declarations are necessary if the database you use is not a Spring-supported
 database. Currently, Spring supports metadata lookup of stored procedure calls for the

@@ -139,8 +139,8 @@ xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] and `RestTestCl
 the same API up to the point of the call to `exchange()`. After that, `RestTestClient`
 provides two alternative ways to verify the response:
 
-1. xref:testing/resttestclient.adoc#resttestclient.workflow[Built-in Assertions] extend the request workflow with a chain of expectations
-2. xref:testing/resttestclient.adoc#resttestclient.assertj[AssertJ Integration] to verify the response via `assertThat()` statements
+1. <<resttestclient.workflow,Built-in Assertions>> extend the request workflow with a chain of expectations
+2. <<resttestclient.assertj,AssertJ Integration>> to verify the response via `assertThat()` statements
 
 TIP: See the xref:integration/rest-clients.adoc#rest-message-conversion[HTTP Message Conversion]
 section for examples on how to prepare a request with any content, including form data and multipart data.
@@ -167,7 +167,7 @@ include-code::./RestClientWorkflowTests[tag=soft-assertions,indent=0]
 You can then choose to decode the response body through one of the following:
 
 * `expectBody(Class<T>)`: Decode to single object.
-* `expectBody()`: Decode to `byte[]` for xref:testing/resttestclient.adoc#resttestclient.json[JSON Content] or an empty body.
+* `expectBody()`: Decode to `byte[]` for <<resttestclient.json,JSON Content>> or an empty body.
 
 
 If the built-in assertions are insufficient, you can consume the object instead and

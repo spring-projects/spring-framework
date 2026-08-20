@@ -12,12 +12,12 @@ The Spring Framework's R2DBC abstraction framework consists of two different pac
 
 * `core`: The `org.springframework.r2dbc.core` package contains the `DatabaseClient`
 class plus a variety of related classes. See
-xref:data-access/r2dbc.adoc#r2dbc-core[Using the R2DBC Core Classes to Control Basic R2DBC Processing and Error Handling].
+<<r2dbc-core,Using the R2DBC Core Classes to Control Basic R2DBC Processing and Error Handling>>.
 
 * `connection`: The `org.springframework.r2dbc.connection` package contains a utility class
 for easy `ConnectionFactory` access and various simple `ConnectionFactory` implementations
 that you can use for testing and running unmodified R2DBC. See
-xref:data-access/r2dbc.adoc#r2dbc-connections[Controlling Database Connections].
+<<r2dbc-connections,Controlling Database Connections>>.
 
 
 [[r2dbc-core]]
@@ -26,12 +26,12 @@ xref:data-access/r2dbc.adoc#r2dbc-connections[Controlling Database Connections].
 This section covers how to use the R2DBC core classes to control basic R2DBC processing,
 including error handling. It includes the following topics:
 
-* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient[Using `DatabaseClient`]
-* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-examples-statement[Executing Statements]
-* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-examples-query[Querying (`SELECT`)]
-* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-examples-update[Updating (`INSERT`, `UPDATE`, and `DELETE`) with `DatabaseClient`]
-* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-filter[Statement Filters]
-* xref:data-access/r2dbc.adoc#r2dbc-auto-generated-keys[Retrieving Auto-generated Keys]
+* <<r2dbc-DatabaseClient,Using `DatabaseClient`>>
+* <<r2dbc-DatabaseClient-examples-statement,Executing Statements>>
+* <<r2dbc-DatabaseClient-examples-query,Querying (`SELECT`)>>
+* <<r2dbc-DatabaseClient-examples-update,Updating (`INSERT`, `UPDATE`, and `DELETE`) with `DatabaseClient`>>
+* <<r2dbc-DatabaseClient-filter,Statement Filters>>
+* <<r2dbc-auto-generated-keys,Retrieving Auto-generated Keys>>
 
 [[r2dbc-DatabaseClient]]
 === Using `DatabaseClient`
@@ -680,11 +680,11 @@ Kotlin::
 
 This section covers:
 
-* xref:data-access/r2dbc.adoc#r2dbc-ConnectionFactory[Using `ConnectionFactory`]
-* xref:data-access/r2dbc.adoc#r2dbc-ConnectionFactoryUtils[Using `ConnectionFactoryUtils`]
-* xref:data-access/r2dbc.adoc#r2dbc-SingleConnectionFactory[Using `SingleConnectionFactory`]
-* xref:data-access/r2dbc.adoc#r2dbc-TransactionAwareConnectionFactoryProxy[Using `TransactionAwareConnectionFactoryProxy`]
-* xref:data-access/r2dbc.adoc#r2dbc-R2dbcTransactionManager[Using `R2dbcTransactionManager`]
+* <<r2dbc-ConnectionFactory,Using `ConnectionFactory`>>
+* <<r2dbc-ConnectionFactoryUtils,Using `ConnectionFactoryUtils`>>
+* <<r2dbc-SingleConnectionFactory,Using `SingleConnectionFactory`>>
+* <<r2dbc-TransactionAwareConnectionFactoryProxy,Using `TransactionAwareConnectionFactoryProxy`>>
+* <<r2dbc-R2dbcTransactionManager,Using `R2dbcTransactionManager`>>
 
 [[r2dbc-ConnectionFactory]]
 === Using `ConnectionFactory`

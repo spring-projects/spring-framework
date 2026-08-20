@@ -22,8 +22,8 @@ This section describes the HTTP caching related options available in Spring WebF
 configuring settings related to the `Cache-Control` header and is accepted as an argument
 in a number of places:
 
-* xref:web/webflux/caching.adoc#webflux-caching-etag-lastmodified[Controllers]
-* xref:web/webflux/caching.adoc#webflux-caching-static-resources[Static Resources]
+* <<webflux-caching-etag-lastmodified,Controllers>>
+* <<webflux-caching-static-resources,Static Resources>>
 
 While {rfc-site}/rfc7234#section-5.2.2[RFC 7234] describes all possible
 directives for the `Cache-Control` response header, the `CacheControl` type takes a

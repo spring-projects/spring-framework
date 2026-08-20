@@ -91,7 +91,7 @@ In the latter scenario, you have several options:
 * Abandon autowiring in favor of explicit wiring.
 * Avoid autowiring for a bean definition by setting its `autowire-candidate` attributes
   to `false`, as described in the
-  xref:core/beans/dependencies/factory-autowire.adoc#beans-factory-autowire-candidate[next section].
+  <<beans-factory-autowire-candidate,next section>>.
 * Designate a single bean definition as the primary candidate by setting the
   `primary` attribute of its `<bean/>` element to `true`.
 * Implement the more fine-grained control available with annotation-based configuration,

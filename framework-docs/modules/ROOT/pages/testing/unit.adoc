@@ -4,7 +4,7 @@
 Dependency injection should make your code less dependent on the container than it would
 be with traditional J2EE / Java EE development. The POJOs that make up your application
 should be testable in JUnit or TestNG tests, with objects instantiated by using the `new`
-operator, without Spring or any other container. You can use xref:testing/unit.adoc#mock-objects[mock objects]
+operator, without Spring or any other container. You can use <<mock-objects,mock objects>>
 (in conjunction with other valuable testing techniques) to test your code in isolation.
 If you follow the architecture recommendations for Spring, the resulting clean layering
 and componentization of your codebase facilitate easier unit testing. For example,
@@ -24,9 +24,9 @@ are described in this chapter.
 
 Spring includes a number of packages dedicated to mocking:
 
-* xref:testing/unit.adoc#mock-objects-env[Environment]
-* xref:testing/unit.adoc#mock-objects-servlet[Servlet API]
-* xref:testing/unit.adoc#mock-objects-web-reactive[Spring Web Reactive]
+* <<mock-objects-env,Environment>>
+* <<mock-objects-servlet,Servlet API>>
+* <<mock-objects-web-reactive,Spring Web Reactive>>
 
 [[mock-objects-env]]
 === Environment
@@ -81,8 +81,8 @@ end-to-end tests with a running server.
 Spring includes a number of classes that can help with unit testing. They fall into two
 categories:
 
-* xref:testing/unit.adoc#unit-testing-utilities[General Testing Utilities]
-* xref:testing/unit.adoc#unit-testing-spring-mvc[Spring MVC Testing Utilities]
+* <<unit-testing-utilities,General Testing Utilities>>
+* <<unit-testing-spring-mvc,Spring MVC Testing Utilities>>
 
 [[unit-testing-utilities]]
 === General Testing Utilities
@@ -144,7 +144,7 @@ that deal with Spring MVC `ModelAndView` objects.
 .Unit testing Spring MVC Controllers
 TIP: To unit test your Spring MVC `Controller` classes as POJOs, use `ModelAndViewAssert`
 combined with `MockHttpServletRequest`, `MockHttpSession`, and so on from Spring's
-xref:testing/unit.adoc#mock-objects-servlet[Servlet API mocks]. For thorough integration
+<<mock-objects-servlet,Servlet API mocks>>. For thorough integration
 testing of your Spring MVC and REST `Controller` classes in conjunction with your
 `WebApplicationContext` configuration for Spring MVC, use
 xref:testing/mockmvc.adoc[MockMvc] instead.

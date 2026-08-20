@@ -23,7 +23,7 @@ interface. If you write your own `BeanPostProcessor`, you should consider implem
 the `Ordered` interface, too. For further details, see the javadoc of the
 {spring-framework-api}/beans/factory/config/BeanPostProcessor.html[`BeanPostProcessor`]
 and {spring-framework-api}/core/Ordered.html[`Ordered`] interfaces. See also the note on
-xref:core/beans/factory-extension.adoc#beans-factory-programmatically-registering-beanpostprocessors[programmatic registration of `BeanPostProcessor` instances].
+<<beans-factory-programmatically-registering-beanpostprocessors,programmatic registration of `BeanPostProcessor` instances>>.
 
 [NOTE]
 ====
@@ -39,7 +39,7 @@ another container, even if both containers are part of the same hierarchy.
 
 To change the actual bean definition (that is, the blueprint that defines the bean),
 you instead need to use a `BeanFactoryPostProcessor`, as described in
-xref:core/beans/factory-extension.adoc#beans-factory-extension-factory-postprocessors[Customizing Configuration Metadata with a `BeanFactoryPostProcessor`].
+<<beans-factory-extension-factory-postprocessors,Customizing Configuration Metadata with a `BeanFactoryPostProcessor`>>.
 ====
 
 The `org.springframework.beans.factory.config.BeanPostProcessor` interface consists of
@@ -329,7 +329,7 @@ and {spring-framework-api}/core/Ordered.html[`Ordered`] interfaces for more deta
 If you want to change the actual bean instances (that is, the objects that are created
 from the configuration metadata), then you instead need to use a `BeanPostProcessor`
 (described earlier in
-xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[Customizing Beans by Using a `BeanPostProcessor`]).
+<<beans-factory-extension-bpp,Customizing Beans by Using a `BeanPostProcessor`>>).
 While it is technically possible to work with bean instances within a `BeanFactoryPostProcessor`
 (for example, by using `BeanFactory.getBean()`), doing so causes premature bean instantiation,
 violating the standard container lifecycle. This may cause negative side effects, such as

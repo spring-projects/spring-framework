@@ -52,7 +52,7 @@ the steps of the WebSocket handshake, including validating the client origin,
 negotiating a sub-protocol, and other details. An application may also need to use this
 option if it needs to configure a custom `RequestUpgradeStrategy` in order to
 adapt to a WebSocket server engine and version that is not yet supported
-(see xref:web/websocket/server.adoc#websocket-server-deployment[Deployment] for more on this subject).
+(see <<websocket-server-deployment,Deployment>> for more on this subject).
 Both the Java configuration and XML namespace make it possible to configure a custom
 `HandshakeHandler`.
 

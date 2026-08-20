@@ -4,9 +4,9 @@
 The Spring Framework provides a number of interfaces you can use to customize the nature
 of a bean. This section groups them as follows:
 
-* xref:core/beans/factory-nature.adoc#beans-factory-lifecycle[Lifecycle Callbacks]
-* xref:core/beans/factory-nature.adoc#beans-factory-aware[`ApplicationContextAware` and `BeanNameAware`]
-* xref:core/beans/factory-nature.adoc#aware-list[Other `Aware` Interfaces]
+* <<beans-factory-lifecycle,Lifecycle Callbacks>>
+* <<beans-factory-aware,`ApplicationContextAware` and `BeanNameAware`>>
+* <<aware-list,Other `Aware` Interfaces>>
 
 
 [[beans-factory-lifecycle]]
@@ -252,7 +252,7 @@ of a `<bean>` element a special `(inferred)` value, which instructs Spring to au
 detect a public `close` or `shutdown` method on the bean class for a specific bean definition.
 You can also set this special `(inferred)` value on the `default-destroy-method` attribute
 of a `<beans>` element to apply this behavior to an entire set of bean definitions (see
-xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[Default Initialization and Destroy Methods]).
+<<beans-factory-lifecycle-default-init-destroy-methods,Default Initialization and Destroy Methods>>).
 
 [NOTE]
 ====
@@ -276,7 +276,7 @@ callback method names on every bean. This means that you, as an application deve
 can write your application classes and use an initialization callback called `init()`,
 without having to configure an `init-method="init"` attribute with each bean definition.
 The Spring IoC container calls that method when the bean is created (and in accordance
-with the standard lifecycle callback contract xref:core/beans/factory-nature.adoc#beans-factory-lifecycle[described previously]).
+with the standard lifecycle callback contract <<beans-factory-lifecycle,described previously>>).
 This feature also enforces a consistent naming convention for initialization and
 destroy method callbacks.
 
@@ -367,8 +367,8 @@ interacts directly with the raw target bean.
 
 As of Spring 2.5, you have three options for controlling bean lifecycle behavior:
 
-* The xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[`InitializingBean`] and
-xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[`DisposableBean`] callback interfaces
+* The <<beans-factory-lifecycle-initializingbean,`InitializingBean`>> and
+<<beans-factory-lifecycle-disposablebean,`DisposableBean`>> callback interfaces
 * Custom `init()` and `destroy()` methods
 * The xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[`@PostConstruct` and `@PreDestroy` annotations]
 . You can combine these mechanisms to control a given bean.
@@ -378,7 +378,7 @@ configured with a different method name, then each configured method is run in t
 order listed after this note. However, if the same method name is configured -- for example,
 `init()` for an initialization method -- for more than one of these lifecycle mechanisms,
 that method is run once, as explained in the
-xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[preceding section].
+<<beans-factory-lifecycle-default-init-destroy-methods,preceding section>>.
 
 Multiple lifecycle mechanisms configured for the same bean, with different
 initialization methods, are called as follows:
@@ -669,7 +669,7 @@ init-method.
 [[aware-list]]
 == Other `Aware` Interfaces
 
-Besides `ApplicationContextAware` and `BeanNameAware` (discussed xref:core/beans/factory-nature.adoc#beans-factory-aware[earlier]),
+Besides `ApplicationContextAware` and `BeanNameAware` (discussed <<beans-factory-aware,earlier>>),
 Spring offers a wide range of `Aware` callback interfaces that let beans indicate to the container
 that they require a certain infrastructure dependency. As a general rule, the name indicates the
 dependency type. The following table summarizes the most important `Aware` interfaces:
@@ -681,7 +681,7 @@ dependency type. The following table summarizes the most important `Aware` inter
 
 | `ApplicationContextAware`
 | Declaring `ApplicationContext`.
-| xref:core/beans/factory-nature.adoc#beans-factory-aware[`ApplicationContextAware` and `BeanNameAware`]
+| <<beans-factory-aware,`ApplicationContextAware` and `BeanNameAware`>>
 
 | `ApplicationEventPublisherAware`
 | Event publisher of the enclosing `ApplicationContext`.
@@ -697,7 +697,7 @@ dependency type. The following table summarizes the most important `Aware` inter
 
 | `BeanNameAware`
 | Name of the declaring bean.
-| xref:core/beans/factory-nature.adoc#beans-factory-aware[`ApplicationContextAware` and `BeanNameAware`]
+| <<beans-factory-aware,`ApplicationContextAware` and `BeanNameAware`>>
 
 | `LoadTimeWeaverAware`
 | Defined weaver for processing class definition at load time.

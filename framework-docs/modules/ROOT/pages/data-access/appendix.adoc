@@ -7,8 +7,8 @@
 
 This part of the appendix lists XML schemas for data access, including the following:
 
-* xref:data-access/appendix.adoc#xsd-schemas-tx[The `tx` Schema]
-* xref:data-access/appendix.adoc#xsd-schemas-jdbc[The `jdbc` Schema]
+* <<xsd-schemas-tx,The `tx` Schema>>
+* <<xsd-schemas-jdbc,The `jdbc` Schema>>
 
 [[xsd-schemas-tx]]
 === The `tx` Schema

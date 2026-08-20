@@ -14,9 +14,9 @@ the underlying implementation in order to provide additional features.
 The Spring JPA support offers three ways of setting up the JPA `EntityManagerFactory`
 that is used by the application to obtain an entity manager.
 
-* xref:data-access/orm/jpa.adoc#orm-jpa-setup-lemfb[Using `LocalEntityManagerFactoryBean`]
-* xref:data-access/orm/jpa.adoc#orm-jpa-setup-jndi[Obtaining an EntityManagerFactory from JNDI]
-* xref:data-access/orm/jpa.adoc#orm-jpa-setup-lcemfb[Using `LocalContainerEntityManagerFactoryBean`]
+* <<orm-jpa-setup-lemfb,Using `LocalEntityManagerFactoryBean`>>
+* <<orm-jpa-setup-jndi,Obtaining an EntityManagerFactory from JNDI>>
+* <<orm-jpa-setup-lcemfb,Using `LocalContainerEntityManagerFactoryBean`>>
 
 [[orm-jpa-setup-lemfb]]
 === Using `LocalEntityManagerFactoryBean`
@@ -519,7 +519,7 @@ Spring JPA also lets a configured `JpaTransactionManager` expose a JPA transacti
 to JDBC access code that accesses the same `DataSource`, provided that the registered
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`. Spring provides
 dialects for the EclipseLink and Hibernate JPA implementations. See the
-xref:data-access/orm/jpa.adoc#orm-jpa-dialect[next section] for details on `JpaDialect`.
+<<orm-jpa-dialect,next section>> for details on `JpaDialect`.
 
 For JTA-style lazy retrieval of actual resource connections, Spring provides a
 corresponding `DataSource` proxy class for the target connection pool: see
@@ -621,7 +621,7 @@ seamlessly integrating with `@Bean` style configuration (no `FactoryBean` involv
 ====
 `LocalSessionFactoryBean` and `LocalSessionFactoryBuilder` support background
 bootstrapping, just as the JPA `LocalContainerEntityManagerFactoryBean` does.
-See xref:data-access/orm/jpa.adoc#orm-jpa-setup-background[Background Bootstrapping] for an introduction.
+See <<orm-jpa-setup-background,Background Bootstrapping>> for an introduction.
 
 On `LocalSessionFactoryBean`, this is available through the `bootstrapExecutor`
 property. On the programmatic `LocalSessionFactoryBuilder`, an overloaded

@@ -19,26 +19,26 @@ You can learn more about {spring-boot-docs-ref}/actuator/observability.html[conf
 == List of produced Observations
 
 Spring Framework instruments various features for observability.
-As outlined xref:integration/observability.adoc[at the beginning of this section], observations can generate timer Metrics and/or Traces depending on the configuration.
+As outlined <<observability,at the beginning of this section>>, observations can generate timer Metrics and/or Traces depending on the configuration.
 
 .Observations produced by Spring Framework
 [%autowidth]
 |===
 |Observation name |Description
 
-|xref:integration/observability.adoc#observability.http-client[`"http.client.requests"`]
+|<<observability.http-client,`"http.client.requests"`>>
 |Time spent for HTTP client exchanges
 
-|xref:integration/observability.adoc#observability.http-server[`"http.server.requests"`]
+|<<observability.http-server,`"http.server.requests"`>>
 |Processing time for HTTP server exchanges at the Framework level
 
-|xref:integration/observability.adoc#observability.jms.publish[`"jms.message.publish"`]
+|<<observability.jms.publish,`"jms.message.publish"`>>
 |Time spent sending a JMS message to a destination by a message producer.
 
-|xref:integration/observability.adoc#observability.jms.process[`"jms.message.process"`]
+|<<observability.jms.process,`"jms.message.process"`>>
 |Processing time for a JMS message that was previously received by a message consumer.
 
-|xref:integration/observability.adoc#observability.tasks-scheduled[`"tasks.scheduled.execution"`]
+|<<observability.tasks-scheduled,`"tasks.scheduled.execution"`>>
 |Processing time for an execution of a `@Scheduled` task
 |===
 

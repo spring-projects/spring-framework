@@ -110,7 +110,7 @@ You can read more about the motivation for Method Injection in
 Lookup method injection is the ability of the container to override methods on
 container-managed beans and return the lookup result for another named bean in the
 container. The lookup typically involves a prototype bean, as in the scenario described
-in xref:core/beans/dependencies/factory-method-injection.adoc[the preceding section]. The Spring Framework
+in <<beans-factory-method-injection,the preceding section>>. The Spring Framework
 implements this method injection by using bytecode generation from the CGLIB library to
 dynamically generate a subclass that overrides the method.
 

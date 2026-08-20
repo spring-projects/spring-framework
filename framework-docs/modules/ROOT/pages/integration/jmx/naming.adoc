@@ -131,7 +131,7 @@ If necessary, you can provide a reference to a particular MBean `server`, and th
 `defaultDomain` attribute (a property of `AnnotationMBeanExporter`) accepts an alternate
 value for the generated MBean `ObjectName` domains. This is used in place of the
 fully qualified package name as described in the previous section on
-xref:integration/jmx/naming.adoc#jmx-naming-metadata[MetadataNamingStrategy], as the following example shows:
+<<jmx-naming-metadata,MetadataNamingStrategy>>, as the following example shows:
 
 include-code::./CustomJmxConfiguration[tag=snippet,indent=0]
 

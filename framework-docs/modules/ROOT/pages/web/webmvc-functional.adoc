@@ -109,7 +109,7 @@ Kotlin::
 
 If you register the `RouterFunction` as a bean, for instance by exposing it in a
 `@Configuration` class, it will be auto-detected by the servlet, as explained in
-xref:web/webmvc-functional.adoc#webmvc-fn-running[Running a Server].
+<<webmvc-fn-running,Running a Server>>.
 
 
 [[webmvc-fn-handler-functions]]
@@ -568,7 +568,7 @@ parameter, through which additional constraints can be expressed.
 
 You can write your own `RequestPredicate`, but the `RequestPredicates` utility class
 offers built-in options for common needs for matching based on the HTTP method, request
-path, headers, xref:#api-version[API version], and more.
+path, headers, <<api-version,API version>>, and more.
 
 The following example uses an `Accept` header, request predicate:
 
@@ -778,7 +778,7 @@ Router functions support matching by API version.
 
 First, enable API versioning in the
 xref:web/webmvc/mvc-config/api-version.adoc[MVC Config], and then you can use the
-`version` xref:#webmvc-fn-predicates[predicate] as follows:
+`version` <<webmvc-fn-predicates,predicate>> as follows:
 
 [tabs]
 ======

@@ -12,7 +12,7 @@ in xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[Special B
 
 For more advanced customizations, not available in the configuration API, you can
 gain full control over the configuration through the
-xref:web/webflux/config.adoc#webflux-config-advanced-java[Advanced Configuration Mode].
+<<webflux-config-advanced-java,Advanced Configuration Mode>>.
 
 
 [[webflux-config-enable]]
@@ -45,7 +45,7 @@ Kotlin::
 
 NOTE: When using Spring Boot, you may want to use `@Configuration` classes of type `WebFluxConfigurer` but without
 `@EnableWebFlux` to keep Spring Boot WebFlux customizations. See more details in
-xref:#webflux-config-customize[the WebFlux config API section] and in
+<<webflux-config-customize,the WebFlux config API section>> and in
 {spring-boot-docs-ref}/web/reactive.html#web.reactive.webflux.auto-configuration[the dedicated Spring Boot documentation].
 
 The preceding example registers a number of Spring WebFlux
@@ -713,7 +713,7 @@ to contain the version. The path segment must be declared as a URI variable, e.g
 "/\{version}", "/api/\{version}", etc. where the actual name is not important.
 As the version is typically at the start of the path, consider configuring it externally
 as a common path prefix for all handlers through the
-xref:web/webflux/config.adoc#webflux-config-path-matching[Path Matching] options.
+<<webflux-config-path-matching,Path Matching>> options.
 
 By default, the version is parsed with `SemanticVersionParser`, but you can also configure
 a custom xref:web/webflux-versioning.adoc#webflux-versioning-parser[ApiVersionParser].

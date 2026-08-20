@@ -27,7 +27,7 @@ The following example shows various values being set:
 	</bean>
 ----
 
-The following example uses the xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[p-namespace] for even more succinct
+The following example uses the <<beans-p-namespace,p-namespace>> for even more succinct
 XML configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -539,7 +539,7 @@ three approaches at the same time.
 == XML Shortcut with the c-namespace
 
 Similar to the
-xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[XML Shortcut with the p-namespace],
+<<beans-p-namespace,XML Shortcut with the p-namespace>>,
 the c-namespace, introduced in Spring 3.1, allows inlined attributes for configuring
 the constructor arguments rather then nested `constructor-arg` elements.
 

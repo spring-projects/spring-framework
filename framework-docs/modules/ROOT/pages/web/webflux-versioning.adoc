@@ -30,9 +30,9 @@ for testing in `WebTestClient`.
 This is the central strategy for API versioning that holds all configured preferences
 related to versioning. It does the following:
 
-- Resolves versions from the requests via xref:#webflux-versioning-resolver[ApiVersionResolver]
-- Parses raw version values into `Comparable<?>` with xref:#webflux-versioning-parser[ApiVersionParser]
-- xref:#webflux-versioning-validation[Validates] request versions
+- Resolves versions from the requests via <<webflux-versioning-resolver,ApiVersionResolver>>
+- Parses raw version values into `Comparable<?>` with <<webflux-versioning-parser,ApiVersionParser>>
+- <<webflux-versioning-validation,Validates>> request versions
 
 `ApiVersionStrategy` helps to map requests to `@RequestMapping` controller methods,
 and is initialized by the WebFlux config. Typically, applications do not interact

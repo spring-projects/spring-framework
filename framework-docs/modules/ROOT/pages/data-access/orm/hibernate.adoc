@@ -26,7 +26,7 @@ To avoid tying application objects to hard-coded resource lookups, you can defin
 resources (such as a JDBC `DataSource` or a Hibernate `SessionFactory`) as beans in the
 Spring container. Application objects that need to access resources receive references
 to such predefined instances through bean references, as illustrated in the DAO
-definition in the xref:data-access/orm/hibernate.adoc#orm-hibernate-straight[next section].
+definition in the <<orm-hibernate-straight,next section>>.
 
 The following excerpt from an XML application context definition shows how to set up a
 JDBC `DataSource` and a Hibernate `SessionFactory` on top of it:

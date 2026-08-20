@@ -105,7 +105,7 @@ by default.
 ====
 Method-level `@Sql` declarations override class-level declarations by default, but this
 behavior may be configured per test class or per test method via `@SqlMergeMode`. See
-xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively-script-merging[Merging and Overriding Configuration with `@SqlMergeMode`]
+<<testcontext-executing-sql-declaratively-script-merging,Merging and Overriding Configuration with `@SqlMergeMode`>>
 for further details.
 
 However, this does not apply to class-level declarations configured for the

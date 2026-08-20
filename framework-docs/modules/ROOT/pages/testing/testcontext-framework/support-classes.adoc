@@ -23,8 +23,8 @@ following features above and beyond the feature set that Spring supports for JUn
 TestNG:
 
 * Dependency injection for test constructors, test methods, and test lifecycle callback
-  methods. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency
-  Injection with the `SpringExtension`] for further details.
+  methods. See <<testcontext-junit-jupiter-di,Dependency Injection with the
+  `SpringExtension`>> for further details.
 * Powerful support for link:https://docs.junit.org/current/extensions/conditional-test-execution.html[conditional
   test execution] based on SpEL expressions, environment variables, system properties,
   and so on. See the documentation for `@EnabledIf` and `@DisabledIf` in
@@ -503,7 +503,7 @@ Kotlin::
 ====
 JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
 since Spring Framework 7.0 in favor of the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+<<testcontext-junit-jupiter-extension,`SpringExtension`>>
 and JUnit Jupiter.
 ====
 
@@ -516,7 +516,7 @@ loading application contexts, dependency injection of test instances, transactio
 method execution, and so on. If you want to use the Spring TestContext Framework with an
 alternative runner (such as JUnit 4's `Parameterized` runner) or third-party runners
 (such as the `MockitoJUnitRunner`), you can, optionally, use
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's support for JUnit rules]
+<<testcontext-junit4-rules,Spring's support for JUnit rules>>
 instead.
 
 The following code listing shows the minimal requirements for configuring a test class to
@@ -566,7 +566,7 @@ be configured through `@ContextConfiguration`.
 ====
 JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
 since Spring Framework 7.0 in favor of the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+<<testcontext-junit-jupiter-extension,`SpringExtension`>>
 and JUnit Jupiter.
 ====
 
@@ -643,7 +643,7 @@ Kotlin::
 ====
 JUnit 4 is officially in maintenance mode, and JUnit 4 support in Spring is deprecated
 since Spring Framework 7.0 in favor of the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+<<testcontext-junit-jupiter-extension,`SpringExtension`>>
 and JUnit Jupiter.
 ====
 
@@ -679,7 +679,7 @@ Furthermore, `AbstractTransactionalJUnit4SpringContextTests` provides an
 TIP: These classes are a convenience for extension. If you do not want your test classes
 to be tied to a Spring-specific class hierarchy, you can configure your own custom test
 classes by using `@RunWith(SpringRunner.class)` or
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit rules].
+<<testcontext-junit4-rules,Spring's JUnit rules>>.
 
 
 [[testcontext-support-classes-testng]]

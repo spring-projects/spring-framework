@@ -282,7 +282,7 @@ class and the `ApplicationListener` interface. If a bean that implements the
 Essentially, this is the standard Observer design pattern.
 
 TIP: As of Spring 4.2, the event infrastructure has been significantly improved and offers
-an xref:core/beans/context-introduction.adoc#context-functionality-events-annotation[annotation-based model] as well as the
+an <<context-functionality-events-annotation,annotation-based model>> as well as the
 ability to publish any arbitrary event (that is, an object that does not necessarily
 extend from `ApplicationEvent`). When such an object is published, we wrap it in an
 event for you.
@@ -698,7 +698,7 @@ Kotlin::
 ======
 
 NOTE: This feature is not supported for
-xref:core/beans/context-introduction.adoc#context-functionality-events-async[asynchronous listeners].
+<<context-functionality-events-async,asynchronous listeners>>.
 
 The `handleBlockedListEvent()` method publishes a new `ListUpdateEvent` for every
 `BlockedListEvent` that it handles. If you need to publish several events, you can return

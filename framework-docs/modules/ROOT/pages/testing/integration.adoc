@@ -41,10 +41,10 @@ integration support, and the rest of this chapter then focuses on dedicated topi
 
 Spring's integration testing support has the following primary goals:
 
-* To manage xref:testing/integration.adoc#testing-ctx-management[Spring IoC container caching] between tests.
-* To provide xref:testing/integration.adoc#testing-fixture-di[Dependency Injection of test fixture instances].
-* To provide xref:testing/integration.adoc#testing-tx[transaction management] appropriate to integration testing.
-* To supply xref:testing/integration.adoc#testing-support-classes[Spring-specific base classes] that assist
+* To manage <<testing-ctx-management,Spring IoC container caching>> between tests.
+* To provide <<testing-fixture-di,Dependency Injection of test fixture instances>>.
+* To provide <<testing-tx,transaction management>> appropriate to integration testing.
+* To supply <<testing-support-classes,Spring-specific base classes>> that assist
   developers in writing integration tests.
 
 The next few sections describe each goal and provide links to implementation and

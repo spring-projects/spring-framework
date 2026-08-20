@@ -58,7 +58,7 @@ implementations to the list of default factories in the same manner through thei
 
 If a custom `ContextCustomizerFactory` is registered via `@ContextCustomizerFactories`, it
 will be _merged_ with the default factories that have been registered using the aforementioned
-xref:testing/testcontext-framework/ctx-management/context-customizers.adoc#testcontext-context-customizers-automatic-discovery[automatic discovery mechanism].
+<<testcontext-context-customizers-automatic-discovery,automatic discovery mechanism>>.
 
 The merging algorithm ensures that duplicates are removed from the list and that locally
 declared factories are appended to the list of default factories when merged.

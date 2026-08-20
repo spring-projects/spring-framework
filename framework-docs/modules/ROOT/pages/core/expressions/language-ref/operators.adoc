@@ -3,12 +3,12 @@
 
 The Spring Expression Language supports the following kinds of operators:
 
-* xref:core/expressions/language-ref/operators.adoc#expressions-operators-relational[Relational Operators]
-* xref:core/expressions/language-ref/operators.adoc#expressions-operators-logical[Logical Operators]
-* xref:core/expressions/language-ref/operators.adoc#expressions-operators-string[String Operators]
-* xref:core/expressions/language-ref/operators.adoc#expressions-operators-mathematical[Mathematical Operators]
-* xref:core/expressions/language-ref/operators.adoc#expressions-assignment[The Assignment Operator]
-* xref:core/expressions/language-ref/operators.adoc#expressions-operators-overloaded[Overloaded Operators]
+* <<expressions-operators-relational,Relational Operators>>
+* <<expressions-operators-logical,Logical Operators>>
+* <<expressions-operators-string,String Operators>>
+* <<expressions-operators-mathematical,Mathematical Operators>>
+* <<expressions-assignment,The Assignment Operator>>
+* <<expressions-operators-overloaded,Overloaded Operators>>
 
 
 
