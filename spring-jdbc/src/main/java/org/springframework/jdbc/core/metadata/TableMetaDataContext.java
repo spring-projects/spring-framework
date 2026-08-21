@@ -205,12 +205,18 @@ public class TableMetaDataContext {
 		if (generatedKeyNames.length > 0) {
 			this.generatedKeyColumnsUsed = true;
 		}
-		if (!declaredColumns.isEmpty()) {
-			return new ArrayList<>(declaredColumns);
-		}
 		Set<String> keys = CollectionUtils.newLinkedHashSet(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase(Locale.ROOT));
+		}
+		if (!declaredColumns.isEmpty()) {
+			List<String> columns = new ArrayList<>();
+			for (String column : declaredColumns) {
+				if (!keys.contains(column.toUpperCase(Locale.ROOT))) {
+					columns.add(column);
+				}
+			}
+			return columns;
 		}
 		List<String> columns = new ArrayList<>();
 		for (TableParameterMetaData meta : obtainMetaDataProvider().getTableParameterMetaData()) {
