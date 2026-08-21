@@ -86,6 +86,9 @@ class DefaultClientResponseBuilderTests {
 				.cookies(cookies -> cookies.set("baz", ResponseCookie.from("baz", "quux").build()))
 				.build();
 
+		assertThat(otherResponse.headers().asHttpHeaders().getFirst("foo")).isEqualTo("bar");
+		assertThat(otherResponse.headers().asHttpHeaders().getFirst("bar")).isEqualTo("baz");
+		assertThat(otherResponse.cookies().getFirst("baz").getValue()).isEqualTo("qux");
 
 		assertThat(result.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(3);

@@ -144,7 +144,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	private HttpHeaders getHeaders() {
 		if (this.headers == null) {
-			this.headers = new HttpHeaders(this.originalResponse.headers().asHttpHeaders());
+			this.headers = HttpHeaders.copyOf(this.originalResponse.headers().asHttpHeaders());
 		}
 		return this.headers;
 	}
