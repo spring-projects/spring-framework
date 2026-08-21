@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.testfixture.beans.FactoryMethods;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -347,7 +348,7 @@ class FactoryMethodTests {
 		assertThat(Arrays.asList(names)).doesNotContain("listInstance");
 		names = xbf.getBeanNamesForType(List.class);
 		assertThat(Arrays.asList(names)).contains("listInstance");
-		List<?> list = (List<?>) xbf.getBean("listInstance");
+		List<?> list = xbf.getBean("listInstance", new ParameterizedTypeReference<>() {});
 		assertThat(list).isEqualTo(Collections.EMPTY_LIST);
 	}
 
