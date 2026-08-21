@@ -37,6 +37,15 @@ import org.springframework.util.StringUtils;
 public class SpelParserConfiguration {
 
 	/**
+	 * Default maximum size to which a collection or array can automatically grow: {@value}.
+	 * <p>Aligned with the default auto-grow limit used for Spring's data binding
+	 * support (see {@code DataBinder.DEFAULT_AUTO_GROW_COLLECTION_LIMIT}), for
+	 * consistency between SpEL and data binding.
+	 * @since 7.1
+	 */
+	public static final int DEFAULT_MAX_AUTO_GROW_SIZE = 256;
+
+	/**
 	 * Default maximum length permitted for a SpEL expression: {@value}.
 	 * @since 5.2.24
 	 */
@@ -162,9 +171,10 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
+	 * @see #DEFAULT_MAX_AUTO_GROW_SIZE
 	 */
 	public SpelParserConfiguration() {
-		this(null, null, false, false, Integer.MAX_VALUE);
+		this(null, null);
 	}
 
 	/**
@@ -180,9 +190,10 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
+	 * @see #DEFAULT_MAX_AUTO_GROW_SIZE
 	 */
 	public SpelParserConfiguration(@Nullable SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader) {
-		this(compilerMode, compilerClassLoader, false, false, Integer.MAX_VALUE);
+		this(compilerMode, compilerClassLoader, false, false, DEFAULT_MAX_AUTO_GROW_SIZE);
 	}
 
 	/**
@@ -196,9 +207,10 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
+	 * @see #DEFAULT_MAX_AUTO_GROW_SIZE
 	 */
 	public SpelParserConfiguration(boolean autoGrowNullReferences, boolean autoGrowCollections) {
-		this(null, null, autoGrowNullReferences, autoGrowCollections, Integer.MAX_VALUE);
+		this(autoGrowNullReferences, autoGrowCollections, DEFAULT_MAX_AUTO_GROW_SIZE);
 	}
 
 	/**
@@ -209,7 +221,9 @@ public class SpelParserConfiguration {
 	 * global defaults per use case.
 	 * @param autoGrowNullReferences if null references should automatically grow
 	 * @param autoGrowCollections if collections should automatically grow
-	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow
+	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow;
+	 * must not be negative, and a value of {@code 0} effectively disables growing
+	 * a collection beyond its current size
 	 * @see #SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
@@ -230,7 +244,9 @@ public class SpelParserConfiguration {
 	 * expression compilation; or {@code null} to use the default {@code ClassLoader}
 	 * @param autoGrowNullReferences if null references should automatically grow
 	 * @param autoGrowCollections if collections should automatically grow
-	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow
+	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow;
+	 * must not be negative, and a value of {@code 0} effectively disables growing
+	 * a collection beyond its current size
 	 * @see #SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
@@ -254,7 +270,9 @@ public class SpelParserConfiguration {
 	 * expression compilation; or {@code null} to use the default {@code ClassLoader}
 	 * @param autoGrowNullReferences if null references should automatically grow
 	 * @param autoGrowCollections if collections should automatically grow
-	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow
+	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow;
+	 * must not be negative, and a value of {@code 0} effectively disables growing
+	 * a collection beyond its current size
 	 * @param maximumExpressionLength the maximum length of a SpEL expression;
 	 * must be a positive number
 	 * @since 5.2.25
@@ -282,7 +300,9 @@ public class SpelParserConfiguration {
 	 * expression compilation; or {@code null} to use the default {@code ClassLoader}
 	 * @param autoGrowNullReferences if null references should automatically grow
 	 * @param autoGrowCollections if collections should automatically grow
-	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow
+	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow;
+	 * must not be negative, and a value of {@code 0} effectively disables growing
+	 * a collection beyond its current size
 	 * @param maximumExpressionLength the maximum length of a SpEL expression;
 	 * must be a positive number
 	 * @param maximumOperations the maximum number of operations permitted during
@@ -311,7 +331,9 @@ public class SpelParserConfiguration {
 	 * expression compilation; or {@code null} to use the default {@code ClassLoader}
 	 * @param autoGrowNullReferences if null references should automatically grow
 	 * @param autoGrowCollections if collections should automatically grow
-	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow
+	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow;
+	 * must not be negative, and a value of {@code 0} effectively disables growing
+	 * a collection beyond its current size
 	 * @param maximumExpressionLength the maximum length of a SpEL expression;
 	 * must be a positive number
 	 * @param maximumOperations the maximum number of operations permitted during
@@ -338,7 +360,9 @@ public class SpelParserConfiguration {
 	 * expression compilation; or {@code null} to use the default {@code ClassLoader}
 	 * @param autoGrowNullReferences if null references should automatically grow
 	 * @param autoGrowCollections if collections should automatically grow
-	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow
+	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow;
+	 * must not be negative, and a value of {@code 0} effectively disables growing
+	 * a collection beyond its current size
 	 * @param maximumExpressionLength the maximum length of a SpEL expression;
 	 * must be a positive number
 	 * @param maximumOperations the maximum number of operations permitted during
@@ -355,6 +379,7 @@ public class SpelParserConfiguration {
 			int maximumOperations, int maximumBigPowerBits, int maximumNestingDepth) {
 
 		Assert.notNull(compilerMode, "'compilerMode' must not be null");
+		Assert.isTrue(maximumAutoGrowSize >= 0, "'maximumAutoGrowSize' must not be negative");
 		Assert.isTrue(maximumExpressionLength > 0, "'maximumExpressionLength' must be a positive number");
 		Assert.isTrue(maximumOperations > 0, "'maximumOperations' must be a positive number");
 		Assert.isTrue(maximumBigPowerBits > 0, "'maximumBigPowerBits' must be a positive number");
@@ -402,6 +427,7 @@ public class SpelParserConfiguration {
 
 	/**
 	 * Return the maximum size to which a collection can auto grow.
+	 * @see #DEFAULT_MAX_AUTO_GROW_SIZE
 	 */
 	public int getMaximumAutoGrowSize() {
 		return this.maximumAutoGrowSize;
