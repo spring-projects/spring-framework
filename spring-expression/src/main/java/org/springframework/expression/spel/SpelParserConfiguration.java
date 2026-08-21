@@ -349,7 +349,6 @@ public class SpelParserConfiguration {
 	 * @param maximumNestingDepth the maximum nesting depth permitted within a SpEL
 	 * expression; must be a positive number
 	 * @since 7.1
-	 * @see #DEFAULT_MAX_EXPRESSION_NESTING_DEPTH
 	 */
 	public SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength,
