@@ -487,12 +487,12 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <E> ListBodySpec<E> expectBodyList(Class<E> elementType) {
+		public <E extends @Nullable Object> ListBodySpec<E> expectBodyList(Class<E> elementType) {
 			return getListBodySpec(this.response.bodyToFlux(elementType));
 		}
 
 		@Override
-		public <E> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType) {
+		public <E extends @Nullable Object> ListBodySpec<E> expectBodyList(ParameterizedTypeReference<E> elementType) {
 			Flux<E> flux = this.response.bodyToFlux(elementType);
 			return getListBodySpec(flux);
 		}

@@ -117,6 +117,10 @@ publishing {
 	}
 }
 
+nullability {
+	nullAwayVersion = "0.14.0"
+}
+
 // Disable publication of test fixture artifacts.
 components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
 components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }

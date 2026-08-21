@@ -20,6 +20,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import org.jspecify.annotations.Nullable;
 import org.quartz.SchedulerConfigException;
 import org.quartz.simpl.SimpleThreadPool;
 
@@ -83,7 +84,7 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 	}
 
 	@Override
-	public <T> Future<T> submit(Callable<T> task) {
+	public <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<>(task);
 		execute(future);
 		return future;

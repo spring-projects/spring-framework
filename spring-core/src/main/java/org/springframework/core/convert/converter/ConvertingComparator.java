@@ -69,6 +69,7 @@ public class ConvertingComparator<S, T extends @Nullable Object> implements Comp
 	 * @param conversionService the conversion service
 	 * @param targetType the target type
 	 */
+	@SuppressWarnings("NullAway") // Retain support for comparators that handle a null conversion result
 	public ConvertingComparator(
 			Comparator<T> comparator, ConversionService conversionService, Class<? extends T> targetType) {
 

@@ -345,7 +345,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public <T> Future<T> submit(Callable<T> task) {
+	public <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<>(task);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;

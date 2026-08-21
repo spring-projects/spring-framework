@@ -45,7 +45,7 @@ import org.springframework.util.NumberUtils;
 final class NumberToNumberConverterFactory implements ConverterFactory<Number, Number>, ConditionalConverter {
 
 	@Override
-	public <T extends Number> Converter<Number, @Nullable T> getConverter(Class<T> targetType) {
+	public <T extends Number> Converter<Number, ? extends @Nullable T> getConverter(Class<T> targetType) {
 		return new NumberToNumber<>(targetType);
 	}
 

@@ -262,7 +262,7 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	}
 
 	@Override
-	public <T> Future<T> submit(Callable<T> task) {
+	public <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 		return super.submit(new DelegatingErrorHandlingCallable<>(task, this.errorHandler));
 	}
 
