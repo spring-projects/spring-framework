@@ -165,7 +165,7 @@ public class ConcurrentTaskExecutor implements AsyncTaskExecutor, SchedulingTask
 	}
 
 	@Override
-	public <T> Future<T> submit(Callable<T> task) {
+	public <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 		return this.adaptedExecutor.submit(task);
 	}
 
@@ -208,7 +208,7 @@ public class ConcurrentTaskExecutor implements AsyncTaskExecutor, SchedulingTask
 		}
 
 		@Override
-		public <T> Future<T> submit(Callable<T> task) {
+		public <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 			return super.submit(ManagedTaskBuilder.buildManagedTask(task, task.toString()));
 		}
 	}

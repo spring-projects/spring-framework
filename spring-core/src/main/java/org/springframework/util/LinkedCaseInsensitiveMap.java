@@ -48,7 +48,7 @@ import org.jspecify.annotations.Nullable;
  * @since 3.0
  * @param <V> the value type
  */
-public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable, Cloneable {
+public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map<String, V>, Serializable, Cloneable {
 
 	@Serial
 	private static final long serialVersionUID = -1797561627545787622L;
