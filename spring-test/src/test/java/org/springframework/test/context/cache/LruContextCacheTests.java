@@ -81,6 +81,42 @@ class LruContextCacheTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> new DefaultContextCache(0));
 	}
 
+	@Test
+	void clearClosesContexts() {
+		DefaultContextCache cache = new DefaultContextCache(4);
+
+		cache.put(fooConfig, key -> fooContext);
+		cache.put(barConfig, key -> barContext);
+		cache.put(bazConfig, key -> bazContext);
+		assertCacheContents(cache, "Foo", "Bar", "Baz");
+
+		cache.clear();
+		assertCacheContents(cache);
+
+		verify(fooContext, times(1)).close();
+		verify(barContext, times(1)).close();
+		verify(bazContext, times(1)).close();
+		verify(abcContext, never()).close();
+	}
+
+	@Test
+	void resetClosesContexts() {
+		DefaultContextCache cache = new DefaultContextCache(4);
+
+		cache.put(fooConfig, key -> fooContext);
+		cache.put(barConfig, key -> barContext);
+		cache.get(fooConfig);
+		assertThat(cache.getHitCount()).isEqualTo(1);
+		assertCacheContents(cache, "Bar", "Foo");
+
+		cache.reset();
+		assertCacheContents(cache);
+		assertThat(cache.getHitCount()).isZero();
+
+		verify(fooContext, times(1)).close();
+		verify(barContext, times(1)).close();
+	}
+
 
 	@Nested
 	@SuppressWarnings("deprecation")
