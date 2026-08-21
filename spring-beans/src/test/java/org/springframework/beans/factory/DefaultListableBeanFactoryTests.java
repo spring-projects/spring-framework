@@ -1237,11 +1237,13 @@ class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
 		bd1.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		lbf.registerBeanDefinition("testBean", bd1);
+		assertThat(lbf.getBeanDefinition("testBean").getScope()).isEqualTo(BeanDefinition.SCOPE_PROTOTYPE);
 		assertThat(lbf.getBean("testBean")).isInstanceOf(TestBean.class);
 
 		RootBeanDefinition bd2 = new RootBeanDefinition(NestedTestBean.class);
-		bd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bd2.setScope(BeanDefinition.SCOPE_SINGLETON);
 		lbf.registerBeanDefinition("testBean", bd2);
+		assertThat(lbf.getBeanDefinition("testBean").getScope()).isEqualTo(BeanDefinition.SCOPE_SINGLETON);
 		assertThat(lbf.getBean("testBean")).isInstanceOf(NestedTestBean.class);
 	}
 
