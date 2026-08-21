@@ -95,6 +95,12 @@ class ArrayConstructorTests extends AbstractExpressionTests {
 		int threshold = 256 * 1024; // ConstructorReference.MAX_ARRAY_ELEMENTS
 		evaluateAndCheckError("new int[T(java.lang.Integer).MAX_VALUE]", SpelMessage.MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED, 0, threshold);
 		evaluateAndCheckError("new int[1024 * 1024][1024 * 1024]", SpelMessage.MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED, 0, threshold);
+		// The product of all dimension sizes stays just under the threshold, but Java
+		// allocates an array object at every nesting level, so the total number of
+		// array objects created (1 root + 262143 sub-arrays) meets the threshold.
+		evaluateAndCheckError("new int[262143][1]", SpelMessage.MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED, 0, threshold);
+		evaluateAndCheckError("new int[262143][1][1][1][1][1][1][1][1][1][1]",
+				SpelMessage.MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED, 0, threshold);
 	}
 
 	@Test
@@ -116,6 +122,9 @@ class ArrayConstructorTests extends AbstractExpressionTests {
 		evaluate("new String[3][2][1]",
 				"[[Ljava.lang.String;[3]{[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}}}",
 				String[][][].class);
+		// 1 root array + 262142 sub-arrays = 262143 array objects, just under the
+		// MAX_ARRAY_ELEMENTS threshold, so this must not be rejected.
+		evaluate("new int[262142][1].length", 262142, Integer.class);
 	}
 
 	@Test

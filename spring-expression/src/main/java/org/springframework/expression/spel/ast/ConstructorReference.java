@@ -67,7 +67,9 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	/**
 	 * Maximum number of elements permitted in an array declaration, applying
-	 * to one-dimensional as well as multi-dimensional arrays.
+	 * to one-dimensional as well as multi-dimensional arrays. For the latter,
+	 * this also bounds the total number of array objects allocated across all
+	 * nesting levels, not just the product of the dimension sizes.
 	 * @since 5.3.17
 	 */
 	private static final int MAX_ARRAY_ELEMENTS = 256 * 1024; // 256K
@@ -312,12 +314,18 @@ public class ConstructorReference extends SpelNodeImpl {
 					// Multidimensional - hold onto your hat!
 					int[] dims = new int[this.dimensions.length];
 					long numElements = 1;
+					// Java allocates a distinct array object at every nesting level, so we
+					// also have to cap the total number of array objects created, not just
+					// the product of all dimension sizes (the number of leaf elements).
+					long totalArrayObjects = 0;
 					for (int d = 0; d < this.dimensions.length; d++) {
 						TypedValue o = this.dimensions[d].getTypedValue(state);
 						int arraySize = ExpressionUtils.toInt(typeConverter, o);
 						dims[d] = arraySize;
+						totalArrayObjects += numElements;
 						numElements *= arraySize;
 						checkNumElements(numElements);
+						checkNumElements(totalArrayObjects);
 					}
 					newArray = Array.newInstance(componentType, dims);
 				}
