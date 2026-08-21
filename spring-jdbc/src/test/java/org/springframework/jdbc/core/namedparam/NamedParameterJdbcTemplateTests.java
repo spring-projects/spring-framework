@@ -80,6 +80,13 @@ class NamedParameterJdbcTemplateTests {
 	private static final String UPDATE_ARRAY_PARAMETERS_PARSED =
 			"update customer set type = array[?, ?, ?] where id = ?";
 
+	private static final String SELECT_NAMED_PARAMETERS_IN_COMMENT =
+			"/*@ queryKey(:id) */ select id, forename from custmr where id = :id and country = :country";
+	private static final String SELECT_NAMED_PARAMETERS_IN_COMMENT_PARSED =
+			"/*@ queryKey(?) */ select id, forename from custmr where id = ? and country = ?";
+	private static final String SELECT_NAMED_PARAMETERS_IN_COMMENT_PARSED_WITHOUT_COMMENT =
+			"/*@ queryKey(:id) */ select id, forename from custmr where id = ? and country = ?";
+
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
 
 
@@ -145,6 +152,63 @@ class NamedParameterJdbcTemplateTests {
 		verify(preparedStatement).setObject(2, 1);
 		verify(preparedStatement).close();
 		verify(connection).close();
+	}
+
+	@Test  // gh-22255
+	void executeWithParametersInCommentsIgnoredByDefault() throws SQLException {
+		given(preparedStatement.executeUpdate()).willReturn(1);
+
+		assertThat(namedParameterTemplate.isAllowParametersInComments()).isFalse();
+
+		params.put("id", 1);
+		params.put("country", "UK");
+		namedParameterTemplate.execute(SELECT_NAMED_PARAMETERS_IN_COMMENT, params,
+				(PreparedStatementCallback<Object>) ps -> {
+					ps.executeUpdate();
+					return "result";
+				});
+
+		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_IN_COMMENT_PARSED_WITHOUT_COMMENT);
+		verify(preparedStatement).setObject(1, 1);
+		verify(preparedStatement).setString(2, "UK");
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test  // gh-22255
+	void executeWithParametersInCommentsAllowed() throws SQLException {
+		given(preparedStatement.executeUpdate()).willReturn(1);
+
+		namedParameterTemplate.setAllowParametersInComments(true);
+		assertThat(namedParameterTemplate.isAllowParametersInComments()).isTrue();
+
+		params.put("id", 1);
+		params.put("country", "UK");
+		namedParameterTemplate.execute(SELECT_NAMED_PARAMETERS_IN_COMMENT, params,
+				(PreparedStatementCallback<Object>) ps -> {
+					ps.executeUpdate();
+					return "result";
+				});
+
+		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_IN_COMMENT_PARSED);
+		verify(preparedStatement).setObject(1, 1);
+		verify(preparedStatement).setObject(2, 1);
+		verify(preparedStatement).setString(3, "UK");
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test  // gh-22255
+	void setAllowParametersInCommentsResetsParsedSqlCacheRetainingCacheLimit() {
+		namedParameterTemplate.setCacheLimit(10);
+		assertThat(namedParameterTemplate.getParsedSql(SELECT_NAMED_PARAMETERS_IN_COMMENT)
+				.getTotalParameterCount()).isEqualTo(2);
+
+		namedParameterTemplate.setAllowParametersInComments(true);
+
+		assertThat(namedParameterTemplate.getCacheLimit()).isEqualTo(10);
+		assertThat(namedParameterTemplate.getParsedSql(SELECT_NAMED_PARAMETERS_IN_COMMENT)
+				.getTotalParameterCount()).isEqualTo(3);
 	}
 
 	@Disabled("SPR-16340")
