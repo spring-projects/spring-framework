@@ -227,6 +227,21 @@ class YamlPropertiesFactoryBeanTests {
 	}
 
 	@Test
+	void loadNestedMapWithBracketedKey() {
+		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+		factory.setResources(new ByteArrayResource("""
+				root:
+				  webservices:
+				    "[domain.test:8080]":
+				      - username: me
+				        password: mypassword
+				""".getBytes()));
+		Properties properties = factory.getObject();
+		assertThat(properties.getProperty("root.webservices[[domain.test:8080]][0].username")).isEqualTo("me");
+		assertThat(properties.getProperty("root.webservices[[domain.test:8080]][0].password")).isEqualTo("mypassword");
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")
 	void yaml() {
 		Yaml yaml = new Yaml();
