@@ -96,12 +96,12 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 */
 	public static Flux<Token> parse(Flux<DataBuffer> buffers, byte[] boundary, int maxHeadersSize,
 			Charset headersCharset) {
-		return Flux.create(sink -> {
+		return Flux.<Token>create(sink -> {
 			MultipartParser parser = new MultipartParser(sink, boundary, maxHeadersSize, headersCharset);
 			sink.onCancel(parser::onSinkCancel);
 			sink.onRequest(l -> parser.requestBuffer());
 			buffers.subscribe(parser);
-		});
+		}).doOnDiscard(BodyToken.class, body -> DataBufferUtils.release(body.buffer()));
 	}
 
 	@Override
@@ -602,13 +602,17 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 			emit.forEach(buffer -> MultipartParser.this.emitBody(buffer, false));
 		}
 
+		/**
+		 * Emit all queued buffers, removing each from the queue before emitting it so
+		 * that {@link #dispose()} cannot release a buffer that was already handed over
+		 * to the sink. A cancellation arriving while this method emits would otherwise
+		 * release such a buffer a second time.
+		 */
 		private void flush() {
-			for (Iterator<DataBuffer> iterator = this.queue.iterator(); iterator.hasNext(); ) {
-				DataBuffer buffer = iterator.next();
-				boolean last = !iterator.hasNext();
-				MultipartParser.this.emitBody(buffer, last);
+			DataBuffer buffer;
+			while ((buffer = this.queue.poll()) != null) {
+				MultipartParser.this.emitBody(buffer, this.queue.isEmpty());
 			}
-			this.queue.clear();
 		}
 
 		@Override
