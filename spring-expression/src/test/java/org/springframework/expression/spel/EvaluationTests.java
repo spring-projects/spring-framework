@@ -86,8 +86,9 @@ class EvaluationTests extends AbstractExpressionTests {
 			String expression = "'%s'".formatted("Y".repeat(19_998));
 			assertThat(expression).hasSize(maximumExpressionLength);
 
-			SpelParserConfiguration configuration =
-					new SpelParserConfiguration(null, null, false, false, 0, maximumExpressionLength);
+			SpelParserConfiguration configuration = SpelParserConfiguration.builder()
+					.maximumExpressionLength(maximumExpressionLength)
+					.build();
 			ExpressionParser parser = new SpelExpressionParser(configuration);
 
 			Expression expr = parser.parseExpression(expression);
@@ -111,8 +112,11 @@ class EvaluationTests extends AbstractExpressionTests {
 			Expression expr1 = parser.parseExpression(expression);
 			assertThat(expr1.getValue(Boolean.class)).isTrue();
 
-			SpelParserConfiguration configuration =
-					new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, maxLength, maxOperations);
+			SpelParserConfiguration configuration = SpelParserConfiguration.builder()
+					.compilerMode(SpelCompilerMode.OFF)
+					.maximumExpressionLength(maxLength)
+					.maximumOperations(maxOperations)
+					.build();
 			parser = new SpelExpressionParser(configuration);
 			Expression expr2 = parser.parseExpression(expression);
 			assertThatExceptionOfType(SpelEvaluationException.class)
@@ -167,13 +171,20 @@ class EvaluationTests extends AbstractExpressionTests {
 				SpringProperties.setProperty(SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME, "" + maxOperations / 2);
 
 				// maxOperations + 1 should override maxOperations / 2
-				SpelParserConfiguration configuration =
-						new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, maxLength, maxOperations + 1);
+				SpelParserConfiguration configuration = SpelParserConfiguration.builder()
+						.compilerMode(SpelCompilerMode.OFF)
+						.maximumExpressionLength(maxLength)
+						.maximumOperations(maxOperations + 1)
+						.build();
 				parser = new SpelExpressionParser(configuration);
 				expr1 = parser.parseExpression(expression);
 				assertThat(expr1.getValue(Boolean.class)).isTrue();
 
-				configuration = new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, maxLength, maxOperations);
+				configuration = SpelParserConfiguration.builder()
+						.compilerMode(SpelCompilerMode.OFF)
+						.maximumExpressionLength(maxLength)
+						.maximumOperations(maxOperations)
+						.build();
 				parser = new SpelExpressionParser(configuration);
 				Expression expr2 = parser.parseExpression(expression);
 				assertThatExceptionOfType(SpelEvaluationException.class)
@@ -191,7 +202,8 @@ class EvaluationTests extends AbstractExpressionTests {
 
 		@Test
 		void createListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e = parser.parseExpression("list[0]");
 			TestClass testClass = new TestClass();
 
@@ -213,7 +225,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void createMapsOnAttemptToIndexNull() {
 			TestClass testClass = new TestClass();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 
 			Object o = parser.parseExpression("map['a']").getValue(ctx);
 			assertThat(o).isNull();
@@ -230,7 +243,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void createObjectsOnAttemptToReferenceNull() {
 			TestClass testClass = new TestClass();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 
 			Object o = parser.parseExpression("wibble.bar").getValue(ctx);
 			assertThat(o).isEqualTo("hello");
@@ -385,7 +399,7 @@ class EvaluationTests extends AbstractExpressionTests {
 		void initializingCollectionElementsOnWrite() {
 			TestPerson person = new TestPerson();
 			EvaluationContext context = new StandardEvaluationContext(person);
-			SpelParserConfiguration config = new SpelParserConfiguration(true, true);
+			SpelParserConfiguration config = SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build();
 			ExpressionParser parser = new SpelExpressionParser(config);
 			Expression e = parser.parseExpression("name");
 			e.setValue(context, "Oleg");
@@ -452,7 +466,8 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			// Add a new element to the list
 			StandardEvaluationContext ctx = new StandardEvaluationContext(instance);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e = parser.parseExpression("listOfStrings[++index3]='def'");
 			e.getValue(ctx);
 			assertThat(instance.listOfStrings).hasSize(2);
@@ -460,7 +475,8 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			// Check reference beyond end of collection
 			ctx = new StandardEvaluationContext(instance);
-			parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			e = parser.parseExpression("listOfStrings[0]");
 			String value = e.getValue(ctx, String.class);
 			assertThat(value).isEqualTo("abc");
@@ -473,7 +489,7 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			// Now turn off growing and reference off the end
 			StandardEvaluationContext failCtx = new StandardEvaluationContext(instance);
-			parser = new SpelExpressionParser(new SpelParserConfiguration(false, false));
+			parser = new SpelExpressionParser(SpelParserConfiguration.withDefaults());
 			Expression failExp = parser.parseExpression("listOfStrings[3]");
 			assertThatExceptionOfType(SpelEvaluationException.class)
 				.isThrownBy(() -> failExp.getValue(failCtx, String.class))
@@ -484,7 +500,12 @@ class EvaluationTests extends AbstractExpressionTests {
 		void limitCollectionGrowing() {
 			TestClass instance = new TestClass();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(instance);
-			SpelExpressionParser parser = new SpelExpressionParser( new SpelParserConfiguration(true, true, 3));
+			SpelParserConfiguration config = SpelParserConfiguration.builder()
+					.autoGrowNullReferences()
+					.autoGrowCollections()
+					.maximumAutoGrowSize(3)
+					.build();
+			SpelExpressionParser parser = new SpelExpressionParser(config);
 			Expression e = parser.parseExpression("foo[2]");
 			e.setValue(ctx, "2");
 			assertThat(instance.getFoo()).hasSize(3);
@@ -819,9 +840,12 @@ class EvaluationTests extends AbstractExpressionTests {
 		// Use a small limit (16 bits) to verify behavior in tests.
 		private static final int TEST_MAX_RESULT_BITS = 16;
 
-		private final SpelExpressionParser limitedParser = new SpelExpressionParser(
-				new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false,
-						0, 10, 10, TEST_MAX_RESULT_BITS));
+		private final SpelExpressionParser limitedParser = new SpelExpressionParser(SpelParserConfiguration.builder()
+				.compilerMode(SpelCompilerMode.OFF)
+				.maximumExpressionLength(10)
+				.maximumOperations(10)
+				.maximumBigPowerBits(TEST_MAX_RESULT_BITS)
+				.build());
 
 
 		@Test
@@ -1016,7 +1040,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void increment01root() {
 			Integer i = 42;
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e = parser.parseExpression("#this++");
 			assertThat(i).isEqualTo(42);
 			assertThatExceptionOfType(SpelEvaluationException.class)
@@ -1028,7 +1053,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void increment02postfix() {
 			Spr9751 helper = new Spr9751();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e;
 
 			// BigDecimal
@@ -1081,7 +1107,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void increment02prefix() {
 			Spr9751 helper = new Spr9751();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e;
 
 			// BigDecimal
@@ -1134,7 +1161,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void increment03() {
 			Spr9751 helper = new Spr9751();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 
 			Expression e1 = parser.parseExpression("m()++");
 			assertThatExceptionOfType(SpelEvaluationException.class)
@@ -1151,7 +1179,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void increment04() {
 			Integer i = 42;
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e1 = parser.parseExpression("++1");
 			assertThatExceptionOfType(SpelEvaluationException.class)
 				.isThrownBy(() -> e1.getValue(ctx, double.class))
@@ -1166,7 +1195,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void decrement01root() {
 			Integer i = 42;
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e = parser.parseExpression("#this--");
 			assertThat(i).isEqualTo(42);
 			assertThatExceptionOfType(SpelEvaluationException.class)
@@ -1178,7 +1208,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void decrement02postfix() {
 			Spr9751 helper = new Spr9751();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e;
 
 			// BigDecimal
@@ -1231,7 +1262,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void decrement02prefix() {
 			Spr9751 helper = new Spr9751();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e;
 
 			// BigDecimal
@@ -1284,7 +1316,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void decrement03() {
 			Spr9751 helper = new Spr9751();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 
 			Expression e1 = parser.parseExpression("m()--");
 			assertThatExceptionOfType(SpelEvaluationException.class)
@@ -1301,7 +1334,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void decrement04() {
 			Integer i = 42;
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e1 = parser.parseExpression("--1");
 			assertThatExceptionOfType(SpelEvaluationException.class)
 				.isThrownBy(() -> e1.getValue(ctx, Integer.class))
@@ -1317,7 +1351,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void incrementAndDecrementTogether() {
 			Spr9751 helper = new Spr9751();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e;
 
 			// index1 is 2 at the start - the 'intArray[#root.index1++]' should not be evaluated twice!
@@ -1345,7 +1380,8 @@ class EvaluationTests extends AbstractExpressionTests {
 		void incrementAllNodeTypes() throws SecurityException, NoSuchMethodException {
 			Spr9751 helper = new Spr9751();
 			StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			ExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 			Expression e;
 
 			// BooleanLiteral

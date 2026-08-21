@@ -46,7 +46,7 @@ class SpelCompilerTests {
 
 	@Test  // gh-24357
 	void expressionCompilesWhenMethodComesFromPublicInterface() {
-		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelParserConfiguration config = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.IMMEDIATE).build();
 		SpelExpressionParser parser = new SpelExpressionParser(config);
 
 		OrderedComponent component = new OrderedComponent();
@@ -59,7 +59,7 @@ class SpelCompilerTests {
 
 	@Test  // gh-25706
 	void defaultMethodInvocation() {
-		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelParserConfiguration config = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.IMMEDIATE).build();
 		SpelExpressionParser parser = new SpelExpressionParser(config);
 
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -84,7 +84,7 @@ class SpelCompilerTests {
 
 	@Test
 	void simpleEvaluationContextBlocksCompilationByDefault() {
-		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelParserConfiguration config = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.IMMEDIATE).build();
 		SpelExpressionParser parser = new SpelExpressionParser(config);
 		// "order" resides in the public Ordered interface and is therefore compilable,
 		// so any non-compilation is attributable solely to the context's policy.
@@ -102,7 +102,7 @@ class SpelCompilerTests {
 
 	@Test
 	void simpleEvaluationContextAllowsCompilationWhenSupported() {
-		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelParserConfiguration config = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.IMMEDIATE).build();
 		SpelExpressionParser parser = new SpelExpressionParser(config);
 		// "order" resides in the public Ordered interface and is therefore compilable.
 		Expression expression = parser.parseExpression("order");
@@ -120,7 +120,7 @@ class SpelCompilerTests {
 
 	@Test
 	void simpleEvaluationContextIgnoresPrecompiledExpressionByDefault() {
-		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelParserConfiguration config = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.IMMEDIATE).build();
 		SpelExpressionParser parser = new SpelExpressionParser(config);
 		// "order" resides in the public Ordered interface and is therefore compilable.
 		Expression expression = parser.parseExpression("order");
@@ -155,7 +155,7 @@ class SpelCompilerTests {
 	 */
 	@Test
 	void simpleEvaluationContextSetAsDefaultBlocksCompilationForImplicitContextVariants() {
-		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelParserConfiguration config = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.IMMEDIATE).build();
 		SpelExpressionParser parser = new SpelExpressionParser(config);
 		// "order" resides in the public Ordered interface and is therefore compilable,
 		// so any non-compilation is attributable solely to the context's policy.
@@ -193,7 +193,7 @@ class SpelCompilerTests {
 	 */
 	@Test
 	void simpleEvaluationContextSetAsDefaultIgnoresPrecompiledExpressionForImplicitContextVariants() {
-		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelParserConfiguration config = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.IMMEDIATE).build();
 		SpelExpressionParser parser = new SpelExpressionParser(config);
 		// "order" resides in the public Ordered interface and is therefore compilable.
 		SpelExpression expression = parser.parseRaw("order");
@@ -240,7 +240,7 @@ class SpelCompilerTests {
 
 	@Test  // gh-28043
 	void changingRegisteredVariableTypeDoesNotResultInFailureInMixedMode() {
-		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.MIXED, null);
+		SpelParserConfiguration config = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.MIXED).build();
 		SpelExpressionParser parser = new SpelExpressionParser(config);
 		Expression sharedExpression = parser.parseExpression("#bean.value");
 		StandardEvaluationContext context = new StandardEvaluationContext();

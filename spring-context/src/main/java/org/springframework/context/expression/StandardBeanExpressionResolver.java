@@ -118,8 +118,10 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 	 * @param beanClassLoader the factory's bean class loader
 	 */
 	public StandardBeanExpressionResolver(@Nullable ClassLoader beanClassLoader) {
-		SpelParserConfiguration parserConfig = new SpelParserConfiguration(
-				null, beanClassLoader, false, false, Integer.MAX_VALUE, retrieveMaxExpressionLength());
+		SpelParserConfiguration parserConfig = SpelParserConfiguration.builder()
+				.compilerClassLoader(beanClassLoader)
+				.maximumExpressionLength(retrieveMaxExpressionLength())
+				.build();
 		this.expressionParser = new SpelExpressionParser(parserConfig);
 	}
 
