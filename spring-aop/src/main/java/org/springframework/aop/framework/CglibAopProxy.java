@@ -17,6 +17,7 @@
 package org.springframework.aop.framework;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -421,7 +422,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * Also takes care of the conversion from {@code Mono} to Kotlin Coroutines if needed.
 	 */
 	private static @Nullable Object processReturnType(
-			Object proxy, @Nullable Object target, Method method, Object[] arguments, @Nullable Object returnValue) {
+			Object proxy, @Nullable Object target, Method method, Object[] arguments, @Nullable Object returnValue) throws
+			NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
 		// Massage return value if necessary
 		if (returnValue != null && returnValue == target &&
@@ -436,9 +438,14 @@ class CglibAopProxy implements AopProxy, Serializable {
 					"Null return value from advice does not match primitive return type for: " + method);
 		}
 		if (COROUTINES_REACTOR_PRESENT && KotlinDetector.isSuspendingFunction(method)) {
-			return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
-					CoroutinesUtils.asFlow(returnValue) :
-					CoroutinesUtils.awaitSingleOrNull(returnValue, arguments[arguments.length - 1]);
+			Class<?> returnParameterType = new MethodParameter(method, -1).getParameterType();
+			if (COROUTINES_FLOW_CLASS_NAME.equals(returnParameterType.getName())) {
+				return CoroutinesUtils.asFlow(returnValue);
+			}
+			Object awaitResult = CoroutinesUtils.awaitSingleOrNull(returnValue, arguments[arguments.length - 1]);
+			return KotlinDetector.isInlineClass(returnParameterType) &&
+					awaitResult != null && KotlinDetector.isInlineClass(awaitResult.getClass()) ?
+					awaitResult.getClass().getDeclaredMethod("unbox-impl").invoke(awaitResult) : awaitResult;
 		}
 		return returnValue;
 	}
