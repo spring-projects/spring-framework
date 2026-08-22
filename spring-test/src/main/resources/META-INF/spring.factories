@@ -12,7 +12,8 @@ org.springframework.test.context.TestExecutionListener = \
 	org.springframework.test.context.transaction.TransactionalTestExecutionListener,\
 	org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener,\
 	org.springframework.test.context.event.EventPublishingTestExecutionListener,\
-	org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener
+	org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener,\
+	org.springframework.test.context.aot.AotCacheTestExecutionListener
 
 # Default ContextCustomizerFactory implementations for the Spring TestContext Framework
 #

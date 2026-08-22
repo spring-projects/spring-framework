@@ -20,6 +20,9 @@ by default, exactly in the following order:
   "after" modes.
 * `CommonCachesTestExecutionListener`: Clears resource caches in the test's
   `ApplicationContext` if necessary.
+* `AotCacheTestExecutionListener`: Coordinates JVM AOT cache recording during integration
+  tests. It activates automatically when the test JVM is started with AOT cache recording
+  flags (see xref:integration/aot-cache.adoc#aot-cache-integration-tests[Generating the cache from integration tests]).
 * `TransactionalTestExecutionListener`: Provides transactional test execution with
   default rollback semantics.
 * `SqlScriptsTestExecutionListener`: Runs SQL scripts configured by using the `@Sql`
