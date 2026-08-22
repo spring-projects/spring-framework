@@ -488,17 +488,23 @@ Kotlin::
 
 It is possible to configure the SpEL expression parser by using a parser configuration
 object (`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
-object controls the behavior of some of the expression components. For example, if you
-index into a collection and the element at the specified index is `null`, SpEL can
-automatically create the element. This is useful when using expressions made up of a
-chain of property references. Similarly, if you index into a collection and specify an
-index that is greater than the current size of the collection, SpEL can automatically
-grow the collection to accommodate that index. In order to add an element at the
-specified index, SpEL will try to create the element using the element type's default
-constructor before setting the specified value. If the element type does not have a
-default constructor, `null` will be added to the collection. If there is no built-in
-converter or custom converter that knows how to set the value, `null` will remain in the
-collection at the specified index. The following example demonstrates how to
+object controls the behavior of some of the expression components. To create a
+`SpelParserConfiguration` instance, favor `SpelParserConfiguration.builder()` over the
+numerous constructors in `SpelParserConfiguration`, since the builder only requires
+configuration of the properties that need to deviate from their sensible defaults --
+or use `SpelParserConfiguration.withDefaults()` if none of those defaults need to be
+overridden.
+
+For example, if you index into a collection and the element at the specified index is
+`null`, SpEL can automatically create the element. This is useful when using expressions
+made up of a chain of property references. Similarly, if you index into a collection and
+specify an index that is greater than the current size of the collection, SpEL can
+automatically grow the collection to accommodate that index. In order to add an element
+at the specified index, SpEL will try to create the element using the element type's
+default constructor before setting the specified value. If the element type does not
+have a default constructor, `null` will be added to the collection. If there is no
+built-in converter or custom converter that knows how to set the value, `null` will
+remain in the collection at the specified index. The following example demonstrates how to
 automatically grow a `List`.
 
 [tabs]
@@ -511,10 +517,10 @@ Java::
 		public List<String> list;
 	}
 
-	// Turn on:
-	// - auto null reference initialization
-	// - auto collection growing
-	SpelParserConfiguration config = new SpelParserConfiguration(true, true);
+	SpelParserConfiguration config = SpelParserConfiguration.builder()
+			.autoGrowNullReferences()
+			.autoGrowCollections()
+			.build();
 
 	ExpressionParser parser = new SpelExpressionParser(config);
 
@@ -536,10 +542,10 @@ Kotlin::
 		var list: List<String>? = null
 	}
 
-	// Turn on:
-	// - auto null reference initialization
-	// - auto collection growing
-	val config = SpelParserConfiguration(true, true)
+	val config = SpelParserConfiguration.builder()
+			.autoGrowNullReferences()
+			.autoGrowCollections()
+			.build()
 
 	val parser = SpelExpressionParser(config)
 
@@ -564,7 +570,8 @@ create a `SpelExpressionParser` programmatically, you can specify a custom
 
 By default, a SpEL expression cannot contain more than 10,000 characters; however, the
 `maxExpressionLength` is configurable. If you create a `SpelExpressionParser`
-programmatically, you can specify a custom `maxExpressionLength` when creating the
+programmatically, you can specify a custom `maxExpressionLength` via
+`SpelParserConfiguration.builder().maximumExpressionLength(...)` when creating the
 `SpelParserConfiguration` that you provide to the `SpelExpressionParser`. If you wish to
 set the `maxExpressionLength` used for parsing SpEL expressions within an
 `ApplicationContext` -- for example, in XML bean definitions, `@Value`, etc. -- you can
@@ -575,12 +582,14 @@ xref:appendix.adoc#appendix-spring-properties[Supported Spring Properties]).
 Similarly, the number of operations performed during the evaluation of a SpEL expression
 cannot exceed 10,000 by default; however, the `maxOperations` value is configurable. If
 you create a `SpelExpressionParser` programmatically (the recommend approach), you can
-specify a custom `maxOperations` value when creating the `SpelParserConfiguration` that
-you provide to the `SpelExpressionParser`. If you are not able to configure an explicit
-value for `maxOperations` via `SpelParserConfiguration`, you can set a JVM system
-property or Spring property named `spring.expression.maxOperations` to the maximum number
-of operations required by your application (see
-xref:appendix.adoc#appendix-spring-properties[Supported Spring Properties]).
+specify a custom `maxOperations` value via
+`SpelParserConfiguration.builder().maximumOperations(...)` when creating the
+`SpelParserConfiguration` that you provide to the `SpelExpressionParser`. If you are not
+able to configure an explicit value for `maxOperations` via `SpelParserConfiguration`,
+you can set a JVM system property or Spring property named
+`spring.expression.maxOperations` to the maximum number of operations required by your
+application (see xref:appendix.adoc#appendix-spring-properties[Supported Spring
+Properties]).
 
 In addition, the result of a `BigDecimal` or `BigInteger` power operation within a SpEL
 expression cannot exceed 1,000,000 bits by default – approximately equivalent to a
@@ -588,19 +597,21 @@ decimal number with 300,000 digits. Power operations involving large base values
 exponents can be computationally expensive, and this limit ensures that evaluations
 remain bounded; however, the `maximumBigPowerBits` value is configurable. If you create a
 `SpelExpressionParser` programmatically (the recommended approach), you can specify a
-custom `maximumBigPowerBits` value when creating the `SpelParserConfiguration` that you
-provide to the `SpelExpressionParser`. To remove this limit entirely, pass
-`Integer.MAX_VALUE` as the `maximumBigPowerBits` value. If you are not able to configure
-an explicit value for `maximumBigPowerBits` via `SpelParserConfiguration`, you can set a
-JVM system property or Spring property named `spring.expression.maxBigPowerBits` to the
-maximum result size in bits (see xref:appendix.adoc#appendix-spring-properties[Supported
-Spring Properties]).
+custom `maximumBigPowerBits` value via
+`SpelParserConfiguration.builder().maximumBigPowerBits(...)` when creating the
+`SpelParserConfiguration` that you provide to the `SpelExpressionParser`. To remove this
+limit entirely, pass `Integer.MAX_VALUE` as the `maximumBigPowerBits` value. If you are
+not able to configure an explicit value for `maximumBigPowerBits` via
+`SpelParserConfiguration`, you can set a JVM system property or Spring property named
+`spring.expression.maxBigPowerBits` to the maximum result size in bits (see
+xref:appendix.adoc#appendix-spring-properties[Supported Spring Properties]).
 
 Likewise, the structural nesting depth of a SpEL expression -- for example, the depth of
 nested inline lists or maps, parenthesized expressions, ternary or Elvis expressions, or
 chained unary operators -- cannot exceed 1,000 by default; however, the
 `maximumNestingDepth` value is configurable. If you create a `SpelExpressionParser`
-programmatically, you can specify a custom `maximumNestingDepth` value when creating the
+programmatically, you can specify a custom `maximumNestingDepth` value via
+`SpelParserConfiguration.builder().maximumNestingDepth(...)` when creating the
 `SpelParserConfiguration` that you provide to the `SpelExpressionParser`. Unlike
 `maxExpressionLength` and `maxOperations`, there is currently no JVM system property or
 Spring property available for configuring `maximumNestingDepth` globally.
@@ -702,8 +713,10 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
-			this.getClass().getClassLoader());
+	SpelParserConfiguration config = SpelParserConfiguration.builder()
+			.compilerMode(SpelCompilerMode.IMMEDIATE)
+			.compilerClassLoader(getClass().getClassLoader())
+			.build();
 
 	SpelExpressionParser parser = new SpelExpressionParser(config);
 
@@ -718,8 +731,10 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	val config = SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
-			this.javaClass.classLoader)
+	val config = SpelParserConfiguration.builder()
+			.compilerMode(SpelCompilerMode.IMMEDIATE)
+			.compilerClassLoader(javaClass.classLoader)
+			.build()
 
 	val parser = SpelExpressionParser(config)
 

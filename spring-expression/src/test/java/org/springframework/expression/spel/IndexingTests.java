@@ -161,7 +161,8 @@ class IndexingTests {
 
 	@Test
 	void setPropertyContainingMapAutoGrow() {
-		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, false));
+		SpelExpressionParser parser = new SpelExpressionParser(
+				SpelParserConfiguration.builder().autoGrowNullReferences().build());
 		Expression expression = parser.parseExpression("parameterizedMap");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
 				.isEqualTo("java.util.Map<java.lang.Integer, java.lang.Integer>");
@@ -206,7 +207,8 @@ class IndexingTests {
 	void setGenericPropertyContainingListAutogrow() {
 		List<Integer> property = new ArrayList<>();
 		this.property = property;
-		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		SpelExpressionParser parser = new SpelExpressionParser(
+				SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
 				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getCanonicalName());
@@ -221,7 +223,8 @@ class IndexingTests {
 	@Test
 	void autoGrowListOfElementsWithoutDefaultConstructor() {
 		this.decimals = new ArrayList<>();
-		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		SpelExpressionParser parser = new SpelExpressionParser(
+				SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 		parser.parseExpression("decimals[0]").setValue(this, "123.4");
 		assertThat(decimals).containsExactly(BigDecimal.valueOf(123.4));
 	}
@@ -231,7 +234,8 @@ class IndexingTests {
 		this.decimals = new ArrayList<>();
 		this.decimals.add(null);
 		this.decimals.add(BigDecimal.ONE);
-		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		SpelExpressionParser parser = new SpelExpressionParser(
+				SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 		parser.parseExpression("decimals[0]").setValue(this, "9876.5");
 		assertThat(decimals).containsExactly(BigDecimal.valueOf(9876.5), BigDecimal.ONE);
 	}
@@ -282,7 +286,8 @@ class IndexingTests {
 
 	@Test
 	void indexIntoGenericPropertyContainingNullList() {
-		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
+		SpelParserConfiguration configuration =
+				SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build();
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
@@ -299,7 +304,8 @@ class IndexingTests {
 	void indexIntoGenericPropertyContainingGrowingList() {
 		List<String> property = new ArrayList<>();
 		this.property = property;
-		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
+		SpelParserConfiguration configuration =
+				SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build();
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
@@ -316,7 +322,8 @@ class IndexingTests {
 	void indexIntoGenericPropertyContainingGrowingList2() {
 		List<String> property2 = new ArrayList<>();
 		this.property2 = property2;
-		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
+		SpelParserConfiguration configuration =
+				SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build();
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property2");
 		assertThat(expression.getValueTypeDescriptor(this)).asString().isEqualTo("java.util.ArrayList<?>");
