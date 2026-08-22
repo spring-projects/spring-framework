@@ -19,49 +19,19 @@ package org.springframework.aop.framework
 import kotlinx.coroutines.delay
 import org.aopalliance.intercept.MethodInterceptor
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Tests for Kotlin support in [CglibAopProxy].
+ * Tests for Kotlin support in [JdkDynamicAopProxy].
  *
- * @author Sebastien Deleuze
+ * @author Dmitry Sulman
  */
-class CglibAopProxyKotlinTests {
-
-	@Test
-	fun proxiedInvocation() {
-		val proxyFactory = ProxyFactory(MyKotlinBean())
-		val proxy = proxyFactory.proxy as MyKotlinBean
-		assertThat(proxy.capitalize("foo")).isEqualTo("FOO")
-	}
-
-	@Test
-	fun proxiedUncheckedException() {
-		val proxyFactory = ProxyFactory(MyKotlinBean())
-		val proxy = proxyFactory.proxy as MyKotlinBean
-		assertThatThrownBy { proxy.uncheckedException() }.isInstanceOf(IllegalStateException::class.java)
-	}
-
-	@Test
-	fun proxiedCheckedException() {
-		val proxyFactory = ProxyFactory(MyKotlinBean())
-		val proxy = proxyFactory.proxy as MyKotlinBean
-		assertThatThrownBy { proxy.checkedException() }.isInstanceOf(CheckedException::class.java)
-	}
-
-	@Test // gh-35487
-	fun jvmDefault() {
-		val proxyFactory = ProxyFactory()
-		proxyFactory.setTarget(AddressRepo())
-		proxyFactory.proxy
-	}
+class JdkDynamicAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClass("bar")
 		})
@@ -71,7 +41,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassProceed() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			it.proceed()
 		})
@@ -81,7 +51,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClass("bar")
 		})
@@ -91,7 +61,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableValueClassNull() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			null
 		})
@@ -101,7 +71,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassNullableValue() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClassNullableValue("bar")
 		})
@@ -111,7 +81,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassNullableValueNull() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClassNullableValue(null)
 		})
@@ -121,7 +91,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationResult() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			Result.success("bar")
 		})
@@ -131,7 +101,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationString() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			"bar"
 		})
@@ -141,7 +111,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationAnyAdviceReturnValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClass("bar")
 		})
@@ -149,73 +119,53 @@ class CglibAopProxyKotlinTests {
 		assertThat(proxy.returnAny()).isEqualTo(ValueClass("bar"))
 	}
 
-	open class MyKotlinBean {
-
-		open fun capitalize(value: String) = value.uppercase()
-
-		open fun uncheckedException() {
-			throw IllegalStateException()
-		}
-
-		open fun checkedException() {
-			throw CheckedException()
-		}
-	}
-
-	class CheckedException() : Exception()
-
-	open class AddressRepo(): CrudRepo<Address, Int>
-
-	interface CrudRepo<E : Any, ID : Any> {
-		fun save(e: E): E {
-			return e
-		}
-		fun delete(id: ID): Long {
-			return 0L
-		}
-	}
-
-	data class Address(
-		val id: Int = 0,
-		val street: String,
-		val version: Int = 0,
-		val createdAt: LocalDateTime? = null,
-		val updatedAt: LocalDateTime? = null,
-	)
-
 	@JvmInline
 	value class ValueClass(val value: String)
 
 	@JvmInline
 	value class ValueClassNullableValue(val value: String?)
 
-	open class TestBean {
-		open suspend fun returnValueClass(): ValueClass {
+	interface TestBean {
+		suspend fun returnValueClass(): ValueClass
+
+		suspend fun returnNullableValueClass(): ValueClass?
+
+		suspend fun returnValueClassNullableValue(): ValueClassNullableValue
+
+		suspend fun returnResult(): Result<String>
+
+		suspend fun returnString(): String
+
+		suspend fun returnAny(): Any
+	}
+
+	class TestBeanImpl : TestBean {
+		override suspend fun returnValueClass(): ValueClass {
 			delay(1000.milliseconds)
 			return ValueClass("foo")
 		}
 
-		open suspend fun returnNullableValueClass(): ValueClass? {
+		override suspend fun returnNullableValueClass(): ValueClass? {
 			delay(1000.milliseconds)
 			return null
 		}
 
-		open suspend fun returnValueClassNullableValue(): ValueClassNullableValue {
+		override suspend fun returnValueClassNullableValue(): ValueClassNullableValue {
 			delay(1000.milliseconds)
 			return ValueClassNullableValue(null)
 		}
 
-		open suspend fun returnResult(): Result<String> {
+		override suspend fun returnResult(): Result<String> {
 			delay(1000.milliseconds)
 			return Result.success("foo")
 		}
 
-		open suspend fun returnString(): String {
+		override suspend fun returnString(): String {
 			delay(1000.milliseconds)
 			return "foo"
 		}
 
-		open suspend fun returnAny(): Any {
+		override suspend fun returnAny(): Any {
 			delay(1000.milliseconds)
 			return ValueClass("foo")
 		}
