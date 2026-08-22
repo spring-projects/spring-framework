@@ -122,6 +122,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
+ * @author Greg Taube
  * @since 16 April 2001
  * @see #registerBeanDefinition
  * @see #addBeanPostProcessor
@@ -201,6 +202,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Map of singleton-only bean names, keyed by dependency type. */
 	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
+
+	/** Map of singleton and non-singleton bean names, keyed by generic dependency type. */
+	private final Map<ResolvableType, String[]> allBeanNamesByResolvableType = new ConcurrentHashMap<>(64);
+
+	/** Map of singleton-only bean names, keyed by generic dependency type. */
+	private final Map<ResolvableType, String[]> singletonBeanNamesByResolvableType = new ConcurrentHashMap<>(64);
 
 	/** List of bean definition names, in registration order. */
 	private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
@@ -588,9 +595,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (resolved != null && !type.hasGenerics()) {
 			return getBeanNamesForType(resolved, includeNonSingletons, allowEagerInit);
 		}
-		else {
+		if (!isConfigurationFrozen() || resolved == null || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		}
+		Map<ResolvableType, String[]> cache = (includeNonSingletons ? this.allBeanNamesByResolvableType :
+				this.singletonBeanNamesByResolvableType);
+		String[] resolvedBeanNames = cache.get(type);
+		if (resolvedBeanNames != null) {
+			return resolvedBeanNames;
+		}
+		resolvedBeanNames = doGetBeanNamesForType(type, includeNonSingletons, true);
+		if (isCacheSafe(type)) {
+			cache.put(type, resolvedBeanNames);
+		}
+		return resolvedBeanNames;
 	}
 
 	@Override
@@ -1476,6 +1494,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Predicate<Class<?>> filter = (beanType -> beanType != Object.class && beanType.isInstance(singletonObject));
 		this.allBeanNamesByType.keySet().removeIf(filter);
 		this.singletonBeanNamesByType.keySet().removeIf(filter);
+		Predicate<ResolvableType> resolvableFilter = (beanType -> beanType.resolve() != Object.class &&
+				beanType.isInstance(singletonObject));
+		this.allBeanNamesByResolvableType.keySet().removeIf(resolvableFilter);
+		this.singletonBeanNamesByResolvableType.keySet().removeIf(resolvableFilter);
 
 		if (this.primaryBeanNamesWithType.containsKey(beanName) && singletonObject.getClass() != NullBean.class) {
 			Class<?> beanType = (singletonObject instanceof FactoryBean<?> fb ?
@@ -1544,6 +1566,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private void clearByTypeCache() {
 		this.allBeanNamesByType.clear();
 		this.singletonBeanNamesByType.clear();
+		this.allBeanNamesByResolvableType.clear();
+		this.singletonBeanNamesByResolvableType.clear();
+	}
+
+	private boolean isCacheSafe(ResolvableType type) {
+		return isCacheSafe(type, Collections.newSetFromMap(new IdentityHashMap<>()));
+	}
+
+	private boolean isCacheSafe(ResolvableType type, Set<Object> seen) {
+		if (!seen.add(type.getType())) {
+			return true;
+		}
+		Class<?> resolved = type.resolve();
+		if (resolved == null || !ClassUtils.isCacheSafe(resolved, getBeanClassLoader())) {
+			return false;
+		}
+		for (ResolvableType generic : type.getGenerics()) {
+			if (!isCacheSafe(generic, seen)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 
