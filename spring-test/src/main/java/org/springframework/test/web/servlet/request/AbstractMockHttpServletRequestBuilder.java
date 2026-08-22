@@ -448,7 +448,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param name the parameter name
 	 * @param values one or more values
 	 */
-	public B param(String name, String... values) {
+	public B param(String name, @Nullable String... values) {
 		this.parameters.addAll(name, Arrays.asList(values));
 		return self();
 	}
