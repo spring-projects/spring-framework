@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import java.io.Closeable;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -37,6 +38,9 @@ import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aot.AotDetector;
+import org.springframework.beans.factory.Aware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.CodeGenerationException;
 import org.springframework.cglib.core.GeneratorStrategy;
@@ -292,8 +296,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 					if (Modifier.isFinal(mod)) {
 						if (logger.isWarnEnabled() && Modifier.isPublic(mod)) {
 							if (implementsInterface(method, ifcs)) {
-								logger.warn("Unable to proxy interface-implementing method [" + method + "] because " +
-										"it is marked as final, consider using interface-based JDK proxies instead.");
+								if (!implementsOnlyConfigurationCallbackInterfaces(method, ifcs)) {
+									logger.warn("Unable to proxy interface-implementing method [" + method + "] because " +
+											"it is marked as final, consider using interface-based JDK proxies instead.");
+								}
 							}
 							else {
 								logger.warn("Public final method [" + method + "] cannot get proxied via CGLIB, " +
@@ -413,6 +419,40 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Check whether every interface that declares the given method is a Spring
+	 * configuration callback interface, such as {@link InitializingBean},
+	 * {@link DisposableBean}, an {@link Aware} sub-interface, or
+	 * {@link Closeable}/{@link AutoCloseable}. Final methods inherited from such
+	 * interfaces are typically driven by the container itself rather than by user
+	 * code, so logging a WARN about CGLIB being unable to advise them is
+	 * misleading noise (gh-35365).
+	 */
+	static boolean implementsOnlyConfigurationCallbackInterfaces(Method method, Set<Class<?>> ifcs) {
+		boolean matched = false;
+		for (Class<?> ifc : ifcs) {
+			if (ClassUtils.hasMethod(ifc, method)) {
+				if (!isConfigurationCallbackInterface(ifc)) {
+					return false;
+				}
+				matched = true;
+			}
+		}
+		return matched;
+	}
+
+	/**
+	 * Determine whether the given interface is a Spring configuration callback
+	 * interface (i.e. {@link InitializingBean}, {@link DisposableBean},
+	 * {@link Closeable}/{@link AutoCloseable}, or an {@link Aware} sub-interface).
+	 * <p>Mirrors {@code ProxyProcessorSupport#isConfigurationCallbackInterface}.
+	 */
+	private static boolean isConfigurationCallbackInterface(Class<?> ifc) {
+		return (InitializingBean.class == ifc || DisposableBean.class == ifc ||
+				Closeable.class == ifc || AutoCloseable.class == ifc ||
+				ObjectUtils.containsElement(ifc.getInterfaces(), Aware.class));
 	}
 
 	/**
