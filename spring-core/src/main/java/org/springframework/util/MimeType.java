@@ -486,9 +486,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Determine if the parameters in this {@code MimeType} and the supplied
 	 * {@code MimeType} are equal, performing case-insensitive comparisons
-	 * for {@link Charset Charsets} and disregarding quoting of parameter
-	 * values, so that, for example, {@code spring="framework"} and
-	 * {@code spring=framework} are considered equal.
+	 * for parameter names and {@link Charset Charsets}, and disregarding
+	 * quoting of parameter values, so that, for example, {@code spring="framework"}
+	 * and {@code spring=framework} are considered equal.
 	 * @since 4.2
 	 */
 	private boolean parametersAreEqual(MimeType other) {
@@ -501,7 +501,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			if (!other.parameters.containsKey(key)) {
 				return false;
 			}
-			if (PARAM_CHARSET.equals(key)) {
+			if (PARAM_CHARSET.equalsIgnoreCase(key)) {
 				if (!ObjectUtils.nullSafeEquals(getCharset(), other.getCharset())) {
 					return false;
 				}
@@ -528,15 +528,15 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	/**
 	 * Compute a hash code for the parameters map, consistent with
-	 * {@link #parametersAreEqual}: normalizing {@link Charset Charsets} and
-	 * disregarding quoting of parameter values.
+	 * {@link #parametersAreEqual}: normalizing parameter names and
+	 * {@link Charset Charsets}, and disregarding quoting of parameter values.
 	 */
 	private int parametersHashCode() {
 		int result = 0;
 		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
 			String key = entry.getKey();
-			Object value = (PARAM_CHARSET.equals(key) ? getCharset() : unquote(entry.getValue()));
-			result += key.hashCode() ^ ObjectUtils.nullSafeHashCode(value);
+			Object value = (PARAM_CHARSET.equalsIgnoreCase(key) ? getCharset() : unquote(entry.getValue()));
+			result += key.toLowerCase(Locale.ROOT).hashCode() ^ ObjectUtils.nullSafeHashCode(value);
 		}
 		return result;
 	}
@@ -602,7 +602,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			if (comp != 0) {
 				return comp;
 			}
-			if (PARAM_CHARSET.equals(thisAttribute)) {
+			if (PARAM_CHARSET.equalsIgnoreCase(thisAttribute)) {
 				Charset thisCharset = getCharset();
 				Charset otherCharset = other.getCharset();
 				if (thisCharset != otherCharset) {

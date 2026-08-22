@@ -136,6 +136,12 @@ class MediaTypeTests {
 	}
 
 	@Test
+	void parseMediaTypeIllegalQualityFactorWithUpperCaseParameterName() {
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio/basic;Q=1.1"));
+	}
+
+	@Test
 	void parseMediaTypeIllegalCharset() {
 		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
 				MediaType.parseMediaType("text/html; charset=foo-bar"));
@@ -291,6 +297,18 @@ class MediaTypeTests {
 		assertThat(MediaType.TEXT_PLAIN.isConcrete()).as("text/plain not concrete").isTrue();
 		assertThat(MediaType.ALL.isConcrete()).as("*/* concrete").isFalse();
 		assertThat(new MediaType("text", "*").isConcrete()).as("text/* concrete").isFalse();
+	}
+
+	@Test
+	void removeQualityValue() {
+		assertThat(MediaType.parseMediaType("audio/basic;q=0.8").removeQualityValue())
+				.isEqualTo(MediaType.parseMediaType("audio/basic"));
+	}
+
+	@Test
+	void removeQualityValueWithUpperCaseParameterName() {
+		assertThat(MediaType.parseMediaType("audio/basic;Q=0.8").removeQualityValue())
+				.isEqualTo(MediaType.parseMediaType("audio/basic"));
 	}
 
 	@Test  // gh-26127
