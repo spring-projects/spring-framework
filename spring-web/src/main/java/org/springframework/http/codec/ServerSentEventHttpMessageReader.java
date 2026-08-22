@@ -163,7 +163,10 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 					sseBuilder.event(line.substring(6).trim());
 				}
 				else if (line.startsWith("retry:")) {
-					sseBuilder.retry(Duration.ofMillis(Long.parseLong(line.substring(6).trim())));
+					Long retry = parseRetry(line.substring(6).trim());
+					if (retry != null) {
+						sseBuilder.retry(Duration.ofMillis(retry));
+					}
 				}
 				else if (line.startsWith(":")) {
 					comment = (comment != null ? comment : new StringBuilder());
@@ -185,6 +188,34 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		}
 		else {
 			return decodedData;
+		}
+	}
+
+	/**
+	 * Parse the value of a {@code retry} field, which is to be ignored unless it
+	 * consists solely of ASCII digits and fits into a {@code long}.
+	 * @return the reconnection time in milliseconds, or {@code null} to ignore the field
+	 * @see <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation">
+	 * HTML Living Standard: interpreting an event stream</a>
+	 */
+	private static @Nullable Long parseRetry(String value) {
+		// Long#parseLong is more lenient than the spec: it accepts a leading sign and
+		// non-ASCII digits, so "-1", "+5000" and "\u0665\u0660\u0660\u0660" would all parse.
+		if (value.isEmpty()) {
+			return null;
+		}
+		for (int i = 0; i < value.length(); i++) {
+			char ch = value.charAt(i);
+			if (ch < '0' || ch > '9') {
+				return null;
+			}
+		}
+		try {
+			return Long.parseLong(value);
+		}
+		catch (NumberFormatException ex) {
+			// Too large for a long: ignore the field rather than failing the stream.
+			return null;
 		}
 	}
 
