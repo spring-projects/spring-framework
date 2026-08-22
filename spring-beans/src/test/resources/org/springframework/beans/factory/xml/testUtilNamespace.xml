@@ -112,14 +112,14 @@
 				<util:constant static-field="java.lang.Thread.State.RUNNABLE"/>
 			</set>
 		</property>
-	  <property name="someMap">
+		<property name="someMap">
 			<map>
 				<entry>
 					<key><value>min</value></key>
 					<util:constant static-field="org.springframework.beans.testfixture.beans.CustomEnum.VALUE_1"/>
 				</entry>
 			</map>
-	  </property>
+		</property>
 	</bean>
 
 	<bean id="circularCollectionsBean" class="org.springframework.beans.testfixture.beans.TestBean">

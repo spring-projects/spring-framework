@@ -55,8 +55,8 @@
 
 	<bean id="thetaClient" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$MultiQualifierClient"/>
 
-    <bean id="thetaFactory" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$QualifiedFactoryBean"/>
+	<bean id="thetaFactory" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$QualifiedFactoryBean"/>
 
-    <bean id="thetaImpl" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$ThetaImpl"/>
+	<bean id="thetaImpl" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$ThetaImpl"/>
 
 </beans>

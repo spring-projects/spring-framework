@@ -4,8 +4,8 @@
 	   xmlns:cache="http://www.springframework.org/schema/cache"
 	   xmlns:p="http://www.springframework.org/schema/p"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-       		http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
-       		http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
+			http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
 
 	<cache:advice id="cacheAdviceInterface" cache-manager="cacheManager">
 		<cache:caching cache="testCache">
@@ -116,7 +116,7 @@
 
 	<bean id="keyGenerator" class="org.springframework.context.testfixture.cache.SomeKeyGenerator"/>
 
-    <bean id="customKeyGenerator" class="org.springframework.context.testfixture.cache.SomeCustomKeyGenerator"/>
+	<bean id="customKeyGenerator" class="org.springframework.context.testfixture.cache.SomeCustomKeyGenerator"/>
 
 	<bean id="customCacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">

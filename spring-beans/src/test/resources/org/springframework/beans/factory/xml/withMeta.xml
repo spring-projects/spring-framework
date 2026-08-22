@@ -13,7 +13,7 @@
 	</spring:bean>
 
 	<spring:bean id="testBean3" class="org.springframework.beans.testfixture.beans.TestBean">
-	  <spring:property name="name" value="Rob">
+		<spring:property name="name" value="Rob">
 			<spring:meta key="surname" value="Harrop"/>
 		</spring:property>
 	</spring:bean>
