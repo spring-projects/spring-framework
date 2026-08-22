@@ -232,7 +232,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
 		return query(sql, EmptySqlParameterSource.INSTANCE, rowMapper);
 	}
 

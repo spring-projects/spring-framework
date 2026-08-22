@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @param <T> the type of objects that may be compared by this comparator
  * @see Comparator#thenComparing(Comparator)
  */
-public class InstanceComparator<T> implements Comparator<T> {
+public class InstanceComparator<T extends @Nullable Object> implements Comparator<T> {
 
 	private final Class<?>[] instanceOrder;
 
