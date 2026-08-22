@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class SpelParserConfigurationTests {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void builderAppliesSameDefaultsAsNoArgConstructor() {
 		SpelParserConfiguration expected = new SpelParserConfiguration();
 		SpelParserConfiguration actual = SpelParserConfiguration.builder().build();
@@ -110,6 +111,7 @@ class SpelParserConfigurationTests {
 	 * these constructors confined to this class.
 	 */
 	@Nested
+	@SuppressWarnings("deprecation")
 	class LegacyConstructorTests {
 
 		@Test

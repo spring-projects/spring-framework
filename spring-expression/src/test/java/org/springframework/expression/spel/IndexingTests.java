@@ -340,7 +340,8 @@ class IndexingTests {
 
 		@Test
 		void defaultMaxAutoGrowSizeMatchesDataBinderDefault() {
-			SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
+			SpelParserConfiguration configuration =
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build();
 			assertThat(configuration.getMaximumAutoGrowSize())
 					.isEqualTo(SpelParserConfiguration.DEFAULT_MAX_AUTO_GROW_SIZE)
 					.isEqualTo(256);
@@ -349,7 +350,8 @@ class IndexingTests {
 		@Test
 		void zeroMaximumAutoGrowSizeIsAllowedAndDisablesGrowth() {
 			decimals = new ArrayList<>();
-			SpelParserConfiguration configuration = new SpelParserConfiguration(true, true, 0);
+			SpelParserConfiguration configuration = SpelParserConfiguration.builder()
+					.autoGrowNullReferences().autoGrowCollections().maximumAutoGrowSize(0).build();
 			SpelExpressionParser parser = new SpelExpressionParser(configuration);
 
 			Expression indexExpression = parser.parseExpression("decimals[0]");
@@ -361,14 +363,15 @@ class IndexingTests {
 		@Test
 		void negativeMaximumAutoGrowSizeIsRejected() {
 			assertThatIllegalArgumentException()
-					.isThrownBy(() -> new SpelParserConfiguration(true, true, -1))
+					.isThrownBy(() -> SpelParserConfiguration.builder().maximumAutoGrowSize(-1))
 					.withMessage("'maximumAutoGrowSize' must not be negative");
 		}
 
 		@Test
 		void collectionGrowsUpToDefaultMaxAutoGrowSizeButNotBeyond() {
 			decimals = new ArrayList<>();
-			SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+			SpelExpressionParser parser = new SpelExpressionParser(
+					SpelParserConfiguration.builder().autoGrowNullReferences().autoGrowCollections().build());
 
 			// Growing up to the default maximum auto-grow size should succeed.
 			parser.parseExpression("decimals[255]").getValue(IndexingTests.this);
@@ -384,7 +387,8 @@ class IndexingTests {
 		@Test
 		void collectionCanGrowBeyondDefaultMaxAutoGrowSizeWhenConfiguredExplicitly() {
 			decimals = new ArrayList<>();
-			SpelParserConfiguration configuration = new SpelParserConfiguration(true, true, 1000);
+			SpelParserConfiguration configuration = SpelParserConfiguration.builder()
+					.autoGrowNullReferences().autoGrowCollections().maximumAutoGrowSize(1000).build();
 			SpelExpressionParser parser = new SpelExpressionParser(configuration);
 
 			parser.parseExpression("decimals[500]").getValue(IndexingTests.this);

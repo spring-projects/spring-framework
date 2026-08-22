@@ -32,8 +32,8 @@ import org.springframework.util.StringUtils;
  * configure and create a {@code SpelParserConfiguration} instance, since the
  * builder only requires configuration of the properties that need to deviate from
  * their sensible defaults &mdash; or use {@link #withDefaults()} if none of those
- * defaults need to be overridden. Note that the constructors in this class are
- * planned to be deprecated in favor of the builder as of Spring Framework 7.1.
+ * defaults need to be overridden. Note that the constructors in this class have
+ * been deprecated in favor of the builder as of Spring Framework 7.1.
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
@@ -205,7 +205,9 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
 	 * @see #DEFAULT_MAX_AUTO_GROW_SIZE
+	 * @deprecated as of Spring Framework 7.1, in favor of {@link #withDefaults()}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration() {
 		this(null, null);
 	}
@@ -223,7 +225,9 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
 	 * @see #DEFAULT_MAX_AUTO_GROW_SIZE
+	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration(@Nullable SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader) {
 		this(compilerMode, compilerClassLoader, false, false, DEFAULT_MAX_AUTO_GROW_SIZE);
 	}
@@ -239,7 +243,9 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
 	 * @see #DEFAULT_MAX_AUTO_GROW_SIZE
+	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration(boolean autoGrowNullReferences, boolean autoGrowCollections) {
 		this(autoGrowNullReferences, autoGrowCollections, DEFAULT_MAX_AUTO_GROW_SIZE);
 	}
@@ -257,7 +263,9 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
+	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration(boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize) {
 		this(null, null, autoGrowNullReferences, autoGrowCollections, maximumAutoGrowSize);
 	}
@@ -279,7 +287,9 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
+	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration(@Nullable SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize) {
 
@@ -308,7 +318,9 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
 	 * @see #DEFAULT_MAX_EXPRESSION_NESTING_DEPTH
+	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration(@Nullable SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength) {
 
@@ -337,7 +349,9 @@ public class SpelParserConfiguration {
 	 * @since 6.2.19
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
 	 * @see #DEFAULT_MAX_EXPRESSION_NESTING_DEPTH
+	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength,
 			int maximumOperations) {
@@ -369,7 +383,9 @@ public class SpelParserConfiguration {
 	 * operation; must be a positive number; use {@link Integer#MAX_VALUE} for no limit
 	 * @since 7.0.9
 	 * @see #DEFAULT_MAX_EXPRESSION_NESTING_DEPTH
+	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength,
 			int maximumOperations, int maximumBigPowerBits) {
@@ -402,7 +418,9 @@ public class SpelParserConfiguration {
 	 * @param maximumNestingDepth the maximum nesting depth permitted within a SpEL
 	 * expression; must be a positive number
 	 * @since 7.1
+	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
+	@Deprecated(since = "7.1")
 	public SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength,
 			int maximumOperations, int maximumBigPowerBits, int maximumNestingDepth) {
@@ -690,6 +708,7 @@ public class SpelParserConfiguration {
 		/**
 		 * Build the {@link SpelParserConfiguration} configured via this builder.
 		 */
+		@SuppressWarnings("deprecation")
 		public SpelParserConfiguration build() {
 			int maximumOperations = (this.maximumOperations != null ?
 					this.maximumOperations : retrieveMaxOperations());

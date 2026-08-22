@@ -65,7 +65,8 @@ class SpelParserTests {
 
 		private final int maxNestingDepth = 10;
 
-		private final SpelExpressionParser parser = new SpelExpressionParser(configurationWithMaxNestingDepth(maxNestingDepth));
+		private final SpelExpressionParser parser = new SpelExpressionParser(
+				SpelParserConfiguration.builder().maximumNestingDepth(maxNestingDepth).build());
 
 
 		@Test
@@ -103,10 +104,10 @@ class SpelParserTests {
 		void maxNestingDepthProtectsAgainstStackOverflowFromChainedUnaryOperators() {
 			// Effectively disable the expression-length limit so that the nesting-depth
 			// limit is the guard that stops the parser well before the JVM call stack does.
-			SpelParserConfiguration configuration = new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false,
-					0, Integer.MAX_VALUE, SpelParserConfiguration.DEFAULT_MAX_OPERATIONS,
-					SpelParserConfiguration.DEFAULT_MAX_BIG_POWER_BITS,
-					SpelParserConfiguration.DEFAULT_MAX_EXPRESSION_NESTING_DEPTH);
+			SpelParserConfiguration configuration = SpelParserConfiguration.builder()
+					.compilerMode(SpelCompilerMode.OFF)
+					.maximumExpressionLength(Integer.MAX_VALUE)
+					.build();
 			SpelExpressionParser parser = new SpelExpressionParser(configuration);
 
 			assertParseExceptionThrownBy(() -> parser.parseExpression("!".repeat(100_000) + "true"))
@@ -127,12 +128,6 @@ class SpelParserTests {
 			assertThatNoException().isThrownBy(() -> parser.parseExpression(nestedTernaryExpression(2)));
 
 			assertNestingDepthExceeded(() -> parser.parseExpression(nestedTernaryExpression(50)), maxNestingDepth);
-		}
-
-		private static SpelParserConfiguration configurationWithMaxNestingDepth(int maxNestingDepth) {
-			return new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 10_000,
-					SpelParserConfiguration.DEFAULT_MAX_OPERATIONS, SpelParserConfiguration.DEFAULT_MAX_BIG_POWER_BITS,
-					maxNestingDepth);
 		}
 
 		private static void assertNestingDepthExceeded(ThrowingCallable throwingCallable, int maxNestingDepth) {
