@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -54,6 +55,7 @@ import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -1404,6 +1406,180 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void serializeClassWithGenerics() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(Map.class, String.class, Integer.class);
+		ResolvableType read = testSerialization(type);
+
+		assertThat(read).hasSameHashCodeAs(type);
+		assertThat(read.toString()).isEqualTo("java.util.Map<java.lang.String, java.lang.Integer>");
+		assertThat(read.getGenerics()).hasSize(2);
+		assertThat(read.getGeneric(0).resolve()).isEqualTo(String.class);
+		assertThat(read.getGeneric(1).resolve()).isEqualTo(Integer.class);
+		assertThat(read.resolveGeneric(0)).isEqualTo(String.class);
+
+		ParameterizedType readType = (ParameterizedType) read.getType();
+		assertThat(readType.getRawType()).isSameAs(Map.class);
+		assertThat(readType.getActualTypeArguments()[0]).isSameAs(String.class);
+		assertThat(readType.getActualTypeArguments()[1]).isSameAs(Integer.class);
+	}
+
+	@Test
+	void serializeClassWithNestedGenerics() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(Map.class,
+				ResolvableType.forClass(String.class),
+				ResolvableType.forClassWithGenerics(List.class, Integer.class));
+		ResolvableType read = testSerialization(type);
+
+		assertThat(read).hasSameHashCodeAs(type);
+		assertThat(read.toString()).isEqualTo("java.util.Map<java.lang.String, java.util.List<java.lang.Integer>>");
+		assertThat(read.getGeneric(1).resolve()).isEqualTo(List.class);
+		assertThat(read.resolveGeneric(1, 0)).isEqualTo(Integer.class);
+
+		ParameterizedType readType = (ParameterizedType) read.getType();
+		assertThat(readType.getRawType()).isSameAs(Map.class);
+		assertThat(readType.getActualTypeArguments()[0]).isSameAs(String.class);
+		Type nested = readType.getActualTypeArguments()[1];
+		assertThat(nested).isInstanceOf(ParameterizedType.class);
+		assertThat(((ParameterizedType) nested).getRawType()).isSameAs(List.class);
+		assertThat(((ParameterizedType) nested).getActualTypeArguments()[0]).isSameAs(Integer.class);
+	}
+
+	@Test
+	void serializeClassWithGenericsResolvesTypeVariables() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(ArrayList.class, String.class);
+		ResolvableType read = testSerialization(type);
+
+		assertThat(read.resolveGeneric()).isEqualTo(String.class);
+		assertThat(read.as(List.class).getGeneric(0).resolve()).isEqualTo(String.class);
+		assertThat(read.asCollection().resolveGeneric()).isEqualTo(String.class);
+	}
+
+	@Test
+	void serializeClassWithNullGenerics() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, (ResolvableType[]) null);
+		ResolvableType read = testSerialization(type);
+
+		assertThat(read).hasSameHashCodeAs(type);
+		assertThat(read.toString()).isEqualTo("java.util.List<?>");
+		assertThat(read.resolve()).isEqualTo(List.class);
+		assertThat(read.getGenerics()).hasSize(1);
+		assertThat(read.getGeneric(0).resolve()).isNull();
+		assertThat(read).isNotEqualTo(ResolvableType.forClass(List.class));
+
+		ParameterizedType readType = (ParameterizedType) read.getType();
+		assertThat(readType.getActualTypeArguments()[0]).isSameAs(List.class.getTypeParameters()[0]);
+	}
+
+	@Test
+	void serializeClassWithNullGenericElement() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(Map.class, (ResolvableType) null, null);
+		ResolvableType read = testSerialization(type);
+
+		assertThat(read).hasSameHashCodeAs(type);
+		assertThat(read.toString()).isEqualTo("java.util.Map<?, ?>");
+		assertThat(read.getGeneric(0).resolve()).isNull();
+		assertThat(read.getGeneric(1).resolve()).isNull();
+
+		ParameterizedType readType = (ParameterizedType) read.getType();
+		assertThat(readType.getActualTypeArguments()[0]).isSameAs(Map.class.getTypeParameters()[0]);
+		assertThat(readType.getActualTypeArguments()[1]).isSameAs(Map.class.getTypeParameters()[1]);
+	}
+
+	@Test
+	void serializeClassWithoutTypeParameters() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(String.class, new ResolvableType[0]);
+		ResolvableType read = testSerialization(type);
+
+		assertThat(read).hasSameHashCodeAs(type);
+		assertThat(read.toString()).isEqualTo("java.lang.String");
+		assertThat(read.resolve()).isEqualTo(String.class);
+		assertThat(read.getGenerics()).isEmpty();
+		assertThat(read.getType()).isInstanceOf(ParameterizedType.class);
+		assertThat(((ParameterizedType) read.getType()).getRawType()).isSameAs(String.class);
+		assertThat(read).isNotEqualTo(ResolvableType.forClass(String.class));
+	}
+
+	@Test
+	void serializeClassWithGenericsHashCodeIsConsistent() throws Exception {
+		ResolvableType stringList = ResolvableType.forClassWithGenerics(List.class, String.class);
+		ResolvableType integerList = ResolvableType.forClassWithGenerics(List.class, Integer.class);
+
+		ResolvableType readStringList = testSerialization(stringList);
+		ResolvableType readIntegerList = testSerialization(integerList);
+
+		assertThat(readStringList).hasSameHashCodeAs(stringList).isNotEqualTo(readIntegerList);
+		assertThat(readStringList.hashCode()).isNotEqualTo(readIntegerList.hashCode());
+
+		ResolvableType rebuilt = ResolvableType.forClassWithGenerics(List.class, String.class);
+		assertThat(readStringList).isEqualTo(rebuilt).hasSameHashCodeAs(rebuilt);
+
+		Map<ResolvableType, String> map = new HashMap<>();
+		map.put(stringList, "string");
+		map.put(integerList, "integer");
+		assertThat(map.get(readStringList)).isEqualTo("string");
+		assertThat(map.get(readIntegerList)).isEqualTo("integer");
+	}
+
+	@Test
+	void serializeClassWithGenericsInsideSerializableHolder() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, String.class);
+		SerializableHolder holder = new SerializableHolder(type);
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+			oos.writeObject(holder);
+		}
+		SerializableHolder read = (SerializableHolder) new ObjectInputStream(
+				new ByteArrayInputStream(bos.toByteArray())).readObject();
+
+		assertThat(read.type).isEqualTo(type).hasSameHashCodeAs(type);
+		assertThat(read.type.resolveGeneric()).isEqualTo(String.class);
+	}
+
+	@Test  // gh-36346: transient cached state populated by derivation must not affect serializability
+	void serializeClassWithGenericsAfterDerivation() throws Exception {
+		ResolvableType type = ResolvableType.forClassWithGenerics(ArrayList.class, String.class);
+		type.as(Collection.class);
+		type.getSuperType();
+		type.getInterfaces();
+		type.getGenerics();
+		type.hasUnresolvableGenerics();
+		ResolvableType read = testSerialization(type);
+
+		assertThat(read).hasSameHashCodeAs(type);
+		assertThat(read.resolveGeneric()).isEqualTo(String.class);
+	}
+
+	@Test  // SPR-17070: derived types are intentionally not serializable
+	void serializeSuperTypeIsNotSupported() {
+		ResolvableType superType = ResolvableType.forClass(ArrayList.class).getSuperType();
+		ResolvableType interfaceType = ResolvableType.forClass(ArrayList.class).getInterfaces()[0];
+		ResolvableType asType = ResolvableType.forClassWithGenerics(ArrayList.class, String.class).as(List.class);
+
+		assertThatExceptionOfType(NotSerializableException.class).isThrownBy(() -> serialize(superType));
+		assertThatExceptionOfType(NotSerializableException.class).isThrownBy(() -> serialize(interfaceType));
+		assertThatExceptionOfType(NotSerializableException.class).isThrownBy(() -> serialize(asType));
+	}
+
+	@Test
+	void forClassWithGenericsUsesJdkTypesDirectly() {
+		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, String.class);
+		ParameterizedType parameterizedType = (ParameterizedType) type.getType();
+
+		assertThat(parameterizedType.getRawType()).isSameAs(List.class);
+		assertThat(parameterizedType.getActualTypeArguments()[0]).isSameAs(String.class);
+		assertThat(parameterizedType.getOwnerType()).isNull();
+
+		ResolvableType raw = ResolvableType.forClassWithGenerics(List.class, (ResolvableType[]) null);
+		assertThat(((ParameterizedType) raw.getType()).getActualTypeArguments()[0])
+				.isSameAs(List.class.getTypeParameters()[0]);
+
+		assertThat(type.toString()).isEqualTo("java.util.List<java.lang.String>");
+		assertThat(type.getType().getTypeName()).isEqualTo("java.util.List<java.lang.String>");
+		assertThat(type.resolveGeneric()).isEqualTo(String.class);
+	}
+
+	@Test
 	void canResolveVoid() {
 		ResolvableType type = ResolvableType.forClass(void.class);
 		assertThat(type.resolve()).isEqualTo(void.class);
@@ -1615,6 +1791,12 @@ class ResolvableTypeTests {
 		return read;
 	}
 
+	private void serialize(ResolvableType type) throws Exception {
+		try (ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream())) {
+			oos.writeObject(type);
+		}
+	}
+
 	private ResolvableType forField(String field) throws NoSuchFieldException {
 		return ResolvableType.forField(Fields.class.getField(field));
 	}
@@ -1631,6 +1813,16 @@ class ResolvableTypeTests {
 	@SuppressWarnings("unused")
 	private HashMap<Integer, List<String>> myMap;
 
+
+	@SuppressWarnings("serial")
+	static class SerializableHolder implements Serializable {
+
+		final ResolvableType type;
+
+		SerializableHolder(ResolvableType type) {
+			this.type = type;
+		}
+	}
 
 	@SuppressWarnings("serial")
 	static class ExtendsList extends ArrayList<CharSequence> {
