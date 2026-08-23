@@ -434,25 +434,13 @@ class CglibAopProxy implements AopProxy, Serializable {
 		boolean matched = false;
 		for (Class<?> ifc : ifcs) {
 			if (ClassUtils.hasMethod(ifc, method)) {
-				if (!isConfigurationCallbackInterface(ifc)) {
+				if (!AopProxyUtils.isConfigurationCallbackInterface(ifc)) {
 					return false;
 				}
 				matched = true;
 			}
 		}
 		return matched;
-	}
-
-	/**
-	 * Determine whether the given interface is a Spring configuration callback
-	 * interface (i.e. {@link InitializingBean}, {@link DisposableBean},
-	 * {@link Closeable}/{@link AutoCloseable}, or an {@link Aware} sub-interface).
-	 * <p>Mirrors {@code ProxyProcessorSupport#isConfigurationCallbackInterface}.
-	 */
-	private static boolean isConfigurationCallbackInterface(Class<?> ifc) {
-		return (InitializingBean.class == ifc || DisposableBean.class == ifc ||
-				Closeable.class == ifc || AutoCloseable.class == ifc ||
-				ObjectUtils.containsElement(ifc.getInterfaces(), Aware.class));
 	}
 
 	/**
