@@ -885,7 +885,7 @@ class HtmlUnitRequestBuilderTests {
 
 
 	private void assertSingleSessionCookie(String expected) {
-		org.htmlunit.util.Cookie jsessionidCookie = webClient.getCookieManager().getCookie("JSESSIONID");
+		org.htmlunit.http.Cookie jsessionidCookie = webClient.getCookieManager().getCookie("JSESSIONID");
 		if (expected == null || expected.contains("Expires=Thu, 01-Jan-1970 00:00:01 GMT")) {
 			assertThat(jsessionidCookie).isNull();
 			return;

@@ -17,7 +17,7 @@
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.htmlunit.util.Cookie;
+import org.htmlunit.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
