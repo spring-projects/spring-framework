@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import java.io.Closeable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -30,6 +31,9 @@ import org.springframework.aop.TargetClassAware;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.beans.factory.Aware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -276,6 +280,17 @@ public abstract class AopProxyUtils {
 			}
 		}
 		return arguments;
+	}
+
+	/**
+	 * Determine whether the given interface is a Spring configuration callback
+	 * interface (i.e. {@link InitializingBean}, {@link DisposableBean},
+	 * {@link Closeable}/{@link AutoCloseable}, or an {@link Aware} sub-interface).
+	 */
+	static boolean isConfigurationCallbackInterface(Class<?> ifc) {
+		return (InitializingBean.class == ifc || DisposableBean.class == ifc ||
+				Closeable.class == ifc || AutoCloseable.class == ifc ||
+				ObjectUtils.containsElement(ifc.getInterfaces(), Aware.class));
 	}
 
 }
