@@ -286,6 +286,7 @@ public abstract class AopProxyUtils {
 	 * Determine whether the given interface is a Spring configuration callback
 	 * interface (i.e. {@link InitializingBean}, {@link DisposableBean},
 	 * {@link Closeable}/{@link AutoCloseable}, or an {@link Aware} sub-interface).
+	 * @since 7.1
 	 */
 	static boolean isConfigurationCallbackInterface(Class<?> ifc) {
 		return (InitializingBean.class == ifc || DisposableBean.class == ifc ||

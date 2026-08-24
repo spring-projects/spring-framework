@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import java.io.Closeable;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -38,9 +37,6 @@ import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aot.AotDetector;
-import org.springframework.beans.factory.Aware;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.CodeGenerationException;
 import org.springframework.cglib.core.GeneratorStrategy;
@@ -296,6 +292,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 					if (Modifier.isFinal(mod)) {
 						if (logger.isWarnEnabled() && Modifier.isPublic(mod)) {
 							if (implementsInterface(method, ifcs)) {
+								// Final methods inherited from configuration callback interfaces are
+								// typically driven by the container itself rather than by user code, so
+								// logging a warning about CGLIB being unable to advise them is misleading noise.
 								if (!implementsOnlyConfigurationCallbackInterfaces(method, ifcs)) {
 									logger.warn("Unable to proxy interface-implementing method [" + method + "] because " +
 											"it is marked as final, consider using interface-based JDK proxies instead.");
@@ -422,13 +421,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 	}
 
 	/**
-	 * Check whether every interface that declares the given method is a Spring
-	 * configuration callback interface, such as {@link InitializingBean},
-	 * {@link DisposableBean}, an {@link Aware} sub-interface, or
-	 * {@link Closeable}/{@link AutoCloseable}. Final methods inherited from such
-	 * interfaces are typically driven by the container itself rather than by user
-	 * code, so logging a WARN about CGLIB being unable to advise them is
-	 * misleading noise (gh-35365).
+	 * Check whether every interface that declares the given method is a
+	 * configuration callback interface.
+	 * @since 7.1
+	 * @see AopProxyUtils#isConfigurationCallbackInterface(Class)
 	 */
 	static boolean implementsOnlyConfigurationCallbackInterfaces(Method method, Set<Class<?>> ifcs) {
 		boolean matched = false;
