@@ -36,13 +36,13 @@ jobs:
         fi
     - name: "Set up Java"
       id: "set-up-java"
-      uses: "actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95" # v5.6.0
+      uses: "actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c" # v6.0.0
       with:
         distribution: "liberica"
         java-version: "25"
     - name: "Check Out Code"
       id: "check-out-code"
-      uses: "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0" # v7.0.0
+      uses: "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0" # v6.0.0
     - name: "Build Release"
       id: "build-release"
       uses: "./.github/actions/release-train-build"
@@ -55,13 +55,13 @@ jobs:
         RELEASE_TRAIN_MAVEN_REPOSITORY_USERNAME: "${{ secrets.RELEASE_TRAIN_PARTICIPANT_MAVEN_REPOSITORY_USERNAME }}"
     - name: "Upload Deployment Repository"
       id: "upload-deployment-repository"
-      uses: "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" # v7.0.1
+      uses: "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" # v6.0.0
       with:
         name: "deployment-repository"
         path: "deployment-repository/**"
     - name: "Upload Deployment Spec"
       id: "upload-deployment-spec"
-      uses: "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" # v7.0.1
+      uses: "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" # v6.0.0
       with:
         archive: "false"
         if-no-files-found: "ignore"
@@ -69,7 +69,7 @@ jobs:
         path: ".github/actions/release-train-build/deployment-spec.yml"
     - name: "Save Build System Caches"
       id: "save-build-system-caches"
-      uses: "actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9" # v6.1.0
+      uses: "actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9" # v6.0.0
       with:
         key: "release-train-${{ inputs.callback-ref }}-${{ github.ref_name }}"
         path: |-
