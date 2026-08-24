@@ -194,6 +194,16 @@ class ServerHttpRequestTests {
 		assertThat(mutated.getURI().getRawPath()).isEqualTo("/other/path");
 	}
 
+	@Test // gh-37099
+	void mutateContextPathToNull() throws Exception {
+		ServerHttpRequest request = createRequest("/context/path", "/context");
+
+		ServerHttpRequest mutated = request.mutate().contextPath(null).path("/path").build();
+		assertThat(mutated.getPath().contextPath().value()).isEmpty();
+		assertThat(mutated.getPath().pathWithinApplication().value()).isEqualTo("/path");
+		assertThat(mutated.getURI().getRawPath()).isEqualTo("/path");
+	}
+
 	@Test
 	void mutateContextPathWithoutUpdatingPathShouldFail() throws Exception {
 		ServerHttpRequest request = createRequest("/context/path", "/context");

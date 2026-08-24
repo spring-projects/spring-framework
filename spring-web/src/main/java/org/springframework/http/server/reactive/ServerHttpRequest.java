@@ -146,8 +146,9 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		 * contextPath} and it must match the start of the path of the URI of
 		 * the request. That means changing the contextPath, implies also
 		 * changing the path via {@link #path(String)}.
+		 * <p>Use {@code null} to clear the context path.
 		 */
-		Builder contextPath(String contextPath);
+		Builder contextPath(@Nullable String contextPath);
 
 		/**
 		 * Set or override the specified header values under the given name.
