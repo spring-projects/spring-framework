@@ -115,8 +115,18 @@ class DefaultClientRequestObservationConventionTests {
 		ClientRequestObservationContext context = createContext(
 				new MockClientHttpRequest(HttpMethod.GET, "/resource/42"), response);
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
-				.contains(KeyValue.of("method", "GET"), KeyValue.of("client.name", "none"), KeyValue.of("uri", "none"));
+				.contains(KeyValue.of("method", "GET"), KeyValue.of("client.name", "none"), KeyValue.of("uri", "/resource/42"));
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("http.url", "/resource/42"));
+	}
+
+	@Test
+	// gh-36547
+	void fallBackToPathWhenUriTemplateIsMissing() {
+		ClientRequestObservationContext context = createContext(
+				new MockClientHttpRequest(HttpMethod.GET, "https://example.org/resource/42?query=123"), response);
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("method", "GET"), KeyValue.of("client.name", "example.org"), KeyValue.of("uri", "/resource/42"));
+		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("http.url", "https://example.org/resource/42?query=123"));
 	}
 
 	@Test

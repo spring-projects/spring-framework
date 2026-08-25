@@ -106,7 +106,11 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 			return KeyValue.of(LowCardinalityKeyNames.URI, extractPath(context.getUriTemplate()));
 		}
 		ClientRequest request = context.getRequest();
-		if (request != null && ROOT_PATH.equals(request.url().getPath())) {
+		if (request != null) {
+			String path = request.url().getPath();
+			if (StringUtils.hasText(path)) {
+				return KeyValue.of(LowCardinalityKeyNames.URI, path);
+			}
 			return URI_ROOT;
 		}
 		return URI_NONE;

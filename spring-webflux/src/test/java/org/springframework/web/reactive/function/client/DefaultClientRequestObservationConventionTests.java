@@ -60,7 +60,7 @@ class DefaultClientRequestObservationConventionTests {
 		ClientRequestObservationContext context = new ClientRequestObservationContext(request);
 		context.setError(new IllegalStateException("Could not create client request"));
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(6)
-				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "none"), KeyValue.of("status", "CLIENT_ERROR"),
+				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "/test"), KeyValue.of("status", "CLIENT_ERROR"),
 						KeyValue.of("client.name", "none"), KeyValue.of("exception", "IllegalStateException"), KeyValue.of("outcome", "UNKNOWN"));
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(1)
 				.contains(KeyValue.of("http.url", "/test"));
@@ -96,8 +96,17 @@ class DefaultClientRequestObservationConventionTests {
 	void shouldAddKeyValuesForRequestWithoutUriTemplate() {
 		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("/resource/42")));
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
-				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "none"));
+				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "/resource/42"));
 		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(1).contains(KeyValue.of("http.url", "/resource/42"));
+	}
+
+	@Test
+	// gh-36547
+	void fallBackToPathWhenUriTemplateIsMissing() {
+		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://example.org/resource/42?query=123")));
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("method", "GET"), KeyValue.of("client.name", "example.org"), KeyValue.of("uri", "/resource/42"));
+		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(1).contains(KeyValue.of("http.url", "https://example.org/resource/42?query=123"));
 	}
 
 	@Test
