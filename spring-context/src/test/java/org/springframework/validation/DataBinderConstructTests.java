@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
@@ -156,6 +157,27 @@ class DataBinderConstructTests {
 		assertThat(map.get("a").param1()).isEqualTo("value1");
 		assertThat(map.get("b").param1()).isEqualTo("value2");
 		assertThat(map.get("c").param1()).isEqualTo("value3");
+	}
+
+	@Test  // gh-37019
+	void dataClassWithMapBindingConstructsValueOncePerKey() {
+		CountingRecord.constructorCallCount.set(0);
+		MapValueResolver valueResolver = new MapValueResolver(Map.of(
+				"countingMap[a].param1", "value1", "countingMap[a].param2", "value2",
+				"countingMap[b].param1", "value3", "countingMap[b].param2", "value4"));
+
+		DataBinder binder = initDataBinder(CountingMapRecord.class);
+		binder.construct(valueResolver);
+
+		CountingMapRecord target = getTarget(binder);
+		Map<String, CountingRecord> map = target.countingMap();
+
+		assertThat(map).hasSize(2);
+		assertThat(map.get("a").param1()).isEqualTo("value1");
+		assertThat(map.get("a").param2()).isEqualTo("value2");
+		assertThat(map.get("b").param1()).isEqualTo("value3");
+		assertThat(map.get("b").param2()).isEqualTo("value4");
+		assertThat(CountingRecord.constructorCallCount).hasValue(2);
 	}
 
 	@Test
@@ -324,6 +346,20 @@ class DataBinderConstructTests {
 
 
 	private record DataClassMapRecord(Map<String, DataClass> dataClassMap) {
+	}
+
+
+	record CountingRecord(String param1, String param2) {
+
+		static final AtomicInteger constructorCallCount = new AtomicInteger();
+
+		CountingRecord {
+			constructorCallCount.incrementAndGet();
+		}
+	}
+
+
+	private record CountingMapRecord(Map<String, CountingRecord> countingMap) {
 	}
 
 

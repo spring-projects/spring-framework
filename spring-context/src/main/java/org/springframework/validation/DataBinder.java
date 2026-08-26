@@ -1069,6 +1069,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			if (map == null) {
 				map = CollectionFactory.createMap(paramType, 16);
 			}
+			else if (map.containsKey(key)) {
+				continue;
+			}
 
 			String indexedPath = name.substring(0, endIdx + 1);
 			map.put(key, createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver));
