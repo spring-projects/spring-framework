@@ -79,18 +79,30 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Base implementation of the {@link PropertyEditorRegistry} interface.
- * Provides management of default editors and custom editors.
- * Mainly serves as base class for {@link BeanWrapperImpl}.
+ *
+ * <p>Provides management of default editors and custom editors.
+ *
+ * <p>Mainly serves as base class for {@link BeanWrapperImpl}.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 1.2.6
  * @see java.beans.PropertyEditorManager
  * @see java.beans.PropertyEditorSupport#setAsText
  * @see java.beans.PropertyEditorSupport#setValue
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
+
+	/**
+	 * The maximum number of {@code [key]} segments that {@link #addStrippedPropertyPaths}
+	 * will process in a single property path, to avoid excessive recursion and the
+	 * resulting exponential blowup in the number of generated stripped paths for
+	 * property paths with a large number of {@code [key]} segments.
+	 * @since 7.1
+	 */
+	private static final int MAX_STRIPPED_PROPERTY_PATH_DEPTH = 8;
 
 	private @Nullable ConversionService conversionService;
 
@@ -500,12 +512,23 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	/**
 	 * Add property paths with all variations of stripped keys and/or indexes.
-	 * Invokes itself recursively with nested paths.
+	 * <p>Invokes itself recursively with nested paths, bounded to a nesting depth
+	 * of {@link #MAX_STRIPPED_PROPERTY_PATH_DEPTH}.
 	 * @param strippedPaths the result list to add to
 	 * @param nestedPath the current nested path
 	 * @param propertyPath the property path to check for keys/indexes to strip
 	 */
 	private void addStrippedPropertyPaths(List<String> strippedPaths, String nestedPath, String propertyPath) {
+		addStrippedPropertyPaths(strippedPaths, nestedPath, propertyPath, 0);
+	}
+
+	private void addStrippedPropertyPaths(
+			List<String> strippedPaths, String nestedPath, String propertyPath, int depth) {
+
+		if (depth >= MAX_STRIPPED_PROPERTY_PATH_DEPTH) {
+			// Avoid excessive recursion.
+			return;
+		}
 		int startIndex = propertyPath.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR);
 		if (startIndex != -1) {
 			int endIndex = propertyPath.indexOf(PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR);
@@ -516,9 +539,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 				// Strip the first key.
 				strippedPaths.add(nestedPath + prefix + suffix);
 				// Search for further keys to strip, with the first key stripped.
-				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix, suffix);
+				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix, suffix, depth + 1);
 				// Search for further keys to strip, with the first key not stripped.
-				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix + key, suffix);
+				addStrippedPropertyPaths(strippedPaths, nestedPath + prefix + key, suffix, depth + 1);
 			}
 		}
 	}
