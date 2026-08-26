@@ -938,7 +938,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			int keyStart = propertyName.indexOf(PROPERTY_KEY_PREFIX, searchIndex);
 			searchIndex = -1;
 			if (keyStart != -1) {
-				int keyEnd = getPropertyNameKeyEnd(propertyName, keyStart + PROPERTY_KEY_PREFIX.length());
+				int keyEnd = PropertyAccessorUtils.getPropertyNameKeyEnd(propertyName, keyStart + PROPERTY_KEY_PREFIX.length());
 				if (keyEnd != -1) {
 					if (actualName == null) {
 						actualName = propertyName.substring(0, keyStart);
@@ -961,32 +961,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			tokens.keys = StringUtils.toStringArray(keys);
 		}
 		return tokens;
-	}
-
-	private int getPropertyNameKeyEnd(String propertyName, int startIndex) {
-		int unclosedPrefixes = 0;
-		int length = propertyName.length();
-		for (int i = startIndex; i < length; i++) {
-			switch (propertyName.charAt(i)) {
-				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR -> {
-					// The property name contains opening prefix(es)...
-					unclosedPrefixes++;
-				}
-				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR -> {
-					if (unclosedPrefixes == 0) {
-						// No unclosed prefix(es) in the property name (left) ->
-						// this is the suffix we are looking for.
-						return i;
-					}
-					else {
-						// This suffix does not close the initial prefix but rather
-						// just one that occurred within the property name.
-						unclosedPrefixes--;
-					}
-				}
-			}
-		}
-		return -1;
 	}
 
 	@Override

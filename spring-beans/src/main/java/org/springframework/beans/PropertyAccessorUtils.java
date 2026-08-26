@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
  * according to the {@link PropertyAccessor} interface.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.2.6
  */
 public abstract class PropertyAccessorUtils {
@@ -81,21 +82,23 @@ public abstract class PropertyAccessorUtils {
 	/**
 	 * Determine the first (or last) nested property separator in the
 	 * given property path, ignoring dots in keys (like "map[my.key]").
+	 * <p>Also tracks bracket nesting depth so that keys containing an unbalanced
+	 * number of {@code [} or {@code ]} characters do not interfere with the
+	 * detection of separators that precede or follow the key.
 	 * @param propertyPath the property path to check
 	 * @param last whether to return the last separator rather than the first
 	 * @return the index of the nested property separator, or -1 if none
 	 */
 	private static int getNestedPropertySeparatorIndex(String propertyPath, boolean last) {
-		boolean inKey = false;
+		int depth = 0;
 		int length = propertyPath.length();
 		int i = (last ? length - 1 : 0);
 		while (last ? i >= 0 : i < length) {
 			switch (propertyPath.charAt(i)) {
-				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR, PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR -> {
-					inKey = !inKey;
-				}
+				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR -> depth += (last ? -1 : 1);
+				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR -> depth += (last ? 1 : -1);
 				case PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR -> {
-					if (!inKey) {
+					if (depth <= 0) {
 						return i;
 					}
 				}
@@ -150,8 +153,7 @@ public abstract class PropertyAccessorUtils {
 			int keyStart = sb.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
 			searchIndex = -1;
 			if (keyStart != -1) {
-				int keyEnd = sb.indexOf(
-						PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
+				int keyEnd = getPropertyNameKeyEnd(sb, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
 				if (keyEnd != -1) {
 					String key = sb.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
 					if (key.length() > 1 && ((key.startsWith("'") && key.endsWith("'")) ||
@@ -183,6 +185,44 @@ public abstract class PropertyAccessorUtils {
 			result[i] = canonicalPropertyName(propertyNames[i]);
 		}
 		return result;
+	}
+
+	/**
+	 * Determine the end of the {@code [key]} expression that starts at the
+	 * given {@code startIndex}, tracking bracket nesting depth so that any
+	 * {@code [} or {@code ]} characters contained within the key itself (for
+	 * example, in a quoted key such as {@code "['key[0]']"}) do not interfere
+	 * with the detection of the actual closing bracket.
+	 * @param propertyName the property name (or path) to search
+	 * @param startIndex the index to start searching from (immediately after
+	 * the opening {@code [})
+	 * @return the index of the matching closing {@code ]}, or -1 if none
+	 * @since 7.1
+	 */
+	static int getPropertyNameKeyEnd(CharSequence propertyName, int startIndex) {
+		int unclosedPrefixes = 0;
+		int length = propertyName.length();
+		for (int i = startIndex; i < length; i++) {
+			switch (propertyName.charAt(i)) {
+				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR -> {
+					// The property name contains opening prefix(es)...
+					unclosedPrefixes++;
+				}
+				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR -> {
+					if (unclosedPrefixes == 0) {
+						// No unclosed prefix(es) in the property name (left) ->
+						// this is the suffix we are looking for.
+						return i;
+					}
+					else {
+						// This suffix does not close the initial prefix but rather
+						// just one that occurred within the property name.
+						unclosedPrefixes--;
+					}
+				}
+			}
+		}
+		return -1;
 	}
 
 }
