@@ -17,7 +17,7 @@ xref:data-access/jdbc/simple.adoc[Simplifying JDBC Operations with the `SimpleJd
 for easy `DataSource` access and various simple `DataSource` implementations that you can
 use for testing and running unmodified JDBC code outside of a Jakarta EE container. A subpackage
 named `org.springframework.jdbc.datasource.embedded` provides support for creating
-embedded databases by using Java database engines, such as HSQL, H2, and Derby. See
+embedded databases by using Java database engines, such as HSQL and H2. See
 xref:data-access/jdbc/connections.adoc[Controlling Database Connections] and
 xref:data-access/jdbc/embedded-database-support.adoc[Embedded Database Support].
 

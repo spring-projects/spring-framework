@@ -483,7 +483,7 @@ as input. See the <<jdbc-params,next section>> for details on how to define an `
 
 NOTE: Explicit declarations are necessary if the database you use is not a Spring-supported
 database. Currently, Spring supports metadata lookup of stored procedure calls for the
-following databases: Apache Derby, DB2, MySQL, Microsoft SQL Server, Oracle, and Sybase.
+following databases: DB2, MySQL, Microsoft SQL Server, Oracle, and Sybase.
 We also support metadata lookup of stored functions for MySQL, Microsoft SQL Server,
 and Oracle.
 

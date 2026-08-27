@@ -3,9 +3,8 @@
 
 The `org.springframework.jdbc.datasource.embedded` package provides support for embedded
 Java database engines. Support for https://www.hsqldb.org[HSQL],
-https://www.h2database.com[H2], and https://db.apache.org/derby[Derby] is provided
-natively. You can also use an extensible API to plug in new embedded database types and
-`DataSource` implementations.
+and https://www.h2database.com[H2] is provided natively.
+You can also use an extensible API to plug in new embedded database types and `DataSource` implementations.
 
 
 [[jdbc-why-embedded-database]]
@@ -41,7 +40,6 @@ supports. It includes the following topics:
 
 * <<jdbc-embedded-database-using-HSQL,Using HSQL>>
 * <<jdbc-embedded-database-using-H2,Using H2>>
-* <<jdbc-embedded-database-using-Derby,Using Derby>>
 
 [[jdbc-embedded-database-using-HSQL]]
 === Using HSQL
@@ -57,13 +55,6 @@ explicitly specified. To specify HSQL explicitly, set the `type` attribute of th
 Spring supports the H2 database. To enable H2, set the `type` attribute of the
 `embedded-database` tag to `H2`. If you use the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.H2`.
-
-[[jdbc-embedded-database-using-Derby]]
-=== Using Derby
-
-Spring supports Apache Derby 10.5 and above. To enable Derby, set the `type`
-attribute of the `embedded-database` tag to `DERBY`. If you use the builder API,
-call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY`.
 
 
 [[jdbc-embedded-database-types-custom]]
