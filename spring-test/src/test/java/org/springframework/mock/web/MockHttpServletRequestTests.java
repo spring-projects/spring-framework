@@ -714,6 +714,33 @@ class MockHttpServletRequestTests {
 		assertThat(listenerEvent.event.getAsyncContext()).isEqualTo(newAsyncContext);
 	}
 
+	@Test
+	void requestedSessionIdValidShouldDefaultToFalse() {
+		assertThat(request.getRequestedSessionId()).isNull();
+		assertThat(request.isRequestedSessionIdValid()).isFalse();
+	}
+
+	@Test
+	void requestedSessionIdValidShouldReturnTrueWhenSessionValid() {
+		MockHttpSession session = new MockHttpSession();
+		request.setSession(session);
+		request.setRequestedSessionId(session.getId());
+		assertThat(request.getRequestedSessionId()).isEqualTo(session.getId());
+		assertThat(request.isRequestedSessionIdValid()).isTrue();
+	}
+
+	@Test
+	void requestedSessionIdValidShouldReturnFalseWhenRotated() {
+		MockHttpSession session = new MockHttpSession();
+		request.setSession(session);
+		request.setRequestedSessionId(session.getId());
+		String previousRequestedId = request.getRequestedSessionId();
+		request.changeSessionId();
+		assertThat(session.getId()).isNotEqualTo(previousRequestedId);
+		assertThat(request.getRequestedSessionId()).isEqualTo(previousRequestedId);
+		assertThat(request.isRequestedSessionIdValid()).isFalse();
+	}
+
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		int count = 0;
 		while (enum1.hasMoreElements()) {
