@@ -2241,8 +2241,8 @@ final class WhatWgUrlParser {
 				// If input contains a U+0025 (%) and the two code points following it
 				// are not ASCII hex digits, invalid-URL-unit validation error.
 				if (p.validate() && ch == '%' &&
-						(input.length() - i < 2 || !isAsciiDigit(input.codePointAt(i + 1)) ||
-								!isAsciiDigit(input.codePointAt(i + 2)))) {
+						(input.length() - i < 3 || !isAsciiHexDigit(input.codePointAt(i + 1)) ||
+								!isAsciiHexDigit(input.codePointAt(i + 2)))) {
 					p.validationError("Code point \"" + ch + "\" is not a URL unit.");
 				}
 			}
