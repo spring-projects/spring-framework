@@ -32,7 +32,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -48,8 +50,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -79,6 +84,8 @@ class ClientHttpConnectorTests {
 
 	private final MockWebServer server = new MockWebServer();
 
+	private final List<ConnectionProvider> connectionProviders = new ArrayList<>();
+
 	@BeforeEach
 	void startServer() throws IOException {
 		server.start();
@@ -86,6 +93,7 @@ class ClientHttpConnectorTests {
 
 	@AfterEach
 	void stopServer() {
+		this.connectionProviders.forEach(provider -> provider.disposeLater().block());
 		server.close();
 	}
 
@@ -179,6 +187,64 @@ class ClientHttpConnectorTests {
 				.expectNextCount(1)
 				.thenRequest(1)
 				.thenCancel()
+				.verify();
+	}
+
+	@Test
+	void cancelWhileResponseDeliveryIsInProgress() throws Exception {
+		prepareResponse(builder -> builder.body("body"));
+		ConnectionProvider connectionProvider = ConnectionProvider.create("cancelWhileResponseDelivery", 1);
+		this.connectionProviders.add(connectionProvider);
+		ReactorClientHttpConnector connector = new ReactorClientHttpConnector(HttpClient.create(connectionProvider));
+
+		CountDownLatch responseReceived = new CountDownLatch(1);
+		CountDownLatch continueResponse = new CountDownLatch(1);
+		CompletableFuture<Boolean> bodyCompleted = new CompletableFuture<>();
+
+		Mono<ClientHttpResponse> responseMono = connector
+				.connect(HttpMethod.GET, this.server.url("/").uri(), ReactiveHttpOutputMessage::setComplete)
+				.doOnNext(response -> {
+					responseReceived.countDown();
+					try {
+						continueResponse.await(5, TimeUnit.SECONDS);
+					}
+					catch (InterruptedException ex) {
+						Thread.currentThread().interrupt();
+					}
+				})
+				.doOnNext(response ->
+					response.getBody().subscribe(DataBufferUtils::release,
+							bodyCompleted::completeExceptionally, () -> bodyCompleted.complete(true)));
+
+		Disposable subscription = responseMono.subscribe();
+
+		assertThat(responseReceived.await(5, TimeUnit.SECONDS)).isTrue();
+		subscription.dispose();
+		continueResponse.countDown();
+		assertThat(bodyCompleted.get(5, TimeUnit.SECONDS)).isTrue();
+
+		prepareResponse(builder -> builder.body("body"));
+		StepVerifier.create(connector
+				.connect(HttpMethod.GET, this.server.url("/").uri(), ReactiveHttpOutputMessage::setComplete)
+				.flatMap(response -> response.getBody().doOnNext(DataBufferUtils::release).then()))
+				.verifyComplete();
+
+		assertThat(this.server.takeRequest().getConnectionIndex())
+				.isEqualTo(this.server.takeRequest().getConnectionIndex());
+	}
+
+	@Test
+	void bodySubscribedAfterCancellation() {
+		prepareResponse(builder -> builder.body("body"));
+
+		ClientHttpResponse response = new ReactorClientHttpConnector()
+				.connect(HttpMethod.GET, this.server.url("/").uri(), ReactiveHttpOutputMessage::setComplete)
+				.block();
+		assertThat(response).isInstanceOf(ReactorClientHttpResponse.class);
+		((ReactorClientHttpResponse) response).releaseAfterCancel(HttpMethod.GET);
+
+		StepVerifier.create(response.getBody())
+				.expectErrorMessage("The client response body has been released already due to cancellation.")
 				.verify();
 	}
 
