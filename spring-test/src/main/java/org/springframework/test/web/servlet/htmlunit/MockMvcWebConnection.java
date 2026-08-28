@@ -183,7 +183,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	private static Cookie createCookie(jakarta.servlet.http.Cookie cookie) {
 		Date expires = null;
 		if (cookie.getMaxAge() > -1) {
-			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);
+			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000L);
 		}
 		BasicClientCookie result = new BasicClientCookie(cookie.getName(), cookie.getValue());
 		result.setDomain(cookie.getDomain());

@@ -109,6 +109,17 @@ class MockMvcWebClientBuilderTests {
 		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("NA");
 	}
 
+	@Test
+	void cookieWithLargeMaxAgeIsStored() throws Exception {
+		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
+		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
+
+		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("NA");
+		assertThat(postResponse(client, "http://localhost/long-lived", "cookie=foo")
+				.getContentAsString()).isEqualTo("Set");
+		assertThat(getResponse(client, "http://localhost/").getContentAsString()).isEqualTo("foo");
+	}
+
 	private void assertMockMvcUsed(WebClient client, String url) throws Exception {
 		assertThat(getResponse(client, url).getContentAsString()).isEqualTo("mvc");
 	}
@@ -159,6 +170,15 @@ class MockMvcWebClientBuilderTests {
 		@PostMapping(path = "/", produces = "text/plain")
 		String setCookie(@RequestParam String cookie, HttpServletResponse response) {
 			response.addCookie(new jakarta.servlet.http.Cookie(COOKIE_NAME, cookie));
+			return "Set";
+		}
+
+		@PostMapping(path = "/long-lived", produces = "text/plain")
+		String setLongLivedCookie(@RequestParam String cookie, HttpServletResponse response) {
+			jakarta.servlet.http.Cookie longLived = new jakarta.servlet.http.Cookie(COOKIE_NAME, cookie);
+			longLived.setMaxAge(Integer.MAX_VALUE);
+			longLived.setPath("/");
+			response.addCookie(longLived);
 			return "Set";
 		}
 
