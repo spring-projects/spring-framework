@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -171,13 +172,16 @@ public class CacheControl {
 	 * Add a "must-understand" directive.
 	 * <p>This directive limits caching of the response to caches that
 	 * understand and conform to the requirements for the response status code.
-	 * The {@link #noStore()} directive should also be set as a fallback for
-	 * caches that do not implement the "must-understand" directive.
+	 * <p>The {@link #noStore()} directive must have been set beforehand, as a
+	 * fallback for caches that do not implement the "must-understand" directive.
 	 * @return {@code this}, to facilitate method chaining
+	 * @throws IllegalStateException if the "no-store" directive has not been set
 	 * @since 7.1
 	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9111#section-5.2.2.3">rfc9111 section 5.2.2.3</a>
 	 */
 	public CacheControl mustUnderstand() {
+		Assert.state(this.noStore, "The \"no-store\" directive should be set as a fallback, " +
+				"use CacheControl.noStore().mustUnderstand() instead");
 		this.mustUnderstand = true;
 		return this;
 	}
@@ -214,9 +218,14 @@ public class CacheControl {
 	 * even if the response would normally be non-cacheable or cacheable
 	 * only within a private cache.
 	 * @return {@code this}, to facilitate method chaining
+	 * @throws IllegalStateException if the "private" or "no-store" directive has already been set
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.5">rfc7234 section 5.2.2.5</a>
 	 */
 	public CacheControl cachePublic() {
+		Assert.state(!this.cachePrivate, "The \"private\" directive has already been set, " +
+				"which is mutually exclusive with \"public\"");
+		Assert.state(!this.noStore, "The \"no-store\" directive has already been set, " +
+				"which contradicts \"public\"");
 		this.cachePublic = true;
 		return this;
 	}
@@ -226,9 +235,12 @@ public class CacheControl {
 	 * <p>This directive indicates that the response message is intended
 	 * for a single user and MUST NOT be stored by a shared cache.
 	 * @return {@code this}, to facilitate method chaining
+	 * @throws IllegalStateException if the "public" directive has already been set
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.6">rfc7234 section 5.2.2.6</a>
 	 */
 	public CacheControl cachePrivate() {
+		Assert.state(!this.cachePublic, "The \"public\" directive has already been set, " +
+				"which is mutually exclusive with \"private\"");
 		this.cachePrivate = true;
 		return this;
 	}

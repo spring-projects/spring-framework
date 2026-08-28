@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 
 /**
@@ -82,6 +83,22 @@ class CacheControlTests {
 	void mustUnderstand() {
 		CacheControl cc = CacheControl.noStore().mustUnderstand();
 		assertThat(cc.getHeaderValue()).isEqualTo("no-store, must-understand");
+	}
+
+	@Test
+	void mustUnderstandWithoutNoStoreRejected() {
+		assertThatIllegalStateException().isThrownBy(() -> CacheControl.maxAge(1, TimeUnit.HOURS).mustUnderstand());
+	}
+
+	@Test
+	void cachePublicAndCachePrivateRejected() {
+		assertThatIllegalStateException().isThrownBy(() -> CacheControl.empty().cachePrivate().cachePublic());
+		assertThatIllegalStateException().isThrownBy(() -> CacheControl.empty().cachePublic().cachePrivate());
+	}
+
+	@Test
+	void cachePublicWithNoStoreRejected() {
+		assertThatIllegalStateException().isThrownBy(() -> CacheControl.noStore().cachePublic());
 	}
 
 	@Test
