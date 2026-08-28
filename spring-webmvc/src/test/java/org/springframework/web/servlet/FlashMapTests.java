@@ -51,6 +51,15 @@ class FlashMapTests {
 	}
 
 	@Test
+	void notExpiredWithLargeTimeToLive() {
+		FlashMap flashMap = new FlashMap();
+		flashMap.startExpirationPeriod(Integer.MAX_VALUE);
+
+		assertThat(flashMap.getExpirationTime()).isGreaterThan(System.currentTimeMillis());
+		assertThat(flashMap.isExpired()).isFalse();
+	}
+
+	@Test
 	void compareTo() {
 		FlashMap flashMap1 = new FlashMap();
 		FlashMap flashMap2 = new FlashMap();
