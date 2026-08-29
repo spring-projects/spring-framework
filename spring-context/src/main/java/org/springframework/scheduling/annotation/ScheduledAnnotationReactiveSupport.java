@@ -117,14 +117,14 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * semantics (i.e. the task blocks until completion of the Publisher, and the
 	 * delay is applied until the next iteration).
 	 */
-	public static Runnable createSubscriptionRunnable(Method method, Object targetBean, Scheduled scheduled,
+	public static Runnable createSubscriptionRunnable(Method method, Object bean, Scheduled scheduled,
 			Supplier<ObservationRegistry> observationRegistrySupplier, List<Runnable> subscriptionTrackerRegistry) {
 
 		boolean shouldBlock = (scheduled.fixedDelay() > 0 || StringUtils.hasText(scheduled.fixedDelayString()));
-		Publisher<?> publisher = getPublisherFor(method, targetBean);
+		Publisher<?> publisher = getPublisherFor(method, bean);
 		Supplier<ScheduledTaskObservationContext> contextSupplier =
-				() -> new ScheduledTaskObservationContext(targetBean, method);
-		String displayName = targetBean.getClass().getName() + "." + method.getName();
+				() -> new ScheduledTaskObservationContext(bean, method);
+		String displayName = bean.getClass().getName() + "." + method.getName();
 		return new SubscribingRunnable(publisher, shouldBlock, scheduled.scheduler(),
 				subscriptionTrackerRegistry, displayName, observationRegistrySupplier, contextSupplier);
 	}

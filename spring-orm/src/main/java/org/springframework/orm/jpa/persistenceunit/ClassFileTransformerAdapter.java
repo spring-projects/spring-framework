@@ -43,7 +43,7 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 
 	private final ClassTransformer classTransformer;
 
-	private boolean currentlyTransforming = false;
+	private final ThreadLocal<@Nullable Boolean> currentlyTransforming = new ThreadLocal<>();
 
 
 	public ClassFileTransformerAdapter(ClassTransformer classTransformer) {
@@ -58,13 +58,13 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) {
 
 		synchronized (this) {
-			if (this.currentlyTransforming) {
+			if (this.currentlyTransforming.get() == Boolean.TRUE) {
 				// Defensively back out when called from within the transform delegate below:
 				// in particular, for the over-eager transformer implementation in Hibernate.
 				return null;
 			}
 
-			this.currentlyTransforming = true;
+			this.currentlyTransforming.set(Boolean.TRUE);
 			try {
 				byte[] transformed = this.classTransformer.transform(
 						loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
@@ -91,7 +91,7 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 				throw new IllegalStateException("Could not weave class [" + className + "]", ex);
 			}
 			finally {
-				this.currentlyTransforming = false;
+				this.currentlyTransforming.remove();
 			}
 		}
 	}
