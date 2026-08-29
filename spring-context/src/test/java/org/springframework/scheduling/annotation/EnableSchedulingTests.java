@@ -42,6 +42,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.resilience.annotation.ConcurrencyLimit;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -318,6 +320,20 @@ class EnableSchedulingTests {
 
 		Thread.sleep(110);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThan(1);
+	}
+
+	@Test
+	void withPlainTaskToDestroy() {
+		ctx = new AnnotationConfigApplicationContext(PlainTaskConfig.class);
+		ctx.getDefaultListableBeanFactory().destroySingleton("config");
+		assertThat(ctx.getBean(ScheduledAnnotationBeanPostProcessor.class).getScheduledTasks().isEmpty()).isTrue();
+	}
+
+	@Test
+	void withProxiedTaskToDestroy() {
+		ctx = new AnnotationConfigApplicationContext(ProxiedTaskConfig.class);
+		ctx.getDefaultListableBeanFactory().destroySingleton("config");
+		assertThat(ctx.getBean(ScheduledAnnotationBeanPostProcessor.class).getScheduledTasks().isEmpty()).isTrue();
 	}
 
 
@@ -888,6 +904,30 @@ class EnableSchedulingTests {
 			scheduler.schedule(() -> counter().incrementAndGet(),
 					triggerContext -> Instant.now().plus(10, ChronoUnit.MILLIS));
 			return scheduler;
+		}
+	}
+
+
+	@Configuration("config")
+	@EnableScheduling
+	static class PlainTaskConfig {
+
+		@Scheduled(fixedDelay = 100)
+		public void task() throws InterruptedException {
+			Thread.sleep(100);
+		}
+	}
+
+
+	@Configuration("config")
+	@EnableScheduling
+	@EnableResilientMethods(proxyTargetClass = true)
+	static class ProxiedTaskConfig {
+
+		@Scheduled(fixedDelay = 100)
+		@ConcurrencyLimit(1)
+		public void task() throws InterruptedException {
+			Thread.sleep(100);
 		}
 	}
 
