@@ -24,6 +24,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 
 /**
@@ -94,9 +95,9 @@ public class ResponseStatusException extends ErrorResponseException {
 			HttpStatusCode status, @Nullable String reason, @Nullable Throwable cause,
 			@Nullable String messageDetailCode, Object @Nullable [] messageDetailArguments) {
 
-		super(status, ProblemDetail.forStatus(status), cause, messageDetailCode, messageDetailArguments);
+		super(status, new ResponseStatusProblemDetail(status, reason, messageDetailCode == null), cause,
+				messageDetailCode, messageDetailArguments);
 		this.reason = reason;
-		setDetail(reason);
 	}
 
 
@@ -117,25 +118,69 @@ public class ResponseStatusException extends ErrorResponseException {
 
 	@Override
 	public ProblemDetail updateAndGetBody(@Nullable MessageSource messageSource, Locale locale) {
-		String detail = getBody().getDetail();
+		ResponseStatusProblemDetail body = (ResponseStatusProblemDetail) getBody();
+		boolean reasonLocalizationAllowed = body.isReasonLocalizationAllowed();
 		super.updateAndGetBody(messageSource, locale);
 
 		// The reason may be a code (consistent with ResponseStatusExceptionResolver)
 
-		if (messageSource != null && getReason() != null && getReason().equals(detail)) {
+		String reason = getReason();
+		if (reasonLocalizationAllowed && messageSource != null && reason != null &&
+				isDefaultDetailMessageCode()) {
 			Object[] arguments = getDetailMessageArguments(messageSource, locale);
-			String resolved = messageSource.getMessage(getReason(), arguments, null, locale);
+			String resolved = messageSource.getMessage(reason, arguments, null, locale);
 			if (resolved != null) {
-				getBody().setDetail(resolved);
+				body.setDetailFromReason(resolved);
 			}
 		}
+		body.setReasonLocalizationAllowed(reasonLocalizationAllowed);
 
 		return getBody();
+	}
+
+	private boolean isDefaultDetailMessageCode() {
+		return getDetailMessageCode().equals(ErrorResponse.getDefaultDetailMessageCode(getClass(), null));
 	}
 
 	@Override
 	public String getMessage() {
 		return getStatusCode() + (this.reason != null ? " \"" + this.reason + "\"" : "");
+	}
+
+
+	private static final class ResponseStatusProblemDetail extends ProblemDetail {
+
+		private static final long serialVersionUID = 1L;
+
+		private boolean reasonLocalizationAllowed;
+
+
+		ResponseStatusProblemDetail(
+				HttpStatusCode status, @Nullable String reason, boolean reasonLocalizationAllowed) {
+
+			super(ProblemDetail.forStatus(status));
+			this.reasonLocalizationAllowed = reasonLocalizationAllowed;
+			super.setDetail(reason);
+		}
+
+		@Override
+		public void setDetail(@Nullable String detail) {
+			super.setDetail(detail);
+			this.reasonLocalizationAllowed = false;
+		}
+
+		boolean isReasonLocalizationAllowed() {
+			return this.reasonLocalizationAllowed;
+		}
+
+		void setDetailFromReason(String detail) {
+			super.setDetail(detail);
+		}
+
+		void setReasonLocalizationAllowed(boolean allowed) {
+			this.reasonLocalizationAllowed = allowed;
+		}
+
 	}
 
 }

@@ -416,11 +416,21 @@ class ErrorResponseExceptionTests {
 			messageSource.addMessage(
 					ErrorResponse.getDefaultDetailMessageCode(ResponseStatusException.class, null),
 					locale, "Default response status exception message");
+			messageSource.addMessage(reason, Locale.US, "Bad Request");
+			messageSource.addMessage(
+					ErrorResponse.getDefaultDetailMessageCode(ResponseStatusException.class, null),
+					Locale.US, "Default response status exception message");
 
 			ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, reason);
 
 			ProblemDetail problemDetail = ex.updateAndGetBody(messageSource, locale);
 			assertThat(problemDetail.getDetail()).isEqualTo(message);
+
+			problemDetail = ex.updateAndGetBody(messageSource, locale);
+			assertThat(problemDetail.getDetail()).isEqualTo(message);
+
+			problemDetail = ex.updateAndGetBody(messageSource, Locale.US);
+			assertThat(problemDetail.getDetail()).isEqualTo("Bad Request");
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -439,6 +449,36 @@ class ErrorResponseExceptionTests {
 
 		ProblemDetail problemDetail = ex.updateAndGetBody(messageSource, locale);
 		assertThat(problemDetail.getDetail()).isEqualTo("Default response status exception message");
+	}
+
+	@Test  // gh-36984
+	void responseStatusExceptionSubclassWithCustomDetail() {
+		Locale locale = Locale.UK;
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage("Request method 'PUT' is not supported.", locale, "Localized reason");
+
+		MethodNotAllowedException ex = new MethodNotAllowedException(
+				HttpMethod.PUT, Arrays.asList(HttpMethod.GET, HttpMethod.POST));
+
+		ProblemDetail problemDetail = ex.updateAndGetBody(messageSource, locale);
+		assertThat(problemDetail.getDetail()).isEqualTo("Supported methods: [GET, POST]");
+	}
+
+	@Test  // gh-36984
+	void responseStatusExceptionWithExplicitDetailMessageCode() {
+		Locale locale = Locale.UK;
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage("custom.detail", locale, "Explicit detail message");
+		messageSource.addMessage("custom.detail", Locale.US, "Explicit US detail message");
+		messageSource.addMessage("bad.request", locale, "Breaking Bad Request");
+
+		CustomResponseStatusException ex = new CustomResponseStatusException("bad.request");
+
+		ProblemDetail problemDetail = ex.updateAndGetBody(messageSource, locale);
+		assertThat(problemDetail.getDetail()).isEqualTo("Explicit detail message");
+
+		problemDetail = ex.updateAndGetBody(messageSource, Locale.US);
+		assertThat(problemDetail.getDetail()).isEqualTo("Explicit US detail message");
 	}
 
 	private void assertStatus(ErrorResponse ex, HttpStatus status) {
@@ -521,6 +561,17 @@ class ErrorResponseExceptionTests {
 			assertThat(BindErrorUtils.resolve(errors, this.messageSource, Locale.UK)).hasSize(4)
 					.containsValues("Bean A message", "Bean B message", "name is required", "age is below minimum");
 		}
+	}
+
+
+	private static class CustomResponseStatusException extends ResponseStatusException {
+
+		private static final long serialVersionUID = 1L;
+
+		CustomResponseStatusException(String reason) {
+			super(HttpStatus.BAD_REQUEST, reason, null, "custom.detail", null);
+		}
+
 	}
 
 }
