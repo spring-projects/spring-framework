@@ -403,7 +403,7 @@ class ErrorResponseExceptionTests {
 		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
-	@Test  // gh-30300
+	@Test  // gh-30300, gh-36984
 	void responseStatusException() {
 		Locale locale = Locale.UK;
 		LocaleContextHolder.setLocale(locale);
@@ -413,6 +413,9 @@ class ErrorResponseExceptionTests {
 			String message = "Breaking Bad Request";
 			StaticMessageSource messageSource = new StaticMessageSource();
 			messageSource.addMessage(reason, locale, message);
+			messageSource.addMessage(
+					ErrorResponse.getDefaultDetailMessageCode(ResponseStatusException.class, null),
+					locale, "Default response status exception message");
 
 			ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, reason);
 
@@ -422,6 +425,20 @@ class ErrorResponseExceptionTests {
 		finally {
 			LocaleContextHolder.resetLocaleContext();
 		}
+	}
+
+	@Test  // gh-36984
+	void responseStatusExceptionWithDefaultMessage() {
+		Locale locale = Locale.UK;
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage(
+				ErrorResponse.getDefaultDetailMessageCode(ResponseStatusException.class, null),
+				locale, "Default response status exception message");
+
+		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad.request");
+
+		ProblemDetail problemDetail = ex.updateAndGetBody(messageSource, locale);
+		assertThat(problemDetail.getDetail()).isEqualTo("Default response status exception message");
 	}
 
 	private void assertStatus(ErrorResponse ex, HttpStatus status) {

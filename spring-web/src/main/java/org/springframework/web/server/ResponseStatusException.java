@@ -117,11 +117,12 @@ public class ResponseStatusException extends ErrorResponseException {
 
 	@Override
 	public ProblemDetail updateAndGetBody(@Nullable MessageSource messageSource, Locale locale) {
+		String detail = getBody().getDetail();
 		super.updateAndGetBody(messageSource, locale);
 
 		// The reason may be a code (consistent with ResponseStatusExceptionResolver)
 
-		if (messageSource != null && getReason() != null && getReason().equals(getBody().getDetail())) {
+		if (messageSource != null && getReason() != null && getReason().equals(detail)) {
 			Object[] arguments = getDetailMessageArguments(messageSource, locale);
 			String resolved = messageSource.getMessage(getReason(), arguments, null, locale);
 			if (resolved != null) {
