@@ -1,3 +1,8 @@
+import org.gradle.api.attributes.Bundling
+import org.gradle.api.attributes.Category
+import org.gradle.api.attributes.DocsType
+import org.gradle.api.attributes.Usage
+
 apply plugin: 'java-library'
 apply plugin: 'org.springframework.build.conventions'
 apply plugin: 'org.springframework.build.optional-dependencies'
@@ -7,6 +12,10 @@ apply plugin: 'org.springframework.build.optional-dependencies'
 apply plugin: 'me.champeau.jmh'
 apply from: "$rootDir/gradle/publications.gradle"
 apply plugin: "io.spring.nullability"
+
+java {
+	withJavadocJar()
+}
 
 dependencies {
 	jmh 'org.openjdk.jmh:jmh-core:1.37'
@@ -102,17 +111,29 @@ tasks.register('sourcesJar', Jar) {
 	// Don't include or exclude anything explicitly by default. See SPR-12085.
 }
 
-tasks.register('javadocJar', Jar) {
-	archiveClassifier.set("javadoc")
-	from javadoc
+configurations {
+	sourcesElements {
+		canBeConsumed = true
+		canBeResolved = false
+		attributes {
+			attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.DOCUMENTATION))
+			attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+			attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType, DocsType.SOURCES))
+			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+		}
+	}
+}
+
+afterEvaluate {
+	configurations.sourcesElements.outgoing.artifacts.clear()
+	configurations.sourcesElements.outgoing.artifact(sourcesJar)
+	components.java.addVariantsFromConfiguration(configurations.sourcesElements) { }
 }
 
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
-			artifact sourcesJar
-			artifact javadocJar
 		}
 	}
 }
