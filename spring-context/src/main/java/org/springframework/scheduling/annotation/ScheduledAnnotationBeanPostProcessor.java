@@ -382,7 +382,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		Runnable task;
 		try {
 			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, scheduled,
-					this::getObservationRegistry,
+					this::resolveObservationRegistry,
 					this.reactiveSubscriptions.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>()));
 		}
 		catch (IllegalArgumentException ex) {
@@ -448,7 +448,8 @@ public class ScheduledAnnotationBeanPostProcessor
 						else {
 							trigger = new CronTrigger(cron);
 						}
-						tasks.add(Objects.requireNonNull(this.registrar.scheduleCronTask(new CronTask(runnable, trigger))));
+						tasks.add(Objects.requireNonNull(
+								this.registrar.scheduleCronTask(new CronTask(runnable, trigger))));
 					}
 				}
 			}
@@ -461,7 +462,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!fixedDelay.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				tasks.add(Objects.requireNonNull(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse))));
+				tasks.add(Objects.requireNonNull(
+						this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse))));
 			}
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
@@ -478,7 +480,8 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedDelayString value \"" + fixedDelayString + "\"; " + ex);
 					}
-					tasks.add(Objects.requireNonNull(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse))));
+					tasks.add(Objects.requireNonNull(
+							this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse))));
 				}
 			}
 
@@ -487,7 +490,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!fixedRate.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				tasks.add(Objects.requireNonNull(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse))));
+				tasks.add(Objects.requireNonNull(
+						this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse))));
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
@@ -504,7 +508,8 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedRateString value \"" + fixedRateString + "\"; " + ex);
 					}
-					tasks.add(Objects.requireNonNull(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse))));
+					tasks.add(Objects.requireNonNull(
+							this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse))));
 				}
 			}
 
@@ -512,7 +517,8 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (initialDelay.isNegative()) {
 					throw new IllegalArgumentException("One-time task only supported with specified initial delay");
 				}
-				tasks.add(Objects.requireNonNull(this.registrar.scheduleOneTimeTask(new OneTimeTask(runnable, delayToUse))));
+				tasks.add(Objects.requireNonNull(
+						this.registrar.scheduleOneTimeTask(new OneTimeTask(runnable, delayToUse))));
 			}
 
 			// Finally register the scheduled tasks
@@ -543,7 +549,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 		Assert.isTrue(method.getParameterCount() == 0, "Only no-arg methods may be annotated with @Scheduled");
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, target.getClass());
-		return new ScheduledMethodRunnable(target, invocableMethod, qualifier, this::getObservationRegistry);
+		return new ScheduledMethodRunnable(target, invocableMethod, qualifier, this::resolveObservationRegistry);
 	}
 
 	/**
@@ -592,7 +598,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 	}
 
-	private ObservationRegistry getObservationRegistry() {
+	private ObservationRegistry resolveObservationRegistry() {
 		return Objects.requireNonNullElse(this.registrar.getObservationRegistry(), ObservationRegistry.NOOP);
 	}
 
