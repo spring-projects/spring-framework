@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.InstanceOfAssertFactories.map;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -81,17 +83,23 @@ class LruContextCacheTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> new DefaultContextCache(0));
 	}
 
-	@Test
+	@Test  // gh-36825
 	void clearClosesContexts() {
 		DefaultContextCache cache = new DefaultContextCache(4);
 
 		cache.put(fooConfig, key -> fooContext);
 		cache.put(barConfig, key -> barContext);
 		cache.put(bazConfig, key -> bazContext);
+		cache.registerContextUsage(fooConfig, getClass());
+		cache.registerContextUsage(barConfig, getClass());
+		cache.registerContextUsage(bazConfig, getClass());
 		assertCacheContents(cache, "Foo", "Bar", "Baz");
+		assertThat(cache.getContextUsageCount()).isEqualTo(3);
 
 		cache.clear();
-		assertCacheContents(cache);
+		assertThat(cache.size()).isZero();
+		assertThat(cache.getParentContextCount()).isZero();
+		assertThat(cache.getContextUsageCount()).isZero();
 
 		verify(fooContext, times(1)).close();
 		verify(barContext, times(1)).close();
@@ -99,22 +107,76 @@ class LruContextCacheTests {
 		verify(abcContext, never()).close();
 	}
 
-	@Test
+	@Test  // gh-36825
 	void resetClosesContexts() {
 		DefaultContextCache cache = new DefaultContextCache(4);
 
 		cache.put(fooConfig, key -> fooContext);
 		cache.put(barConfig, key -> barContext);
 		cache.get(fooConfig);
+		cache.get(abcConfig);
 		assertThat(cache.getHitCount()).isEqualTo(1);
+		assertThat(cache.getMissCount()).isEqualTo(1);
 		assertCacheContents(cache, "Bar", "Foo");
 
 		cache.reset();
-		assertCacheContents(cache);
+		assertThat(cache.size()).isZero();
 		assertThat(cache.getHitCount()).isZero();
+		assertThat(cache.getMissCount()).isZero();
+		assertThat(cache.getParentContextCount()).isZero();
+		assertThat(cache.getContextUsageCount()).isZero();
 
 		verify(fooContext, times(1)).close();
 		verify(barContext, times(1)).close();
+	}
+
+	@Test  // gh-36825
+	void clearClosesContextHierarchyBottomUp() {
+		DefaultContextCache cache = new DefaultContextCache(4);
+
+		// Foo (parent) <- Bar (child) <- Baz (grandchild)
+		MergedContextConfiguration parentConfig = config(Foo.class);
+		MergedContextConfiguration childConfig = config(Bar.class, parentConfig);
+		MergedContextConfiguration grandchildConfig = config(Baz.class, childConfig);
+
+		cache.put(parentConfig, key -> fooContext);
+		cache.put(childConfig, key -> barContext);
+		cache.put(grandchildConfig, key -> bazContext);
+		assertCacheContents(cache, "Foo", "Bar", "Baz");
+		assertThat(cache.getParentContextCount()).isEqualTo(2);
+
+		cache.clear();
+		assertThat(cache.size()).isZero();
+		assertThat(cache.getParentContextCount()).isZero();
+
+		// Child contexts must be closed before their parents.
+		InOrder inOrder = inOrder(bazContext, barContext, fooContext);
+		inOrder.verify(bazContext).close();
+		inOrder.verify(barContext).close();
+		inOrder.verify(fooContext).close();
+	}
+
+	@Test  // gh-36825
+	void resetClosesContextHierarchyBottomUp() {
+		DefaultContextCache cache = new DefaultContextCache(4);
+
+		// Foo (parent) <- Bar (child)
+		MergedContextConfiguration parentConfig = config(Foo.class);
+		MergedContextConfiguration childConfig = config(Bar.class, parentConfig);
+
+		cache.put(parentConfig, key -> fooContext);
+		cache.put(childConfig, key -> barContext);
+		assertCacheContents(cache, "Foo", "Bar");
+		assertThat(cache.getParentContextCount()).isEqualTo(1);
+
+		cache.reset();
+		assertThat(cache.size()).isZero();
+		assertThat(cache.getParentContextCount()).isZero();
+
+		// Child contexts must be closed before their parents.
+		InOrder inOrder = inOrder(barContext, fooContext);
+		inOrder.verify(barContext).close();
+		inOrder.verify(fooContext).close();
 	}
 
 
@@ -520,6 +582,10 @@ class LruContextCacheTests {
 
 	private static MergedContextConfiguration config(Class<?> clazz) {
 		return new MergedContextConfiguration(null, null, new Class<?>[] { clazz }, null, null);
+	}
+
+	private static MergedContextConfiguration config(Class<?> clazz, MergedContextConfiguration parent) {
+		return new MergedContextConfiguration(null, null, new Class<?>[] { clazz }, null, null, null, null, parent);
 	}
 
 	private static void assertCacheContents(DefaultContextCache cache, String... expectedNames) {
