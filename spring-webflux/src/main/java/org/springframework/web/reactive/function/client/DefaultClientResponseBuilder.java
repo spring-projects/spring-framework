@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -144,7 +145,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	private HttpHeaders getHeaders() {
 		if (this.headers == null) {
-			this.headers = new HttpHeaders(this.originalResponse.headers().asHttpHeaders());
+			this.headers = HttpHeaders.copyOf(this.originalResponse.headers().asHttpHeaders());
 		}
 		return this.headers;
 	}
@@ -166,7 +167,10 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	private MultiValueMap<String, ResponseCookie> getCookies() {
 		if (this.cookies == null) {
-			this.cookies = new LinkedMultiValueMap<>(this.originalResponse.cookies());
+			MultiValueMap<String, ResponseCookie> originalCookies = this.originalResponse.cookies();
+			this.cookies = new LinkedMultiValueMap<>(originalCookies.size());
+			originalCookies.forEach(
+					(name, values) -> this.cookies.put(name, new ArrayList<>(values)));
 		}
 		return this.cookies;
 	}
