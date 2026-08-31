@@ -55,6 +55,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.SpringProperties;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -437,7 +438,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				AtomicBoolean invokeFailure = new AtomicBoolean(false);
 				CompletableFuture<?> result = doRetrieve(cache, key,
 						() -> {
-							CompletableFuture<?> invokeResult = ((CompletableFuture<?>) invokeOperation(invoker));
+							CompletableFuture<?> invokeResult = ((CompletableFuture<?>) unwrapReturnValue(
+									invokeOperation(invoker), method));
 							if (invokeResult == null) {
 								throw new IllegalStateException("Returned CompletableFuture must not be null: " + method);
 							}
@@ -446,7 +448,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 								return CompletableFuture.failedFuture(ex);
 							});
 						});
-				return result.exceptionallyCompose(ex -> {
+				CompletableFuture<?> resultWithErrorHandling = result.exceptionallyCompose(ex -> {
 					if (!(ex instanceof RuntimeException rex)) {
 						return CompletableFuture.failedFuture(ex);
 					}
@@ -455,12 +457,13 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 						if (invokeFailure.get()) {
 							return CompletableFuture.failedFuture(ex);
 						}
-						return (CompletableFuture) invokeOperation(invoker);
+						return (CompletableFuture) unwrapReturnValue(invokeOperation(invoker), method);
 					}
 					catch (Throwable ex2) {
 						return CompletableFuture.failedFuture(ex2);
 					}
 				});
+				return wrapCacheValue(method, resultWithErrorHandling);
 			}
 			if (this.reactiveCachingHandler != null) {
 				Object returnValue = this.reactiveCachingHandler.executeSynchronized(invoker, method, cache, key);
@@ -469,7 +472,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 			}
 			try {
-				return wrapCacheValue(method, doGet(cache, key, () -> unwrapReturnValue(invokeOperation(invoker))));
+				return wrapCacheValue(method, doGet(cache, key, () -> unwrapReturnValue(invokeOperation(invoker), method)));
 			}
 			catch (Cache.ValueRetrievalException ex) {
 				// Directly propagate ThrowableWrapper from the invoker,
@@ -572,7 +575,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		else {
 			// Invoke the method if we don't have a cache hit
 			returnValue = invokeOperation(invoker);
-			cacheValue = unwrapReturnValue(returnValue);
+			cacheValue = unwrapReturnValue(returnValue, method);
 		}
 
 		// Collect puts from any @Cacheable miss, if no cached value is found
@@ -588,7 +591,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		for (CachePutRequest cachePutRequest : cachePutRequests) {
 			Object returnOverride = cachePutRequest.apply(cacheValue);
 			if (returnOverride != null) {
-				returnValue = returnOverride;
+				returnValue = (isCompletableFutureWithOptionalReturnType(method) ?
+						wrapCacheValue(method, returnOverride) : returnOverride);
 			}
 		}
 
@@ -614,11 +618,22 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				(cacheValue == null || cacheValue.getClass() != Optional.class)) {
 			return Optional.ofNullable(cacheValue);
 		}
+		if (isCompletableFutureWithOptionalReturnType(method) && cacheValue instanceof CompletableFuture<?> future) {
+			return future.thenApply(value -> Optional.ofNullable(ObjectUtils.unwrapOptional(value)));
+		}
 		return cacheValue;
 	}
 
-	private @Nullable Object unwrapReturnValue(@Nullable Object returnValue) {
+	private @Nullable Object unwrapReturnValue(@Nullable Object returnValue, Method method) {
+		if (isCompletableFutureWithOptionalReturnType(method) && returnValue instanceof CompletableFuture<?> future) {
+			return future.thenApply(ObjectUtils::unwrapOptional);
+		}
 		return ObjectUtils.unwrapOptional(returnValue);
+	}
+
+	private boolean isCompletableFutureWithOptionalReturnType(Method method) {
+		return (CompletableFuture.class.isAssignableFrom(method.getReturnType()) &&
+				ResolvableType.forMethodReturnType(method).getGeneric().resolve() == Optional.class);
 	}
 
 	private boolean hasCachePut(CacheOperationContexts contexts) {

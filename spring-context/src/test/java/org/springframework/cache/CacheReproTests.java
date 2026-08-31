@@ -210,6 +210,50 @@ class CacheReproTests {
 	}
 
 	@Test
+	void spr37162AdaptsToCompletableFutureWithOptional() {
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(Spr14235Config.class, Spr37162FutureOptionalService.class);
+		Spr37162FutureOptionalService bean = context.getBean(Spr37162FutureOptionalService.class);
+		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
+
+		assertThat(bean.findById("tb1").join()).contains("PREFIX-tb1");
+		assertThat(bean.getInvocationCount()).isOne();
+		assertThat(cache.get("tb1").get()).isEqualTo("PREFIX-tb1");
+		assertThat(bean.findById("tb1").join()).contains("PREFIX-tb1");
+		assertThat(bean.getInvocationCount()).isOne();
+
+		assertThat(bean.findById("").join()).isEmpty();
+		assertThat(bean.getInvocationCount()).isEqualTo(2);
+		assertThat(cache.get("").get()).isNull();
+		assertThat(bean.findById("").join()).isEmpty();
+		assertThat(bean.getInvocationCount()).isEqualTo(2);
+
+		context.close();
+	}
+
+	@Test
+	void spr37162AdaptsToCompletableFutureWithOptionalAndSync() {
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(Spr14235Config.class, Spr37162FutureOptionalServiceSync.class);
+		Spr37162FutureOptionalServiceSync bean = context.getBean(Spr37162FutureOptionalServiceSync.class);
+		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
+
+		assertThat(bean.findById("tb1").join()).contains("PREFIX-tb1");
+		assertThat(bean.getInvocationCount()).isOne();
+		assertThat(cache.get("tb1").get()).isEqualTo("PREFIX-tb1");
+		assertThat(bean.findById("tb1").join()).contains("PREFIX-tb1");
+		assertThat(bean.getInvocationCount()).isOne();
+
+		assertThat(bean.findById("").join()).isEmpty();
+		assertThat(bean.getInvocationCount()).isEqualTo(2);
+		assertThat(cache.get("").get()).isNull();
+		assertThat(bean.findById("").join()).isEmpty();
+		assertThat(bean.getInvocationCount()).isEqualTo(2);
+
+		context.close();
+	}
+
+	@Test
 	void spr14235AdaptsToCompletableFutureWithSync() throws Exception {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(Spr14235Config.class, Spr14235FutureServiceSync.class);
@@ -608,6 +652,40 @@ class CacheReproTests {
 		@CacheEvict(cacheNames = "itemCache", allEntries = true, condition = "#result > 0")
 		public CompletableFuture<Integer> clear() {
 			return CompletableFuture.completedFuture(1);
+		}
+	}
+
+
+	public static class Spr37162FutureOptionalService {
+
+		private int invocationCount;
+
+		@Cacheable("itemCache")
+		public CompletableFuture<Optional<String>> findById(String id) {
+			this.invocationCount++;
+			return CompletableFuture.completedFuture(
+					(id.isEmpty() ? Optional.empty() : Optional.of("PREFIX-" + id)));
+		}
+
+		int getInvocationCount() {
+			return this.invocationCount;
+		}
+	}
+
+
+	public static class Spr37162FutureOptionalServiceSync {
+
+		private int invocationCount;
+
+		@Cacheable(value = "itemCache", sync = true)
+		public CompletableFuture<Optional<String>> findById(String id) {
+			this.invocationCount++;
+			return CompletableFuture.completedFuture(
+					(id.isEmpty() ? Optional.empty() : Optional.of("PREFIX-" + id)));
+		}
+
+		int getInvocationCount() {
+			return this.invocationCount;
 		}
 	}
 
