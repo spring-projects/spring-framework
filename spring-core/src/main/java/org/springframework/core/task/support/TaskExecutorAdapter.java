@@ -113,7 +113,7 @@ public class TaskExecutorAdapter implements AsyncTaskExecutor {
 	}
 
 	@Override
-	public <T> Future<T> submit(Callable<T> task) {
+	public <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 		try {
 			if (this.taskDecorator == null &&
 					this.concurrentExecutor instanceof ExecutorService executorService) {

@@ -336,7 +336,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	@Override
-	public <T> Future<T> submit(Callable<T> task) {
+	public <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
 			return executor.submit(new DelegatingErrorHandlingCallable<>(task, this.errorHandler));
