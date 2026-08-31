@@ -21,6 +21,8 @@ import java.lang.reflect.Proxy;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.SpringProxy;
+import org.springframework.aop.target.PrototypeTargetSource;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.DecoratingProxy;
@@ -36,6 +38,36 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  */
 class AopProxyUtilsTests {
+
+	@Test
+	void ultimateTarget() {
+		TestBean target = new TestBean();
+		Object proxy = ProxyFactory.getProxy(new SingletonTargetSource(target));
+		assertThat(AopProxyUtils.getSingletonTarget(proxy)).isSameAs(target);
+		assertThat(AopProxyUtils.ultimateSingletonTarget(proxy)).isSameAs(target);
+		assertThat(AopProxyUtils.ultimateTargetClass(proxy)).isEqualTo(TestBean.class);
+	}
+
+	@Test
+	void ultimateTargetWithNestedProxy() {
+		TestBean target = new TestBean();
+		Object innerProxy = ProxyFactory.getProxy(new SingletonTargetSource(target));
+		Object outerProxy = ProxyFactory.getProxy(new SingletonTargetSource(innerProxy));
+		assertThat(AopProxyUtils.getSingletonTarget(innerProxy)).isSameAs(target);
+		assertThat(AopProxyUtils.getSingletonTarget(outerProxy)).isSameAs(innerProxy);
+		assertThat(AopProxyUtils.ultimateSingletonTarget(outerProxy)).isSameAs(target);
+		assertThat(AopProxyUtils.ultimateTargetClass(outerProxy)).isEqualTo(TestBean.class);
+	}
+
+	@Test
+	void ultimateTargetWithNonSingleton() {
+		PrototypeTargetSource prototypeTarget = new PrototypeTargetSource();
+		prototypeTarget.setTargetClass(TestBean.class);
+		Object proxy = ProxyFactory.getProxy(prototypeTarget);
+		assertThat(AopProxyUtils.getSingletonTarget(proxy)).isNull();
+		assertThat(AopProxyUtils.ultimateSingletonTarget(proxy)).isSameAs(proxy);
+		assertThat(AopProxyUtils.ultimateTargetClass(proxy)).isEqualTo(TestBean.class);
+	}
 
 	@Test
 	void completeProxiedInterfacesWorksWithNull() {
@@ -112,22 +144,22 @@ class AopProxyUtilsTests {
 	@Test
 	void completeJdkProxyInterfacesFromNullInterface() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class, null, Comparable.class))
-			.withMessage("'userInterfaces' must not contain null values");
+				.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(ITestBean.class, null, Comparable.class))
+				.withMessage("'userInterfaces' must not contain null values");
 	}
 
 	@Test
 	void completeJdkProxyInterfacesFromClassThatIsNotAnInterface() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(TestBean.class))
-			.withMessage(TestBean.class.getName() + " must be a non-sealed interface");
+				.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(TestBean.class))
+				.withMessage(TestBean.class.getName() + " must be a non-sealed interface");
 	}
 
 	@Test
 	void completeJdkProxyInterfacesFromSealedInterface() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(SealedInterface.class))
-			.withMessage(SealedInterface.class.getName() + " must be a non-sealed interface");
+				.isThrownBy(() -> AopProxyUtils.completeJdkProxyInterfaces(SealedInterface.class))
+				.withMessage(SealedInterface.class.getName() + " must be a non-sealed interface");
 	}
 
 	@Test

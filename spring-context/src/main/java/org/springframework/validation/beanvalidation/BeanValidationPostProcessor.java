@@ -108,12 +108,8 @@ public class BeanValidationPostProcessor implements BeanPostProcessor, Initializ
 	 */
 	protected void doValidate(Object bean) {
 		Assert.state(this.validator != null, "No Validator set");
-		Object objectToValidate = AopProxyUtils.getSingletonTarget(bean);
-		if (objectToValidate == null) {
-			objectToValidate = bean;
-		}
+		Object objectToValidate = AopProxyUtils.ultimateSingletonTarget(bean);
 		Set<ConstraintViolation<Object>> result = this.validator.validate(objectToValidate);
-
 		if (!result.isEmpty()) {
 			StringBuilder sb = new StringBuilder("Bean state is invalid: ");
 			for (Iterator<ConstraintViolation<Object>> it = result.iterator(); it.hasNext();) {

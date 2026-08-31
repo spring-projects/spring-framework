@@ -323,10 +323,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @param bean the target bean instance
 	 */
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
-		Object key = AopProxyUtils.getSingletonTarget(bean);
-		if (key == null) {
-			key = bean;
-		}
+		Object key = AopProxyUtils.ultimateSingletonTarget(bean);
 
 		// Is the method a Kotlin suspending function? Throws if true and the reactor bridge isn't on the classpath.
 		// Does the method return a reactive type? Throws if true and it isn't a deferred Publisher type.

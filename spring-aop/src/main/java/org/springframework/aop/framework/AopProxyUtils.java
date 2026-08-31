@@ -70,6 +70,29 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
+	 * Obtain the ultimate singleton target object behind the given proxy,
+	 * even for a nested proxy scenario where the immediate singleton target
+	 * is yet another proxy.
+	 * @param candidate the (potential) proxy to check
+	 * @return the singleton target object managed in a {@link SingletonTargetSource},
+	 * or the original candidate if not a proxy or not an existing singleton target
+	 * @since 7.0.10
+	 * @see Advised#getTargetSource()
+	 * @see SingletonTargetSource#getTarget()
+	 */
+	public static Object ultimateSingletonTarget(Object candidate) {
+		Object current = candidate;
+		while (current instanceof Advised advised) {
+			TargetSource targetSource = advised.getTargetSource();
+			if (!(targetSource instanceof SingletonTargetSource singleTargetSource)) {
+				break;
+			}
+			current = singleTargetSource.getTarget();
+		}
+		return current;
+	}
+
+	/**
 	 * Determine the ultimate target class of the given bean instance, traversing
 	 * not only a top-level proxy but any number of nested proxies as well &mdash;
 	 * as long as possible without side effects, that is, just for singleton targets.
