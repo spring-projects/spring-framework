@@ -25,12 +25,14 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
@@ -102,6 +104,7 @@ import org.springframework.util.StringValueResolver;
  * @author Victor Brown
  * @author Sam Brannen
  * @author Simon Baslé
+ * @author Yanming Zhou
  * @since 3.0
  * @see Scheduled
  * @see EnableScheduling
@@ -379,7 +382,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		Runnable task;
 		try {
 			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, scheduled,
-					this.registrar::getObservationRegistry,
+					this::getObservationRegistry,
 					this.reactiveSubscriptions.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>()));
 		}
 		catch (IllegalArgumentException ex) {
@@ -445,7 +448,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						else {
 							trigger = new CronTrigger(cron);
 						}
-						tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, trigger)));
+						tasks.add(Objects.requireNonNull(this.registrar.scheduleCronTask(new CronTask(runnable, trigger))));
 					}
 				}
 			}
@@ -458,7 +461,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!fixedDelay.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse)));
+				tasks.add(Objects.requireNonNull(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse))));
 			}
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
@@ -475,7 +478,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedDelayString value \"" + fixedDelayString + "\"; " + ex);
 					}
-					tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse)));
+					tasks.add(Objects.requireNonNull(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, delayToUse))));
 				}
 			}
 
@@ -484,7 +487,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!fixedRate.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse)));
+				tasks.add(Objects.requireNonNull(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse))));
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
@@ -501,7 +504,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedRateString value \"" + fixedRateString + "\"; " + ex);
 					}
-					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse)));
+					tasks.add(Objects.requireNonNull(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, delayToUse))));
 				}
 			}
 
@@ -509,7 +512,7 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (initialDelay.isNegative()) {
 					throw new IllegalArgumentException("One-time task only supported with specified initial delay");
 				}
-				tasks.add(this.registrar.scheduleOneTimeTask(new OneTimeTask(runnable, delayToUse)));
+				tasks.add(Objects.requireNonNull(this.registrar.scheduleOneTimeTask(new OneTimeTask(runnable, delayToUse))));
 			}
 
 			// Finally register the scheduled tasks
@@ -540,7 +543,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 		Assert.isTrue(method.getParameterCount() == 0, "Only no-arg methods may be annotated with @Scheduled");
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, target.getClass());
-		return new ScheduledMethodRunnable(target, invocableMethod, qualifier, this.registrar::getObservationRegistry);
+		return new ScheduledMethodRunnable(target, invocableMethod, qualifier, this::getObservationRegistry);
 	}
 
 	/**
@@ -587,6 +590,10 @@ public class ScheduledAnnotationBeanPostProcessor
 		synchronized (this.scheduledTasks) {
 			return (this.scheduledTasks.containsKey(bean) || this.reactiveSubscriptions.containsKey(bean));
 		}
+	}
+
+	private ObservationRegistry getObservationRegistry() {
+		return Objects.requireNonNullElse(this.registrar.getObservationRegistry(), ObservationRegistry.NOOP);
 	}
 
 	private void cancelScheduledTasks(Object bean) {
