@@ -94,25 +94,20 @@ javadoc {
 	logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
 }
 
-tasks.register('sourcesJar', Jar) {
-	dependsOn classes
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	archiveClassifier.set("sources")
-	from sourceSets.main.allSource
-	// Don't include or exclude anything explicitly by default. See SPR-12085.
+java {
+	withJavadocJar()
+	withSourcesJar()
 }
 
-tasks.register('javadocJar', Jar) {
-	archiveClassifier.set("javadoc")
-	from javadoc
+tasks.named('sourcesJar', Jar).configure {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	// Don't include or exclude anything explicitly by default. See SPR-12085.
 }
 
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
-			artifact sourcesJar
-			artifact javadocJar
 		}
 	}
 }
