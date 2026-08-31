@@ -77,7 +77,7 @@ class ScriptUtilsIntegrationTests extends AbstractDatabaseInitializationTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "removal"})
 	void statementWithMultipleResultSets() throws SQLException {
 		// Derby does not support multiple statements/ResultSets within a single Statement.
 		assumeThat(this.databaseType).isNotSameAs(EmbeddedDatabaseType.DERBY);
