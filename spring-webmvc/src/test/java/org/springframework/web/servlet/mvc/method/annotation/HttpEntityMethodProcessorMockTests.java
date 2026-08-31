@@ -665,6 +665,43 @@ class HttpEntityMethodProcessorMockTests {
 	}
 
 	@Test
+	void shouldIgnoreResourceByteRangeWhenIfRangeETagDoesNotMatch() throws Exception {
+		ByteArrayResource resource = new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8));
+		ResponseEntity<Resource> returnValue = ResponseEntity.ok().eTag("\"current\"").body(resource);
+		servletRequest.addHeader(HttpHeaders.RANGE, "bytes=0-5");
+		servletRequest.addHeader(HttpHeaders.IF_RANGE, "\"stale\"");
+
+		given(resourceMessageConverter.canWrite(ByteArrayResource.class, null)).willReturn(true);
+		given(resourceMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
+		given(resourceMessageConverter.canWrite(ByteArrayResource.class, APPLICATION_OCTET_STREAM)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+
+		then(resourceMessageConverter).should(times(1)).write(
+				isA(ByteArrayResource.class), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
+		then(resourceRegionMessageConverter).should(never()).write(anyCollection(), any(), any());
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
+		assertThat(servletResponse.getHeader(HttpHeaders.CONTENT_RANGE)).isNull();
+	}
+
+	@Test
+	void shouldHandleResourceByteRangeWhenIfRangeETagMatches() throws Exception {
+		ResponseEntity<Resource> returnValue = ResponseEntity.ok().eTag("\"current\"")
+				.body(new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8)));
+		servletRequest.addHeader(HttpHeaders.RANGE, "bytes=0-5");
+		servletRequest.addHeader(HttpHeaders.IF_RANGE, "\"current\"");
+
+		given(resourceRegionMessageConverter.canWrite(any(), eq(null))).willReturn(true);
+		given(resourceRegionMessageConverter.canWrite(any(), eq(APPLICATION_OCTET_STREAM))).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+
+		then(resourceRegionMessageConverter).should(times(1)).write(
+				anyCollection(), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
+		assertThat(servletResponse.getStatus()).isEqualTo(206);
+	}
+
+	@Test
 	void handleReturnTypeResourceIllegalByteRange() throws Exception {
 		ResponseEntity<Resource> returnValue = ResponseEntity
 				.ok(new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8)));

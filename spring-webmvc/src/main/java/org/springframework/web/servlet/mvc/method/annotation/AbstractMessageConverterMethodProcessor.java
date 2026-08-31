@@ -227,11 +227,14 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					outputMessage.getServletResponse().getStatus() == 200) {
 				Resource resource = (Resource) value;
 				try {
-					List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
-					outputMessage.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
-					body = HttpRange.toResourceRegions(httpRanges, resource);
-					valueType = body.getClass();
-					targetType = RESOURCE_REGION_LIST_TYPE;
+					List<HttpRange> httpRanges =
+							HttpRange.parseRanges(inputMessage.getHeaders(), outputMessage.getHeaders());
+					if (!httpRanges.isEmpty()) {
+						outputMessage.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
+						body = HttpRange.toResourceRegions(httpRanges, resource);
+						valueType = body.getClass();
+						targetType = RESOURCE_REGION_LIST_TYPE;
+					}
 				}
 				catch (IllegalArgumentException ex) {
 					outputMessage.getHeaders().set(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
