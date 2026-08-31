@@ -592,7 +592,7 @@ public abstract class SharedEntityManagerCreator {
 				else if (retVal instanceof Query query) {
 					retVal = adaptQueryProxy(proxy, query, returnType);
 				}
-				else if (method.getName().equals("registerStoredProcedureParameter") && args.length == 3 &&
+				if (method.getName().equals("registerStoredProcedureParameter") && args.length == 3 &&
 						(args[2] == ParameterMode.OUT || args[2] == ParameterMode.INOUT)) {
 					if (this.outputParameters == null) {
 						this.outputParameters = new LinkedHashMap<>();
