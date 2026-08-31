@@ -83,16 +83,21 @@ class DefaultClientResponseBuilderTests {
 		ClientResponse result = otherResponse.mutate()
 				.statusCode(HttpStatus.BAD_REQUEST)
 				.headers(headers -> headers.set("foo", "baar"))
-				.cookies(cookies -> cookies.set("baz", ResponseCookie.from("baz", "quux").build()))
+				.cookies(cookies -> cookies.add("baz", ResponseCookie.from("baz", "pop").build()))
 				.build();
 
+		assertThat(otherResponse.headers().asHttpHeaders().getFirst("foo")).isEqualTo("bar");
+		assertThat(otherResponse.headers().asHttpHeaders().getFirst("bar")).isEqualTo("baz");
+		assertThat(otherResponse.cookies().get("baz")).hasSize(1);
 
 		assertThat(result.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(3);
 		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
 		assertThat(result.headers().asHttpHeaders().getFirst("bar")).isEqualTo("baz");
 		assertThat(result.cookies()).hasSize(1);
-		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("quux");
+		assertThat(result.cookies().get("baz")).hasSize(2);
+		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("qux");
+		assertThat(result.cookies().get("baz").get(1).getValue()).isEqualTo("pop");
 		assertThat(result.logPrefix()).isEqualTo("my-prefix");
 
 		StepVerifier.create(result.bodyToFlux(String.class))
