@@ -193,12 +193,13 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		Flux<DataBuffer> processed = processInput(input, elementType, mimeType, hints);
 		return Mono.deferContextual(contextView -> {
 
 			Map<String, Object> hintsToUse = contextView.isEmpty() ? hints :
 					Hints.merge(hints, ContextView.class.getName(), contextView);
 
-			return DataBufferUtils.join(input, this.maxInMemorySize).flatMap(dataBuffer ->
+			return DataBufferUtils.join(processed, this.maxInMemorySize).flatMap(dataBuffer ->
 					Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hintsToUse)));
 		});
 	}

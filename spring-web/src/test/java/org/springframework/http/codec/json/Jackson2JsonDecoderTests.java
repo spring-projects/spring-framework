@@ -312,16 +312,18 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 				null);
 	}
 
-	@Test
+	@Test  // gh-37195
 	@SuppressWarnings("unchecked")
 	void decodeMonoNonUtf8Encoding() {
-		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
+		Flux<DataBuffer> input = Flux.concat(
+				stringBuffer("{\"føø\":\"", StandardCharsets.ISO_8859_1),
+				stringBuffer("bår\"}", StandardCharsets.ISO_8859_1));
 		ResolvableType type = ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {});
 
 		testDecodeToMono(input, type, step -> step
-						.assertNext(value -> assertThat((Map<String, String>) value).containsEntry("foo", "bar"))
+						.assertNext(value -> assertThat((Map<String, String>) value).containsEntry("føø", "bår"))
 						.verifyComplete(),
-				MediaType.parseMediaType("application/json; charset=utf-16"),
+				MediaType.parseMediaType("application/json; charset=iso-8859-1"),
 				null);
 	}
 
