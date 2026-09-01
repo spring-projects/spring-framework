@@ -131,6 +131,9 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 				return (contentType != null ? Collections.singletonList(contentType) : null);
 			}
 			if (!values.isEmpty()) {
+				if (values.size() == 1) {
+					return Collections.singletonList(values.iterator().next());
+				}
 				return new ArrayList<>(values);
 			}
 		}
