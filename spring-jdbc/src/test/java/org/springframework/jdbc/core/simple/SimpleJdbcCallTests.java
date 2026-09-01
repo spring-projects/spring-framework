@@ -266,8 +266,7 @@ class SimpleJdbcCallTests {
 		verify(procedureColumnsResultSet).close();
 	}
 
-
-	@Test
+	@Test  // gh-37206
 	void functionWithAdditionalOutParameterDeclaredBeforeReturn() throws Exception {
 		initializeGetTotalFunctionWithMetaData();
 		SimpleJdbcCall function = new SimpleJdbcCall(dataSource).withFunctionName("get_total");
@@ -282,7 +281,7 @@ class SimpleJdbcCallTests {
 		assertThat(total).isEqualTo(42);
 	}
 
-	@Test
+	@Test  // gh-37206
 	void functionWithAdditionalOutParameterDeclaredAfterReturn() throws Exception {
 		initializeGetTotalFunctionWithMetaData();
 		SimpleJdbcCall function = new SimpleJdbcCall(dataSource).withFunctionName("get_total");
@@ -296,7 +295,7 @@ class SimpleJdbcCallTests {
 		assertThat(total).isEqualTo(42);
 	}
 
-	@Test
+	@Test  // gh-37206
 	void sqlServerProcedureWithReturnValueDeclaredAfterOutParameter() throws Exception {
 		initializeSqlServerProcedureWithReturnValue();
 		SimpleJdbcCall procedure = new SimpleJdbcCall(dataSource).withProcedureName("my_proc").withReturnValue();
@@ -309,7 +308,7 @@ class SimpleJdbcCallTests {
 		verifyStatement(procedure, "{? = call my_proc(?, ?)}");
 	}
 
-	@Test
+	@Test  // gh-37206
 	void sqlServerProcedureWithReturnValueDeclaredFirst() throws Exception {
 		initializeSqlServerProcedureWithReturnValue();
 		SimpleJdbcCall procedure = new SimpleJdbcCall(dataSource).withProcedureName("my_proc").withReturnValue();
