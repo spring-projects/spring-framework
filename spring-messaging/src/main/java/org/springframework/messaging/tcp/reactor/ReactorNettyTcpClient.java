@@ -222,7 +222,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 						.map(retrySignal -> (int) retrySignal.totalRetriesInARow())
 						.flatMap(attempt -> reconnect(attempt, strategy))))
 				.repeatWhen(flux -> flux
-						.scan(1, (count, element) -> count++)
+					.scan(1, (count, element) -> count + 1)
 						.flatMap(attempt -> reconnect(attempt, strategy)))
 				.subscribe();
 		return connectFuture;
