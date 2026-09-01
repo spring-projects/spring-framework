@@ -36,6 +36,9 @@ import java.util.TimeZone;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -652,6 +655,36 @@ class HttpHeadersTests {
 		headers.setBearerAuth(token);
 		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
 		assertThat(authorization).isEqualTo("Bearer foo");
+	}
+
+	@ParameterizedTest
+	@CsvSource(value = {
+					"@0,0",
+					"@1,1000",
+					"@10,10000",
+					"@-1,-1000",
+					"@1659578233,1659578233000", // Example from RFC
+					"@-62135596800,-62135596800000", // Example from RFC
+					"@253402214400,253402214400000", // Example from RFC
+	})
+	void rfc9651Dates_valid(String value, long timestampMillis) {
+		headers.set("Deprecation", value);
+		assertThat(headers.getFirstDate("Deprecation")).isEqualTo(timestampMillis);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+					"@",
+					" @1",
+					"@ 1",
+					"@0000-",
+					"@15+",
+					"@12p",
+					"@0x15",
+	})
+	void rfc9651Dates_invalid(String value) {
+		headers.set("Deprecation", value);
+		assertThatIllegalArgumentException().isThrownBy(() -> headers.getFirstDate("Deprecation"));
 	}
 
 
