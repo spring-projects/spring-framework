@@ -136,6 +136,11 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 				builder.setBeforeInvocation(Boolean.parseBoolean(after.trim()));
 			}
 
+			String immediate = opElement.getAttribute("immediate");
+			if (StringUtils.hasText(immediate)) {
+				builder.setImmediate(Boolean.parseBoolean(immediate.trim()));
+			}
+
 			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, key -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
