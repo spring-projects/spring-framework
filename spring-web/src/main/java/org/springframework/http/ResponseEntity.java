@@ -78,7 +78,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.web.client.RestOperations#getForEntity(URI, Class)
  * @see RequestEntity
  */
-public class ResponseEntity<T> extends HttpEntity<T> {
+public class ResponseEntity<T extends @Nullable Object> extends HttpEntity<T> {
 
 	private final HttpStatusCode status;
 
@@ -87,6 +87,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * Create a {@code ResponseEntity} with a status code only.
 	 * @param status the status code
 	 */
+	@SuppressWarnings("NullAway")
 	public ResponseEntity(HttpStatusCode status) {
 		this(null, (HttpHeaders) null, status);
 	}
@@ -96,7 +97,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param body the entity body
 	 * @param status the status code
 	 */
-	public ResponseEntity(@Nullable T body, HttpStatusCode status) {
+	public ResponseEntity(T body, HttpStatusCode status) {
 		this(body, (HttpHeaders) null, status);
 	}
 
@@ -106,6 +107,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param status the status code
 	 * @since 7.0
 	 */
+	@SuppressWarnings("NullAway")
 	public ResponseEntity(HttpHeaders headers, HttpStatusCode status) {
 		this(null, headers, status);
 	}
@@ -117,7 +119,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param rawStatus the status code value
 	 * @since 7.0
 	 */
-	public ResponseEntity(@Nullable T body, @Nullable HttpHeaders headers, int rawStatus) {
+	public ResponseEntity(T body, @Nullable HttpHeaders headers, int rawStatus) {
 		this(body, headers, HttpStatusCode.valueOf(rawStatus));
 	}
 
@@ -128,7 +130,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param statusCode the status code
 	 * @since 7.0
 	 */
-	public ResponseEntity(@Nullable T body, @Nullable HttpHeaders headers, HttpStatusCode statusCode) {
+	public ResponseEntity(T body, @Nullable HttpHeaders headers, HttpStatusCode statusCode) {
 		super(body, headers);
 		Assert.notNull(statusCode, "HttpStatusCode must not be null");
 
@@ -141,7 +143,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param status the status code
 	 * @deprecated in favor of {@link #ResponseEntity(HttpHeaders, HttpStatusCode)}
 	 */
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"removal", "NullAway"})
 	@Deprecated(since = "7.0", forRemoval = true)
 	public ResponseEntity(MultiValueMap<String, String> headers, HttpStatusCode status) {
 		this(null, headers, status);
@@ -157,7 +159,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 */
 	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
-	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, int rawStatus) {
+	public ResponseEntity(T body, @Nullable MultiValueMap<String, String> headers, int rawStatus) {
 		this(body, headers, HttpStatusCode.valueOf(rawStatus));
 	}
 
@@ -170,7 +172,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 */
 	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
-	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatusCode statusCode) {
+	public ResponseEntity(T body, @Nullable MultiValueMap<String, String> headers, HttpStatusCode statusCode) {
 		super(body, headers);
 		Assert.notNull(statusCode, "HttpStatusCode must not be null");
 
@@ -263,7 +265,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the created {@code ResponseEntity}
 	 * @since 4.1
 	 */
-	public static <T> ResponseEntity<T> ok(@Nullable T body) {
+	public static <T extends @Nullable Object> ResponseEntity<T> ok(T body) {
 		return ok().body(body);
 	}
 
@@ -296,7 +298,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public <T> ResponseEntity<T> build() {
+			public <T extends @Nullable Object> ResponseEntity<T> build() {
 				return (ResponseEntity<T>) body(body);
 			}
 		};
@@ -310,7 +312,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the created {@code ResponseEntity}
 	 * @since 6.0.5
 	 */
-	public static <T> ResponseEntity<T> ofNullable(@Nullable T body) {
+	public static <T extends @Nullable Object> ResponseEntity<T> ofNullable(T body) {
 		if (body == null) {
 			return notFound().build();
 		}
@@ -518,7 +520,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @return the response entity
 		 * @see BodyBuilder#body(Object)
 		 */
-		<T> ResponseEntity<T> build();
+		<T extends @Nullable Object> ResponseEntity<T> build();
 	}
 
 
@@ -552,7 +554,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @param body the body of the response entity
 		 * @return the built response entity
 		 */
-		<T> ResponseEntity<T> body(@Nullable T body);
+		<T extends @Nullable Object> ResponseEntity<T> body(T body);
 	}
 
 
@@ -654,13 +656,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 			return this;
 		}
 
+		@SuppressWarnings("NullAway")
 		@Override
-		public <T> ResponseEntity<T> build() {
+		public <T extends @Nullable Object> ResponseEntity<T> build() {
 			return body(null);
 		}
 
 		@Override
-		public <T> ResponseEntity<T> body(@Nullable T body) {
+		public <T extends @Nullable Object> ResponseEntity<T> body(T body) {
 			return new ResponseEntity<>(body, this.headers, this.statusCode);
 		}
 	}
