@@ -32,6 +32,21 @@ NOTE: It is also possible to configure `disallowedFields`, but that's fragile, a
 due to be https://github.com/spring-projects/spring-framework/issues/36802[deprecated] in Spring Framework 7.1.
 It is easy to overlook fields or introduce additional fields over time that should also be excluded.
 
+The patterns given to `allowedFields` and `disallowedFields` are not limited to top-level
+field names. They are property paths, using the same syntax supported for reading and
+writing bean properties elsewhere in the Framework. They also support `*` as a
+wildcard; this means you can constrain binding more precisely:
+
+* `"address"` matches the `address` property.
+* `"person.address.city"` matches the `city` property of the nested `address` property of `person`.
+* `"addresses[0].city"` matches the `city` property of the element at index `0` in the `addresses` array or `List`.
+* `"map[key]"` matches the entry associated with `key` in the `map` property.
+* `"map*"` matches every entry in the `map` property, such as `"map[key1]"` and `"map[key2]"`.
+  the same wildcard syntax also applies to indexed elements in an array or `List`.
+
+See the {spring-framework-api}/validation/DataBinder.html#setAllowedFields(java.lang.String...)[`DataBinder#setAllowedFields`]
+javadoc for further details on the supported pattern syntax.
+
 By default, `DataBinder` applies both constructor and setter binding.
 This is fine with immutable objects and dedicated objects, but for domain objects, you must
 remember to set `allowedFields`. To ensure data binding is only used in declarative style where
