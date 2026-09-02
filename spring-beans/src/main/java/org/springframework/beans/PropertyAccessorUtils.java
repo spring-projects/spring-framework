@@ -225,4 +225,33 @@ public abstract class PropertyAccessorUtils {
 		return -1;
 	}
 
+	/**
+	 * Determine whether the given property path contains unbalanced
+	 * {@code [} or {@code ]} brackets, by scanning the whole path once
+	 * and tracking bracket nesting depth.
+	 * <p>A path is considered balanced if the depth never goes negative
+	 * (that is, a {@code ]} is never encountered without a corresponding
+	 * preceding {@code [}) and returns to {@code 0} by the end of the path
+	 * (that is, every {@code [} has a corresponding {@code ]}).
+	 * @param propertyPath the property path (or path segment) to check
+	 * @return {@code true} if the path contains unbalanced brackets
+	 * @since 7.1
+	 */
+	static boolean hasUnbalancedBrackets(String propertyPath) {
+		int depth = 0;
+		int length = propertyPath.length();
+		for (int i = 0; i < length; i++) {
+			switch (propertyPath.charAt(i)) {
+				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR -> depth++;
+				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR -> {
+					depth--;
+					if (depth < 0) {
+						return true;
+					}
+				}
+			}
+		}
+		return (depth != 0);
+	}
+
 }

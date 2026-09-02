@@ -802,6 +802,10 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @return a property accessor for the target bean
 	 */
 	protected AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath) {
+		if (PropertyAccessorUtils.hasUnbalancedBrackets(propertyPath)) {
+			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyPath,
+					"Property path '" + propertyPath + "' contains unbalanced brackets");
+		}
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
 		// Handle nested properties recursively.
 		if (pos > -1) {
