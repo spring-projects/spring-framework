@@ -142,6 +142,10 @@ public interface ServerRequest {
 
 	/**
 	 * Bind to this request and return an instance of the given type.
+	 * <p>Please read the security warning om
+	 * {@link org.springframework.validation.DataBinder} and review the guidance
+	 * on model object design in the Data Binding section for Spring MVC in
+	 * the reference documentation.
 	 * @param bindType the type of class to bind this request to
 	 * @param <T> the type to bind to
 	 * @return a constructed and bound instance of {@code bindType}
@@ -154,9 +158,13 @@ public interface ServerRequest {
 
 	/**
 	 * Bind to this request and return an instance of the given type.
+	 * <p>Please read the security warning om
+	 * {@link org.springframework.validation.DataBinder} and review the guidance
+	 * on model object design in the Data Binding section for Spring MVC in
+	 * the reference documentation.
 	 * @param bindType the type of class to bind this request to
-	 * @param dataBinderCustomizer used to customize the data binder, for example, set
-	 * (dis)allowed fields
+	 * @param dataBinderCustomizer used to customize the data binder, for example,
+	 * set allowed fields if using property (instead of constructor) binding.
 	 * @param <T> the type to bind to
 	 * @return a constructed and bound instance of {@code bindType}
 	 * @throws BindException in case of binding errors

@@ -107,4 +107,6 @@ Kotlin::
 
 
 [[mvc-ann-initbinder-model-design]]
-NOTE: For more guidance on model design, please see xref:web/webmvc/mvc-data-binding.adoc[Data Binding].
+== Model Design
+
+Please see xref:web/webmvc/mvc-data-binding.adoc[Data Binding] for guidance on safe model object design.
