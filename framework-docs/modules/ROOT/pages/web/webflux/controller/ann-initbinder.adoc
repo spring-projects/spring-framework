@@ -107,4 +107,6 @@ Kotlin::
 
 
 [[webflux-ann-initbinder-model-design]]
-NOTE: For more guidance on model design, please see xref:web/webflux/data-binding.adoc[Data Binding].
+== Model Design
+
+Please see xref:web/webflux/data-binding.adoc[Data Binding] for more guidance on model object design.

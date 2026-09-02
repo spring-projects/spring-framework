@@ -37,8 +37,8 @@ import org.springframework.ui.Model;
  * external clients. Therefore the design and use of data binding should be considered
  * carefully with regard to security. For more details, please refer to the dedicated
  * sections on data binding for
- * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-initbinder-model-design">Spring Web MVC</a> and
- * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux-ann-initbinder-model-design">Spring WebFlux</a>
+ * <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-data-binding.html#mvc-data-binding-design">Spring Web MVC</a> and
+ * <a href="https://docs.spring.io/spring-framework/reference/web/webflux/data-binding.html#webflux-data-binding-design">Spring WebFlux</a>
  * in the reference manual.
  *
  * <p>{@code @ModelAttribute} can be used to expose command objects to a web view,

@@ -49,7 +49,7 @@ recommended either to use an object tailored specifically for web binding, or to
 constructor binding only. If property binding must still be used, then _allowedFields_
 patterns should be set to limit which properties can be set. For further details on this
 and example configuration, see
-xref:web/webflux/controller/ann-initbinder.adoc#webflux-ann-initbinder-model-design[model design].
+xref:web/webflux/data-binding.adoc#webflux-data-binding-design[model design].
 
 When using constructor binding, you can customize request parameter names through an
 `@BindParam` annotation. For example:
