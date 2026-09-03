@@ -151,7 +151,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 	/**
 	 * When enabled, if there is neither a
-	 * {@link UrlPathHelper#resolveAndCacheLookupPath esolved} String lookupPath nor a
+	 * {@link UrlPathHelper#resolveAndCacheLookupPath resolved} String lookupPath nor a
 	 * {@link ServletRequestPathUtils#parseAndCache parsed} {@code RequestPath}
 	 * then use the {@link #setUrlPathHelper configured} {@code UrlPathHelper}
 	 * to resolve a String lookupPath. This in turn determines use of URL
