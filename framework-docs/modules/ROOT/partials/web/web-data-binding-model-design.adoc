@@ -42,7 +42,7 @@ wildcard; this means you can constrain binding more precisely:
 * `"addresses[0].city"` matches the `city` property of the element at index `0` in the `addresses` array or `List`.
 * `"map[key]"` matches the entry associated with `key` in the `map` property.
 * `"map*"` matches every entry in the `map` property, such as `"map[key1]"` and `"map[key2]"`.
-  the same wildcard syntax also applies to indexed elements in an array or `List`.
+  The same wildcard syntax also applies to indexed elements in an array or `List`.
 
 See the {spring-framework-api}/validation/DataBinder.html#setAllowedFields(java.lang.String...)[`DataBinder#setAllowedFields`]
 javadoc for further details on the supported pattern syntax.

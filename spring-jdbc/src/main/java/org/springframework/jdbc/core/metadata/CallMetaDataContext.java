@@ -374,9 +374,14 @@ public class CallMetaDataContext {
 			if (declaredParams.containsKey(paramNameToCheck) || (meta.isReturnParameter() && returnDeclared)) {
 				SqlParameter param;
 				if (meta.isReturnParameter()) {
-					param = declaredParams.get(getFunctionReturnName());
+					// Same normalization as the declaredParams keys above; the function
+					// return name may have been adopted from a declared out parameter
+					param = declaredParams.get(paramNameToCheck);
+					if (param == null) {
+						param = declaredParams.get(lowerCase(provider.parameterNameToUse(getFunctionReturnName())));
+					}
 					if (param == null && !getOutParameterNames().isEmpty()) {
-						param = declaredParams.get(getOutParameterNames().get(0).toLowerCase(Locale.ROOT));
+						param = declaredParams.get(lowerCase(provider.parameterNameToUse(getOutParameterNames().get(0))));
 					}
 					if (param == null) {
 						throw new InvalidDataAccessApiUsageException(
