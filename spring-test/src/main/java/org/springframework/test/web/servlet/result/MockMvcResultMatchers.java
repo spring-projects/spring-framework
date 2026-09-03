@@ -85,7 +85,8 @@ public abstract class MockMvcResultMatchers {
 	/**
 	 * Asserts the request was forwarded to the given URL.
 	 * <p>This method accepts only exact matches.
-	 * @param expectedUrl the exact URL expected
+	 * @param expectedUrl the exact URL expected; or {@code null} to assert
+	 * that no forwarding occurred
 	 */
 	public static ResultMatcher forwardedUrl(@Nullable String expectedUrl) {
 		return result -> assertEquals("Forwarded URL", expectedUrl, result.getResponse().getForwardedUrl());
@@ -124,9 +125,10 @@ public abstract class MockMvcResultMatchers {
 	/**
 	 * Asserts the request was redirected to the given URL.
 	 * <p>This method accepts only exact matches.
-	 * @param expectedUrl the exact URL expected
+	 * @param expectedUrl the exact URL expected; or {@code null} to assert
+	 * that no redirect occurred
 	 */
-	public static ResultMatcher redirectedUrl(String expectedUrl) {
+	public static ResultMatcher redirectedUrl(@Nullable String expectedUrl) {
 		return result -> assertEquals("Redirected URL", expectedUrl, result.getResponse().getRedirectedUrl());
 	}
 
