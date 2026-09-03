@@ -262,6 +262,7 @@ public final class HttpServiceProxyFactory {
 			resolvers.add(new RequestBodyArgumentResolver(this.exchangeAdapter));
 			resolvers.add(new PathVariableArgumentResolver(service));
 			resolvers.add(new RequestParamArgumentResolver(service));
+			resolvers.add(new ModelAttributeArgumentResolver(service));
 			resolvers.add(new RequestPartArgumentResolver(this.exchangeAdapter));
 			resolvers.add(new CookieValueArgumentResolver(service));
 			if (this.exchangeAdapter.supportsRequestAttributes()) {
