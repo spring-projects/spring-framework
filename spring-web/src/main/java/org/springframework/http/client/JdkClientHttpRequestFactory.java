@@ -86,7 +86,7 @@ public class JdkClientHttpRequestFactory implements ClientHttpRequestFactory {
 	 * @see java.net.http.HttpRequest.Builder#timeout
 	 */
 	public void setReadTimeout(int readTimeout) {
-		this.readTimeout = Duration.ofMillis(readTimeout);
+		this.readTimeout = readTimeout == 0 ? null : Duration.ofMillis(readTimeout);
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class JdkClientHttpRequestFactory implements ClientHttpRequestFactory {
 	 * @see java.net.http.HttpRequest.Builder#timeout
 	 */
 	public void setReadTimeout(Duration readTimeout) {
-		this.readTimeout = readTimeout;
+		this.readTimeout = Duration.ZERO.equals(readTimeout) ? null : readTimeout;
 	}
 
 	/**
