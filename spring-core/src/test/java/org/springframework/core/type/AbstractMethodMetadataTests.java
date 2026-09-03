@@ -109,6 +109,12 @@ public abstract class AbstractMethodMetadataTests {
 	}
 
 	@Test
+	void toStringMethodShowsPrimitives() {
+		assertThat(getTagged(WithMethodParameters.class).toString())
+				.isEqualTo("public java.lang.String org.springframework.core.type.AbstractMethodMetadataTests$WithMethodParameters.test(java.lang.String[],int)");
+	}
+
+	@Test
 	void getDeclaringClassReturnsDeclaringClass() {
 		assertThat(getTagged(WithMethod.class).getDeclaringClassName()).isEqualTo(WithMethod.class.getName());
 	}
@@ -264,6 +270,15 @@ public abstract class AbstractMethodMetadataTests {
 
 		@Tag
 		public String test() {
+			return "";
+		}
+
+	}
+
+	public static class WithMethodParameters {
+
+		@Tag
+		public String test(String[] names, int age) {
 			return "";
 		}
 
