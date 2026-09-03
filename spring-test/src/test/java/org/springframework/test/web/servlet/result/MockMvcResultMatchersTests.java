@@ -118,15 +118,15 @@ class MockMvcResultMatchersTests {
 	@Test
 	void forwardNonMatching() {
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() -> forwardedUrlPattern("api/resource/2").match(forwardedUrlStub("api/resource/1")))
-			.withMessage("'api/resource/2' is not an Ant-style path pattern");
+			.isThrownBy(() -> forwardedUrl("/api/resource/2").match(forwardedUrlStub("/api/resource/1")))
+			.withMessageEndingWith("expected:</api/resource/2> but was:</api/resource/1>");
 	}
 
 	@Test
 	void forwardNonMatchingBecauseNotForward() {
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() -> forwardedUrlPattern("/resource/*").match(redirectedUrlStub("/resource/1")))
-			.withMessage("Forwarded URL 'null' does not match the expected URL pattern '/resource/*'");
+			.isThrownBy(() -> forwardedUrl("/resource/1").match(redirectedUrlStub("/resource/1")))
+			.withMessageEndingWith("expected:</resource/1> but was:<null>");
 	}
 
 	@Test  // gh-22155
