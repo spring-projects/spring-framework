@@ -16,7 +16,7 @@
 
 package org.springframework.core.retry.support;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  */
 public class CompositeRetryListener implements RetryListener {
 
-	private final List<RetryListener> listeners = new LinkedList<>();
+	private final List<RetryListener> listeners = new ArrayList<>();
 
 
 	/**
