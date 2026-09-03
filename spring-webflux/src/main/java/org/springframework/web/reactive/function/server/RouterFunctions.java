@@ -760,7 +760,7 @@ public abstract class RouterFunctions {
 		 * defined router functions into this builder, or can be combined with
 		 * {@link RouterFunctions#route(RequestPredicate, HandlerFunction)}
 		 * to allow for more flexible predicate matching.
-		 * <p>For instance, the fbelow adds the router function returned from
+		 * <p>For instance, the below adds the router function returned from
 		 * {@code OrderController.routerFunction()} to the {@code changeUser}
 		 * method in {@code userController}:
 		 * <pre class="code">
