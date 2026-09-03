@@ -103,6 +103,12 @@ class MockMvcResultMatchersTests {
 			.doesNotThrowAnyException();
 	}
 
+	@Test
+	void forwardWithQueryString() {
+		assertThatCode(() -> forwardedUrl("/api/resource/1?arg=value").match(forwardedUrlStub("/api/resource/1?arg=value")))
+			.doesNotThrowAnyException();
+	}
+
 	@Test  // gh-22155
 	void forwardWithNullAssertsNoForwardingOccurred() {
 		assertThatCode(() -> forwardedUrl(null).match(noRedirectOrForwardStub()))
@@ -128,12 +134,6 @@ class MockMvcResultMatchersTests {
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> forwardedUrl(null).match(forwardedUrlStub("/resource/1")))
 			.withMessageEndingWith("expected:<null> but was:</resource/1>");
-	}
-
-	@Test
-	void forwardWithQueryString() {
-		assertThatCode(() -> forwardedUrl("/api/resource/1?arg=value").match(forwardedUrlStub("/api/resource/1?arg=value")))
-			.doesNotThrowAnyException();
 	}
 
 	@Test
