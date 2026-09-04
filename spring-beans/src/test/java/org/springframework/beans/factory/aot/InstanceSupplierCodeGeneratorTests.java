@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -29,10 +32,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeHint;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.InstanceSupplier;
@@ -61,6 +68,8 @@ import org.springframework.beans.testfixture.beans.factory.generator.factory.Num
 import org.springframework.beans.testfixture.beans.factory.generator.factory.NumberHolderFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.generator.factory.SampleFactory;
 import org.springframework.beans.testfixture.beans.factory.generator.injection.InjectionComponent;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
@@ -112,6 +121,30 @@ class InstanceSupplierCodeGeneratorTests {
 			assertThat(bean).isInstanceOf(InjectionComponent.class).extracting("bean").isEqualTo("injected");
 		});
 		assertThat(getReflectionHints().getTypeHint(InjectionComponent.class)).isNotNull();
+	}
+
+	@Test
+	void generateWhenHasConstructorWithLazyInterfaceParameterRegistersJdkProxyHint() {
+		this.beanFactory.setAutowireCandidateResolver(new TestLazyAutowireCandidateResolver());
+		BeanDefinition beanDefinition = new RootBeanDefinition(LazyInterfaceConstructorComponent.class);
+		generate(beanDefinition);
+		assertThat(this.generationContext.getRuntimeHints().proxies().jdkProxyHints()).singleElement().satisfies(
+				hint -> assertThat(hint.getProxiedInterfaces())
+						.containsExactly(TypeReference.of(LazyInterfaceDependency.class)));
+	}
+
+	@Test
+	void generateWhenHasConstructorWithLazyClassParameterRegistersCglibProxyHints() {
+		TestLazyAutowireCandidateResolver resolver = new TestLazyAutowireCandidateResolver();
+		this.beanFactory.setAutowireCandidateResolver(resolver);
+		BeanDefinition beanDefinition = new RootBeanDefinition(LazyClassConstructorComponent.class);
+		generate(beanDefinition);
+		assertThat(getReflectionHints().getTypeHint(resolver.getProxyClass(LazyClassDependency.class)))
+				.satisfies(hasMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.ACCESS_DECLARED_FIELDS));
+		assertThat(getReflectionHints().getTypeHint(LazyClassDependency.class))
+				.satisfies(hasMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS,
+						MemberCategory.INVOKE_DECLARED_METHODS));
 	}
 
 	@Test
@@ -218,6 +251,34 @@ class InstanceSupplierCodeGeneratorTests {
 	}
 
 	@Test
+	void generateWhenHasFactoryMethodWithLazyInterfaceParameterRegistersJdkProxyHint() {
+		this.beanFactory.setAutowireCandidateResolver(new TestLazyAutowireCandidateResolver());
+		BeanDefinition beanDefinition = BeanDefinitionBuilder
+				.rootBeanDefinition(LazyFactory.class)
+				.setFactoryMethod("interfaceComponent").getBeanDefinition();
+		generate(beanDefinition);
+		assertThat(this.generationContext.getRuntimeHints().proxies().jdkProxyHints()).singleElement().satisfies(
+				hint -> assertThat(hint.getProxiedInterfaces())
+						.containsExactly(TypeReference.of(LazyInterfaceDependency.class)));
+	}
+
+	@Test
+	void generateWhenHasFactoryMethodWithLazyClassParameterRegistersCglibProxyHints() {
+		TestLazyAutowireCandidateResolver resolver = new TestLazyAutowireCandidateResolver();
+		this.beanFactory.setAutowireCandidateResolver(resolver);
+		BeanDefinition beanDefinition = BeanDefinitionBuilder
+				.rootBeanDefinition(LazyFactory.class)
+				.setFactoryMethod("classComponent").getBeanDefinition();
+		generate(beanDefinition);
+		assertThat(getReflectionHints().getTypeHint(resolver.getProxyClass(LazyClassDependency.class)))
+				.satisfies(hasMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.ACCESS_DECLARED_FIELDS));
+		assertThat(getReflectionHints().getTypeHint(LazyClassDependency.class))
+				.satisfies(hasMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS,
+						MemberCategory.INVOKE_DECLARED_METHODS));
+	}
+
+	@Test
 	void generateWhenHasFactoryMethodOnInterface() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(SimpleBean.class)
@@ -316,6 +377,10 @@ class InstanceSupplierCodeGeneratorTests {
 		return hint -> assertThat(hint.methods()).anySatisfy(hasMode(mode));
 	}
 
+	private ThrowingConsumer<TypeHint> hasMemberCategories(MemberCategory... memberCategories) {
+		return hint -> assertThat(hint.getMemberCategories()).contains(memberCategories);
+	}
+
 	private ThrowingConsumer<ExecutableHint> hasMode(ExecutableMode mode) {
 		return hint -> assertThat(hint.getMode()).isEqualTo(mode);
 	}
@@ -329,6 +394,19 @@ class InstanceSupplierCodeGeneratorTests {
 
 	private void compile(BeanDefinition beanDefinition, BiConsumer<InstanceSupplier<?>, Compiled> result) {
 		compile(TestCompiler.forSystem(), beanDefinition, result);
+	}
+
+	private void generate(BeanDefinition beanDefinition) {
+		this.beanFactory.registerBeanDefinition("testBean", beanDefinition);
+		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, "testBean");
+		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
+		GeneratedClass generateClass = this.generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
+		InstanceSupplierCodeGenerator generator = new InstanceSupplierCodeGenerator(
+				this.generationContext, generateClass.getName(),
+				generateClass.getMethods(), false);
+		InstantiationDescriptor instantiationDescriptor = registeredBean.resolveInstantiationDescriptor();
+		assertThat(instantiationDescriptor).isNotNull();
+		generator.generateCode(registeredBean, instantiationDescriptor);
 	}
 
 	private void compile(TestCompiler testCompiler, BeanDefinition beanDefinition,
@@ -356,6 +434,80 @@ class InstanceSupplierCodeGeneratorTests {
 		this.generationContext.writeGeneratedContent();
 		testCompiler.with(this.generationContext).compile(compiled -> result.accept(
 				(InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
+	}
+
+
+	private static class TestLazyAutowireCandidateResolver implements AutowireCandidateResolver {
+
+		private final Map<Class<?>, Class<?>> proxyClasses = new HashMap<>();
+
+		@Override
+		public Class<?> getLazyResolutionProxyClass(DependencyDescriptor descriptor, String beanName) {
+			Class<?> dependencyType = descriptor.getDependencyType();
+			if (dependencyType.isInterface()) {
+				return Proxy.newProxyInstance(dependencyType.getClassLoader(), new Class<?>[] {dependencyType},
+						(proxy, method, args) -> null).getClass();
+			}
+			return getProxyClass(dependencyType);
+		}
+
+		Class<?> getProxyClass(Class<?> type) {
+			return this.proxyClasses.computeIfAbsent(type, this::createProxyClass);
+		}
+
+		private Class<?> createProxyClass(Class<?> type) {
+			Enhancer enhancer = new Enhancer();
+			enhancer.setSuperclass(type);
+			enhancer.setCallbackType(NoOp.class);
+			return enhancer.createClass();
+		}
+
+		@Override
+		public AutowireCandidateResolver cloneIfNecessary() {
+			return this;
+		}
+	}
+
+
+	interface LazyInterfaceDependency {
+	}
+
+
+	static class LazyClassDependency {
+	}
+
+
+	static class LazyInterfaceConstructorComponent {
+
+		LazyInterfaceConstructorComponent(LazyInterfaceDependency dependency) {
+		}
+	}
+
+
+	static class LazyClassConstructorComponent {
+
+		LazyClassConstructorComponent(LazyClassDependency dependency) {
+		}
+	}
+
+
+	static class LazyInterfaceFactoryMethodComponent {
+	}
+
+
+	static class LazyClassFactoryMethodComponent {
+	}
+
+
+	static class LazyFactory {
+
+		static LazyInterfaceFactoryMethodComponent interfaceComponent(LazyInterfaceDependency dependency) {
+			return new LazyInterfaceFactoryMethodComponent();
+		}
+
+		static LazyClassFactoryMethodComponent classComponent(LazyClassDependency dependency) {
+			return new LazyClassFactoryMethodComponent();
+		}
 	}
 
 
