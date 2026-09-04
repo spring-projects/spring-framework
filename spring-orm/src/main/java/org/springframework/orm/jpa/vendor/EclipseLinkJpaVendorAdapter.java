@@ -90,6 +90,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the specified database
 	 * @return the EclipseLink target database name, or {@code null} if none found
 	 */
+	@SuppressWarnings("removal")
 	protected @Nullable String determineTargetDatabaseName(Database database) {
 		return switch (database) {
 			case DB2 -> TargetDatabase.DB2;

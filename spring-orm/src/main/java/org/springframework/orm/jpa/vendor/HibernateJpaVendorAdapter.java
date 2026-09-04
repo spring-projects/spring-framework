@@ -252,6 +252,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter implemen
 	 * @since 7.0
 	 * @see #determineDatabaseDialectClass
 	 */
+	@SuppressWarnings("removal")
 	protected @Nullable String determineDatabaseDialectName(Database database) {
 		return switch (database) {
 			case DERBY -> "org.hibernate.community.dialect.DerbyDialect";
