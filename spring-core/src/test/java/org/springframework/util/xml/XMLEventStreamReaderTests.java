@@ -26,7 +26,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 import org.xmlunit.util.Predicate;
@@ -35,20 +34,23 @@ import org.springframework.core.testfixture.xml.XmlContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Tests for {@link XMLEventStreamReader}.
+ */
 class XMLEventStreamReaderTests {
 
 	private static final String XML =
-			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'>content</prefix:child></root>"
-			;
+			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'>content</prefix:child></root>";
 
-	private XMLEventStreamReader streamReader;
+	private final XMLEventStreamReader streamReader;
 
-	@BeforeEach
-	void createStreamReader() throws Exception {
+
+	XMLEventStreamReaderTests() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));
-		streamReader = new XMLEventStreamReader(eventReader);
+		this.streamReader = new XMLEventStreamReader(eventReader);
 	}
+
 
 	@Test
 	void readAll() throws Exception {
