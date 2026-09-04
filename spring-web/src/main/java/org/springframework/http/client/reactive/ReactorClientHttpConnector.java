@@ -48,6 +48,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
+ * @author Seungbin Ko
  * @since 5.0
  * @see reactor.netty.http.client.HttpClient
  */
@@ -175,7 +176,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 				.doOnCancel(() -> {
 					ReactorClientHttpResponse response = responseRef.get();
 					if (response != null) {
-						response.releaseAfterCancel(method);
+						response.releaseAfterCancel();
 					}
 				});
 	}

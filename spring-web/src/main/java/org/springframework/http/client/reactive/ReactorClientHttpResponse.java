@@ -16,6 +16,7 @@
 
 package org.springframework.http.client.reactive;
 
+import java.lang.ref.Cleaner;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -48,12 +49,15 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
+ * @author Seungbin Ko
  * @since 5.0
  * @see reactor.netty.http.client.HttpClient
  */
 class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpResponse.class);
+
+	private static final Cleaner cleaner = Cleaner.create();
 
 	private final HttpClientResponse response;
 
@@ -63,8 +67,10 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyDataBufferFactory bufferFactory;
 
-	// 0 - not subscribed, 1 - subscribed, 2 - cancelled via connector (before subscribe)
+	// 0 - not subscribed, 1 - subscribed, 2 - released before subscribe (cancelled or unreachable)
 	private final AtomicInteger state = new AtomicInteger();
+
+	private final Cleaner.@Nullable Cleanable cleanable;
 
 
 	/**
@@ -78,6 +84,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		this.inbound = connection.inbound();
 		this.bufferFactory = new NettyDataBufferFactory(connection.outbound().alloc());
+		this.cleanable = (mayHaveBody() ?
+				cleaner.register(this, new BodyReleaser(connection, this.state)) : null);
 	}
 
 
@@ -98,6 +106,9 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		return this.inbound.receive()
 				.doOnSubscribe(s -> {
 					if (this.state.compareAndSet(0, 1)) {
+						if (this.cleanable != null) {
+							this.cleanable.clean();
+						}
 						return;
 					}
 					if (this.state.get() == 2) {
@@ -160,19 +171,24 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	 * materialize if the cancellation happened very early, or the response
 	 * reading was delayed for some reason.
 	 */
-	void releaseAfterCancel(HttpMethod method) {
-		if (mayHaveBody(method) && this.state.compareAndSet(0, 2)) {
+	void releaseAfterCancel() {
+		if (mayHaveBody() && this.state.compareAndSet(0, 2)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("[" + getId() + "]" + "Releasing body, not yet subscribed.");
 			}
-			this.inbound.receive().doOnNext(byteBuf -> {}).subscribe(byteBuf -> {}, ex -> {});
+			drain(this.inbound);
 		}
 	}
 
-	private boolean mayHaveBody(HttpMethod method) {
+	private boolean mayHaveBody() {
 		int code = getStatusCode().value();
 		return !((code >= 100 && code < 200) || code == 204 || code == 205 ||
-				method.equals(HttpMethod.HEAD) || getHeaders().getContentLength() == 0);
+				HttpMethod.HEAD.name().equals(this.response.method().name()) ||
+				getHeaders().getContentLength() == 0);
+	}
+
+	private static void drain(NettyInbound inbound) {
+		inbound.receive().doOnNext(byteBuf -> {}).subscribe(byteBuf -> {}, ex -> {});
 	}
 
 	@Override
@@ -180,6 +196,39 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		return "ReactorClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
 				"status=" + getStatusCode() + '}';
+	}
+
+
+	/**
+	 * Registered with a {@link Cleaner} for the case where the response is
+	 * dropped after it was emitted, without the content having been subscribed
+	 * to, e.g. by {@code Mono.zip} when it is cancelled after one of its sources
+	 * has emitted. There is no cancel signal to react to in that case, and
+	 * Reactor Netty does not drain the content when the connection is closed,
+	 * so the content is drained once the response becomes unreachable.
+	 * Must not reference the response.
+	 */
+	private static final class BodyReleaser implements Runnable {
+
+		private final Connection connection;
+
+		private final AtomicInteger state;
+
+		BodyReleaser(Connection connection, AtomicInteger state) {
+			this.connection = connection;
+			this.state = state;
+		}
+
+		@Override
+		public void run() {
+			if (this.state.compareAndSet(0, 2)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("[" + this.connection.channel().id().asShortText() + "]" +
+							"Releasing body, never subscribed.");
+				}
+				drain(this.connection.inbound());
+			}
+		}
 	}
 
 }
