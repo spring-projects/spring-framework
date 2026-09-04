@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -450,6 +451,28 @@ class JavaMailSenderTests {
 	void connectionWithFailure() {
 		sender.setHost(null);
 		assertThatExceptionOfType(MessagingException.class).isThrownBy(sender::testConnection);
+	}
+
+	@Test
+	void javaTimeSentDateSupport() throws Exception {
+		Instant sentDate = Instant.parse("2026-06-20T10:15:30.00Z");
+		Date expectedDate = Date.from(sentDate);
+
+		// Test MimeMessageHelper
+		MimeMessage mimeMessage = sender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+		helper.setSentDate(sentDate);
+		assertThat(mimeMessage.getSentDate()).isEqualTo(expectedDate);
+
+		// Test MimeMailMessage
+		MimeMailMessage mimeMailMessage = new MimeMailMessage(helper);
+		mimeMailMessage.setSentDate(sentDate);
+		assertThat(mimeMessage.getSentDate()).isEqualTo(expectedDate);
+
+		// Test SimpleMailMessage (via MailMessage interface default method)
+		SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+		simpleMailMessage.setSentDate(sentDate);
+		assertThat(simpleMailMessage.getSentDate()).isEqualTo(expectedDate);
 	}
 
 
