@@ -39,8 +39,8 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * {@link HttpMessageWriter} for writing a {@code MultiValueMap<String, String>}
- * as HTML form data, i.e. {@code "application/x-www-form-urlencoded"}, to the
- * body of a request.
+ * or a {@code Map<String, String>} as HTML form data, i.e.
+ * {@code "application/x-www-form-urlencoded"}, to the body of a request.
  *
  * <p>Note that unless the media type is explicitly set to
  * {@link MediaType#APPLICATION_FORM_URLENCODED}, the {@link #canWrite} method
@@ -58,7 +58,7 @@ import org.springframework.util.MultiValueMap;
  * @see org.springframework.http.codec.multipart.MultipartHttpMessageWriter
  */
 public class FormHttpMessageWriter extends LoggingCodecSupport
-		implements HttpMessageWriter<MultiValueMap<String, String>> {
+		implements HttpMessageWriter<Map<String, ?>> {
 
 	/** The default charset used by the writer. */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
@@ -68,6 +68,9 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 
 	private static final ResolvableType MULTIVALUE_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
+	private static final ResolvableType MAP_TYPE =
+			ResolvableType.forClassWithGenerics(Map.class, String.class, String.class);
 
 
 	private Charset defaultCharset = DEFAULT_CHARSET;
@@ -99,22 +102,24 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		if (!MultiValueMap.class.isAssignableFrom(elementType.toClass())) {
+		if (!Map.class.isAssignableFrom(elementType.toClass())) {
 			return false;
 		}
 		if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {
-			// Optimistically, any MultiValueMap with or without generics
+			// Optimistically, any Map with or without generics
 			return true;
 		}
 		if (mediaType == null) {
-			// Only String-based MultiValueMap
-			return MULTIVALUE_TYPE.isAssignableFrom(elementType);
+			// Only String-based Map or MultiValueMap
+			return MULTIVALUE_TYPE.isAssignableFrom(elementType) ||
+					MAP_TYPE.isAssignableFrom(elementType);
 		}
 		return false;
 	}
 
 	@Override
-	public Mono<Void> write(Publisher<? extends MultiValueMap<String, String>> inputStream,
+	@SuppressWarnings("unchecked")
+	public Mono<Void> write(Publisher<? extends Map<String, ?>> inputStream,
 			ResolvableType elementType, @Nullable MediaType mediaType, ReactiveHttpOutputMessage message,
 			Map<String, Object> hints) {
 
@@ -125,7 +130,13 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 
 		return Mono.from(inputStream).flatMap(form -> {
 			logFormData(form, hints);
-			String value = serializeForm(form, charset);
+			String value;
+			if (form instanceof MultiValueMap<?, ?> multiValueMap) {
+				value = serializeForm((MultiValueMap<String, String>) multiValueMap, charset);
+			}
+			else {
+				value = serializeForm((Map<String, String>) form, charset);
+			}
 			ByteBuffer byteBuffer = charset.encode(value);
 			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer); // wrapping only, no allocation
 			message.getHeaders().setContentLength(byteBuffer.remaining());
@@ -151,7 +162,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		return mediaType;
 	}
 
-	private void logFormData(MultiValueMap<String, String> form, Map<String, Object> hints) {
+	private void logFormData(Map<String, ?> form, Map<String, Object> hints) {
 		LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Writing " +
 				(isEnableLoggingRequestDetails() ?
 						LogFormatUtils.formatValue(form, !traceOn) :
@@ -171,6 +182,21 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 						builder.append(URLEncoder.encode(value, charset));
 					}
 				}));
+		return builder.toString();
+	}
+
+	protected String serializeForm(Map<String, String> formData, Charset charset) {
+		StringBuilder builder = new StringBuilder();
+		formData.forEach((name, value) -> {
+			if (builder.length() != 0) {
+				builder.append('&');
+			}
+			builder.append(URLEncoder.encode(name, charset));
+			if (value != null) {
+				builder.append('=');
+				builder.append(URLEncoder.encode(value, charset));
+			}
+		});
 		return builder.toString();
 	}
 

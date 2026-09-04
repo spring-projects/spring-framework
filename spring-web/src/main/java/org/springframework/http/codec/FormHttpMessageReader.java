@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * @since 5.0
  */
 public class FormHttpMessageReader extends LoggingCodecSupport
-		implements HttpMessageReader<MultiValueMap<String, String>> {
+		implements HttpMessageReader<Map<String, ?>> {
 
 	/**
 	 * The default charset used by the reader.
@@ -57,6 +57,9 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 
 	private static final ResolvableType MULTIVALUE_STRINGS_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
+	private static final ResolvableType MAP_STRINGS_TYPE =
+			ResolvableType.forClassWithGenerics(Map.class, String.class, String.class);
 
 
 	private Charset defaultCharset = DEFAULT_CHARSET;
@@ -107,10 +110,14 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 		if (!supportsMediaType(mediaType)) {
 			return false;
 		}
+		if (!Map.class.isAssignableFrom(elementType.toClass())) {
+			return false;
+		}
 		if (MultiValueMap.class.isAssignableFrom(elementType.toClass()) && elementType.hasUnresolvableGenerics()) {
 			return true;
 		}
-		return MULTIVALUE_STRINGS_TYPE.isAssignableFrom(elementType);
+		return MULTIVALUE_STRINGS_TYPE.isAssignableFrom(elementType) ||
+				MAP_STRINGS_TYPE.isAssignableFrom(elementType);
 	}
 
 	private static boolean supportsMediaType(@Nullable MediaType mediaType) {
@@ -118,14 +125,14 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 	}
 
 	@Override
-	public Flux<MultiValueMap<String, String>> read(ResolvableType elementType,
+	public Flux<Map<String, ?>> read(ResolvableType elementType,
 			ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
 		return Flux.from(readMono(elementType, message, hints));
 	}
 
 	@Override
-	public Mono<MultiValueMap<String, String>> readMono(ResolvableType elementType,
+	public Mono<Map<String, ?>> readMono(ResolvableType elementType,
 			ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
 		MediaType contentType = message.getHeaders().getContentType();
@@ -137,6 +144,9 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 					DataBufferUtils.release(buffer);
 					MultiValueMap<String, String> formData = parseFormData(charset, body);
 					logFormData(formData, hints);
+					if (!MultiValueMap.class.isAssignableFrom(elementType.toClass())) {
+						return formData.asSingleValueMap();
+					}
 					return formData;
 				});
 	}
