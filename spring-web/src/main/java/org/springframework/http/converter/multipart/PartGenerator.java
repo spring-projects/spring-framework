@@ -293,7 +293,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 		private void switchToFile(DataBuffer current, boolean last) {
 			FileState fileState = new FileState(this.headers, PartGenerator.this.fileStorageDirectory);
-			this.content.forEach(fileState::writeBuffer);
+			this.content.forEach(buffer -> fileState.onBody(buffer, false));
 			fileState.onBody(current, last);
 			PartGenerator.this.state = fileState;
 		}

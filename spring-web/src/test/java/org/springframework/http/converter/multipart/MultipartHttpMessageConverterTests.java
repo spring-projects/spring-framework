@@ -236,6 +236,17 @@ class MultipartHttpMessageConverterTests {
 					.isInstanceOf(HttpMessageConversionException.class).hasMessage("Part exceeded the disk usage limit of 35 bytes");
 		}
 
+		@Test // gh-37238
+		void readMultipartMaxDiskUsageExceededAcrossBufferedPrefix() throws Exception {
+			MockHttpInputMessage response = createMultipartResponse("large-file.multipart", "B");
+			converter.setMaxInMemorySize(1935);
+			// just over the max in memory, will only fail if buffered memory is counted for when writing to file
+			converter.setMaxDiskUsagePerPart(1945);
+			assertThatThrownBy(() -> converter.read(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class), response, null))
+					.isInstanceOf(HttpMessageConversionException.class)
+					.hasMessage("Part exceeded the disk usage limit of 1945 bytes");
+		}
+
 		@Test
 		void readMultipartUnnamedPart() throws Exception {
 			MockHttpInputMessage response = createMultipartResponse("simple.multipart", "simple-boundary");
