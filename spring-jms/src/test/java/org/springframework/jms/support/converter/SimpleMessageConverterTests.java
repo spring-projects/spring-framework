@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.support;
+package org.springframework.jms.support.converter;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
@@ -29,9 +29,6 @@ import jakarta.jms.ObjectMessage;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.Test;
-
-import org.springframework.jms.support.converter.MessageConversionException;
-import org.springframework.jms.support.converter.SimpleMessageConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
