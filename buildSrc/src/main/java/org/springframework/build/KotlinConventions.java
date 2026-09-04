@@ -37,7 +37,8 @@ public class KotlinConventions {
 			if (project.getLayout().getProjectDirectory().dir("src/main/kotlin").getAsFile().exists()) {
 				project.getPlugins().apply(DokkaPlugin.class);
 				project.getExtensions().configure(DokkaExtension.class, dokka -> configure(project, dokka));
-				project.project(":framework-api").getDependencies().add("dokka", project);
+				project.project(":framework-api").getDependencies()
+						.add("dokka", project.getDependencyFactory().createProjectDependency());
 			}
 		});
 	}
