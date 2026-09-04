@@ -415,7 +415,7 @@ class JacksonJsonHttpMessageConverterTests {
 				MediaType.APPLICATION_JSON, outputMessage, null);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 
-		assertThat(result).isEqualTo("{\ndata:  \"name\" : \"Jason\"\ndata:}");
+		assertThat(result).isEqualTo("{\ndata:   \"name\" : \"Jason\"\ndata: }");
 	}
 
 	@Test

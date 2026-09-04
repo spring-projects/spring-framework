@@ -96,7 +96,7 @@ public final class ServerSentEvent<T> {
 
 	/**
 	 * Return a StringBuilder with the id, event, retry, and comment fields fully
-	 * serialized, and also appending "data:" if there is data.
+	 * serialized, and also appending "data: " if there is data.
 	 * @since 6.2.1
 	 */
 	public String format() {
@@ -116,7 +116,7 @@ public final class ServerSentEvent<T> {
 			sb.append('\n');
 		}
 		if (this.data != null) {
-			sb.append("data:");
+			sb.append("data: ");
 		}
 		return sb.toString();
 	}

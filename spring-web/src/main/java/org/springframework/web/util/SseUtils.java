@@ -31,9 +31,9 @@ public abstract class SseUtils {
 	/**
 	 * Append {@code value} to {@code output}, replacing each line separator
 	 * ({@code "\n"}, {@code "\r"}, or {@code "\r\n"}) it contains with a new
-	 * {@code field} line (that is, {@code "\n" + field + ":"}). This keeps a
-	 * multi-line field value from breaking out of the current SSE field when
-	 * written on the wire.
+	 * {@code field} line (that is, {@code "\n" + field + ": "}, or
+	 * {@code "\n:"} for a comment). This keeps a multi-line field value from
+	 * breaking out of the current SSE field when written on the wire.
 	 * @param field the name of the SSE field that {@code value} belongs to
 	 * (for example, {@code "data"}), or an empty string for a comment
 	 * @param value the field value to escape and append
@@ -44,7 +44,7 @@ public abstract class SseUtils {
 			output.append(value);
 			return;
 		}
-		String lineSeparatorReplacement = "\n" + field + ":";
+		String lineSeparatorReplacement = "\n" + field + (field.isEmpty() ? ":" : ": ");
 		int length = value.length();
 		for (int i = 0; i < length; i++) {
 			char c = value.charAt(i);

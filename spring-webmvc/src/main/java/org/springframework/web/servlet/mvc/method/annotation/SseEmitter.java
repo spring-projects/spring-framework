@@ -240,7 +240,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 			if (object instanceof ModelAndView mav && !this.hasName && mav.getViewName() != null) {
 				name(mav.getViewName());
 			}
-			append("data:");
+			append("data: ");
 			saveAppendedText(TEXT_PLAIN);
 			if (object instanceof String text) {
 				writeStringData(text, mediaType);

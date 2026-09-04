@@ -177,6 +177,9 @@ final class SseServerResponse extends AbstractServerResponse {
 
 		private SseBuilder field(String name, String value) {
 			this.builder.append(name).append(':');
+			if (!name.isEmpty()) {
+				this.builder.append(' ');
+			}
 			SseUtils.appendFieldValue(name, value, this.builder);
 			this.builder.append('\n');
 			return this;
@@ -200,7 +203,7 @@ final class SseServerResponse extends AbstractServerResponse {
 
 		@SuppressWarnings("unchecked")
 		private void writeObject(Object data) throws IOException {
-			this.builder.append("data:");
+			this.builder.append("data: ");
 			try {
 				this.outputMessage.getBody().write(builderBytes());
 				Class<?> dataClass = data.getClass();

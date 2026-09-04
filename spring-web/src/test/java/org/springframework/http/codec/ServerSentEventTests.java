@@ -51,7 +51,7 @@ class ServerSentEventTests {
 	void supportMultiLineComments(String newLine, String description) {
 		ServerSentEvent<String> event = ServerSentEvent.<String>builder()
 				.comment("foo" + newLine + "bar" + newLine + "baz").data("payload").build();
-		assertThat(event.format()).isEqualTo(":foo\n:bar\n:baz\ndata:");
+		assertThat(event.format()).isEqualTo(":foo\n:bar\n:baz\ndata: ");
 	}
 
 	private static Stream<Arguments> newLineCharacters() {

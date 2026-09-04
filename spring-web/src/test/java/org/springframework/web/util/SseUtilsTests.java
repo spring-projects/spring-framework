@@ -44,9 +44,9 @@ class SseUtilsTests {
 	@MethodSource("newLineCharacters")
 	void appendFieldValueReplacesLineSeparatorWithFieldPrefix(String newLine, String description) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("data:");
+		sb.append("data: ");
 		SseUtils.appendFieldValue("data", "first" + newLine + "second", sb);
-		assertThat(sb).hasToString("data:first\ndata:second");
+		assertThat(sb).hasToString("data: first\ndata: second");
 	}
 
 	@ParameterizedTest(name = "{1}")

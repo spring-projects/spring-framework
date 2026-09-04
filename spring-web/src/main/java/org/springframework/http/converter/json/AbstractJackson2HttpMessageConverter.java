@@ -108,7 +108,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
 		this.defaultObjectMapper = objectMapper;
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
-		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
+		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata: "));
 		this.ssePrettyPrinter = prettyPrinter;
 	}
 

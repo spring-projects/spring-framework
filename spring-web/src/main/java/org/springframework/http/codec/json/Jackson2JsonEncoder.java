@@ -69,7 +69,7 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 
 	private static PrettyPrinter initSsePrettyPrinter() {
 		DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
-		printer.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
+		printer.indentObjectsWith(new DefaultIndenter("  ", "\ndata: "));
 		return printer;
 	}
 

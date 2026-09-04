@@ -267,7 +267,7 @@ class ReactiveTypeHandlerTests {
 		sink.tryEmitNext("baz");
 		sink.tryEmitComplete();
 
-		assertThat(emitterHandler.getValuesAsText()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
+		assertThat(emitterHandler.getValuesAsText()).isEqualTo("data: foo\n\ndata: bar\n\ndata: baz\n\n");
 	}
 
 	@Test
@@ -286,7 +286,7 @@ class ReactiveTypeHandlerTests {
 		sink.tryEmitNext(ServerSentEvent.builder("baz").id("3").build());
 		sink.tryEmitComplete();
 
-		assertThat(emitterHandler.getValuesAsText()).isEqualTo("id:1\ndata:foo\n\nid:2\ndata:bar\n\nid:3\ndata:baz\n\n");
+		assertThat(emitterHandler.getValuesAsText()).isEqualTo("id:1\ndata: foo\n\nid:2\ndata: bar\n\nid:3\ndata: baz\n\n");
 	}
 
 	@ParameterizedTest
@@ -453,7 +453,7 @@ class ReactiveTypeHandlerTests {
 
 			sink.tryEmitComplete();
 
-			assertThat(emitterHandler.getValuesAsText()).isEqualTo("data:emitted value\n\n");
+			assertThat(emitterHandler.getValuesAsText()).isEqualTo("data: emitted value\n\n");
 			assertThat(emitterHandler.getSavedRequest()).isSameAs(this.servletRequest);
 		}
 		finally {

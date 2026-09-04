@@ -385,7 +385,7 @@ class MappingJackson2HttpMessageConverterTests {
 		this.converter.writeInternal(bean, null, outputMessage);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 
-		assertThat(result).isEqualTo("{\ndata:  \"name\" : \"Jason\"\ndata:}");
+		assertThat(result).isEqualTo("{\ndata:   \"name\" : \"Jason\"\ndata: }");
 	}
 
 	@Test

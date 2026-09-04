@@ -71,7 +71,7 @@ class SseServerResponseTests {
 		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
 		assertThat(mav).isNull();
 
-		String expected = "data:" + body + "\n\n";
+		String expected = "data: " + body + "\n\n";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 
@@ -127,7 +127,7 @@ class SseServerResponseTests {
 		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
 		assertThat(mav).isNull();
 
-		String expected = "data:{\"name\":\"John Doe\",\"age\":42}\n\n";
+		String expected = "data: {\"name\":\"John Doe\",\"age\":42}\n\n";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 
@@ -151,10 +151,10 @@ class SseServerResponseTests {
 		assertThat(mav).isNull();
 
 		String expected = """
-				data:{
-				data:  "name" : "John Doe",
-				data:  "age" : 42
-				data:}
+				data: {
+				data:   "name" : "John Doe",
+				data:   "age" : 42
+				data: }
 
 				""";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
@@ -186,7 +186,7 @@ class SseServerResponseTests {
 				:comment line 1
 				:comment line 2
 				retry:1000
-				data:data
+				data: data
 
 				""";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
@@ -229,7 +229,7 @@ class SseServerResponseTests {
 		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
 		assertThat(mav).isNull();
 
-		String expected = "data:line1\ndata:line2\ndata:line3\n\n";
+		String expected = "data: line1\ndata: line2\ndata: line3\n\n";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 

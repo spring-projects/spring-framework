@@ -175,7 +175,7 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 
 	private PrettyPrinter initSsePrettyPrinter() {
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
-		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
+		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata: "));
 		return prettyPrinter;
 	}
 

@@ -590,7 +590,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 			ServerSentEvent<?> sse = (ServerSentEvent<?>) hints;
 			CharSequence eventText = (sse != null ? sse.format() :
-					(fragment.viewName() != null ? "event:" + fragment.viewName() + "\n" : "") + "data:");
+					(fragment.viewName() != null ? "event:" + fragment.viewName() + "\n" : "") + "data: ");
 
 			DataBuffer prefix = encodeText(eventText.toString(), charset, bufferFactory);
 			DataBuffer suffix = encodeText("\n\n", charset, bufferFactory);

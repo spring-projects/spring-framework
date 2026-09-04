@@ -218,7 +218,7 @@ class RequestMappingHandlerAdapterTests {
 
 		assertThat(this.response.getStatus()).isEqualTo(200);
 		assertThat(this.response.getHeader("Content-Type")).isEqualTo("text/event-stream");
-		assertThat(this.response.getContentAsString()).isEqualTo("data:event 1\n\ndata:event 2\n\n");
+		assertThat(this.response.getContentAsString()).isEqualTo("data: event 1\n\ndata: event 2\n\n");
 	}
 
 	@Test
