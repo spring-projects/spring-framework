@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.util.backoff;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
-
-import org.springframework.util.backoff.BackOffExecution;
-import org.springframework.util.backoff.ExponentialBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;

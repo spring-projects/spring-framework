@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.util.backoff;
 
 import org.junit.jupiter.api.Test;
-
-import org.springframework.util.backoff.BackOffExecution;
-import org.springframework.util.backoff.FixedBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
