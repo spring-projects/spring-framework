@@ -123,7 +123,7 @@ public class SQLErrorCodes {
 	}
 
 	public void setDuplicateKeyCodes(String... duplicateKeyCodes) {
-		this.duplicateKeyCodes = duplicateKeyCodes;
+		this.duplicateKeyCodes = StringUtils.sortStringArray(duplicateKeyCodes);
 	}
 
 	public void setDataIntegrityViolationCodes(String... dataIntegrityViolationCodes) {
