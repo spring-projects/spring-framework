@@ -573,6 +573,11 @@ for asynchronous execution in the first place, not externally re-declared to be 
 However, you can manually set up Spring's `AsyncExecutionInterceptor` with Spring AOP,
 in combination with a custom pointcut.
 
+TIP: When `@Async` is combined with `@Retryable`, the async advice is applied outermost, so
+all retry attempts run on the async executor thread. See
+xref:core/resilience.adoc#resilience-annotations-retryable-combining-async[Combining `@Retryable` with `@Async`]
+for details.
+
 
 [[scheduling-annotation-support-qualification]]
 === Executor Qualification with `@Async`
