@@ -34,9 +34,11 @@ import javax.xml.stream.events.XMLEvent;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Implementation of the {@link javax.xml.stream.XMLStreamReader} interface that wraps a
- * {@link XMLEventReader}. Useful because the StAX {@link javax.xml.stream.XMLInputFactory}
- * allows one to create an event reader from a stream reader, but not vice-versa.
+ * Implementation of the {@link javax.xml.stream.XMLStreamReader} interface that wraps an
+ * {@link XMLEventReader}.
+ *
+ * <p>Useful because the StAX {@link javax.xml.stream.XMLInputFactory} allows one
+ * to create an event reader from a stream reader, but not vice-versa.
  *
  * @author Arjen Poutsma
  * @since 3.0
