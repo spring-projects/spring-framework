@@ -28,6 +28,8 @@ import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.w3c.dom.Node;
 import org.xmlunit.util.Predicate;
 
@@ -71,17 +73,24 @@ class XMLEventStreamReaderTests {
 		assertThat(XmlContent.from(writer)).isSimilarTo(XML, nodeFilter);
 	}
 
-	@Test  // gh-36914
-	void getTextCharactersHonorsSourceStart() throws Exception {
-		char[] target = new char[10];
-
+	@ParameterizedTest  // gh-36914
+	@CsvSource(textBlock = """
+			0, content
+			1, ontent
+			4, ent
+			6, t
+			7, ''
+			""")
+	void getTextCharactersHonorsSourceStart(int sourceStart, String expected) throws Exception {
 		advanceToCharacters();
 
-		// text node is "content" (7 chars); copy from index 4 with an oversized buffer
-		// getTextCharacters(sourceStart, ...) must not read past the source
-		int count = streamReader.getTextCharacters(4, target, 0, 10);
-		assertThat(count).isEqualTo(3);
-		assertThat(new String(target, 0, count)).isEqualTo("ent");
+		// text node is "content" (7 chars); request an oversized buffer to ensure
+		// getTextCharacters(sourceStart, ...) does not read past the source
+		char[] target = new char[10];
+		int count = streamReader.getTextCharacters(sourceStart, target, 0, 10);
+
+		assertThat(count).isEqualTo(expected.length());
+		assertThat(new String(target, 0, count)).isEqualTo(expected);
 	}
 
 	private void advanceToCharacters() throws Exception {
