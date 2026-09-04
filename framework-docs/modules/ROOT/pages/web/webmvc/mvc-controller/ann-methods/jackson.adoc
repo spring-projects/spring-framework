@@ -31,8 +31,8 @@ Java::
 
 	public class User {
 
-		public interface WithoutPasswordView {};
-		public interface WithPasswordView extends WithoutPasswordView {};
+		public interface WithoutPasswordView {}
+		public interface WithPasswordView extends WithoutPasswordView {}
 
 		private String username;
 		private String password;
@@ -152,7 +152,7 @@ Kotlin::
 		@GetMapping("/user")
 		fun getUser(model: Model): String {
 			model["user"] = User("eric", "7!jd#h23")
-			model[JsonView::class.qualifiedName] = User.WithoutPasswordView::class.java
+			model[JsonView::class.java.name] = User.WithoutPasswordView::class.java
 			return "userView"
 		}
 	}
