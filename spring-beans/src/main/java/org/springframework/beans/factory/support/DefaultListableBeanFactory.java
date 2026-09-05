@@ -1027,6 +1027,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	protected @Nullable Object obtainInstanceFromSupplier(Supplier<?> supplier, String beanName, RootBeanDefinition mbd,
+			@Nullable Object @Nullable [] args) throws Exception {
+
+		if (args != null && supplier instanceof InstanceSupplier<?> instanceSupplier) {
+			RegisteredBean registeredBean = RegisteredBean.of(this, beanName, mbd);
+			return instanceSupplier.get(registeredBean, args);
+		}
+		return obtainInstanceFromSupplier(supplier, beanName, mbd);
+	}
+
+	@Override
 	protected void cacheMergedBeanDefinition(RootBeanDefinition mbd, String beanName) {
 		super.cacheMergedBeanDefinition(mbd, beanName);
 		if (mbd.isPrimary()) {
