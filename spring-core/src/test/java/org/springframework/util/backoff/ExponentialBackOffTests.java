@@ -79,7 +79,17 @@ class ExponentialBackOffTests {
 	}
 
 	@Test
-	void maxAttemptsReached() {
+	void maxIntervalReachedImmediately() {
+		ExponentialBackOff backOff = new ExponentialBackOff(1000L, 2.0);
+		backOff.setMaxInterval(50L);
+
+		BackOffExecution execution = backOff.start();
+		assertThat(execution.nextBackOff()).isEqualTo(50L);
+		assertThat(execution.nextBackOff()).isEqualTo(50L);
+	}
+
+	@Test
+	void maxElapsedTimeReached() {
 		ExponentialBackOff backOff = new ExponentialBackOff(2000L, 2.0);
 		backOff.setMaxElapsedTime(4000L);
 
@@ -88,6 +98,19 @@ class ExponentialBackOffTests {
 		assertThat(execution.nextBackOff()).isEqualTo(4000L);
 		// > 4 sec wait in total
 		assertThat(execution.nextBackOff()).isEqualTo(BackOffExecution.STOP);
+	}
+
+	@Test
+	void maxAttempts() {
+		ExponentialBackOff backOff = new ExponentialBackOff();
+		backOff.setInitialInterval(1000L);
+		backOff.setMultiplier(2.0);
+		backOff.setMaxInterval(10000L);
+		backOff.setMaxAttempts(6);
+		List<Long> delays = new ArrayList<>();
+		BackOffExecution execution = backOff.start();
+		IntStream.range(0, 7).forEach(i -> delays.add(execution.nextBackOff()));
+		assertThat(delays).containsExactly(1000L, 2000L, 4000L, 8000L, 10000L, 10000L, BackOffExecution.STOP);
 	}
 
 	@Test
@@ -129,16 +152,6 @@ class ExponentialBackOffTests {
 	}
 
 	@Test
-	void maxIntervalReachedImmediately() {
-		ExponentialBackOff backOff = new ExponentialBackOff(1000L, 2.0);
-		backOff.setMaxInterval(50L);
-
-		BackOffExecution execution = backOff.start();
-		assertThat(execution.nextBackOff()).isEqualTo(50L);
-		assertThat(execution.nextBackOff()).isEqualTo(50L);
-	}
-
-	@Test
 	void toStringContent() {
 		ExponentialBackOff backOff = new ExponentialBackOff(2000L, 2.0);
 		assertThat(backOff).asString()
@@ -157,19 +170,6 @@ class ExponentialBackOffTests {
 		assertThat(execution).asString().isEqualTo("ExponentialBackOffExecution[currentInterval=2000ms, multiplier=2.0, attempts=1]");
 		execution.nextBackOff();
 		assertThat(execution).asString().isEqualTo("ExponentialBackOffExecution[currentInterval=4000ms, multiplier=2.0, attempts=2]");
-	}
-
-	@Test
-	void maxAttempts() {
-		ExponentialBackOff backOff = new ExponentialBackOff();
-		backOff.setInitialInterval(1000L);
-		backOff.setMultiplier(2.0);
-		backOff.setMaxInterval(10000L);
-		backOff.setMaxAttempts(6);
-		List<Long> delays = new ArrayList<>();
-		BackOffExecution execution = backOff.start();
-		IntStream.range(0, 7).forEach(i -> delays.add(execution.nextBackOff()));
-		assertThat(delays).containsExactly(1000L, 2000L, 4000L, 8000L, 10000L, 10000L, BackOffExecution.STOP);
 	}
 
 }
