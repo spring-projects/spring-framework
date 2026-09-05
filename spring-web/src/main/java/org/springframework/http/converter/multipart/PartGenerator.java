@@ -86,6 +86,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 	@Override
 	public void onHeaders(HttpHeaders headers) {
+		this.state.onComplete();
 		if (isFormField(headers)) {
 			this.state = new FormFieldState(headers);
 		}
@@ -127,6 +128,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 	@Override
 	public void onComplete() {
+		this.state.onComplete();
 		if (logger.isTraceEnabled()) {
 			logger.trace("Finished reading " + this.partCount + " part(s)");
 		}
@@ -172,6 +174,14 @@ final class PartGenerator implements MultipartParser.PartListener {
 		void onBody(DataBuffer dataBuffer, boolean last);
 
 		/**
+		 * Invoked when no further {@link #onBody(DataBuffer, boolean) body} is
+		 * expected for the current part, that is when a new part begins, or when
+		 * parsing completed. This emits the part, also when it has an empty body.
+		 */
+		default void onComplete() {
+		}
+
+		/**
 		 * Clean up resources.
 		 */
 		default void dispose() {
@@ -210,6 +220,8 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 		private final HttpHeaders headers;
 
+		private boolean emitted;
+
 		public FormFieldState(HttpHeaders headers) {
 			this.headers = headers;
 		}
@@ -227,6 +239,14 @@ final class PartGenerator implements MultipartParser.PartListener {
 						PartGenerator.this.maxInMemorySize + " bytes");
 			}
 			if (last) {
+				onComplete();
+			}
+		}
+
+		@Override
+		public void onComplete() {
+			if (!this.emitted) {
+				this.emitted = true;
 				byte[] bytes = this.value.toByteArrayUnsafe();
 				String value = new String(bytes, MultipartUtils.charset(this.headers));
 				FormFieldPart formFieldPart = DefaultParts.formFieldPart(this.headers, value);
@@ -268,6 +288,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 		private final HttpHeaders headers;
 
+		private boolean emitted;
 
 		public InMemoryState(HttpHeaders headers) {
 			this.headers = headers;
@@ -282,6 +303,14 @@ final class PartGenerator implements MultipartParser.PartListener {
 			}
 			this.content.add(dataBuffer);
 			if (last) {
+				onComplete();
+			}
+		}
+
+		@Override
+		public void onComplete() {
+			if (!this.emitted) {
+				this.emitted = true;
 				emitMemoryPart();
 			}
 		}
@@ -339,6 +368,8 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 		private long byteCount;
 
+		private boolean emitted;
+
 		public FileState(HttpHeaders headers, Path folder) {
 			this.headers = headers;
 			this.file = createFile(folder);
@@ -377,6 +408,14 @@ final class PartGenerator implements MultipartParser.PartListener {
 			}
 			writeBuffer(dataBuffer);
 			if (last) {
+				onComplete();
+			}
+		}
+
+		@Override
+		public void onComplete() {
+			if (!this.emitted) {
+				this.emitted = true;
 				Part part = DefaultParts.part(this.headers, this.file);
 				PartGenerator.this.addPart(part);
 				closeOutputStream();

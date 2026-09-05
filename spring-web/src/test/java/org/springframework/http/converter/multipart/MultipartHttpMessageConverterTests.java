@@ -197,6 +197,26 @@ class MultipartHttpMessageConverterTests {
 		}
 
 		@Test
+		void readMultipartEmptyPart() throws Exception {
+			MockHttpInputMessage response = createMultipartResponse("servlet-empty-part.multipart", "boundary");
+			MultiValueMap<String, Part> result = converter.read(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class), response, null);
+
+			assertThat(result).containsOnlyKeys("text1", "text2");
+			assertThat(result.get("text1")).anyMatch(isFormData("text1", ""));
+			assertThat(result.get("text2")).anyMatch(isFormData("text2", "a"));
+		}
+
+		@Test
+		void readMultipartEmptyLastPart() throws Exception {
+			MockHttpInputMessage response = createMultipartResponse("servlet-empty-last-part.multipart", "boundary");
+			MultiValueMap<String, Part> result = converter.read(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class), response, null);
+
+			assertThat(result).containsOnlyKeys("text1", "text2");
+			assertThat(result.get("text1")).anyMatch(isFormData("text1", "a"));
+			assertThat(result.get("text2")).anyMatch(isFormData("text2", ""));
+		}
+
+		@Test
 		void readMultipartInvalid() throws Exception {
 			MockHttpInputMessage response = createMultipartResponse("garbage-1.multipart", "boundary");
 			assertThatThrownBy(() -> converter.read(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class), response, null))
