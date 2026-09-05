@@ -160,14 +160,12 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	}
 
 	/**
-	 * This method currently does not address the following issues which we may
+	 * This method currently does not address the following issue which we may
 	 * choose to address at a later point in time.
 	 *
 	 * <ul>
 	 * <li>non-ASCII, non-visible, and non-printable characters within a character
 	 * or String literal are not escaped.</li>
-	 * <li>formatting for float and double values does not take into account whether
-	 * a value is not a number (NaN) or infinite.</li>
 	 * </ul>
 	 * @param value the attribute value to format
 	 * @return the formatted string representation
@@ -199,10 +197,30 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			return Long.toString((Long) value) + 'L';
 		}
 		if (type == Float.class) {
-			return Float.toString((Float) value) + 'f';
+			float floatValue = (Float) value;
+			if (Float.isNaN(floatValue)) {
+				return "0.0f/0.0f";
+			}
+			if (floatValue == Float.POSITIVE_INFINITY) {
+				return "1.0f/0.0f";
+			}
+			if (floatValue == Float.NEGATIVE_INFINITY) {
+				return "-1.0f/0.0f";
+			}
+			return Float.toString(floatValue) + 'f';
 		}
 		if (type == Double.class) {
-			return Double.toString((Double) value);
+			double doubleValue = (Double) value;
+			if (Double.isNaN(doubleValue)) {
+				return "0.0/0.0";
+			}
+			if (doubleValue == Double.POSITIVE_INFINITY) {
+				return "1.0/0.0";
+			}
+			if (doubleValue == Double.NEGATIVE_INFINITY) {
+				return "-1.0/0.0";
+			}
+			return Double.toString(doubleValue);
 		}
 		if (value instanceof Enum<?> e) {
 			return e.name();
