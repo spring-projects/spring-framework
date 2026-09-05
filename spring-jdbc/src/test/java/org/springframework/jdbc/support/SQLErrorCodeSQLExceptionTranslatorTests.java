@@ -107,6 +107,20 @@ class SQLErrorCodeSQLExceptionTranslatorTests {
 				.hasCause(sqlException);
 	}
 
+	@Test  // gh-37235
+	void duplicateKeyCodesDeclaredInUnsortedOrder() {
+		SQLErrorCodes errorCodes = new SQLErrorCodes();
+		errorCodes.setDuplicateKeyCodes("90002", "1586", "1062");
+		SQLErrorCodeSQLExceptionTranslator unsortedCodesTranslator = new SQLErrorCodeSQLExceptionTranslator(errorCodes);
+
+		for (int errorCode : new int[] {90002, 1586, 1062}) {
+			SQLException sqlException = new SQLException("", "", errorCode);
+			assertThat(unsortedCodesTranslator.translate("task", "SQL", sqlException))
+					.isInstanceOf(DuplicateKeyException.class)
+					.hasCause(sqlException);
+		}
+	}
+
 	@Test
 	void batchExceptionTranslation() {
 		SQLException badSqlEx = new SQLException("", "", 1);
