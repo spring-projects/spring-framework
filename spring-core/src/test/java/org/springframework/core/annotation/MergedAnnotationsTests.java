@@ -2060,6 +2060,30 @@ class MergedAnnotationsTests {
 				.isEqualTo("@%s({\"FromValueAttributeMeta\"})", ValueAttribute.class.getCanonicalName());
 	}
 
+	@Test  // gh-37244
+	void toStringForSynthesizedAnnotationsWithNonFiniteFloatingPointValues() {
+		Map<String, Object> attributes = Map.of(
+				"name", "test",
+				"floatValue", Float.NaN,
+				"doubleValue", Double.NaN);
+		RequestMapping mapping = MergedAnnotation.of(RequestMapping.class, attributes).synthesize();
+		assertThat(mapping).asString().contains("floatValue=0.0f/0.0f", "doubleValue=0.0/0.0");
+
+		attributes = Map.of(
+				"name", "test",
+				"floatValue", Float.POSITIVE_INFINITY,
+				"doubleValue", Double.POSITIVE_INFINITY);
+		mapping = MergedAnnotation.of(RequestMapping.class, attributes).synthesize();
+		assertThat(mapping).asString().contains("floatValue=1.0f/0.0f", "doubleValue=1.0/0.0");
+
+		attributes = Map.of(
+				"name", "test",
+				"floatValue", Float.NEGATIVE_INFINITY,
+				"doubleValue", Double.NEGATIVE_INFINITY);
+		mapping = MergedAnnotation.of(RequestMapping.class, attributes).synthesize();
+		assertThat(mapping).asString().contains("floatValue=-1.0f/0.0f", "doubleValue=-1.0/0.0");
+	}
+
 	@Test
 	void equalsForSynthesizedAnnotations() throws Exception {
 		Method methodWithPath = WebController.class.getMethod("handleMappedWithPathAttribute");
