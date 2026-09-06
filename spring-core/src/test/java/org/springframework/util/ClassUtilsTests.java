@@ -104,17 +104,29 @@ class ClassUtilsTests {
 	}
 
 	@Test
-	void forNamesWithDeepNestingTypes() throws ClassNotFoundException {
-		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass.NestedClassLevel1", classLoader))
-				.isEqualTo(NestedClass.NestedClassLevel1.class);
-		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass.NestedClassLevel1.NestedClassLevel2", classLoader))
-				.isEqualTo(NestedClass.NestedClassLevel1.NestedClassLevel2.class);
-		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests$NestedClass$NestedClassLevel1$NestedClassLevel2", classLoader))
-				.isEqualTo(NestedClass.NestedClassLevel1.NestedClassLevel2.class);
-		assertThatThrownBy(() -> ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass$NestedClassLevel1", classLoader))
-				.isInstanceOf(ClassNotFoundException.class);
-		assertThatThrownBy(() -> ClassUtils.forName("org.springframework.util.ClassUtilsTests$NestedClass.NestedClassLevel1", classLoader))
-				.isInstanceOf(ClassNotFoundException.class);
+	void forNameWithDeepNestingTypes() throws ClassNotFoundException {
+		String javaSourceStyle = "org.springframework.util.ClassUtilsTests.NestedClass.NestedClassLevel1";
+		String deepNestingJavaSourceStyle = "org.springframework.util.ClassUtilsTests.NestedClass.NestedClassLevel1.NestedClassLevel2";
+		String mixedStyle1 = "org.springframework.util.ClassUtilsTests$NestedClass.NestedClassLevel1.NestedClassLevel2";
+		String mixedStyle2 = "org.springframework.util.ClassUtilsTests.NestedClass$NestedClassLevel1.NestedClassLevel2";
+		String mixedStyle3 = "org.springframework.util.ClassUtilsTests.NestedClass.NestedClassLevel1$NestedClassLevel2";
+
+		assertThat(ClassUtils.forName(javaSourceStyle, classLoader)).isEqualTo(NestedClass.NestedClassLevel1.class);
+		assertThat(ClassUtils.forName(deepNestingJavaSourceStyle, classLoader)).isEqualTo(NestedClass.NestedClassLevel1.NestedClassLevel2.class);
+		assertThat(ClassUtils.forName(mixedStyle1, classLoader)).isEqualTo(NestedClass.NestedClassLevel1.NestedClassLevel2.class);
+		assertThat(ClassUtils.forName(mixedStyle2, classLoader)).isEqualTo(NestedClass.NestedClassLevel1.NestedClassLevel2.class);
+		assertThat(ClassUtils.forName(mixedStyle3, classLoader)).isEqualTo(NestedClass.NestedClassLevel1.NestedClassLevel2.class);
+	}
+
+	@Test
+	void forNameWithInvalidClassName() throws ClassNotFoundException {
+		String endWithDotClassName = "org.springframework.util.ClassUtilsTests.";
+		String noDotClassName = "ClassUtilsTests";
+		String packNameOnly = "org.springframework.util";
+
+		assertThatThrownBy(() -> ClassUtils.forName(endWithDotClassName, classLoader)).isInstanceOf(ClassNotFoundException.class);
+		assertThatThrownBy(() -> ClassUtils.forName(noDotClassName, classLoader)).isInstanceOf(ClassNotFoundException.class);
+		assertThatThrownBy(() -> ClassUtils.forName(packNameOnly, classLoader)).isInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test

@@ -309,27 +309,34 @@ public abstract class ClassUtils {
 			return Class.forName(name, false, clToUse);
 		}
 		catch (ClassNotFoundException ex) {
-			if (name.lastIndexOf(NESTED_CLASS_SEPARATOR) > 0) {
-				// not java source style
-				throw ex;
-			}
-			String curName = name;
-			for (;;) {
-				int lastDotIndex = curName.lastIndexOf(PACKAGE_SEPARATOR);
-				int previousDotIndex = curName.lastIndexOf(PACKAGE_SEPARATOR, lastDotIndex - 1);
-				if (lastDotIndex != -1 && previousDotIndex != -1 &&
-						Character.isUpperCase(curName.charAt(previousDotIndex + 1))) {
-					curName = curName.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR +
-							curName.substring(lastDotIndex + 1);
-					try {
-						return Class.forName(curName, false, clToUse);
-					}
-					catch (ClassNotFoundException ex2) {
-						// Swallow - let original exception get through
+			if (name.charAt(name.length() - 1) != PACKAGE_SEPARATOR) {
+				StringBuilder nestedClassName = new StringBuilder(name);
+				int lastDotIndex = -1;
+				for (int i = nestedClassName.length() - 1; i >= 0; i--) {
+					if (nestedClassName.charAt(i) == PACKAGE_SEPARATOR) {
+						char next = nestedClassName.charAt(i + 1);
+						if (Character.isUpperCase(next)) {
+							lastDotIndex = i;
+							nestedClassName.setCharAt(i, NESTED_CLASS_SEPARATOR);
+						}
+						else {
+							// Package name has been encountered
+							if (lastDotIndex == -1) {
+								throw ex;
+							}
+							else {
+								// Replace the $ before the top-level class name with dot(.)
+								nestedClassName.setCharAt(lastDotIndex, PACKAGE_SEPARATOR);
+							}
+							break;
+						}
 					}
 				}
-				else {
-					break;
+				try {
+					return Class.forName(nestedClassName.toString(), false, clToUse);
+				}
+				catch (ClassNotFoundException ex2) {
+					// Swallow - let original exception get through
 				}
 			}
 			throw ex;
