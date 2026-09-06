@@ -309,7 +309,7 @@ public abstract class ClassUtils {
 			return Class.forName(name, false, clToUse);
 		}
 		catch (ClassNotFoundException ex) {
-			if (name.charAt(name.length() - 1) != PACKAGE_SEPARATOR) {
+			if (!name.isEmpty() && name.charAt(name.length() - 1) != PACKAGE_SEPARATOR) {
 				StringBuilder nestedClassName = new StringBuilder(name);
 				int lastDotIndex = -1;
 				for (int i = nestedClassName.length() - 1; i >= 0; i--) {

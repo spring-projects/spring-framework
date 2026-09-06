@@ -123,10 +123,14 @@ class ClassUtilsTests {
 		String endWithDotClassName = "org.springframework.util.ClassUtilsTests.";
 		String noDotClassName = "ClassUtilsTests";
 		String packNameOnly = "org.springframework.util";
+		String emptyClassName = "";
+		String spaceClassName = " ";
 
 		assertThatThrownBy(() -> ClassUtils.forName(endWithDotClassName, classLoader)).isInstanceOf(ClassNotFoundException.class);
 		assertThatThrownBy(() -> ClassUtils.forName(noDotClassName, classLoader)).isInstanceOf(ClassNotFoundException.class);
 		assertThatThrownBy(() -> ClassUtils.forName(packNameOnly, classLoader)).isInstanceOf(ClassNotFoundException.class);
+		assertThatThrownBy(() -> ClassUtils.forName(emptyClassName, classLoader)).isInstanceOf(ClassNotFoundException.class);
+		assertThatThrownBy(() -> ClassUtils.forName(spaceClassName, classLoader)).isInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test
