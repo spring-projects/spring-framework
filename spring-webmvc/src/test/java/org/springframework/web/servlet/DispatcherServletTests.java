@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -30,15 +31,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
@@ -71,6 +76,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -920,6 +926,114 @@ class DispatcherServletTests {
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_DISPOSITION);
 	}
 
+	@Test  // gh-36637
+	void detectsHandlerMappingsOrderedByBeanDefinitionOrderAttribute() throws Exception {
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.setServletContext(getServletContext());
+
+		RootBeanDefinition first = new RootBeanDefinition(StubHandlerMapping.class);
+		first.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, 1);
+		context.registerBeanDefinition("first", first);
+
+		RootBeanDefinition second = new RootBeanDefinition(StubHandlerMapping.class);
+		second.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, 2);
+		context.registerBeanDefinition("second", second);
+
+		DispatcherServlet servlet = new DispatcherServlet(context);
+		servlet.init(servletConfig);
+
+		List<HandlerMapping> mappings = servlet.getHandlerMappings();
+		assertThat(mappings).isNotNull().hasSize(2);
+		assertThat(mappings.get(0)).isSameAs(context.getBean("first"));
+		assertThat(mappings.get(1)).isSameAs(context.getBean("second"));
+	}
+
+	@Test  // gh-36637
+	void beanDefinitionOrderAttributeOverridesAnnotationOrderForHandlerMappings() throws Exception {
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.setServletContext(getServletContext());
+
+		// Without an ORDER_ATTRIBUTE override this bean's @Order(1) would put it first.
+		RootBeanDefinition annotated = new RootBeanDefinition(LowOrderAnnotatedHandlerMapping.class);
+		annotated.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, 100);
+		context.registerBeanDefinition("annotatedButOverridden", annotated);
+
+		RootBeanDefinition viaAttribute = new RootBeanDefinition(StubHandlerMapping.class);
+		viaAttribute.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, 1);
+		context.registerBeanDefinition("orderedByAttribute", viaAttribute);
+
+		DispatcherServlet servlet = new DispatcherServlet(context);
+		servlet.init(servletConfig);
+
+		List<HandlerMapping> mappings = servlet.getHandlerMappings();
+		assertThat(mappings).isNotNull().hasSize(2);
+		assertThat(mappings.get(0)).isSameAs(context.getBean("orderedByAttribute"));
+		assertThat(mappings.get(1)).isSameAs(context.getBean("annotatedButOverridden"));
+	}
+
+	@Test  // gh-36637
+	void nonIntegerOrderAttributeIsRejected() {
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.setServletContext(getServletContext());
+
+		RootBeanDefinition invalid = new RootBeanDefinition(StubHandlerMapping.class);
+		invalid.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, "not-an-integer");
+		context.registerBeanDefinition("invalid", invalid);
+
+		// A second bean is required to actually trigger sorting.
+		RootBeanDefinition valid = new RootBeanDefinition(StubHandlerMapping.class);
+		valid.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, 1);
+		context.registerBeanDefinition("valid", valid);
+
+		DispatcherServlet servlet = new DispatcherServlet(context);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> servlet.init(servletConfig))
+				.withMessageContaining("Invalid value type for attribute 'order'");
+	}
+
+	@Test  // gh-36637
+	void handlerMappingOrderFromBeanDefinitionInheritsAcrossParentContext() throws Exception {
+		StaticWebApplicationContext parent = new StaticWebApplicationContext();
+		parent.setServletContext(getServletContext());
+		RootBeanDefinition fromParent = new RootBeanDefinition(StubHandlerMapping.class);
+		fromParent.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, 5);
+		parent.registerBeanDefinition("fromParent", fromParent);
+		parent.refresh();
+
+		StaticWebApplicationContext child = new StaticWebApplicationContext();
+		child.setServletContext(getServletContext());
+		child.setParent(parent);
+		RootBeanDefinition fromChild = new RootBeanDefinition(StubHandlerMapping.class);
+		fromChild.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, 1);
+		child.registerBeanDefinition("fromChild", fromChild);
+
+		DispatcherServlet servlet = new DispatcherServlet(child);
+		servlet.init(servletConfig);
+
+		List<HandlerMapping> mappings = servlet.getHandlerMappings();
+		assertThat(mappings).isNotNull().hasSize(2);
+		assertThat(mappings.get(0)).isSameAs(child.getBean("fromChild"));
+		assertThat(mappings.get(1)).isSameAs(parent.getBean("fromParent"));
+	}
+
+	@Test  // gh-36637
+	void detectsHandlerMappingsOrderedByFactoryMethodAnnotation() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(getServletContext());
+		context.register(OrderedFactoryMethodHandlerMappings.class);
+
+		DispatcherServlet servlet = new DispatcherServlet(context);
+		servlet.init(servletConfig);
+
+		// Bean names registered alphabetically as a, b, c; their @Order values on the
+		// factory methods are 3, 1, 2 respectively, so the resulting list must be b, c, a.
+		List<HandlerMapping> mappings = servlet.getHandlerMappings();
+		assertThat(mappings).isNotNull().hasSize(3);
+		assertThat(mappings.get(0)).isSameAs(context.getBean("b"));
+		assertThat(mappings.get(1)).isSameAs(context.getBean("c"));
+		assertThat(mappings.get(2)).isSameAs(context.getBean("a"));
+	}
+
 
 	public static class ControllerFromParent implements Controller {
 
@@ -979,6 +1093,38 @@ class DispatcherServletTests {
 			}
 			response.getWriter().write("error");
 			throw new IllegalArgumentException("test error");
+		}
+	}
+
+	private static class StubHandlerMapping implements HandlerMapping {
+		@Override
+		public @Nullable HandlerExecutionChain getHandler(HttpServletRequest request) {
+			return null;
+		}
+	}
+
+	@Order(1)
+	private static class LowOrderAnnotatedHandlerMapping extends StubHandlerMapping {
+	}
+
+	private static class OrderedFactoryMethodHandlerMappings {
+
+		@Bean
+		@Order(3)
+		public HandlerMapping a() {
+			return new StubHandlerMapping();
+		}
+
+		@Bean
+		@Order(1)
+		public HandlerMapping b() {
+			return new StubHandlerMapping();
+		}
+
+		@Bean
+		@Order(2)
+		public HandlerMapping c() {
+			return new StubHandlerMapping();
 		}
 	}
 
