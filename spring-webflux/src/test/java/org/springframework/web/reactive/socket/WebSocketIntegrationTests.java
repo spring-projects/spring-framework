@@ -41,6 +41,7 @@ import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.adapter.NettyWebSocketSessionSupport;
+import org.springframework.web.reactive.socket.client.JdkWebSocketClient;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
@@ -102,6 +103,23 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 	}
 
 	@ParameterizedWebSocketTest
+	void binaryEcho(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
+		startServer(client, server, serverConfigClass);
+		byte[] input = new byte[] {0, 1, 2, 3, (byte) 255};
+		AtomicReference<byte[]> actual = new AtomicReference<>();
+		this.client.execute(getUrl("/echo"), session ->
+				session.send(Mono.just(session.binaryMessage(factory -> factory.wrap(input))))
+						.thenMany(session.receive().take(1))
+						.doOnNext(message -> {
+							byte[] bytes = new byte[message.getPayload().readableByteCount()];
+							message.getPayload().read(bytes);
+							actual.set(bytes);
+						})
+						.then()).block(TIMEOUT);
+		assertThat(actual.get()).containsExactly(input);
+	}
+
+	@ParameterizedWebSocketTest
 	void subProtocol(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
@@ -129,8 +147,13 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 				.block(TIMEOUT);
 
 		HandshakeInfo info = infoRef.get();
-		assertThat(info.getHeaders().getFirst("Upgrade")).isEqualToIgnoringCase("websocket");
-		assertThat(info.getHeaders().getFirst("Sec-WebSocket-Protocol")).isEqualTo(protocol);
+		if (client instanceof JdkWebSocketClient) {
+			assertThat(info.getHeaders().isEmpty()).isTrue();
+		}
+		else {
+			assertThat(info.getHeaders().getFirst("Upgrade")).isEqualToIgnoringCase("websocket");
+			assertThat(info.getHeaders().getFirst("Sec-WebSocket-Protocol")).isEqualTo(protocol);
+		}
 		assertThat(info.getSubProtocol()).as("Wrong protocol accepted").isEqualTo(protocol);
 		assertThat(protocolRef.get()).as("Wrong protocol detected on the server side").isEqualTo(protocol);
 	}
@@ -192,7 +215,12 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 				})
 				.block(TIMEOUT);
 		assertThat(receivedCookieRef.get()).isEqualTo("cookie");
-		assertThat(cookie.get()).isEqualTo("project=spring");
+		if (client instanceof JdkWebSocketClient) {
+			assertThat(cookie.get()).isNull();
+		}
+		else {
+			assertThat(cookie.get()).isEqualTo("project=spring");
+		}
 	}
 
 	@ParameterizedWebSocketTest
@@ -221,6 +249,10 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 	}
 
 	private WebSocketClient extendLimits(WebSocketClient client, int limit) {
+		if (client instanceof JdkWebSocketClient jdk) {
+			jdk.setMaxMessageSize(limit);
+		}
+
 		if (client instanceof ReactorNettyWebSocketClient netty) {
 			client = new ReactorNettyWebSocketClient(
 					netty.getHttpClient(),
