@@ -312,7 +312,8 @@ public abstract class ClassUtils {
 			if (!name.isEmpty() && name.charAt(name.length() - 1) != PACKAGE_SEPARATOR) {
 				StringBuilder nestedClassName = new StringBuilder(name);
 				int lastDotIndex = -1;
-				for (int i = nestedClassName.length() - 1; i >= 0; i--) {
+				int i = nestedClassName.length() - 1;
+				for (; i >= 0; i--) {
 					if (nestedClassName.charAt(i) == PACKAGE_SEPARATOR) {
 						char next = nestedClassName.charAt(i + 1);
 						if (Character.isUpperCase(next)) {
@@ -331,6 +332,10 @@ public abstract class ClassUtils {
 							break;
 						}
 					}
+				}
+				if (i == -1 && lastDotIndex != -1 && !Character.isUpperCase(nestedClassName.charAt(0))) {
+					// Single package name, such as a.ClassA
+					nestedClassName.setCharAt(lastDotIndex, PACKAGE_SEPARATOR);
 				}
 				try {
 					return Class.forName(nestedClassName.toString(), false, clToUse);
