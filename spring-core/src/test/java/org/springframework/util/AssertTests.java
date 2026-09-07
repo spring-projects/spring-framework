@@ -441,7 +441,7 @@ class AssertTests {
 	@Test
 	void noNullElementsWithEmptyCollectionAndMessageSupplier() {
 		assertThatCode(() ->
-				Assert.noNullElements(emptyList(), "enigma"))
+				Assert.noNullElements(emptyList(), () -> "enigma"))
 			.doesNotThrowAnyException();
 	}
 
