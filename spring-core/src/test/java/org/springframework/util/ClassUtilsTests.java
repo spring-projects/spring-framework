@@ -134,6 +134,18 @@ class ClassUtilsTests {
 	}
 
 	@Test
+	void forNameWithNonStandardClassName() throws ClassNotFoundException {
+		assertThat(ClassUtils.forName("a.Upper.UpperPackageCls$Inner", classLoader)).isEqualTo(a.Upper.UpperPackageCls.Inner.class);
+		assertThatThrownBy(() -> ClassUtils.forName("a.Upper.UpperPackageCls.Inner", classLoader)).isInstanceOf(ClassNotFoundException.class);
+		assertThat(ClassUtils.forName("a.$Cls$Inner", classLoader)).isEqualTo(a.$Cls.Inner.class);
+		assertThatThrownBy(() -> ClassUtils.forName("a.$Cls.Inner", classLoader)).isInstanceOf(ClassNotFoundException.class);
+		assertThat(ClassUtils.forName("a._Cls$Inner", classLoader)).isEqualTo(a._Cls.Inner.class);
+		assertThatThrownBy(() -> ClassUtils.forName("a._Cls.Inner", classLoader)).isInstanceOf(ClassNotFoundException.class);
+		assertThat(ClassUtils.forName("a.lowerStartCls$Inner", classLoader)).isEqualTo(a.lowerStartCls.Inner.class);
+		assertThatThrownBy(() -> ClassUtils.forName("a.lowerStartCls.Inner", classLoader)).isInstanceOf(ClassNotFoundException.class);
+	}
+
+	@Test
 	void forNameWithPrimitiveClasses() throws ClassNotFoundException {
 		assertThat(ClassUtils.forName("boolean", classLoader)).isEqualTo(boolean.class);
 		assertThat(ClassUtils.forName("byte", classLoader)).isEqualTo(byte.class);

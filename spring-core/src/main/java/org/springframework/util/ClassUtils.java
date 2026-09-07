@@ -273,6 +273,10 @@ public abstract class ClassUtils {
 	 * for primitives (for example, "int") and array class names (for example, "String[]").
 	 * Furthermore, it is also capable of resolving nested class names in Java source
 	 * style (for example, "java.lang.Thread.State" instead of "java.lang.Thread$State").
+	 * <p>Note: When using the Java source style, it assumes standard naming conventions,
+	 * package names all lowercase and class names starting with uppercase. If your class
+	 * or package name deviates from these conventions, use the fully qualified binary
+	 * name instead to ensure correct resolution.
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * (can be {@code null}, which indicates the default class loader)
