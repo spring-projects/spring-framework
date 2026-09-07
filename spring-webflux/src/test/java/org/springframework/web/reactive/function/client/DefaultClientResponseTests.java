@@ -289,7 +289,6 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void createException() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
@@ -368,7 +367,6 @@ class DefaultClientResponseTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void createError() {
 		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 		DataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
@@ -387,7 +385,7 @@ class DefaultClientResponseTests {
 					WebClientResponseException exception = (WebClientResponseException) t;
 					assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 					assertThat(exception.getMessage()).isEqualTo("404 Not Found");
-					assertThat(exception.getHeaders().containsHeaderValue("Content-Type", "text/plain"));
+					assertThat(exception.getHeaders().containsHeaderValue("Content-Type", "text/plain")).isTrue();
 					assertThat(exception.getResponseBodyAsByteArray()).isEqualTo(bytes);
 				})
 				.verify();
