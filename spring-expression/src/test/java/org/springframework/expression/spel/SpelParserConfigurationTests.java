@@ -102,6 +102,39 @@ class SpelParserConfigurationTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> builder.maximumNestingDepth(0));
 	}
 
+	@Test
+	void canonicalConstructorAppliesAllValues() {
+		ClassLoader classLoader = getClass().getClassLoader();
+		SpelParserConfiguration configuration = new SpelParserConfiguration(
+				SpelCompilerMode.IMMEDIATE, classLoader, true, true, 99, 100, 101, 102, 103);
+
+		assertThat(configuration.getCompilerMode()).isEqualTo(SpelCompilerMode.IMMEDIATE);
+		assertThat(configuration.getCompilerClassLoader()).isSameAs(classLoader);
+		assertThat(configuration.isAutoGrowNullReferences()).isTrue();
+		assertThat(configuration.isAutoGrowCollections()).isTrue();
+		assertThat(configuration.getMaximumAutoGrowSize()).isEqualTo(99);
+		assertThat(configuration.getMaximumExpressionLength()).isEqualTo(100);
+		assertThat(configuration.getMaximumOperations()).isEqualTo(101);
+		assertThat(configuration.getMaximumBigPowerBits()).isEqualTo(102);
+		assertThat(configuration.getMaximumNestingDepth()).isEqualTo(103);
+	}
+
+	@Test
+	void canonicalConstructorRejectsInvalidValues() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SpelParserConfiguration(null, null, false, false, 0, 1, 1, 1, 1));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, -1, 1, 1, 1, 1));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 0, 1, 1, 1));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 1, 0, 1, 1));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 1, 1, 0, 1));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 1, 1, 1, 0));
+	}
+
 
 	/**
 	 * Regression tests for the legacy constructors in {@link SpelParserConfiguration}.
@@ -209,39 +242,6 @@ class SpelParserConfigurationTests {
 			assertThat(configuration.getMaximumBigPowerBits()).isEqualTo(102);
 			assertThat(configuration.getMaximumNestingDepth())
 					.isEqualTo(SpelParserConfiguration.DEFAULT_MAX_EXPRESSION_NESTING_DEPTH);
-		}
-
-		@Test
-		void canonicalConstructorAppliesAllValues() {
-			ClassLoader classLoader = getClass().getClassLoader();
-			SpelParserConfiguration configuration = new SpelParserConfiguration(
-					SpelCompilerMode.IMMEDIATE, classLoader, true, true, 99, 100, 101, 102, 103);
-
-			assertThat(configuration.getCompilerMode()).isEqualTo(SpelCompilerMode.IMMEDIATE);
-			assertThat(configuration.getCompilerClassLoader()).isSameAs(classLoader);
-			assertThat(configuration.isAutoGrowNullReferences()).isTrue();
-			assertThat(configuration.isAutoGrowCollections()).isTrue();
-			assertThat(configuration.getMaximumAutoGrowSize()).isEqualTo(99);
-			assertThat(configuration.getMaximumExpressionLength()).isEqualTo(100);
-			assertThat(configuration.getMaximumOperations()).isEqualTo(101);
-			assertThat(configuration.getMaximumBigPowerBits()).isEqualTo(102);
-			assertThat(configuration.getMaximumNestingDepth()).isEqualTo(103);
-		}
-
-		@Test
-		void canonicalConstructorRejectsInvalidValues() {
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					new SpelParserConfiguration(null, null, false, false, 0, 1, 1, 1, 1));
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, -1, 1, 1, 1, 1));
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 0, 1, 1, 1));
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 1, 0, 1, 1));
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 1, 1, 0, 1));
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 1, 1, 1, 0));
 		}
 
 	}

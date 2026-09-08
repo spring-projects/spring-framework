@@ -396,9 +396,7 @@ public class SpelParserConfiguration {
 
 	/**
 	 * Create a new {@code SpelParserConfiguration} instance.
-	 * <p><strong>NOTE</strong>: Favor {@link #builder()} for complete
-	 * configuration control and the ability to override global defaults
-	 * per use case.
+	 * <p>This is the internal, canonical constructor.
 	 * @param compilerMode the compiler mode that parsers using this configuration
 	 * should use; must not be {@code null}
 	 * @param compilerClassLoader the {@code ClassLoader} to use as the basis for
@@ -418,10 +416,8 @@ public class SpelParserConfiguration {
 	 * @param maximumNestingDepth the maximum nesting depth permitted within a SpEL
 	 * expression; must be a positive number
 	 * @since 7.1
-	 * @deprecated as of Spring Framework 7.1, in favor of the {@linkplain #builder() builder API}
 	 */
-	@Deprecated(since = "7.1")
-	public SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
+	SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength,
 			int maximumOperations, int maximumBigPowerBits, int maximumNestingDepth) {
 
