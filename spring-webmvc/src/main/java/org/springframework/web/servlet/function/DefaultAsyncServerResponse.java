@@ -115,8 +115,11 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 			throws ServletException, IOException {
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
-		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		AsyncWebRequest asyncWebRequest = asyncManager.getAsyncWebRequest();
+		if (asyncWebRequest == null) {
+			asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+			asyncManager.setAsyncWebRequest(asyncWebRequest);
+		}
 		try {
 			asyncManager.startDeferredResultProcessing(deferredResult);
 		}
