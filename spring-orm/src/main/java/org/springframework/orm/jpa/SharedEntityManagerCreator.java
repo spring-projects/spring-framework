@@ -245,8 +245,9 @@ public abstract class SharedEntityManagerCreator {
 						try {
 							result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs, ih);
 						}
-						catch (IllegalArgumentException ex) {
+						catch (IllegalArgumentException | LinkageError ex) {
 							// Hibernate 8.0 NativeMutationOrSelectionQueryImpl multi-interface mismatch?
+							// IllegalArgumentException on the JVM, LinkageError in native image
 							// Fall back to single declared interface from method signature.
 							Class<?>[] singleIfc = new Class<?>[] {method.getReturnType()};
 							cachedQueryInterfaces.put(query.getClass(), singleIfc);
