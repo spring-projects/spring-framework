@@ -449,7 +449,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 						return null;
 					}
 					case "getNetworkTimeout" -> {
-						return this.networkTimeout == null ? 0 : networkTimeout;
+						return this.networkTimeout == null ? 0 : this.networkTimeout;
 					}
 					case "setClientInfo" -> {
 						if (args.length == 2) {
@@ -558,10 +558,10 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 					target.setAutoCommit(this.autoCommit);
 				}
 				if (this.networkTimeout != null) {
-					target.setNetworkTimeout(this.networkTimeoutExecutor, networkTimeout);
+					target.setNetworkTimeout(this.networkTimeoutExecutor, this.networkTimeout);
 				}
 				if (this.clientInfo != null) {
-					for (Map.Entry<String, String> entry: clientInfo.entrySet()) {
+					for (Map.Entry<String, String> entry: this.clientInfo.entrySet()) {
 						target.setClientInfo(entry.getKey(), entry.getValue());
 					}
 				}
