@@ -22,7 +22,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import javax.sql.DataSource;
 
@@ -86,6 +88,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Chengang Guan
  * @since 1.1.4
  * @see DataSourceTransactionManager
  * @see #setTargetDataSource
@@ -311,6 +314,12 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 		private @Nullable Boolean autoCommit;
 
+		private @Nullable Executor networkTimeoutExecutor;
+
+		private @Nullable Integer networkTimeout;
+
+		private @Nullable Map<String, String> clientInfo;
+
 		private boolean closed = false;
 
 		private @Nullable Connection target;
@@ -434,6 +443,24 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 						// Ignore: no warnings to expose yet.
 						return null;
 					}
+					case "setNetworkTimeout" -> {
+						this.networkTimeoutExecutor = (Executor) args[0];
+						this.networkTimeout = (Integer) args[1];
+						return null;
+					}
+					case "getNetworkTimeout" -> {
+						return this.networkTimeout == null ? 0 : networkTimeout;
+					}
+					case "setClientInfo" -> {
+						if (args.length == 2) {
+							if (this.clientInfo == null) {
+								this.clientInfo = new LinkedHashMap<>();
+							}
+							this.clientInfo.put((String) args[0], (String) args[1]);
+							return null;
+						}
+						// setClientInfo(Properties) will fall-through
+					}
 					case "close" -> {
 						// Ignore: no target connection yet.
 						this.closed = true;
@@ -529,6 +556,14 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 				}
 				if (this.autoCommit != null && this.autoCommit != defaultAutoCommit()) {
 					target.setAutoCommit(this.autoCommit);
+				}
+				if (this.networkTimeout != null) {
+					target.setNetworkTimeout(this.networkTimeoutExecutor, networkTimeout);
+				}
+				if (this.clientInfo != null) {
+					for (Map.Entry<String, String> entry: clientInfo.entrySet()) {
+						target.setClientInfo(entry.getKey(), entry.getValue());
+					}
 				}
 			}
 			catch (Throwable settingsEx) {
