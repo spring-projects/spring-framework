@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import java.util.Collections;
 
+import jakarta.persistence.Query;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.hint.ExecutableMode;
@@ -53,6 +54,10 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 	// As of Hibernate 8.0
 	private static final String MUTATION_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.internal.MutationQueryImpl";
 
+	// As of Hibernate 8.0
+	private static final String MUTATION_OR_SELECTION_QUERY_IMPL_CLASS_NAME =
+			"org.hibernate.query.internal.MutationOrSelectionQueryImpl";
+
 	private static final String NATIVE_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.sql.internal.NativeQueryImpl";
 
 	private static final String STATELESS_SESSION_CLASS_NAME = "org.hibernate.StatelessSession";
@@ -75,11 +80,15 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 				builder.onReachableType(SharedEntityManagerCreator.class).withMethod("getMetamodel",
 						Collections.emptyList(), ExecutableMode.INVOKE);
 			});
+			// Fallback proxy for Hibernate 8.0 query implementation types like NativeMutationOrSelectionQueryImpl,
+			// matching the single-interface fallback in SharedEntityManagerCreator. See gh-36878
+			hints.proxies().registerJdkProxy(TypeReference.of(Query.class));
 		}
 		registerJdkProxyFor(hints, classLoader, QUERY_SQM_IMPL_CLASS_NAME);
 		registerJdkProxyFor(hints, classLoader, SQM_QUERY_IMPL_CLASS_NAME);
 		registerJdkProxyFor(hints, classLoader, SELECTION_QUERY_IMPL_CLASS_NAME);
 		registerJdkProxyFor(hints, classLoader, MUTATION_QUERY_IMPL_CLASS_NAME);
+		registerJdkProxyFor(hints, classLoader, MUTATION_OR_SELECTION_QUERY_IMPL_CLASS_NAME);
 		registerJdkProxyFor(hints, classLoader, NATIVE_QUERY_IMPL_CLASS_NAME);
 		registerJdkProxyFor(hints, classLoader, STATELESS_SESSION_CLASS_NAME);
 		if (ClassUtils.isPresent(PERSISTENCE_UNIT_INFO_DESCRIPTOR_CLASS_NAME, classLoader)) {
