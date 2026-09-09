@@ -78,10 +78,10 @@ public enum ArchitectureRules {
 	static ArchRule javaClassesShouldNotImportKotlinAnnotations() {
 		return ArchRuleDefinition.noClasses()
 				.that(new DescribedPredicate<JavaClass>("is not a Kotlin class") {
-						  @Override
-						  public boolean test(JavaClass javaClass) {
-							  return javaClass.getSourceCodeLocation()
-									  .getSourceFileName().endsWith(".java");
+							@Override
+							public boolean test(JavaClass javaClass) {
+								return javaClass.getSourceCodeLocation()
+										.getSourceFileName().endsWith(".java");
 						  }
 					  }
 				)
