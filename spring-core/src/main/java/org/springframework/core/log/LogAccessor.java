@@ -124,7 +124,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with fatal log level.
+	 * Log an exception with fatal log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
@@ -141,7 +141,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with error log level.
+	 * Log an exception with error log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
@@ -158,7 +158,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with warn log level.
+	 * Log an exception with warn log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
@@ -175,7 +175,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with info log level.
+	 * Log an exception with info log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
@@ -192,7 +192,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with debug log level.
+	 * Log an exception with debug log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
@@ -209,7 +209,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with trace log level.
+	 * Log an exception with trace log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
@@ -231,7 +231,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with fatal log level.
+	 * Log an exception with fatal log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -252,7 +252,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with error log level.
+	 * Log an exception with error log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -273,7 +273,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with warn log level.
+	 * Log an exception with warn log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -294,7 +294,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with info log level.
+	 * Log an exception with info log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -315,7 +315,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with debug log level.
+	 * Log an exception with debug log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -336,7 +336,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with trace log level.
+	 * Log an exception with trace log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
