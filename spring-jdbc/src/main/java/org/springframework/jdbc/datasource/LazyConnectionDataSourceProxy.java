@@ -37,12 +37,36 @@ import org.springframework.util.Assert;
 /**
  * Proxy for a target DataSource, fetching actual JDBC Connections lazily,
  * i.e. not until first creation of a Statement. Connection initialization
- * properties like auto-commit mode, transaction isolation and read-only mode
- * will be kept and applied to the actual JDBC Connection as soon as an actual
- * Connection is fetched (if ever). Consequently, commit and rollback calls will
- * be ignored if no Statements have been created. As of 6.1.2, there is also
- * special support for a {@link #setReadOnlyDataSource read-only DataSource} to use
- * during a read-only transaction, in addition to the regular target DataSource.
+ * properties like auto-commit mode, transaction isolation, read-only mode,
+ * catalog, schema, holdability, client info and network timeout will be kept
+ * and applied to the actual JDBC Connection as soon as an actual Connection
+ * is fetched (if ever). Consequently, commit and rollback calls will be ignored
+ * if no Statements have been created.
+ *
+ * <p>Once a properties has been set, the corresponding getter method returns the
+ * set value until the actual Connection is fetched. If the property has not been
+ * set, invoking the getter triggers a fetch of the actual connection in order to
+ * obtain the default value.
+ *
+ * <p>Although client info is listed among the deferred properties above,
+ * the following methods are exceptions to the lazy acquisition behavior and
+ * force immediate acquisition of the underlying Connection.
+ * The {@link java.sql.Connection#getClientInfo()} and
+ * {@link java.sql.Connection#getClientInfo(java.lang.String)}
+ * methods are read operations whose values cannot be reliably cached due to
+ * driver defaults, remnants from pooled connections, or external session
+ * modifications.
+ *
+ * <p>The{@link java.sql.Connection#setClientInfo(java.util.Properties)}
+ * method also forces immediate acquisition. JDBC driver implementations are
+ * inconsistent: some treat it as an overwrite, while others treat it as an
+ * append/merge. To guarantee behavior identical to that of a non-lazy DataSource
+ * across all drivers, the proxy does not cache or replay it, thereby avoiding any
+ * risk of semantic mismatch.
+ *
+ * <p>As of 6.1.2, there is also special support for a
+ * {@link #setReadOnlyDataSource read-only DataSource} to use during a
+ * read-only transaction, in addition to the regular target DataSource.
  *
  * <p>This DataSource proxy allows to avoid fetching JDBC Connections from
  * a pool unless actually necessary. JDBC transaction control can happen
@@ -449,7 +473,10 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 						return null;
 					}
 					case "getNetworkTimeout" -> {
-						return this.networkTimeout == null ? 0 : this.networkTimeout;
+						if (this.networkTimeout != null) {
+							return this.networkTimeout;
+						}
+						// Else fetch actual Connection and check there.
 					}
 					case "setClientInfo" -> {
 						if (args.length == 2) {
@@ -459,6 +486,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 							this.clientInfo.put((String) args[0], (String) args[1]);
 							return null;
 						}
+						// Else fetch actual Connection and check there.
 						// setClientInfo(Properties) will fall-through
 					}
 					case "close" -> {
