@@ -118,6 +118,7 @@ class MultipartParserTests {
 		parse("no-body.multipart", "boundary", listener);
 
 		listener.assertHeader(headers -> assertThat(headers.hasHeaderValues("Part", List.of("1"))).isTrue())
+				.assertBodyChunk("")
 				.assertHeader(headers -> assertThat(headers.hasHeaderValues("Part", List.of("2"))).isTrue())
 				.assertBodyChunk("a")
 				.assertComplete();

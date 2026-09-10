@@ -488,6 +488,7 @@ final class MultipartParser {
 					// iterate over buffers in reverse order
 					DataBufferUtils.release(boundaryBuffer);
 					DataBuffer prev;
+					boolean found = false;
 					while ((prev = this.queue.pollLast()) != null) {
 						int prevByteCount = prev.readableByteCount();
 						int prevLen = prevByteCount + len;
@@ -497,6 +498,7 @@ final class MultipartParser {
 							DataBufferUtils.release(prev);
 							enqueue(body);
 							flush();
+							found = true;
 							break;
 						}
 						else {
@@ -505,11 +507,21 @@ final class MultipartParser {
 							len += prevByteCount;
 						}
 					}
+					if (!found) {
+						// all buffered bytes were boundary bytes: the part had an empty body
+						invokeListener(buffer.factory().allocateBuffer(0), true);
+					}
 				}
 				else /* if (len == 0) */ {
 					// buffer starts with complete delimiter, flush out the previous buffers
 					DataBufferUtils.release(boundaryBuffer);
-					flush();
+					if (this.queue.isEmpty()) {
+						// nothing was ever buffered for this part: the part had an empty body
+						invokeListener(buffer.factory().allocateBuffer(0), true);
+					}
+					else {
+						flush();
+					}
 				}
 
 				changeState(new HeadersState(), buffer);
