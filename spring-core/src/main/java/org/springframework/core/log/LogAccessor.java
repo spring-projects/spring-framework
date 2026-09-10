@@ -120,7 +120,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void fatal(CharSequence message) {
-		this.log.fatal(message);
+		if (this.log.isFatalEnabled()) {
+			this.log.fatal(message);
+		}
 	}
 
 	/**
@@ -129,7 +131,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void fatal(Throwable cause, CharSequence message) {
-		this.log.fatal(message, cause);
+		if (this.log.isFatalEnabled()) {
+			this.log.fatal(message, cause);
+		}
 	}
 
 	/**
@@ -137,7 +141,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void error(CharSequence message) {
-		this.log.error(message);
+		if (this.log.isErrorEnabled()) {
+			this.log.error(message);
+		}
 	}
 
 	/**
@@ -146,7 +152,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void error(Throwable cause, CharSequence message) {
-		this.log.error(message, cause);
+		if (this.log.isErrorEnabled()) {
+			this.log.error(message, cause);
+		}
 	}
 
 	/**
@@ -154,7 +162,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void warn(CharSequence message) {
-		this.log.warn(message);
+		if (this.log.isWarnEnabled()) {
+			this.log.warn(message);
+		}
 	}
 
 	/**
@@ -163,7 +173,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void warn(Throwable cause, CharSequence message) {
-		this.log.warn(message, cause);
+		if (this.log.isWarnEnabled()) {
+			this.log.warn(message, cause);
+		}
 	}
 
 	/**
@@ -171,7 +183,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void info(CharSequence message) {
-		this.log.info(message);
+		if (this.log.isInfoEnabled()) {
+			this.log.info(message);
+		}
 	}
 
 	/**
@@ -180,7 +194,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void info(Throwable cause, CharSequence message) {
-		this.log.info(message, cause);
+		if (this.log.isInfoEnabled()) {
+			this.log.info(message, cause);
+		}
 	}
 
 	/**
@@ -188,7 +204,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void debug(CharSequence message) {
-		this.log.debug(message);
+		if (this.log.isDebugEnabled()) {
+			this.log.debug(message);
+		}
 	}
 
 	/**
@@ -197,7 +215,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void debug(Throwable cause, CharSequence message) {
-		this.log.debug(message, cause);
+		if (this.log.isDebugEnabled()) {
+			this.log.debug(message, cause);
+		}
 	}
 
 	/**
@@ -205,7 +225,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void trace(CharSequence message) {
-		this.log.trace(message);
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(message);
+		}
 	}
 
 	/**
@@ -214,7 +236,9 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void trace(Throwable cause, CharSequence message) {
-		this.log.trace(message, cause);
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(message, cause);
+		}
 	}
 
 
