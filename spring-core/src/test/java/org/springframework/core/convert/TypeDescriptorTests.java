@@ -26,6 +26,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -84,6 +86,36 @@ class TypeDescriptorTests {
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isFalse();
+	}
+
+	@Test
+	void forParameter() throws Exception {
+		Method method = getClass().getMethod("testParameterScalar", String.class);
+		Parameter parameter = method.getParameters()[0];
+		TypeDescriptor desc = TypeDescriptor.forParameter(parameter);
+		assertThat(desc.getType()).isEqualTo(String.class);
+	}
+
+	@Test
+	void forParameterMustNotBeNull() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> TypeDescriptor.forParameter(null))
+				.withMessage("Parameter must not be null");
+	}
+
+	@Test
+	void nestedParameter() throws Exception {
+		Method method = getClass().getMethod("test2", List.class);
+		Parameter parameter = method.getParameters()[0];
+		TypeDescriptor desc = TypeDescriptor.nested(parameter, 2);
+		assertThat(desc.getType()).isEqualTo(String.class);
+	}
+
+	@Test
+	void nestedParameterMustNotBeNull() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> TypeDescriptor.nested((Parameter) null, 2))
+				.withMessage("Parameter must not be null");
 	}
 
 	@Test
