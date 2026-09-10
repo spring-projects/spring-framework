@@ -1,13 +1,9 @@
---LiG0chJ0k7YtLt-FzTklYFgz50i88xJCW5jD
-Content-Disposition: form-data; name="files"; filename="file17312898095703516893.tmp"
-Content-Type: application/octet-stream
-Content-Length: 0
+--simple-boundary
+Content-Disposition: form-data; name="file"; filename="test.txt"
 
 
---LiG0chJ0k7YtLt-FzTklYFgz50i88xJCW5jD
-Content-Disposition: form-data; name="files"; filename="file14790463448453253614.tmp"
-Content-Type: application/octet-stream
-Content-Length: 0
+--simple-boundary
+Content-Disposition: form-data; name="action"
 
-
---LiG0chJ0k7YtLt-FzTklYFgz50i88xJCW5jD--
+asd
+--simple-boundary--
