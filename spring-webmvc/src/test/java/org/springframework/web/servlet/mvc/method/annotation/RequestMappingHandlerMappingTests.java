@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerTypePredicate;
+import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.annotation.PutExchange;
@@ -169,22 +170,36 @@ class RequestMappingHandlerMappingTests {
 
 	@PathPatternsParameterizedTest
 	void version(RequestMappingHandlerMapping mapping) throws Exception {
-		MockHttpServletRequest request = initRequestForVersionTest(mapping, "1.1");
+		MockHttpServletRequest request = initRequestForVersionTest(mapping, VersionController.class, "1.1");
 		HandlerMethod handlerMethod = (HandlerMethod) mapping.getHandler(request).getHandler();
 		assertThat(handlerMethod.getMethod().getName()).isEqualTo("foo1_1");
 	}
 
 	@PathPatternsParameterizedTest
 	void versionInvalid(RequestMappingHandlerMapping mapping) throws Exception {
-		MockHttpServletRequest request = initRequestForVersionTest(mapping, "99");
+		MockHttpServletRequest request = initRequestForVersionTest(mapping, VersionController.class, "99");
 		assertThatThrownBy(() -> mapping.getHandler(request)).isInstanceOf(InvalidApiVersionException.class);
 	}
 
+	@PathPatternsParameterizedTest
+	void versionWithHttpExchange(RequestMappingHandlerMapping mapping) throws Exception {
+		MockHttpServletRequest request = initRequestForVersionTest(mapping, VersionHttpExchangeController.class, "1.1");
+		HandlerMethod handlerMethod = (HandlerMethod) mapping.getHandler(request).getHandler();
+		assertThat(handlerMethod.getMethod().getName()).isEqualTo("foo1_1");
+	}
+
+	@PathPatternsParameterizedTest
+	void versionInvalidWithHttpExchange(RequestMappingHandlerMapping mapping) {
+		MockHttpServletRequest request = initRequestForVersionTest(mapping, VersionHttpExchangeController.class, "99");
+		assertThatThrownBy(() -> mapping.getHandler(request)).isInstanceOf(InvalidApiVersionException.class);
+	}
+
+
 	private static MockHttpServletRequest initRequestForVersionTest(
-			RequestMappingHandlerMapping mapping, String version) {
+			RequestMappingHandlerMapping mapping, Class<?> controllerClass, String version) {
 
 		((StaticWebApplicationContext) mapping.getApplicationContext())
-				.registerSingleton("controller", VersionController.class);
+				.registerSingleton("controller", controllerClass);
 
 		DefaultApiVersionStrategy versionStrategy = new DefaultApiVersionStrategy(
 				List.of(new HeaderApiVersionResolver("API-Version")), new SemanticApiVersionParser(),
@@ -673,6 +688,22 @@ class RequestMappingHandlerMappingTests {
 		}
 
 		@GetMapping(version = "1.1")
+		public String foo1_1() {
+			return "foo1_1";
+		}
+	}
+
+
+	@RestController
+	@HttpExchange("/foo")
+	static class VersionHttpExchangeController {
+
+		@GetExchange
+		public String foo() {
+			return "foo";
+		}
+
+		@GetExchange(version = "1.1")
 		public String foo1_1() {
 			return "foo1_1";
 		}
