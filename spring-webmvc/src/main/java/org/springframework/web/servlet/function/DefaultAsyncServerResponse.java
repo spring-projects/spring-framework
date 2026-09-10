@@ -116,6 +116,8 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		AsyncWebRequest asyncWebRequest = asyncManager.getAsyncWebRequest();
+		// defensive check as asyncWebRequest should not be null,
+		// should have been set already in HandlerFunctionAdapter#getWebAsyncManager
 		if (asyncWebRequest == null) {
 			asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
 			asyncManager.setAsyncWebRequest(asyncWebRequest);
