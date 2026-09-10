@@ -198,11 +198,15 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	/*
-	 * Transition the node to the {@code removed} state and decrement the current size of the cache.
+	 * Transition the node to the {@code removed} state and decrement the
+	 * current size of the cache, unless the node has already been removed.
 	 */
 	private void markAsRemoved(Node<K, V> node) {
 		for (; ; ) {
 			CacheEntry<V> current = node.get();
+			if (current.state == CacheEntryState.REMOVED) {
+				return;
+			}
 			CacheEntry<V> removed = new CacheEntry<>(current.value, CacheEntryState.REMOVED);
 			if (node.compareAndSet(current, removed)) {
 				this.currentSize.lazySet(this.currentSize.get() - 1);
