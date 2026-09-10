@@ -65,8 +65,10 @@ public abstract class ForwardedHeaderUtils {
 	 * Parse the "Forwarded" header.
 	 * @param uri the request {@code URI}
 	 * @param headers the HTTP headers to get the "Forwarded" header from
-	 * @param remoteAddress for a default port for the parsed "for" value
-	 * @param localAddress for a default port for the parsed "by" value
+	 * @param remoteAddress for a default port for the parsed "for" value.
+	 * If null and no port is specified in the header, 0 is returned.
+	 * @param localAddress for a default port for the parsed "by" value.
+	 * If null, the port indication from the 'uri' is used as the 'byAddress'.
 	 * @return a {@link ForwardedInfo} with the parse results
 	 * @since 6.1.29
 	 * @see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>
@@ -95,7 +97,7 @@ public abstract class ForwardedHeaderUtils {
 
 			String forValue = pairs.get("for");
 			if (forValue != null) {
-				forAddress = parseInetSocketAddress(forValue, getPortToUse(remoteAddress, uri));
+				forAddress = parseInetSocketAddress(forValue, getRemotePortFallback(remoteAddress));
 			}
 			String byValue = pairs.get("by");
 			if (byValue != null) {
@@ -220,6 +222,10 @@ public abstract class ForwardedHeaderUtils {
 		return (address != null ? address.getPort() : "https".equals(uri.getScheme()) ? 443 : 80);
 	}
 
+	private static int getRemotePortFallback(@Nullable InetSocketAddress address) {
+		return (address != null ? address.getPort() : 0);
+	}
+
 	private static InetSocketAddress parseInetSocketAddress(String value, int port) {
 		String host = value;
 		int portSeparatorIdx = value.lastIndexOf(':');
@@ -247,7 +253,8 @@ public abstract class ForwardedHeaderUtils {
 	 * {@code byAddress} in {@link ForwardedInfo} is always {@code null}.
 	 * @param uri the request {@code URI}
 	 * @param headers the HTTP headers to get the "Forwarded" header from
-	 * @param remoteAddress for a default port for the parsed "for" value
+	 * @param remoteAddress for a default port for the parsed "for" value.
+	 * If null, port 0 is returned if not specified in the header.
 	 * @param localAddress for a default port for the parsed "by" value;
 	 * this argument is ignored currently and the byAddress is always {@code null}
 	 * @return a {@link ForwardedInfo} with the scheme, host, and port adapted
@@ -289,8 +296,7 @@ public abstract class ForwardedHeaderUtils {
 			String host = getLeftMostValue(forHeader);
 			boolean ipv6 = (host.indexOf(':') != -1);
 			host = (ipv6 && !host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
-			int port = getPortToUse(remoteAddress, uri);
-			forAddress = InetSocketAddress.createUnresolved(host, port);
+			forAddress = InetSocketAddress.createUnresolved(host, getRemotePortFallback(remoteAddress));
 		}
 
 		return new ForwardedInfo(uriComponentsBuilder, forAddress, null);
@@ -371,11 +377,13 @@ public abstract class ForwardedHeaderUtils {
 	/**
 	 * Parse the first "Forwarded: for=..." or "X-Forwarded-For" header value to
 	 * an {@code InetSocketAddress} representing the address of the client.
-	 * @param uri the request {@code URI}
+	 * @param uri the request {@code URI} (not used)
 	 * @param headers the request headers that may contain forwarded headers
 	 * @param remoteAddress the current remote address
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
-	 * {@code null} if the headers are not present
+	 * {@code null} if the headers are not present. If the address is present but
+	 * the port is omitted in the header, the port is taken from {@code remoteAddress}
+	 * if given, otherwise 0 is used.
 	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader} and
 	 * {@link #parseXForwardedHeaders}
 	 */
@@ -389,7 +397,7 @@ public abstract class ForwardedHeaderUtils {
 			Matcher matcher = FORWARDED_FOR_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
 				String value = matcher.group(1).trim();
-				return parseInetSocketAddress(value, getPortToUse(remoteAddress, uri));
+				return parseInetSocketAddress(value, getRemotePortFallback(remoteAddress));
 			}
 		}
 
@@ -398,7 +406,7 @@ public abstract class ForwardedHeaderUtils {
 			String host = getLeftMostValue(forHeader);
 			boolean ipv6 = (host.indexOf(':') != -1);
 			host = (ipv6 && !host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
-			return InetSocketAddress.createUnresolved(host, getPortToUse(remoteAddress, uri));
+			return InetSocketAddress.createUnresolved(host, getRemotePortFallback(remoteAddress));
 		}
 
 		return null;
@@ -411,7 +419,8 @@ public abstract class ForwardedHeaderUtils {
 	 * @param headers the request headers that may contain forwarded headers
 	 * @param localAddress the current local address
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
-	 * {@code null} if the headers are not present
+	 * {@code null} if the headers are not present. A port number of '0' indicates
+	 * that the port is unspecified.
 	 * @since 7.0
 	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader} and
 	 * {@link #parseXForwardedHeaders}
