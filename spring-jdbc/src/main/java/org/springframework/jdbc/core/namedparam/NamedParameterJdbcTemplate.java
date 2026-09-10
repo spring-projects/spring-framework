@@ -86,6 +86,9 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	/** The JdbcTemplate we are wrapping. */
 	private final JdbcOperations classicJdbcTemplate;
 
+	/** Whether named parameters within SQL comments are to be parsed as well. */
+	private boolean allowParametersInComments = false;
+
 	/** Cache of original SQL String to ParsedSql representation. */
 	private volatile ConcurrentLruCache<String, ParsedSql> parsedSqlCache;
 
@@ -107,7 +110,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	public NamedParameterJdbcTemplate(JdbcOperations classicJdbcTemplate) {
 		Assert.notNull(classicJdbcTemplate, "JdbcTemplate must not be null");
 		this.classicJdbcTemplate = classicJdbcTemplate;
-		this.parsedSqlCache = new ConcurrentLruCache<>(DEFAULT_CACHE_LIMIT, NamedParameterUtils::parseSqlStatement);
+		this.parsedSqlCache = createParsedSqlCache(DEFAULT_CACHE_LIMIT);
 	}
 
 	/**
@@ -119,6 +122,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	public NamedParameterJdbcTemplate(NamedParameterJdbcTemplate original, JdbcTemplate classicJdbcTemplate) {
 		Assert.notNull(classicJdbcTemplate, "JdbcTemplate must not be null");
 		this.classicJdbcTemplate = classicJdbcTemplate;
+		this.allowParametersInComments = original.allowParametersInComments;
 		this.parsedSqlCache = original.parsedSqlCache;
 	}
 
@@ -149,7 +153,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 * Default is 256. 0 indicates no caching, always parsing each statement.
 	 */
 	public void setCacheLimit(int cacheLimit) {
-		this.parsedSqlCache = new ConcurrentLruCache<>(cacheLimit, NamedParameterUtils::parseSqlStatement);
+		this.parsedSqlCache = createParsedSqlCache(cacheLimit);
 	}
 
 	/**
@@ -157,6 +161,41 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 */
 	public int getCacheLimit() {
 		return this.parsedSqlCache.capacity();
+	}
+
+	/**
+	 * Specify whether named parameters within SQL comments are to be parsed and
+	 * substituted as well, rather than being ignored. Default is {@code false}.
+	 * <p>Turning this flag on is useful for database engines that interpret hints
+	 * or routing keys declared in comments, for example
+	 * <code>"&#47;*@ queryKey(:userId) *&#47; SELECT ..."</code>.
+	 * <p><b>NOTE: Even with this flag turned on, string literals and quoted
+	 * identifiers are still skipped.</b> Also, the target driver or engine needs to
+	 * count a placeholder within a comment as an actual bind parameter; otherwise,
+	 * the number of bind values is not going to match. See
+	 * {@link NamedParameterUtils#parseSqlStatement(String, boolean)} for details.
+	 * <p>Note that changing this setting resets this template's SQL cache,
+	 * retaining the configured {@link #setCacheLimit cache limit}.
+	 * @since 7.1
+	 * @see NamedParameterUtils#parseSqlStatement(String, boolean)
+	 */
+	public void setAllowParametersInComments(boolean allowParametersInComments) {
+		this.allowParametersInComments = allowParametersInComments;
+		this.parsedSqlCache = createParsedSqlCache(getCacheLimit());
+	}
+
+	/**
+	 * Return whether named parameters within SQL comments are to be parsed as well.
+	 * @since 7.1
+	 */
+	public boolean isAllowParametersInComments() {
+		return this.allowParametersInComments;
+	}
+
+	private ConcurrentLruCache<String, ParsedSql> createParsedSqlCache(int cacheLimit) {
+		boolean allowInComments = this.allowParametersInComments;
+		return new ConcurrentLruCache<>(cacheLimit,
+				sql -> NamedParameterUtils.parseSqlStatement(sql, allowInComments));
 	}
 
 
