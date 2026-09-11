@@ -17,11 +17,10 @@
 package org.springframework.beans.factory;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jspecify.annotations.Nullable;
@@ -29,6 +28,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -522,8 +522,8 @@ public abstract class BeanFactoryUtils {
 		if (parentResult.length == 0) {
 			return result;
 		}
-		List<String> merged = new ArrayList<>(result.length + parentResult.length);
-		merged.addAll(Arrays.asList(result));
+		Set<String> merged = CollectionUtils.newLinkedHashSet(result.length + parentResult.length);
+		Collections.addAll(merged, result);
 		for (String beanName : parentResult) {
 			if (!merged.contains(beanName) && !hbf.containsLocalBean(beanName)) {
 				merged.add(beanName);
