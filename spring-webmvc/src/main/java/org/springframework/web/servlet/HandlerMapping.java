@@ -101,6 +101,14 @@ public interface HandlerMapping {
 	String BEST_MATCHING_PATTERN_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingPattern";
 
 	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains the best
+	 * matching {@link org.springframework.web.util.pattern.PathPattern}, when
+	 * parsed patterns are in use.
+	 * @since 7.1
+	 */
+	String BEST_MATCHING_PATH_PATTERN_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingPathPattern";
+
+	/**
 	 * Name of the boolean {@link HttpServletRequest} attribute that indicates
 	 * whether type-level mappings should be inspected.
 	 * <p>Note: This attribute is not required to be supported by all
