@@ -237,8 +237,14 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 						"Null return value from advice does not match primitive return type for: " + method);
 			}
 			if (COROUTINES_REACTOR_PRESENT && KotlinDetector.isSuspendingFunction(method)) {
-				return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
-						CoroutinesUtils.asFlow(retVal) : CoroutinesUtils.awaitSingleOrNull(retVal, args[args.length - 1]);
+				Class<?> returnParameterType = new MethodParameter(method, -1).getParameterType();
+				if (COROUTINES_FLOW_CLASS_NAME.equals(returnParameterType.getName())) {
+					return CoroutinesUtils.asFlow(retVal);
+				}
+				Object awaitResult = CoroutinesUtils.awaitSingleOrNull(retVal, args[args.length - 1]);
+				return KotlinDetector.isInlineClass(returnParameterType) &&
+						awaitResult != null && KotlinDetector.isInlineClass(awaitResult.getClass()) ?
+						awaitResult.getClass().getDeclaredMethod("unbox-impl").invoke(awaitResult) : awaitResult;
 			}
 			return retVal;
 		}
