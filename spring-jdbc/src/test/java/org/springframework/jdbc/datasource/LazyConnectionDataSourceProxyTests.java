@@ -129,8 +129,8 @@ class LazyConnectionDataSourceProxyTests {
 		Connection lazyConnection1 = lazyProxy.getConnection();
 		lazyConnection1.setCatalog("catalogName");
 		assertThat(lazyConnection1.getCatalog()).isEqualTo("catalogName");
-		verify(physicalConnection1,never()).setCatalog("catalogName");
-		verify(physicalConnection1,never()).getCatalog();
+		verify(physicalConnection1, never()).setCatalog("catalogName");
+		verify(physicalConnection1, never()).getCatalog();
 		establishPhysicalConnection(lazyConnection1);
 		verify(physicalConnection1).setCatalog("catalogName");
 
@@ -150,8 +150,8 @@ class LazyConnectionDataSourceProxyTests {
 		Connection lazyConnection1 = lazyProxy.getConnection();
 		lazyConnection1.setSchema("schemaName");
 		assertThat(lazyConnection1.getSchema()).isEqualTo("schemaName");
-		verify(physicalConnection1,never()).setSchema("schemaName");
-		verify(physicalConnection1,never()).getSchema();
+		verify(physicalConnection1, never()).setSchema("schemaName");
+		verify(physicalConnection1, never()).getSchema();
 		establishPhysicalConnection(lazyConnection1);
 		verify(physicalConnection1).setSchema("schemaName");
 
@@ -171,8 +171,8 @@ class LazyConnectionDataSourceProxyTests {
 		Connection lazyConnection1 = lazyProxy.getConnection();
 		lazyConnection1.setHoldability(CLOSE_CURSORS_AT_COMMIT);
 		assertThat(lazyConnection1.getHoldability()).isEqualTo(CLOSE_CURSORS_AT_COMMIT);
-		verify(physicalConnection1,never()).setHoldability(CLOSE_CURSORS_AT_COMMIT);
-		verify(physicalConnection1,never()).getHoldability();
+		verify(physicalConnection1, never()).setHoldability(CLOSE_CURSORS_AT_COMMIT);
+		verify(physicalConnection1, never()).getHoldability();
 		establishPhysicalConnection(lazyConnection1);
 		verify(physicalConnection1).setHoldability(CLOSE_CURSORS_AT_COMMIT);
 
@@ -191,8 +191,8 @@ class LazyConnectionDataSourceProxyTests {
 		Connection lazyConnection = lazyProxy.getConnection();
 		lazyConnection.setTransactionIsolation(TRANSACTION_READ_COMMITTED);
 		assertThat(lazyConnection.getTransactionIsolation()).isEqualTo(TRANSACTION_READ_COMMITTED);
-		verify(physicalConnection,never()).setTransactionIsolation(TRANSACTION_READ_COMMITTED);
-		verify(physicalConnection,never()).getTransactionIsolation();
+		verify(physicalConnection, never()).setTransactionIsolation(TRANSACTION_READ_COMMITTED);
+		verify(physicalConnection, never()).getTransactionIsolation();
 		establishPhysicalConnection(lazyConnection);
 		verify(physicalConnection).setTransactionIsolation(TRANSACTION_READ_COMMITTED);
 	}
@@ -207,8 +207,8 @@ class LazyConnectionDataSourceProxyTests {
 		Connection lazyConnection = lazyProxy.getConnection();
 		lazyConnection.setAutoCommit(true);
 		assertThat(lazyConnection.getAutoCommit()).isTrue();
-		verify(physicalConnection,never()).setAutoCommit(true);
-		verify(physicalConnection,never()).getAutoCommit();
+		verify(physicalConnection, never()).setAutoCommit(true);
+		verify(physicalConnection, never()).getAutoCommit();
 		establishPhysicalConnection(lazyConnection);
 		verify(physicalConnection).setAutoCommit(true);
 	}
@@ -226,8 +226,8 @@ class LazyConnectionDataSourceProxyTests {
 		Connection lazyConnection1 = lazyProxy.getConnection();
 		lazyConnection1.setNetworkTimeout(executor, 1000);
 		assertThat(lazyConnection1.getNetworkTimeout()).isEqualTo(1000);
-		verify(physicalConnection1,never()).setNetworkTimeout(executor, 1000);
-		verify(physicalConnection1,never()).getNetworkTimeout();
+		verify(physicalConnection1, never()).setNetworkTimeout(executor, 1000);
+		verify(physicalConnection1, never()).getNetworkTimeout();
 		establishPhysicalConnection(lazyConnection1);
 		verify(physicalConnection1).setNetworkTimeout(executor, 1000);
 

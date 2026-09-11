@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  * is fetched (if ever). Consequently, commit and rollback calls will be ignored
  * if no Statements have been created.
  *
- * <p>Once a properties has been set, the corresponding getter method returns the
+ * <p>Once a property has been set, the corresponding getter method returns the
  * set value until the actual Connection is fetched. If the property has not been
  * set, invoking the getter triggers a fetch of the actual connection in order to
  * obtain the default value.
@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  * driver defaults, remnants from pooled connections, or external session
  * modifications.
  *
- * <p>The{@link java.sql.Connection#setClientInfo(java.util.Properties)}
+ * <p>The {@link java.sql.Connection#setClientInfo(java.util.Properties)}
  * method also forces immediate acquisition. JDBC driver implementations are
  * inconsistent: some treat it as an overwrite, while others treat it as an
  * append/merge. To guarantee behavior identical to that of a non-lazy DataSource
