@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +32,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -56,6 +59,8 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Jiri Krokviak
+ * @author Yanming Zhou
  * @since 6.1
  * @see JdbcClient#create(DataSource)
  * @see JdbcClient#create(JdbcOperations)
@@ -296,6 +301,11 @@ final class DefaultJdbcClient implements JdbcClient {
 					this.classicOps.update(statementCreatorForIndexedParamsWithKeys(keyColumnNames), generatedKeyHolder));
 		}
 
+		@Override
+		public BatchSpec batch() {
+			return new DefaultBatchSpec();
+		}
+
 		private boolean useNamedParams() {
 			boolean hasNamedParams = (this.namedParams.hasValues() || this.namedParamSource != this.namedParams);
 			if (hasNamedParams && !this.indexedParams.isEmpty()) {
@@ -321,6 +331,162 @@ final class DefaultJdbcClient implements JdbcClient {
 				pscf.setReturnGeneratedKeys(true);
 			}
 			return pscf.newPreparedStatementCreator(this.indexedParams);
+		}
+
+
+		private class DefaultBatchSpec implements BatchSpec {
+
+			private final List<Object[]> indexedBatch = new ArrayList<>();
+
+			private final List<SqlParameterSource> namedBatch = new ArrayList<>();
+
+			private @Nullable Boolean usingNamedParams;
+
+			private List<@Nullable Object> currentIndexedParams = new ArrayList<>();
+
+			private MapSqlParameterSource currentNamedParams = new MapSqlParameterSource();
+
+			private SqlParameterSource currentNamedParamSource = this.currentNamedParams;
+
+			@Override
+			public BatchSpec param(@Nullable Object value) {
+				validateIndexedParamValue(value);
+				this.currentIndexedParams.add(value);
+				return this;
+			}
+
+			@Override
+			public BatchSpec param(String name, @Nullable Object value) {
+				this.currentNamedParams.addValue(name, value);
+				return this;
+			}
+
+			@Override
+			public BatchSpec params(Object... values) {
+				Collections.addAll(this.currentIndexedParams, values);
+				return this;
+			}
+
+			@Override
+			public BatchSpec params(List<?> values) {
+				this.currentIndexedParams.addAll(values);
+				return this;
+			}
+
+			@Override
+			public BatchSpec params(Map<String, ?> paramMap) {
+				this.currentNamedParams.addValues(paramMap);
+				return this;
+			}
+
+			@SuppressWarnings({"rawtypes", "unchecked"})
+			@Override
+			public BatchSpec paramSource(Object namedParamObject) {
+				this.currentNamedParamSource = (namedParamObject instanceof Map map ?
+						new MapSqlParameterSource(map) :
+						new SimplePropertySqlParameterSource(namedParamObject));
+				return this;
+			}
+
+			@Override
+			public BatchSpec paramSource(SqlParameterSource namedParamSource) {
+				this.currentNamedParamSource = namedParamSource;
+				return this;
+			}
+
+			@Override
+			public BatchSpec add() {
+				completeEntry();
+				return this;
+			}
+
+			@Override
+			public int[] batchUpdate() {
+				completeEntry();
+				return (Boolean.TRUE.equals(this.usingNamedParams) ?
+						namedParamOps.batchUpdate(sql, this.namedBatch.toArray(new SqlParameterSource[0])) :
+						classicOps.batchUpdate(sql, this.indexedBatch));
+			}
+
+			@Override
+			public int[] batchUpdate(KeyHolder generatedKeyHolder) {
+				return doBatchUpdate(generatedKeyHolder, null);
+			}
+
+			@Override
+			public int[] batchUpdate(KeyHolder generatedKeyHolder, String... keyColumnNames) {
+				return doBatchUpdate(generatedKeyHolder, keyColumnNames);
+			}
+
+			private int[] doBatchUpdate(KeyHolder generatedKeyHolder, String @Nullable [] keyColumnNames) {
+				completeEntry();
+				if (Boolean.TRUE.equals(this.usingNamedParams)) {
+					if (keyColumnNames != null) {
+						return namedParamOps.batchUpdate(sql, this.namedBatch.toArray(new SqlParameterSource[0]),
+								generatedKeyHolder, keyColumnNames);
+					}
+					else {
+						return namedParamOps.batchUpdate(sql, this.namedBatch.toArray(new SqlParameterSource[0]),
+								generatedKeyHolder);
+					}
+				}
+				else {
+					if (this.indexedBatch.isEmpty()) {
+						return new int[0];
+					}
+					PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sql);
+					if (keyColumnNames != null) {
+						pscf.setGeneratedKeysColumnNames(keyColumnNames);
+					}
+					else {
+						pscf.setReturnGeneratedKeys(true);
+					}
+					PreparedStatementCreator psc = pscf.newPreparedStatementCreator(this.indexedBatch.get(0));
+					return classicOps.batchUpdate(psc, new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int i) throws SQLException {
+							pscf.newPreparedStatementSetter(indexedBatch.get(i)).setValues(ps);
+						}
+
+						@Override
+						public int getBatchSize() {
+							return indexedBatch.size();
+						}
+					}, generatedKeyHolder);
+				}
+			}
+
+			private void completeEntry() {
+				boolean hasIndexed = !this.currentIndexedParams.isEmpty();
+				boolean hasNamed = (this.currentNamedParams.hasValues() ||
+						this.currentNamedParamSource != this.currentNamedParams);
+				if (hasIndexed && hasNamed) {
+					throw new IllegalStateException("Configure either named or indexed parameters, not both");
+				}
+				if (this.currentNamedParams.hasValues() && this.currentNamedParamSource != this.currentNamedParams) {
+					throw new IllegalStateException(
+							"Configure either individual named parameters or a SqlParameterSource, not both");
+				}
+				if (!hasIndexed && !hasNamed) {
+					return;
+				}
+				if (this.usingNamedParams == null) {
+					this.usingNamedParams = hasNamed;
+				}
+				else if (this.usingNamedParams != hasNamed) {
+					throw new IllegalStateException(
+							"Configure either named or indexed parameters for all batch entries, not both");
+				}
+				if (hasNamed) {
+					this.namedBatch.add(this.currentNamedParamSource);
+					this.currentNamedParams = new MapSqlParameterSource();
+					this.currentNamedParamSource = this.currentNamedParams;
+				}
+				else {
+					this.indexedBatch.add(this.currentIndexedParams.toArray());
+					this.currentIndexedParams = new ArrayList<>();
+				}
+			}
 		}
 
 
