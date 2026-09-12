@@ -21,10 +21,20 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.jspecify.annotations.Nullable;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.reader.UnicodeReader;
+import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -32,6 +42,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Convenient utility methods for loading of {@code java.util.Properties},
@@ -39,6 +50,12 @@ import org.springframework.util.ResourceUtils;
  *
  * <p>For more configurable properties loading, including the option of a
  * customized encoding, consider using the PropertiesLoaderSupport class.
+ *
+ * <p>As of 7.1, YAML resources (identified by a {@code .yml} or {@code .yaml}
+ * filename extension) are supported as well, provided that SnakeYAML is
+ * present on the classpath. SnakeYAML is an optional dependency of this
+ * module: if it is not present, attempting to load a YAML resource results
+ * in an {@link IllegalStateException}.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -49,6 +66,13 @@ import org.springframework.util.ResourceUtils;
 public abstract class PropertiesLoaderUtils {
 
 	private static final String XML_FILE_EXTENSION = ".xml";
+
+	private static final String YAML_FILE_EXTENSION = ".yaml";
+
+	private static final String YML_FILE_EXTENSION = ".yml";
+
+	private static final boolean snakeYamlPresent = ClassUtils.isPresent(
+			"org.yaml.snakeyaml.Yaml", PropertiesLoaderUtils.class.getClassLoader());
 
 
 	/**
@@ -93,6 +117,10 @@ public abstract class PropertiesLoaderUtils {
 				stream = resource.getInputStream();
 				persister.loadFromXml(props, stream);
 			}
+			else if (isYamlFile(filename)) {
+				stream = resource.getInputStream();
+				fillYamlProperties(props, stream, resource);
+			}
 			else if (resource.requiresReader()) {
 				reader = resource.getReader();
 				persister.load(props, reader);
@@ -136,6 +164,9 @@ public abstract class PropertiesLoaderUtils {
 			String filename = resource.getFilename();
 			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
 				props.loadFromXML(is);
+			}
+			else if (isYamlFile(filename)) {
+				fillYamlProperties(props, is, resource);
 			}
 			else {
 				props.load(is);
@@ -184,12 +215,111 @@ public abstract class PropertiesLoaderUtils {
 				if (resourceName.endsWith(XML_FILE_EXTENSION)) {
 					props.loadFromXML(is);
 				}
+				else if (isYamlFile(resourceName)) {
+					fillYamlProperties(props, is, url);
+				}
 				else {
 					props.load(is);
 				}
 			}
 		}
 		return props;
+	}
+
+	private static boolean isYamlFile(@Nullable String filename) {
+		return (filename != null &&
+				(filename.endsWith(YAML_FILE_EXTENSION) || filename.endsWith(YML_FILE_EXTENSION)));
+	}
+
+	private static void fillYamlProperties(Properties props, InputStream is, Object source) throws IOException {
+		if (!snakeYamlPresent) {
+			throw new IllegalStateException(
+					"Could not detect SnakeYAML library on the classpath - it is required to parse YAML resource: " + source);
+		}
+		SnakeYamlPropertiesLoader.fillProperties(props, is);
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on SnakeYAML at runtime.
+	 */
+	private static class SnakeYamlPropertiesLoader {
+
+		static void fillProperties(Properties props, InputStream is) throws IOException {
+			Yaml yaml = createYaml();
+			Map<String, Object> flattened = new LinkedHashMap<>();
+			try (Reader reader = new UnicodeReader(is)) {
+				for (Object document : yaml.loadAll(reader)) {
+					if (document != null) {
+						buildFlattenedMap(flattened, asMap(document), null);
+					}
+				}
+			}
+			flattened.forEach((key, value) -> props.setProperty(key, String.valueOf(value)));
+		}
+
+		private static Yaml createYaml() {
+			LoaderOptions loaderOptions = new LoaderOptions();
+			loaderOptions.setAllowDuplicateKeys(false);
+			loaderOptions.setTagInspector(tag -> false);
+			DumperOptions dumperOptions = new DumperOptions();
+			return new Yaml(new Constructor(loaderOptions), new Representer(dumperOptions), dumperOptions, loaderOptions);
+		}
+
+		@SuppressWarnings({"rawtypes", "unchecked"})
+		private static Map<String, Object> asMap(Object object) {
+			// YAML can have numbers as keys
+			Map<String, Object> result = new LinkedHashMap<>();
+			if (!(object instanceof Map map)) {
+				// A document can be a text literal
+				result.put("document", object);
+				return result;
+			}
+			map.forEach((key, value) -> {
+				if (value instanceof Map) {
+					value = asMap(value);
+				}
+				if (key instanceof CharSequence) {
+					result.put(key.toString(), value);
+				}
+				else {
+					// It has to be a map key in this case
+					result.put("[" + key + "]", value);
+				}
+			});
+			return result;
+		}
+
+		@SuppressWarnings("unchecked")
+		private static void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path) {
+			source.forEach((key, value) -> {
+				if (StringUtils.hasText(path)) {
+					key = (key.startsWith("[") ? path + key : path + '.' + key);
+				}
+				if (value instanceof String) {
+					result.put(key, value);
+				}
+				else if (value instanceof Map<?, ?> map) {
+					// Need a compound key
+					buildFlattenedMap(result, (Map<String, Object>) map, key);
+				}
+				else if (value instanceof Collection<?> collection) {
+					// Need a compound key
+					if (collection.isEmpty()) {
+						result.put(key, "");
+					}
+					else {
+						int count = 0;
+						for (Object object : collection) {
+							buildFlattenedMap(result, Collections.singletonMap("[" + (count++) + "]", object), key);
+						}
+					}
+				}
+				else {
+					result.put(key, (value != null ? value : ""));
+				}
+			});
+		}
 	}
 
 }

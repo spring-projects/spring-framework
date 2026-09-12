@@ -1,0 +1,13 @@
+enigma: 42
+
+environments:
+  dev:
+    url: https://dev.bar.com
+    name: Developer Setup
+  prod:
+    url: https://foo.bar.com
+    name: My Cool App
+
+servers:
+  - dev.bar.com
+  - foo.bar.com
