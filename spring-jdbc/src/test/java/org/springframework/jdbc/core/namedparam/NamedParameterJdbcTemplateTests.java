@@ -53,6 +53,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * @author Rick Evans
@@ -580,4 +581,104 @@ class NamedParameterJdbcTemplateTests {
 		verify(connection, atLeastOnce()).close();
 	}
 
+
+	@Test
+	void testMultipleBatchUpdateWithSqlParameterSource() throws Exception {
+		List<SqlParameterSource> ids = List.of(
+				new MapSqlParameterSource("id", 100),
+				new MapSqlParameterSource("id", 200),
+				new MapSqlParameterSource("id", 300),
+				new MapSqlParameterSource("id", 400),
+				new MapSqlParameterSource("id", 500)
+		);
+
+		int[] rowsAffected1 = new int[]{1, 2};
+		int[] rowsAffected2 = new int[]{3, 4};
+		int[] rowsAffected3 = new int[]{5};
+
+		given(preparedStatement.executeBatch()).willReturn(rowsAffected1, rowsAffected2, rowsAffected3);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
+
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+
+		int batchSize = 2;
+
+		int[][] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids, batchSize);
+
+		assertThat(actualRowsAffected.length).as("executed 3 batches").isEqualTo(3);
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected1);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected2);
+		assertThat(actualRowsAffected[2]).isEqualTo(rowsAffected3);
+
+		verify(preparedStatement, times(5)).addBatch();
+		verify(connection, times(1)).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 100);
+		verify(preparedStatement).setObject(1, 200);
+		verify(preparedStatement).setObject(1, 300);
+		verify(preparedStatement).setObject(1, 400);
+		verify(preparedStatement).setObject(1, 500);
+		verify(preparedStatement, atLeastOnce()).close();
+		verify(connection, atLeastOnce()).close();
+	}
+
+	@Test
+	void testMultipleBatchUpdateWithEmptySqlParameterSourceArg() {
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+
+		int batchSize = 2;
+
+		int[][] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", Collections.emptyList(), batchSize);
+
+		assertThat(actualRowsAffected.length).as("executed 0 batches").isZero();
+		verifyNoInteractions(preparedStatement);
+		verifyNoInteractions(connection);
+	}
+
+	@Test
+	void testMultipleBatchUpdateWithSqlParameterSourceWithZeroBatchSize() {
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+
+		int batchSize = 0;
+
+		int[][] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id",
+				List.of(new MapSqlParameterSource("id", 100)),
+				batchSize);
+
+		assertThat(actualRowsAffected.length).as("executed 0 batches").isZero();
+		verifyNoInteractions(preparedStatement);
+		verifyNoInteractions(connection);
+	}
+
+	@Test
+	void testMultipleBatchUpdateWithSqlParameterSourceSmallerThanBatchSize() throws Exception {
+		List<SqlParameterSource> ids = List.of(
+				new MapSqlParameterSource("id", 100),
+				new MapSqlParameterSource("id", 200)
+		);
+
+		int[] rowsAffected = new int[]{1, 2};
+
+		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
+
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+
+		int batchSize = 3;
+
+		int[][] actualRowsAffected = namedParameterTemplate.batchUpdate(
+				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids, batchSize);
+
+		assertThat(actualRowsAffected.length).as("executed 1 batch").isEqualTo(1);
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected);
+
+		verify(preparedStatement, times(2)).addBatch();
+		verify(connection, times(1)).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 100);
+		verify(preparedStatement).setObject(1, 200);
+		verify(preparedStatement, atLeastOnce()).close();
+		verify(connection, atLeastOnce()).close();
+	}
 }
