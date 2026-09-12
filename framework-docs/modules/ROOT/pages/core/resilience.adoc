@@ -115,6 +115,141 @@ whereas the caller of the `@Retryable` method will only ever see the last except
 ====
 
 
+[[resilience-annotations-retryable-combining]]
+=== Combining `@Retryable` with Other Proxy-Based Features
+
+Spring AOP applies interceptors in a specific order when multiple annotations such as
+`@Retryable`, `@Transactional`, `@Cacheable`, and `@Async` are present on the same method.
+The resulting advice chain determines how retries interact with each feature, and
+understanding that chain is important for using `@Retryable` correctly in combination with
+other annotations.
+
+[[resilience-annotations-retryable-combining-transactional]]
+==== With `@Transactional`
+
+When `@Transactional` and `@Retryable` are used together, the advice chain is:
+
+----
+Retry (OUTER) → Transaction (INNER) → target method
+----
+
+Each retry attempt starts a fresh transaction. If the target method throws, the transaction
+is rolled back and `@Retryable` decides whether to retry. On success, the transaction
+commits. This is usually the desired behavior for transient failures such as database
+deadlocks.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Transactional
+@Retryable(TransientDataAccessException.class)
+public void updateRecord() {
+    // Each retry runs in its own transaction
+}
+----
+
+[NOTE]
+====
+Because the retry interceptor is outside the transaction interceptor, the current
+transaction has already been rolled back by the time the retry interceptor receives the
+exception. The retry interceptor sees the same, unwrapped exception that the target
+method threw.
+====
+
+[[resilience-annotations-retryable-combining-cacheable]]
+==== With `@Cacheable`
+
+When `@Cacheable` and `@Retryable` are used together, the advice chain is:
+
+----
+Retry (OUTER) → Cache (INNER) → target method
+----
+
+The cache interceptor runs on every attempt. If the cache is populated between attempts
+(for example, by a concurrent request), subsequent retry attempts will return the cached
+value without invoking the target method. On success, the cache is populated as normal.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Cacheable("items")
+@Retryable
+public Item loadItem(String id) {
+    // Retry wraps the cache lookup; each attempt checks the cache first
+}
+----
+
+[[resilience-annotations-retryable-combining-async]]
+==== With `@Async`
+
+When `@Async` and `@Retryable` are used together, the advice chain is:
+
+----
+Async (OUTER) → Retry (INNER) → target method
+----
+
+The method is submitted to the async executor once, and all retry attempts run on the
+same async thread. The caller receives a `CompletableFuture` or `Future` that completes
+when the last retry attempt finishes (either with a result or a final exception).
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Async
+@Retryable
+public CompletableFuture<String> fetchData() {
+    // Retries happen on the async thread, not the calling thread
+}
+----
+
+[NOTE]
+====
+Because `@Async` is outermost, the calling thread is never blocked by retry delays.
+All retry attempts, including any configured delay between them, happen on the async
+executor thread.
+====
+
+[[resilience-annotations-retryable-combining-order]]
+==== Adjusting Advice Order
+
+The `@Async` ordering described above reflects the relative `order` of the
+`RetryAnnotationBeanPostProcessor` (registered by `@EnableResilientMethods`) and the
+`AsyncAnnotationBeanPostProcessor` (registered by `@EnableAsync`). Both are plain
+`Ordered` bean post-processors, so you can change their relative ordering by setting the
+`order` attribute on `@EnableResilientMethods` and/or `@EnableAsync`.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Configuration
+@EnableResilientMethods(order = Ordered.LOWEST_PRECEDENCE) // <1>
+@EnableAsync(order = Ordered.LOWEST_PRECEDENCE - 1) // <2>
+class AppConfig {
+}
+----
+<1> Raises the retry post-processor's order so that it runs after the async
+post-processor.
+<2> Lowers the async post-processor's order so that it runs before the retry
+post-processor. As a result, retry becomes the outermost advice and async the
+innermost, reversing the default order.
+
+[NOTE]
+====
+With the reversed order shown above, exceptions thrown during asynchronous execution are
+not retried: the retry interceptor only sees the `Future` handle, which is returned
+immediately, rather than the outcome of the asynchronous invocation. Such an arrangement
+only retries synchronous submission failures (for example, a rejected task submission)
+and is rarely desirable in practice.
+====
+
+[NOTE]
+====
+This technique does not apply to `@Transactional` or `@Cacheable`. Their advisors are
+registered through Spring's shared `InfrastructureAdvisorAutoProxyCreator`, whose own
+post-processor `order` is fixed at `Ordered.HIGHEST_PRECEDENCE` and is unaffected by the
+`order` attribute on `@EnableTransactionManagement` or `@EnableCaching` (that attribute
+only affects ordering relative to other advisors on the same proxy). As a result, retry
+advice is always applied outside `@Transactional` and `@Cacheable`, regardless of the
+`order` configured on `@EnableResilientMethods`.
+====
+
+
 [[resilience-annotations-concurrencylimit]]
 == `@ConcurrencyLimit`
 
