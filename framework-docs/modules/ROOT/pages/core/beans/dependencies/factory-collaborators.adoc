@@ -377,10 +377,25 @@ beans for classes A and B to be injected into each other, the Spring IoC contain
 detects this circular reference at runtime, and throws a
 `BeanCurrentlyInCreationException`.
 
-One possible solution is to edit the source code of some classes to be configured by
-setters rather than constructors. Alternatively, avoid constructor injection and use
-setter injection only. In other words, although it is not recommended, you can configure
-circular dependencies with setter injection.
+A circular dependency is often a sign that responsibilities are not cleanly separated.
+The preferred solution is therefore to refactor the design so that the cycle is removed --
+for example, by extracting the shared logic into a third collaborator that both beans
+depend on.
+
+If the cycle cannot be avoided, you have a few options for keeping constructor injection:
+
+* Annotate one of the constructor parameters with
+  xref:core/beans/dependencies/factory-lazy-init.adoc[`@Lazy`]. Spring then injects a lazy-resolution
+  proxy for that dependency instead of the fully initialized bean, deferring the actual
+  lookup until the dependency is first used and thereby breaking the cycle.
+* Inject an
+  xref:core/beans/annotation-config/autowired.adoc[`ObjectProvider<T>`] (or `Provider<T>`) for one side of
+  the cycle and retrieve the collaborating bean on demand rather than at construction time.
+
+Alternatively, you can edit the source code of some classes to be configured by
+setters rather than constructors, or avoid constructor injection and use setter injection
+only. In other words, although it is not recommended, you can configure circular
+dependencies with setter injection.
 
 Unlike the typical case (with no circular dependencies), a circular dependency
 between bean A and bean B forces one of the beans to be injected into the other prior to
