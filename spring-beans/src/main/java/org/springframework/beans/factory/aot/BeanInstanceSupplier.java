@@ -189,21 +189,50 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	@Override
 	public T get(RegisteredBean registeredBean) {
 		Assert.notNull(registeredBean, "'registeredBean' must not be null");
+		return get(registeredBean, (AutowiredArguments) null);
+	}
+
+	@Override
+	public T get(RegisteredBean registeredBean, @Nullable Object @Nullable ... args) {
+		Assert.notNull(registeredBean, "'registeredBean' must not be null");
+		return get(registeredBean, (args != null ? AutowiredArguments.of(args) : null));
+	}
+
+	@Override
+	public boolean supportsExplicitArguments(@Nullable Object @Nullable ... args) {
+		return (this.generatorWithoutArguments == null && this.lookup.supportsArguments(args));
+	}
+
+	@SuppressWarnings("unchecked")
+	private T get(RegisteredBean registeredBean, @Nullable AutowiredArguments explicitArguments) {
 		if (this.generatorWithoutArguments != null) {
+			Assert.isTrue(explicitArguments == null || explicitArguments.toArray().length == 0,
+					"Explicit arguments are not supported");
 			Executable executable = getFactoryMethodForGenerator();
 			return invokeBeanSupplier(executable, () -> this.generatorWithoutArguments.apply(registeredBean));
 		}
 		else if (this.generatorWithArguments != null) {
 			Executable executable = getFactoryMethodForGenerator();
-			AutowiredArguments arguments = resolveArguments(registeredBean,
-					executable != null ? executable : this.lookup.get(registeredBean));
+			Executable argumentsExecutable = (executable != null ? executable : this.lookup.get(registeredBean));
+			AutowiredArguments arguments = (explicitArguments != null ? explicitArguments :
+					resolveArguments(registeredBean, argumentsExecutable));
+			validateArgumentCount(argumentsExecutable, arguments);
 			return invokeBeanSupplier(executable, () -> this.generatorWithArguments.apply(registeredBean, arguments));
 		}
 		else {
 			Executable executable = this.lookup.get(registeredBean);
-			@Nullable Object[] arguments = resolveArguments(registeredBean, executable).toArray();
+			@Nullable Object[] arguments = (explicitArguments != null ?
+					explicitArguments.toArray() : resolveArguments(registeredBean, executable).toArray());
+			validateArgumentCount(executable, AutowiredArguments.of(arguments));
 			return invokeBeanSupplier(executable, () -> (T) instantiate(registeredBean, executable, arguments));
 		}
+	}
+
+	private void validateArgumentCount(Executable executable, AutowiredArguments arguments) {
+		int argumentCount = arguments.toArray().length;
+		int parameterCount = executable.getParameterCount();
+		Assert.isTrue(argumentCount == parameterCount,
+				() -> "Incorrect number of arguments: expected " + parameterCount + " but got " + argumentCount);
 	}
 
 	@Override
@@ -383,6 +412,25 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	abstract static class ExecutableLookup {
 
 		abstract Executable get(RegisteredBean registeredBean);
+
+		abstract Class<?>[] getParameterTypes();
+
+		boolean supportsArguments(@Nullable Object @Nullable [] args) {
+			if (args == null) {
+				return true;
+			}
+			Class<?>[] parameterTypes = getParameterTypes();
+			if (args.length != parameterTypes.length) {
+				return false;
+			}
+			for (int i = 0; i < args.length; i++) {
+				@Nullable Object arg = args[i];
+				if (arg == null || ClassUtils.resolvePrimitiveIfNecessary(parameterTypes[i]) != arg.getClass()) {
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 
 
@@ -407,6 +455,11 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 				throw new IllegalArgumentException(
 						"%s cannot be found on %s".formatted(this, beanClass.getName()), ex);
 			}
+		}
+
+		@Override
+		Class<?>[] getParameterTypes() {
+			return this.parameterTypes;
 		}
 
 		@Override
@@ -449,6 +502,11 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 				this.resolvedMethod = method;
 			}
 			return method;
+		}
+
+		@Override
+		Class<?>[] getParameterTypes() {
+			return this.parameterTypes;
 		}
 
 		@Override
