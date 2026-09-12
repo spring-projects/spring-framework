@@ -107,9 +107,45 @@ class SessionAttributesHandlerTests {
 		assertThat(sessionAttributeStore.retrieveAttribute(request, "attr3")).isInstanceOf(TestBean.class);
 	}
 
+	@Test
+	void retrieveAttributesDoesNotReturnAttributesForAnotherHandlerType() {
+		ModelMap model = new ModelMap();
+		model.put("testBean", new TestBean());
+
+		sessionAttributesHandler.storeAttributes(request, model);
+
+		SessionAttributesHandler anotherHandler =
+				new SessionAttributesHandler(AnotherTestSessionAttributesHolder.class, sessionAttributeStore);
+
+		assertThat(anotherHandler.retrieveAttributes(request))
+				.as("A handler should not retrieve session attributes for a different handler type")
+				.isEmpty();
+	}
+
+	@Test
+	void cleanupAttributesDoesNotRemoveAttributesForAnotherHandlerType() {
+		TestBean testBean = new TestBean();
+		ModelMap model = new ModelMap("testBean", testBean);
+		sessionAttributesHandler.storeAttributes(request, model);
+
+		SessionAttributesHandler anotherHandler =
+				new SessionAttributesHandler(AnotherTestSessionAttributesHolder.class, sessionAttributeStore);
+
+		// Restore known attribute names before cleanup
+		anotherHandler.retrieveAttributes(request);
+		anotherHandler.cleanupAttributes(request);
+
+		assertThat(sessionAttributeStore.retrieveAttribute(request, "testBean"))
+				.as("A handler should not remove a session attribute for a different handler type")
+				.isSameAs(testBean);
+	}
 
 	@SessionAttributes(names = {"attr1", "attr2"}, types = TestBean.class)
 	private static class TestSessionAttributesHolder {
+	}
+
+	@SessionAttributes(types = TestBean.class)
+	private static class AnotherTestSessionAttributesHolder {
 	}
 
 }
