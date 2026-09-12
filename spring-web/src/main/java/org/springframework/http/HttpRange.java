@@ -145,6 +145,46 @@ public abstract class HttpRange {
 		return result;
 	}
 
+	/**
+	 * Parse ranges from the given request headers, taking an {@code If-Range}
+	 * header into account based on the given response headers.
+	 * <p>If the request does not contain an {@code If-Range} header, or if its
+	 * value matches the {@code ETag} or {@code Last-Modified} response header,
+	 * this delegates to {@link #parseRanges(String)}. Otherwise, an empty list
+	 * is returned to indicate that the {@code Range} header should be ignored.
+	 * @param requestHeaders the request headers
+	 * @param responseHeaders the response headers for the selected representation
+	 * @return the parsed ranges, or an empty list if the {@code Range} header
+	 * should be ignored
+	 * @throws IllegalArgumentException if the range cannot be parsed
+	 * or if the number of ranges is greater than 100
+	 * @since 7.1
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-13.1.5">RFC 9110, Section 13.1.5</a>
+	 */
+	public static List<HttpRange> parseRanges(HttpHeaders requestHeaders, HttpHeaders responseHeaders) {
+		Assert.notNull(requestHeaders, "Request headers must not be null");
+		Assert.notNull(responseHeaders, "Response headers must not be null");
+
+		List<String> ifRangeValues = requestHeaders.get(HttpHeaders.IF_RANGE);
+		if (ifRangeValues != null) {
+			if (ifRangeValues.size() != 1 || !matchIfRange(ifRangeValues.get(0), responseHeaders)) {
+				return Collections.emptyList();
+			}
+		}
+		return parseRanges(requestHeaders.getFirst(HttpHeaders.RANGE));
+	}
+
+	private static boolean matchIfRange(@Nullable String ifRange, HttpHeaders responseHeaders) {
+		if (ifRange == null) {
+			return false;
+		}
+		ifRange = ifRange.trim();
+		if (ifRange.startsWith("\"")) {
+			return ifRange.equals(responseHeaders.getETag());
+		}
+		return ifRange.equals(responseHeaders.getFirst(HttpHeaders.LAST_MODIFIED));
+	}
+
 	private static HttpRange parseRange(String range) {
 		Assert.hasLength(range, "Range String must not be empty");
 		int dashIdx = range.indexOf('-');
