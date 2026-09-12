@@ -145,7 +145,7 @@ Kotlin::
 ----
 	package org.spring.samples.spel.inventor
 
-	class PlaceOfBirth(var city: String, var country: String? = null) {
+	class PlaceOfBirth(var city: String, var country: String? = null)
 ----
 ======
 
