@@ -446,9 +446,21 @@ specify CORS settings by URL pattern. If both are specified, they are combined b
 === Client
 
 Spring WebFlux provides a `WebSocketClient` abstraction with implementations for
-Reactor Netty, Tomcat, Jetty, and standard Java (that is, JSR-356).
+Reactor Netty, Tomcat, Jetty, the Jakarta WebSocket API, and the JDK `HttpClient`.
 
-NOTE: The Tomcat client is effectively an extension of the standard Java one with some extra
+`JdkWebSocketClient` uses the WebSocket support in `java.net.http` without an additional
+WebSocket client library. You can supply an `HttpClient` to configure connection settings.
+Incoming text and binary fragments are aggregated into complete messages, with a default
+limit of 64 KiB per message that you can change through `setMaxMessageSize`.
+
+NOTE: The JDK does not expose successful handshake response headers, so
+`HandshakeInfo.getHeaders()` is empty for this client. The negotiated sub-protocol is
+available through `HandshakeInfo.getSubProtocol()`. Incoming callbacks, including remote
+close notifications, follow demand for `WebSocketSession.receive()`. Local closure and
+cancellation of `execute` do not require receive demand. Close codes and reasons must
+satisfy the constraints of `java.net.http.WebSocket.sendClose`.
+
+NOTE: The Tomcat client is effectively an extension of the Jakarta WebSocket client with some extra
 functionality in the `WebSocketSession` handling to take advantage of the Tomcat-specific
 API to suspend receiving messages for back pressure.
 
