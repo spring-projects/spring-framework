@@ -28,6 +28,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.ParameterizedTypeReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,8 +61,8 @@ class BeanNamePointcutTests {
 		testBean1 = (ITestBean) ctx.getBean("testBean1");
 		testBean2 = (ITestBean) ctx.getBean("testBean2");
 		testBeanContainingNestedBean = (ITestBean) ctx.getBean("testBeanContainingNestedBean");
-		testFactoryBean1 = (Map<?, ?>) ctx.getBean("testFactoryBean1");
-		testFactoryBean2 = (Map<?, ?>) ctx.getBean("testFactoryBean2");
+		testFactoryBean1 = ctx.getBean("testFactoryBean1", new ParameterizedTypeReference<>() {});
+		testFactoryBean2 = ctx.getBean("testFactoryBean2", new ParameterizedTypeReference<>() {});
 		counterAspect = (Counter) ctx.getBean("counterAspect");
 		interceptThis = (ITestBean) ctx.getBean("interceptThis");
 		dontInterceptThis = (ITestBean) ctx.getBean("dontInterceptThis");
