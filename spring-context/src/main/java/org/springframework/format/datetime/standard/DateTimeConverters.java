@@ -27,7 +27,6 @@ import java.util.GregorianCalendar;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.format.datetime.DateFormatterRegistrar;
 
 /**
  * Installs lower-level type converters required to integrate
@@ -52,8 +51,6 @@ final class DateTimeConverters {
 	 * @param registry the converter registry
 	 */
 	public static void registerConverters(ConverterRegistry registry) {
-		DateFormatterRegistrar.addDateConverters(registry);
-
 		registry.addConverter(new LocalDateTimeToLocalDateConverter());
 		registry.addConverter(new LocalDateTimeToLocalTimeConverter());
 		registry.addConverter(new ZonedDateTimeToLocalDateConverter());
