@@ -43,9 +43,13 @@ public interface CacheableService<T> {
 
 	void evictEarly(Object arg1);
 
+	void evictImmediate(Object arg1);
+
 	void evictAll(Object arg1);
 
 	void evictAllEarly(Object arg1);
+
+	void evictAllImmediate(Object arg1);
 
 	T conditional(int field);
 
