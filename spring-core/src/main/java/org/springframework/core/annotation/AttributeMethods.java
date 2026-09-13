@@ -81,7 +81,8 @@ final class AttributeMethods {
 				foundNestedAnnotation = true;
 			}
 			ReflectionUtils.makeAccessible(method);
-			this.canThrowTypeNotPresentException[i] = (type == Class.class || type == Class[].class || type.isEnum());
+			this.canThrowTypeNotPresentException[i] = (type == Class.class || type == Class[].class ||
+					type.isEnum() || (type.isArray() && type.componentType().isEnum()));
 		}
 		this.hasDefaultValueMethod = foundDefaultValueMethod;
 		this.hasNestedAnnotation = foundNestedAnnotation;
