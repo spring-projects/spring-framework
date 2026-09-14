@@ -54,6 +54,13 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 		this.entityAgent = entityAgent;
 	}
 
+	protected EntityManagerHolder(EntityManagerHolder original) {
+		this.entityManager = original.entityManager;
+		this.entityAgent = original.entityAgent;
+		this.transactionActive = original.transactionActive;
+		this.savepointManager = original.savepointManager;
+	}
+
 
 	void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
