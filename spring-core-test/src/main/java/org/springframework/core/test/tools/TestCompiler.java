@@ -231,6 +231,18 @@ public final class TestCompiler {
 	}
 
 	/**
+	 * Create a new {@link TestCompiler} instance that fails if a deprecation
+	 * warning is encountered. This sets the {@code -Xlint:deprecation},
+	 * {@code -Xlint:removal}, and {@code -Werror} compiler options.
+	 * @return a new {@code TestCompiler} instance
+	 * @since 7.1
+	 * @see #withCompilerOptions(String...)
+	 */
+	public TestCompiler failOnDeprecationWarning() {
+		return withCompilerOptions("-Xlint:deprecation", "-Xlint:removal", "-Werror");
+	}
+
+	/**
 	 * Compile content from this instance along with the additional provided
 	 * content.
 	 * @param content the additional content to compile
