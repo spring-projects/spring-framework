@@ -16,6 +16,10 @@
 
 package org.springframework.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,6 +110,47 @@ class ConcurrentLruCacheTests {
 		assertThat(this.cache.contains("k1")).isFalse();
 		assertThat(this.cache.contains("k2")).isFalse();
 		assertThat(this.cache.contains("k3")).isTrue();
+	}
+
+	@Test
+	void removeRacingWithEvictionDoesNotExceedCapacity() throws Exception {
+		ConcurrentLruCache<Integer, String> cache = new ConcurrentLruCache<>(2, key -> "value" + key);
+		AtomicBoolean stop = new AtomicBoolean();
+		AtomicInteger removals = new AtomicInteger();
+		AtomicReference<Throwable> failure = new AtomicReference<>();
+		Thread remover = new Thread(() -> {
+			try {
+				while (!stop.get()) {
+					cache.get(0);
+					if (cache.remove(0)) {
+						removals.incrementAndGet();
+					}
+				}
+			}
+			catch (Throwable ex) {
+				failure.set(ex);
+			}
+		});
+		remover.start();
+		try {
+			for (int i = 1; i <= 50_000; i++) {
+				cache.get(i);
+			}
+		}
+		finally {
+			stop.set(true);
+			remover.join(5000);
+		}
+		int budget = 50_000;
+		int key = 100_000;
+		while (cache.size() > cache.capacity() && budget-- > 0) {
+			cache.get(key++);
+		}
+
+		assertThat(remover.isAlive()).isFalse();
+		assertThat(failure.get()).isNull();
+		assertThat(removals.get()).isGreaterThan(0);
+		assertThat(cache.size()).isLessThanOrEqualTo(cache.capacity());
 	}
 
 }
