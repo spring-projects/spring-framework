@@ -163,30 +163,29 @@ class CollectionToCollectionConverterTests {
 	@Test
 	void convertEmptyVector_shouldReturnEmptyArrayList() {
 		Vector<String> vector = new Vector<>();
-		vector.add("Element");
-		testCollectionConversionToArrayList(vector);
+		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
+		Object convertedValue = converter.convert(
+				vector, TypeDescriptor.forObject(vector), TypeDescriptor.valueOf(ArrayList.class));
+		assertThat(convertedValue).isInstanceOf(ArrayList.class);
+		assertThat(convertedValue).asInstanceOf(LIST).isEmpty();
 	}
 
 	@Test
 	void convertNonEmptyVector_shouldReturnNonEmptyArrayList() {
 		Vector<String> vector = new Vector<>();
 		vector.add("Element");
-		testCollectionConversionToArrayList(vector);
+		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
+		Object convertedValue = converter.convert(
+				vector, TypeDescriptor.forObject(vector), TypeDescriptor.valueOf(ArrayList.class));
+		assertThat(convertedValue).isInstanceOf(ArrayList.class);
+		assertThat(convertedValue).asInstanceOf(LIST).isNotEmpty();
 	}
 
 	@Test
 	void collectionsEmptyList() throws Exception {
 		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
 		TypeDescriptor type = new TypeDescriptor(getClass().getField("list"));
-		converter.convert(list, type, TypeDescriptor.valueOf(Class.forName("java.util.Collections$EmptyList")));
-	}
-
-	@SuppressWarnings("rawtypes")
-	private void testCollectionConversionToArrayList(Collection<String> source) {
-		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
-		Object convertedValue = converter.convert(
-				source, TypeDescriptor.forObject(source), TypeDescriptor.forObject(new ArrayList()));
-		assertThat(convertedValue).asInstanceOf(LIST).hasSameSizeAs(source);
+		assertThat(converter.convert(list, type, TypeDescriptor.valueOf(Class.forName("java.util.Collections$EmptyList")))).isSameAs(list);
 	}
 
 	@Test
