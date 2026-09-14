@@ -162,23 +162,20 @@ class CollectionToCollectionConverterTests {
 
 	@Test
 	void convertEmptyVector_shouldReturnEmptyArrayList() {
-		Vector<String> vector = new Vector<>();
-		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
-		Object convertedValue = converter.convert(
-				vector, TypeDescriptor.forObject(vector), TypeDescriptor.valueOf(ArrayList.class));
-		assertThat(convertedValue).isInstanceOf(ArrayList.class);
-		assertThat(convertedValue).asInstanceOf(LIST).isEmpty();
+		Object convertedValue = convertVectorToArrayList(new Vector<>());
+		assertThat(convertedValue)
+				.isInstanceOf(ArrayList.class)
+				.asInstanceOf(LIST).isEmpty();
 	}
 
 	@Test
 	void convertNonEmptyVector_shouldReturnNonEmptyArrayList() {
 		Vector<String> vector = new Vector<>();
 		vector.add("Element");
-		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
-		Object convertedValue = converter.convert(
-				vector, TypeDescriptor.forObject(vector), TypeDescriptor.valueOf(ArrayList.class));
-		assertThat(convertedValue).isInstanceOf(ArrayList.class);
-		assertThat(convertedValue).asInstanceOf(LIST).isNotEmpty();
+		Object convertedValue = convertVectorToArrayList(vector);
+		assertThat(convertedValue)
+				.isInstanceOf(ArrayList.class)
+				.asInstanceOf(LIST).containsOnly("Element");
 	}
 
 	@Test
@@ -252,6 +249,12 @@ class CollectionToCollectionConverterTests {
 		list.add("A");
 		list.add("C");
 		assertThat(conversionService.convert(list, new TypeDescriptor(getClass().getField("enumSet")))).isEqualTo(EnumSet.of(MyEnum.A, MyEnum.C));
+	}
+
+
+	private static Object convertVectorToArrayList(Vector<String> vector) {
+		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
+		return converter.convert(vector, TypeDescriptor.forObject(vector), TypeDescriptor.valueOf(ArrayList.class));
 	}
 
 
