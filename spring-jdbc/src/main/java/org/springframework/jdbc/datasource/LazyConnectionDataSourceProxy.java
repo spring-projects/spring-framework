@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * Proxy for a target DataSource, fetching actual JDBC Connections lazily,
  * i.e. not until first creation of a Statement. Connection initialization
  * properties like auto-commit mode, transaction isolation, read-only mode,
- * catalog, schema, holdability, client info and network timeout will be kept
+ * catalog, schema, holdability, client info, and network timeout will be kept
  * and applied to the actual JDBC Connection as soon as an actual Connection
  * is fetched (if ever). Consequently, commit and rollback calls will be ignored
  * if no Statements have been created.

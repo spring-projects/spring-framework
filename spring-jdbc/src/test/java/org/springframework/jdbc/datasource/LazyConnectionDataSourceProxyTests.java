@@ -40,8 +40,8 @@ import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -119,7 +119,7 @@ class LazyConnectionDataSourceProxyTests {
 	}
 
 	@Test
-	void lazyHandlingCatalog() throws SQLException {
+	void lazyHandlingOfCatalog() throws SQLException {
 		DataSource mockDataSource = mock();
 		Connection physicalConnection1 = mock();
 		Connection physicalConnection2 = mock();
@@ -140,7 +140,7 @@ class LazyConnectionDataSourceProxyTests {
 	}
 
 	@Test
-	void lazyHandlingSchema() throws SQLException {
+	void lazyHandlingOfSchema() throws SQLException {
 		DataSource mockDataSource = mock();
 		Connection physicalConnection1 = mock();
 		Connection physicalConnection2 = mock();
@@ -161,7 +161,7 @@ class LazyConnectionDataSourceProxyTests {
 	}
 
 	@Test
-	void lazyHandlingHoldability() throws SQLException {
+	void lazyHandlingOfHoldability() throws SQLException {
 		DataSource mockDataSource = mock();
 		Connection physicalConnection1 = mock();
 		Connection physicalConnection2 = mock();
@@ -182,7 +182,7 @@ class LazyConnectionDataSourceProxyTests {
 	}
 
 	@Test
-	void lazyHandlingTransactionIsolation() throws SQLException {
+	void lazyHandlingOfTransactionIsolation() throws SQLException {
 		DataSource mockDataSource = mock();
 		Connection physicalConnection = mock();
 		when(mockDataSource.getConnection()).thenReturn(physicalConnection);
@@ -198,7 +198,7 @@ class LazyConnectionDataSourceProxyTests {
 	}
 
 	@Test
-	void lazyHandlingAutoCommit() throws SQLException {
+	void lazyHandlingOfAutoCommit() throws SQLException {
 		DataSource mockDataSource = mock();
 		Connection physicalConnection = mock();
 		when(mockDataSource.getConnection()).thenReturn(physicalConnection);
@@ -214,7 +214,7 @@ class LazyConnectionDataSourceProxyTests {
 	}
 
 	@Test
-	void lazyHandlingNetworkTimeoutExecutor() throws SQLException {
+	void lazyHandlingOfNetworkTimeoutExecutor() throws SQLException {
 		DataSource mockDataSource = mock();
 		Connection physicalConnection1 = mock();
 		Connection physicalConnection2 = mock();
@@ -234,11 +234,12 @@ class LazyConnectionDataSourceProxyTests {
 		// null executor
 		Connection lazyConnection2 = lazyProxy.getConnection();
 		lazyConnection2.setNetworkTimeout(null, 1000);
-		assertThatThrownBy(() -> establishPhysicalConnection(lazyConnection2)).isInstanceOf(SQLException.class);
+		assertThatExceptionOfType(SQLException.class)
+				.isThrownBy(() -> establishPhysicalConnection(lazyConnection2));
 	}
 
 	@Test
-	void lazyHandlingClientInfoForKV() throws SQLException {
+	void lazyHandlingOfClientInfoForKeyValuePairs() throws SQLException {
 		DataSource mockDataSource = mock();
 		Connection physicalConnection = mock();
 		when(mockDataSource.getConnection()).thenReturn(physicalConnection);
@@ -251,11 +252,12 @@ class LazyConnectionDataSourceProxyTests {
 		verify(physicalConnection, never()).setClientInfo("k2", "v2");
 		lazyConnection.getClientInfo("k1"); // establish physical connection immediately
 		verify(physicalConnection).setClientInfo("k1", "v1");
+		verify(physicalConnection).setClientInfo("k2", "v2");
 		verify(physicalConnection).getClientInfo("k1");
 	}
 
 	@Test
-	void nonLazyHandlingClientInfoForProperties() throws SQLException {
+	void nonLazyHandlingOfClientInfoForProperties() throws SQLException {
 		DataSource mockDataSource = mock();
 		Connection physicalConnection = mock();
 		when(mockDataSource.getConnection()).thenReturn(physicalConnection);
