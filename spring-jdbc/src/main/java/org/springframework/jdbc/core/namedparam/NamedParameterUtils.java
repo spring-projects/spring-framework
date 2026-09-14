@@ -52,6 +52,12 @@ public abstract class NamedParameterUtils {
 	private static final String[] STOP_SKIP = {"'", "\"", "\n", "*/", "`"};
 
 	/**
+	 * Flags indicating which of the {@link #START_SKIP} entries start a comment
+	 * rather than a quoted identifier or string literal.
+	 */
+	private static final boolean[] COMMENT_SKIP = {false, false, true, true, false};
+
+	/**
 	 * Set of characters that qualify as parameter separators,
 	 * indicating that a parameter name in an SQL String has ended.
 	 */
@@ -77,10 +83,41 @@ public abstract class NamedParameterUtils {
 	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters.
 	 * Named parameters are substituted for a JDBC placeholder.
+	 * <p>Named parameters within comments are ignored; see
+	 * {@link #parseSqlStatement(String, boolean)} for an option to include them.
 	 * @param sql the SQL statement
 	 * @return the parsed statement, represented as {@link ParsedSql} instance
 	 */
 	public static ParsedSql parseSqlStatement(String sql) {
+		return parseSqlStatement(sql, false);
+	}
+
+	/**
+	 * Parse the SQL statement and locate any placeholders or named parameters,
+	 * optionally including named parameters within comments.
+	 * Named parameters are substituted for a JDBC placeholder.
+	 * <p>By default, named parameters within line comments (<code>--</code>) and block
+	 * comments (<code>&#47;* ... *&#47;</code>) are ignored, just like named parameters
+	 * within string literals and quoted identifiers. Specifying {@code true} for the
+	 * {@code allowParametersInComments} flag makes named parameters within comments
+	 * subject to regular parsing and substitution, which is useful for database engines
+	 * that interpret hints or routing keys in comments, for example
+	 * <code>"&#47;*@ queryKey(:userId) *&#47; SELECT ..."</code>.
+	 * <p><b>NOTE: Even with the flag set to {@code true}, string literals and quoted
+	 * identifiers are still skipped.</b> As a consequence, an apostrophe within a
+	 * comment (as in <code>"&#47;* don't touch *&#47;"</code>) is going to be interpreted
+	 * as the start of a string literal, potentially skipping over subsequent named
+	 * parameters. Also, since a named parameter within a comment gets substituted with a
+	 * JDBC placeholder like any other, the target driver or engine needs to count such a
+	 * placeholder as an actual bind parameter; otherwise, the number of bind values is
+	 * not going to match.
+	 * @param sql the SQL statement
+	 * @param allowParametersInComments whether to parse named parameters
+	 * within SQL comments as well, rather than ignoring them
+	 * @return the parsed statement, represented as {@link ParsedSql} instance
+	 * @since 7.1
+	 */
+	public static ParsedSql parseSqlStatement(String sql, boolean allowParametersInComments) {
 		Assert.notNull(sql, "SQL must not be null");
 
 		Set<String> namedParameters = new HashSet<>();
@@ -97,7 +134,7 @@ public abstract class NamedParameterUtils {
 		while (i < statement.length) {
 			int skipToPosition = i;
 			while (i < statement.length) {
-				skipToPosition = skipCommentsAndQuotes(statement, i);
+				skipToPosition = skipCommentsAndQuotes(statement, i, !allowParametersInComments);
 				if (i == skipToPosition) {
 					break;
 				}
@@ -223,10 +260,15 @@ public abstract class NamedParameterUtils {
 	 * Skip over comments and quoted names present in an SQL statement.
 	 * @param statement character array containing SQL statement
 	 * @param position current position of statement
+	 * @param skipComments whether to skip over comments as well,
+	 * rather than just over quoted names and string literals
 	 * @return next position to process after any comments or quotes are skipped
 	 */
-	private static int skipCommentsAndQuotes(char[] statement, int position) {
+	private static int skipCommentsAndQuotes(char[] statement, int position, boolean skipComments) {
 		for (int i = 0; i < START_SKIP.length; i++) {
+			if (!skipComments && COMMENT_SKIP[i]) {
+				continue;
+			}
 			if (statement[position] == START_SKIP[i].charAt(0)) {
 				boolean match = true;
 				for (int j = 1; j < START_SKIP[i].length(); j++) {
