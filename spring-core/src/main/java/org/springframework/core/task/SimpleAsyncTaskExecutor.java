@@ -319,7 +319,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		if (isThrottleActive() && startTimeout > TIMEOUT_IMMEDIATE) {
 			this.concurrencyThrottle.beforeAccess();
 			try {
-				doExecute(new TaskTrackingRunnable(taskToUse, future));
+				doExecute(new TaskTrackingRunnable(taskToUse, future, true));
 			}
 			catch (Throwable ex) {
 				// Release concurrency permit if thread creation fails
@@ -328,7 +328,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			}
 		}
 		else if (this.activeThreads != null) {
-			doExecute(new TaskTrackingRunnable(taskToUse, future));
+			doExecute(new TaskTrackingRunnable(taskToUse, future, false));
 		}
 		else {
 			doExecute(taskToUse);
@@ -471,24 +471,27 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 		private final @Nullable Future<?> future;
 
-		public TaskTrackingRunnable(Runnable task, @Nullable Future<?> future) {
+		private final boolean releaseThrottle;
+
+		public TaskTrackingRunnable(Runnable task, @Nullable Future<?> future, boolean releaseThrottle) {
 			Assert.notNull(task, "Task must not be null");
 			this.task = task;
 			this.future = future;
+			this.releaseThrottle = releaseThrottle;
 		}
 
 		@Override
 		public void run() {
 			Set<Thread> threads = activeThreads;
 			Thread thread = null;
-			if (threads != null) {
-				thread = Thread.currentThread();
-				synchronized (threads) {
-					checkCancelled(this.future);
-					threads.add(thread);
-				}
-			}
 			try {
+				if (threads != null) {
+					thread = Thread.currentThread();
+					synchronized (threads) {
+						checkCancelled(this.future);
+						threads.add(thread);
+					}
+				}
 				this.task.run();
 			}
 			finally {
@@ -502,7 +505,11 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 						}
 					}
 				}
-				concurrencyThrottle.afterAccess();
+				// Release the throttle permit only if one was acquired (see execute),
+				// and always release it once acquired -- even if checkCancelled() above threw.
+				if (this.releaseThrottle) {
+					concurrencyThrottle.afterAccess();
+				}
 			}
 		}
 	}
