@@ -180,7 +180,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 */
 	void cancelAndSetCompleted() {
 		cancel();
-		for (;;) {
+		while (true) {
 			State prev = this.state.get();
 			if (prev == State.COMPLETED) {
 				break;

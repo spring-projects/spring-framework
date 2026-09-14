@@ -203,7 +203,7 @@ public final class ConcurrentLruCache<K, V> {
 	 * current size of the cache, unless the node has already been removed.
 	 */
 	private void markAsRemoved(Node<K, V> node) {
-		for (; ; ) {
+		while (true) {
 			CacheEntry<V> current = node.get();
 			if (current.state == CacheEntryState.REMOVED) {
 				return;
