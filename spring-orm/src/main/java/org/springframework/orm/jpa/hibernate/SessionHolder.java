@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa.hibernate;
 
+import jakarta.persistence.EntityManager;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
@@ -49,8 +50,12 @@ public class SessionHolder extends EntityManagerHolder {
 	}
 
 	SessionHolder(StatelessSession session) {
-		super(null);
+		super((EntityManager) null);
 		setStatelessSession(session);
+	}
+
+	SessionHolder(EntityManagerHolder emHolder) {
+		super(emHolder);
 	}
 
 

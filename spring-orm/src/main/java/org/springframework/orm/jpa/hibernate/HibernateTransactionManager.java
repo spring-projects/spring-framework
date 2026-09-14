@@ -44,6 +44,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -391,9 +392,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
 		SessionFactory sessionFactory = obtainSessionFactory();
-		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null) {
+		Object resource = TransactionSynchronizationManager.getResource(sessionFactory);
+		if (resource instanceof EntityManagerHolder emHolder) {
+			SessionHolder sessionHolder;
+			if (emHolder instanceof SessionHolder originalSessionHolder) {
+				sessionHolder = originalSessionHolder;
+			}
+			else {
+				sessionHolder = new SessionHolder(emHolder);
+				TransactionSynchronizationManager.unbindResource(sessionFactory);
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound Session [" + sessionHolder.getSession() + "] for Hibernate transaction");
 			}
