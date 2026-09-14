@@ -190,7 +190,7 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 	}
 
 	int addWork() {
-		for (;;) {
+		while (true) {
 			int produced = this.workAmount.getPlain();
 
 			if (produced == Integer.MIN_VALUE) {
@@ -319,7 +319,7 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 			this.available = null;
 
 			int actualWorkAmount = this.workAmount.getAcquire();
-			for (;;) {
+			while (true) {
 				if (this.closed) {
 					return CLOSED;
 				}
@@ -354,7 +354,7 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 	void cleanAndFinalize() {
 		this.available = null;
 
-		for (;;) {
+		while (true) {
 			int workAmount = this.workAmount.getPlain();
 			T value;
 			while ((value = this.queue.poll()) != null) {

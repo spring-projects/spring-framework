@@ -169,7 +169,7 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 	}
 
 	int addWork() {
-		for (;;) {
+		while (true) {
 			int produced = this.workAmount.getPlain();
 
 			if (produced == Integer.MIN_VALUE) {
@@ -297,7 +297,7 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 			this.available = null;
 
 			int actualWorkAmount = this.workAmount.getAcquire();
-			for (;;) {
+			while (true) {
 				if (this.closed) {
 					return CLOSED;
 				}
@@ -332,7 +332,7 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 		discard(this.available);
 		this.available = null;
 
-		for (;;) {
+		while (true) {
 			int workAmount = this.workAmount.getPlain();
 			DataBuffer value;
 			while ((value = this.queue.poll()) != null) {
