@@ -169,7 +169,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 					ReactorClientHttpResponse clientResponse = new ReactorClientHttpResponse(response, connection);
 					responseRef.set(clientResponse);
 					registerAttributeCallback(connection);
-					return Mono.just((ClientHttpResponse) clientResponse);
+					return Mono.create(clientResponse::deliver);
 				})
 				.next()
 				.doOnCancel(() -> {
