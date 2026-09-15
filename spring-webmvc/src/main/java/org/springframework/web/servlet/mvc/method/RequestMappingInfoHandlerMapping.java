@@ -171,6 +171,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			uriVariables = result.getUriVariables();
 			request.setAttribute(MATRIX_VARIABLES_ATTRIBUTE, result.getMatrixVariables());
 		}
+		request.setAttribute(BEST_MATCHING_PATH_PATTERN_ATTRIBUTE, bestPattern);
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern.getPatternString());
 		ServerHttpObservationFilter.findObservationContext(request)
 				.ifPresent(context -> context.setPathPattern(bestPattern.getPatternString()));

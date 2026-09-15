@@ -62,6 +62,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -315,6 +316,21 @@ class RequestMappingInfoHandlerMappingTests {
 		mapping.handleMatch(info, "/1/2", request);
 
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
+	}
+
+	@Test
+	void handleMatchBestMatchingPathPatternAttribute() {
+		TestRequestMappingInfoHandlerMapping mapping = new TestRequestMappingInfoHandlerMapping();
+		RequestMappingInfo info = mapping.createInfo("/{path1}/2", "/**");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
+		ServletRequestPathUtils.parseAndCache(request);
+
+		mapping.handleMatch(info, "/1/2", request);
+
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATH_PATTERN_ATTRIBUTE))
+				.isInstanceOfSatisfying(PathPattern.class,
+						pattern -> assertThat(pattern.getPatternString()).isEqualTo("/{path1}/2"));
 	}
 
 	@SuppressWarnings("removal")
