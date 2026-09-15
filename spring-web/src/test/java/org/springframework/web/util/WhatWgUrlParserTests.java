@@ -16,6 +16,9 @@
 
 package org.springframework.web.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -61,6 +64,21 @@ class WhatWgUrlParserTests {
 		testParse("https://XN--pokxncvks.example", "https", "xn--pokxncvks.example", null, "", null, null);
 		testParse("https://xn--/", "https", "xn--", null, "/", null, null);
 		testParse("file://xn--/p", "file", "xn--", null, "/p", null, null);
+	}
+
+	@Test
+	void parseOpaqueHostTruncatedPercentEscape() {
+		// A truncated or non-hex percent-escape in an opaque host is a validation error,
+		// not a failure, and must not read past the end of the input
+		// (see https://url.spec.whatwg.org/#concept-opaque-host-parser).
+		List<String> errors = new ArrayList<>();
+		WhatWgUrlParser.UrlRecord record = WhatWgUrlParser.parse("foo://%4", EMPTY_URL_RECORD, null, errors::add);
+		assertThat(record.host().toString()).isEqualTo("%4");
+
+		record = WhatWgUrlParser.parse("foo://%4x", EMPTY_URL_RECORD, null, errors::add);
+		assertThat(record.host().toString()).isEqualTo("%4x");
+
+		assertThat(errors).isNotEmpty();
 	}
 
 	private void testParse(String input, String scheme, @Nullable String host, @Nullable String port, String path, @Nullable String query, @Nullable String fragment) {
