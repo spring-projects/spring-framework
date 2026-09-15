@@ -167,6 +167,11 @@ Reactive Streams cancellation signals. See the
 xref:data-access/transaction/programmatic.adoc#tx-prog-operator-cancel[Cancel Signals]
 section under "Using the TransactionalOperator" for more details.
 
+TIP: When `@Transactional` is combined with `@Retryable`, the retry advice is applied
+outermost, so each retry attempt runs in its own transaction. See
+xref:core/resilience.adoc#resilience-annotations-retryable-combining-transactional[Combining `@Retryable` with `@Transactional`]
+for details.
+
 [[transaction-declarative-annotations-method-visibility]]
 .Method visibility and `@Transactional` in proxy mode
 [NOTE]
