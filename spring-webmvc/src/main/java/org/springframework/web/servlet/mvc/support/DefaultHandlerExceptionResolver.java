@@ -619,6 +619,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * <p>The default implementation sends an HTTP 400 error, and returns an empty {@code ModelAndView}.
 	 * Alternatively, a fallback view could be chosen, or the HttpMessageNotReadableException could be
 	 * rethrown as-is.
+	 * <p>If the root cause suggests a "lost connection", handling is delegated instead to
+	 * {@link #handleDisconnectedClientException(Exception, HttpServletRequest, HttpServletResponse, Object)}.
 	 * @param ex the HttpMessageNotReadableException to be handled
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -628,6 +630,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
+
+		if (DisconnectedClientHelper.isClientDisconnectedException(ex)) {
+			return handleDisconnectedClientException(ex, request, response, handler);
+		}
 
 		if (!response.isCommitted()) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -645,6 +651,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * <p>The default implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}.
 	 * Alternatively, a fallback view could be chosen, or the HttpMessageNotWritableException could
 	 * be rethrown as-is.
+	 * <p>If the root cause suggests a "lost connection", handling is delegated instead to
+	 * {@link #handleDisconnectedClientException(Exception, HttpServletRequest, HttpServletResponse, Object)}.
 	 * @param ex the HttpMessageNotWritableException to be handled
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -654,6 +662,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
+
+		if (DisconnectedClientHelper.isClientDisconnectedException(ex)) {
+			return handleDisconnectedClientException(ex, request, response, handler);
+		}
 
 		if (!response.isCommitted()) {
 			sendServerError(ex, request, response);
