@@ -1180,12 +1180,12 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
 
 			ReactiveAdapter adapter = this.registry.getAdapter(context.getMethod().getReturnType());
-			if (adapter != null) {
+			if (adapter != null || KotlinDetector.isSuspendingFunction(method)) {
 				CompletableFuture<?> cachedFuture = doRetrieve(cache, key);
 				if (cachedFuture == null) {
 					return null;
 				}
-				if (adapter.isMultiValue()) {
+				if (adapter != null && adapter.isMultiValue()) {
 					return adapter.fromPublisher(Flux.from(Mono.fromFuture(cachedFuture))
 							.switchIfEmpty(Flux.defer(() -> (Flux) Objects.requireNonNull(evaluate(null, invoker, method, contexts))))
 							.flatMap(v -> Objects.requireNonNull(evaluate(valueToFlux(v, contexts), invoker, method, contexts)))
@@ -1201,7 +1201,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 							}));
 				}
 				else {
-					return adapter.fromPublisher(Mono.fromFuture(cachedFuture)
+					Mono<?> result = Mono.fromFuture(cachedFuture)
 							.switchIfEmpty(Mono.defer(() -> (Mono) Objects.requireNonNull(evaluate(null, invoker, method, contexts))))
 							.flatMap(v -> Objects.requireNonNull(evaluate(Mono.justOrEmpty(unwrapCacheValue(v)), invoker, method, contexts)))
 							.onErrorResume(RuntimeException.class, ex -> {
@@ -1213,7 +1213,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 								catch (RuntimeException exception) {
 									return Mono.error(exception);
 								}
-							}));
+							});
+					return (adapter != null ? adapter.fromPublisher(result) : result);
 				}
 			}
 			return NOT_HANDLED;
