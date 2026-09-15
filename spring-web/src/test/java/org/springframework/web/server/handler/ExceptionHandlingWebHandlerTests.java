@@ -17,6 +17,7 @@
 package org.springframework.web.server.handler;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -79,7 +80,10 @@ class ExceptionHandlingWebHandlerTests {
 
 	@Test
 	void thrownExceptionBecomesErrorSignal() {
-		createWebHandler(new BadRequestExceptionHandler()).handle(this.exchange).block();
+		new ExceptionHandlingWebHandler(
+				new StubWebHandler(new IllegalStateException("boo"), true),
+				List.of(new BadRequestExceptionHandler())).handle(this.exchange).block();
+
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
