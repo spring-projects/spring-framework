@@ -39,6 +39,8 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.aot.AotProcessingException;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
@@ -290,6 +292,25 @@ class ApplicationContextAotGeneratorTests {
 				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 				AutowiredGenericTemplate bean = freshApplicationContext.getBean(AutowiredGenericTemplate.class);
 				assertThat(bean).hasFieldOrPropertyWithValue("genericTemplate", applicationContext.getBean("genericTemplate"));
+			});
+		}
+
+		@Test  // gh-36649
+		void processAheadOfTimeWhenPrototypeBeanHasAutowiringAndRuntimeConstructorArguments() {
+			GenericApplicationContext applicationContext = new GenericApplicationContext();
+			registerBeanPostProcessor(applicationContext,
+					AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, AutowiredAnnotationBeanPostProcessor.class);
+			RootBeanDefinition beanDefinition = new RootBeanDefinition(AutowiredPrototypeComponent.class);
+			beanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+			applicationContext.registerBeanDefinition("autowiredPrototypeComponent", beanDefinition);
+
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				Object argument = new Object();
+				AutowiredPrototypeComponent bean =
+						freshApplicationContext.getBean(AutowiredPrototypeComponent.class, argument);
+				assertThat(bean.getConstructorArgument()).isSameAs(argument);
+				assertThat(bean.getBeanFactory()).isSameAs(freshApplicationContext.getBeanFactory());
 			});
 		}
 
@@ -870,6 +891,27 @@ class ApplicationContextAotGeneratorTests {
 		@Override
 		public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
 			return 44;
+		}
+	}
+
+
+	public static class AutowiredPrototypeComponent {
+
+		private final Object constructorArgument;
+
+		@Autowired
+		public BeanFactory beanFactory;
+
+		public AutowiredPrototypeComponent(Object constructorArgument) {
+			this.constructorArgument = constructorArgument;
+		}
+
+		public Object getConstructorArgument() {
+			return this.constructorArgument;
+		}
+
+		public BeanFactory getBeanFactory() {
+			return this.beanFactory;
 		}
 	}
 

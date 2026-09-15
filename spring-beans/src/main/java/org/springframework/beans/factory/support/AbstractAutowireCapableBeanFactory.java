@@ -1181,11 +1181,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					"Bean class isn't public, and non-public access not allowed: " + beanClass.getName());
 		}
 
-		if (args == null) {
-			Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
-			if (instanceSupplier != null) {
-				return obtainFromSupplier(instanceSupplier, beanName, mbd);
-			}
+		Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
+		if (instanceSupplier != null && supportsInstanceSupplierWithArguments(instanceSupplier, args)) {
+			return obtainFromSupplier(instanceSupplier, beanName, mbd, args);
 		}
 
 		if (mbd.getFactoryMethodName() != null) {
@@ -1229,19 +1227,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return instantiateBean(beanName, mbd);
 	}
 
+	private boolean supportsInstanceSupplierWithArguments(
+			Supplier<?> instanceSupplier, @Nullable Object @Nullable [] args) {
+
+		return (args == null || (instanceSupplier instanceof InstanceSupplier<?> supplier &&
+				supplier.supportsExplicitArguments(args)));
+	}
+
 	/**
 	 * Obtain a bean instance from the given supplier.
 	 * @param supplier the configured supplier
 	 * @param beanName the corresponding bean name
 	 * @return a BeanWrapper for the new instance
 	 */
-	private BeanWrapper obtainFromSupplier(Supplier<?> supplier, String beanName, RootBeanDefinition mbd) {
+	private BeanWrapper obtainFromSupplier(Supplier<?> supplier, String beanName, RootBeanDefinition mbd,
+			@Nullable Object @Nullable [] args) {
+
 		String outerBean = this.currentlyCreatedBean.get();
 		this.currentlyCreatedBean.set(beanName);
 		Object instance;
 
 		try {
-			instance = obtainInstanceFromSupplier(supplier, beanName, mbd);
+			instance = obtainInstanceFromSupplier(supplier, beanName, mbd, args);
 		}
 		catch (Throwable ex) {
 			if (ex instanceof BeanCreationException bce && beanName.equals(bce.getBeanName())) {
@@ -1281,6 +1288,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return throwingSupplier.getWithException();
 		}
 		return supplier.get();
+	}
+
+	/**
+	 * Obtain a bean instance from the given supplier.
+	 * @param supplier the configured supplier
+	 * @param beanName the corresponding bean name
+	 * @param mbd the bean definition for the bean
+	 * @param args explicit arguments passed in programmatically via the getBean method,
+	 * or {@code null} if none
+	 * @return the bean instance (possibly {@code null})
+	 * @since 7.1
+	 */
+	protected @Nullable Object obtainInstanceFromSupplier(Supplier<?> supplier, String beanName, RootBeanDefinition mbd,
+			@Nullable Object @Nullable [] args) throws Exception {
+
+		return obtainInstanceFromSupplier(supplier, beanName, mbd);
 	}
 
 	/**
