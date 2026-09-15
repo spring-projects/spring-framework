@@ -25,7 +25,7 @@ jobs:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           publish: true
       - name: Deploy
-        uses: spring-io/artifactory-deploy-action@926d7f7cc810569395346bf3a4d91b380b3e355b # v0.0.4
+        uses: spring-io/artifactory-deploy-action@aba148f1541e09adcf5735af90029fac9a6d3083 # v0.0.5
         with:
           artifact-properties: |
             /**/framework-api-*.zip::zip.name=spring-framework,zip.deployed=false
