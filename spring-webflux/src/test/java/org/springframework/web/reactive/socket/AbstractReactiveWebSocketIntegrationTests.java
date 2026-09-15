@@ -45,6 +45,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.DispatcherHandler;
+import org.springframework.web.reactive.socket.client.JdkWebSocketClient;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
@@ -90,6 +91,7 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 	static Stream<Object[]> arguments() throws IOException {
 
 		List<Named<WebSocketClient>> clients = List.of(
+			named(JdkWebSocketClient.class.getSimpleName(), new JdkWebSocketClient()),
 			named(TomcatWebSocketClient.class.getSimpleName(), new TomcatWebSocketClient()),
 			named(JettyWebSocketClient.class.getSimpleName(), new JettyWebSocketClient()),
 			named(ReactorNettyWebSocketClient.class.getSimpleName(), new ReactorNettyWebSocketClient())
