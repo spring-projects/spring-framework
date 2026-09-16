@@ -119,6 +119,14 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		return this.maxMessageSize;
 	}
 
+	/**
+	 * Return the configured {@link ExtensionRegistry}.
+	 * @since 7.0.3
+	 */
+	protected ExtensionRegistry getExtensionRegistry() {
+		return this.extensionRegistry;
+	}
+
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
@@ -130,7 +138,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		MessageDecoderFunction decoderFunction =
-				new MessageDecoderFunction(elementType, this.maxMessageSize, initMessageSizeReader());
+				(MessageDecoderFunction) createMessageDecoderFunction(elementType, this.maxMessageSize, initMessageSizeReader());
 
 		return Flux.from(inputStream)
 				.flatMapIterable(decoderFunction)
@@ -143,6 +151,18 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	 */
 	protected MessageSizeReader initMessageSizeReader() {
 		return new DefaultMessageSizeReader();
+	}
+
+	/**
+	 * Create the {@link Function} that decodes a stream of {@link DataBuffer}s into
+	 * a stream of {@link Message}s. Subclasses can override this to customize
+	 * decoding, e.g. for gRPC-Web framing.
+	 * @since 7.0.3
+	 */
+	protected Function<DataBuffer, Iterable<? extends Message>> createMessageDecoderFunction(
+			ResolvableType elementType, int maxMessageSize, MessageSizeReader messageSizeReader) {
+
+		return new MessageDecoderFunction(elementType, maxMessageSize, messageSizeReader);
 	}
 
 	@Override
@@ -158,9 +178,17 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
 		try {
-			Message.Builder builder = getMessageBuilder(targetType.toClass());
-			merge(dataBuffer, builder);
-			return builder.build();
+			ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+			dataBuffer.toByteBuffer(byteBuffer);
+			CodedInputStream stream = CodedInputStream.newInstance(byteBuffer);
+			Message message = decodeMessage(stream, targetType);
+			if (message == null) {
+				throw new DecodingException("Decoded message is null");
+			}
+			return message;
+		}
+		catch (DecodingException ex) {
+			throw ex;
 		}
 		catch (IOException ex) {
 			throw new DecodingException("I/O error while parsing input stream", ex);
@@ -197,13 +225,45 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		builder.mergeFrom(CodedInputStream.newInstance(byteBuffer), this.extensionRegistry);
 	}
 
+	/**
+	 * Decode a single Protobuf message from the given {@link CodedInputStream}.
+	 * <p>Subclasses can override this to customize message creation, e.g. to handle
+	 * gRPC-Web trailer frames (where the MSB of the flag byte is set) or to apply
+	 * decompression.
+	 * <p>Returning {@code null} indicates that the frame should be skipped (e.g. trailer).
+	 * @param codedInputStream the stream containing the message payload (without size prefix)
+	 * @param targetType the target message type
+	 * @return the decoded message, or {@code null} to skip
+	 * @throws Exception if decoding fails
+	 * @since 7.0.3
+	 */
+	protected @Nullable Message decodeMessage(CodedInputStream codedInputStream, ResolvableType targetType)
+			throws Exception {
+
+		return decodeMessage(codedInputStream, targetType.toClass());
+	}
+
+	/**
+	 * Decode a single Protobuf message from the given {@link CodedInputStream}.
+	 * @param codedInputStream the stream containing the message payload
+	 * @param targetClass the target message class
+	 * @return the decoded message, or {@code null} to skip
+	 * @throws Exception if decoding fails
+	 * @since 7.0.3
+	 */
+	protected @Nullable Message decodeMessage(CodedInputStream codedInputStream, Class<?> targetClass)
+			throws Exception {
+
+		return getMessageBuilder(targetClass).mergeFrom(codedInputStream, this.extensionRegistry).build();
+	}
+
 	@Override
 	public List<MimeType> getDecodableMimeTypes() {
 		return getMimeTypes();
 	}
 
 
-	private class MessageDecoderFunction implements Function<DataBuffer, Iterable<? extends Message>> {
+	protected class MessageDecoderFunction implements Function<DataBuffer, Iterable<? extends Message>> {
 
 		private final ResolvableType elementType;
 
@@ -258,10 +318,10 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						CodedInputStream stream = CodedInputStream.newInstance(byteBuffer);
 						DataBufferUtils.release(this.output);
 						this.output = null;
-						Message message = getMessageBuilder(this.elementType.toClass())
-								.mergeFrom(stream, extensionRegistry)
-								.build();
-						messages.add(message);
+						Message message = decodeMessage(stream, this.elementType);
+						if (message != null) {
+							messages.add(message);
+						}
 					}
 				} while (remainingBytesToRead > 0);
 				return messages;
@@ -284,6 +344,14 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 			if (this.output != null) {
 				DataBufferUtils.release(this.output);
 			}
+		}
+
+		protected ResolvableType getElementType() {
+			return this.elementType;
+		}
+
+		protected MessageSizeReader getMessageSizeReader() {
+			return this.messageSizeReader;
 		}
 	}
 
