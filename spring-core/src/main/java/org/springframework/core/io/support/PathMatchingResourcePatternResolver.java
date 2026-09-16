@@ -1305,7 +1305,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				// and convert the drive letter to uppercase for consistent duplicate detection.
 				path = "/" + StringUtils.capitalize(path);
 			}
-			// Since '#' can appear in directories/filenames, java.net.URL should not treat it as a fragment
+			// Since '%' and '#' can appear in directories/filenames, java.net.URL
+			// should not treat them as an escape sequence or fragment.
+			path = StringUtils.replace(path, "%", "%25");
 			return StringUtils.replace(path, "#", "%23");
 		}
 

@@ -401,7 +401,32 @@ class PathMatchingResourcePatternResolverTests {
 			assertThat(result.replace("\\", "/")).contains("!!!!").contains("asset.jar!/assets/file.txt");
 		}
 
-		private void writeAssetJar(Path path) throws Exception {
+		@Test  // gh-37280
+		void javaDashJarFindsClassPathManifestEntriesWhenPathContainsPercentHex() throws Exception {
+			assertFindsAssetJarOnClassPathWithDirectoryName("host%3A8099");
+		}
+
+		@Test  // gh-37280
+		void javaDashJarFindsClassPathManifestEntriesWhenPathContainsLonePercent() throws Exception {
+			assertFindsAssetJarOnClassPathWithDirectoryName("100%");
+		}
+
+		private void assertFindsAssetJarOnClassPathWithDirectoryName(String directoryName) throws Exception {
+			Path assetJar = this.temp.resolve("lib").resolve(directoryName).resolve("asset.jar");
+			Files.createDirectories(assetJar.getParent());
+			writeAssetJarFile(assetJar);
+			writeApplicationJarWithAbsolutePath(this.temp.resolve("app.jar"), assetJar);
+			String java = ProcessHandle.current().info().command().get();
+			Process process = new ProcessBuilder(java, "-jar", "app.jar")
+					.directory(this.temp.toFile())
+					.redirectErrorStream(true)
+					.start();
+			String result = StreamUtils.copyToString(process.getInputStream(), StandardCharsets.UTF_8);
+			assertThat(process.waitFor()).as(result).isZero();
+			assertThat(result.replace("\\", "/")).contains("!!!!").contains("asset.jar!/assets/file.txt");
+		}
+
+		private void writeAssetJarFile(Path path) throws Exception {
 			try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(path.toFile()))) {
 				jar.putNextEntry(new ZipEntry("assets/"));
 				jar.closeEntry();
@@ -409,6 +434,10 @@ class PathMatchingResourcePatternResolverTests {
 				StreamUtils.copy("test", StandardCharsets.UTF_8, jar);
 				jar.closeEntry();
 			}
+		}
+
+		private void writeAssetJar(Path path) throws Exception {
+			writeAssetJarFile(path);
 
 			assertThat(new FileSystemResource(path).exists()).isTrue();
 			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isTrue();
