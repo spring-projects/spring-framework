@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -299,6 +300,20 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 				.satisfies(ex -> assertThat(ex.getPossibleMatches()).isNull());
 	}
 
+	@Test  // gh-37252
+	void overriddenGetPropertyAccessorForPropertyPathIsInvokedForEachNestedLevel() {
+		TestBean rod = new TestBean("rod", 31);
+		TestBean kerry = new TestBean("kerry", 35);
+		rod.setSpouse(kerry);
+		kerry.setSpouse(rod);
+
+		CountingBeanWrapper accessor = new CountingBeanWrapper(rod);
+
+		assertThat(accessor.getPropertyValue("spouse.spouse.name")).isEqualTo("rod");
+		// Once for "spouse.spouse.name", once for "spouse.name", and once for "name".
+		assertThat(accessor.invocations).hasValue(3);
+	}
+
 
 	private interface BaseProperty {
 
@@ -443,6 +458,37 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 
 		public Optional<TestBean> getObject() {
 			return Optional.ofNullable(this.value);
+		}
+	}
+
+	/**
+	 * A {@link BeanWrapperImpl} which tracks how often
+	 * {@link #getPropertyAccessorForPropertyPath(String)} is invoked, in order to
+	 * verify that an override is applied to each level of a nested property path.
+	 */
+	private static class CountingBeanWrapper extends BeanWrapperImpl {
+
+		private final AtomicInteger invocations;
+
+		CountingBeanWrapper(Object target) {
+			super(target);
+			this.invocations = new AtomicInteger();
+		}
+
+		private CountingBeanWrapper(Object object, String nestedPath, CountingBeanWrapper parent) {
+			super(object, nestedPath, parent.getRootInstance());
+			this.invocations = parent.invocations;
+		}
+
+		@Override
+		protected BeanWrapperImpl newNestedPropertyAccessor(Object object, String nestedPath) {
+			return new CountingBeanWrapper(object, nestedPath, this);
+		}
+
+		@Override
+		protected AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath) {
+			this.invocations.incrementAndGet();
+			return super.getPropertyAccessorForPropertyPath(propertyPath);
 		}
 	}
 

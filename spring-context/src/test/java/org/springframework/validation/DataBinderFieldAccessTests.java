@@ -155,6 +155,29 @@ class DataBinderFieldAccessTests {
 				binder.bind(outOfBounds));
 	}
 
+	@Test  // gh-37252
+	void directFieldAccessHonorsMaxNestedPathDepth() {
+		TestBean rod = new TestBean("rod", 31);
+		TestBean kerry = new TestBean("kerry", 35);
+		rod.setSpouse(kerry);
+		kerry.setSpouse(rod);
+
+		DataBinder binder = new DataBinder(rod);
+		binder.setMaxNestedPathDepth(2);
+		binder.initDirectFieldAccess();
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("spouse.spouse.name", "Jane");
+		binder.bind(pvs);
+		assertThat(rod.getName()).isEqualTo("Jane");
+
+		MutablePropertyValues tooDeep = new MutablePropertyValues();
+		tooDeep.add("spouse.spouse.spouse.name", "Joe");
+		assertThatExceptionOfType(InvalidPropertyException.class)
+				.isThrownBy(() -> binder.bind(tooDeep))
+				.withMessageEndingWith("Nesting depth of property path exceeds the maximum of 2");
+	}
+
 	@Test
 	void bindingWithErrorsAndCustomEditors() {
 		FieldAccessBean rod = new FieldAccessBean();

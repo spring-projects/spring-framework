@@ -21,18 +21,38 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.convert.ConversionService;
 
 /**
- * Interface that encapsulates configuration methods for a PropertyAccessor.
- * Also extends the PropertyEditorRegistry interface, which defines methods
- * for PropertyEditor management.
+ * Interface that encapsulates configuration methods for a {@link PropertyAccessor}.
+ *
+ * <p>Also extends the {@link PropertyEditorRegistry} interface, which defines methods
+ * for {@link java.beans.PropertyEditor} management.
  *
  * <p>Serves as base interface for {@link BeanWrapper}.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.0
  * @see BeanWrapper
  */
 public interface ConfigurablePropertyAccessor extends PropertyAccessor, PropertyEditorRegistry, TypeConverter {
+
+	/**
+	 * Default maximum nesting depth permitted for a nested property path: {@value}.
+	 * <p>This limit guards against deeply nested property paths that could otherwise
+	 * drive the recursive resolution of a nested property path to exhaust the current
+	 * thread's call stack.
+	 * <p><strong>NOTE</strong>: This limit improves diagnostics for the common case
+	 * by converting what would otherwise be an opaque {@link StackOverflowError}
+	 * into a descriptive {@link InvalidPropertyException}, but it is <em>not</em>
+	 * a guaranteed defense against {@code StackOverflowError} under every possible
+	 * JVM thread stack size configuration. The amount of stack space consumed per
+	 * level of nesting depends on the JVM, its current JIT compilation state, and
+	 * the platform.
+	 * @since 7.1
+	 * @see #setMaxNestedPathDepth(int)
+	 */
+	int DEFAULT_MAX_NESTED_PATH_DEPTH = 100;
+
 
 	/**
 	 * Specify a {@link ConversionService} to use for converting
@@ -86,5 +106,24 @@ public interface ConfigurablePropertyAccessor extends PropertyAccessor, Property
 	 * @since 7.1
 	 */
 	int getAutoGrowCollectionLimit();
+
+	/**
+	 * Specify the maximum nesting depth permitted for a nested property path.
+	 * <p>The nesting depth corresponds to the number of intermediate properties
+	 * traversed to reach the final property &mdash; for example,
+	 * {@code "address.country.name"} has a nesting depth of 2.
+	 * <p>Specify {@code 0} to disable nested property paths altogether, while
+	 * still allowing simple, indexed, and mapped property access.
+	 * <p>Default is {@link #DEFAULT_MAX_NESTED_PATH_DEPTH}.
+	 * @param maxNestedPathDepth the maximum nesting depth; must not be negative
+	 * @since 7.1
+	 */
+	void setMaxNestedPathDepth(int maxNestedPathDepth);
+
+	/**
+	 * Return the maximum nesting depth permitted for a nested property path.
+	 * @since 7.1
+	 */
+	int getMaxNestedPathDepth();
 
 }
