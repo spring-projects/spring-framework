@@ -56,6 +56,7 @@ import org.springframework.util.FastByteArrayOutputStream;
  * of {@link Part} objects.
  *
  * @author Arjen Poutsma
+ * @author Seonghun Lee
  * @since 5.3
  */
 @SuppressWarnings("NullAway") // Dataflow analysis limitation
@@ -380,6 +381,16 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		}
 
 		private void switchToFile(DataBuffer current, long byteCount) {
+			if (PartGenerator.this.maxDiskUsagePerPart != -1 && byteCount > PartGenerator.this.maxDiskUsagePerPart) {
+				DataBufferUtils.release(current);
+				this.content.forEach(DataBufferUtils::release);
+				this.content.clear();
+				emitError(new DataBufferLimitException(
+						"Part exceeded the disk usage limit of " + PartGenerator.this.maxDiskUsagePerPart +
+								" bytes"));
+				return;
+			}
+
 			List<DataBuffer> content = new ArrayList<>(this.content);
 			content.add(current);
 			this.releaseOnDispose = false;
