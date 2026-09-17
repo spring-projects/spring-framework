@@ -179,18 +179,22 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	/**
-	 * Immediately remove all entries from this cache.
+	 * Remove all entries from this cache.
+	 * <p>This method does not block or synchronize with in-flight
+	 * writes. An entry added concurrently while this method is running
+	 * may still survive this call, as if it had been added immediately
+	 * afterward.
 	 */
 	public void clear() {
 		this.evictionLock.lock();
 		try {
+			this.writeOperations.drainAll();
 			Node<K, V> node;
 			while ((node = this.evictionQueue.poll()) != null) {
 				this.cache.remove(node.key, node);
 				markAsRemoved(node);
 			}
 			this.readOperations.clear();
-			this.writeOperations.drainAll();
 		}
 		finally {
 			this.evictionLock.unlock();
