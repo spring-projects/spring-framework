@@ -42,7 +42,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyAccessorUtils;
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
@@ -1751,12 +1751,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	private boolean isConvertibleProperty(String propertyName, BeanWrapper bw) {
 		try {
-			return !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName) &&
+			return !isNestedOrIndexedProperty(propertyName) &&
 					BeanUtils.hasUniqueWriteMethod(bw.getPropertyDescriptor(propertyName));
 		}
 		catch (InvalidPropertyException ex) {
 			return false;
 		}
+	}
+
+	/**
+	 * Check whether the given property path indicates an indexed or nested property.
+	 */
+	private static boolean isNestedOrIndexedProperty(String propertyName) {
+		for (int i = 0; i < propertyName.length(); i++) {
+			char ch = propertyName.charAt(i);
+			if (ch == PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR || ch == PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

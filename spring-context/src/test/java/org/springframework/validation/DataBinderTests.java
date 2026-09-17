@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.InvalidPropertyException;
+import org.springframework.beans.InvalidPropertyPathException;
 import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -733,6 +734,56 @@ class DataBinderTests {
 		assertThat(rod.getAge()).as("did not change age").isZero();
 		assertThat(rod.getFavoriteColor()).as("did not change favorite color").isNull();
 		assertThat(binder.getBindingResult().getSuppressedFields()).containsExactlyInAnyOrder("age", "favoriteColor");
+	}
+
+	@Test  // gh-37275
+	void bindingWithMalformedFieldNameSurfacesAsFieldErrorRatherThanBeingSilentlyDropped() throws BindException {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "rod");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "Rod");
+		pvs.add("map[key1]other", "value");  // trailing garbage after a key: not a well-formed property path
+
+		binder.bind(pvs);
+
+		assertThat(rod.getName()).as("well-formed fields still bind").isEqualTo("Rod");
+		assertThat(binder.getBindingResult().getFieldErrors("map[key1]other")).singleElement().satisfies(error -> {
+			assertThat(error.getCode()).isEqualTo(InvalidPropertyPathException.ERROR_CODE);
+			assertThat(error.getRejectedValue()).isEqualTo("value");
+		});
+		assertThatExceptionOfType(BindException.class).isThrownBy(binder::close);
+	}
+
+	@Test  // gh-37275
+	void bindingWithMalformedFieldNameIsNotSuppressedEvenWhenAllowedFieldsAreConfigured() throws BindException {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "rod");
+		binder.setAllowedFields("name");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "Rod");
+		pvs.add("map[key1]other", "value");
+
+		binder.bind(pvs);
+
+		assertThat(binder.getBindingResult().getSuppressedFields()).isEmpty();
+		assertThat(binder.getBindingResult().getFieldErrors("map[key1]other")).hasSize(1);
+	}
+
+	@Test  // gh-37275
+	void isAllowedNeverThrowsForMalformedField() {
+		class ExposingBinder extends DataBinder {
+			ExposingBinder(Object target) {
+				super(target, "target");
+			}
+			boolean callIsAllowed(String field) {
+				return isAllowed(field);
+			}
+		}
+
+		ExposingBinder binder = new ExposingBinder(new TestBean());
+		binder.setAllowedFields("name");
+
+		assertThat(binder.callIsAllowed("map[key1]other")).isFalse();
 	}
 
 	@Test
@@ -2080,7 +2131,7 @@ class DataBinderTests {
 		rod.setSpouse(kerry);
 		kerry.setSpouse(rod);
 
-		DataBinder binder = new DataBinder(rod);
+		DataBinder binder = new DataBinder(rod, "rod");
 		binder.setMaxNestedPathDepth(2);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -2090,9 +2141,11 @@ class DataBinderTests {
 
 		MutablePropertyValues tooDeep = new MutablePropertyValues();
 		tooDeep.add("spouse.spouse.spouse.name", "Joe");
-		assertThatExceptionOfType(InvalidPropertyException.class)
-				.isThrownBy(() -> binder.bind(tooDeep))
-				.withMessageEndingWith("Nesting depth of property path exceeds the maximum of 2");
+		binder.bind(tooDeep);
+		assertThat(binder.getBindingResult().getFieldErrors("spouse.spouse.spouse.name")).singleElement().satisfies(error -> {
+			assertThat(error.getCode()).isEqualTo(InvalidPropertyPathException.ERROR_CODE);
+			assertThat(error.getRejectedValue()).isEqualTo("Joe");
+		});
 	}
 
 	@Test  // gh-37252

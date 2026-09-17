@@ -301,9 +301,9 @@ abstract class AbstractPropertyAccessorTests {
 		Person target = createPerson("John", "London", "UK");
 		AbstractPropertyAccessor accessor = createAccessor(target);
 
-		assertThatExceptionOfType(NotReadablePropertyException.class)
+		assertThatExceptionOfType(InvalidPropertyPathException.class)
 				.isThrownBy(() -> accessor.getPropertyValue(propertyPath))
-				.withMessageEndingWith("contains unbalanced brackets");
+				.withMessageContaining("Invalid property path '" + propertyPath + "'");
 	}
 
 	@Test
@@ -1384,9 +1384,9 @@ abstract class AbstractPropertyAccessorTests {
 		Person target = createPerson("John", "Paris", "FR");
 		AbstractPropertyAccessor accessor = createAccessor(target);
 
-		assertThatExceptionOfType(NotWritablePropertyException.class)
+		assertThatExceptionOfType(InvalidPropertyPathException.class)
 				.isThrownBy(() -> accessor.setPropertyValue(propertyPath, "Zürich"))
-				.withMessageEndingWith("does not exist");
+				.withMessageContaining("Invalid property path '" + propertyPath + "'");
 		assertThat(target.getAddress().getCity()).isEqualTo("Paris");
 	}
 
@@ -1441,8 +1441,6 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(accessor.getPropertyValue("map[key5[foo]].name")).isEqualTo("name8");
 		assertThat(accessor.getPropertyValue("map['key5[foo]'].name")).isEqualTo("name8");
 		assertThat(accessor.getPropertyValue("map[\"key5[foo]\"].name")).isEqualTo("name8");
-		assertThat(accessor.getPropertyValue("map['].name")).isEqualTo("name9");
-		assertThat(accessor.getPropertyValue("map[\"].name")).isEqualTo("name9");
 		assertThat(accessor.getPropertyValue("iterableMap[key1].name")).isEqualTo("nameC");
 		assertThat(accessor.getPropertyValue("iterableMap[key2][0].name")).isEqualTo("nameA");
 		assertThat(accessor.getPropertyValue("iterableMap[key2][1].name")).isEqualTo("nameB");
@@ -1708,9 +1706,9 @@ abstract class AbstractPropertyAccessorTests {
 		}
 
 		private static void assertNestedPathDepthExceeded(ThrowingCallable throwingCallable, int maxDepth) {
-			assertThatExceptionOfType(InvalidPropertyException.class)
+			assertThatExceptionOfType(InvalidPropertyPathException.class)
 					.isThrownBy(throwingCallable)
-					.withMessageEndingWith("Nesting depth of property path exceeds the maximum of " + maxDepth);
+					.withMessageEndingWith("nesting depth exceeds the maximum of " + maxDepth);
 		}
 	}
 

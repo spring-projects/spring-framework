@@ -16,6 +16,11 @@
 
 package org.springframework.beans;
 
+import java.beans.PropertyChangeEvent;
+import java.util.Objects;
+
+import org.jspecify.annotations.Nullable;
+
 /**
  * Exception thrown when a property path is not a well-formed property path
  * according to the grammar implemented by {@link PropertyPath}.
@@ -54,6 +59,27 @@ public class InvalidPropertyPathException extends PropertyAccessException {
 	public InvalidPropertyPathException(String propertyPath, String reason) {
 		super("Invalid property path '" + propertyPath + "': " + reason, null);
 		this.propertyPath = propertyPath;
+	}
+
+	/**
+	 * Create a new {@code InvalidPropertyPathException}.
+	 * @param propertyChangeEvent the event for the property
+	 * @param cause the original parsing exception
+	 */
+	public InvalidPropertyPathException(PropertyChangeEvent propertyChangeEvent, InvalidPropertyPathException cause) {
+		super(propertyChangeEvent, Objects.requireNonNull(cause.getMessage()), cause);
+		this.propertyPath = cause.propertyPath;
+	}
+
+	/**
+	 * Create a new {@code InvalidPropertyPathException}.
+	 * @param source the bean that fired the event
+	 * @param propertyName the programmatic name of the property that was changed
+	 * @param newValue the new value of the property
+	 * @param cause the original parsing exception
+	 */
+	public InvalidPropertyPathException(Object source, String propertyName, @Nullable Object newValue, InvalidPropertyPathException cause) {
+		this(new PropertyChangeEvent(source, propertyName, null, newValue), cause);
 	}
 
 

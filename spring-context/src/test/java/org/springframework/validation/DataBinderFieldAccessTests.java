@@ -23,6 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.InvalidPropertyException;
+import org.springframework.beans.InvalidPropertyPathException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
@@ -162,7 +163,7 @@ class DataBinderFieldAccessTests {
 		rod.setSpouse(kerry);
 		kerry.setSpouse(rod);
 
-		DataBinder binder = new DataBinder(rod);
+		DataBinder binder = new DataBinder(rod, "rod");
 		binder.setMaxNestedPathDepth(2);
 		binder.initDirectFieldAccess();
 
@@ -173,9 +174,11 @@ class DataBinderFieldAccessTests {
 
 		MutablePropertyValues tooDeep = new MutablePropertyValues();
 		tooDeep.add("spouse.spouse.spouse.name", "Joe");
-		assertThatExceptionOfType(InvalidPropertyException.class)
-				.isThrownBy(() -> binder.bind(tooDeep))
-				.withMessageEndingWith("Nesting depth of property path exceeds the maximum of 2");
+		binder.bind(tooDeep);
+		assertThat(binder.getBindingResult().getFieldErrors("spouse.spouse.spouse.name")).singleElement().satisfies(error -> {
+			assertThat(error.getCode()).isEqualTo(InvalidPropertyPathException.ERROR_CODE);
+			assertThat(error.getRejectedValue()).isEqualTo("Joe");
+		});
 	}
 
 	@Test
