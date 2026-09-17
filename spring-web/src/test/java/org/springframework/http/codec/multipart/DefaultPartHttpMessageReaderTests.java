@@ -317,7 +317,7 @@ class DefaultPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 	@Test  // gh-35099
 	void exceedDiskUsageOnSpillOver() {
-		MockServerHttpRequest request = createRequest("files.multipart", "\"----WebKitFormBoundaryG8fJ50opQOML0oGD\"");
+		MockServerHttpRequest request = createRequest(new ClassPathResource("files.multipart", getClass()), "\"----WebKitFormBoundaryG8fJ50opQOML0oGD\"");
 
 		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
 		reader.setMaxInMemorySize(90);
