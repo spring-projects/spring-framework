@@ -63,6 +63,7 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Seonghun Lee
  */
 class DefaultPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
@@ -306,6 +307,20 @@ class DefaultPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
 		reader.setMaxHeadersSize(80);
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		StepVerifier.create(result)
+				.expectError(DataBufferLimitException.class)
+				.verify();
+	}
+
+	@Test  // gh-35099
+	void exceedDiskUsageOnSpillOver() {
+		MockServerHttpRequest request = createRequest("files.multipart", "\"----WebKitFormBoundaryG8fJ50opQOML0oGD\"");
+
+		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
+		reader.setMaxInMemorySize(90);
+		reader.setMaxDiskUsagePerPart(99);
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
 		StepVerifier.create(result)
