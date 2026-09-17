@@ -179,7 +179,11 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	/**
-	 * Immediately remove all entries from this cache.
+	 * Remove all entries currently tracked by the eviction queue.
+	 * <p>Concurrent writes whose {@code AddTask} is still pending in
+	 * the write queue may survive this call, they are treated as if
+	 * they arrived after the {@code clear} operation. This method does
+	 * not block or synchronize with in-flight {@code put} operations.
 	 */
 	public void clear() {
 		this.evictionLock.lock();
