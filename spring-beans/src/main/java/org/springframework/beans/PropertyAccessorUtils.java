@@ -25,7 +25,17 @@ import org.jspecify.annotations.Nullable;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.2.6
+ * @deprecated as of 7.1, in favor of {@link PropertyPath}. Use
+ * {@link PropertyPath#parse(String)} and {@link PropertyPath#canonicalName()}
+ * in place of {@link #canonicalPropertyName} and {@link #canonicalPropertyNames},
+ * and match a registered path against a property by comparing canonical names
+ * in place of {@link #matchesProperty}. There is no direct replacement for
+ * {@link #getPropertyName}, {@link #isNestedOrIndexedProperty},
+ * {@link #getFirstNestedPropertySeparatorIndex}, or
+ * {@link #getLastNestedPropertySeparatorIndex}, which operate on raw,
+ * unparsed property path text.
  */
+@Deprecated(since = "7.1", forRemoval = true)
 public abstract class PropertyAccessorUtils {
 
 	/**
@@ -121,17 +131,21 @@ public abstract class PropertyAccessorUtils {
 	 * @return whether the paths match
 	 */
 	public static boolean matchesProperty(String registeredPath, String propertyPath) {
-		if (!registeredPath.startsWith(propertyPath)) {
+		// canonicalPropertyName, not PropertyPath.parse directly: this method's
+		// long-standing contract is non-throwing, even for a malformed path.
+		String registered = canonicalPropertyName(registeredPath);
+		String property = canonicalPropertyName(propertyPath);
+		if (!registered.startsWith(property)) {
 			return false;
 		}
-		if (registeredPath.length() == propertyPath.length()) {
+		if (registered.length() == property.length()) {
 			return true;
 		}
-		if (registeredPath.charAt(propertyPath.length()) != PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR) {
+		if (registered.charAt(property.length()) != PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR) {
 			return false;
 		}
-		return (registeredPath.indexOf(PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR, propertyPath.length() + 1) ==
-				registeredPath.length() - 1);
+		return (registered.indexOf(PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR, property.length() + 1) ==
+				registered.length() - 1);
 	}
 
 	/**
@@ -143,30 +157,7 @@ public abstract class PropertyAccessorUtils {
 	 * @return the canonical representation of the property path
 	 */
 	public static String canonicalPropertyName(@Nullable String propertyName) {
-		if (propertyName == null) {
-			return "";
-		}
-
-		StringBuilder sb = new StringBuilder(propertyName);
-		int searchIndex = 0;
-		while (searchIndex != -1) {
-			int keyStart = sb.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
-			searchIndex = -1;
-			if (keyStart != -1) {
-				int keyEnd = getPropertyNameKeyEnd(sb, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
-				if (keyEnd != -1) {
-					String key = sb.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
-					if (key.length() > 1 && ((key.startsWith("'") && key.endsWith("'")) ||
-							(key.startsWith("\"") && key.endsWith("\"")))) {
-						sb.delete(keyStart + 1, keyStart + 2);
-						sb.delete(keyEnd - 2, keyEnd - 1);
-						keyEnd = keyEnd - 2;
-					}
-					searchIndex = keyEnd + PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
-				}
-			}
-		}
-		return sb.toString();
+		return PropertyPath.canonicalNameOrOriginal(propertyName);
 	}
 
 	/**
@@ -185,73 +176,6 @@ public abstract class PropertyAccessorUtils {
 			result[i] = canonicalPropertyName(propertyNames[i]);
 		}
 		return result;
-	}
-
-	/**
-	 * Determine the end of the {@code [key]} expression that starts at the
-	 * given {@code startIndex}, tracking bracket nesting depth so that any
-	 * {@code [} or {@code ]} characters contained within the key itself (for
-	 * example, in a quoted key such as {@code "['key[0]']"}) do not interfere
-	 * with the detection of the actual closing bracket.
-	 * @param propertyName the property name (or path) to search
-	 * @param startIndex the index to start searching from (immediately after
-	 * the opening {@code [})
-	 * @return the index of the matching closing {@code ]}, or -1 if none
-	 * @since 7.1
-	 */
-	static int getPropertyNameKeyEnd(CharSequence propertyName, int startIndex) {
-		int unclosedPrefixes = 0;
-		int length = propertyName.length();
-		for (int i = startIndex; i < length; i++) {
-			switch (propertyName.charAt(i)) {
-				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR -> {
-					// The property name contains opening prefix(es)...
-					unclosedPrefixes++;
-				}
-				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR -> {
-					if (unclosedPrefixes == 0) {
-						// No unclosed prefix(es) in the property name (left) ->
-						// this is the suffix we are looking for.
-						return i;
-					}
-					else {
-						// This suffix does not close the initial prefix but rather
-						// just one that occurred within the property name.
-						unclosedPrefixes--;
-					}
-				}
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Determine whether the given property path contains unbalanced
-	 * {@code [} or {@code ]} brackets, by scanning the whole path once
-	 * and tracking bracket nesting depth.
-	 * <p>A path is considered balanced if the depth never goes negative
-	 * (that is, a {@code ]} is never encountered without a corresponding
-	 * preceding {@code [}) and returns to {@code 0} by the end of the path
-	 * (that is, every {@code [} has a corresponding {@code ]}).
-	 * @param propertyPath the property path (or path segment) to check
-	 * @return {@code true} if the path contains unbalanced brackets
-	 * @since 7.1
-	 */
-	static boolean hasUnbalancedBrackets(String propertyPath) {
-		int depth = 0;
-		int length = propertyPath.length();
-		for (int i = 0; i < length; i++) {
-			switch (propertyPath.charAt(i)) {
-				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR -> depth++;
-				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR -> {
-					depth--;
-					if (depth < 0) {
-						return true;
-					}
-				}
-			}
-		}
-		return (depth != 0);
 	}
 
 }
