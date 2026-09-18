@@ -130,12 +130,12 @@ public class SimplePropertyRowMapper<T> implements RowMapper<T> {
 			String name = this.constructorParameterNames[i];
 			int index;
 			try {
-				// Try direct name match first
-				index = rs.findColumn(name);
+				// Try common underscored name match first
+				index = rs.findColumn(JdbcUtils.convertPropertyNameToUnderscoreName(name));
 			}
 			catch (SQLException ex) {
-				// Try underscored name match instead
-				index = rs.findColumn(JdbcUtils.convertPropertyNameToUnderscoreName(name));
+				// Try direct name match (typically with camelCase) instead
+				index = rs.findColumn(name);
 			}
 			TypeDescriptor td = this.constructorParameterTypes[i];
 			Object value = JdbcUtils.getResultSetValue(rs, index, td.getType());
