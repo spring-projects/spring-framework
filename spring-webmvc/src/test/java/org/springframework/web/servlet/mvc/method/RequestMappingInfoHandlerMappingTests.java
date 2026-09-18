@@ -316,6 +316,7 @@ class RequestMappingInfoHandlerMappingTests {
 		mapping.handleMatch(info, "/1/2", request);
 
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATH_PATTERN_ATTRIBUTE)).isNull();
 	}
 
 	@Test

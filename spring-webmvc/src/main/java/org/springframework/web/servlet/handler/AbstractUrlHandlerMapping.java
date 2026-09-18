@@ -319,7 +319,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		pathWithinMapping = UrlPathHelper.defaultInstance.removeSemicolonContent(pathWithinMapping);
 		PathPattern.PathMatchInfo pathMatchInfo = pattern.matchAndExtract(path);
 		Map<String, String> uriVariables = (pathMatchInfo != null ? pathMatchInfo.getUriVariables(): null);
-		return buildPathExposingHandler(handler, pattern.getPatternString(), pathWithinMapping, uriVariables);
+		return buildPathExposingHandler(handler, pattern, pathWithinMapping, uriVariables);
 	}
 
 	/**
@@ -419,12 +419,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Build a handler object for the given raw handler, exposing the actual
-	 * handler, the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}, as well as
+	 * handler, the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE},
+	 * the {@link #BEST_MATCHING_PATTERN_ATTRIBUTE}, as well as
 	 * the {@link #URI_TEMPLATE_VARIABLES_ATTRIBUTE} before executing the handler.
 	 * <p>The default implementation builds a {@link HandlerExecutionChain}
 	 * with a special interceptor that exposes the path attribute and URI
 	 * template variables
 	 * @param rawHandler the raw handler to expose
+	 * @param bestMatchingPattern the {@linkplain HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern}
 	 * @param pathWithinMapping the path to expose before executing the handler
 	 * @param uriTemplateVariables the URI template variables, can be {@code null} if no variables found
 	 * @return the final handler object
@@ -441,7 +443,32 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
+	 * Build a handler object for the given raw handler, exposing the actual
+	 * handler, the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE},
+	 * the {@link #BEST_MATCHING_PATH_PATTERN_ATTRIBUTE}
+	 * the {@link #BEST_MATCHING_PATTERN_ATTRIBUTE}, as well as
+	 * the {@link #URI_TEMPLATE_VARIABLES_ATTRIBUTE} before executing the handler.
+	 * @param rawHandler the raw handler to expose
+	 * @param bestMatchingPattern the {@linkplain HandlerMapping#BEST_MATCHING_PATH_PATTERN_ATTRIBUTE best matching pattern}
+	 * @param pathWithinMapping the path to expose before executing the handler
+	 * @param uriTemplateVariables the URI template variables, can be {@code null} if no variables found
+	 * @return the final handler object
+	 * @since 7.1
+	 */
+	protected Object buildPathExposingHandler(Object rawHandler, PathPattern bestMatchingPattern,
+			String pathWithinMapping, @Nullable Map<String, String> uriTemplateVariables) {
+
+		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
+		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
+		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
+			chain.addInterceptor(new UriTemplateVariablesHandlerInterceptor(uriTemplateVariables));
+		}
+		return chain;
+	}
+
+	/**
 	 * Expose the path within the current mapping as request attribute.
+	 * @param bestMatchingPattern the best matching pattern
 	 * @param pathWithinMapping the path within the current mapping
 	 * @param request the request to expose the path to
 	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
@@ -453,6 +480,22 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		ServerHttpObservationFilter.findObservationContext(request)
 				.ifPresent(context -> context.setPathPattern(bestMatchingPattern));
 		request.setAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
+	}
+
+	/**
+	 * Expose the path within the current mapping as request attribute.
+	 * @param bestMatchingPattern the best matching pattern
+	 * @param pathWithinMapping the path within the current mapping
+	 * @param request the request to expose the path to
+	 * @since 7.1
+	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
+	 * @see #BEST_MATCHING_PATH_PATTERN_ATTRIBUTE
+	 */
+	protected void exposePathWithinMapping(PathPattern bestMatchingPattern, String pathWithinMapping,
+			HttpServletRequest request) {
+
+		request.setAttribute(BEST_MATCHING_PATH_PATTERN_ATTRIBUTE, bestMatchingPattern);
+		exposePathWithinMapping(bestMatchingPattern.getPatternString(), pathWithinMapping, request);
 	}
 
 	/**
@@ -495,23 +538,39 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Special interceptor for exposing the
-	 * {@link AbstractUrlHandlerMapping#PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE} attribute.
+	 * {@link AbstractUrlHandlerMapping#PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE} and,
+	 * when parsed patterns are in use, the
+	 * {@link AbstractUrlHandlerMapping#BEST_MATCHING_PATH_PATTERN_ATTRIBUTE} attribute.
 	 * @see AbstractUrlHandlerMapping#exposePathWithinMapping
 	 */
 	private class PathExposingHandlerInterceptor implements HandlerInterceptor {
 
 		private final String bestMatchingPattern;
 
+		private final @Nullable PathPattern bestMatchingPathPattern;
+
 		private final String pathWithinMapping;
 
 		public PathExposingHandlerInterceptor(String bestMatchingPattern, String pathWithinMapping) {
 			this.bestMatchingPattern = bestMatchingPattern;
+			this.bestMatchingPathPattern = null;
+			this.pathWithinMapping = pathWithinMapping;
+		}
+
+		public PathExposingHandlerInterceptor(PathPattern bestMatchingPattern, String pathWithinMapping) {
+			this.bestMatchingPattern = bestMatchingPattern.getPatternString();
+			this.bestMatchingPathPattern = bestMatchingPattern;
 			this.pathWithinMapping = pathWithinMapping;
 		}
 
 		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-			exposePathWithinMapping(this.bestMatchingPattern, this.pathWithinMapping, request);
+			if (this.bestMatchingPathPattern != null) {
+				exposePathWithinMapping(this.bestMatchingPathPattern, this.pathWithinMapping, request);
+			}
+			else {
+				exposePathWithinMapping(this.bestMatchingPattern, this.pathWithinMapping, request);
+			}
 			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
 			request.setAttribute(INTROSPECT_TYPE_LEVEL_MAPPING, supportsTypeLevelMappings());
 			return true;
