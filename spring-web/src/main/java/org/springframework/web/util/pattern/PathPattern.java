@@ -94,7 +94,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * <li>Consider length (longer wins)
 	 * </ol>
 	 */
-	public static final Comparator<PathPattern> SPECIFICITY_COMPARATOR =
+	public static final Comparator<@Nullable PathPattern> SPECIFICITY_COMPARATOR =
 			Comparator.nullsLast(
 					Comparator.<PathPattern>
 							comparingInt(p -> p.isCatchAll() ? 1 : 0)
