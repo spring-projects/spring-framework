@@ -780,7 +780,7 @@ class RetryTemplateTests {
 		@Test
 		void retryableWithTimeoutExceededAfterSecondRetry() {
 			RetryPolicy retryPolicy = RetryPolicy.builder()
-					.timeout(Duration.ofMillis(20))
+					.timeout(Duration.ofMillis(200))
 					.delay(Duration.ZERO)
 					.build();
 			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
@@ -790,7 +790,7 @@ class RetryTemplateTests {
 			Retryable<String> retryable = () -> {
 				int currentInvocation = invocationCount.incrementAndGet();
 				if (currentInvocation == 3) {
-					Thread.sleep(100);
+					Thread.sleep(500);
 				}
 				throw new CustomException("Boom " + currentInvocation);
 			};
@@ -798,7 +798,7 @@ class RetryTemplateTests {
 			assertThat(invocationCount).hasValue(0);
 			assertThatExceptionOfType(RetryException.class)
 					.isThrownBy(() -> retryTemplate.execute(retryable))
-					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(20ms\\); aborting execution")
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(200ms\\); aborting execution")
 					.withCause(new CustomException("Boom 3"))
 					.satisfies(throwable -> {
 						var counter = new AtomicInteger(1);
