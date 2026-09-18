@@ -44,6 +44,11 @@ The following example uses `@Cacheable` on the `findBook` method with multiple c
 	public Book findBook(ISBN isbn) {...}
 ----
 
+TIP: When `@Cacheable` is combined with `@Retryable`, the retry advice is applied
+outermost, so each retry attempt checks the cache before invoking the method. See
+xref:core/resilience.adoc#resilience-annotations-retryable-combining-cacheable[Combining `@Retryable` with `@Cacheable`]
+for details.
+
 [[cache-annotations-cacheable-default-key]]
 === Default Key Generation
 
