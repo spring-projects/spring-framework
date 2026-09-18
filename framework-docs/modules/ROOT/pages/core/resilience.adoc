@@ -155,6 +155,9 @@ exception. The retry interceptor sees the same, unwrapped exception that the tar
 method threw.
 ====
 
+TIP: See xref:data-access/transaction/declarative/annotations.adoc[Using `@Transactional`]
+for general details on declarative transaction management.
+
 [[resilience-annotations-retryable-combining-cacheable]]
 ==== With `@Cacheable`
 
@@ -168,6 +171,9 @@ The cache interceptor runs on every attempt. If the cache is populated between a
 (for example, by a concurrent request), subsequent retry attempts will return the cached
 value without invoking the target method. On success, the cache is populated as normal.
 
+The same fixed ordering applies to `@CacheEvict` and `@CachePut`, since they share the
+same underlying cache advisor.
+
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 @Cacheable("items")
@@ -176,6 +182,9 @@ public Item loadItem(String id) {
     // Retry wraps the cache lookup; each attempt checks the cache first
 }
 ----
+
+TIP: See xref:integration/cache/annotations.adoc#cache-annotations-cacheable[The `@Cacheable` Annotation]
+for general details on declarative caching.
 
 [[resilience-annotations-retryable-combining-async]]
 ==== With `@Async`
@@ -205,6 +214,9 @@ Because `@Async` is outermost, the calling thread is never blocked by retry dela
 All retry attempts, including any configured delay between them, happen on the async
 executor thread.
 ====
+
+TIP: See xref:integration/scheduling.adoc#scheduling-annotation-support-async[The `@Async` annotation]
+for general details on asynchronous method execution.
 
 [[resilience-annotations-retryable-combining-order]]
 ==== Adjusting Advice Order
