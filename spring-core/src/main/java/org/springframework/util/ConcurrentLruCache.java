@@ -188,13 +188,13 @@ public final class ConcurrentLruCache<K, V> {
 	public void clear() {
 		this.evictionLock.lock();
 		try {
-			this.writeOperations.drainAll();
-			Node<K, V> node;
-			while ((node = this.evictionQueue.poll()) != null) {
+			for (Node<K, V> node : this.cache.values()) {
 				this.cache.remove(node.key, node);
+				this.evictionQueue.remove(node);
 				markAsRemoved(node);
 			}
 			this.readOperations.clear();
+			this.writeOperations.drainAll();
 		}
 		finally {
 			this.evictionLock.unlock();
