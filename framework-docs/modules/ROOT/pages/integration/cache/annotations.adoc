@@ -416,6 +416,11 @@ confirm the exclusion.
 As of 6.1, `@CachePut` takes `CompletableFuture` and reactive return types into account,
 performing the put operation whenever the produced object is available.
 
+TIP: When `@CachePut` is combined with `@Retryable`, the retry advice is applied
+outermost, so each successful retry attempt updates the cache; a failed attempt does
+not. See xref:core/resilience.adoc#resilience-annotations-retryable-combining-cacheable[Combining `@Retryable` with `@Cacheable`]
+for details.
+
 
 [[cache-annotations-evict]]
 == The `@CacheEvict` Annotation
@@ -460,6 +465,12 @@ and, thus, requires a result.
 
 As of 6.1, `@CacheEvict` takes `CompletableFuture` and reactive return types into account,
 performing an after-invocation evict operation whenever processing has completed.
+
+TIP: When `@CacheEvict` is combined with `@Retryable`, the retry advice is applied
+outermost, so eviction runs again on every retry attempt -- and, with
+`beforeInvocation=true`, before each attempt regardless of its outcome. See
+xref:core/resilience.adoc#resilience-annotations-retryable-combining-cacheable[Combining `@Retryable` with `@Cacheable`]
+for details.
 
 
 [[cache-annotations-caching]]
