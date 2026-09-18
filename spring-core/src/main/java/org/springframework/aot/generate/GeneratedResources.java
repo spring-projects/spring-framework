@@ -91,6 +91,17 @@ public class GeneratedResources {
 		return cleanedPath;
 	}
 
+	/**
+	 * Get or add a generated resource for the specified {@code extension} and
+	 * {@code featureName}, and no particular component. If this method has
+	 * previously been called with the given {@code extension}/{@code featureName}
+	 * the existing resource will be returned, otherwise a new resource will
+	 * be generated.
+	 * @param extension the file extension
+	 * @param featureName the name of the feature to associate with the
+	 * generated resource
+	 * @return an existing or newly generated resource
+	 */
 	public GeneratedResource getOrAddForFeature(String extension, String featureName) {
 		Assert.hasLength(extension, "'extension' must not be empty");
 		Assert.hasLength(featureName, "'featureName' must not be empty");
@@ -99,6 +110,19 @@ public class GeneratedResources {
 				key -> createAndAddGeneratedResource(extension, featureName, null));
 	}
 
+	/**
+	 * Get or add a generated resource for the specified {@code extension} and
+	 * {@code featureName}, targeting the specified {@code targetComponent}. If
+	 * this method has previously been called with the given
+	 * {@code extension}/{@code featureName}/{@code targetComponent} the
+	 * existing resource will be returned, otherwise a new resource will be
+	 * generated.
+	 * @param extension the file extension
+	 * @param featureName the name of the feature to associate with the
+	 * generated resource
+	 * @param targetComponent the target component
+	 * @return an existing or newly generated resource
+	 */
 	public GeneratedResource getOrAddForFeatureComponent(String extension, String featureName,
 			ClassName targetComponent) {
 		Assert.hasLength(extension, "'extension' must not be empty");
@@ -109,12 +133,29 @@ public class GeneratedResources {
 				key -> createAndAddGeneratedResource(extension, featureName, targetComponent));
 	}
 
+	/**
+	 * Add a new generated resource for the specified {@code extension} and
+	 * {@code featureName}, and no particular component.
+	 * @param extension the file extension
+	 * @param featureName the name of the feature to associate with the
+	 * generated resource
+	 * @return the newly generated resource
+	 */
 	public GeneratedResource addForFeature(String extension, String featureName) {
 		Assert.hasLength(extension, "'extension' must not be empty");
 		Assert.hasLength(featureName, "'featureName' must not be empty");
 		return createAndAddGeneratedResource(extension, featureName, null);
 	}
 
+	/**
+	 * Add a new generated resource for the specified {@code extension} and
+	 * {@code featureName}, targeting the specified {@code targetComponent}.
+	 * @param extension the file extension
+	 * @param featureName the name of the feature to associate with the
+	 * generated resource
+	 * @param targetComponent the target component
+	 * @return the newly generated resource
+	 */
 	public GeneratedResource addForFeatureComponent(String extension, String featureName,
 			ClassName targetComponent) {
 		Assert.hasLength(extension, "'extension' must not be empty");
@@ -133,7 +174,7 @@ public class GeneratedResources {
 	}
 
 	/**
-	 * Write the {@link GeneratedResource generated resources} using the given
+	 * Write the {@linkplain GeneratedResource generated resources} using the given
 	 * {@link GeneratedFiles} instance.
 	 * @param generatedFiles where to write the generated resources
 	 */

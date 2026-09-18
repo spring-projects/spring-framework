@@ -36,7 +36,7 @@ import org.springframework.util.function.ThrowingConsumer;
  * @since 7.1
  * @see GeneratedResources
  */
-public class GeneratedResource {
+public final class GeneratedResource {
 
 	private final String path;
 
@@ -74,11 +74,12 @@ public class GeneratedResource {
 
 	/**
 	 * Handle this instance, using the provided {@link Content}.
-	 * <p>Generated resources are usually written only once, but there are cases
-	 * where they need to be stored in a unique path and several rounds of
-	 * AOT processing may touch the same file. For cases like this use
-	 * {@code createOrValidate} as only one attempt to create the content is
-	 * allowed.
+	 * <p>{@link Content#create(InputStreamSource) create} only allows a single
+	 * attempt to create the content of a generated resource. If several rounds
+	 * of AOT processing may touch the same unique path, use
+	 * {@link Content#createOrValidate(InputStreamSource) createOrValidate}
+	 * instead, which creates the content on the first call and validates it
+	 * against subsequent calls.
 	 * @param content the content to use
 	 */
 	public void handle(Consumer<Content> content) {
@@ -216,15 +217,16 @@ public class GeneratedResource {
 			Assert.notNull(content, "'content' must not be null");
 			if (this.source == null) {
 				this.source = content;
+				return;
 			}
-			if (!hasSomeContentAs(content)) {
+			if (!hasSameContentAs(content)) {
 				throw new IllegalArgumentException(
 						"Content for generated resource at '%s' differs from the content that has already been written"
 								.formatted(getPath()));
 			}
 		}
 
-		private boolean hasSomeContentAs(InputStreamSource content) {
+		private boolean hasSameContentAs(InputStreamSource content) {
 			try (InputStream input1 = getInputStream(); InputStream input2 = content.getInputStream()) {
 				if (input1 == input2) {
 					return true;

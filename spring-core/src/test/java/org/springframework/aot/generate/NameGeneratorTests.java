@@ -47,7 +47,7 @@ class NameGeneratorTests {
 		}
 
 		@Test
-		void generateClassNameUseFeatureNamePrefix() {
+		void generateClassNameUsesFeatureNamePrefix() {
 			ClassName generated = new NameGenerator(TEST_TARGET, "One")
 					.generateClassName("test", ClassName.get(InputStream.class));
 			assertThat(generated).hasToString("java.io.InputStream__OneTest");
@@ -113,7 +113,7 @@ class NameGeneratorTests {
 		}
 
 		@Test
-		void generateResourcePathUseFeatureNamePrefix() {
+		void generateResourcePathUsesFeatureNamePrefix() {
 			String generated = new NameGenerator(TEST_TARGET, "one")
 					.generateResourcePath("txt", "test", ClassName.get(InputStream.class));
 			assertThat(generated).hasToString("java/io/InputStream-one-test.txt");
@@ -148,7 +148,7 @@ class NameGeneratorTests {
 		}
 
 		@Test
-		void generateResourcePathWhenCaseFeatureNameGeneratesName() {
+		void generateResourcePathWithUppercaseFeatureNameGeneratesName() {
 			String generated = generator.generateResourcePath("txt", "Bytes", ClassName.get(InputStream.class));
 			assertThat(generated).hasToString("java/io/InputStream-Bytes.txt");
 		}

@@ -59,9 +59,11 @@ public interface GenerationContext {
 
 	/**
 	 * Get the {@link GeneratedFiles} used by the context.
-	 * <p>Used to write java source, resource, or class bytecode files.
-	 * For java source and resource, use {@link #getGeneratedResources()}
-	 * and {@link #getGeneratedClasses()}, respectively.
+	 * <p>Used to write Java source, resource, or class bytecode files.
+	 * For Java source and resource files, use {@link #getGeneratedClasses()}
+	 * and {@link #getGeneratedResources()}, respectively. Class bytecode
+	 * files have no dedicated abstraction and must be written directly
+	 * using this method.
 	 * @return the generated files
 	 * @see #getGeneratedClasses()
 	 * @see #getGeneratedResources()

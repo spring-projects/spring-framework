@@ -29,8 +29,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Generate unique names based on a target {@link ClassName} and a
- * feature name. Support generating class names and resource paths.
+ * Generator for unique names based on a target {@link ClassName} and a
+ * feature name. Supports generating class names and resource paths.
  *
  * <p>This class is stateful, so the same instance should be used for all name
  * generation.
@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @since 7.1
  */
-public class NameGenerator {
+public final class NameGenerator {
 
 	private static final String CLASS_NAME_SEPARATOR = "__";
 
@@ -121,9 +121,9 @@ public class NameGenerator {
 	 * {@code featureName} and {@code target}. If the {@code target} is
 	 * {@code null}, the configured main target of this instance is used.
 	 * <p>The resource path is a suffixed version of the target. For instance, a
-	 * {@code com.example.Demo} target with an {@code metadata} feature name
+	 * {@code com.example.Demo} target with a {@code metadata} feature name
 	 * and a {@code json} extension leads to a
-	 * {@code com/example/Demo--metadata.json} generated resource path.
+	 * {@code com/example/Demo-metadata.json} generated resource path.
 	 * The feature name is qualified by the configured feature name prefix,
 	 * if any.
 	 * <p>Generated resource paths are unique. If such a feature was already
@@ -174,8 +174,8 @@ public class NameGenerator {
 
 
 	/**
-	 * Create a new {@link NameGenerator} instance for the specified
-	 * feature name prefix, keeping track of all the class names generated
+	 * Create a new {@link NameGenerator} instance for the specified feature name
+	 * prefix, keeping track of all the class names and resource names generated
 	 * by this instance.
 	 * @param featureNamePrefix the feature name prefix to use
 	 * @return a new instance for the specified feature name prefix

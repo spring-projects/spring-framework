@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Tests for {@link GeneratedResource}.
+ * Tests for {@link GeneratedResources}.
  *
  * @author Stephane Nicoll
  */
@@ -67,13 +67,13 @@ class GeneratedResourcesTests {
 	}
 
 	@Test
-	void getOrAddForUsesProvidedPath() {
+	void getOrAddUsesProvidedPath() {
 		GeneratedResource generatedClass = this.generatedResources.getOrAdd("META-INF/test.properties");
 		assertThat(generatedClass.getPath()).isEqualTo("META-INF/test.properties");
 	}
 
 	@Test
-	void getOrAddWWhenNewReturnsEmptyGeneratedResource() {
+	void getOrAddWhenNewReturnsEmptyGeneratedResource() {
 		GeneratedResource generatedResource = this.generatedResources.getOrAdd(TEST_RESOURCE_PATH);
 		assertThat(generatedResource.getPath()).isEqualTo(TEST_RESOURCE_PATH);
 		assertThat(generatedResource.hasContent()).isFalse();
@@ -155,7 +155,7 @@ class GeneratedResourcesTests {
 	}
 
 	@Test
-	void withFeatureNameUpdatesNamingConventions() {
+	void withFeatureNamePrefixUpdatesNamingConventions() {
 		GeneratedResource generatedResources1 = this.generatedResources
 				.addForFeatureComponent("txt", "one", TEST_COMPONENT);
 		GeneratedResource generatedResources2 = this.generatedResources.withFeatureNamePrefix("another")
@@ -165,7 +165,7 @@ class GeneratedResourcesTests {
 	}
 
 	@Test
-	void writeToAddResources() {
+	void writeToAddsResources() {
 		this.generatedResources.addForFeatureComponent("txt", "one", TEST_COMPONENT)
 				.handle(this::createTestContent);
 		this.generatedResources.addForFeatureComponent("json", "two", TEST_COMPONENT)

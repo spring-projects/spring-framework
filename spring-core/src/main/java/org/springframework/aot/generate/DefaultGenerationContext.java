@@ -78,6 +78,7 @@ public class DefaultGenerationContext implements GenerationContext {
 	 * Create a new {@link DefaultGenerationContext} instance backed by the
 	 * specified items.
 	 * @param generatedClasses the generated classes
+	 * @param generatedResources the generated resources
 	 * @param generatedFiles the generated files
 	 * @param runtimeHints the runtime hints
 	 */
