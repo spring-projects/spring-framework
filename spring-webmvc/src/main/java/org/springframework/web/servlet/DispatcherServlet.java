@@ -632,10 +632,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			this.viewNameTranslator =
 					context.getBean(REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, RequestToViewNameTranslator.class);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.viewNameTranslator.getClass().getSimpleName());
+				logger.trace("Detected " + this.viewNameTranslator);
 			}
 			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.viewNameTranslator);
+				logger.debug("Detected " + this.viewNameTranslator.getClass().getSimpleName());
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -696,10 +696,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		try {
 			this.flashMapManager = context.getBean(FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.flashMapManager.getClass().getSimpleName());
+				logger.trace("Detected " + this.flashMapManager);
 			}
 			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.flashMapManager);
+				logger.debug("Detected " + this.flashMapManager.getClass().getSimpleName());
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
