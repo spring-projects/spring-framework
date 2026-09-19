@@ -1027,6 +1027,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	protected Object applyInstanceSupplierPostProcessing(Object bean, String beanName, RootBeanDefinition mbd) {
+		InstanceSupplier<?> instanceSupplier = (InstanceSupplier<?>) mbd.getInstanceSupplier();
+		if (instanceSupplier != null) {
+			try {
+				return ((InstanceSupplier<Object>) instanceSupplier)
+						.postProcessInstance(RegisteredBean.of(this, beanName, mbd), bean);
+			}
+			catch (RuntimeException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				throw new BeanCreationException(beanName,
+						"Post-processing of instance supplier failed", ex);
+			}
+		}
+		return bean;
+	}
+
+	@Override
 	protected void cacheMergedBeanDefinition(RootBeanDefinition mbd, String beanName) {
 		super.cacheMergedBeanDefinition(mbd, beanName);
 		if (mbd.isPrimary()) {
