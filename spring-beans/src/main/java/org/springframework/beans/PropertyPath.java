@@ -52,7 +52,6 @@ import org.springframework.util.Assert;
  */
 public final class PropertyPath {
 
-
 	private final String canonicalName;
 
 	private final List<Segment> segments;

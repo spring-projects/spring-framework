@@ -22,13 +22,13 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Exception thrown when a property path is not a well-formed property path
- * according to the grammar implemented by {@link PropertyPath}.
+ * Exception thrown when a property path is not well-formed according to the grammar
+ * implemented by {@link PropertyPath}.
  *
- * <p>This signals a syntactically invalid path, as opposed to a
- * syntactically valid path that happens not to resolve against a particular
- * target object. The latter cases are reported as {@link NotReadablePropertyException}
- * or {@link NotWritablePropertyException} instead.
+ * <p>This signals a syntactically invalid path, as opposed to a syntactically valid
+ * path that happens not to resolve against a particular target object. The latter
+ * cases are reported as {@link NotReadablePropertyException} or
+ * {@link NotWritablePropertyException} instead.
  *
  * <p>Extends {@link PropertyAccessException} so that a malformed path
  * encountered while binding a single property value can be collected into a
