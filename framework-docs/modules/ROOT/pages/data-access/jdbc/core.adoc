@@ -174,7 +174,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val actors = jdbcTemplate.query("select first_name, last_name from t_actor") { rs, _ ->
-			Actor(rs.getString("first_name"), rs.getString("last_name"))
+			Actor(rs.getString("first_name"), rs.getString("last_name")) }
 ----
 ======
 
@@ -555,8 +555,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// some JDBC-backed DAO class...
-	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
-
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
 
 	fun countOfActors(exampleActor: Actor): Int {
