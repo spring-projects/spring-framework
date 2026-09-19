@@ -535,6 +535,7 @@ class ForwardedHeaderUtilsTests {
 
 		assertThat(info.forAddress()).isNotNull();
 		assertThat(info.forAddress().getHostString()).isEqualTo("192.0.2.0");
+		assertThat(info.forAddress().getPort()).isEqualTo(0);
 
 		UriComponents result = info.uriComponentsBuilder().build();
 		assertThat(result.getScheme()).isEqualTo("http");
@@ -543,15 +544,41 @@ class ForwardedHeaderUtilsTests {
 		assertThat(result.getPort()).isEqualTo(8080);
 	}
 
+	@Test
+	void fromHttpRequestForwardedWithPort() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Forwarded", "for=192.0.2.1:1920");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		ForwardedHeaderUtils.ForwardedInfo info =
+				ForwardedHeaderUtils.parseStandardHeader(httpRequest.getURI(), httpRequest.getHeaders(), null, null);
+
+		assertThat(info.forAddress()).isNotNull();
+		assertThat(info.forAddress().getHostString()).isEqualTo("192.0.2.1");
+		assertThat(info.forAddress().getPort()).isEqualTo(1920);
+	}
+
 	@Test  // gh-34253
 	void fromHttpRequestXForwardedHeaderForIpv6Formatting() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Forwarded-For", "fd00:fefe:1::4, 192.168.0.1");
 
 		InetSocketAddress address = ForwardedHeaderUtils.parseXForwardedHeaders(
-				URI.create("https://example.com"), headers, null, null).forAddress();
+				URI.create("https://example.com"), headers, InetSocketAddress.createUnresolved("host.not.used", 42), null).forAddress();
 
 		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
+		assertThat(address.getPort()).isEqualTo(42);
+	}
+
+	@Test
+	void parseForwardedForDeprecated() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-For", "192.168.0.1");
+
+		InetSocketAddress address = ForwardedHeaderUtils.parseForwardedFor(URI.create("https://example.com"), headers, null);
+
+		assertThat(address.getHostName()).isEqualTo("192.168.0.1");
+		assertThat(address.getPort()).isEqualTo(0);
 	}
 
 	@Test
