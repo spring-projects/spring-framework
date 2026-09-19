@@ -468,7 +468,7 @@ seconds:
 ----
 	@Scheduled(initialDelay = 0, fixedRate = 5000)
 	public Mono<Void> reactiveSomething() {
-		AtomicInteger countdown = new AtomicInteger(2);
+		AtomicInteger countDown = new AtomicInteger(2);
 
 		return Mono.defer(() -> {
 			if (countDown.get() == 0 || countDown.decrementAndGet() == 0) {
