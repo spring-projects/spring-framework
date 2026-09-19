@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -40,6 +41,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -119,6 +121,23 @@ class DefaultRestClientTests {
 				this.client.get().uri(URL).retrieve()
 						.requiredBody(new ParameterizedTypeReference<String>() {})
 		);
+	}
+
+	@Test // gh-37078
+	void bodyWhenResponseBodyThrowsIOExceptionThenResourceAccessException() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+		given(this.response.getHeaders()).willReturn(responseHeaders);
+		given(this.response.getBody()).willThrow(new SocketTimeoutException("Read timed out"));
+
+		assertThatExceptionOfType(ResourceAccessException.class)
+				.isThrownBy(() -> this.client.get().uri(URL).retrieve().body(String.class))
+				.withMessageContaining("I/O error while extracting response for type")
+				.withMessageNotContaining("content type")
+				.withCauseInstanceOf(SocketTimeoutException.class);
 	}
 
 	@ParameterizedTest(name = "{0}")
