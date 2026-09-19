@@ -972,14 +972,16 @@ public class MethodParameter {
 		 * functions via Kotlin reflection.
 		 */
 		private static Type getGenericReturnType(Method method) {
-			try {
-				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-				if (function != null && function.isSuspend()) {
-					return ReflectJvmMapping.getJavaType(function.getReturnType());
+			if (KotlinDetector.isSuspendingFunction(method)) {
+				try {
+					KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+					if (function != null && function.isSuspend()) {
+						return ReflectJvmMapping.getJavaType(function.getReturnType());
+					}
 				}
-			}
-			catch (UnsupportedOperationException ex) {
-				// probably a synthetic class - let's use java reflection instead
+				catch (UnsupportedOperationException ex) {
+					// probably a synthetic class - let's use java reflection instead
+				}
 			}
 			return method.getGenericReturnType();
 		}
@@ -989,18 +991,20 @@ public class MethodParameter {
 		 * functions via Kotlin reflection.
 		 */
 		private static Class<?> getReturnType(Method method) {
-			try {
-				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-				if (function != null && function.isSuspend()) {
-					Type paramType = ReflectJvmMapping.getJavaType(function.getReturnType());
-					if (paramType == Unit.class) {
-						paramType = void.class;
+			if (KotlinDetector.isSuspendingFunction(method)) {
+				try {
+					KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+					if (function != null && function.isSuspend()) {
+						Type paramType = ReflectJvmMapping.getJavaType(function.getReturnType());
+						if (paramType == Unit.class) {
+							paramType = void.class;
+						}
+						return ResolvableType.forType(paramType).resolve(method.getReturnType());
 					}
-					return ResolvableType.forType(paramType).resolve(method.getReturnType());
 				}
-			}
-			catch (UnsupportedOperationException ex) {
-				// probably a synthetic class - let's use java reflection instead
+				catch (UnsupportedOperationException ex) {
+					// probably a synthetic class - let's use java reflection instead
+				}
 			}
 			return method.getReturnType();
 		}

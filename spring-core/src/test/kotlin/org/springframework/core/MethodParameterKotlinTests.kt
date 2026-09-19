@@ -31,6 +31,7 @@ import kotlin.reflect.jvm.javaMethod
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @author Konrad Kaminski
+ * @author Greg Taube
  */
 class MethodParameterKotlinTests {
 
@@ -115,6 +116,18 @@ class MethodParameterKotlinTests {
 	}
 
 	@Test
+	fun `Regular function return type`() {
+		assertThat(returnParameterType("regularFun")).isEqualTo(Producer::class.java)
+		assertThat(returnGenericParameterTypeName("regularFun")).isEqualTo("org.springframework.core.Producer<java.lang.Number>")
+	}
+
+	@Test
+	fun `Regular function with Continuation parameter return type`() {
+		assertThat(returnParameterType("regularFunWithContinuation")).isEqualTo(Producer::class.java)
+		assertThat(returnGenericParameterTypeName("regularFunWithContinuation")).isEqualTo("org.springframework.core.Producer<java.lang.Number>")
+	}
+
+	@Test
 	fun `Parameter name for regular function`() {
 		val methodParameter = returnMethodParameter("nullable", 0)
 		assertThat(methodParameter.getParameterName()).isEqualTo("nullable")
@@ -186,6 +199,12 @@ class MethodParameterKotlinTests {
 
 	@Suppress("unused", "unused_parameter")
 	suspend fun suspendFun8(p1: String): Any? = TODO()
+
+	@Suppress("unused", "unused_parameter")
+	fun regularFun(p1: String): Producer<Number> = TODO()
+
+	@Suppress("unused", "unused_parameter")
+	fun regularFunWithContinuation(p1: String, continuation: Continuation<Number>): Producer<Number> = TODO()
 }
 
 interface Producer<out T>
