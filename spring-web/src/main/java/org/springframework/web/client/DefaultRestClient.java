@@ -61,6 +61,7 @@ import org.springframework.http.client.observation.ClientHttpObservationDocument
 import org.springframework.http.client.observation.ClientRequestObservationContext;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.client.observation.DefaultClientRequestObservationConvention;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
@@ -814,6 +815,23 @@ final class DefaultRestClient implements RestClient {
 			T body = body(bodyType);
 			Assert.state(body != null, "The body must not be null");
 			return body;
+		}
+
+		@Override
+		public <T> void bodyToServerSentEvents(Class<T> dataType, Consumer<ServerSentEvent<T>> consumer) {
+			Assert.notNull(dataType, "DataType must not be null");
+			Assert.notNull(consumer, "Consumer must not be null");
+
+			SseEventReader sseReader = new SseEventReader(
+					DefaultRestClient.this.messageConverters, this.hints);
+
+			executeAndExtract((request, response) -> {
+				try (response) {
+					applyStatusHandlers(request, response);
+					sseReader.read(response, dataType, consumer);
+				}
+				return null;
+			});
 		}
 
 		@Override

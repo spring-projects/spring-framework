@@ -25,6 +25,8 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -57,6 +59,7 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.multipart.FilePart;
 import org.springframework.http.converter.multipart.FormFieldPart;
 import org.springframework.http.converter.multipart.Part;
@@ -1207,6 +1210,76 @@ class RestClientIntegrationTests {
 				.body(String.class);
 
 		expectRequest(request -> assertThat(request.getHeaders().get("Cookie")).isEqualTo("test=Hello"));
+	}
+
+	@ParameterizedRestClientTest
+	void serverSentEventsAsString(ClientHttpRequestFactory requestFactory) throws IOException {
+		startServer(requestFactory);
+
+		String sseBody = ": first comment\n" +
+				"data: line1\n" +
+				"data: line2\n" +
+				"id: 42\n" +
+				"event: update\n" +
+				"retry: 3000\n" +
+				"\n" +
+				"data: just data\n";
+
+		prepareResponse(builder -> builder
+				.setHeader("Content-Type", "text/event-stream")
+				.body(sseBody));
+
+		List<ServerSentEvent<String>> events = new ArrayList<>();
+		this.restClient.get()
+				.uri("/events")
+				.accept(MediaType.TEXT_EVENT_STREAM)
+				.retrieve()
+				.bodyToServerSentEvents(String.class, events::add);
+
+		assertThat(events).hasSize(2);
+
+		ServerSentEvent<String> event1 = events.get(0);
+		assertThat(event1.comment()).isEqualTo("first comment");
+		assertThat(event1.data()).isEqualTo("line1\nline2");
+		assertThat(event1.id()).isEqualTo("42");
+		assertThat(event1.event()).isEqualTo("update");
+		assertThat(event1.retry()).isEqualTo(Duration.ofMillis(3000));
+
+		ServerSentEvent<String> event2 = events.get(1);
+		assertThat(event2.data()).isEqualTo("just data");
+		assertThat(event2.id()).isNull();
+		assertThat(event2.event()).isNull();
+		assertThat(event2.retry()).isNull();
+
+		expectRequestCount(1);
+		expectRequest(request ->
+				assertThat(request.getHeaders().get("Accept")).isEqualTo("text/event-stream"));
+	}
+
+	@ParameterizedRestClientTest
+	void serverSentEventsAsPojo(ClientHttpRequestFactory requestFactory) throws IOException {
+		startServer(requestFactory);
+
+		String sseBody = "data: {\"bar\":\"barbar\",\"foo\":\"foofoo\"}\n" +
+				"\n" +
+				"data: {\"bar\":\"b2\",\"foo\":\"f2\"}\n";
+
+		prepareResponse(builder -> builder
+				.setHeader("Content-Type", "text/event-stream")
+				.body(sseBody));
+
+		List<Pojo> pojos = new ArrayList<>();
+		this.restClient.get()
+				.uri("/events")
+				.accept(MediaType.TEXT_EVENT_STREAM)
+				.retrieve()
+				.bodyToServerSentEvents(Pojo.class, sse -> pojos.add(sse.data()));
+
+		assertThat(pojos).containsExactly(
+				new Pojo("foofoo", "barbar"),
+				new Pojo("f2", "b2"));
+
+		expectRequestCount(1);
 	}
 
 	private void prepareResponse(Function<MockResponse.Builder, MockResponse.Builder> f) {

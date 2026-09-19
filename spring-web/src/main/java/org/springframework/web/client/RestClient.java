@@ -46,6 +46,7 @@ import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.lang.CheckReturnValue;
@@ -1076,6 +1077,40 @@ public interface RestClient {
 		 * @since 7.0.4
 		 */
 		<T> T requiredBody(ParameterizedTypeReference<T> bodyType);
+
+		/**
+		 * Consume a stream of Server-Sent Events (SSE) from a
+		 * {@link MediaType#TEXT_EVENT_STREAM text/event-stream} response, invoking
+		 * the given consumer for each decoded event.
+		 * <p>Unlike {@link #body(Class) body}, which expects a single, fully
+		 * buffered response, this method reads the response incrementally as it
+		 * is streamed from the server, and blocks until the stream has been
+		 * fully consumed (i.e. the server closes the connection) or an error
+		 * occurs. The {@code data} payload of each event is decoded to
+		 * {@code dataType} using the configured
+		 * {@link Builder#messageConverters message converters} &mdash; typically
+		 * {@code String} for plain text events, or a JSON type when the payload
+		 * is JSON.
+		 * <p>Typical usage:
+		 * <pre class="code">
+		 * List&lt;TradeEvent&gt; events = new CopyOnWriteArrayList&lt;&gt;();
+		 * client.get()
+		 *     .uri("/events")
+		 *     .accept(MediaType.TEXT_EVENT_STREAM)
+		 *     .retrieve()
+		 *     .bodyToServerSentEvents(TradeEvent.class, events::add);
+		 * </pre>
+		 * @param dataType the type to decode the event {@code data} payload to
+		 * @param consumer the consumer invoked for each decoded event
+		 * @param <T> the data type
+		 * @throws RestClientResponseException by default when receiving a
+		 * response with a status code of 4xx or 5xx. Use
+		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
+		 * handling.
+		 * @see ServerSentEvent
+		 * @since 7.1
+		 */
+		<T> void bodyToServerSentEvents(Class<T> dataType, Consumer<ServerSentEvent<T>> consumer);
 
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to an Object of
