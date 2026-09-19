@@ -370,7 +370,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public @Nullable V computeIfAbsent(@Nullable K key, Function<@Nullable ? super K, @Nullable ? extends V> mappingFunction) {
+	public @Nullable V computeIfAbsent(@Nullable K key, Function<? super @Nullable K, ? extends @Nullable V> mappingFunction) {
 		// Avoid locking if entry is present
 		Reference<K, V> ref = getReference(key, Restructure.NEVER);
 		Entry<K, V> entry = (ref != null ? ref.get() : null);
@@ -396,7 +396,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public @Nullable V computeIfPresent(@Nullable K key, BiFunction<@Nullable ? super K, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+	public @Nullable V computeIfPresent(@Nullable K key, BiFunction<? super @Nullable K, ? super @Nullable V, ? extends @Nullable V> remappingFunction) {
 		// Avoid locking if entry is absent
 		Reference<K, V> ref = getReference(key, Restructure.NEVER);
 		Entry<K, V> entry = (ref != null ? ref.get() : null);
@@ -428,7 +428,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public @Nullable V compute(@Nullable K key, BiFunction<@Nullable ? super K, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+	public @Nullable V compute(@Nullable K key, BiFunction<? super @Nullable K, ? super @Nullable V, ? extends @Nullable V> remappingFunction) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
@@ -461,7 +461,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public @Nullable V merge(@Nullable K key, @Nullable V value, BiFunction<@Nullable ? super V, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+	public @Nullable V merge(@Nullable K key, @Nullable V value, BiFunction<? super @Nullable V, ? super @Nullable V, ? extends @Nullable V> remappingFunction) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
