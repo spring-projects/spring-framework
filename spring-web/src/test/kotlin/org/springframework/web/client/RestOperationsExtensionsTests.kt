@@ -23,7 +23,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
+import org.springframework.http.RequestEntity
+import org.springframework.http.ResponseEntity
 import org.springframework.util.ReflectionUtils
 import java.net.URI
 import kotlin.reflect.full.createType

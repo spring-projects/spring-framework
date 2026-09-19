@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.RequestPostProcessor
 import org.springframework.util.MultiValueMap
 import java.security.Principal
-import java.util.*
+import java.util.Locale
 import jakarta.servlet.http.Cookie
 import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder
 

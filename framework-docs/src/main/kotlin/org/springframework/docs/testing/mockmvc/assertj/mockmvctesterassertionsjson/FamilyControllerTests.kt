@@ -16,7 +16,8 @@
 
 package org.springframework.docs.testing.mockmvc.assertj.mockmvctesterassertionsjson
 
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.entry
 import org.assertj.core.api.InstanceOfAssertFactories
 import org.assertj.core.api.ThrowingConsumer
 import org.springframework.test.web.servlet.assertj.MockMvcTester

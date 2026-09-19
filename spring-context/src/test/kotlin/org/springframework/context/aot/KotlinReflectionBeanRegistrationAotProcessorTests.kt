@@ -22,7 +22,10 @@ import org.mockito.Mockito
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates
 import org.springframework.aot.test.generate.TestGenerationContext
-import org.springframework.beans.factory.aot.*
+import org.springframework.beans.factory.aot.AotServices
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor
+import org.springframework.beans.factory.aot.BeanRegistrationCode
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.beans.factory.support.RegisteredBean
 import org.springframework.beans.factory.support.RootBeanDefinition

@@ -17,11 +17,16 @@
 package org.springframework.test.web.servlet.result
 
 import io.mockk.mockk
-import org.hamcrest.text.CharSequenceLength.*
+import org.hamcrest.text.CharSequenceLength.hasLength
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
-import org.springframework.test.web.servlet.*
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MvcResult
+import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.ResultActionsDsl
+import org.springframework.test.web.servlet.ResultHandler
+import org.springframework.test.web.servlet.ResultMatcher
 import org.springframework.web.servlet.FlashMap
 import org.springframework.web.servlet.ModelAndView
 import java.nio.charset.StandardCharsets

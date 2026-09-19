@@ -20,10 +20,20 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpHeaders.*
-import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpHeaders.ACCEPT
+import org.springframework.http.HttpHeaders.CONTENT_TYPE
+import org.springframework.http.HttpMethod.GET
+import org.springframework.http.HttpMethod.PATCH
+import org.springframework.http.HttpMethod.POST
+import org.springframework.http.HttpMethod.PUT
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType.*
+import org.springframework.http.MediaType.APPLICATION_ATOM_XML
+import org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
+import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE
+import org.springframework.http.MediaType.APPLICATION_PDF_VALUE
 import org.springframework.web.servlet.handler.PathPatternsTestUtils
 
 /**

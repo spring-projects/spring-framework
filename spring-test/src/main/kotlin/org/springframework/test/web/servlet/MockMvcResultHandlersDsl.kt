@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet
 
-import org.springframework.test.web.servlet.result.*
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import java.io.OutputStream
 import java.io.Writer
 

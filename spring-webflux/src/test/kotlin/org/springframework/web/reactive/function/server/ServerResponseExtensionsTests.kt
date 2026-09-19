@@ -25,7 +25,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.MediaType.*
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.APPLICATION_XML
+import org.springframework.http.MediaType.TEXT_EVENT_STREAM
+import org.springframework.http.MediaType.TEXT_HTML
 import reactor.core.publisher.Mono
 import java.util.concurrent.CompletableFuture
 

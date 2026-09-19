@@ -18,7 +18,11 @@ package org.springframework.web.reactive.result.method.annotation
 
 import io.micrometer.observation.ObservationRegistry
 import io.micrometer.observation.tck.TestObservationRegistry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.assertj.core.api.Assertions.assertThat

@@ -19,7 +19,10 @@ package org.springframework.cache
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.testfixture.beans.TestBean
-import org.springframework.cache.CacheReproTests.*
+import org.springframework.cache.CacheReproTests.Spr14235Config
+import org.springframework.cache.CacheReproTests.Spr15271ConfigA
+import org.springframework.cache.CacheReproTests.Spr15271ConfigB
+import org.springframework.cache.CacheReproTests.Spr15271Interface
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable

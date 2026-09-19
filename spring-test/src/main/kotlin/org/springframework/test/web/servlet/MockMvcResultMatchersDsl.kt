@@ -17,7 +17,17 @@
 package org.springframework.test.web.servlet
 
 import org.hamcrest.Matcher
-import org.springframework.test.web.servlet.result.*
+import org.springframework.test.web.servlet.result.ContentResultMatchersDsl
+import org.springframework.test.web.servlet.result.CookieResultMatchersDsl
+import org.springframework.test.web.servlet.result.FlashAttributeResultMatchersDsl
+import org.springframework.test.web.servlet.result.HeaderResultMatchersDsl
+import org.springframework.test.web.servlet.result.JsonPathResultMatchersDsl
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.result.ModelResultMatchersDsl
+import org.springframework.test.web.servlet.result.RequestResultMatchersDsl
+import org.springframework.test.web.servlet.result.StatusResultMatchersDsl
+import org.springframework.test.web.servlet.result.ViewResultMatchersDsl
+import org.springframework.test.web.servlet.result.XpathResultMatchersDsl
 
 /**
  * Provide a [MockMvcResultMatchers] Kotlin DSL in order to be able to write idiomatic Kotlin code.

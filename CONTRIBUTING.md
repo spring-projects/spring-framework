@@ -122,6 +122,12 @@ The wiki pages
 [IntelliJ IDEA Editor Settings](https://github.com/spring-projects/spring-framework/wiki/IntelliJ-IDEA-Editor-Settings)
 define the source file coding standards we use along with some IntelliJ editor settings we customize.
 
+Kotlin source code follows the official
+[Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html), with the
+project-specific settings in [.editorconfig](.editorconfig) taking precedence. In particular,
+Kotlin source code uses tabs with an indent size of four and does not use wildcard imports.
+Run `./gradlew ktlintCheck` to check Kotlin source code.
+
 ### Reference Docs
 
 The reference documentation is authored in [Asciidoctor](https://asciidoctor.org/) format

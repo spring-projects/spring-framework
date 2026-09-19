@@ -25,7 +25,8 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import java.net.InetSocketAddress
 import java.security.Principal
-import java.util.*
+import java.util.Optional
+import java.util.OptionalLong
 
 /**
  * Tests for WebMvc.fn [ServerRequest] extensions.

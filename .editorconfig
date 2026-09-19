@@ -8,3 +8,8 @@ indent_style = tab
 indent_size = 4
 continuation_indent_size = 8
 end_of_line = lf
+
+[*.{kt,kts}]
+ktlint_code_style = ktlint_official
+ktlint_standard = disabled
+ktlint_standard_no-wildcard-imports = enabled

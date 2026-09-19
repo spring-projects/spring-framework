@@ -18,7 +18,9 @@ package org.springframework.web.bind.annotation
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import org.springframework.aot.hint.*
+import org.springframework.aot.hint.ExecutableHint
+import org.springframework.aot.hint.ReflectionHints
+import org.springframework.aot.hint.TypeReference
 
 /**
  * Kotlin tests for {@link ControllerMappingReflectiveProcessor}.

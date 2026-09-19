@@ -20,7 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.core.test.ConstructorPerson
 import java.math.BigDecimal
-import java.util.*
+import java.util.Date
 
 class DataClassRowMapperKotlinTests : AbstractRowMapperTests() {
 

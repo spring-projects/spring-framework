@@ -25,7 +25,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor
 import org.springframework.beans.factory.getBean
 import org.springframework.beans.factory.getBeanProvider
-import org.springframework.context.support.BeanDefinitionDsl.*
+import org.springframework.context.support.BeanDefinitionDsl.Scope
 import org.springframework.core.Ordered
 import org.springframework.core.env.get
 import org.springframework.core.testfixture.env.MockPropertySource

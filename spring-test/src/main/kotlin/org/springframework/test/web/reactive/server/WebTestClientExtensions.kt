@@ -19,7 +19,12 @@ package org.springframework.test.web.reactive.server
 import kotlinx.coroutines.flow.Flow
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.test.web.reactive.server.WebTestClient.*
+import org.springframework.test.web.reactive.server.WebTestClient.BodySpec
+import org.springframework.test.web.reactive.server.WebTestClient.FluxExchangeResult
+import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec
+import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec
+import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec
 
 /**
  * Extension for [RequestBodySpec.body] providing a variant without explicit class

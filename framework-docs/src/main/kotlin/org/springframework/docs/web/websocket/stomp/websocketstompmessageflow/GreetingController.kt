@@ -3,7 +3,7 @@ package org.springframework.docs.web.websocket.stomp.websocketstompmessageflow
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.stereotype.Controller
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 // tag::snippet[]
 @Controller

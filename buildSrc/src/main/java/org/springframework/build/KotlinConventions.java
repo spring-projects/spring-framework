@@ -24,6 +24,8 @@ import org.jetbrains.dokka.gradle.DokkaPlugin;
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget;
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion;
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile;
+import org.jlleitschuh.gradle.ktlint.KtlintExtension;
+import org.jlleitschuh.gradle.ktlint.KtlintPlugin;
 
 /**
  * @author Brian Clozel
@@ -33,6 +35,11 @@ public class KotlinConventions {
 
 	void apply(Project project) {
 		project.getPlugins().withId("org.jetbrains.kotlin.jvm", plugin -> {
+			project.getPlugins().apply(KtlintPlugin.class);
+			project.getExtensions().configure(KtlintExtension.class, ktlint -> {
+				ktlint.getVersion().set("1.8.0");
+				ktlint.getRelative().set(true);
+			});
 			project.getTasks().withType(KotlinCompile.class, this::configure);
 			if (project.getLayout().getProjectDirectory().dir("src/main/kotlin").getAsFile().exists()) {
 				project.getPlugins().apply(DokkaPlugin.class);
