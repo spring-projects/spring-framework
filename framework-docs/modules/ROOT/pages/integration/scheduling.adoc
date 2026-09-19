@@ -131,7 +131,7 @@ listing shows the `TaskScheduler` interface definition:
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay);
 
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay);
-
+	}
 ----
 
 The simplest method is the one named `schedule` that takes only a `Runnable` and an `Instant`.
@@ -475,7 +475,7 @@ seconds:
 				return Mono.fromRunnable(() -> System.out.println("Message"));
 			}
 			return Mono.error(new IllegalStateException("Cannot deliver message"));
-		})
+		});
 	}
 ----
 
