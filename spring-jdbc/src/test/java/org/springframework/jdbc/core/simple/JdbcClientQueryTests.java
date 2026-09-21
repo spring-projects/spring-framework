@@ -212,8 +212,7 @@ class JdbcClientQueryTests {
 				.param(1, 3)
 				.query().optionalValue();
 
-		assertThat(value.isPresent()).isTrue();
-		assertThat(value.get()).isEqualTo(22);
+		assertThat(value).contains(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 		verify(resultSet).close();
@@ -229,7 +228,7 @@ class JdbcClientQueryTests {
 				.param(1, 3)
 				.query().optionalValue();
 
-		assertThat(value.isPresent()).isFalse();
+		assertThat(value).isEmpty();
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 		verify(resultSet).close();
