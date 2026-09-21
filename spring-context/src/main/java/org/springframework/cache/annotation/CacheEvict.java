@@ -77,7 +77,8 @@ public @interface CacheEvict {
 	 * <li>{@code #result} for a reference to the result of the method invocation, which
 	 * can only be used if {@link #beforeInvocation()} is {@code false}. For supported
 	 * wrappers such as {@code Optional}, {@code #result} refers to the actual object,
-	 * not the wrapper</li>
+	 * not the wrapper. For a method that returns a {@code Flux}, {@code #result} refers
+	 * to a {@code List} containing all values collected from the {@code Flux}.</li>
 	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
 	 * references to the {@link java.lang.reflect.Method method}, target object, and
 	 * affected cache(s) respectively.</li>
@@ -123,6 +124,11 @@ public @interface CacheEvict {
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
 	 * <ul>
+	 * <li>{@code #result} for a reference to the result of the method invocation, which
+	 * can only be used if {@link #beforeInvocation()} is {@code false}. For supported
+	 * wrappers such as {@code Optional}, {@code #result} refers to the actual object,
+	 * not the wrapper. For a method that returns a {@code Flux}, {@code #result} refers
+	 * to a {@code List} containing all values collected from the {@code Flux}.</li>
 	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
 	 * references to the {@link java.lang.reflect.Method method}, target object, and
 	 * affected cache(s) respectively.</li>

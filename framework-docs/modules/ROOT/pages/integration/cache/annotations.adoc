@@ -381,10 +381,12 @@ available to the context so that you can use them for key and conditional comput
 
 | `result`
 | Evaluation context
-| The result of the method call (the value to be cached). Only available in `unless`
-  expressions, `cache put` expressions (to compute the `key`), or `cache evict`
-  expressions (when `beforeInvocation` is `false`). For supported wrappers (such as
-  `Optional`), `#result` refers to the actual object, not the wrapper.
+| The result of the method call (the value to be cached, or evaluated for eviction). Only
+  available in `unless` expressions, `cache put` expressions (`key`, `condition`, or
+  `unless`), or `cache evict` expressions (`key` or `condition`, when `beforeInvocation`
+  is `false`). For supported wrappers (such as `Optional`), `#result` refers to the
+  actual object, not the wrapper. For a method returning a `Flux`, `#result` refers to a
+  `List` containing all values collected from the `Flux`.
 | `#result`
 |===
 
@@ -464,7 +466,12 @@ not the case with `@Cacheable` which adds data to the cache or updates data in t
 and, thus, requires a result.
 
 As of 6.1, `@CacheEvict` takes `CompletableFuture` and reactive return types into account,
-performing an after-invocation evict operation whenever processing has completed.
+performing an after-invocation evict operation whenever processing has completed. As with
+`@Cacheable` and `@CachePut`, for a method returning a `Flux`, all emitted elements are
+collected into a `List` before the evict operation is performed. When `beforeInvocation`
+is `false`, that same `List` is what the `condition` SpEL expression sees as the
+`#result`. Either way, the `Flux` returned to the caller is unaffected by this collection
+process.
 
 TIP: When `@CacheEvict` is combined with `@Retryable`, the retry advice is applied
 outermost, so eviction runs again on every retry attempt -- and, with
