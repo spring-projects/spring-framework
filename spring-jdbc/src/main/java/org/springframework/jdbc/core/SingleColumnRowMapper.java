@@ -46,7 +46,7 @@ import org.springframework.util.NumberUtils;
  * @see JdbcTemplate#queryForList(String, Class)
  * @see JdbcTemplate#queryForObject(String, Class)
  */
-public class SingleColumnRowMapper<T> implements RowMapper<@Nullable T> {
+public class SingleColumnRowMapper<T extends @Nullable Object> implements RowMapper<T> {
 
 	private @Nullable Class<?> requiredType;
 
@@ -115,7 +115,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<@Nullable T> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public @Nullable T mapRow(ResultSet rs, int rowNum) throws SQLException {
+	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 		// Validate column count.
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int nrOfColumns = rsmd.getColumnCount();
