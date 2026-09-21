@@ -131,7 +131,7 @@ listing shows the `TaskScheduler` interface definition:
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay);
 
 		ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay);
-
+	}
 ----
 
 The simplest method is the one named `schedule` that takes only a `Runnable` and an `Instant`.
@@ -468,14 +468,14 @@ seconds:
 ----
 	@Scheduled(initialDelay = 0, fixedRate = 5000)
 	public Mono<Void> reactiveSomething() {
-		AtomicInteger countdown = new AtomicInteger(2);
+		AtomicInteger countDown = new AtomicInteger(2);
 
 		return Mono.defer(() -> {
 			if (countDown.get() == 0 || countDown.decrementAndGet() == 0) {
 				return Mono.fromRunnable(() -> System.out.println("Message"));
 			}
 			return Mono.error(new IllegalStateException("Cannot deliver message"));
-		})
+		});
 	}
 ----
 
@@ -572,6 +572,11 @@ NOTE: There is no direct XML equivalent for `@Async`, since such methods should 
 for asynchronous execution in the first place, not externally re-declared to be asynchronous.
 However, you can manually set up Spring's `AsyncExecutionInterceptor` with Spring AOP,
 in combination with a custom pointcut.
+
+TIP: When `@Async` is combined with `@Retryable`, the async advice is applied outermost, so
+all retry attempts run on the async executor thread. See
+xref:core/resilience.adoc#resilience-annotations-retryable-combining-async[Combining `@Retryable` with `@Async`]
+for details.
 
 
 [[scheduling-annotation-support-qualification]]

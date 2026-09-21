@@ -94,7 +94,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * <li>Consider length (longer wins)
 	 * </ol>
 	 */
-	public static final Comparator<PathPattern> SPECIFICITY_COMPARATOR =
+	public static final Comparator<@Nullable PathPattern> SPECIFICITY_COMPARATOR =
 			Comparator.nullsLast(
 					Comparator.<PathPattern>
 							comparingInt(p -> p.isCatchAll() ? 1 : 0)
@@ -567,7 +567,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @return {@code true} has more than zero elements
 	 */
 	private boolean hasLength(@Nullable PathContainer container) {
-		return container != null && container.elements().size() > 0;
+		return container != null && !container.elements().isEmpty();
 	}
 
 	private static int scoreByNormalizedLength(PathPattern pattern) {

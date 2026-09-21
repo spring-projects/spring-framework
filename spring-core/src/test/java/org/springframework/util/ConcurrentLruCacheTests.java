@@ -16,9 +16,11 @@
 
 package org.springframework.util;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
 
 import org.junit.jupiter.api.Test;
 
@@ -61,7 +63,7 @@ class ConcurrentLruCacheTests {
 	@Test
 	void getAndSize() {
 		assertThat(this.cache.capacity()).isEqualTo(2);
-		assertThat(this.cache.size()).isEqualTo(0);
+		assertThat(this.cache.size()).isZero();
 		assertThat(this.cache.get("k1")).isEqualTo("k1value");
 		assertThat(this.cache.size()).isEqualTo(1);
 		assertThat(this.cache.contains("k1")).isTrue();
@@ -102,7 +104,7 @@ class ConcurrentLruCacheTests {
 		assertThat(this.cache.contains("k1")).isTrue();
 		assertThat(this.cache.contains("k2")).isTrue();
 		this.cache.clear();
-		assertThat(this.cache.size()).isEqualTo(0);
+		assertThat(this.cache.size()).isZero();
 		assertThat(this.cache.contains("k1")).isFalse();
 		assertThat(this.cache.contains("k2")).isFalse();
 		assertThat(this.cache.get("k3")).isEqualTo("k3value");
@@ -110,6 +112,36 @@ class ConcurrentLruCacheTests {
 		assertThat(this.cache.contains("k1")).isFalse();
 		assertThat(this.cache.contains("k2")).isFalse();
 		assertThat(this.cache.contains("k3")).isTrue();
+	}
+
+	@Test  // gh-37287
+	void clearRemovesEntryWithPendingWriteOperation() throws Exception {
+		String key = "k1";
+
+		// Hold the eviction lock so that the put() triggered below cannot drain
+		// its own AddTask and is left pending in the write operations queue.
+		Field evictionLockField = ConcurrentLruCache.class.getDeclaredField("evictionLock");
+		evictionLockField.setAccessible(true);
+		Lock evictionLock = (Lock) evictionLockField.get(this.cache);
+
+		evictionLock.lock();
+		try {
+			Thread putTrigger = new Thread(() -> this.cache.get(key));
+			putTrigger.start();
+			putTrigger.join(5000);
+			assertThat(putTrigger.isAlive()).isFalse();
+		}
+		finally {
+			evictionLock.unlock();
+		}
+
+		assertThat(this.cache.size()).as("cache size").isEqualTo(1);
+		assertThat(this.cache.contains(key)).as("contains %s", key).isTrue();
+
+		this.cache.clear();
+
+		assertThat(this.cache.size()).as("cache size").isZero();
+		assertThat(this.cache.contains(key)).as("contains %s", key).isFalse();
 	}
 
 	@Test

@@ -23,13 +23,17 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.Assert;
+
 /**
  * Abstract implementation of the {@link PropertyAccessor} interface.
- * Provides base implementations of all convenience methods, with the
+ *
+ * <p>Provides base implementations of all convenience methods, with the
  * implementation of actual property access left to subclasses.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.0
  * @see #getPropertyValue
  * @see #setPropertyValue
@@ -41,6 +45,8 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	private boolean autoGrowNestedPaths = false;
 
 	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
+
+	private int maxNestedPathDepth = DEFAULT_MAX_NESTED_PATH_DEPTH;
 
 	boolean suppressNotWritablePropertyException = false;
 
@@ -73,6 +79,17 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	@Override
 	public int getAutoGrowCollectionLimit() {
 		return this.autoGrowCollectionLimit;
+	}
+
+	@Override
+	public void setMaxNestedPathDepth(int maxNestedPathDepth) {
+		Assert.isTrue(maxNestedPathDepth >= 0, "'maxNestedPathDepth' must not be negative");
+		this.maxNestedPathDepth = maxNestedPathDepth;
+	}
+
+	@Override
+	public int getMaxNestedPathDepth() {
+		return this.maxNestedPathDepth;
 	}
 
 

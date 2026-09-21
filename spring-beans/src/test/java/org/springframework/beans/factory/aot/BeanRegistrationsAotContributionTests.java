@@ -27,10 +27,10 @@ import javax.lang.model.element.Modifier;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
+import org.springframework.aot.generate.NameGenerator;
 import org.springframework.aot.generate.ValueCodeGenerationException;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationsAotContribution.Registration;
@@ -109,7 +109,7 @@ class BeanRegistrationsAotContributionTests {
 	@Test
 	void applyToWhenHasNameGeneratesPrefixedFeatureName() {
 		this.generationContext = new TestGenerationContext(
-				new ClassNameGenerator(TestGenerationContext.TEST_TARGET, "Management"));
+				new NameGenerator(TestGenerationContext.TEST_TARGET, "Management"));
 		this.beanFactoryInitializationCode = new MockBeanFactoryInitializationCode(this.generationContext);
 		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(TestBean.class));
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(this.methodGeneratorFactory,

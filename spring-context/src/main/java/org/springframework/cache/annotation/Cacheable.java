@@ -104,8 +104,8 @@ public @interface Cacheable {
 	 * affected cache(s) respectively.</li>
 	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
 	 * ({@code #root.targetClass}) are also available.
-	 * <li>Method arguments can be accessed by index. For instance the second argument
-	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * <li>Method arguments can be accessed by index. For example, the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1}, or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
 	 */
@@ -138,7 +138,7 @@ public @interface Cacheable {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used for making the method
-	 * caching conditional. Cache the result if the condition evaluates to
+	 * caching conditional. Caches the result if the condition evaluates to
 	 * {@code true}.
 	 * <p>Default is {@code ""}, meaning the method result is always cached.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
@@ -149,8 +149,8 @@ public @interface Cacheable {
 	 * affected cache(s) respectively.</li>
 	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
 	 * ({@code #root.targetClass}) are also available.
-	 * <li>Method arguments can be accessed by index. For instance the second argument
-	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * <li>Method arguments can be accessed by index. For example, the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1}, or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
 	 */
@@ -158,7 +158,7 @@ public @interface Cacheable {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used to veto method caching.
-	 * Veto caching the result if the condition evaluates to {@code true}.
+	 * Vetoes caching of the result if the condition evaluates to {@code true}.
 	 * <p>Unlike {@link #condition}, this expression is evaluated after the method
 	 * has been called and can therefore refer to the {@code result}.
 	 * <p>Default is {@code ""}, meaning that caching is never vetoed.
@@ -167,14 +167,16 @@ public @interface Cacheable {
 	 * <ul>
 	 * <li>{@code #result} for a reference to the result of the method invocation. For
 	 * supported wrappers such as {@code Optional}, {@code #result} refers to the actual
-	 * object, not the wrapper</li>
+	 * object, not the wrapper. For a method that returns a {@code Flux}, {@code #result}
+	 * refers to a {@code List} containing all values collected from the {@code Flux},
+	 * mirroring the value that would be cached.</li>
 	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
 	 * references to the {@link java.lang.reflect.Method method}, target object, and
 	 * affected cache(s) respectively.</li>
 	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
 	 * ({@code #root.targetClass}) are also available.
-	 * <li>Method arguments can be accessed by index. For instance the second argument
-	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * <li>Method arguments can be accessed by index. For example, the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1}, or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
 	 * @since 3.2

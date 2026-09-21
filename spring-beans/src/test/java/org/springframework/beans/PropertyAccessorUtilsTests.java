@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Sam Brannen
  */
+@SuppressWarnings("removal")
 class PropertyAccessorUtilsTests {
 
 	@Test
@@ -80,6 +81,13 @@ class PropertyAccessorUtilsTests {
 		assertThat(PropertyAccessorUtils.matchesProperty("user[name]", "user")).isTrue();
 	}
 
+	@Test  // gh-37275
+	void matchesPropertyNeverThrowsForMalformedInput() {
+		// Non-throwing, best-effort contract, same as canonicalPropertyName.
+		assertThat(PropertyAccessorUtils.matchesProperty("map[key1]other", "map")).isFalse();
+		assertThat(PropertyAccessorUtils.matchesProperty("map", "map[key1]other")).isFalse();
+	}
+
 	@Test
 	void canonicalPropertyName() {
 		assertThat(PropertyAccessorUtils.canonicalPropertyName(null)).isEmpty();
@@ -103,32 +111,6 @@ class PropertyAccessorUtilsTests {
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[\"key[0]\"]")).isEqualTo("map[key[0]]");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key[0]'].name")).isEqualTo("map[key[0]].name");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("users['admin[0]']")).isEqualTo("users[admin[0]]");
-	}
-
-	@Test  // gh-36999
-	void hasUnbalancedBrackets() {
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("property")).isFalse();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("array[]")).isFalse();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("array[0]")).isFalse();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map[key1]")).isFalse();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map[key1][key2]")).isFalse();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map[key1].name")).isFalse();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map['key[0]'].name")).isFalse();
-
-		// A lone '[' or ']' anywhere in the path is unbalanced.
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map.[.name")).isTrue();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map.].name")).isTrue();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map.[X.name")).isTrue();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map.X[.name")).isTrue();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("[map")).isTrue();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map]")).isTrue();
-
-		// Multiple stray brackets are unbalanced.
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map.[[.name")).isTrue();
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map.]].name")).isTrue();
-
-		// A ']' before any preceding '[' is unbalanced even if a '[' follows later.
-		assertThat(PropertyAccessorUtils.hasUnbalancedBrackets("map.][.name")).isTrue();
 	}
 
 	@Test

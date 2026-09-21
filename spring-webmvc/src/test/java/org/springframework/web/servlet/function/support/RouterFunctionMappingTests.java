@@ -37,6 +37,7 @@ import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
+import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -174,6 +175,9 @@ class RouterFunctionMappingTests {
 
 		assertThat(result).isNotNull();
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/match");
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATH_PATTERN_ATTRIBUTE))
+				.isInstanceOfSatisfying(PathPattern.class,
+						pattern -> assertThat(pattern.getPatternString()).isEqualTo("/match"));
 		assertThat(ServerHttpObservationFilter.findObservationContext(request))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo("/match"));
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(handlerFunction);

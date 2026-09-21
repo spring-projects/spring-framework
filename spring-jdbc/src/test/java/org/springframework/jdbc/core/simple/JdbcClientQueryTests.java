@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.NumberUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,21 +50,22 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 6.1
  */
 class JdbcClientQueryTests {
 
-	private DataSource dataSource = mock();
+	private final DataSource dataSource = mock();
 
-	private Connection connection = mock();
+	private final Connection connection = mock();
 
-	private PreparedStatement preparedStatement = mock();
+	private final PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet = mock();
+	private final ResultSet resultSet = mock();
 
-	private ResultSetMetaData resultSetMetaData = mock();
+	private final ResultSetMetaData resultSetMetaData = mock();
 
-	private JdbcClient client = JdbcClient.create(dataSource);
+	private final JdbcClient client = JdbcClient.create(dataSource);
 
 
 	@BeforeEach
@@ -78,6 +80,26 @@ class JdbcClientQueryTests {
 
 
 	// Indexed parameters
+
+	@Test
+	void queryForRowSetWithIndexedParam() throws Exception {
+		given(resultSet.next()).willReturn(true, true, false);
+		given(resultSet.getObject(1)).willReturn(11, 12);
+
+		SqlRowSet rowSet = client.sql("SELECT AGE FROM CUSTMR WHERE ID < ?")
+				.param(3).query().rowSet();
+
+		assertThat(rowSet.next()).isTrue();
+		assertThat(rowSet.getInt("age")).as("First row is Integer").isEqualTo(11);
+		assertThat(rowSet.next()).isTrue();
+		assertThat(rowSet.getInt("age")).as("Second row is Integer").isEqualTo(12);
+
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
+		verify(preparedStatement).setObject(1, 3);
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
 
 	@Test
 	void queryForListWithIndexedParam() throws Exception {
@@ -190,8 +212,7 @@ class JdbcClientQueryTests {
 				.param(1, 3)
 				.query().optionalValue();
 
-		assertThat(value.isPresent()).isTrue();
-		assertThat(value.get()).isEqualTo(22);
+		assertThat(value).contains(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 		verify(resultSet).close();
@@ -207,7 +228,7 @@ class JdbcClientQueryTests {
 				.param(1, 3)
 				.query().optionalValue();
 
-		assertThat(value.isPresent()).isFalse();
+		assertThat(value).isEmpty();
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 		verify(resultSet).close();
@@ -243,7 +264,7 @@ class JdbcClientQueryTests {
 				.query((rs, rowNum) -> rs.getInt(1))
 				.optional();
 
-		assertThat(value.get()).isEqualTo(22);
+		assertThat(value).contains(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 		verify(resultSet).close();
@@ -293,6 +314,27 @@ class JdbcClientQueryTests {
 
 
 	// Named parameters
+
+	@Test
+	void queryForRowSetWithNamedParam() throws Exception {
+		given(resultSet.next()).willReturn(true, true, false);
+		given(resultSet.getObject(1)).willReturn(11, 12);
+
+		SqlRowSet rowSet = client.sql("SELECT AGE FROM CUSTMR WHERE ID < :id")
+				.param("id", 3)
+				.query().rowSet();
+
+		assertThat(rowSet.next()).isTrue();
+		assertThat(rowSet.getInt("age")).as("First row is Integer").isEqualTo(11);
+		assertThat(rowSet.next()).isTrue();
+		assertThat(rowSet.getInt("age")).as("Second row is Integer").isEqualTo(12);
+
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
+		verify(preparedStatement).setObject(1, 3);
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
 
 	@Test
 	void queryForListWithNamedParam() throws Exception {
@@ -427,7 +469,7 @@ class JdbcClientQueryTests {
 				.query((rs, rowNum) -> rs.getInt(1))
 				.optional();
 
-		assertThat(value.get()).isEqualTo(22);
+		assertThat(value).contains(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 3);
 		verify(resultSet).close();
@@ -610,7 +652,7 @@ class JdbcClientQueryTests {
 				return NumberUtils.parseNumber(source.substring(3), BigInteger.class);
 			}
 		});
-		client = JdbcClient.create(new NamedParameterJdbcTemplate(dataSource), conversionService);
+		JdbcClient client = JdbcClient.create(new NamedParameterJdbcTemplate(dataSource), conversionService);
 		AgeFieldHolder value = client.sql("SELECT AGE FROM CUSTMR WHERE ID = :id")
 				.param("id", 3)
 				.query(AgeFieldHolder.class).single();

@@ -42,12 +42,15 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.pattern.PathPattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE;
+import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATH_PATTERN_ATTRIBUTE;
+import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 import static org.springframework.web.servlet.HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
@@ -97,6 +100,30 @@ class SimpleUrlHandlerMappingTests {
 		assertThat(chain.getHandler()).isSameAs(mainController);
 		assertThat(request.getAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("/welcome.html");
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(mainController);
+	}
+
+	@HandlerMappingsTest
+	void resolveBestMatchingPathPatternAttribute(SimpleUrlHandlerMapping handlerMapping) throws Exception {
+		StaticApplicationContext applicationContext = new StaticApplicationContext();
+		applicationContext.registerSingleton("mainController", Object.class);
+		Object mainController = applicationContext.getBean("mainController");
+		handlerMapping.setUrlMap(Map.of("/welcome*", "mainController"));
+		handlerMapping.setApplicationContext(applicationContext);
+
+		boolean usePathPatterns = handlerMapping.getPatternParser() != null;
+		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/welcome.x", usePathPatterns);
+		HandlerExecutionChain chain = getHandler(handlerMapping, request);
+
+		assertThat(chain.getHandler()).isSameAs(mainController);
+		assertThat(request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/welcome*");
+		if (usePathPatterns) {
+			assertThat(request.getAttribute(BEST_MATCHING_PATH_PATTERN_ATTRIBUTE))
+					.isInstanceOfSatisfying(PathPattern.class,
+							pattern -> assertThat(pattern.getPatternString()).isEqualTo("/welcome*"));
+		}
+		else {
+			assertThat(request.getAttribute(BEST_MATCHING_PATH_PATTERN_ATTRIBUTE)).isNull();
+		}
 	}
 
 	@HandlerMappingsTest

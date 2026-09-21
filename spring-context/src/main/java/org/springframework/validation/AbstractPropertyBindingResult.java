@@ -22,8 +22,8 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
-import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.PropertyPath;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.ConvertingPropertyEditorAdapter;
@@ -76,11 +76,11 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 
 	/**
 	 * Returns the canonical property name.
-	 * @see org.springframework.beans.PropertyAccessorUtils#canonicalPropertyName
+	 * @see PropertyPath#canonicalNameOrOriginal(String)
 	 */
 	@Override
 	protected String canonicalFieldName(String field) {
-		return PropertyAccessorUtils.canonicalPropertyName(field);
+		return PropertyPath.canonicalNameOrOriginal(field);
 	}
 
 	/**

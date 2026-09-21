@@ -632,10 +632,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			this.viewNameTranslator =
 					context.getBean(REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, RequestToViewNameTranslator.class);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.viewNameTranslator.getClass().getSimpleName());
+				logger.trace("Detected " + this.viewNameTranslator);
 			}
 			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.viewNameTranslator);
+				logger.debug("Detected " + this.viewNameTranslator.getClass().getSimpleName());
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -696,10 +696,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		try {
 			this.flashMapManager = context.getBean(FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.flashMapManager.getClass().getSimpleName());
+				logger.trace("Detected " + this.flashMapManager);
 			}
 			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.flashMapManager);
+				logger.debug("Detected " + this.flashMapManager.getClass().getSimpleName());
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -1368,8 +1368,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param request current HTTP request
 	 * @param attributesSnapshot the snapshot of the request attributes before the include
 	 */
-	@SuppressWarnings("unchecked")
-	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?, ?> attributesSnapshot) {
+	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<String, Object> attributesSnapshot) {
 		// Need to copy into separate Collection here, to avoid side effects
 		// on the Enumeration when removing attributes.
 		Set<String> attrsToCheck = new HashSet<>();
@@ -1382,7 +1381,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		// Add attributes that may have been removed
-		attrsToCheck.addAll((Set<String>) attributesSnapshot.keySet());
+		attrsToCheck.addAll(attributesSnapshot.keySet());
 
 		// Iterate over the attributes to check, restoring the original value
 		// or removing the attribute, respectively, if appropriate.
