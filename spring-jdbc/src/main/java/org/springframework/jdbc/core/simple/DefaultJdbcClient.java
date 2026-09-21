@@ -445,6 +445,10 @@ final class DefaultJdbcClient implements JdbcClient {
 					return classicOps.batchUpdate(psc, new BatchPreparedStatementSetter() {
 						@Override
 						public void setValues(PreparedStatement ps, int i) throws SQLException {
+							if (i == 0) {
+								// indexedBatch[0] is already set by pscf.newPreparedStatementCreator()
+								return;
+							}
 							pscf.newPreparedStatementSetter(indexedBatch.get(i)).setValues(ps);
 						}
 
