@@ -28,7 +28,7 @@ import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation indicating that a method (or all methods on a class) triggers a
- * {@link org.springframework.cache.Cache#evict(Object) cache evict} operation.
+ * {@linkplain org.springframework.cache.Cache#evict(Object) cache evict} operation.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
@@ -77,14 +77,15 @@ public @interface CacheEvict {
 	 * <li>{@code #result} for a reference to the result of the method invocation, which
 	 * can only be used if {@link #beforeInvocation()} is {@code false}. For supported
 	 * wrappers such as {@code Optional}, {@code #result} refers to the actual object,
-	 * not the wrapper</li>
+	 * not the wrapper. For a method that returns a {@code Flux}, {@code #result} refers
+	 * to a {@code List} containing all values collected from the {@code Flux}.</li>
 	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
 	 * references to the {@link java.lang.reflect.Method method}, target object, and
 	 * affected cache(s) respectively.</li>
 	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
 	 * ({@code #root.targetClass}) are also available.
-	 * <li>Method arguments can be accessed by index. For instance the second argument
-	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * <li>Method arguments can be accessed by index. For example, the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1}, or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
 	 */
@@ -117,19 +118,24 @@ public @interface CacheEvict {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used for making the cache
-	 * eviction operation conditional. Evict that cache if the condition evaluates
-	 * to {@code true}.
+	 * eviction operation conditional. Evicts from the cache if the condition
+	 * evaluates to {@code true}.
 	 * <p>Default is {@code ""}, meaning the cache eviction is always performed.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
 	 * <ul>
+	 * <li>{@code #result} for a reference to the result of the method invocation, which
+	 * can only be used if {@link #beforeInvocation()} is {@code false}. For supported
+	 * wrappers such as {@code Optional}, {@code #result} refers to the actual object,
+	 * not the wrapper. For a method that returns a {@code Flux}, {@code #result} refers
+	 * to a {@code List} containing all values collected from the {@code Flux}.</li>
 	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
 	 * references to the {@link java.lang.reflect.Method method}, target object, and
 	 * affected cache(s) respectively.</li>
 	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
 	 * ({@code #root.targetClass}) are also available.
-	 * <li>Method arguments can be accessed by index. For instance the second argument
-	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * <li>Method arguments can be accessed by index. For example, the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1}, or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
 	 */

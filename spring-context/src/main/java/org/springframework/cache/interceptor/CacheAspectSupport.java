@@ -1089,6 +1089,39 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 
 	/**
+	 * Reactive Streams Subscriber for exhausting the Flux and collecting a List
+	 * to evaluate for eviction.
+	 */
+	private final class CacheEvictListSubscriber implements Subscriber<Object> {
+
+		private final List<CacheOperationContext> contexts;
+
+		private final List<Object> cacheValue = new ArrayList<>();
+
+		public CacheEvictListSubscriber(List<CacheOperationContext> contexts) {
+			this.contexts = contexts;
+		}
+
+		@Override
+		public void onSubscribe(Subscription s) {
+			s.request(Integer.MAX_VALUE);
+		}
+		@Override
+		public void onNext(Object o) {
+			this.cacheValue.add(o);
+		}
+		@Override
+		public void onError(Throwable t) {
+			this.cacheValue.clear();
+		}
+		@Override
+		public void onComplete() {
+			performCacheEvicts(this.contexts, this.cacheValue);
+		}
+	}
+
+
+	/**
 	 * Inner class to avoid a hard dependency on the Reactive Streams API at runtime.
 	 */
 	private class ReactiveCachingHandler {
@@ -1169,8 +1202,16 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		public @Nullable Object processCacheEvicts(List<CacheOperationContext> contexts, @Nullable Object result) {
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
-				return adapter.fromPublisher(Mono.from(adapter.toPublisher(result))
-						.doOnSuccess(value -> performCacheEvicts(contexts, value)));
+				if (adapter.isMultiValue()) {
+					Flux<?> source = Flux.from(adapter.toPublisher(result))
+							.publish().refCount(2);
+					source.subscribe(new CacheEvictListSubscriber(contexts));
+					return adapter.fromPublisher(source);
+				}
+				else {
+					return adapter.fromPublisher(Mono.from(adapter.toPublisher(result))
+							.doOnSuccess(value -> performCacheEvicts(contexts, value)));
+				}
 			}
 			return NOT_HANDLED;
 		}
