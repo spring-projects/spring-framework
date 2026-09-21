@@ -28,7 +28,7 @@ import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation indicating that a method (or all methods on a class) triggers a
- * {@link org.springframework.cache.Cache#evict(Object) cache evict} operation.
+ * {@linkplain org.springframework.cache.Cache#evict(Object) cache evict} operation.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
@@ -84,8 +84,8 @@ public @interface CacheEvict {
 	 * affected cache(s) respectively.</li>
 	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
 	 * ({@code #root.targetClass}) are also available.
-	 * <li>Method arguments can be accessed by index. For instance the second argument
-	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * <li>Method arguments can be accessed by index. For example, the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1}, or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
 	 */
@@ -118,8 +118,8 @@ public @interface CacheEvict {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used for making the cache
-	 * eviction operation conditional. Evict that cache if the condition evaluates
-	 * to {@code true}.
+	 * eviction operation conditional. Evicts from the cache if the condition
+	 * evaluates to {@code true}.
 	 * <p>Default is {@code ""}, meaning the cache eviction is always performed.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
@@ -134,8 +134,8 @@ public @interface CacheEvict {
 	 * affected cache(s) respectively.</li>
 	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
 	 * ({@code #root.targetClass}) are also available.
-	 * <li>Method arguments can be accessed by index. For instance the second argument
-	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * <li>Method arguments can be accessed by index. For example, the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1}, or {@code #a1}. Arguments
 	 * can also be accessed by name if that information is available.</li>
 	 * </ul>
 	 */

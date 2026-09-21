@@ -216,8 +216,8 @@ documentation of your cache provider for more details.
 [[cache-annotations-cacheable-reactive]]
 === Caching with CompletableFuture and Reactive Return Types
 
-As of 6.1, cache annotations take `CompletableFuture` and reactive return types
-into account, automatically adapting the cache interaction accordingly.
+Cache annotations take `CompletableFuture` and reactive return types into account,
+automatically adapting the cache interaction accordingly.
 
 For a method returning a `CompletableFuture`, the object produced by that future
 will be cached whenever it is complete, and the cache lookup for a cache hit will
@@ -249,6 +249,10 @@ and the cache lookup for a cache hit will be retrieved as a `Flux` (backed by a
 	@Cacheable("books")
 	public Flux<Book> findBooks(String author) {...}
 ----
+
+This collected `List` is also what an `unless` SpEL expression sees as the `#result` for
+such a method (see <<cache-spel-context,SpEL evaluation context>>); the `Flux` returned
+to the caller is unaffected by this collection process.
 
 Such `CompletableFuture` and reactive adaptation also works for synchronized caching,
 computing the value only once in case of a concurrent cache miss:
@@ -415,8 +419,8 @@ other), such declarations should be avoided. Note also that such conditions shou
 on the result object (that is, the `#result` variable), as these are validated up-front to
 confirm the exclusion.
 
-As of 6.1, `@CachePut` takes `CompletableFuture` and reactive return types into account,
-performing the put operation whenever the produced object is available.
+`@CachePut` takes `CompletableFuture` and reactive return types into account, performing
+the put operation whenever the produced object is available.
 
 TIP: When `@CachePut` is combined with `@Retryable`, the retry advice is applied
 outermost, so each successful retry attempt updates the cache; a failed attempt does
@@ -465,7 +469,7 @@ trigger, the return values are ignored (as they do not interact with the cache).
 not the case with `@Cacheable` which adds data to the cache or updates data in the cache
 and, thus, requires a result.
 
-As of 6.1, `@CacheEvict` takes `CompletableFuture` and reactive return types into account,
+`@CacheEvict` takes `CompletableFuture` and reactive return types into account,
 performing an after-invocation evict operation whenever processing has completed. As with
 `@Cacheable` and `@CachePut`, for a method returning a `Flux`, all emitted elements are
 collected into a `List` before the evict operation is performed. When `beforeInvocation`
