@@ -238,6 +238,34 @@ class DataFieldMaxValueIncrementerTests {
 	}
 
 	@Test
+	void mySQLMaxValueIncrementerWithCommitFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(2L, 2L, 4L);
+		willThrow(new SQLException("Cannot commit")).willDoNothing().given(connection).commit();
+
+		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.setCacheSize(2);
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue);
+		assertThat(incrementer.nextLongValue()).isEqualTo(1);
+		assertThat(incrementer.nextLongValue()).isEqualTo(2);
+		assertThat(incrementer.nextLongValue()).isEqualTo(3);
+		assertThat(incrementer.nextLongValue()).isEqualTo(4);
+
+		verify(dataSource, times(3)).getConnection();
+		verify(statement, times(3)).executeUpdate("update myseq set seq = last_insert_id(seq + 2) limit 1");
+		verify(connection, times(3)).commit();
+	}
+
+	@Test
 	void mariaDBSequenceMaxValueIncrementer() throws SQLException {
 		given(dataSource.getConnection()).willReturn(connection);
 		given(connection.createStatement()).willReturn(statement);
