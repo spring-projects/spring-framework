@@ -52,8 +52,7 @@ Kotlin::
 		var mvcResult = mockMvc.get("/path").andExpect {
 			status { isOk() } // <1>
 			request { asyncStarted() } // <2>
-			// TODO Remove unused generic parameter
-			request { asyncResult<Nothing>("body") } // <3>
+			request { asyncResult("body") } // <3>
 		}.andReturn()
 
 
