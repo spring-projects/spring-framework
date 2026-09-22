@@ -46,10 +46,13 @@ jar {
 	manifest.attributes["Build-Jdk-Spec"] = "${System.getProperty("java.specification.version")}"
 
 	from("${rootDir}/framework-docs/src/docs/dist") {
-		include "license.txt"
 		include "notice.txt"
 		into "META-INF"
 		expand(copyright: new Date().format("yyyy"), version: project.version)
+	}
+	from("${rootDir}/framework-docs/src/docs/dist") {
+		include "license.txt"
+		into "META-INF"
 	}
 }
 
