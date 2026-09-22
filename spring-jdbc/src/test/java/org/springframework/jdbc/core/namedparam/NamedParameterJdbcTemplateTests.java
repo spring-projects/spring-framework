@@ -37,6 +37,8 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 
 import org.springframework.jdbc.Customer;
@@ -51,10 +53,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -90,19 +90,19 @@ class NamedParameterJdbcTemplateTests {
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
 
 
-	private Connection connection = mock();
+	private final Connection connection = mock();
 
-	private DataSource dataSource = mock();
+	private final DataSource dataSource = mock();
 
-	private PreparedStatement preparedStatement = mock();
+	private final PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet = mock();
+	private final ResultSet resultSet = mock();
 
-	private DatabaseMetaData databaseMetaData = mock();
+	private final DatabaseMetaData databaseMetaData = mock();
 
-	private NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(dataSource);
+	private final NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(dataSource);
 
-	private Map<String, Object> params = new HashMap<>();
+	private final Map<String, Object> params = new HashMap<>();
 
 
 	@BeforeEach
@@ -460,68 +460,89 @@ class NamedParameterJdbcTemplateTests {
 		verify(connection).close();
 	}
 
-	@Test
-	void batchUpdateWithPlainMap() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithPlainMap(boolean supportsBatchUpdates) throws SQLException {
 		@SuppressWarnings("unchecked")
 		final Map<String, Integer>[] ids = new Map[2];
 		ids[0] = Collections.singletonMap("id", 100);
 		ids[1] = Collections.singletonMap("id", 200);
 		final int[] rowsAffected = new int[] {1, 2};
 
-		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
-		given(connection.getMetaData()).willReturn(databaseMetaData);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1]);
+		}
+		NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-		verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
-		verify(preparedStatement).setObject(1, 100);
-		verify(preparedStatement).setObject(1, 200);
-		verify(preparedStatement, times(2)).addBatch();
-		verify(preparedStatement, atLeastOnce()).close();
-		verify(connection, atLeastOnce()).close();
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
+		inOrder.verify(preparedStatement).setObject(1, 100);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setObject(1, 200);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
 	}
 
 	@Test
 	void batchUpdateWithEmptyMap() {
 		@SuppressWarnings("unchecked")
 		final Map<String, Integer>[] ids = new Map[0];
-		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+		NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
 		assertThat(actualRowsAffected.length).as("executed 0 updates").isEqualTo(0);
 	}
 
-	@Test
-	void batchUpdateWithSqlParameterSource() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithSqlParameterSource(boolean supportsBatchUpdates) throws SQLException {
 		SqlParameterSource[] ids = new SqlParameterSource[2];
 		ids[0] = new MapSqlParameterSource("id", 100);
 		ids[1] = new MapSqlParameterSource("id", 200);
 		final int[] rowsAffected = new int[] {1, 2};
 
-		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
-		given(connection.getMetaData()).willReturn(databaseMetaData);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1]);
+		}
+		NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-		verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
-		verify(preparedStatement).setObject(1, 100);
-		verify(preparedStatement).setObject(1, 200);
-		verify(preparedStatement, times(2)).addBatch();
-		verify(preparedStatement, atLeastOnce()).close();
-		verify(connection, atLeastOnce()).close();
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
+		inOrder.verify(preparedStatement).setObject(1, 100);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setObject(1, 200);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
 	}
 
-	@Test
-	void batchUpdateWithInClause() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithInClause(boolean supportsBatchUpdates) throws SQLException {
 		@SuppressWarnings("unchecked")
 		Map<String, Object>[] parameters = new Map[3];
 		parameters[0] = Collections.singletonMap("ids", Arrays.asList(1, 2));
@@ -529,88 +550,154 @@ class NamedParameterJdbcTemplateTests {
 		parameters[2] = Collections.singletonMap("ids", (Iterable<Integer>) () -> Arrays.asList(5, 6).iterator());
 
 		final int[] rowsAffected = new int[] {1, 2, 3};
-		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
-		given(connection.getMetaData()).willReturn(databaseMetaData);
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1], rowsAffected[2]);
+		}
 
 		JdbcTemplate template = new JdbcTemplate(dataSource, false);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(template);
+		NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(template);
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"delete sometable where id in (:ids)",
 				parameters
 		);
 
-		assertThat(actualRowsAffected.length).as("executed 3 updates").isEqualTo(3);
-
-		InOrder inOrder = inOrder(preparedStatement);
-
+		assertThat(actualRowsAffected).as("executed 3 updates").isEqualTo(rowsAffected);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement("delete sometable where id in (?, ?)");
 		inOrder.verify(preparedStatement).setObject(1, 1);
 		inOrder.verify(preparedStatement).setObject(2, 2);
-		inOrder.verify(preparedStatement).addBatch();
-
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
 		inOrder.verify(preparedStatement).setString(1, "3");
 		inOrder.verify(preparedStatement).setString(2, "4");
-		inOrder.verify(preparedStatement).addBatch();
-
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
 		inOrder.verify(preparedStatement).setObject(1, 5);
 		inOrder.verify(preparedStatement).setObject(2, 6);
-		inOrder.verify(preparedStatement).addBatch();
-
-		inOrder.verify(preparedStatement, atLeastOnce()).close();
-		verify(connection, atLeastOnce()).close();
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
 	}
 
-	@Test
-	void batchUpdateWithSqlParameterSourcePlusTypeInfo() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithSqlParameterSourcePlusTypeInfo(boolean supportsBatchUpdates) throws SQLException {
 		SqlParameterSource[] ids = new SqlParameterSource[3];
 		ids[0] = new MapSqlParameterSource().addValue("id", null, Types.NULL);
 		ids[1] = new MapSqlParameterSource().addValue("id", 100, Types.NUMERIC);
 		ids[2] = new MapSqlParameterSource().addValue("id", 200, Types.NUMERIC);
 		final int[] rowsAffected = new int[] {1, 2, 3};
 
-		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
-		given(connection.getMetaData()).willReturn(databaseMetaData);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1], rowsAffected[2]);
+		}
+		NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertThat(actualRowsAffected.length).as("executed 3 updates").isEqualTo(3);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-		assertThat(actualRowsAffected[2]).isEqualTo(rowsAffected[2]);
-		verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
-		verify(preparedStatement).setNull(1, Types.NULL);
-		verify(preparedStatement).setObject(1, 100, Types.NUMERIC);
-		verify(preparedStatement).setObject(1, 200, Types.NUMERIC);
-		verify(preparedStatement, times(3)).addBatch();
-		verify(preparedStatement, atLeastOnce()).close();
-		verify(connection, atLeastOnce()).close();
+		assertThat(actualRowsAffected).as("executed 3 updates").isEqualTo(rowsAffected);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
+		inOrder.verify(preparedStatement).setNull(1, Types.NULL);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setObject(1, 100, Types.NUMERIC);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setObject(1, 200, Types.NUMERIC);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
 	}
 
-	@Test
-	void batchUpdateWithGeneratedKeys() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithGeneratedKeys(boolean supportsBatchUpdates) throws SQLException {
 		final SqlParameterSource[] batchArgs = new SqlParameterSource[2];
 		batchArgs[0] = new MapSqlParameterSource(Map.of("forename", "foo", "country", "UK"));
 		batchArgs[1] = new MapSqlParameterSource(Map.of("forename", "bar", "country", "US"));
 		final int[] rowsAffected = new int[] {1, 1};
 
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1]);
+		}
 		given(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).willReturn(preparedStatement);
-		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
-		given(connection.getMetaData()).willReturn(databaseMetaData);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+		NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(INSERT_NAMED_PARAMETERS, batchArgs, new GeneratedKeyHolder());
-		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-		verify(connection).prepareStatement("insert into custmr(forename,country) values (?,?)", Statement.RETURN_GENERATED_KEYS);
-		verify(preparedStatement).setString(1, "foo");
-		verify(preparedStatement).setString(2, "UK");
-		verify(preparedStatement).setString(1, "bar");
-		verify(preparedStatement).setString(2, "US");
-		verify(preparedStatement, times(2)).addBatch();
-		verify(preparedStatement, atLeastOnce()).close();
-		verify(connection, atLeastOnce()).close();
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement("insert into custmr(forename,country) values (?,?)", Statement.RETURN_GENERATED_KEYS);
+		inOrder.verify(preparedStatement).setString(1, "foo");
+		inOrder.verify(preparedStatement).setString(2, "UK");
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setString(1, "bar");
+		inOrder.verify(preparedStatement).setString(2, "US");
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithGeneratedKeysAndKeyColumnNames(boolean supportsBatchUpdates) throws SQLException {
+		final SqlParameterSource[] batchArgs = new SqlParameterSource[2];
+		batchArgs[0] = new MapSqlParameterSource(Map.of("forename", "foo", "country", "UK"));
+		batchArgs[1] = new MapSqlParameterSource(Map.of("forename", "bar", "country", "US"));
+		final int[] rowsAffected = new int[] {1, 1};
+		final String[] keyColumnNames = new String[] {"id"};
+
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1]);
+		}
+		given(connection.prepareStatement(anyString(), eq(keyColumnNames))).willReturn(preparedStatement);
+		NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+
+		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(INSERT_NAMED_PARAMETERS, batchArgs, new GeneratedKeyHolder(), keyColumnNames);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement("insert into custmr(forename,country) values (?,?)", keyColumnNames);
+		inOrder.verify(preparedStatement).setString(1, "foo");
+		inOrder.verify(preparedStatement).setString(2, "UK");
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setString(1, "bar");
+		inOrder.verify(preparedStatement).setString(2, "US");
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
 	}
 
 }
