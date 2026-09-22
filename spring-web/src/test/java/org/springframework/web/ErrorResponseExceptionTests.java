@@ -424,6 +424,28 @@ class ErrorResponseExceptionTests {
 		}
 	}
 
+	@Test  // gh-36984
+	void responseStatusExceptionCustomReason() {
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		try {
+			String reason = "bad.request";
+			String message = "Breaking Bad Request";
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage(reason, locale, message);
+
+			String customReason = "my custom reason";
+			ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, customReason);
+
+			ProblemDetail problemDetail = ex.updateAndGetBody(messageSource, locale);
+			assertThat(problemDetail.getDetail()).isEqualTo(customReason);
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
 	private void assertStatus(ErrorResponse ex, HttpStatus status) {
 		ProblemDetail body = ex.getBody();
 		assertThat(ex.getStatusCode()).isEqualTo(status);
