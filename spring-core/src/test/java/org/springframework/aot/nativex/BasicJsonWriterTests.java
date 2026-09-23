@@ -144,7 +144,7 @@ class BasicJsonWriterTests {
 
 	@Test
 	void writeWithEscapeBackslash() {
-		assertStringAttribute("foo\"bar", "foo\\\"bar");
+		assertStringAttribute("foo\\bar", "foo\\\\bar");
 	}
 
 	@Test
