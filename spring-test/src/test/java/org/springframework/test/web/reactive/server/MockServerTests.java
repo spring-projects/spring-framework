@@ -111,6 +111,39 @@ class MockServerTests {
 		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 	}
 
+	@Test
+	void mutateDoesNotShareDefaultHeaderAndCookieValues() {
+		WebTestClient client = WebTestClient
+				.bindToWebHandler(exchange -> exchange.getResponse().setComplete())
+				.configureClient()
+				.defaultHeaders(headers -> headers.add("foo", "bar"))
+				.defaultCookie("foo", "bar")
+				.build();
+
+		client.mutate()
+				.defaultHeaders(headers -> headers.add("foo", "baz"))
+				.defaultCookie("foo", "baz")
+				.build();
+
+		assertDefaultHeaderAndCookie(client, "bar");
+		assertDefaultHeaderAndCookie(client.mutate().build(), "bar");
+	}
+
+	@Test
+	void buildDoesNotShareDefaultHeaderAndCookieValues() {
+		WebTestClient.Builder builder = WebTestClient
+				.bindToWebHandler(exchange -> exchange.getResponse().setComplete())
+				.configureClient()
+				.defaultHeader("foo", "bar")
+				.defaultCookie("foo", "bar");
+		WebTestClient client = builder.build();
+
+		builder.defaultHeader("foo", "baz");
+		builder.defaultCookie("foo", "baz");
+
+		assertDefaultHeaderAndCookie(client, "bar");
+	}
+
 	@Test // SPR-16124
 	void exchangeResultHasCookieHeaders() {
 
@@ -158,6 +191,12 @@ class MockServerTests {
 		assertThat(new String(bytes, UTF_8)).isEqualTo("body");
 	}
 
+
+	private void assertDefaultHeaderAndCookie(WebTestClient client, String value) {
+		ExchangeResult result = client.get().uri("/").exchange().expectBody().isEmpty();
+		assertThat(result.getRequestHeaders().get("foo")).containsExactly(value);
+		assertThat(result.getRequestHeaders().get(HttpHeaders.COOKIE)).containsExactly("foo=" + value);
+	}
 
 	private DataBuffer toDataBuffer(String value) {
 		byte[] bytes = value.getBytes(UTF_8);
