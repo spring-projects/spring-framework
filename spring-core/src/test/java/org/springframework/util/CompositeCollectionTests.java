@@ -124,8 +124,19 @@ class CompositeCollectionTests {
 		assertThat(composite.remove("foo")).isTrue();
 		assertThat(composite.contains("foo")).isFalse();
 		assertThat(first).containsExactly("bar");
-
 		assertThat(composite.remove("quux")).isFalse();
+
+		// test remove element existing in both first and second
+		first = new ArrayList<>(List.of("foo", "bar"));
+		second = new ArrayList<>(List.of("foo", "qux"));
+		composite = new CompositeCollection<>(first, second);
+
+		assertThat(composite.remove("foo")).isTrue();
+		assertThat(first).containsExactly("bar");
+		assertThat(composite.contains("foo")).isTrue();
+		assertThat(composite.remove("foo")).isTrue();
+		assertThat(second).containsExactly("qux");
+		assertThat(composite.contains("foo")).isFalse();
 	}
 
 	@Test
@@ -207,4 +218,5 @@ class CompositeCollectionTests {
 
 		assertThat(composite).containsExactly("foo", null, "bar", null);
 	}
+
 }
