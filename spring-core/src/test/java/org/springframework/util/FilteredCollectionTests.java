@@ -79,9 +79,11 @@ class FilteredCollectionTests {
 
 	@Test
 	void nullable() {
-		List<@Nullable String> list = Arrays.asList("foo", "bar", null);
+		List<@Nullable String> list = new ArrayList<>(Arrays.asList("foo", "bar", null));
 		FilteredCollection<@Nullable String> filtered = new FilteredCollection<>(list, s -> !"bar".equals(s));
 
 		assertThat(filtered).containsExactlyInAnyOrder("foo", null);
+		assertThat(filtered.contains(null)).isTrue();
+		assertThat(filtered.remove(null)).isTrue();
 	}
 }

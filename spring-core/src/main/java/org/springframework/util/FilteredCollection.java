@@ -71,14 +71,14 @@ class FilteredCollection<E extends @Nullable Object> extends AbstractCollection<
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean remove(Object o) {
+	public boolean remove(@Nullable Object o) {
 		boolean removed = this.delegate.remove(o);
 		return removed && this.filter.test((E) o);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean contains(Object o) {
+	public boolean contains(@Nullable Object o) {
 		if (this.delegate.contains(o)) {
 			return this.filter.test((E) o);
 		}

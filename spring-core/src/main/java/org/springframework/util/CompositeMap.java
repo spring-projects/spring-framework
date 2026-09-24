@@ -86,7 +86,7 @@ final class CompositeMap<K, V extends @Nullable Object> implements Map<K, V> {
 	}
 
 	@Override
-	public boolean containsValue(Object value) {
+	public boolean containsValue(@Nullable Object value) {
 		if (this.first.containsValue(value)) {
 			return true;
 		}
