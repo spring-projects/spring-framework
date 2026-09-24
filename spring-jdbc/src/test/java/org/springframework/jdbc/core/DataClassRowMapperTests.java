@@ -17,15 +17,22 @@
 package org.springframework.jdbc.core;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.test.ConstructorPerson;
 import org.springframework.jdbc.core.test.ConstructorPersonWithGenerics;
 import org.springframework.jdbc.core.test.ConstructorPersonWithSetters;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link DataClassRowMapper}.
@@ -86,6 +93,33 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 		mock.verifyClosed();
 	}
 
+	@Test
+	void staticQueryWithDataClassResolvesColumnsViaMetaData() throws Exception {
+		Mock mock = new Mock();
+		ConstructorPersonWithGenerics person = mock.getJdbcTemplate().queryForObject(
+				"select name, age, birth_date, balance from people",
+				new DataClassRowMapper<>(ConstructorPersonWithGenerics.class));
+		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
+
+		verify(mock.getResultSet(), never()).findColumn(anyString());
+		mock.verifyClosed();
+	}
+
+	@Test
+	void staticQueryWithDataRecordAndMissingColumn() throws Exception {
+		Mock mock = new Mock();
+		SQLException ex = new SQLException("No such column");
+		given(mock.getResultSet().findColumn("email")).willThrow(ex);
+
+		assertThatExceptionOfType(DataAccessException.class).isThrownBy(() ->
+				mock.getJdbcTemplate().queryForObject(
+						"select name, age, birth_date, balance, e_mail from people",
+						new DataClassRowMapper<>(EmailRecordPerson.class)))
+				.withCause(ex);
+
+		mock.verifyClosed();
+	}
+
 	protected void verifyPerson(RecordPerson person) {
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
@@ -96,6 +130,9 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 
 
 	record RecordPerson(String name, long age, Date birth_date, BigDecimal balance) {
+	}
+
+	record EmailRecordPerson(String name, String email) {
 	}
 
 }
