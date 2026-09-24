@@ -81,12 +81,14 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 * Set the underlying URLConnection's connect timeout as {@code Duration}.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Default is the system's default timeout.
+	 * <p>Values exceeding {@link Integer#MAX_VALUE} milliseconds (about 24.8 days)
+	 * are capped at that value.
 	 * @since 6.1
 	 * @see URLConnection#setConnectTimeout(int)
 	 */
 	public void setConnectTimeout(Duration connectTimeout) {
 		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
-		this.connectTimeout = (int) connectTimeout.toMillis();
+		this.connectTimeout = (int) Math.min(connectTimeout.toMillis(), Integer.MAX_VALUE);
 	}
 
 	/**
@@ -103,12 +105,14 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 * Set the underlying URLConnection's read timeout (in milliseconds).
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Default is the system's default timeout.
+	 * <p>Values exceeding {@link Integer#MAX_VALUE} milliseconds (about 24.8 days)
+	 * are capped at that value.
 	 * @since 6.1
 	 * @see URLConnection#setReadTimeout(int)
 	 */
 	public void setReadTimeout(Duration readTimeout) {
 		Assert.notNull(readTimeout, "ReadTimeout must not be null");
-		this.readTimeout = (int) readTimeout.toMillis();
+		this.readTimeout = (int) Math.min(readTimeout.toMillis(), Integer.MAX_VALUE);
 	}
 
 
