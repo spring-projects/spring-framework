@@ -90,6 +90,18 @@ class AttributeMethodsTests {
 	}
 
 	@Test
+	void canThrowTypeNotPresentExceptionWhenHasAnnotationAttributeReturnsTrue() {
+		AttributeMethods methods = AttributeMethods.forAnnotationType(NestedValue.class);
+		assertThat(methods.canThrowTypeNotPresentException(0)).isTrue();
+	}
+
+	@Test
+	void canThrowTypeNotPresentExceptionWhenHasAnnotationArrayAttributeReturnsTrue() {
+		AttributeMethods methods = AttributeMethods.forAnnotationType(NestedArrayValue.class);
+		assertThat(methods.canThrowTypeNotPresentException(0)).isTrue();
+	}
+
+	@Test
 	void canThrowTypeNotPresentExceptionWhenNotClassOrClassArrayAttributeReturnsFalse() {
 		AttributeMethods methods = AttributeMethods.forAnnotationType(ValueOnly.class);
 		assertThat(methods.canThrowTypeNotPresentException(0)).isFalse();
@@ -139,6 +151,117 @@ class AttributeMethodsTests {
 		given(annotation.value()).willReturn((Class) InputStream.class);
 		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		attributes.validate(annotation);
+	}
+
+	@Test
+	void isValidWhenNestedAnnotationHasEnumConstantNotPresentExceptionReturnsFalse() {
+		EnumValueInner inner = mockBrokenEnumValueInner();
+		NestedValue annotation = mockAnnotation(NestedValue.class);
+		given(annotation.value()).willReturn(inner);
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThat(attributes.canLoad(annotation, getClass())).isFalse();
+	}
+
+	@Test
+	void isValidWhenNestedAnnotationDoesNotHaveEnumConstantNotPresentExceptionReturnsTrue() {
+		EnumValueInner inner = mockHealthyEnumValueInner();
+		NestedValue annotation = mockAnnotation(NestedValue.class);
+		given(annotation.value()).willReturn(inner);
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThat(attributes.canLoad(annotation, getClass())).isTrue();
+	}
+
+	@Test
+	void validateWhenNestedAnnotationHasEnumConstantNotPresentExceptionThrowsException() {
+		EnumValueInner inner = mockBrokenEnumValueInner();
+		NestedValue annotation = mockAnnotation(NestedValue.class);
+		given(annotation.value()).willReturn(inner);
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThatIllegalStateException().isThrownBy(() -> attributes.validate(annotation))
+				.withMessageContaining("EnumValueInner")
+				.withCauseInstanceOf(EnumConstantNotPresentException.class);
+	}
+
+	@Test
+	void validateWhenNestedAnnotationDoesNotHaveEnumConstantNotPresentExceptionThrowsNothing() {
+		EnumValueInner inner = mockHealthyEnumValueInner();
+		NestedValue annotation = mockAnnotation(NestedValue.class);
+		given(annotation.value()).willReturn(inner);
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		attributes.validate(annotation);
+	}
+
+	@Test
+	void isValidWhenNestedAnnotationArrayHasEnumConstantNotPresentExceptionReturnsFalse() {
+		EnumValueInner inner = mockBrokenEnumValueInner();
+		NestedArrayValue annotation = mockAnnotation(NestedArrayValue.class);
+		given(annotation.value()).willReturn(new EnumValueInner[] {inner});
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThat(attributes.canLoad(annotation, getClass())).isFalse();
+	}
+
+	@Test
+	void isValidWhenNestedAnnotationArrayDoesNotHaveEnumConstantNotPresentExceptionReturnsTrue() {
+		EnumValueInner inner = mockHealthyEnumValueInner();
+		NestedArrayValue annotation = mockAnnotation(NestedArrayValue.class);
+		given(annotation.value()).willReturn(new EnumValueInner[] {inner});
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThat(attributes.canLoad(annotation, getClass())).isTrue();
+	}
+
+	@Test
+	void isValidWhenNestedAnnotationArrayIsEmptyReturnsTrue() {
+		NestedArrayValue annotation = mockAnnotation(NestedArrayValue.class);
+		given(annotation.value()).willReturn(new EnumValueInner[0]);
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThat(attributes.canLoad(annotation, getClass())).isTrue();
+	}
+
+	@Test
+	void validateWhenNestedAnnotationArrayHasEnumConstantNotPresentExceptionThrowsException() {
+		EnumValueInner inner = mockBrokenEnumValueInner();
+		NestedArrayValue annotation = mockAnnotation(NestedArrayValue.class);
+		given(annotation.value()).willReturn(new EnumValueInner[] {inner});
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThatIllegalStateException().isThrownBy(() -> attributes.validate(annotation))
+				.withMessageContaining("EnumValueInner")
+				.withCauseInstanceOf(EnumConstantNotPresentException.class);
+	}
+
+	@Test
+	void isValidWhenDeeplyNestedAnnotationHasEnumConstantNotPresentExceptionReturnsFalse() {
+		EnumValueInner inner = mockBrokenEnumValueInner();
+		NestedValue nested = mockAnnotation(NestedValue.class);
+		given(nested.value()).willReturn(inner);
+		DeepNestedValue annotation = mockAnnotation(DeepNestedValue.class);
+		given(annotation.value()).willReturn(nested);
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThat(attributes.canLoad(annotation, getClass())).isFalse();
+	}
+
+	@Test
+	void validateWhenDeeplyNestedAnnotationHasEnumConstantNotPresentExceptionThrowsException() {
+		EnumValueInner inner = mockBrokenEnumValueInner();
+		NestedValue nested = mockAnnotation(NestedValue.class);
+		given(nested.value()).willReturn(inner);
+		DeepNestedValue annotation = mockAnnotation(DeepNestedValue.class);
+		given(annotation.value()).willReturn(nested);
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThatIllegalStateException().isThrownBy(() -> attributes.validate(annotation))
+				.withMessageContaining("EnumValueInner")
+				.withCauseInstanceOf(EnumConstantNotPresentException.class);
+	}
+
+	private EnumValueInner mockBrokenEnumValueInner() {
+		EnumValueInner inner = mockAnnotation(EnumValueInner.class);
+		given(inner.value()).willThrow(new EnumConstantNotPresentException(ExampleEnum.class, "MISSING"));
+		return inner;
+	}
+
+	private EnumValueInner mockHealthyEnumValueInner() {
+		EnumValueInner inner = mockAnnotation(EnumValueInner.class);
+		given(inner.value()).willReturn(ExampleEnum.ONE);
+		return inner;
 	}
 
 	private List<Method> getAll(AttributeMethods attributes) {
@@ -205,6 +328,40 @@ class AttributeMethodsTests {
 		String two();
 
 		String three() default "3";
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface EnumValueInner {
+
+		ExampleEnum value();
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface NestedValue {
+
+		EnumValueInner value();
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface NestedArrayValue {
+
+		EnumValueInner[] value();
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface DeepNestedValue {
+
+		NestedValue value();
+
+	}
+
+	enum ExampleEnum {
+
+		ONE
 
 	}
 
