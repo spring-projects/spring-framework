@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.util.ConcurrentModificationException;
 import java.util.Objects;
 import java.util.Queue;
@@ -249,6 +250,9 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 			this.closed = true;
 			requiredSubscriber().cancel();
 			cleanAndFinalize();
+			if (ex instanceof IOException ioEx) {
+				throw ioEx;
+			}
 			throw Exceptions.propagate(ex);
 		}
 		finally {
@@ -307,6 +311,9 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 			this.closed = true;
 			requiredSubscriber().cancel();
 			cleanAndFinalize();
+			if (ex instanceof IOException ioEx) {
+				throw ioEx;
+			}
 			throw Exceptions.propagate(ex);
 		}
 		finally {
@@ -314,7 +321,7 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 		}
 	}
 
-	byte[] getNextOrAwait() {
+	byte[] getNextOrAwait() throws InterruptedIOException {
 		if (this.available == null || this.available.length - this.position == 0) {
 			this.available = null;
 
@@ -407,7 +414,7 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 		}
 	}
 
-	private void await() {
+	private void await() throws InterruptedIOException {
 		Thread toUnpark = Thread.currentThread();
 
 		while (true) {
@@ -420,10 +427,23 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 				throw new IllegalStateException("Only one (Virtual)Thread can await!");
 			}
 
-			if (this.parkedThread.compareAndSet( null, toUnpark)) {
+			if (this.parkedThread.compareAndSet(null, toUnpark) || this.parkedThread.get() == toUnpark) {
 				LockSupport.park();
 				// we don't just break here because park() can wake up spuriously
 				// if we got a proper resume, get() == READY and the loop will quit above
+				// if we woke up spuriously, the reference is still ours and we park again
+			}
+
+			// park() also returns on interruption, without a resume() having set READY,
+			// in which case the loop could otherwise neither park again nor exit.
+			// Honor the cancellation, unless data arrived concurrently: then deliver it
+			// first and let the restored interrupt status surface on the next await() call.
+			if (Thread.interrupted()) {
+				Thread.currentThread().interrupt();
+				if (this.parkedThread.get() != READY) {
+					this.parkedThread.lazySet(null);
+					throw new InterruptedIOException("Interrupted while awaiting data");
+				}
 			}
 		}
 		// clear the resume indicator so that the next await call will park without a resume()
