@@ -114,9 +114,7 @@ class CompositeCollection<E extends @Nullable Object> implements Collection<E> {
 
 	@Override
 	public boolean remove(Object o) {
-		boolean firstResult = this.first.remove(o);
-		boolean secondResult = this.second.remove(o);
-		return firstResult || secondResult;
+		return (this.first.remove(o) || this.second.remove(o));
 	}
 
 	@Override
