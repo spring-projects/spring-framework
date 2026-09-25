@@ -97,8 +97,10 @@ public abstract class AbstractIdentityColumnMaxValueIncrementer extends Abstract
 			try {
 				stmt = con.createStatement();
 				DataSourceUtils.applyTransactionTimeout(stmt, dataSource);
-				this.valueCache = new long[getCacheSize()];
-				this.nextValueIndex = 0;
+				// Do not publish valueCache or nextValueIndex until every identity
+				// read succeeds. Publishing either up front leaves a zero-filled
+				// cache that the next call serves instead of retrying.
+				long[] newCache = new long[getCacheSize()];
 				for (int i = 0; i < getCacheSize(); i++) {
 					stmt.executeUpdate(getIncrementStatement());
 					ResultSet rs = stmt.executeQuery(getIdentityStatement());
@@ -106,13 +108,15 @@ public abstract class AbstractIdentityColumnMaxValueIncrementer extends Abstract
 						if (!rs.next()) {
 							throw new DataAccessResourceFailureException("Identity statement failed after inserting");
 						}
-						this.valueCache[i] = rs.getLong(1);
+						newCache[i] = rs.getLong(1);
 					}
 					finally {
 						JdbcUtils.closeResultSet(rs);
 					}
 				}
-				stmt.executeUpdate(getDeleteStatement(this.valueCache));
+				this.valueCache = newCache;
+				this.nextValueIndex = 0;
+				stmt.executeUpdate(getDeleteStatement(newCache));
 			}
 			catch (SQLException ex) {
 				throw new DataAccessResourceFailureException("Could not increment identity", ex);
