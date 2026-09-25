@@ -41,6 +41,9 @@ import javax.sql.DataSource;
 import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InOrder;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
@@ -66,6 +69,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -83,19 +87,19 @@ import static org.mockito.Mockito.verify;
  */
 class JdbcTemplateTests {
 
-	private DataSource dataSource = mock();
+	private final DataSource dataSource = mock();
 
-	private Connection connection = mock();
+	private final Connection connection = mock();
 
-	private Statement statement = mock();
+	private final Statement statement = mock();
 
-	private PreparedStatement preparedStatement = mock();
+	private final PreparedStatement preparedStatement = mock();
 
-	private CallableStatement callableStatement = mock();
+	private final CallableStatement callableStatement = mock();
 
-	private ResultSet resultSet = mock();
+	private final ResultSet resultSet = mock();
 
-	private JdbcTemplate template = new JdbcTemplate(this.dataSource);
+	private final JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
 
 	@BeforeEach
@@ -148,7 +152,7 @@ class JdbcTemplateTests {
 				.withCause(sqlException);
 		verify(this.preparedStatement).setInt(1, idParam);
 		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -196,7 +200,7 @@ class JdbcTemplateTests {
 		String[] results = {"rod", "gary", " portia"};
 
 		class StringHandler implements RowCallbackHandler {
-			private List<String> list = new ArrayList<>();
+			private final List<String> list = new ArrayList<>();
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				this.list.add(rs.getString(1));
@@ -259,9 +263,9 @@ class JdbcTemplateTests {
 		willThrow(new RuntimeException()).given(this.connection).close();
 
 		SingleConnectionDataSource scf = new SingleConnectionDataSource(this.dataSource.getConnection(), false);
-		this.template = new JdbcTemplate(scf, false);
+		JdbcTemplate template = new JdbcTemplate(scf, false);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-		this.template.query(sql, rcch);
+		template.query(sql, rcch);
 
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -382,7 +386,7 @@ class JdbcTemplateTests {
 				.isThrownBy(() -> this.template.update(sql))
 				.withCause(sqlException);
 		verify(this.statement).close();
-		verify(this.connection, atLeastOnce()).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -400,24 +404,38 @@ class JdbcTemplateTests {
 		verify(this.connection).close();
 	}
 
-	@Test
-	void batchUpdate() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdate(boolean supportsBatchUpdates) throws SQLException {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 2"};
 
-		given(this.statement.executeBatch()).willReturn(new int[] {1, 1});
-		mockDatabaseMetaData(true);
 		given(this.connection.createStatement()).willReturn(this.statement);
+		if (supportsBatchUpdates) {
+			given(this.statement.executeBatch()).willReturn(new int[] {1, 1});
+			mockDatabaseMetaData(true);
+		}
+		else {
+			given(this.statement.execute(anyString())).willReturn(false);
+			given(this.statement.getUpdateCount()).willReturn(1);
+			mockDatabaseMetaData(false);
+		}
 
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-
-		verify(this.statement).addBatch(sql[0]);
-		verify(this.statement).addBatch(sql[1]);
-		verify(this.statement).close();
-		verify(this.connection, atLeastOnce()).close();
+		assertThat(actualRowsAffected).as("executed 2 updates").containsExactly(1, 1);
+		InOrder inOrder = inOrder(this.connection, this.statement);
+		if (supportsBatchUpdates) {
+			inOrder.verify(this.statement).addBatch(sql[0]);
+			inOrder.verify(this.statement).addBatch(sql[1]);
+		}
+		else {
+			inOrder.verify(this.statement).execute(sql[0]);
+			inOrder.verify(this.statement).execute(sql[1]);
+		}
+		inOrder.verify(this.statement).close();
+		inOrder.verify(this.connection).close();
 	}
 
 	@Test
@@ -438,28 +456,6 @@ class JdbcTemplateTests {
 	}
 
 	@Test
-	void batchUpdateWithNoBatchSupport() throws Exception {
-		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
-				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 2"};
-
-		given(this.statement.execute(sql[0])).willReturn(false);
-		given(this.statement.getUpdateCount()).willReturn(1, 1);
-		given(this.statement.execute(sql[1])).willReturn(false);
-
-		mockDatabaseMetaData(false);
-		given(this.connection.createStatement()).willReturn(this.statement);
-
-		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
-
-		int[] actualRowsAffected = template.batchUpdate(sql);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-
-		verify(this.statement, never()).addBatch(anyString());
-		verify(this.statement).close();
-		verify(this.connection, atLeastOnce()).close();
-	}
-
-	@Test
 	void batchUpdateWithNoBatchSupportAndSelect() throws Exception {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"SELECT * FROM NOSUCHTABLE"};
@@ -475,17 +471,24 @@ class JdbcTemplateTests {
 				template.batchUpdate(sql));
 		verify(this.statement, never()).addBatch(anyString());
 		verify(this.statement).close();
-		verify(this.connection, atLeastOnce()).close();
+		verify(this.connection).close();
 	}
 
-	@Test
-	void batchUpdateWithPreparedStatement() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithPreparedStatement(boolean supportsBatchUpdates) throws SQLException {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] {100, 200};
 		final int[] rowsAffected = new int[] {1, 2};
 
-		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
-		mockDatabaseMetaData(true);
+		if (supportsBatchUpdates) {
+			given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+			mockDatabaseMetaData(true);
+		}
+		else {
+			given(this.preparedStatement.executeUpdate()).willReturn(1, 2);
+			mockDatabaseMetaData(false);
+		}
 
 		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
 			@Override
@@ -501,15 +504,19 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
-		verify(this.preparedStatement, times(2)).addBatch();
-		verify(this.preparedStatement).setInt(1, ids[0]);
-		verify(this.preparedStatement).setInt(1, ids[1]);
-		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
+		InOrder inOrder = inOrder(this.connection, this.preparedStatement);
+		inOrder.verify(this.preparedStatement).setInt(1, ids[0]);
+		if (supportsBatchUpdates) {
+			inOrder.verify(this.preparedStatement).addBatch();
+		}
+		inOrder.verify(this.preparedStatement).setInt(1, ids[1]);
+		if (supportsBatchUpdates) {
+			inOrder.verify(this.preparedStatement).addBatch();
+		}
+		inOrder.verify(this.preparedStatement).close();
+		inOrder.verify(this.connection).close();
 	}
 
 	@Test
@@ -540,14 +547,21 @@ class JdbcTemplateTests {
 		verify(this.preparedStatement, never()).executeBatch();
 	}
 
-	@Test
-	void interruptibleBatchUpdate() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void interruptibleBatchUpdate(boolean supportsBatchUpdates) throws SQLException {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] {100, 200};
 		final int[] rowsAffected = new int[] {1, 2};
 
-		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
-		mockDatabaseMetaData(true);
+		if (supportsBatchUpdates) {
+			given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+			mockDatabaseMetaData(true);
+		}
+		else {
+			given(this.preparedStatement.executeUpdate()).willReturn(1, 2);
+			mockDatabaseMetaData(false);
+		}
 
 		BatchPreparedStatementSetter setter =
 				new InterruptibleBatchPreparedStatementSetter() {
@@ -570,25 +584,35 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-
-		verify(this.preparedStatement, times(2)).addBatch();
-		verify(this.preparedStatement).setInt(1, ids[0]);
-		verify(this.preparedStatement).setInt(1, ids[1]);
-		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
+		InOrder inOrder = inOrder(this.connection, this.preparedStatement);
+		inOrder.verify(this.preparedStatement).setInt(1, ids[0]);
+		if (supportsBatchUpdates) {
+			inOrder.verify(this.preparedStatement).addBatch();
+		}
+		inOrder.verify(this.preparedStatement).setInt(1, ids[1]);
+		if (supportsBatchUpdates) {
+			inOrder.verify(this.preparedStatement).addBatch();
+		}
+		inOrder.verify(this.preparedStatement).close();
+		inOrder.verify(this.connection).close();
 	}
 
-	@Test
-	void interruptibleBatchUpdateWithBaseClass() throws Exception {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void interruptibleBatchUpdateWithBaseClass(boolean supportsBatchUpdates) throws SQLException {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] {100, 200};
 		final int[] rowsAffected = new int[] {1, 2};
 
-		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
-		mockDatabaseMetaData(true);
+		if (supportsBatchUpdates) {
+			given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+			mockDatabaseMetaData(true);
+		}
+		else {
+			given(this.preparedStatement.executeUpdate()).willReturn(1, 2);
+			mockDatabaseMetaData(false);
+		}
 
 		BatchPreparedStatementSetter setter =
 				new AbstractInterruptibleBatchPreparedStatementSetter() {
@@ -607,83 +631,18 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-
-		verify(this.preparedStatement, times(2)).addBatch();
-		verify(this.preparedStatement).setInt(1, ids[0]);
-		verify(this.preparedStatement).setInt(1, ids[1]);
-		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
-	}
-
-	@Test
-	void interruptibleBatchUpdateWithBaseClassAndNoBatchSupport() throws Exception {
-		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final int[] ids = new int[] {100, 200};
-		final int[] rowsAffected = new int[] {1, 2};
-
-		given(this.preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1]);
-		mockDatabaseMetaData(false);
-
-		BatchPreparedStatementSetter setter =
-				new AbstractInterruptibleBatchPreparedStatementSetter() {
-					@Override
-					protected boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException {
-						if (i < ids.length) {
-							ps.setInt(1, ids[i]);
-							return true;
-						}
-						else {
-							return false;
-						}
-					}
-				};
-
-		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
-
-		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-
-		verify(this.preparedStatement, never()).addBatch();
-		verify(this.preparedStatement).setInt(1, ids[0]);
-		verify(this.preparedStatement).setInt(1, ids[1]);
-		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
-	}
-
-	@Test
-	void batchUpdateWithPreparedStatementAndNoBatchSupport() throws Exception {
-		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final int[] ids = new int[] {100, 200};
-		final int[] rowsAffected = new int[] {1, 2};
-
-		given(this.preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1]);
-
-		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
-			@Override
-			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				ps.setInt(1, ids[i]);
-			}
-			@Override
-			public int getBatchSize() {
-				return ids.length;
-			}
-		};
-
-		int[] actualRowsAffected = this.template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-
-		verify(this.preparedStatement, never()).addBatch();
-		verify(this.preparedStatement).setInt(1, ids[0]);
-		verify(this.preparedStatement).setInt(1, ids[1]);
-		verify(this.preparedStatement).close();
-		verify(this.connection).close();
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
+		InOrder inOrder = inOrder(this.connection, this.preparedStatement);
+		inOrder.verify(this.preparedStatement).setInt(1, ids[0]);
+		if (supportsBatchUpdates) {
+			inOrder.verify(this.preparedStatement).addBatch();
+		}
+		inOrder.verify(this.preparedStatement).setInt(1, ids[1]);
+		if (supportsBatchUpdates) {
+			inOrder.verify(this.preparedStatement).addBatch();
+		}
+		inOrder.verify(this.preparedStatement).close();
+		inOrder.verify(this.connection).close();
 	}
 
 	@Test
@@ -716,7 +675,7 @@ class JdbcTemplateTests {
 			verify(this.preparedStatement).setInt(1, ids[0]);
 			verify(this.preparedStatement).setInt(1, ids[1]);
 			verify(this.preparedStatement).close();
-			verify(this.connection, atLeastOnce()).close();
+			verify(this.connection).close();
 		}
 	}
 
@@ -742,15 +701,13 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, ids);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setObject(1, 100);
 		verify(this.preparedStatement).setObject(1, 200);
 		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -764,17 +721,15 @@ class JdbcTemplateTests {
 
 		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
 		mockDatabaseMetaData(true);
-		this.template = new JdbcTemplate(this.dataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
-		int[] actualRowsAffected = this.template.batchUpdate(sql, ids, sqlTypes);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		int[] actualRowsAffected = template.batchUpdate(sql, ids, sqlTypes);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setObject(1, 100, sqlTypes[0]);
 		verify(this.preparedStatement).setObject(1, 200, sqlTypes[0]);
 		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -791,17 +746,14 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[][] actualRowsAffected = template.batchUpdate(sql, ids, 2, setter);
-		assertThat(actualRowsAffected[0]).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0][0]).isEqualTo(rowsAffected1[0]);
-		assertThat(actualRowsAffected[0][1]).isEqualTo(rowsAffected1[1]);
-		assertThat(actualRowsAffected[1][0]).isEqualTo(rowsAffected2[0]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(new int[][] {rowsAffected1, rowsAffected2});
 
 		verify(this.preparedStatement, times(3)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids.get(0));
 		verify(this.preparedStatement).setInt(1, ids.get(1));
 		verify(this.preparedStatement).setInt(1, ids.get(2));
 		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -850,7 +802,7 @@ class JdbcTemplateTests {
 		verify(this.preparedStatement).setInt(1, 3);
 		verify(this.preparedStatement, times(2)).executeBatch();
 		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -869,13 +821,13 @@ class JdbcTemplateTests {
 	void couldNotGetConnectionForOperationWithLazyExceptionTranslator() throws SQLException {
 		SQLException sqlException = new SQLException("foo", "07xxx");
 		given(this.dataSource.getConnection()).willThrow(sqlException);
-		this.template = new JdbcTemplate();
-		this.template.setDataSource(this.dataSource);
-		this.template.afterPropertiesSet();
+		JdbcTemplate template = new JdbcTemplate();
+		template.setDataSource(this.dataSource);
+		template.afterPropertiesSet();
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 
 		assertThatExceptionOfType(CannotGetJdbcConnectionException.class)
-				.isThrownBy(() -> this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
+				.isThrownBy(() -> template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
 				.withCause(sqlException);
 	}
 
@@ -902,20 +854,20 @@ class JdbcTemplateTests {
 
 		SQLException sqlException = new SQLException("foo", "07xxx");
 		given(this.dataSource.getConnection()).willThrow(sqlException);
-		this.template = new JdbcTemplate();
-		this.template.setDataSource(this.dataSource);
-		this.template.setLazyInit(false);
+		JdbcTemplate template = new JdbcTemplate();
+		template.setDataSource(this.dataSource);
+		template.setLazyInit(false);
 		if (beanProperty) {
 			// This will get a connection.
-			this.template.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(this.dataSource));
+			template.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(this.dataSource));
 		}
 		else {
 			// This will cause creation of default SQL translator.
-			this.template.afterPropertiesSet();
+			template.afterPropertiesSet();
 		}
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 		assertThatExceptionOfType(CannotGetJdbcConnectionException.class)
-				.isThrownBy(() -> this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
+				.isThrownBy(() -> template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
 				.withCause(sqlException);
 	}
 
@@ -948,7 +900,7 @@ class JdbcTemplateTests {
 				.withCause(sqlException);
 		verify(this.preparedStatement).setString(1, name);
 		verify(this.preparedStatement).close();
-		verify(this.connection, atLeastOnce()).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -1116,7 +1068,7 @@ class JdbcTemplateTests {
 				this.template.call(conn -> conn.prepareCall("my query"), Collections.singletonList(param)));
 		verify(this.resultSet).close();
 		verify(this.callableStatement).close();
-		verify(this.connection).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
 	@Test
@@ -1297,9 +1249,9 @@ class JdbcTemplateTests {
 
 	private static class Dispatcher implements PreparedStatementCreator, SqlProvider {
 
-		private int id;
+		private final int id;
 
-		private String sql;
+		private final String sql;
 
 		public Dispatcher(int id, String sql) {
 			this.id = id;
