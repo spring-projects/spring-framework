@@ -161,30 +161,8 @@ final class DefaultJdbcClient implements JdbcClient {
 
 		@Override
 		public StatementSpec param(int jdbcIndex, @Nullable Object value) {
-			if (jdbcIndex < 1) {
-				throw new IllegalArgumentException("Invalid JDBC index: needs to start at 1");
-			}
-			validateIndexedParamValue(value);
-			int index = jdbcIndex - 1;
-			int size = this.indexedParams.size();
-			if (index < size) {
-				this.indexedParams.set(index, value);
-			}
-			else {
-				for (int i = size; i < index; i++) {
-					this.indexedParams.add(null);
-				}
-				this.indexedParams.add(value);
-			}
+			addIndexedParam(this.indexedParams, jdbcIndex, value);
 			return this;
-		}
-
-		private void validateIndexedParamValue(@Nullable Object value) {
-			if (value instanceof Iterable) {
-				throw new IllegalArgumentException("Invalid positional parameter value of type Iterable (" +
-						value.getClass().getSimpleName() +
-						"): Parameter expansion is only supported with named parameters.");
-			}
 		}
 
 		@Override
@@ -333,6 +311,32 @@ final class DefaultJdbcClient implements JdbcClient {
 			return pscf.newPreparedStatementCreator(this.indexedParams);
 		}
 
+		private static void addIndexedParam(List<@Nullable Object> indexedParams, int jdbcIndex, @Nullable Object value) {
+			if (jdbcIndex < 1) {
+				throw new IllegalArgumentException("Invalid JDBC index: needs to start at 1");
+			}
+			validateIndexedParamValue(value);
+			int index = jdbcIndex - 1;
+			int size = indexedParams.size();
+			if (index < size) {
+				indexedParams.set(index, value);
+			}
+			else {
+				for (int i = size; i < index; i++) {
+					indexedParams.add(null);
+				}
+				indexedParams.add(value);
+			}
+		}
+
+		private static void validateIndexedParamValue(@Nullable Object value) {
+			if (value instanceof Iterable) {
+				throw new IllegalArgumentException("Invalid positional parameter value of type Iterable (" +
+						value.getClass().getSimpleName() +
+						"): Parameter expansion is only supported with named parameters.");
+			}
+		}
+
 
 		private class DefaultBatchSpec implements BatchSpec {
 
@@ -356,9 +360,25 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			@Override
+			public BatchSpec param(int jdbcIndex, @Nullable Object value) {
+				addIndexedParam(this.currentIndexedParams, jdbcIndex, value);
+				return this;
+			}
+
+			@Override
+			public BatchSpec param(int jdbcIndex, @Nullable Object value, int sqlType) {
+				return param(jdbcIndex, new SqlParameterValue(sqlType, value));
+			}
+
+			@Override
 			public BatchSpec param(String name, @Nullable Object value) {
 				this.currentNamedParams.addValue(name, value);
 				return this;
+			}
+
+			@Override
+			public BatchSpec param(String name, @Nullable Object value, int sqlType) {
+				return param(name, new SqlParameterValue(sqlType, value));
 			}
 
 			@Override
