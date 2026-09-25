@@ -350,6 +350,8 @@ abstract class AnnotationsScanner {
 
 	private static boolean isOverride(Method rootMethod, Method candidateMethod) {
 		return (!Modifier.isPrivate(candidateMethod.getModifiers()) &&
+				!Modifier.isStatic(rootMethod.getModifiers()) &&
+				!Modifier.isStatic(candidateMethod.getModifiers()) &&
 				candidateMethod.getParameterCount() == rootMethod.getParameterCount() &&
 				candidateMethod.getName().equals(rootMethod.getName()) &&
 				hasSameParameterTypes(rootMethod, candidateMethod));
