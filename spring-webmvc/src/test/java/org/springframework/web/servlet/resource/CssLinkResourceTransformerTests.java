@@ -167,6 +167,20 @@ class CssLinkResourceTransformerTests {
 		assertThat(result).isEqualToNormalizingNewlines(expected);
 	}
 
+	@Test
+	void transformUnclosedUrlFunction() throws Exception {
+		this.request = new MockHttpServletRequest("GET", "/static/unclosed_url_function.css");
+		Resource css = getResource("unclosed_url_function.css");
+		String expected = """
+				body { background: url("/static/images/image-f448cd1d5dba82b774f3202c878230b3.png?#iefix") }
+				div { background: url(images/image.png
+				""";
+
+		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
+		String result = new String(actual.getByteArray(), UTF_8);
+		assertThat(result).isEqualToNormalizingNewlines(expected);
+	}
+
 	private Resource getResource(String filePath) {
 		return new ClassPathResource("test/" + filePath, getClass());
 	}
