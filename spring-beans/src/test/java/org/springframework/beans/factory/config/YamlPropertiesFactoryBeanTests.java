@@ -226,6 +226,40 @@ class YamlPropertiesFactoryBeanTests {
 		assertThat(properties.get("foo")).isNull();
 	}
 
+	@Test  // gh-27020
+	void loadNestedMapWithBracketedKeyContainingDotAndColon() {
+		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+		factory.setResources(new ByteArrayResource((
+				"root:\n" +
+				"  webservices:\n" +
+				"    \"[domain.test:8080]\":\n" +
+				"      - username: me\n" +
+				"        password: mypassword\n").getBytes()));
+		Properties properties = factory.getObject();
+		assertThat(properties.getProperty("root.webservices[[domain.test:8080]][0].username"))
+				.isEqualTo("me");
+		assertThat(properties.getProperty("root.webservices[[domain.test:8080]][0].password"))
+				.isEqualTo("mypassword");
+	}
+
+	@Test  // gh-27020
+	void loadNestedMapWithBracketedKeyContainingDot() {
+		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+		factory.setResources(new ByteArrayResource(
+				"root:\n  \"[my.dotted.key]\": value\n".getBytes()));
+		Properties properties = factory.getObject();
+		assertThat(properties.getProperty("root[[my.dotted.key]]")).isEqualTo("value");
+	}
+
+	@Test  // gh-27020
+	void loadNestedMapWithBracketedKeyContainingColon() {
+		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+		factory.setResources(new ByteArrayResource(
+				"root:\n  \"[host:8080]\": value\n".getBytes()));
+		Properties properties = factory.getObject();
+		assertThat(properties.getProperty("root[[host:8080]]")).isEqualTo("value");
+	}
+
 	@Test
 	@SuppressWarnings("unchecked")
 	void yaml() {

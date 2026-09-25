@@ -340,7 +340,19 @@ public abstract class YamlProcessor {
 		source.forEach((key, value) -> {
 			if (StringUtils.hasText(path)) {
 				if (key.startsWith("[")) {
-					key = path + key;
+					if (containsKeyPathSeparator(key)) {
+						// User-supplied YAML key whose literal brackets must be preserved
+						// when flattened to property paths (for example a YAML key such as
+						// "[domain.test:8080]" must round-trip as "[[domain.test:8080]]" so
+						// that consumers like the Spring Boot binder treat the original
+						// brackets as part of the key rather than as a map-key marker).
+						key = path + '[' + key + ']';
+					}
+					else {
+						// Bracket-wrapped key generated internally — collection index or
+						// the toString() of a non-CharSequence map key. No dot separator.
+						key = path + key;
+					}
 				}
 				else {
 					key = path + '.' + key;
@@ -370,6 +382,25 @@ public abstract class YamlProcessor {
 				result.put(key, (value != null ? value : (includeEmpty ? emptyValue : "")));
 			}
 		});
+	}
+
+	/**
+	 * Detect whether the given bracket-prefixed key contains characters that downstream
+	 * consumers of the flattened properties would interpret as path separators. Keys
+	 * generated internally by this class for collection indices and for the
+	 * {@code toString()} of non-CharSequence map keys do not contain such characters,
+	 * so the presence of a {@code '.'} or {@code ':'} indicates a user-supplied key
+	 * whose brackets are part of the key itself and need additional wrapping to be
+	 * preserved.
+	 */
+	private static boolean containsKeyPathSeparator(String key) {
+		for (int i = 0; i < key.length(); i++) {
+			char c = key.charAt(i);
+			if (c == '.' || c == ':') {
+				return true;
+			}
+		}
+		return false;
 	}
 
 
