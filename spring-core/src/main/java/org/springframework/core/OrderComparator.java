@@ -44,6 +44,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 07.04.2003
  * @see Ordered
  * @see PriorityOrdered
@@ -82,6 +83,15 @@ public class OrderComparator implements Comparator<Object> {
 		}
 		else if (p2 && !p1) {
 			return 1;
+		}
+
+		boolean t1 = (o1 instanceof TailOrdered);
+		boolean t2 = (o2 instanceof TailOrdered);
+		if (t1 && !t2) {
+			return 1;
+		}
+		else if (t2 && !t1) {
+			return -1;
 		}
 
 		int i1 = getOrder(o1, sourceProvider);
