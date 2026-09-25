@@ -377,10 +377,40 @@ beans for classes A and B to be injected into each other, the Spring IoC contain
 detects this circular reference at runtime, and throws a
 `BeanCurrentlyInCreationException`.
 
-One possible solution is to edit the source code of some classes to be configured by
-setters rather than constructors. Alternatively, avoid constructor injection and use
-setter injection only. In other words, although it is not recommended, you can configure
-circular dependencies with setter injection.
+A circular dependency is often a sign that responsibilities are not cleanly separated.
+The preferred solution is to refactor the design to remove the cycle -- for example, by
+extracting the shared logic into a third component on which both classes depend.
+
+If the cycle cannot be avoided, you have a few options for retaining constructor
+injection:
+
+* Annotate one of the constructor parameters with
+  xref:core/beans/classpath-scanning.adoc#beans-factorybeans-annotations-lazy-injection-points[`@Lazy`].
+  Spring then injects a lazy-resolution proxy instead of the fully initialized bean. The
+  proxy must not be invoked during construction, since doing so would resolve the target
+  bean too early and re-create the cycle.
+* Inject an {spring-framework-api}/beans/factory/ObjectProvider.html[`ObjectProvider<T>`]
+  or a xref:core/beans/standard-annotations.adoc#beans-inject-named[`Provider<T>`] for one
+  side of the cycle and retrieve the collaborating bean on demand.
+
+Alternatively, you can edit the source code of some classes to be configured by setters
+rather than constructors, or avoid constructor injection and use setter injection only.
+In other words, although it is not recommended, you can configure circular dependencies
+with setter injection.
+
+With `@Bean`-based configuration, a circular dependency between `@Bean` methods can be
+broken by adding `@Lazy` to one of the method parameters, as the following example
+shows:
+
+include-code::./CircularDependencyConfiguration[tag=snippet,indent=0]
+
+In the preceding example, `PaymentProcessor` is an interface, which allows Spring to use
+a JDK dynamic proxy without requiring a subclass of a concrete class. Spring injects the
+lazy-resolution proxy instead of resolving the `PaymentProcessor` bean immediately when
+it creates `OrderConfirmation`. The target bean is resolved when the proxy is first used,
+subject to the same constraint described above. See
+xref:core/beans/classpath-scanning.adoc#beans-factorybeans-annotations-lazy-injection-points[Lazy Injection Points]
+for more details.
 
 Unlike the typical case (with no circular dependencies), a circular dependency
 between bean A and bean B forces one of the beans to be injected into the other prior to
