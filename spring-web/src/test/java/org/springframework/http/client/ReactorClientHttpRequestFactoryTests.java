@@ -16,14 +16,18 @@
 
 package org.springframework.http.client;
 
+import java.time.Duration;
 import java.util.function.Function;
 
+import io.netty.channel.ChannelOption;
 import org.junit.jupiter.api.Test;
 import reactor.netty.http.client.HttpClient;
 
 import org.springframework.http.HttpMethod;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 
 /**
  * @author Arjen Poutsma
@@ -42,6 +46,16 @@ class ReactorClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTes
 	void httpMethods() throws Exception {
 		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
+	}
+
+	@Test
+	void connectTimeoutAsDurationExceedingIntegerRangeIsCapped() {
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(HttpClient.create());
+		requestFactory.setConnectTimeout(Duration.ofDays(50));
+
+		assertThat(requestFactory).extracting("httpClient", as(type(HttpClient.class)))
+				.extracting(client -> client.configuration().options().get(ChannelOption.CONNECT_TIMEOUT_MILLIS))
+				.isEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Test
