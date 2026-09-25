@@ -104,3 +104,9 @@ dependencies {
 	testRuntimeOnly("org.glassfish:jakarta.el")
 	testRuntimeOnly("org.hibernate.validator:hibernate-validator")
 }
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xcontext-parameters")
+    }
+}
