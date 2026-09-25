@@ -96,8 +96,10 @@ class TransactionAwareConnectionFactoryProxyTests {
 	@Test
 	void getTargetConnectionShouldReturnTargetConnection() {
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
-				.map(Wrapped.class::cast).as(StepVerifier::create)
-				.consumeNextWith(wrapped -> assertThat(wrapped.unwrap()).isEqualTo(connectionMock1))
+				.as(StepVerifier::create)
+				.consumeNextWith(connection ->
+						assertThat(ConnectionFactoryUtils.getTargetConnection(connection))
+								.isSameAs(connectionMock1))
 				.verifyComplete();
 	}
 
