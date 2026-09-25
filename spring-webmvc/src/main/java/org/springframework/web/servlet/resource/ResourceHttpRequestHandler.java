@@ -554,30 +554,33 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		// Content phase
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
-		if (request.getHeader(HttpHeaders.RANGE) == null) {
-			Assert.state(this.resourceHttpMessageConverter != null, "Converter not initialized");
-			if (HttpMethod.HEAD.matches(request.getMethod())) {
-				this.resourceHttpMessageConverter.addDefaultHeaders(outputMessage, resource, mediaType);
-				outputMessage.flush();
-			}
-			else {
-				this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
-			}
-		}
-		else {
-			Assert.state(this.resourceRegionHttpMessageConverter != null, "Converter not initialized");
+		if (request.getHeader(HttpHeaders.RANGE) != null) {
 			ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(request);
 			try {
-				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
-				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-				this.resourceRegionHttpMessageConverter.write(
-						HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
+				List<HttpRange> httpRanges = HttpRange.parseRanges(inputMessage.getHeaders(), outputMessage.getHeaders());
+				if (!httpRanges.isEmpty()) {
+					Assert.state(this.resourceRegionHttpMessageConverter != null, "Converter not initialized");
+					response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+					this.resourceRegionHttpMessageConverter.write(
+							HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
+					return;
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				response.setContentType(null);
 				response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
 				response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+				return;
 			}
+		}
+
+		Assert.state(this.resourceHttpMessageConverter != null, "Converter not initialized");
+		if (HttpMethod.HEAD.matches(request.getMethod())) {
+			this.resourceHttpMessageConverter.addDefaultHeaders(outputMessage, resource, mediaType);
+			outputMessage.flush();
+		}
+		else {
+			this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
 		}
 	}
 
