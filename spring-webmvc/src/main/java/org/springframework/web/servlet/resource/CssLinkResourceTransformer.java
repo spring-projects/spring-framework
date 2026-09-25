@@ -140,8 +140,11 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 					return;
 				}
 				position += getKeyword().length();
-				while (Character.isWhitespace(content.charAt(position))) {
+				while (position < content.length() && Character.isWhitespace(content.charAt(position))) {
 					position++;
+				}
+				if (position == content.length()) {
+					return;
 				}
 				if (content.charAt(position) == '\'') {
 					position = extractLink(position, "'", content, result);
@@ -158,6 +161,12 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		protected int extractLink(int index, String endKey, String content, SortedSet<ContentChunkInfo> linksToAdd) {
 			int start = index + 1;
 			int end = content.indexOf(endKey, start);
+			if (end == -1) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Unterminated link at index " + start + ", no closing \"" + endKey + "\"");
+				}
+				return content.length();
+			}
 			linksToAdd.add(new ContentChunkInfo(start, end));
 			return end + endKey.length();
 		}

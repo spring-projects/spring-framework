@@ -183,6 +183,25 @@ class CssLinkResourceTransformerTests {
 				.verify();
 	}
 
+	@Test
+	void transformUnclosedUrlFunction() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/unclosed_url_function.css"));
+		Resource css = getResource("unclosed_url_function.css");
+		String expected = """
+				body { background: url("/static/images/image-f448cd1d5dba82b774f3202c878230b3.png?#iefix") }
+				div { background: url(images/image.png
+				""";
+
+		StepVerifier.create(this.transformerChain.transform(exchange, css)
+				.cast(TransformedResource.class))
+				.consumeNextWith(transformedResource -> {
+					String result = new String(transformedResource.getByteArray(), UTF_8);
+					assertThat(result).isEqualToNormalizingNewlines(expected);
+				})
+				.expectComplete()
+				.verify();
+	}
+
 	private Resource getResource(String filePath) {
 		return new ClassPathResource("test/" + filePath, getClass());
 	}

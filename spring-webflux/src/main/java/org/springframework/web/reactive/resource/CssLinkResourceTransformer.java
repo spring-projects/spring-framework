@@ -176,8 +176,11 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 					return;
 				}
 				position += getKeyword().length();
-				while (Character.isWhitespace(content.charAt(position))) {
+				while (position < content.length() && Character.isWhitespace(content.charAt(position))) {
 					position++;
+				}
+				if (position == content.length()) {
+					return;
 				}
 				if (content.charAt(position) == '\'') {
 					position = extractLink(position, '\'', content, result);
@@ -194,6 +197,12 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		protected int extractLink(int index, char endChar, String content, Set<ContentChunkInfo> result) {
 			int start = index + 1;
 			int end = content.indexOf(endChar, start);
+			if (end == -1) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Unterminated link at index " + start + ", no closing '" + endChar + "'");
+				}
+				return content.length();
+			}
 			result.add(new ContentChunkInfo(start, end, true));
 			return end + 1;
 		}
