@@ -39,11 +39,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
+import static org.springframework.transaction.TransactionDefinition.ISOLATION_READ_COMMITTED;
 import static org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ;
 import static org.springframework.transaction.TransactionDefinition.ISOLATION_SERIALIZABLE;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_MANDATORY;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRED;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_SUPPORTS;
+
+import static org.springframework.transaction.support.AbstractPlatformTransactionManager.SYNCHRONIZATION_ALWAYS;
 import static org.springframework.transaction.support.AbstractPlatformTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION;
 import static org.springframework.transaction.support.DefaultTransactionDefinition.PREFIX_ISOLATION;
 import static org.springframework.transaction.support.DefaultTransactionDefinition.PREFIX_PROPAGATION;
@@ -76,6 +79,58 @@ class TransactionSupportTests {
 
 		assertThatExceptionOfType(IllegalTransactionStateException.class)
 				.isThrownBy(() -> tm.getTransaction(new DefaultTransactionDefinition(PROPAGATION_MANDATORY)));
+	}
+
+	@Test
+	void noExistingTransactionWithExistingAnotherTransactionManager() {
+		AbstractPlatformTransactionManager tm1 = new TestTransactionManager(false, true);
+		tm1.setTransactionSynchronization(SYNCHRONIZATION_ALWAYS);
+
+		DefaultTransactionDefinition txDef1 =
+				new DefaultTransactionDefinition(PROPAGATION_REQUIRED);
+		txDef1.setName("tx1");
+		txDef1.setReadOnly(false);
+		txDef1.setIsolationLevel(ISOLATION_READ_COMMITTED);
+
+		DefaultTransactionStatus txStatus1 = (DefaultTransactionStatus)tm1.getTransaction(txDef1);
+
+		// assert for txStatus1 and TransactionSynchronizationManager property
+		assertThat(txStatus1.hasTransaction()).as("Must have transaction").isTrue();
+		assertThat(txStatus1.isNewTransaction()).as("Must be new transaction").isTrue();
+		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly())
+				.as("Transaction1 Must be readOnly false")
+				.isEqualTo(txStatus1.isReadOnly());
+		assertThat(TransactionSynchronizationManager.getCurrentTransactionName())
+				.as("TransactionSynchronizationManager have correct transaction name")
+						.isEqualTo(txStatus1.getTransactionName());
+		assertThat(TransactionSynchronizationManager.getCurrentTransactionIsolationLevel())
+				.as("isolation level must be default").isNull();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+
+		// Setting another trnasaction manager
+		AbstractPlatformTransactionManager tm2 = new TestTransactionManager(false, true);
+		tm2.setTransactionSynchronization(SYNCHRONIZATION_ALWAYS);
+
+		// Opening a new transaction before `transaction 1` commits.
+		DefaultTransactionDefinition txDef2 =
+				new DefaultTransactionDefinition(PROPAGATION_SUPPORTS);
+		txDef2.setReadOnly(true);
+		txDef2.setIsolationLevel(ISOLATION_REPEATABLE_READ);
+		txDef2.setName("tx2");
+
+		// assert for txStatus1 and TransactionSynchronizationManager property
+		DefaultTransactionStatus txStatus2 = (DefaultTransactionStatus)
+				tm2.getTransaction(txDef2);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).as("Must not have transaction")
+				.isEqualTo(txStatus2.hasTransaction());
+		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).as("Must be readOnly true")
+				.isEqualTo(txStatus2.isReadOnly());
+		assertThat(TransactionSynchronizationManager.getCurrentTransactionIsolationLevel())
+				.as("isolation level must be Repeatable Read")
+				.isEqualTo(ISOLATION_REPEATABLE_READ);
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
+
+		TransactionSynchronizationManager.clearSynchronization();
 	}
 
 	@Test
