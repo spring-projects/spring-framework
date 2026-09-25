@@ -27,6 +27,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
@@ -232,6 +233,7 @@ class RestClientBuilderTests {
 		DefaultRestClientBuilder copiedBuilder = new DefaultRestClientBuilder(sourceBuilder);
 
 		sourceBuilder.defaultCookie("thirdCookie", "thirdValue");
+		sourceBuilder.defaultCookie("firstCookie", "fourthValue");
 
 		assertThat(fieldValue("defaultCookies", copiedBuilder))
 				.asInstanceOf(InstanceOfAssertFactories.MAP)
@@ -239,6 +241,20 @@ class RestClientBuilderTests {
 						Map.entry("firstCookie", List.of("firstValue")),
 						Map.entry("secondCookie", List.of("secondValue"))
 				);
+	}
+
+	@Test
+	void copyConstructorCopiesDefaultHeadersImmutable() {
+		DefaultRestClientBuilder sourceBuilder = new DefaultRestClientBuilder();
+		sourceBuilder.defaultHeaders(headers -> headers.add("firstHeader", "firstValue"));
+		DefaultRestClientBuilder copiedBuilder = new DefaultRestClientBuilder(sourceBuilder);
+
+		sourceBuilder.defaultHeaders(headers -> headers.add("firstHeader", "secondValue"));
+
+		assertThat(fieldValue("defaultHeaders", copiedBuilder))
+				.asInstanceOf(InstanceOfAssertFactories.type(HttpHeaders.class))
+				.extracting(headers -> headers.get("firstHeader"), InstanceOfAssertFactories.LIST)
+				.containsExactly("firstValue");
 	}
 
 	@Test

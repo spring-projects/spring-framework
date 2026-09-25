@@ -281,6 +281,26 @@ class DefaultWebClientTests {
 	}
 
 	@Test
+	void mutateDoesNotShareDefaultHeaderAndCookieValues() {
+		WebClient client = this.builder
+				.defaultHeaders(headers -> headers.add("foo", "bar"))
+				.defaultCookie("foo", "bar")
+				.build();
+
+		client.mutate()
+				.defaultHeaders(headers -> headers.add("foo", "baz"))
+				.defaultCookie("foo", "baz")
+				.build();
+
+		client.mutate().build().get().uri("/path")
+				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
+
+		ClientRequest request = verifyAndGetRequest();
+		assertThat(request.headers().get("foo")).containsExactly("bar");
+		assertThat(request.cookies().get("foo")).containsExactly("bar");
+	}
+
+	@Test
 	void cloneBuilder() {
 		Consumer<ClientCodecConfigurer> codecsConfig = c -> {};
 		ExchangeFunction exchangeFunction = request -> Mono.empty();
