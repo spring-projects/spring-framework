@@ -16,7 +16,10 @@
 
 package org.springframework.cache.transaction;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.support.AbstractCacheManager;
 
 /**
@@ -25,6 +28,7 @@ import org.springframework.cache.support.AbstractCacheManager;
  * on explicitly through the {@link #setTransactionAware} bean property.
  *
  * @author Juergen Hoeller
+ * @author Seonghun Lee
  * @since 3.2
  * @see #setTransactionAware
  * @see TransactionAwareCacheDecorator
@@ -33,6 +37,8 @@ import org.springframework.cache.support.AbstractCacheManager;
 public abstract class AbstractTransactionSupportingCacheManager extends AbstractCacheManager {
 
 	private boolean transactionAware = false;
+
+	private @Nullable CacheErrorHandler errorHandler;
 
 
 	/**
@@ -52,10 +58,35 @@ public abstract class AbstractTransactionSupportingCacheManager extends Abstract
 		return this.transactionAware;
 	}
 
+	/**
+	 * Set the {@link CacheErrorHandler} for {@link Cache#put}, {@link Cache#evict}
+	 * and {@link Cache#clear} failures in the after-commit phase of a transaction,
+	 * applied when this CacheManager is {@linkplain #setTransactionAware
+	 * transaction-aware}.
+	 * <p>By default, such failures are propagated to the caller of the transaction
+	 * commit, bypassing any error handler configured at the cache interception
+	 * level, since the deferred operation runs outside the intercepted cache
+	 * invocation.
+	 * @since 7.1
+	 * @see TransactionAwareCacheDecorator
+	 */
+	public void setErrorHandler(@Nullable CacheErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
+	}
+
+	/**
+	 * Return the {@link CacheErrorHandler} for after-commit cache operation
+	 * failures, if any.
+	 * @since 7.1
+	 */
+	public @Nullable CacheErrorHandler getErrorHandler() {
+		return this.errorHandler;
+	}
+
 
 	@Override
 	protected Cache decorateCache(Cache cache) {
-		return (isTransactionAware() ? new TransactionAwareCacheDecorator(cache) : cache);
+		return (isTransactionAware() ? new TransactionAwareCacheDecorator(cache, getErrorHandler()) : cache);
 	}
 
 }
