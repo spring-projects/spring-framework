@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -735,6 +736,94 @@ class TypeDescriptorTests {
 				out.toByteArray()));
 		TypeDescriptor readObject = (TypeDescriptor) inputStream.readObject();
 		assertThat(readObject).isEqualTo(typeDescriptor);
+	}
+
+	@Test  // gh-33948
+	void serializableWithFieldAnnotations() throws Exception {
+		Field field = getClass().getField("fieldAnnotated");
+		TypeDescriptor readObject = serializeAndDeserialize(new TypeDescriptor(field));
+		assertThat(readObject.getAnnotations()).containsExactly(field.getAnnotations());
+		assertThat(readObject.hasAnnotation(FieldAnnotation.class)).isTrue();
+	}
+
+	@Test  // gh-33948
+	void serializableWithMethodParameterAnnotations() throws Exception {
+		MethodParameter methodParameter = new MethodParameter(
+				getClass().getMethod("testAnnotatedMethod", String.class), 0);
+		TypeDescriptor readObject = serializeAndDeserialize(new TypeDescriptor(methodParameter));
+		assertThat(readObject.getAnnotations()).containsExactly(methodParameter.getParameterAnnotations());
+		assertThat(readObject.hasAnnotation(ParameterAnnotation.class)).isTrue();
+	}
+
+	@Test  // gh-33948
+	void serializableWithPropertyAnnotations() throws Exception {
+		Property property = new Property(getClass(), getClass().getMethod("getProperty"),
+				getClass().getMethod("setProperty", Map.class));
+		TypeDescriptor readObject = serializeAndDeserialize(new TypeDescriptor(property));
+		assertThat(readObject.getAnnotations()).containsExactly(property.getAnnotations());
+		assertThat(readObject.hasAnnotation(MethodAnnotation1.class)).isTrue();
+	}
+
+	@Test  // gh-33948
+	void serializableWithAnnotationArray() throws Exception {
+		Annotation[] annotations = getClass().getField("fieldAnnotated").getAnnotations();
+		TypeDescriptor readObject = serializeAndDeserialize(
+				new TypeDescriptor(ResolvableType.forClass(String.class), String.class, annotations));
+		assertThat(readObject.getAnnotations()).containsExactly(annotations);
+		assertThat(readObject.hasAnnotation(FieldAnnotation.class)).isTrue();
+	}
+
+	@Test  // gh-33948
+	void serializableWithoutAnnotations() throws Exception {
+		TypeDescriptor readObject = serializeAndDeserialize(new TypeDescriptor(getClass().getField("fieldScalar")));
+		assertThat(readObject.getAnnotations()).isEmpty();
+		// An empty AnnotatedElementAdapter is a shared instance which returns its annotation
+		// array as is, whereas any other adapter hands out a defensive copy on every call.
+		assertThat(readObject.getAnnotations()).isSameAs(readObject.getAnnotations());
+	}
+
+	@Test  // gh-33948
+	void serializableWithDerivedTypeDescriptor() throws Exception {
+		Field field = getClass().getField("mapPreserveContext");
+		TypeDescriptor valueTypeDescriptor = new TypeDescriptor(field).getMapValueTypeDescriptor();
+		TypeDescriptor readObject = serializeAndDeserialize(valueTypeDescriptor);
+		assertThat(readObject.getAnnotations()).containsExactly(field.getAnnotations());
+	}
+
+	@Test  // gh-33948
+	void serializationResolvesAnnotationsThatHaveNotBeenResolvedYet() throws Exception {
+		AtomicInteger resolutionCount = new AtomicInteger();
+		MethodParameter methodParameter =
+				new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0) {
+					@Override
+					public Annotation[] getParameterAnnotations() {
+						resolutionCount.incrementAndGet();
+						return super.getParameterAnnotations();
+					}
+				};
+
+		TypeDescriptor typeDescriptor = new TypeDescriptor(methodParameter);
+		assertThat(resolutionCount).hasValue(0);
+
+		TypeDescriptor readObject = serializeAndDeserialize(typeDescriptor);
+		assertThat(resolutionCount).hasValue(1);
+		assertThat(readObject.getAnnotations()).containsExactly(methodParameter.getParameterAnnotations());
+	}
+
+	/**
+	 * Serialize the supplied {@link TypeDescriptor} without resolving its
+	 * annotations first, and assert that the deserialized copy is equal to it.
+	 */
+	private static TypeDescriptor serializeAndDeserialize(TypeDescriptor typeDescriptor) throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try (ObjectOutputStream outputStream = new ObjectOutputStream(out)) {
+			outputStream.writeObject(typeDescriptor);
+		}
+		try (ObjectInputStream inputStream = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()))) {
+			TypeDescriptor readObject = (TypeDescriptor) inputStream.readObject();
+			assertThat(readObject).isEqualTo(typeDescriptor);
+			return readObject;
+		}
 	}
 
 	@Test
