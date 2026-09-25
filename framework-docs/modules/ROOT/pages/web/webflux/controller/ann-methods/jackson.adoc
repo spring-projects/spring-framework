@@ -32,8 +32,8 @@ Java::
 
 	public class User {
 
-		public interface WithoutPasswordView {};
-		public interface WithPasswordView extends WithoutPasswordView {};
+		public interface WithoutPasswordView {}
+		public interface WithPasswordView extends WithoutPasswordView {}
 
 		private String username;
 		private String password;
