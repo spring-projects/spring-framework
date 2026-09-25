@@ -361,6 +361,18 @@ class NamedParameterUtilsTests {
 		assertThat(substituteNamedParameters(parsedSql)).isEqualTo("select * from `tb&user` where id = ?");
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"select * from t where a = :a -",
+			"select * from t where a = :a /",
+			"-",
+			"/"
+		})
+	void parseSqlStatementEndingWithFirstCharacterOfCommentStart(String sql) {
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(parsedSql.getOriginalSql()).isEqualTo(sql);
+	}
+
 	private static String substituteNamedParameters(ParsedSql parsedSql) {
 		return NamedParameterUtils.substituteNamedParameters(parsedSql, null);
 	}
