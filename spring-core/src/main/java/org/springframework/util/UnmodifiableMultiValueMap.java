@@ -39,11 +39,12 @@ import org.jspecify.annotations.Nullable;
  * Unmodifiable wrapper for {@link MultiValueMap}.
  *
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  * @since 6.0
  * @param <K> the key type
  * @param <V> the value element type
  */
-final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serializable {
+final class UnmodifiableMultiValueMap<K, V extends @Nullable Object> implements MultiValueMap<K, V>, Serializable {
 
 	private static final long serialVersionUID = -8697084563854098920L;
 
