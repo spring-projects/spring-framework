@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Chengang Guan
  */
 class RepeatableContainersTests {
 
@@ -77,6 +78,13 @@ class RepeatableContainersTests {
 				StandardRepeatablesWithContainerWithMultipleAttributesTestCase.class,
 				StandardContainerWithMultipleAttributes.class);
 			assertThat(values).containsExactly("a", "b");
+		}
+
+		@Test
+		void standardRepeatablesWhenContainerNotReferencedByRepeatableReturnsNull() {
+			Object[] values = findRepeatedAnnotationValues(RepeatableContainers.standardRepeatables(),
+					FakeRepeatablesTestCase.class, FakeStandardContainer.class);
+			assertThat(values).isNull();
 		}
 
 	}
@@ -212,6 +220,12 @@ class RepeatableContainersTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
+	@interface FakeStandardContainer {
+
+		StandardRepeatable[] value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(StandardContainer.class)
 	@interface StandardRepeatable {
 
@@ -261,6 +275,10 @@ class RepeatableContainersTests {
 
 	@ExplicitContainer({ @ExplicitRepeatable("a"), @ExplicitRepeatable("b") })
 	static class ExplicitRepeatablesTestCase {
+	}
+
+	@FakeStandardContainer({ @StandardRepeatable("a"), @StandardRepeatable("b") })
+	static class FakeRepeatablesTestCase {
 	}
 
 }
