@@ -131,7 +131,7 @@ final class AttributeMethods {
 	 * {@code Class.getAnnotations() failure} on a regular JVM).
 	 * @param annotation the annotation to validate
 	 * @throws IllegalStateException if a declared {@code Class} attribute could not be read
-	 * @see #canLoad(Annotation)
+	 * @see #canLoad(Annotation, AnnotatedElement)
 	 */
 	void validate(Annotation annotation) {
 		assertAnnotation(annotation);
