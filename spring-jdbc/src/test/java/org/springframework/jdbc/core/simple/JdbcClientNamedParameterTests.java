@@ -547,7 +547,7 @@ class JdbcClientNamedParameterTests {
 	@Test
 	void updateWithGeneratedKeys() throws SQLException {
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
-		given(resultSetMetaData.getColumnLabel(1)).willReturn("1");
+		given(resultSetMetaData.getColumnLabel(1)).willReturn("id");
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getObject(1)).willReturn(11);
@@ -560,7 +560,7 @@ class JdbcClientNamedParameterTests {
 		int rowsAffected = client.sql(INSERT_GENERATE_KEYS).param("name", "rod").update(generatedKeyHolder);
 
 		assertThat(rowsAffected).isEqualTo(1);
-		assertThat(generatedKeyHolder.getKeyList()).hasSize(1);
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("id", 11));
 		assertThat(generatedKeyHolder.getKey()).isEqualTo(11);
 		verify(preparedStatement).setString(1, "rod");
 		verify(resultSet).close();
@@ -616,7 +616,7 @@ class JdbcClientNamedParameterTests {
 	@Test
 	void updateWithGeneratedKeysAndKeyColumnNames() throws SQLException {
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
-		given(resultSetMetaData.getColumnLabel(1)).willReturn("1");
+		given(resultSetMetaData.getColumnLabel(1)).willReturn("id");
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getObject(1)).willReturn(11);
@@ -629,7 +629,7 @@ class JdbcClientNamedParameterTests {
 		int rowsAffected = client.sql(INSERT_GENERATE_KEYS).param("name", "rod").update(generatedKeyHolder, "id");
 
 		assertThat(rowsAffected).isEqualTo(1);
-		assertThat(generatedKeyHolder.getKeyList()).hasSize(1);
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("id", 11));
 		assertThat(generatedKeyHolder.getKey()).isEqualTo(11);
 		verify(preparedStatement).setString(1, "rod");
 		verify(resultSet).close();

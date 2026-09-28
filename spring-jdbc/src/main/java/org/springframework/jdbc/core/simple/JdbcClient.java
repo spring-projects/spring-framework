@@ -391,7 +391,11 @@ public interface JdbcClient {
 	interface BatchSpec {
 
 		/**
-		 * Bind a positional parameter for the current batch entry.
+		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
+		 * by implicit order of parameter value registration, for the current batch entry.
+		 * <p>This is primarily intended for statements with a single parameter
+		 * or very few parameters, registering each parameter value in the order
+		 * of the parameter's occurrence in the SQL statement.
 		 * @param value the parameter value to bind
 		 * @return this batch specification (for chaining)
 		 * @see StatementSpec#param(Object)
@@ -400,27 +404,29 @@ public interface JdbcClient {
 
 		/**
 		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
-		 * by explicit JDBC statement parameter index.
+		 * by explicit JDBC statement parameter index, for the current batch entry.
 		 * @param jdbcIndex the JDBC-style index (starting with 1)
 		 * @param value the parameter value to bind
 		 * @return this batch specification (for chaining)
-		 * @see java.sql.PreparedStatement#setObject(int, Object)
+		 * @see StatementSpec#param(int, Object)
 		 */
 		BatchSpec param(int jdbcIndex, @Nullable Object value);
 
 		/**
 		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
-		 * by explicit JDBC statement parameter index.
+		 * by explicit JDBC statement parameter index, for the current batch entry.
 		 * @param jdbcIndex the JDBC-style index (starting with 1)
 		 * @param value the parameter value to bind
 		 * @param sqlType the associated SQL type (see {@link java.sql.Types})
 		 * @return this batch specification (for chaining)
-		 * @see java.sql.PreparedStatement#setObject(int, Object, int)
+		 * @see StatementSpec#param(int, Object, int)
 		 */
 		BatchSpec param(int jdbcIndex, @Nullable Object value, int sqlType);
 
 		/**
-		 * Bind a named parameter for the current batch entry.
+		 * Bind a named statement parameter for ":x" placeholder resolution,
+		 * with each "x" name matching a ":x" placeholder in the SQL statement,
+		 * for the current batch entry.
 		 * @param name the parameter name
 		 * @param value the parameter value to bind
 		 * @return this batch specification (for chaining)
@@ -429,17 +435,24 @@ public interface JdbcClient {
 		BatchSpec param(String name, @Nullable Object value);
 
 		/**
-		 * Bind a named parameter for the current batch entry.
+		 * Bind a named statement parameter for ":x" placeholder resolution,
+		 * with each "x" name matching a ":x" placeholder in the SQL statement,
+		 * for the current batch entry.
 		 * @param name the parameter name
 		 * @param value the parameter value to bind
 		 * @param sqlType the associated SQL type (see {@link java.sql.Types})
 		 * @return this batch specification (for chaining)
-		 * @see java.sql.PreparedStatement#setObject(int, Object, int)
+		 * @see StatementSpec#param(String, Object, int)
 		 */
 		BatchSpec param(String name, @Nullable Object value, int sqlType);
 
 		/**
-		 * Bind a var-args list of positional parameters for the current batch entry.
+		 * Bind a var-args list of positional parameters for "?" placeholder
+		 * resolution, for the current batch entry.
+		 * <p>The given list will be added to existing positional parameters
+		 * for the current batch entry, if any. Each element from the complete
+		 * list will be bound as a JDBC positional parameter with a corresponding
+		 * JDBC index (i.e. list index + 1).
 		 * @param values the parameter values to bind
 		 * @return this batch specification (for chaining)
 		 * @see StatementSpec#params(Object...)
@@ -447,7 +460,12 @@ public interface JdbcClient {
 		BatchSpec params(Object... values);
 
 		/**
-		 * Bind a list of positional parameters for the current batch entry.
+		 * Bind a list of positional parameters for "?" placeholder resolution,
+		 * for the current batch entry.
+		 * <p>The given list will be added to existing positional parameters
+		 * for the current batch entry, if any. Each element from the complete
+		 * list will be bound as a JDBC positional parameter with a corresponding
+		 * JDBC index (i.e. list index + 1).
 		 * @param values the parameter values to bind
 		 * @return this batch specification (for chaining)
 		 * @see StatementSpec#params(List)
@@ -455,7 +473,10 @@ public interface JdbcClient {
 		BatchSpec params(List<?> values);
 
 		/**
-		 * Bind named parameters for the current batch entry.
+		 * Bind named statement parameters for ":x" placeholder resolution,
+		 * for the current batch entry.
+		 * <p>The given map will be merged into existing named parameters
+		 * for the current batch entry, if any.
 		 * @param paramMap a map of names and parameter values to bind
 		 * @return this batch specification (for chaining)
 		 * @see StatementSpec#params(Map)
@@ -463,8 +484,12 @@ public interface JdbcClient {
 		BatchSpec params(Map<String, ?> paramMap);
 
 		/**
-		 * Provide all named parameters for the current batch entry based on the
-		 * properties, record components, or fields of the given parameter object.
+		 * Bind named statement parameters for ":x" placeholder resolution,
+		 * for the current batch entry.
+		 * <p>The given parameter object will define all named parameters for
+		 * the current batch entry, based on its JavaBean properties, record
+		 * components, or raw fields. A Map instance can be provided as a
+		 * complete parameter source as well.
 		 * @param namedParamObject a custom parameter object
 		 * @return this batch specification (for chaining)
 		 * @see StatementSpec#paramSource(Object)
@@ -472,8 +497,11 @@ public interface JdbcClient {
 		BatchSpec paramSource(Object namedParamObject);
 
 		/**
-		 * Provide all named parameters for the current batch entry through the
-		 * given parameter source.
+		 * Bind named statement parameters for ":x" placeholder resolution,
+		 * for the current batch entry.
+		 * <p>The given parameter source will define all named parameters for
+		 * the current batch entry, possibly associating specific SQL types
+		 * with each value.
 		 * @param namedParamSource a custom {@link SqlParameterSource} instance
 		 * @return this batch specification (for chaining)
 		 * @see StatementSpec#paramSource(SqlParameterSource)
