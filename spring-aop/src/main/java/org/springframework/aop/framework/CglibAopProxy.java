@@ -17,7 +17,6 @@
 package org.springframework.aop.framework;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -52,7 +51,6 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
 import org.springframework.core.KotlinDetector;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.SmartClassLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -96,8 +94,6 @@ class CglibAopProxy implements AopProxy, Serializable {
 	private static final int INVOKE_EQUALS = 5;
 	private static final int INVOKE_HASHCODE = 6;
 
-
-	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 	private static final boolean COROUTINES_REACTOR_PRESENT = ClassUtils.isPresent(
 			"kotlinx.coroutines.reactor.MonoKt", CglibAopProxy.class.getClassLoader());
@@ -422,8 +418,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 * Also takes care of the conversion from {@code Mono} to Kotlin Coroutines if needed.
 	 */
 	private static @Nullable Object processReturnType(
-			Object proxy, @Nullable Object target, Method method, Object[] arguments, @Nullable Object returnValue) throws
-			NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+			Object proxy, @Nullable Object target, Method method, Object[] arguments, @Nullable Object returnValue) {
 
 		// Massage return value if necessary
 		if (returnValue != null && returnValue == target &&
@@ -438,14 +433,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					"Null return value from advice does not match primitive return type for: " + method);
 		}
 		if (COROUTINES_REACTOR_PRESENT && KotlinDetector.isSuspendingFunction(method)) {
-			Class<?> returnParameterType = new MethodParameter(method, -1).getParameterType();
-			if (COROUTINES_FLOW_CLASS_NAME.equals(returnParameterType.getName())) {
-				return CoroutinesUtils.asFlow(returnValue);
-			}
-			Object awaitResult = CoroutinesUtils.awaitSingleOrNull(returnValue, arguments[arguments.length - 1]);
-			return KotlinDetector.isInlineClass(returnParameterType) &&
-					awaitResult != null && KotlinDetector.isInlineClass(awaitResult.getClass()) ?
-					awaitResult.getClass().getDeclaredMethod("unbox-impl").invoke(awaitResult) : awaitResult;
+			return CoroutinesUtils.adaptReturnValue(method, returnValue, arguments[arguments.length - 1]);
 		}
 		return returnValue;
 	}

@@ -149,6 +149,172 @@ class CglibAopProxyKotlinTests {
 		assertThat(proxy.returnAny()).isEqualTo(ValueClass("bar"))
 	}
 
+	@Test
+	suspend fun proxiedSuspendedInvocationValueClassPrimitiveValue() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClassPrimitiveValue(1)
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnValueClassPrimitiveValue()).isEqualTo(ValueClassPrimitiveValue(1))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationValueClassPrimitiveValueProceed() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			it.proceed()
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnValueClassPrimitiveValue()).isEqualTo(ValueClassPrimitiveValue(0))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableValueClassPrimitiveValue() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClassPrimitiveValue(1)
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableValueClassPrimitiveValue()).isEqualTo(ValueClassPrimitiveValue(1))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableValueClassPrimitiveValueNull() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			null
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableValueClassPrimitiveValue()).isNull()
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableValueClassNullableValue() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClassNullableValue("bar")
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableValueClassNullableValue()).isEqualTo(ValueClassNullableValue("bar"))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableValueClassNullableValueNull() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClassNullableValue(null)
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableValueClassNullableValue()).isEqualTo(ValueClassNullableValue(null))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableGenericValueClass() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			GenericValueClass("bar")
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableGenericValueClass()).isEqualTo(GenericValueClass("bar"))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNestedValueClass() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			NestedValueClass(ValueClass("bar"))
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNestedValueClass()).isEqualTo(NestedValueClass(ValueClass("bar")))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableNestedValueClassPrimitiveValue() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			NestedValueClassPrimitiveValue(ValueClassPrimitiveValue(1))
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableNestedValueClassPrimitiveValue())
+			.isEqualTo(NestedValueClassPrimitiveValue(ValueClassPrimitiveValue(1)))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableNestedValueClassNullableValue() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			NestedValueClassNullableValue(ValueClassNullableValue("bar"))
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableNestedValueClassNullableValue())
+			.isEqualTo(NestedValueClassNullableValue(ValueClassNullableValue("bar")))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableNonNullGenericValueClass() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			NonNullGenericValueClass("bar")
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableNonNullGenericValueClass()).isEqualTo(NonNullGenericValueClass("bar"))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationNullableResult() {
+		val proxyFactory = ProxyFactory(TestBean())
+		proxyFactory.addAdvice(MethodInterceptor {
+			Result.success("bar")
+		})
+		val proxy = proxyFactory.proxy as TestBean
+		assertThat(proxy.returnNullableResult()?.getOrNull()).isEqualTo("bar")
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationValueClassOverridingAny() {
+		val proxyFactory = ProxyFactory(ValueClassOverridingAnyBean())
+		proxyFactory.isProxyTargetClass = true
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClass("bar")
+		})
+		val proxy = proxyFactory.proxy as ValueClassOverridingAnyBean
+		assertThat(proxy.returnValue()).isEqualTo(ValueClass("bar"))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationValueClassOverridingGeneric() {
+		val proxyFactory = ProxyFactory(ValueClassOverridingGenericBean())
+		proxyFactory.isProxyTargetClass = true
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClass("bar")
+		})
+		val proxy = proxyFactory.proxy as ValueClassOverridingGenericBean
+		assertThat(proxy.returnValue()).isEqualTo(ValueClass("bar"))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationValueClassOverridingGenericParameter() {
+		val proxyFactory = ProxyFactory(ValueClassOverridingGenericParameterBean())
+		proxyFactory.isProxyTargetClass = true
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClass("bar")
+		})
+		val proxy = proxyFactory.proxy as ValueClassOverridingGenericParameterBean
+		assertThat(proxy.returnValue("foo")).isEqualTo(ValueClass("bar"))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationValueClassOverloadingGenericParameter() {
+		val proxyFactory = ProxyFactory(ValueClassOverloadingGenericParameterBean())
+		proxyFactory.isProxyTargetClass = true
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClass("bar")
+		})
+		val proxy = proxyFactory.proxy as ValueClassOverloadingGenericParameterBean
+		assertThat(proxy.returnValue("foo").value).isEqualTo("bar")
+	}
+
 	open class MyKotlinBean {
 
 		open fun capitalize(value: String) = value.uppercase()
@@ -183,41 +349,171 @@ class CglibAopProxyKotlinTests {
 		val updatedAt: LocalDateTime? = null,
 	)
 
+	@Test
+	suspend fun proxiedSuspendedInvocationPrivateValueClass() {
+		val proxyFactory = ProxyFactory(PrivateValueClassBean())
+		proxyFactory.isProxyTargetClass = true
+		proxyFactory.addAdvice(MethodInterceptor {
+			PrivateValueClass("bar")
+		})
+		val proxy = proxyFactory.proxy as PrivateValueClassBean
+		assertThat(proxy.returnValue()).isEqualTo(PrivateValueClass("bar"))
+	}
+
 	@JvmInline
 	value class ValueClass(val value: String)
 
 	@JvmInline
 	value class ValueClassNullableValue(val value: String?)
 
+	@JvmInline
+	value class ValueClassPrimitiveValue(val value: Int)
+
+	@JvmInline
+	value class GenericValueClass<T>(val value: T)
+
+	@JvmInline
+	value class NestedValueClass(val value: ValueClass)
+
+	@JvmInline
+	value class NestedValueClassPrimitiveValue(val value: ValueClassPrimitiveValue)
+
+	@JvmInline
+	value class NestedValueClassNullableValue(val value: ValueClassNullableValue)
+
+	@JvmInline
+	value class NonNullGenericValueClass<T : Any>(val value: T)
+
 	open class TestBean {
 		open suspend fun returnValueClass(): ValueClass {
-			delay(1000.milliseconds)
+			delay(10.milliseconds)
 			return ValueClass("foo")
 		}
 
 		open suspend fun returnNullableValueClass(): ValueClass? {
-			delay(1000.milliseconds)
+			delay(10.milliseconds)
 			return null
 		}
 
 		open suspend fun returnValueClassNullableValue(): ValueClassNullableValue {
-			delay(1000.milliseconds)
+			delay(10.milliseconds)
 			return ValueClassNullableValue(null)
 		}
 
 		open suspend fun returnResult(): Result<String> {
-			delay(1000.milliseconds)
+			delay(10.milliseconds)
 			return Result.success("foo")
 		}
 
 		open suspend fun returnString(): String {
-			delay(1000.milliseconds)
+			delay(10.milliseconds)
 			return "foo"
 		}
 
 		open suspend fun returnAny(): Any {
-			delay(1000.milliseconds)
+			delay(10.milliseconds)
 			return ValueClass("foo")
+		}
+
+		open suspend fun returnValueClassPrimitiveValue(): ValueClassPrimitiveValue {
+			delay(10.milliseconds)
+			return ValueClassPrimitiveValue(0)
+		}
+
+		open suspend fun returnNullableValueClassPrimitiveValue(): ValueClassPrimitiveValue? {
+			delay(10.milliseconds)
+			return null
+		}
+
+		open suspend fun returnNullableValueClassNullableValue(): ValueClassNullableValue? {
+			delay(10.milliseconds)
+			return null
+		}
+
+		open suspend fun returnNullableGenericValueClass(): GenericValueClass<String>? {
+			delay(10.milliseconds)
+			return null
+		}
+
+		open suspend fun returnNestedValueClass(): NestedValueClass {
+			delay(10.milliseconds)
+			return NestedValueClass(ValueClass("foo"))
+		}
+
+		open suspend fun returnNullableNestedValueClassPrimitiveValue(): NestedValueClassPrimitiveValue? {
+			delay(10.milliseconds)
+			return null
+		}
+
+		open suspend fun returnNullableNestedValueClassNullableValue(): NestedValueClassNullableValue? {
+			delay(10.milliseconds)
+			return null
+		}
+
+		open suspend fun returnNullableNonNullGenericValueClass(): NonNullGenericValueClass<String>? {
+			delay(10.milliseconds)
+			return null
+		}
+
+		open suspend fun returnNullableResult(): Result<String>? {
+			delay(10.milliseconds)
+			return null
+		}
+	}
+
+
+	interface AnyBean {
+		suspend fun returnValue(): Any
+	}
+
+	open class ValueClassOverridingAnyBean : AnyBean {
+		override suspend fun returnValue(): ValueClass {
+			delay(10.milliseconds)
+			return ValueClass("foo")
+		}
+	}
+
+	interface GenericBean<T> {
+		suspend fun returnValue(): T
+	}
+
+	open class ValueClassOverridingGenericBean : GenericBean<ValueClass> {
+		override suspend fun returnValue(): ValueClass {
+			delay(10.milliseconds)
+			return ValueClass("foo")
+		}
+	}
+
+	interface GenericParameterBean<T> {
+		suspend fun returnValue(value: T): Any
+	}
+
+	open class ValueClassOverridingGenericParameterBean : GenericParameterBean<String> {
+		override suspend fun returnValue(value: String): ValueClass {
+			delay(10.milliseconds)
+			return ValueClass(value)
+		}
+	}
+
+	open class ValueClassOverloadingGenericParameterBean : GenericParameterBean<Int> {
+		override suspend fun returnValue(value: Int): Any {
+			delay(10.milliseconds)
+			return value
+		}
+
+		open suspend fun returnValue(value: String): ValueClass {
+			delay(10.milliseconds)
+			return ValueClass(value)
+		}
+	}
+
+	@JvmInline
+	private value class PrivateValueClass(val value: String)
+
+	private open class PrivateValueClassBean {
+		open suspend fun returnValue(): PrivateValueClass {
+			delay(10.milliseconds)
+			return PrivateValueClass("foo")
 		}
 	}
 
