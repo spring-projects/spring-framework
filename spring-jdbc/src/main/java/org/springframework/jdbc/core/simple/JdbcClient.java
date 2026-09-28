@@ -399,6 +399,27 @@ public interface JdbcClient {
 		BatchSpec param(@Nullable Object value);
 
 		/**
+		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
+		 * by explicit JDBC statement parameter index.
+		 * @param jdbcIndex the JDBC-style index (starting with 1)
+		 * @param value the parameter value to bind
+		 * @return this batch specification (for chaining)
+		 * @see java.sql.PreparedStatement#setObject(int, Object)
+		 */
+		BatchSpec param(int jdbcIndex, @Nullable Object value);
+
+		/**
+		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
+		 * by explicit JDBC statement parameter index.
+		 * @param jdbcIndex the JDBC-style index (starting with 1)
+		 * @param value the parameter value to bind
+		 * @param sqlType the associated SQL type (see {@link java.sql.Types})
+		 * @return this batch specification (for chaining)
+		 * @see java.sql.PreparedStatement#setObject(int, Object, int)
+		 */
+		BatchSpec param(int jdbcIndex, @Nullable Object value, int sqlType);
+
+		/**
 		 * Bind a named parameter for the current batch entry.
 		 * @param name the parameter name
 		 * @param value the parameter value to bind
@@ -406,6 +427,16 @@ public interface JdbcClient {
 		 * @see StatementSpec#param(String, Object)
 		 */
 		BatchSpec param(String name, @Nullable Object value);
+
+		/**
+		 * Bind a named parameter for the current batch entry.
+		 * @param name the parameter name
+		 * @param value the parameter value to bind
+		 * @param sqlType the associated SQL type (see {@link java.sql.Types})
+		 * @return this batch specification (for chaining)
+		 * @see java.sql.PreparedStatement#setObject(int, Object, int)
+		 */
+		BatchSpec param(String name, @Nullable Object value, int sqlType);
 
 		/**
 		 * Bind a var-args list of positional parameters for the current batch entry.

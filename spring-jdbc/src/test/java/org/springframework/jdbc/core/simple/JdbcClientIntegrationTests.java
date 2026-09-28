@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -166,11 +167,53 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
+	void batchUpdateWithJdbcIndexParameters() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
+				.batch()
+				.param(2, "Smith").param(1, "Jane").add()
+				.param(2, "Doe").param(1, "John")
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
+	void batchUpdateWithJdbcIndexParametersAndSqlType() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
+				.batch()
+				.param(2, "Smith", Types.VARCHAR).param(1, "Jane", Types.VARCHAR).add()
+				.param(2, "Doe", Types.VARCHAR).param(1, "John", Types.VARCHAR)
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
 	void batchUpdateWithNamedParameters() {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 				.batch()
 					.param("firstName", "Jane").param("lastName", "Smith").add()
 					.param("firstName", "John").param("lastName", "Doe")
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
+	void batchUpdateWithNamedParametersAndSqlType() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+				.param("firstName", "Jane", Types.VARCHAR).param("lastName", "Smith", Types.VARCHAR).add()
+				.param("firstName", "John", Types.VARCHAR).param("lastName", "Doe", Types.VARCHAR)
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
