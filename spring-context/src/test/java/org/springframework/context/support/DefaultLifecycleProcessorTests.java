@@ -17,10 +17,19 @@
 package org.springframework.context.support;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.FactoryBean;
@@ -567,6 +576,72 @@ class DefaultLifecycleProcessorTests {
 				two -> assertThat(two).isEqualTo(bean99).satisfies(hasPhase(99)),
 				hasPhase(7), hasPhase(1), hasPhase(Integer.MIN_VALUE));
 		context.close();
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {0, 100})
+	void waitsForShutdownCallbacksAcrossDependentPhases(int deferredPhase) throws Exception {
+		CompletableFuture<Runnable> stopCallback = new CompletableFuture<>();
+		StaticApplicationContext context = createContextWithDeferredShutdown(deferredPhase, stopCallback);
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		try {
+			Future<?> shutdown = executor.submit(context::close);
+			try {
+				stopCallback.get(5, TimeUnit.SECONDS);
+				assertThatExceptionOfType(TimeoutException.class)
+						.isThrownBy(() -> shutdown.get(100, TimeUnit.MILLISECONDS));
+			}
+			finally {
+				stopCallback.thenAccept(Runnable::run);
+			}
+			shutdown.get(5, TimeUnit.SECONDS);
+		}
+		finally {
+			executor.shutdownNow();
+			context.close();
+		}
+	}
+
+	@Test
+	@Timeout(5)
+	void shutdownTimeoutAppliesToDependentBeans() {
+		CompletableFuture<Runnable> stopCallback = new CompletableFuture<>();
+		try (StaticApplicationContext context = createContextWithDeferredShutdown(0, stopCallback)) {
+			context.getBean(DefaultLifecycleProcessor.class).setTimeoutPerShutdownPhase(1);
+			context.stop();
+			assertThat(stopCallback).isCompleted();
+		}
+		finally {
+			stopCallback.thenAccept(Runnable::run);
+		}
+	}
+
+	private StaticApplicationContext createContextWithDeferredShutdown(
+			int deferredPhase, CompletableFuture<Runnable> stopCallback) {
+
+		StaticApplicationContext context = new StaticApplicationContext();
+		for (int phase : new int[] {0, 100}) {
+			context.getBeanFactory().registerSingleton("bean" + phase, new DummySmartLifecycleBean() {
+				@Override
+				public int getPhase() {
+					return phase;
+				}
+
+				@Override
+				public void stop(Runnable callback) {
+					stop();
+					if (phase == deferredPhase) {
+						stopCallback.complete(callback);
+					}
+					else {
+						callback.run();
+					}
+				}
+			});
+		}
+		context.getBeanFactory().registerDependentBean("bean100", "bean0");
+		context.refresh();
+		return context;
 	}
 
 	@Test
