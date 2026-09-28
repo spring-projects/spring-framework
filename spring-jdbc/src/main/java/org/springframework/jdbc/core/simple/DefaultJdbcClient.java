@@ -19,10 +19,12 @@ package org.springframework.jdbc.core.simple;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
@@ -337,6 +339,16 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 		}
 
+		@SuppressWarnings({"rawtypes", "unchecked"})
+		private static SqlParameterSource toSqlParameterSource(Object namedParamObject) {
+			if (namedParamObject instanceof SqlParameterSource sqlParameterSource) {
+				return sqlParameterSource;
+			}
+			return (namedParamObject instanceof Map map ?
+					new MapSqlParameterSource(map) :
+					new SimplePropertySqlParameterSource(namedParamObject));
+		}
+
 
 		private class DefaultBatchSpec implements BatchSpec {
 
@@ -346,84 +358,45 @@ final class DefaultJdbcClient implements JdbcClient {
 
 			private @Nullable Boolean usingNamedParams;
 
-			private List<@Nullable Object> currentIndexedParams = new ArrayList<>();
-
-			private MapSqlParameterSource currentNamedParams = new MapSqlParameterSource();
-
-			private SqlParameterSource currentNamedParamSource = this.currentNamedParams;
-
 			@Override
-			public BatchSpec param(@Nullable Object value) {
-				validateIndexedParamValue(value);
-				this.currentIndexedParams.add(value);
+			public BatchSpec entry(Consumer<BatchEntry> entryConsumer) {
+				DefaultBatchEntry entry = new DefaultBatchEntry();
+				entryConsumer.accept(entry);
+				addEntry(entry);
 				return this;
 			}
 
 			@Override
-			public BatchSpec param(int jdbcIndex, @Nullable Object value) {
-				addIndexedParam(this.currentIndexedParams, jdbcIndex, value);
+			public BatchSpec entry(List<?> values) {
+				DefaultBatchEntry entry = new DefaultBatchEntry();
+				entry.indexedParams.addAll(values);
+				addEntry(entry);
 				return this;
 			}
 
 			@Override
-			public BatchSpec param(int jdbcIndex, @Nullable Object value, int sqlType) {
-				return param(jdbcIndex, new SqlParameterValue(sqlType, value));
-			}
-
-			@Override
-			public BatchSpec param(String name, @Nullable Object value) {
-				this.currentNamedParams.addValue(name, value);
+			public BatchSpec entry(Map<String, ?> paramMap) {
+				DefaultBatchEntry entry = new DefaultBatchEntry();
+				entry.namedParams.addValues(paramMap);
+				addEntry(entry);
 				return this;
 			}
 
 			@Override
-			public BatchSpec param(String name, @Nullable Object value, int sqlType) {
-				this.currentNamedParams.addValue(name, value, sqlType);
-				return this;
+			public BatchSpec entries(Object... namedParamObjects) {
+				return entries(Arrays.asList(namedParamObjects));
 			}
 
 			@Override
-			public BatchSpec params(Object... values) {
-				Collections.addAll(this.currentIndexedParams, values);
-				return this;
-			}
-
-			@Override
-			public BatchSpec params(List<?> values) {
-				this.currentIndexedParams.addAll(values);
-				return this;
-			}
-
-			@Override
-			public BatchSpec params(Map<String, ?> paramMap) {
-				this.currentNamedParams.addValues(paramMap);
-				return this;
-			}
-
-			@SuppressWarnings({"rawtypes", "unchecked"})
-			@Override
-			public BatchSpec paramSource(Object namedParamObject) {
-				this.currentNamedParamSource = (namedParamObject instanceof Map map ?
-						new MapSqlParameterSource(map) :
-						new SimplePropertySqlParameterSource(namedParamObject));
-				return this;
-			}
-
-			@Override
-			public BatchSpec paramSource(SqlParameterSource namedParamSource) {
-				this.currentNamedParamSource = namedParamSource;
-				return this;
-			}
-
-			@Override
-			public BatchSpec add() {
-				completeEntry();
+			public BatchSpec entries(List<?> namedParamObjects) {
+				for (Object namedParamObject : namedParamObjects) {
+					addNamedEntry(toSqlParameterSource(namedParamObject));
+				}
 				return this;
 			}
 
 			@Override
 			public int[] update() {
-				completeEntry();
 				return (Boolean.TRUE.equals(this.usingNamedParams) ?
 						namedParamOps.batchUpdate(sql, this.namedBatch.toArray(new SqlParameterSource[0])) :
 						classicOps.batchUpdate(sql, this.indexedBatch));
@@ -440,7 +413,6 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			private int[] doUpdate(KeyHolder generatedKeyHolder, String @Nullable [] keyColumnNames) {
-				completeEntry();
 				if (Boolean.TRUE.equals(this.usingNamedParams)) {
 					if (keyColumnNames != null) {
 						return namedParamOps.batchUpdate(sql, this.namedBatch.toArray(new SqlParameterSource[0]),
@@ -481,36 +453,97 @@ final class DefaultJdbcClient implements JdbcClient {
 				}
 			}
 
-			private void completeEntry() {
-				boolean hasIndexed = !this.currentIndexedParams.isEmpty();
-				boolean hasNamed = (this.currentNamedParams.hasValues() ||
-						this.currentNamedParamSource != this.currentNamedParams);
+			private void addEntry(DefaultBatchEntry entry) {
+				boolean hasIndexed = !entry.indexedParams.isEmpty();
+				boolean hasNamed = (entry.namedParams.hasValues() || entry.namedParamSource != entry.namedParams);
 				if (hasIndexed && hasNamed) {
 					throw new IllegalStateException("Configure either named or indexed parameters, not both");
 				}
-				if (this.currentNamedParams.hasValues() && this.currentNamedParamSource != this.currentNamedParams) {
+				if (entry.namedParams.hasValues() && entry.namedParamSource != entry.namedParams) {
 					throw new IllegalStateException(
 							"Configure either individual named parameters or a SqlParameterSource, not both");
 				}
-				if (!hasIndexed && !hasNamed) {
-					return;
+				if (hasNamed) {
+					addNamedEntry(entry.namedParamSource);
 				}
+				else if (hasIndexed) {
+					addIndexedEntry(entry.indexedParams.toArray());
+				}
+				else {
+					throw new IllegalStateException("Configure at least one parameter for each batch entry");
+				}
+			}
+
+			private void addNamedEntry(SqlParameterSource namedParamSource) {
+				enforceParamStyle(true);
+				this.namedBatch.add(namedParamSource);
+			}
+
+			private void addIndexedEntry(@Nullable Object[] indexedParams) {
+				enforceParamStyle(false);
+				this.indexedBatch.add(indexedParams);
+			}
+
+			private void enforceParamStyle(boolean named) {
 				if (this.usingNamedParams == null) {
-					this.usingNamedParams = hasNamed;
+					this.usingNamedParams = named;
 				}
-				else if (this.usingNamedParams != hasNamed) {
+				else if (this.usingNamedParams != named) {
 					throw new IllegalStateException(
 							"Configure either named or indexed parameters for all batch entries, not both");
 				}
-				if (hasNamed) {
-					this.namedBatch.add(this.currentNamedParamSource);
-					this.currentNamedParams = new MapSqlParameterSource();
-					this.currentNamedParamSource = this.currentNamedParams;
-				}
-				else {
-					this.indexedBatch.add(this.currentIndexedParams.toArray());
-					this.currentIndexedParams = new ArrayList<>();
-				}
+			}
+		}
+
+
+		private static class DefaultBatchEntry implements BatchEntry {
+
+			private final List<@Nullable Object> indexedParams = new ArrayList<>();
+
+			private final MapSqlParameterSource namedParams = new MapSqlParameterSource();
+
+			private SqlParameterSource namedParamSource = this.namedParams;
+
+			@Override
+			public BatchEntry param(@Nullable Object value) {
+				validateIndexedParamValue(value);
+				this.indexedParams.add(value);
+				return this;
+			}
+
+			@Override
+			public BatchEntry param(int jdbcIndex, @Nullable Object value) {
+				addIndexedParam(this.indexedParams, jdbcIndex, value);
+				return this;
+			}
+
+			@Override
+			public BatchEntry param(int jdbcIndex, @Nullable Object value, int sqlType) {
+				return param(jdbcIndex, new SqlParameterValue(sqlType, value));
+			}
+
+			@Override
+			public BatchEntry param(String name, @Nullable Object value) {
+				this.namedParams.addValue(name, value);
+				return this;
+			}
+
+			@Override
+			public BatchEntry param(String name, @Nullable Object value, int sqlType) {
+				this.namedParams.addValue(name, value, sqlType);
+				return this;
+			}
+
+			@Override
+			public BatchEntry paramSource(Object namedParamObject) {
+				this.namedParamSource = toSqlParameterSource(namedParamObject);
+				return this;
+			}
+
+			@Override
+			public BatchEntry paramSource(SqlParameterSource namedParamSource) {
+				this.namedParamSource = namedParamSource;
+				return this;
 			}
 		}
 

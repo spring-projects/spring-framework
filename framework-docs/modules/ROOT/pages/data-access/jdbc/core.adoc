@@ -679,17 +679,30 @@ provides `firstName` and `lastName` properties, such as the `Actor` class from a
 ----
 
 For batch updates, accumulate the batch entries in a fluent fashion through `batch()`,
-binding the parameters for each entry as for a single update – either as positional
-parameters or as named parameters – and separating consecutive entries with `add()`.
-The accumulated entries are executed as a single JDBC batch by `update()`, which
-also completes the final entry implicitly:
+defining each entry through `entry(...)` – either with a callback that binds positional
+or named parameters as for a single update, or with a `List` of positional parameters
+or a `Map` of named parameters. The accumulated entries are executed as a single JDBC
+batch by `update()`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
 			.batch()
-				.param("firstName", "Leonor").param("lastName", "Watling").add()
-				.param("firstName", "Christian").param("lastName", "Bale")
+				.entry(entry -> entry.param("firstName", "Leonor").param("lastName", "Watling"))
+				.entry(entry -> entry.param("firstName", "Christian").param("lastName", "Bale"))
+			.update();
+----
+
+Alternatively, define several entries at once through `entries(...)`, with each given
+parameter source object – for example, an `Actor` record – representing one entry.
+`entry(...)` and `entries(...)` calls may be freely combined within the same batch:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	List<Actor> actors = ...;
+	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
+			.batch()
+				.entries(actors)
 			.update();
 ----
 

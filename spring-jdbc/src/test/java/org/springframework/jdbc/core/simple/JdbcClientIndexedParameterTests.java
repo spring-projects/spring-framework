@@ -340,7 +340,7 @@ class JdbcClientIndexedParameterTests {
 		}
 
 		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
-				.param(1, 1).param(2, 1).add()
+				.entry(entry -> entry.param(1, 1).param(2, 1))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1);
@@ -367,8 +367,8 @@ class JdbcClientIndexedParameterTests {
 		}
 
 		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
-				.param(1, 1).param(2, 1).add()
-				.param(1, 2).param(2, 2).add()
+				.entry(entry -> entry.param(1, 1).param(2, 1))
+				.entry(entry -> entry.param(1, 2).param(2, 2))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -416,12 +416,8 @@ class JdbcClientIndexedParameterTests {
 		}
 
 		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
-				.param(1, new SqlParameterValue(Types.DECIMAL, 1))
-				.param(2, new SqlParameterValue(Types.INTEGER, 1))
-				.add()
-				.param(1, new SqlParameterValue(Types.DECIMAL, 2))
-				.param(2, new SqlParameterValue(Types.INTEGER, 2))
-				.add()
+				.entry(entry -> entry.param(1, new SqlParameterValue(Types.DECIMAL, 1)).param(2, new SqlParameterValue(Types.INTEGER, 1)))
+				.entry(entry -> entry.param(1, new SqlParameterValue(Types.DECIMAL, 2)).param(2, new SqlParameterValue(Types.INTEGER, 2)))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -453,12 +449,8 @@ class JdbcClientIndexedParameterTests {
 		}
 
 		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
-				.param(1, 1, Types.DECIMAL)
-				.param(2, 1, Types.INTEGER)
-				.add()
-				.param(1, 2, Types.DECIMAL)
-				.param(2, 2, Types.INTEGER)
-				.add()
+				.entry(entry -> entry.param(1, 1, Types.DECIMAL).param(2, 1, Types.INTEGER))
+				.entry(entry -> entry.param(1, 2, Types.DECIMAL).param(2, 2, Types.INTEGER))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -523,8 +515,8 @@ class JdbcClientIndexedParameterTests {
 
 		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 		int[] rowsAffected = client.sql(INSERT_GENERATE_KEYS).batch()
-				.param("rod").add()
-				.param("johnson").add()
+				.entry(entry -> entry.param("rod"))
+				.entry(entry -> entry.param("johnson"))
 				.update(generatedKeyHolder);
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -592,8 +584,8 @@ class JdbcClientIndexedParameterTests {
 
 		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 		int[] rowsAffected = client.sql(INSERT_GENERATE_KEYS).batch()
-				.param("rod").add()
-				.param("johnson").add()
+				.entry(entry -> entry.param("rod"))
+				.entry(entry -> entry.param("johnson"))
 				.update(generatedKeyHolder, "id");
 
 		assertThat(rowsAffected).containsExactly(1, 1);
