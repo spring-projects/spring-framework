@@ -403,6 +403,38 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			@Override
+			public int[][] update(int batchSize) {
+				if (Boolean.TRUE.equals(this.usingNamedParams)) {
+					SqlParameterSource[] batchArgs = this.namedBatch.toArray(new SqlParameterSource[0]);
+					if (batchSize <= 0 || batchSize >= batchArgs.length) {
+						return new int[][] {namedParamOps.batchUpdate(sql, batchArgs)};
+					}
+					int total = batchArgs.length;
+					int nOfBatches = total % batchSize == 0 ? total / batchSize : total / batchSize + 1;
+					int[][] rowsAffected = new int[nOfBatches][];
+					for (int i = 0; i < nOfBatches; i++) {
+						int start = i * batchSize;
+						rowsAffected[i] = namedParamOps.batchUpdate(sql, Arrays.copyOfRange(batchArgs, start, Math.min(total, start + batchSize)));
+					}
+					return rowsAffected;
+				}
+				else {
+					List<@Nullable Object[]> batchArgs = this.indexedBatch;
+					if (batchSize <= 0 || batchSize >= batchArgs.size()) {
+						return new int[][] {classicOps.batchUpdate(sql, batchArgs)};
+					}
+					int total = batchArgs.size();
+					int nOfBatches = total % batchSize == 0 ? total / batchSize : total / batchSize + 1;
+					int[][] rowsAffected = new int[nOfBatches][];
+					for (int i = 0; i < nOfBatches; i++) {
+						int start = i * batchSize;
+						rowsAffected[i] = classicOps.batchUpdate(sql, batchArgs.subList(start, Math.min(total, start + batchSize)));
+					}
+					return rowsAffected;
+				}
+			}
+
+			@Override
 			public int[] update(KeyHolder generatedKeyHolder) {
 				return doUpdate(generatedKeyHolder, null);
 			}

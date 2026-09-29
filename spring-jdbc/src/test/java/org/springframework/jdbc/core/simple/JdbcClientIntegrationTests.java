@@ -24,6 +24,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -425,6 +427,50 @@ class JdbcClientIntegrationTests {
 							.entry(List.of("Jane", "Smith"))
 							.entries(new NewUser("John", "Doe")))
 				.withMessage(MIXED_BATCH_ENTRIES_MESSAGE);
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {0, 1, 2, 3, 4})
+	void batchUpdateWithNamedParametersAndBatchSize(int batchSize) {
+		int[][] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+				.entry(entry -> entry.param("firstName", "Jane").param("lastName", "Smith"))
+				.entry(entry -> entry.param("firstName", "John").param("lastName", "Doe"))
+				.entry(entry -> entry.param("firstName", "Jason").param("lastName", "Kidd"))
+				.update(batchSize);
+
+		switch (batchSize) {
+			case 0, 3, 4 -> assertThat(rowsAffected).isEqualTo(new int[][] {new int[] {1, 1, 1}});
+			case 1 -> assertThat(rowsAffected).isEqualTo(new int[][] {new int[] {1}, new int[] {1}, new int[] {1}});
+			case 2 -> assertThat(rowsAffected).isEqualTo(new int[][] {new int[] {1, 1}, new int[] {1}});
+		}
+
+		assertNumUsers(4);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+		assertUser(3, "Jason", "Kidd");
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {0, 1, 2, 3, 4})
+	void batchUpdateWithIndexedParametersAndBatchSize(int batchSize) {
+		int[][] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
+				.batch()
+					.entry(entry -> entry.param(1, "Jane").param(2, "Smith"))
+					.entry(entry -> entry.param(1, "John").param(2, "Doe"))
+					.entry(entry -> entry.param(1, "Jason").param(2, "Kidd"))
+				.update(batchSize);
+
+		switch (batchSize) {
+			case 0, 3, 4 -> assertThat(rowsAffected).isEqualTo(new int[][] {new int[] {1, 1, 1}});
+			case 1 -> assertThat(rowsAffected).isEqualTo(new int[][] {new int[] {1}, new int[] {1}, new int[] {1}});
+			case 2 -> assertThat(rowsAffected).isEqualTo(new int[][] {new int[] {1, 1}, new int[] {1}});
+		}
+
+		assertNumUsers(4);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+		assertUser(3, "Jason", "Kidd");
 	}
 
 	@Test

@@ -476,6 +476,19 @@ public interface JdbcClient {
 		int[] update();
 
 		/**
+		 * Execute the accumulated batch entries as multiple batch updates, each batch should
+		 * be of size indicated in 'batchSize'.
+		 * @param batchSize batch size
+		 * @return an array containing for each batch another array containing the numbers of
+		 * rows affected by each update in the batch
+		 * (may also contain special JDBC-defined negative values for affected rows such as
+		 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+		 * @throws DataAccessException if there is any problem issuing the update
+		 * @see java.sql.PreparedStatement#executeBatch()
+		 */
+		int[][] update(int batchSize);
+
+		/**
 		 * Execute the accumulated batch entries as a batch update, returning
 		 * generated keys.
 		 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
