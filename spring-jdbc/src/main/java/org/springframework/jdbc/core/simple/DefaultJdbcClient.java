@@ -352,7 +352,7 @@ final class DefaultJdbcClient implements JdbcClient {
 
 		private class DefaultBatchSpec implements BatchSpec {
 
-			private final List<Object[]> indexedBatch = new ArrayList<>();
+			private final List<@Nullable Object[]> indexedBatch = new ArrayList<>();
 
 			private final List<SqlParameterSource> namedBatch = new ArrayList<>();
 
