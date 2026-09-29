@@ -86,7 +86,7 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 		this.context = this.tomcatServer.addContext("", System.getProperty("java.io.tmpdir"));
 		this.context.addApplicationListener(WsContextListener.class.getName());
 		Tomcat.addServlet(this.context, "dispatcherServlet", new DispatcherServlet(wac)).setAsyncSupported(true);
-		this.context.addServletMappingDecoded("/", "dispatcherServlet");
+		this.context.addServletMapping("/", "dispatcherServlet", false);
 		for (Filter filter : filters) {
 			FilterDef filterDef = new FilterDef();
 			filterDef.setFilterName(filter.getClass().getName());
