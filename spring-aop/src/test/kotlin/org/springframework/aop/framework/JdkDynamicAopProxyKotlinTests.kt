@@ -19,49 +19,20 @@ package org.springframework.aop.framework
 import kotlinx.coroutines.delay
 import org.aopalliance.intercept.MethodInterceptor
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Tests for Kotlin support in [CglibAopProxy].
+ * Tests for Kotlin support in [JdkDynamicAopProxy].
  *
+ * @author Dmitry Sulman
  * @author Sebastien Deleuze
  */
-class CglibAopProxyKotlinTests {
-
-	@Test
-	fun proxiedInvocation() {
-		val proxyFactory = ProxyFactory(MyKotlinBean())
-		val proxy = proxyFactory.proxy as MyKotlinBean
-		assertThat(proxy.capitalize("foo")).isEqualTo("FOO")
-	}
-
-	@Test
-	fun proxiedUncheckedException() {
-		val proxyFactory = ProxyFactory(MyKotlinBean())
-		val proxy = proxyFactory.proxy as MyKotlinBean
-		assertThatThrownBy { proxy.uncheckedException() }.isInstanceOf(IllegalStateException::class.java)
-	}
-
-	@Test
-	fun proxiedCheckedException() {
-		val proxyFactory = ProxyFactory(MyKotlinBean())
-		val proxy = proxyFactory.proxy as MyKotlinBean
-		assertThatThrownBy { proxy.checkedException() }.isInstanceOf(CheckedException::class.java)
-	}
-
-	@Test // gh-35487
-	fun jvmDefault() {
-		val proxyFactory = ProxyFactory()
-		proxyFactory.setTarget(AddressRepo())
-		proxyFactory.proxy
-	}
+class JdkDynamicAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClass("bar")
 		})
@@ -71,7 +42,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassProceed() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			it.proceed()
 		})
@@ -81,7 +52,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClass("bar")
 		})
@@ -91,7 +62,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableValueClassNull() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			null
 		})
@@ -101,7 +72,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassNullableValue() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClassNullableValue("bar")
 		})
@@ -111,7 +82,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassNullableValueNull() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClassNullableValue(null)
 		})
@@ -121,7 +92,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationResult() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			Result.success("bar")
 		})
@@ -131,7 +102,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationString() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			"bar"
 		})
@@ -141,7 +112,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationAnyAdviceReturnValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClass("bar")
 		})
@@ -151,7 +122,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassPrimitiveValue() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClassPrimitiveValue(1)
 		})
@@ -161,7 +132,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassPrimitiveValueProceed() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			it.proceed()
 		})
@@ -171,7 +142,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableValueClassPrimitiveValue() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClassPrimitiveValue(1)
 		})
@@ -181,7 +152,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableValueClassPrimitiveValueNull() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			null
 		})
@@ -191,7 +162,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableValueClassNullableValue() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClassNullableValue("bar")
 		})
@@ -201,7 +172,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableValueClassNullableValueNull() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClassNullableValue(null)
 		})
@@ -211,7 +182,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableGenericValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			GenericValueClass("bar")
 		})
@@ -221,7 +192,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNestedValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			NestedValueClass(ValueClass("bar"))
 		})
@@ -231,7 +202,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableNestedValueClassPrimitiveValue() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			NestedValueClassPrimitiveValue(ValueClassPrimitiveValue(1))
 		})
@@ -242,7 +213,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableNestedValueClassNullableValue() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			NestedValueClassNullableValue(ValueClassNullableValue("bar"))
 		})
@@ -253,7 +224,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableNonNullGenericValueClass() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			NonNullGenericValueClass("bar")
 		})
@@ -263,7 +234,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationNullableResult() {
-		val proxyFactory = ProxyFactory(TestBean())
+		val proxyFactory = ProxyFactory(TestBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			Result.success("bar")
 		})
@@ -273,8 +244,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassOverridingAny() {
-		val proxyFactory = ProxyFactory(ValueClassOverridingAnyBean())
-		proxyFactory.isProxyTargetClass = true
+		val proxyFactory = ProxyFactory(ValueClassOverridingAnyBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClass("bar")
 		})
@@ -284,8 +254,7 @@ class CglibAopProxyKotlinTests {
 
 	@Test
 	suspend fun proxiedSuspendedInvocationValueClassOverridingGeneric() {
-		val proxyFactory = ProxyFactory(ValueClassOverridingGenericBean())
-		proxyFactory.isProxyTargetClass = true
+		val proxyFactory = ProxyFactory(ValueClassOverridingGenericBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			ValueClass("bar")
 		})
@@ -294,65 +263,8 @@ class CglibAopProxyKotlinTests {
 	}
 
 	@Test
-	suspend fun proxiedSuspendedInvocationValueClassOverridingGenericParameter() {
-		val proxyFactory = ProxyFactory(ValueClassOverridingGenericParameterBean())
-		proxyFactory.isProxyTargetClass = true
-		proxyFactory.addAdvice(MethodInterceptor {
-			ValueClass("bar")
-		})
-		val proxy = proxyFactory.proxy as ValueClassOverridingGenericParameterBean
-		assertThat(proxy.returnValue("foo")).isEqualTo(ValueClass("bar"))
-	}
-
-	@Test
-	suspend fun proxiedSuspendedInvocationValueClassOverloadingGenericParameter() {
-		val proxyFactory = ProxyFactory(ValueClassOverloadingGenericParameterBean())
-		proxyFactory.isProxyTargetClass = true
-		proxyFactory.addAdvice(MethodInterceptor {
-			ValueClass("bar")
-		})
-		val proxy = proxyFactory.proxy as ValueClassOverloadingGenericParameterBean
-		assertThat(proxy.returnValue("foo").value).isEqualTo("bar")
-	}
-
-	open class MyKotlinBean {
-
-		open fun capitalize(value: String) = value.uppercase()
-
-		open fun uncheckedException() {
-			throw IllegalStateException()
-		}
-
-		open fun checkedException() {
-			throw CheckedException()
-		}
-	}
-
-	class CheckedException() : Exception()
-
-	open class AddressRepo(): CrudRepo<Address, Int>
-
-	interface CrudRepo<E : Any, ID : Any> {
-		fun save(e: E): E {
-			return e
-		}
-		fun delete(id: ID): Long {
-			return 0L
-		}
-	}
-
-	data class Address(
-		val id: Int = 0,
-		val street: String,
-		val version: Int = 0,
-		val createdAt: LocalDateTime? = null,
-		val updatedAt: LocalDateTime? = null,
-	)
-
-	@Test
 	suspend fun proxiedSuspendedInvocationPrivateValueClass() {
-		val proxyFactory = ProxyFactory(PrivateValueClassBean())
-		proxyFactory.isProxyTargetClass = true
+		val proxyFactory = ProxyFactory(PrivateValueClassBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
 			PrivateValueClass("bar")
 		})
@@ -384,78 +296,110 @@ class CglibAopProxyKotlinTests {
 	@JvmInline
 	value class NonNullGenericValueClass<T : Any>(val value: T)
 
-	open class TestBean {
-		open suspend fun returnValueClass(): ValueClass {
+	interface TestBean {
+		suspend fun returnValueClass(): ValueClass
+
+		suspend fun returnNullableValueClass(): ValueClass?
+
+		suspend fun returnValueClassNullableValue(): ValueClassNullableValue
+
+		suspend fun returnResult(): Result<String>
+
+		suspend fun returnString(): String
+
+		suspend fun returnAny(): Any
+
+		suspend fun returnValueClassPrimitiveValue(): ValueClassPrimitiveValue
+
+		suspend fun returnNullableValueClassPrimitiveValue(): ValueClassPrimitiveValue?
+
+		suspend fun returnNullableValueClassNullableValue(): ValueClassNullableValue?
+
+		suspend fun returnNullableGenericValueClass(): GenericValueClass<String>?
+
+		suspend fun returnNestedValueClass(): NestedValueClass
+
+		suspend fun returnNullableNestedValueClassPrimitiveValue(): NestedValueClassPrimitiveValue?
+
+		suspend fun returnNullableNestedValueClassNullableValue(): NestedValueClassNullableValue?
+
+		suspend fun returnNullableNonNullGenericValueClass(): NonNullGenericValueClass<String>?
+
+		suspend fun returnNullableResult(): Result<String>?
+	}
+
+	class TestBeanImpl : TestBean {
+		override suspend fun returnValueClass(): ValueClass {
 			delay(10.milliseconds)
 			return ValueClass("foo")
 		}
 
-		open suspend fun returnNullableValueClass(): ValueClass? {
+		override suspend fun returnNullableValueClass(): ValueClass? {
 			delay(10.milliseconds)
 			return null
 		}
 
-		open suspend fun returnValueClassNullableValue(): ValueClassNullableValue {
+		override suspend fun returnValueClassNullableValue(): ValueClassNullableValue {
 			delay(10.milliseconds)
 			return ValueClassNullableValue(null)
 		}
 
-		open suspend fun returnResult(): Result<String> {
+		override suspend fun returnResult(): Result<String> {
 			delay(10.milliseconds)
 			return Result.success("foo")
 		}
 
-		open suspend fun returnString(): String {
+		override suspend fun returnString(): String {
 			delay(10.milliseconds)
 			return "foo"
 		}
 
-		open suspend fun returnAny(): Any {
+		override suspend fun returnAny(): Any {
 			delay(10.milliseconds)
 			return ValueClass("foo")
 		}
 
-		open suspend fun returnValueClassPrimitiveValue(): ValueClassPrimitiveValue {
+		override suspend fun returnValueClassPrimitiveValue(): ValueClassPrimitiveValue {
 			delay(10.milliseconds)
 			return ValueClassPrimitiveValue(0)
 		}
 
-		open suspend fun returnNullableValueClassPrimitiveValue(): ValueClassPrimitiveValue? {
+		override suspend fun returnNullableValueClassPrimitiveValue(): ValueClassPrimitiveValue? {
 			delay(10.milliseconds)
 			return null
 		}
 
-		open suspend fun returnNullableValueClassNullableValue(): ValueClassNullableValue? {
+		override suspend fun returnNullableValueClassNullableValue(): ValueClassNullableValue? {
 			delay(10.milliseconds)
 			return null
 		}
 
-		open suspend fun returnNullableGenericValueClass(): GenericValueClass<String>? {
+		override suspend fun returnNullableGenericValueClass(): GenericValueClass<String>? {
 			delay(10.milliseconds)
 			return null
 		}
 
-		open suspend fun returnNestedValueClass(): NestedValueClass {
+		override suspend fun returnNestedValueClass(): NestedValueClass {
 			delay(10.milliseconds)
 			return NestedValueClass(ValueClass("foo"))
 		}
 
-		open suspend fun returnNullableNestedValueClassPrimitiveValue(): NestedValueClassPrimitiveValue? {
+		override suspend fun returnNullableNestedValueClassPrimitiveValue(): NestedValueClassPrimitiveValue? {
 			delay(10.milliseconds)
 			return null
 		}
 
-		open suspend fun returnNullableNestedValueClassNullableValue(): NestedValueClassNullableValue? {
+		override suspend fun returnNullableNestedValueClassNullableValue(): NestedValueClassNullableValue? {
 			delay(10.milliseconds)
 			return null
 		}
 
-		open suspend fun returnNullableNonNullGenericValueClass(): NonNullGenericValueClass<String>? {
+		override suspend fun returnNullableNonNullGenericValueClass(): NonNullGenericValueClass<String>? {
 			delay(10.milliseconds)
 			return null
 		}
 
-		open suspend fun returnNullableResult(): Result<String>? {
+		override suspend fun returnNullableResult(): Result<String>? {
 			delay(10.milliseconds)
 			return null
 		}
@@ -466,7 +410,11 @@ class CglibAopProxyKotlinTests {
 		suspend fun returnValue(): Any
 	}
 
-	open class ValueClassOverridingAnyBean : AnyBean {
+	interface ValueClassOverridingAnyBean : AnyBean {
+		override suspend fun returnValue(): ValueClass
+	}
+
+	class ValueClassOverridingAnyBeanImpl : ValueClassOverridingAnyBean {
 		override suspend fun returnValue(): ValueClass {
 			delay(10.milliseconds)
 			return ValueClass("foo")
@@ -477,41 +425,26 @@ class CglibAopProxyKotlinTests {
 		suspend fun returnValue(): T
 	}
 
-	open class ValueClassOverridingGenericBean : GenericBean<ValueClass> {
+	interface ValueClassOverridingGenericBean : GenericBean<ValueClass> {
+		override suspend fun returnValue(): ValueClass
+	}
+
+	class ValueClassOverridingGenericBeanImpl : ValueClassOverridingGenericBean {
 		override suspend fun returnValue(): ValueClass {
 			delay(10.milliseconds)
 			return ValueClass("foo")
 		}
 	}
 
-	interface GenericParameterBean<T> {
-		suspend fun returnValue(value: T): Any
-	}
-
-	open class ValueClassOverridingGenericParameterBean : GenericParameterBean<String> {
-		override suspend fun returnValue(value: String): ValueClass {
-			delay(10.milliseconds)
-			return ValueClass(value)
-		}
-	}
-
-	open class ValueClassOverloadingGenericParameterBean : GenericParameterBean<Int> {
-		override suspend fun returnValue(value: Int): Any {
-			delay(10.milliseconds)
-			return value
-		}
-
-		open suspend fun returnValue(value: String): ValueClass {
-			delay(10.milliseconds)
-			return ValueClass(value)
-		}
-	}
-
 	@JvmInline
 	private value class PrivateValueClass(val value: String)
 
-	private open class PrivateValueClassBean {
-		open suspend fun returnValue(): PrivateValueClass {
+	private interface PrivateValueClassBean {
+		suspend fun returnValue(): PrivateValueClass
+	}
+
+	private class PrivateValueClassBeanImpl : PrivateValueClassBean {
+		override suspend fun returnValue(): PrivateValueClass {
 			delay(10.milliseconds)
 			return PrivateValueClass("foo")
 		}
