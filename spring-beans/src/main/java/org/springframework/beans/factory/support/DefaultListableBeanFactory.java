@@ -399,6 +399,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeanProvider(requiredType, true);
 	}
 
+	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
 		return getBeanProvider(ResolvableType.forType(requiredType), true);
 	}
