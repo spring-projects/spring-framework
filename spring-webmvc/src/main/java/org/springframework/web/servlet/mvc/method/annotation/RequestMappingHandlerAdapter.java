@@ -901,8 +901,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		// Obtain wrapped response to enforce lifecycle rule from Servlet spec, section 2.3.3.4
 		response = asyncWebRequest.getNativeResponse(HttpServletResponse.class);
 
-		ServletWebRequest webRequest = (asyncWebRequest instanceof ServletWebRequest ?
-				(ServletWebRequest) asyncWebRequest : new ServletWebRequest(request, response));
+		ServletWebRequest webRequest = (asyncWebRequest instanceof ServletWebRequest servletWebRequest ?
+				servletWebRequest : new ServletWebRequest(request, response));
 
 		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
 		ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);

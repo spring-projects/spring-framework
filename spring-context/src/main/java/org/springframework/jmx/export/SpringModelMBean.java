@@ -51,7 +51,6 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * @see javax.management.modelmbean.RequiredModelMBean#RequiredModelMBean()
 	 */
 	public SpringModelMBean() throws MBeanException, RuntimeOperationsException {
-		super();
 	}
 
 	/**

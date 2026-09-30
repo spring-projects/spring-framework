@@ -114,7 +114,6 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * @see #setTargetConnectionFactory
 	 */
 	public CachingConnectionFactory() {
-		super();
 		setReconnectOnException(true);
 	}
 
