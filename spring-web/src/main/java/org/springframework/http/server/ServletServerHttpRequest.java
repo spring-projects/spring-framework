@@ -197,6 +197,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.headers;
 	}
 
+	@Override
 	public @Nullable Principal getPrincipal() {
 		return this.servletRequest.getUserPrincipal();
 	}

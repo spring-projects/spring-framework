@@ -25,6 +25,7 @@ import org.mockito.InOrder;
 
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManagerTests;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -154,7 +155,7 @@ class JdbcTransactionManagerTests extends DataSourceTransactionManagerTests {
 
 		// specific ConcurrencyFailureException
 		assertThatExceptionOfType(ConcurrencyFailureException.class).isThrownBy(() ->
-				tt.executeWithoutResult(status -> status.setRollbackOnly()));
+				tt.executeWithoutResult(TransactionStatus::setRollbackOnly));
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();
 		InOrder ordered = inOrder(con);

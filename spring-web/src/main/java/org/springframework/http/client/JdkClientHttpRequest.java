@@ -185,14 +185,9 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		}
 		else {
 			switch (this.method.name()) {
-				case "GET" :
-					builder.GET();
-					break;
-				case "DELETE" :
-					builder.DELETE();
-					break;
-				default :
-					builder.method(this.method.name(), HttpRequest.BodyPublishers.noBody());
+				case "GET" -> builder.GET();
+				case "DELETE" -> builder.DELETE();
+				default -> builder.method(this.method.name(), HttpRequest.BodyPublishers.noBody());
 			}
 		}
 		return builder.build();

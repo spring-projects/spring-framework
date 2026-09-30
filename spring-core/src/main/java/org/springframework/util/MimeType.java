@@ -547,11 +547,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		thisAttributes.addAll(getParameters().keySet());
 		TreeSet<String> otherAttributes = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		otherAttributes.addAll(other.getParameters().keySet());
-		Iterator<String> thisAttributesIterator = thisAttributes.iterator();
 		Iterator<String> otherAttributesIterator = otherAttributes.iterator();
 
-		while (thisAttributesIterator.hasNext()) {
-			String thisAttribute = thisAttributesIterator.next();
+		for (String thisAttribute : thisAttributes) {
 			String otherAttribute = otherAttributesIterator.next();
 			comp = thisAttribute.compareToIgnoreCase(otherAttribute);
 			if (comp != 0) {

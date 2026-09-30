@@ -69,7 +69,6 @@ class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 	private final CacheEvaluationContextFactory evaluationContextFactory;
 
 	public CacheOperationExpressionEvaluator(CacheEvaluationContextFactory evaluationContextFactory) {
-		super();
 		this.evaluationContextFactory = evaluationContextFactory;
 		this.evaluationContextFactory.setParameterNameDiscoverer(this::getParameterNameDiscoverer);
 	}

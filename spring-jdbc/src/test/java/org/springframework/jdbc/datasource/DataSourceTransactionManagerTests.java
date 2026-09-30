@@ -375,7 +375,7 @@ public class DataSourceTransactionManagerTests {
 
 				tt.executeWithoutResult(status -> {
 					assertThat(status.isRollbackOnly()).isFalse();
-					tt2.executeWithoutResult(status2 -> status2.setRollbackOnly());
+					tt2.executeWithoutResult(TransactionStatus::setRollbackOnly);
 					assertThat(status.isRollbackOnly()).isTrue();
 				});
 			});
@@ -401,7 +401,7 @@ public class DataSourceTransactionManagerTests {
 
 			tt.executeWithoutResult(status -> {
 				assertThat(status.isRollbackOnly()).isFalse();
-				tt2.executeWithoutResult(status2 -> status2.setRollbackOnly());
+				tt2.executeWithoutResult(TransactionStatus::setRollbackOnly);
 				assertThat(status.isRollbackOnly()).isTrue();
 			});
 		});
@@ -621,7 +621,7 @@ public class DataSourceTransactionManagerTests {
 				assertThat(status.isReadOnly()).isFalse();
 				assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
 				assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
-				tt2.executeWithoutResult(status2 -> status2.setRollbackOnly());
+				tt2.executeWithoutResult(TransactionStatus::setRollbackOnly);
 		})).withCause(failure);
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).isFalse();

@@ -587,12 +587,12 @@ class GenericConversionServiceTests {
 		List<?> aList = (List<?>) conversionService.convert(List.of("foo"),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ARaw.class)));
-		assertThat(aList).allMatch(e -> e instanceof ARaw);
+		assertThat(aList).allMatch(ARaw.class::isInstance);
 
 		List<?> bList = (List<?>) conversionService.convert(List.of("foo"),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(BRaw.class)));
-		assertThat(bList).allMatch(e -> e instanceof BRaw);
+		assertThat(bList).allMatch(BRaw.class::isInstance);
 	}
 
 	@Test

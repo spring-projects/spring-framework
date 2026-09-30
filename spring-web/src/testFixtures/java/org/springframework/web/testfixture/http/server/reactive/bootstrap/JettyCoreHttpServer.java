@@ -41,8 +41,9 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 
 	@Override
 	protected void initServer() {
-		if (logger.isTraceEnabled())
+		if (logger.isTraceEnabled()) {
 			this.byteBufferPool = new ArrayByteBufferPool.Tracking();
+		}
 		this.jettyServer = new Server(null, null, byteBufferPool);
 
 		ServerConnector connector = new ServerConnector(this.jettyServer);

@@ -52,7 +52,6 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Construct a new, empty {@code WebSocketHttpHeaders} instance.
 	 */
 	public WebSocketHttpHeaders() {
-		super();
 	}
 
 	/**

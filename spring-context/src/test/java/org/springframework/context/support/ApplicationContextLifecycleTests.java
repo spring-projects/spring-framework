@@ -169,6 +169,7 @@ class ApplicationContextLifecycleTests {
 
 	private static class FailingContextRefreshedListener implements ApplicationListener<ContextRefreshedEvent> {
 
+		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			throw new IllegalStateException();
 		}
