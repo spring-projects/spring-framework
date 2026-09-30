@@ -36,8 +36,10 @@ import java.sql.SQLException;
  * @author Thomas Risberg
  * @since 3.1
  * @param <T> the argument type
- * @see JdbcTemplate#batchUpdate(String, java.util.Collection, int, ParameterizedPreparedStatementSetter)
+ * @deprecated as of 7.1, along with
+ * {@link JdbcTemplate#batchUpdate(String, java.util.Collection, int, ParameterizedPreparedStatementSetter)}
  */
+@Deprecated(since = "7.1")
 @FunctionalInterface
 public interface ParameterizedPreparedStatementSetter<T> {
 
