@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.throwable;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Chengang Guan
  */
 class TypeMappedAnnotationTests {
 
@@ -107,6 +109,46 @@ class TypeMappedAnnotationTests {
 		assertThat(annotation.getValue("classValue")).contains(new Class<?>[] {});
 		assertThat(annotation.getValue("annotationValue")).contains(new MergedAnnotation<?>[] {});
 		assertThat(annotation.getValue("enumValue")).contains(new ExampleEnum[] {});
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void adaptFromSingleValueToArray() {
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put("stringValue", "s");
+		attributes.put("byteValue", (byte) 1);
+		attributes.put("shortValue", (short) 1);
+		attributes.put("intValue", 1);
+		attributes.put("longValue", 1L);
+		attributes.put("booleanValue", true);
+		attributes.put("charValue", 'c');
+		attributes.put("doubleValue", 1.0d);
+		attributes.put("floatValue", 1.0f);
+		attributes.put("classValue", String.class);
+		attributes.put("enumValue", ExampleEnum.ONE);
+		attributes.put("annotationValue", TypeMappedAnnotation.of(null, null,
+				ExplicitMirror.class, Collections.singletonMap("a", "singleValue")));
+
+		MergedAnnotation<ArrayTypes> annotation = TypeMappedAnnotation.of(null, null, ArrayTypes.class, attributes);
+		assertThat(annotation.getValue("stringValue")).contains(new String[] {"s"});
+		assertThat(annotation.getValue("byteValue")).contains(new byte[] {1});
+		assertThat(annotation.getValue("shortValue")).contains(new short[] {1});
+		assertThat(annotation.getValue("intValue")).contains(new int[] {1});
+		assertThat(annotation.getValue("longValue")).contains(new long[] {1L});
+		assertThat(annotation.getValue("booleanValue")).contains(new boolean[] {true});
+		assertThat(annotation.getValue("charValue")).contains(new char[] {'c'});
+		assertThat(annotation.getValue("doubleValue")).contains(new double[] {1.0d});
+		assertThat(annotation.getValue("floatValue")).contains(new float[] {1.0f});
+		assertThat(annotation.getValue("classValue")).contains(new Class<?>[] {String.class});
+		assertThat(annotation.getValue("enumValue")).contains(new ExampleEnum[] {ExampleEnum.ONE});
+		assertThat(annotation.getValue("annotationValue")).hasValueSatisfying(value -> {
+			assertThat(value.getClass().isArray()).isTrue();
+			assertThat(Array.getLength(value)).isEqualTo(1);
+			Object element = Array.get(value, 0);
+			MergedAnnotation<ExplicitMirror> mirror = (MergedAnnotation<ExplicitMirror>) element;
+			assertThat(mirror.getString("a")).isEqualTo("singleValue");
+			assertThat(mirror.getString("b")).isEqualTo("singleValue");
+		});
 	}
 
 	@Test
