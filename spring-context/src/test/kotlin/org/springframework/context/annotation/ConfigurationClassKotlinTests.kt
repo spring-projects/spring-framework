@@ -23,6 +23,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor
 import org.springframework.beans.factory.getBean
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
+import org.springframework.context.support.registerBean
 
 /**
  * Integration tests for Kotlin configuration classes.
@@ -53,6 +54,31 @@ class ConfigurationClassKotlinTests {
 		val context = AnnotationConfigApplicationContext(beanFactory)
 		context.register(ProcessorConfiguration::class.java)
 		context.refresh()
+	}
+
+	@Test
+	fun `Configuration with constructor parameter default value is autowired`() {
+		val context = AnnotationConfigApplicationContext()
+		context.registerBean<Foo>()
+		context.register(ConfigurationWithParameterDefaultValue::class.java)
+		context.refresh()
+		assertThat(context.getBean<Bar>().foo).isSameAs(context.getBean<Foo>())
+	}
+
+	@Test
+	fun `Configuration with nullable constructor parameter default value is autowired`() {
+		val context = AnnotationConfigApplicationContext()
+		context.registerBean<Foo>()
+		context.register(ConfigurationWithNullableParameterDefaultValue::class.java)
+		context.refresh()
+		assertThat(context.getBean<NullableBar>().foo).isSameAs(context.getBean<Foo>())
+	}
+
+	@Test
+	fun `Configuration with constructor parameter default value falls back to the default value`() {
+		val context = AnnotationConfigApplicationContext(ConfigurationWithParameterDefaultValue::class.java)
+		assertThat(context.getBeanNamesForType(Foo::class.java)).isEmpty()
+		assertThat(context.getBean<Bar>().foo).isNotNull()
 	}
 
 
@@ -89,7 +115,23 @@ class ConfigurationClassKotlinTests {
 		}
 	}
 
+	@Configuration
+	open class ConfigurationWithParameterDefaultValue(private val foo: Foo = Foo()) {
+
+		@Bean
+		open fun bar() = Bar(foo)
+	}
+
+	@Configuration
+	open class ConfigurationWithNullableParameterDefaultValue(private val foo: Foo? = null) {
+
+		@Bean
+		open fun nullableBar() = NullableBar(foo)
+	}
+
 	class Foo
 
 	class Bar(val foo: Foo)
+
+	class NullableBar(val foo: Foo?)
 }

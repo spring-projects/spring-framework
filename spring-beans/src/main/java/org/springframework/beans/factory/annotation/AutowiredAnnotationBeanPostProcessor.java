@@ -370,28 +370,28 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
 					Constructor<?> requiredConstructor = null;
 					Constructor<?> defaultConstructor = null;
-					Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(beanClass);
+					Class<?> userClass = ClassUtils.getUserClass(beanClass);
+					Constructor<?> primaryConstructor = findPrimaryConstructor(beanClass, userClass);
 					int nonSyntheticConstructors = 0;
 					for (Constructor<?> candidate : rawCandidates) {
-						if (!candidate.isSynthetic()) {
+						Constructor<?> superCtor = null;
+						if (userClass != beanClass) {
+							try {
+								superCtor = userClass.getDeclaredConstructor(candidate.getParameterTypes());
+							}
+							catch (NoSuchMethodException ex) {
+								// Simply proceed, no equivalent superclass constructor found...
+							}
+						}
+						if (!candidate.isSynthetic() && (superCtor == null || !superCtor.isSynthetic())) {
 							nonSyntheticConstructors++;
 						}
 						else if (primaryConstructor != null) {
 							continue;
 						}
 						MergedAnnotation<?> ann = findAutowiredAnnotation(candidate);
-						if (ann == null) {
-							Class<?> userClass = ClassUtils.getUserClass(beanClass);
-							if (userClass != beanClass) {
-								try {
-									Constructor<?> superCtor =
-											userClass.getDeclaredConstructor(candidate.getParameterTypes());
-									ann = findAutowiredAnnotation(superCtor);
-								}
-								catch (NoSuchMethodException ex) {
-									// Simply proceed, no equivalent superclass constructor found...
-								}
-							}
+						if (ann == null && superCtor != null) {
+							ann = findAutowiredAnnotation(superCtor);
 						}
 						if (ann != null) {
 							if (requiredConstructor != null) {
@@ -449,6 +449,30 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			}
 		}
 		return (candidateConstructors.length > 0 ? candidateConstructors : null);
+	}
+
+	/**
+	 * Find the primary constructor of the given bean class, resolving it against
+	 * the user class in case of a CGLIB-generated subclass (for example, an enhanced
+	 * Kotlin {@code @Configuration} class) which does not retain the metadata
+	 * required for primary constructor detection.
+	 * @see BeanUtils#findPrimaryConstructor(Class)
+	 */
+	private static @Nullable Constructor<?> findPrimaryConstructor(Class<?> beanClass, Class<?> userClass) {
+		Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(beanClass);
+		if (primaryConstructor == null && userClass != beanClass) {
+			Constructor<?> userPrimaryConstructor = BeanUtils.findPrimaryConstructor(userClass);
+			if (userPrimaryConstructor != null) {
+				try {
+					primaryConstructor = beanClass.getDeclaredConstructor(
+							userPrimaryConstructor.getParameterTypes());
+				}
+				catch (NoSuchMethodException ex) {
+					// Simply proceed, no equivalent subclass constructor found...
+				}
+			}
+		}
+		return primaryConstructor;
 	}
 
 	private void checkLookupMethods(Class<?> beanClass, final String beanName) throws BeanCreationException {

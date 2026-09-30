@@ -18,6 +18,9 @@ package org.springframework.beans
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.cglib.core.SpringNamingPolicy
+import org.springframework.cglib.proxy.Enhancer
+import org.springframework.cglib.proxy.NoOp
 
 /**
  * Kotlin tests for [BeanUtils].
@@ -88,6 +91,37 @@ class BeanUtilsKotlinTests {
 	@Test
 	fun `Instantiate private class`() {
 		BeanUtils.instantiateClass(PrivateClass::class.java.getDeclaredConstructor())
+	}
+
+	@Test
+	fun `Instantiate generated subclass with optional parameters and all parameters specified`() {
+		val constructor = generateSubclass(OpenBar::class.java)
+			.getDeclaredConstructor(String::class.java, Int::class.java, String::class.java)
+		val bar = BeanUtils.instantiateClass(constructor, "a", 8, "b")
+		assertThat(bar.javaClass).isNotEqualTo(OpenBar::class.java)
+		assertThat(bar.param1).isEqualTo("a")
+		assertThat(bar.param2).isEqualTo(8)
+		assertThat(bar.param3).isEqualTo("b")
+	}
+
+	@Test
+	fun `Instantiate generated subclass with optional parameters and only mandatory parameters specified by position`() {
+		val constructor = generateSubclass(OpenBar::class.java)
+			.getDeclaredConstructor(String::class.java, Int::class.java, String::class.java)
+		val bar = BeanUtils.instantiateClass(constructor, "a")
+		assertThat(bar.param1).isEqualTo("a")
+		assertThat(bar.param2).isEqualTo(12)
+		assertThat(bar.param3).isEqualTo("c")
+	}
+
+	@Test
+	fun `Instantiate generated subclass with optional parameters specified with null value`() {
+		val constructor = generateSubclass(OpenBar::class.java)
+			.getDeclaredConstructor(String::class.java, Int::class.java, String::class.java)
+		val bar = BeanUtils.instantiateClass(constructor, "a", null, "b")
+		assertThat(bar.param1).isEqualTo("a")
+		assertThat(bar.param2).isEqualTo(12)
+		assertThat(bar.param3).isEqualTo("b")
 	}
 
 	@Test
@@ -201,6 +235,8 @@ class BeanUtilsKotlinTests {
 
 	class Qux(val param1: String, val param2: Int?)
 
+	open class OpenBar(val param1: String, val param2: Int = 12, val param3: String = "c")
+
 	class TwoConstructorsWithDefaultOne {
 
 		constructor()
@@ -252,5 +288,15 @@ class BeanUtilsKotlinTests {
 	data class ConstructorWithNullablePrimitiveValueClass(val value: PrimitiveValueClass?)
 
 	class ClassWithZeroParameterCtor()
+
+
+	@Suppress("UNCHECKED_CAST")
+	private fun <T> generateSubclass(clazz: Class<T>): Class<out T> {
+		val enhancer = Enhancer()
+		enhancer.setSuperclass(clazz)
+		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE)
+		enhancer.setCallbackType(NoOp::class.java)
+		return enhancer.createClass() as Class<out T>
+	}
 
 }
