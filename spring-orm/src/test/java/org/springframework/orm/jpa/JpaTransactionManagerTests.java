@@ -16,7 +16,10 @@
 
 package org.springframework.orm.jpa;
 
+import java.sql.Connection;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -26,6 +29,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.jdbc.datasource.ConnectionHandle;
+import org.springframework.jdbc.datasource.SimpleConnectionHandle;
+import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
@@ -611,6 +617,39 @@ class JpaTransactionManagerTests {
 		verify(tx).commit();
 		verify(manager).flush();
 		verify(manager).close();
+	}
+
+	@Test  // gh-14130
+	void transactionWithinOtherTransactionManagerForSameDataSource() {
+		DataSource dataSource = mock();
+		Connection connection = mock();
+		JpaDialect jpaDialect = new DefaultJpaDialect() {
+			@Override
+			public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly) {
+				return new SimpleConnectionHandle(connection);
+			}
+		};
+
+		EntityManagerFactory otherFactory = mock();
+		EntityManager otherManager = mock();
+		given(otherFactory.createEntityManager()).willReturn(otherManager);
+		given(otherManager.getTransaction()).willReturn(mock());
+		given(otherManager.isOpen()).willReturn(true);
+
+		JpaTransactionManager otherTm = new JpaTransactionManager(otherFactory);
+		otherTm.setDataSource(dataSource);
+		otherTm.setJpaDialect(jpaDialect);
+		tm.setDataSource(dataSource);
+		tm.setJpaDialect(jpaDialect);
+
+		assertThatExceptionOfType(IllegalTransactionStateException.class)
+				.isThrownBy(() -> new TransactionTemplate(otherTm).executeWithoutResult(status ->
+						tt.executeWithoutResult(innerStatus -> {})))
+				.withMessageStartingWith("Pre-bound JDBC Connection found!")
+				.withMessageContaining("another transaction manager")
+				.withMessageNotContaining("DataSourceTransactionManager");
+
+		verify(otherManager).close();
 	}
 
 }
