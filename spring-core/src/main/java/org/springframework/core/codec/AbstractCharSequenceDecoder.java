@@ -33,6 +33,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferMatcher;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.LimitedDataBufferList;
 import org.springframework.core.log.LogFormatUtils;
@@ -100,7 +101,7 @@ public abstract class AbstractCharSequenceDecoder<T extends CharSequence> extend
 		byte[][] delimiterBytes = getDelimiterBytes(mimeType);
 
 		LimitedDataBufferList chunks = new LimitedDataBufferList(getMaxInMemorySize());
-		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delimiterBytes);
+		DataBufferMatcher matcher = DataBufferUtils.matcher(delimiterBytes);
 
 		return Flux.from(input)
 				.concatMapIterable(buffer -> processDataBuffer(buffer, matcher, chunks))
@@ -127,7 +128,7 @@ public abstract class AbstractCharSequenceDecoder<T extends CharSequence> extend
 		});
 	}
 
-	private Collection<DataBuffer> processDataBuffer(DataBuffer buffer, DataBufferUtils.Matcher matcher,
+	private Collection<DataBuffer> processDataBuffer(DataBuffer buffer, DataBufferMatcher matcher,
 			LimitedDataBufferList chunks) {
 
 		boolean release = true;

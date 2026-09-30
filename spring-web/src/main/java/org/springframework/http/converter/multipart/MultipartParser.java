@@ -31,7 +31,8 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
-import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferMatcher;
+import org.springframework.core.io.buffer.DataBuffers;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -113,7 +114,7 @@ final class MultipartParser {
 				newState.data(remainder);
 			}
 			else {
-				DataBufferUtils.release(remainder);
+				DataBuffers.release(remainder);
 			}
 		}
 	}
@@ -255,11 +256,11 @@ final class MultipartParser {
 	 */
 	private final class PreambleState implements State {
 
-		private final DataBufferUtils.Matcher firstBoundary;
+		private final DataBufferMatcher firstBoundary;
 
 
 		PreambleState() {
-			this.firstBoundary = DataBufferUtils.matcher(concat(TWO_HYPHENS, MultipartParser.this.boundary));
+			this.firstBoundary = DataBufferMatcher.of(concat(TWO_HYPHENS, MultipartParser.this.boundary));
 		}
 
 		/**
@@ -275,11 +276,11 @@ final class MultipartParser {
 					logger.trace("First boundary found @" + endIdx + " in " + buf);
 				}
 				DataBuffer preambleBuffer = buf.split(endIdx + 1);
-				DataBufferUtils.release(preambleBuffer);
+				DataBuffers.release(preambleBuffer);
 				changeState(new HeadersState(), buf);
 			}
 			else {
-				DataBufferUtils.release(buf);
+				DataBuffers.release(buf);
 			}
 		}
 
@@ -302,7 +303,7 @@ final class MultipartParser {
 	 */
 	private final class HeadersState implements State {
 
-		private final DataBufferUtils.Matcher endHeaders = DataBufferUtils.matcher(concat(CR_LF, CR_LF));
+		private final DataBufferMatcher endHeaders = DataBufferMatcher.of(concat(CR_LF, CR_LF));
 
 		private final List<DataBuffer> buffers = new ArrayList<>();
 
@@ -405,7 +406,7 @@ final class MultipartParser {
 			DataBuffer joined = this.buffers.get(0).factory().join(this.buffers);
 			this.buffers.clear();
 			String string = joined.toString(MultipartParser.this.headersCharset);
-			DataBufferUtils.release(joined);
+			DataBuffers.release(joined);
 			String[] lines = string.split(HEADER_ENTRY_SEPARATOR);
 			HttpHeaders result = new HttpHeaders();
 			for (String line : lines) {
@@ -429,7 +430,7 @@ final class MultipartParser {
 
 		@Override
 		public void dispose() {
-			this.buffers.forEach(DataBufferUtils::release);
+			this.buffers.forEach(DataBuffers::release);
 		}
 
 		@Override
@@ -446,7 +447,7 @@ final class MultipartParser {
 	 */
 	private final class BodyState implements State {
 
-		private final DataBufferUtils.Matcher boundaryMatcher;
+		private final DataBufferMatcher boundaryMatcher;
 
 		private final int boundaryLength;
 
@@ -454,7 +455,7 @@ final class MultipartParser {
 
 		public BodyState() {
 			byte[] delimiter = concat(CR_LF, TWO_HYPHENS, MultipartParser.this.boundary);
-			this.boundaryMatcher = DataBufferUtils.matcher(delimiter);
+			this.boundaryMatcher = DataBufferMatcher.of(delimiter);
 			this.boundaryLength = delimiter.length;
 		}
 
@@ -479,14 +480,14 @@ final class MultipartParser {
 					// whole boundary in buffer.
 					// slice off the body part, and flush
 					DataBuffer body = boundaryBuffer.split(len);
-					DataBufferUtils.release(boundaryBuffer);
+					DataBuffers.release(boundaryBuffer);
 					enqueue(body);
 					flush();
 				}
 				else if (len < 0) {
 					// boundary spans multiple buffers, and we've just found the end
 					// iterate over buffers in reverse order
-					DataBufferUtils.release(boundaryBuffer);
+					DataBuffers.release(boundaryBuffer);
 					DataBuffer prev;
 					boolean found = false;
 					while ((prev = this.queue.pollLast()) != null) {
@@ -495,7 +496,7 @@ final class MultipartParser {
 						if (prevLen >= 0) {
 							// slice body part of previous buffer, and flush it
 							DataBuffer body = prev.split(prevLen + prev.readPosition());
-							DataBufferUtils.release(prev);
+							DataBuffers.release(prev);
 							enqueue(body);
 							flush();
 							found = true;
@@ -503,7 +504,7 @@ final class MultipartParser {
 						}
 						else {
 							// previous buffer only contains boundary bytes
-							DataBufferUtils.release(prev);
+							DataBuffers.release(prev);
 							len += prevByteCount;
 						}
 					}
@@ -514,7 +515,7 @@ final class MultipartParser {
 				}
 				else /* if (len == 0) */ {
 					// buffer starts with complete delimiter, flush out the previous buffers
-					DataBufferUtils.release(boundaryBuffer);
+					DataBuffers.release(boundaryBuffer);
 					if (this.queue.isEmpty()) {
 						// nothing was ever buffered for this part: the part had an empty body
 						invokeListener(buffer.factory().allocateBuffer(0), true);
@@ -581,7 +582,7 @@ final class MultipartParser {
 
 		@Override
 		public void dispose() {
-			this.queue.forEach(DataBufferUtils::release);
+			this.queue.forEach(DataBuffers::release);
 			this.queue.clear();
 		}
 
@@ -605,7 +606,7 @@ final class MultipartParser {
 
 		@Override
 		public void data(DataBuffer buf) {
-			DataBufferUtils.release(buf);
+			DataBuffers.release(buf);
 		}
 
 		@Override

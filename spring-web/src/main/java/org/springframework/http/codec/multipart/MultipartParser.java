@@ -40,6 +40,7 @@ import reactor.util.context.Context;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferMatcher;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 
@@ -306,7 +307,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 */
 	private final class PreambleState implements State {
 
-		private final DataBufferUtils.Matcher firstBoundary;
+		private final DataBufferMatcher firstBoundary;
 
 
 		public PreambleState() {
@@ -359,7 +360,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 */
 	private final class HeadersState implements State {
 
-		private final DataBufferUtils.Matcher endHeaders = DataBufferUtils.matcher(MultipartUtils.concat(CR_LF, CR_LF));
+		private final DataBufferMatcher endHeaders = DataBufferUtils.matcher(MultipartUtils.concat(CR_LF, CR_LF));
 
 		private final AtomicInteger byteCount = new AtomicInteger();
 
@@ -504,7 +505,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 */
 	private final class BodyState implements State {
 
-		private final DataBufferUtils.Matcher boundary;
+		private final DataBufferMatcher boundary;
 
 		private final int boundaryLength;
 
