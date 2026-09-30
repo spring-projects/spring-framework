@@ -597,6 +597,19 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
+	void getWithSingleValuePrimitiveAttributesOverridingPrimitiveArraysViaAliasFor() {
+		MergedAnnotation<PrimitiveArrays> annotation = MergedAnnotations.from(ComposedPrimitiveSingleValuesClass.class)
+				.get(PrimitiveArrays.class);
+		assertThat(annotation.isPresent()).isTrue();
+		assertThat(annotation.getIntArray("ints")).containsExactly(42);
+		assertThat(annotation.getLongArray("longs")).containsExactly(42L);
+		assertThat(annotation.getBooleanArray("booleans")).containsExactly(true);
+		assertThat(annotation.getCharArray("chars")).containsExactly('c');
+		assertThat(annotation.getDoubleArray("doubles")).containsExactly(4.2d);
+		assertThat(annotation.synthesize().ints()).containsExactly(42);
+	}
+
+	@Test
 	void getWithInheritedAnnotationsFromShadowedAliasComposedAnnotation() {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				ShadowedAliasComposedContextConfigurationClass.class, SearchStrategy.INHERITED_ANNOTATIONS)
@@ -2299,6 +2312,44 @@ class MergedAnnotationsTests {
 	@TransactionalComponent
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedTransactionalComponent {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface PrimitiveArrays {
+
+		int[] ints() default {};
+
+		long[] longs() default {};
+
+		boolean[] booleans() default {};
+
+		char[] chars() default {};
+
+		double[] doubles() default {};
+	}
+
+	@PrimitiveArrays
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComposedPrimitiveSingleValues {
+
+		@AliasFor(annotation = PrimitiveArrays.class, attribute = "ints")
+		int anInt() default 0;
+
+		@AliasFor(annotation = PrimitiveArrays.class, attribute = "longs")
+		long aLong() default 0L;
+
+		@AliasFor(annotation = PrimitiveArrays.class, attribute = "booleans")
+		boolean aBoolean() default false;
+
+		@AliasFor(annotation = PrimitiveArrays.class, attribute = "chars")
+		char aChar() default 'x';
+
+		@AliasFor(annotation = PrimitiveArrays.class, attribute = "doubles")
+		double aDouble() default 0.0d;
+	}
+
+	@ComposedPrimitiveSingleValues(anInt = 42, aLong = 42L, aBoolean = true, aChar = 'c', aDouble = 4.2d)
+	static class ComposedPrimitiveSingleValuesClass {
 	}
 
 	static class NonAnnotatedClass {

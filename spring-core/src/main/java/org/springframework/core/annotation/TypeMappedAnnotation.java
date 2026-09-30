@@ -493,7 +493,9 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	private Object adaptForAttribute(Method attribute, Object value) {
 		Class<?> attributeType = ClassUtils.resolvePrimitiveIfNecessary(attribute.getReturnType());
 		if (attributeType.isArray() && !value.getClass().isArray()) {
-			Object array = Array.newInstance(value.getClass(), 1);
+			Object array = ClassUtils.isAssignable(attributeType.getComponentType(), value.getClass()) ?
+					Array.newInstance(attributeType.getComponentType(), 1) :
+					Array.newInstance(value.getClass(), 1);
 			Array.set(array, 0, value);
 			return adaptForAttribute(attribute, array);
 		}
