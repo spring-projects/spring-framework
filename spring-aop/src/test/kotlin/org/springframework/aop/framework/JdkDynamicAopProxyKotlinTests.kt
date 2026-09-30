@@ -253,6 +253,26 @@ class JdkDynamicAopProxyKotlinTests {
 	}
 
 	@Test
+	suspend fun proxiedSuspendedInvocationValueClassOverridingValueClass() {
+		val proxyFactory = ProxyFactory(ValueClassOverridingValueClassBeanImpl())
+		proxyFactory.addAdvice(MethodInterceptor {
+			ValueClass("bar")
+		})
+		val proxy = proxyFactory.proxy as ValueClassOverridingValueClassBean
+		assertThat(proxy.returnValue()).isEqualTo(ValueClass("bar"))
+	}
+
+	@Test
+	suspend fun proxiedSuspendedInvocationValueClassOverridingValueClassProceed() {
+		val proxyFactory = ProxyFactory(ValueClassOverridingValueClassBeanImpl())
+		proxyFactory.addAdvice(MethodInterceptor {
+			it.proceed()
+		})
+		val proxy = proxyFactory.proxy as ValueClassOverridingValueClassBean
+		assertThat(proxy.returnValue()).isEqualTo(ValueClass("foo"))
+	}
+
+	@Test
 	suspend fun proxiedSuspendedInvocationValueClassOverridingGeneric() {
 		val proxyFactory = ProxyFactory(ValueClassOverridingGenericBeanImpl())
 		proxyFactory.addAdvice(MethodInterceptor {
@@ -415,6 +435,21 @@ class JdkDynamicAopProxyKotlinTests {
 	}
 
 	class ValueClassOverridingAnyBeanImpl : ValueClassOverridingAnyBean {
+		override suspend fun returnValue(): ValueClass {
+			delay(10.milliseconds)
+			return ValueClass("foo")
+		}
+	}
+
+	interface ValueClassBean {
+		suspend fun returnValue(): ValueClass
+	}
+
+	interface ValueClassOverridingValueClassBean : ValueClassBean {
+		override suspend fun returnValue(): ValueClass
+	}
+
+	class ValueClassOverridingValueClassBeanImpl : ValueClassOverridingValueClassBean {
 		override suspend fun returnValue(): ValueClass {
 			delay(10.milliseconds)
 			return ValueClass("foo")
