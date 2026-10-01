@@ -197,6 +197,30 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		builder.mergeFrom(CodedInputStream.newInstance(byteBuffer), this.extensionRegistry);
 	}
 
+	/**
+	 * Decode a single message from the given {@link CodedInputStream}.
+	 * <p>Subclasses can override this to customize the message creation step
+	 * (for example to support grpc-web framing).
+	 * @param inputStream the input stream with the message contents
+	 * @param elementType the target message type
+	 * @return the decoded message
+	 * @throws IOException in case of I/O errors
+	 * @since 7.1
+	 */
+	protected Message decodeMessage(CodedInputStream inputStream, ResolvableType elementType) throws IOException {
+		try {
+			return getMessageBuilder(elementType.toClass())
+					.mergeFrom(inputStream, this.extensionRegistry)
+					.build();
+		}
+		catch (IOException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new DecodingException("Could not read Protobuf message: " + ex.getMessage(), ex);
+		}
+	}
+
 	@Override
 	public List<MimeType> getDecodableMimeTypes() {
 		return getMimeTypes();
@@ -258,9 +282,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						CodedInputStream stream = CodedInputStream.newInstance(byteBuffer);
 						DataBufferUtils.release(this.output);
 						this.output = null;
-						Message message = getMessageBuilder(this.elementType.toClass())
-								.mergeFrom(stream, extensionRegistry)
-								.build();
+						Message message = decodeMessage(stream, this.elementType);
 						messages.add(message);
 					}
 				} while (remainingBytesToRead > 0);
