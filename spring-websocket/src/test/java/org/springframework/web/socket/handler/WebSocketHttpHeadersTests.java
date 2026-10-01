@@ -142,6 +142,20 @@ class WebSocketHttpHeadersTests {
 		assertThat(parsedExtensions).hasSize(3);
 	}
 
+	@Test  // gh-37282
+	void getSecWebSocketProtocolWithMultipleHeaderValues() {
+		this.headers.put(WebSocketHttpHeaders.SEC_WEBSOCKET_PROTOCOL, List.of("foo", "bar, baz"));
+
+		assertThat(this.headers.getSecWebSocketProtocol()).containsExactly("foo", "bar", "baz");
+	}
+
+	@Test  // gh-37282
+	void getSecWebSocketProtocolWithSingleHeaderValue() {
+		this.headers.setSecWebSocketProtocol("foo, bar");
+
+		assertThat(this.headers.getSecWebSocketProtocol()).containsExactly("foo", "bar");
+	}
+
 	@Test  // gh-35792
 	void addAllViaWebSocketHttpHeadersApi() {
 		headers.add("green", "grape");
