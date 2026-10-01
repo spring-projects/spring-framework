@@ -352,7 +352,7 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 			if (hints != null && hints.containsKey(JSON_VIEW_HINT)) {
 				objectReader = objectReader.withView((Class<?>) hints.get(JSON_VIEW_HINT));
 			}
-			objectReader = customizeReader(objectReader, javaType);
+			objectReader = customizeReader(objectReader, javaType, contentType);
 			if (isUnicode) {
 				return objectReader.readValue(inputStream);
 			}
@@ -374,9 +374,12 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 	 * for reading values.
 	 * @param reader the reader instance to customize
 	 * @param javaType the type of element values to read
+	 * @param contentType the content type of the HTTP input message
 	 * @return the customized {@link ObjectReader}
 	 */
-	protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType) {
+	protected ObjectReader customizeReader(
+			ObjectReader reader, JavaType javaType, @Nullable MediaType contentType) {
+
 		return reader;
 	}
 

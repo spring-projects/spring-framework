@@ -385,7 +385,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				Class<?> deserializationView = mappingJacksonInputMessage.getDeserializationView();
 				if (deserializationView != null) {
 					ObjectReader objectReader = objectMapper.readerWithView(deserializationView).forType(javaType);
-					objectReader = customizeReader(objectReader, javaType);
+					objectReader = customizeReader(objectReader, javaType, contentType);
 					if (isUnicode) {
 						return objectReader.readValue(inputStream);
 					}
@@ -397,7 +397,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			}
 
 			ObjectReader objectReader = objectMapper.reader().forType(javaType);
-			objectReader = customizeReader(objectReader, javaType);
+			objectReader = customizeReader(objectReader, javaType, contentType);
 			if (isUnicode) {
 				return objectReader.readValue(inputStream);
 			}
@@ -419,10 +419,13 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * for reading values.
 	 * @param reader the reader instance to customize
 	 * @param javaType the target type of element values to read to
+	 * @param contentType the content type of the HTTP input message
 	 * @return the customized {@link ObjectReader}
 	 * @since 6.0
 	 */
-	protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType) {
+	protected ObjectReader customizeReader(
+			ObjectReader reader, JavaType javaType, @Nullable MediaType contentType) {
+
 		return reader;
 	}
 

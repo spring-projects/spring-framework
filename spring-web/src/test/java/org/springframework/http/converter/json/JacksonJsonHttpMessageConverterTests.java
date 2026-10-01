@@ -860,7 +860,7 @@ class JacksonJsonHttpMessageConverterTests {
 	private static class JacksonJsonHttpMessageConverterWithCustomization extends JacksonJsonHttpMessageConverter {
 
 		@Override
-		protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType) {
+		protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType, @Nullable MediaType contentType) {
 			return reader.without(EnumFeature.READ_ENUMS_USING_TO_STRING);
 		}
 

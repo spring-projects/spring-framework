@@ -819,7 +819,7 @@ class MappingJackson2HttpMessageConverterTests {
 	private static class MappingJackson2HttpMessageConverterWithCustomization extends MappingJackson2HttpMessageConverter {
 
 		@Override
-		protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType) {
+		protected ObjectReader customizeReader(ObjectReader reader, JavaType javaType, @Nullable MediaType contentType) {
 			return reader.with(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
 		}
 
