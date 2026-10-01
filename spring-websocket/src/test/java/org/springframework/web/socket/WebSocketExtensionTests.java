@@ -54,6 +54,28 @@ class WebSocketExtensionTests {
 				.containsExactly("x-foo-extension", "x-bar-extension");
 	}
 
+	@Test
+	void parseHeaderWithQuotedParameterValue() {
+		List<WebSocketExtension> extensions =
+				WebSocketExtension.parseExtensions("permessage-deflate; client_max_window_bits=\"15\"");
+
+		assertThat(extensions).singleElement().satisfies(extension -> {
+			assertThat(extension.getName()).isEqualTo("permessage-deflate");
+			assertThat(extension.getParameters()).containsOnly(entry("client_max_window_bits", "15"));
+		});
+	}
+
+	@Test
+	void parseHeaderWithQuotedParameterValueContainingDelimiter() {
+		List<WebSocketExtension> extensions =
+				WebSocketExtension.parseExtensions("x-test; param=\"a;b\", x-other");
+
+		assertThat(extensions).hasSize(2);
+		assertThat(extensions.get(0).getName()).isEqualTo("x-test");
+		assertThat(extensions.get(0).getParameters()).containsOnly(entry("param", "a;b"));
+		assertThat(extensions.get(1).getName()).isEqualTo("x-other");
+	}
+
 
 	@Nested
 	class EqualsTests {

@@ -131,7 +131,7 @@ public class WebSocketExtension {
 	 */
 	public static List<WebSocketExtension> parseExtensions(String extensions) {
 		if (StringUtils.hasText(extensions)) {
-			String[] tokens = StringUtils.tokenizeToStringArray(extensions, ",");
+			String[] tokens = tokenize(extensions, ',');
 			List<WebSocketExtension> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
 				result.add(parseExtension(token));
@@ -147,7 +147,7 @@ public class WebSocketExtension {
 		if (extension.contains(",")) {
 			throw new IllegalArgumentException("Expected single extension value: [" + extension + "]");
 		}
-		String[] parts = StringUtils.tokenizeToStringArray(extension, ";");
+		String[] parts = tokenize(extension, ';');
 		String name = parts[0].trim();
 
 		Map<String, String> parameters = null;
@@ -157,14 +157,56 @@ public class WebSocketExtension {
 				String parameter = parts[i];
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex != -1) {
-					String attribute = parameter.substring(0, eqIndex);
-					String value = parameter.substring(eqIndex + 1);
-					parameters.put(attribute, value);
+					String attribute = parameter.substring(0, eqIndex).trim();
+					String value = parameter.substring(eqIndex + 1).trim();
+					parameters.put(attribute, unquote(value));
 				}
 			}
 		}
 
 		return new WebSocketExtension(name, parameters);
+	}
+
+	/**
+	 * Tokenize the given string using the supplied delimiter, respecting double-quoted
+	 * segments (and backslash escapes within them) so that delimiters inside quotes are
+	 * not treated as separators.
+	 */
+	private static String[] tokenize(String value, char delimiter) {
+		List<String> tokens = new ArrayList<>();
+		int start = 0;
+		boolean quoted = false;
+		boolean escaped = false;
+		for (int i = 0; i < value.length(); i++) {
+			char ch = value.charAt(i);
+			if (ch == delimiter && !quoted) {
+				addToken(tokens, value, start, i);
+				start = i + 1;
+			}
+			else if (!escaped && ch == '"') {
+				quoted = !quoted;
+			}
+			escaped = (!escaped && ch == '\\');
+		}
+		addToken(tokens, value, start, value.length());
+		return tokens.toArray(new String[0]);
+	}
+
+	private static void addToken(List<String> tokens, String value, int start, int end) {
+		String token = value.substring(start, end).trim();
+		if (!token.isEmpty()) {
+			tokens.add(token);
+		}
+	}
+
+	/**
+	 * Remove surrounding double quotes from the given value, if present.
+	 */
+	private static String unquote(String value) {
+		if (value.length() >= 2 && value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"') {
+			value = value.substring(1, value.length() - 1);
+		}
+		return value;
 	}
 
 }
