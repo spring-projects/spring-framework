@@ -77,11 +77,13 @@ final class AttributeMethods {
 			if (!foundDefaultValueMethod && (method.getDefaultValue() != null)) {
 				foundDefaultValueMethod = true;
 			}
-			if (!foundNestedAnnotation && (type.isAnnotation() || (type.isArray() && type.componentType().isAnnotation()))) {
+			boolean nestedAnnotation = (type.isAnnotation() || (type.isArray() && type.componentType().isAnnotation()));
+			if (!foundNestedAnnotation && nestedAnnotation) {
 				foundNestedAnnotation = true;
 			}
 			ReflectionUtils.makeAccessible(method);
-			this.canThrowTypeNotPresentException[i] = (type == Class.class || type == Class[].class || type.isEnum());
+			this.canThrowTypeNotPresentException[i] = (type == Class.class || type == Class[].class ||
+					type.isEnum() || nestedAnnotation);
 		}
 		this.hasDefaultValueMethod = foundDefaultValueMethod;
 		this.hasNestedAnnotation = foundNestedAnnotation;
@@ -104,7 +106,10 @@ final class AttributeMethods {
 		for (int i = 0; i < size(); i++) {
 			if (canThrowTypeNotPresentException(i)) {
 				try {
-					AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
+					Object value = AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
+					if (!canLoadNestedAnnotations(value, source)) {
+						return false;
+					}
 				}
 				catch (IllegalStateException ex) {
 					// Plain invocation failure to expose -> leave up to attribute retrieval
@@ -116,6 +121,20 @@ final class AttributeMethods {
 						failureLogger.log("Failed to introspect meta-annotation @" +
 								annotation.annotationType().getSimpleName(), source, ex);
 					}
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean canLoadNestedAnnotations(@Nullable Object value, AnnotatedElement source) {
+		if (value instanceof Annotation nested) {
+			return forAnnotationType(nested.annotationType()).canLoad(nested, source);
+		}
+		if (value instanceof Annotation[] nestedArray) {
+			for (Annotation nested : nestedArray) {
+				if (!forAnnotationType(nested.annotationType()).canLoad(nested, source)) {
 					return false;
 				}
 			}
@@ -138,7 +157,8 @@ final class AttributeMethods {
 		for (int i = 0; i < size(); i++) {
 			if (canThrowTypeNotPresentException(i)) {
 				try {
-					AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
+					Object value = AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
+					validateNestedAnnotations(value);
 				}
 				catch (IllegalStateException ex) {
 					throw ex;
@@ -148,6 +168,17 @@ final class AttributeMethods {
 							"Could not obtain annotation attribute value for " + get(i).getName() +
 							" declared on @" + ClassUtils.getCanonicalName(annotation.annotationType()), ex);
 				}
+			}
+		}
+	}
+
+	private void validateNestedAnnotations(@Nullable Object value) {
+		if (value instanceof Annotation nested) {
+			forAnnotationType(nested.annotationType()).validate(nested);
+		}
+		else if (value instanceof Annotation[] nestedArray) {
+			for (Annotation nested : nestedArray) {
+				forAnnotationType(nested.annotationType()).validate(nested);
 			}
 		}
 	}
