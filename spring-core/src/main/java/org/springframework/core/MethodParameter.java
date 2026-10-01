@@ -492,7 +492,8 @@ public class MethodParameter {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
 				paramType = (method != null ?
-						(KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(getContainingClass()) ?
+						(KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(getContainingClass()) &&
+								KotlinDetector.isSuspendingFunction(method) ?
 								KotlinDelegate.getGenericReturnType(method) : method.getGenericReturnType()) : void.class);
 			}
 			else {
@@ -520,7 +521,8 @@ public class MethodParameter {
 			if (method == null) {
 				return void.class;
 			}
-			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(getContainingClass())) {
+			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(getContainingClass()) &&
+					KotlinDetector.isSuspendingFunction(method)) {
 				return KotlinDelegate.getReturnType(method);
 			}
 			return method.getReturnType();
