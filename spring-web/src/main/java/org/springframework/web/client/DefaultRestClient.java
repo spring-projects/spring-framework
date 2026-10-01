@@ -232,14 +232,14 @@ final class DefaultRestClient implements RestClient {
 					clientResponse, this.messageConverters, bodyType, bodyClass, hints);
 		}
 		catch (UncheckedIOException | IOException exc) {
-			Throwable cause;
+			IOException cause;
 			if (exc instanceof UncheckedIOException uncheckedIOException) {
 				cause = uncheckedIOException.getCause();
 			}
 			else {
-				cause = exc;
+				cause = (IOException) exc;
 			}
-			throw new RestClientException("Error while extracting response for type [" +
+			throw new ResourceAccessException("I/O error while extracting response for type [" +
 					ResolvableType.forType(bodyType) + "] and content type [" + RestClientUtils.getContentType(clientResponse) + "]", cause);
 		}
 	}

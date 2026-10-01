@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -40,6 +41,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -144,6 +146,26 @@ class DefaultRestClientTests {
 					assertThat(result).isInstanceOf(ResponseEntity.class);
 				})
 		);
+	}
+
+	@Test  // gh-37078
+	void bodyReadIoExceptionThrowsResourceAccessException() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
+		responseHeaders.setContentLength(100);
+		given(this.response.getHeaders()).willReturn(responseHeaders);
+		given(this.response.getBody()).willReturn(new InputStream() {
+			@Override
+			public int read() throws IOException {
+				throw new SocketTimeoutException("Read timed out");
+			}
+		});
+
+		assertThatExceptionOfType(ResourceAccessException.class)
+				.isThrownBy(() -> this.client.get().uri(URL).retrieve().body(String.class))
+				.withCauseInstanceOf(SocketTimeoutException.class);
 	}
 
 

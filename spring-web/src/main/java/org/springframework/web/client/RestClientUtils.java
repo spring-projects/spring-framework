@@ -109,7 +109,11 @@ abstract class RestClientUtils {
 				}
 			}
 		}
-		catch (IOException | HttpMessageNotReadableException ex) {
+		catch (IOException ex) {
+			throw new ResourceAccessException("I/O error while extracting response for type [" +
+					ResolvableType.forType(bodyType) + "] and content type [" + contentType + "]", ex);
+		}
+		catch (HttpMessageNotReadableException ex) {
 			throw new RestClientException("Error while extracting response for type [" +
 					ResolvableType.forType(bodyType) + "] and content type [" + contentType + "]", ex);
 		}
