@@ -255,6 +255,35 @@ class ResourceHttpRequestHandlerTests {
 		}
 
 		@Test
+		void ignoreRangeWhenIfRangeETagDoesNotMatch() throws Exception {
+			this.handler.setEtagGenerator(resource -> "\"current\"");
+			this.request.addHeader(HttpHeaders.RANGE, "bytes=0-1");
+			this.request.addHeader(HttpHeaders.IF_RANGE, "\"stale\"");
+			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.response.getStatus()).isEqualTo(200);
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo("\"current\"");
+			assertThat(this.response.getHeader(HttpHeaders.CONTENT_RANGE)).isNull();
+			assertThat(this.response.getContentLength()).isEqualTo(10);
+			assertThat(this.response.getContentAsString()).isEqualTo("Some text.");
+		}
+
+		@Test
+		void partialContentByteRangeWhenIfRangeETagMatches() throws Exception {
+			this.handler.setEtagGenerator(resource -> "\"current\"");
+			this.request.addHeader(HttpHeaders.RANGE, "bytes=0-1");
+			this.request.addHeader(HttpHeaders.IF_RANGE, "\"current\"");
+			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.response.getStatus()).isEqualTo(206);
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo("\"current\"");
+			assertThat(this.response.getHeader(HttpHeaders.CONTENT_RANGE)).isEqualTo("bytes 0-1/10");
+			assertThat(this.response.getContentAsString()).isEqualTo("So");
+		}
+
+		@Test
 		void partialContentByteRangeNoEnd() throws Exception {
 			this.request.addHeader("Range", "bytes=9-");
 			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");

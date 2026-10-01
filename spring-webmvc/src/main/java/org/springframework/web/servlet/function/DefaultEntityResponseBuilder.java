@@ -57,6 +57,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -284,11 +285,14 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 				if (rangeHeader != null) {
 					Resource resource = (Resource) entity;
 					try {
-						List<HttpRange> httpRanges = HttpRange.parseRanges(rangeHeader);
-						serverResponse.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
-						entity = HttpRange.toResourceRegions(httpRanges, resource);
-						entityClass = entity.getClass();
-						entityType = RESOURCE_REGION_LIST_TYPE;
+						List<HttpRange> httpRanges = HttpRange.parseRanges(
+								new ServletServerHttpRequest(request).getHeaders(), serverResponse.getHeaders());
+						if (!httpRanges.isEmpty()) {
+							serverResponse.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
+							entity = HttpRange.toResourceRegions(httpRanges, resource);
+							entityClass = entity.getClass();
+							entityType = RESOURCE_REGION_LIST_TYPE;
+						}
 					}
 					catch (IllegalArgumentException ex) {
 						serverResponse.getHeaders().set(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
