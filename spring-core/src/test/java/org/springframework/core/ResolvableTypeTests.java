@@ -27,6 +27,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
@@ -51,6 +52,7 @@ import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.core.ResolvableType.VariableResolver;
+import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1063,6 +1065,32 @@ class ResolvableTypeTests {
 		assertThat(charSequenceType.isInstance(new StringBuilder("a StringBuilder"))).isTrue();
 		assertThat(stringType.isInstance("a String")).isTrue();
 		assertThat(stringType.isInstance(new StringBuilder("a StringBuilder"))).isFalse();
+	}
+
+	@Test
+	void isInstanceWithProxy() {
+		// CGLIB proxy: getUserClass() should unwrap the generated subclass
+		Enhancer enhancer = new Enhancer();
+		enhancer.setSuperclass(ExtendsList.class);
+		enhancer.setCallback((org.springframework.cglib.proxy.MethodInterceptor)
+				(obj, method, args, proxy) -> (method.getName().equals("size") ? 0 : proxy.invokeSuper(obj, args)));
+		Object cglibProxy = enhancer.create();
+
+		assertThat(ResolvableType.forClass(List.class).isInstance(cglibProxy)).isTrue();
+		assertThat(ResolvableType.forClass(ArrayList.class).isInstance(cglibProxy)).isTrue();
+		assertThat(ResolvableType.forClass(ExtendsList.class).isInstance(cglibProxy)).isTrue();
+		assertThat(ResolvableType.forClassWithGenerics(List.class, CharSequence.class).isInstance(cglibProxy)).isTrue();
+		assertThat(ResolvableType.forClass(Set.class).isInstance(cglibProxy)).isFalse();
+
+		// JDK dynamic proxy: implements the interface directly; generics are
+		// erased on the proxy class, so we fall back to the raw type check.
+		Object jdkProxy = Proxy.newProxyInstance(getClass().getClassLoader(),
+				new Class<?>[] { List.class }, (proxy, method, args) -> (method.getName().equals("size") ? 0 : null));
+
+		assertThat(ResolvableType.forClass(List.class).isInstance(jdkProxy)).isTrue();
+		assertThat(ResolvableType.forClass(Collection.class).isInstance(jdkProxy)).isTrue();
+		assertThat(ResolvableType.forClassWithGenerics(List.class, String.class).isInstance(jdkProxy)).isTrue();
+		assertThat(ResolvableType.forClass(Set.class).isInstance(jdkProxy)).isFalse();
 	}
 
 	@Test

@@ -24,6 +24,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
@@ -246,7 +247,20 @@ public class ResolvableType implements Serializable {
 	 * @see #isAssignableFrom(Class)
 	 */
 	public boolean isInstance(@Nullable Object obj) {
-		return (obj != null && isAssignableFrom(obj.getClass()));
+		if (obj == null) {
+			return false;
+		}
+		Class<?> userClass = ClassUtils.getUserClass(obj);
+		if (isAssignableFrom(userClass)) {
+			return true;
+		}
+		// For JDK dynamic proxies, the target class's generic type information
+		// is not available on the proxy class, so fall back to a raw type check.
+		if (Proxy.isProxyClass(userClass)) {
+			Class<?> resolved = resolve();
+			return (resolved != null && resolved.isInstance(obj));
+		}
+		return false;
 	}
 
 	/**
