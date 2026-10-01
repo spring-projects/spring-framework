@@ -32,6 +32,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.service.registry.HttpServiceGroup.ClientType;
 import org.springframework.web.service.registry.echo.EchoA;
+import org.springframework.web.service.registry.echo.EchoAImpl;
 import org.springframework.web.service.registry.echo.EchoB;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,6 +69,15 @@ class HttpServiceRegistrarTests {
 		assertProxyBeanDef(ECHO_GROUP, EchoA.class);
 		assertProxyBeanDef(ECHO_GROUP, EchoB.class);
 		assertBeanDefinitionCount(3);
+	}
+
+	@Test
+	void scanIgnoresConcreteClassesImplementingHttpExchangeInterface() {
+		doRegister(registry -> registry.forGroup(ECHO_GROUP).detectInBasePackages(EchoA.class));
+
+		Map<String, HttpServiceGroup> groupMap = groupMap();
+		HttpServiceGroup echoGroup = groupMap.get(ECHO_GROUP);
+		assertThat(echoGroup.httpServiceTypes()).doesNotContain(EchoAImpl.class);
 	}
 
 	@Test
