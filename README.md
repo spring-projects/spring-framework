@@ -23,7 +23,7 @@ See the [Micro-Benchmarks](https://github.com/spring-projects/spring-framework/w
 
 ## Build from Source
 
-See the [Build from Source](https://github.com/spring-projects/spring-framework/wiki/Build-from-Source) wiki page and the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+See the [Build from Source](CONTRIBUTING.md#build-from-source) section of the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## Continuous Integration Builds
 
