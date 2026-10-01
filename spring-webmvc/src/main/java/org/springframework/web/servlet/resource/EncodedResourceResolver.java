@@ -145,18 +145,18 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 			return resource;
 		}
 
-		for (String acceptedCoding : acceptedCodings) {
-			if (this.contentCodings.contains(acceptedCoding)) {
+		for (String contentCoding : this.contentCodings) {
+			if (acceptedCodings.contains(contentCoding)) {
 				try {
-					String extension = getExtension(acceptedCoding);
-					Resource encoded = new EncodedResource(resource, acceptedCoding, extension);
+					String extension = getExtension(contentCoding);
+					Resource encoded = new EncodedResource(resource, contentCoding, extension);
 					if (encoded.exists()) {
 						return encoded;
 					}
 				}
 				catch (IOException ex) {
 					if (logger.isTraceEnabled()) {
-						logger.trace("No " + acceptedCoding + " resource for [" + resource.getFilename() + "]", ex);
+						logger.trace("No " + contentCoding + " resource for [" + resource.getFilename() + "]", ex);
 					}
 				}
 			}
