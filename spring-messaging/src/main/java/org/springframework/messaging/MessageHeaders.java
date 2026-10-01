@@ -212,6 +212,41 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return (T) value;
 	}
 
+	/**
+	 * Return the header value for the given key, throwing an exception if the
+	 * header is not present.
+	 * @param key the header key
+	 * @return the header value
+	 * @throws IllegalStateException if the header is not present
+	 * @since 7.0
+	 */
+	public Object getRequiredHeader(String key) {
+		Object value = this.headers.get(key);
+		if (value == null) {
+			throw new IllegalStateException("No header available for key '" + key + "'");
+		}
+		return value;
+	}
+
+	/**
+	 * Return the header value for the given key and type, throwing an exception
+	 * if the header is not present.
+	 * @param key the header key
+	 * @param type the expected type of the header value
+	 * @return the header value
+	 * @throws IllegalStateException if the header is not present
+	 * @throws IllegalArgumentException if the header value is not of the expected type
+	 * @since 7.0
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getRequiredHeader(String key, Class<T> type) {
+		T value = get(key, type);
+		if (value == null) {
+			throw new IllegalStateException("No header available for key '" + key + "'");
+		}
+		return value;
+	}
+
 
 	// Delegating Map implementation
 

@@ -28,6 +28,7 @@ import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Test fixture for {@link MessageHeaders}.
@@ -144,6 +145,44 @@ class MessageHeadersTests {
 		Map<String, Object> map = new HashMap<>();
 		MessageHeaders headers = new MessageHeaders(map);
 		assertThat(headers.get("nosuchattribute", String.class)).isNull();
+	}
+
+	@Test  // gh-37016
+	void getRequiredHeaderReturnsValueWhenPresent() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("test", "value");
+		MessageHeaders headers = new MessageHeaders(map);
+		assertThat(headers.getRequiredHeader("test")).isEqualTo("value");
+	}
+
+	@Test  // gh-37016
+	void getRequiredHeaderThrowsWhenMissing() {
+		Map<String, Object> map = new HashMap<>();
+		MessageHeaders headers = new MessageHeaders(map);
+		assertThatIllegalStateException().isThrownBy(() -> headers.getRequiredHeader("nosuchattribute"));
+	}
+
+	@Test  // gh-37016
+	void getRequiredHeaderWithTypeReturnsValueWhenPresent() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("test", 123);
+		MessageHeaders headers = new MessageHeaders(map);
+		assertThat(headers.getRequiredHeader("test", Integer.class)).isEqualTo(123);
+	}
+
+	@Test  // gh-37016
+	void getRequiredHeaderWithTypeThrowsWhenMissing() {
+		Map<String, Object> map = new HashMap<>();
+		MessageHeaders headers = new MessageHeaders(map);
+		assertThatIllegalStateException().isThrownBy(() -> headers.getRequiredHeader("nosuchattribute", String.class));
+	}
+
+	@Test  // gh-37016
+	void getRequiredHeaderWithTypeThrowsOnIncorrectType() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("test", 123);
+		MessageHeaders headers = new MessageHeaders(map);
+		assertThatIllegalArgumentException().isThrownBy(() -> headers.getRequiredHeader("test", String.class));
 	}
 
 	@Test
