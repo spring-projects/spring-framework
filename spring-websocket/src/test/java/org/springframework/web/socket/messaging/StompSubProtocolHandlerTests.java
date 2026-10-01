@@ -44,6 +44,7 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -169,6 +170,31 @@ class StompSubProtocolHandlerTests {
 				CONNECTED
 				version:1.0
 				heart-beat:0,0
+				user-name:joe
+
+				\u0000""");
+	}
+
+	@Test  // gh-37041
+	void handleMessageToClientWithSimpConnectAckPropagatesNativeHeaders() {
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+		accessor.setAcceptVersion("1.2");
+		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+
+		SimpMessageHeaderAccessor ackAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+		ackAccessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
+		ackAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, new long[] {0, 0});
+		ackAccessor.setNativeHeader(StompHeaders.SESSION, "session-123");
+		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
+
+		assertThat(this.session.getSentMessages()).hasSize(1);
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertThat(actual.getPayload()).isEqualTo("""
+				CONNECTED
+				version:1.2
+				heart-beat:0,0
+				session:session-123
 				user-name:joe
 
 				\u0000""");

@@ -46,6 +46,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.support.AbstractMessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
@@ -613,6 +614,14 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		else {
 			connectedHeaders.setHeartbeat(0, 0);
 		}
+
+		// Propagate any other native headers (e.g. "session") set on the CONNECT_ACK,
+		// skipping "version" and "heart-beat" which are handled above.
+		connectAckHeaders.toNativeHeaderMap().forEach((key, values) -> {
+			if (!StompHeaderAccessor.STOMP_VERSION_HEADER.equals(key) && !StompHeaders.HEARTBEAT.equals(key)) {
+				connectedHeaders.setNativeHeaderValues(key, values);
+			}
+		});
 
 		return connectedHeaders;
 	}
