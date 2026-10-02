@@ -16,6 +16,7 @@
 
 package org.springframework.core.task;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -24,6 +25,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
+
+import org.springframework.util.ConcurrencyThrottleSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -131,6 +134,60 @@ class SimpleAsyncTaskExecutorTests {
 		assertThat(completed)
 				.withFailMessage("Executor should not deadlock if concurrency permit was properly released after first failure")
 				.isTrue();
+	}
+
+	@Test  // immediate-timeout tasks bypass the throttle: no permit acquired, so none released
+	@SuppressWarnings("deprecation")
+	void immediateTaskDoesNotReleaseThrottlePermit() throws Exception {
+		// doExecute runs the wrapper inline so the throttle accounting is observed deterministically
+		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor() {
+			@Override
+			protected void doExecute(Runnable task) {
+				task.run();
+			}
+		};
+		executor.setConcurrencyLimit(2);
+		executor.setTaskTerminationTimeout(10_000);  // enables active-thread tracking
+
+		executor.execute(() -> {}, AsyncTaskExecutor.TIMEOUT_IMMEDIATE);
+
+		// The task never acquired a permit, so afterAccess() must not have been called.
+		assertThat(concurrencyCount(executor)).isZero();
+	}
+
+	@Test  // a throttled task cancelled before it runs must still release its acquired permit
+	@SuppressWarnings("deprecation")
+	void cancelledThrottledTaskReleasesPermit() throws Exception {
+		AtomicReference<Runnable> captured = new AtomicReference<>();
+		// capture the wrapper without running it, to control the cancellation timing
+		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor() {
+			@Override
+			protected void doExecute(Runnable task) {
+				captured.set(task);
+			}
+		};
+		executor.setConcurrencyLimit(1);
+		executor.setCancelRemainingTasksOnClose(true);  // close() marks remaining tasks cancelled
+
+		executor.execute(() -> {}, AsyncTaskExecutor.TIMEOUT_INDEFINITE);  // acquires a permit
+		assertThat(concurrencyCount(executor)).isOne();
+
+		executor.close();  // sets the cancelled flag
+
+		// The wrapper hits checkCancelled() and throws before running the task, but the
+		// acquired permit must still be released.
+		assertThatExceptionOfType(CancellationException.class)
+				.isThrownBy(() -> captured.get().run());
+		assertThat(concurrencyCount(executor)).isZero();
+	}
+
+	private static int concurrencyCount(SimpleAsyncTaskExecutor executor) throws Exception {
+		Field throttleField = SimpleAsyncTaskExecutor.class.getDeclaredField("concurrencyThrottle");
+		throttleField.setAccessible(true);
+		Object throttle = throttleField.get(executor);
+		Field countField = ConcurrencyThrottleSupport.class.getDeclaredField("concurrencyCount");
+		countField.setAccessible(true);
+		return countField.getInt(throttle);
 	}
 
 	@Test
