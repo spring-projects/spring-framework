@@ -50,6 +50,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link JpaTransactionManager}.
+ *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Phillip Webb
@@ -619,7 +620,7 @@ class JpaTransactionManagerTests {
 		verify(manager).close();
 	}
 
-	@Test  // gh-14130
+	@Test  // gh-37356
 	void transactionWithinOtherTransactionManagerForSameDataSource() {
 		DataSource dataSource = mock();
 		Connection connection = mock();
@@ -641,9 +642,10 @@ class JpaTransactionManagerTests {
 		otherTm.setJpaDialect(jpaDialect);
 		tm.setDataSource(dataSource);
 		tm.setJpaDialect(jpaDialect);
+		TransactionTemplate otherTt = new TransactionTemplate(otherTm);
 
 		assertThatExceptionOfType(IllegalTransactionStateException.class)
-				.isThrownBy(() -> new TransactionTemplate(otherTm).executeWithoutResult(status ->
+				.isThrownBy(() -> otherTt.executeWithoutResult(status ->
 						tt.executeWithoutResult(innerStatus -> {})))
 				.withMessageStartingWith("Pre-bound JDBC Connection found!")
 				.withMessageContaining("another transaction manager")

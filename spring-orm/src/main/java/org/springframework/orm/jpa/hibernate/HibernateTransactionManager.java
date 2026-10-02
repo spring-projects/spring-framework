@@ -443,15 +443,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
 		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
-			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC Connection found! HibernateTransactionManager does not support " +
-					"running within another transaction manager that exposes a JDBC Connection " +
-					"for the same DataSource (for example, a HibernateTransactionManager or " +
-					"JpaTransactionManager for a different SessionFactory) if told to manage " +
-					"the DataSource itself. Alternatively, a JDBC Connection may have been " +
-					"left bound to the current thread. It is recommended to use a single " +
-					"HibernateTransactionManager for all transactions on a single DataSource, " +
-					"no matter whether Hibernate or JDBC access.");
+			throw new IllegalTransactionStateException("""
+					Pre-bound JDBC Connection found! HibernateTransactionManager does not support running within \
+					another transaction manager that exposes a JDBC Connection for the same DataSource \
+					(or after a leaked Connection binding) if told to manage the DataSource itself. \
+					Use a single HibernateTransactionManager for all transactions on a single DataSource.""");
 		}
 
 		SessionImplementor session = null;
