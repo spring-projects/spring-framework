@@ -172,7 +172,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * which effectively is a specific variant of this flag, replacing the early soft
 	 * shutdown in the concurrent managed stop phase with a serial soft shutdown in
 	 * the executor's destruction step, with individual awaiting according to the
-	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
+	 * {@link #setAwaitTerminationMillis "awaitTerminationMillis"} property.
 	 * <p>This flag will only have effect when the executor is running in a Spring
 	 * application context and able to receive the {@link ContextClosedEvent}. Also,
 	 * note that {@link ThreadPoolTaskExecutor} effectively accepts tasks after context
@@ -183,7 +183,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 * @see DisposableBean#destroy()
 	 * @see #shutdown()
-	 * @see #setAwaitTerminationSeconds
+	 * @see #setAwaitTerminationMillis
 	 */
 	public void setAcceptTasksAfterContextClose(boolean acceptTasksAfterContextClose) {
 		this.acceptTasksAfterContextClose = acceptTasksAfterContextClose;
@@ -203,19 +203,29 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * are being completed. If you want this executor to block and wait for the
 	 * termination of tasks before the rest of the container continues to shut
 	 * down - for example, in order to keep up other resources that your tasks may need -,
-	 * set the {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"}
+	 * set the {@link #setAwaitTerminationMillis "awaitTerminationMillis"}
 	 * property instead of or in addition to this property.
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
 	 * @see #shutdown()
-	 * @see #setAwaitTerminationSeconds
+	 * @see #setAwaitTerminationMillis
 	 */
 	public void setWaitForTasksToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
 		this.waitForTasksToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
 	/**
-	 * Set the maximum number of seconds that this executor is supposed to block
+	 * Variant of {@link #setAwaitTerminationMillis} with second precision.
+	 * @see #setAwaitTerminationMillis
+	 * @deprecated in favor of {@link #setAwaitTerminationMillis}
+	 */
+	@Deprecated(since = "7.1.0")
+	public void setAwaitTerminationSeconds(int awaitTerminationSeconds) {
+		this.awaitTerminationMillis = awaitTerminationSeconds * 1000L;
+	}
+
+	/**
+	 * Set the maximum number of milliseconds that this executor is supposed to block
 	 * on shutdown in order to wait for remaining tasks to complete their execution
 	 * before the rest of the container continues to shut down. This is particularly
 	 * useful if your remaining tasks are likely to need access to other resources
@@ -234,17 +244,9 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * since all remaining tasks in the queue will still get executed - in contrast
 	 * to the default shutdown behavior where it's just about waiting for currently
 	 * executing tasks that aren't reacting to thread interruption.
-	 * @see #setAwaitTerminationMillis
+	 * @since 5.2.4
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#awaitTermination
-	 */
-	public void setAwaitTerminationSeconds(int awaitTerminationSeconds) {
-		this.awaitTerminationMillis = awaitTerminationSeconds * 1000L;
-	}
-
-	/**
-	 * Variant of {@link #setAwaitTerminationSeconds} with millisecond precision.
-	 * @since 5.2.4
 	 * @see #setAwaitTerminationSeconds
 	 */
 	public void setAwaitTerminationMillis(long awaitTerminationMillis) {
@@ -394,7 +396,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	/**
 	 * Wait for the executor to terminate, according to the value of the
-	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
+	 * {@link #setAwaitTerminationMillis "awaitTerminationMillis"} property.
 	 */
 	private void awaitTerminationIfNecessary(ExecutorService executor) {
 		if (this.awaitTerminationMillis > 0) {
