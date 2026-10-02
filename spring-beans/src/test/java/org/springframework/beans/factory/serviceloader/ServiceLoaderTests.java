@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.ParameterizedTypeReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
@@ -47,7 +48,7 @@ class ServiceLoaderTests {
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceLoaderFactoryBean.class);
 		bd.getPropertyValues().add("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
-		ServiceLoader<?> serviceLoader = (ServiceLoader<?>) bf.getBean("service");
+		ServiceLoader<?> serviceLoader = bf.getBean("service", new ParameterizedTypeReference<>() {});
 		assertThat(serviceLoader).element(0).isInstanceOf(DocumentBuilderFactory.class);
 	}
 
@@ -66,7 +67,7 @@ class ServiceLoaderTests {
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceListFactoryBean.class);
 		bd.getPropertyValues().add("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
-		List<?> serviceList = (List<?>) bf.getBean("service");
+		List<?> serviceList = bf.getBean("service", new ParameterizedTypeReference<>() {});
 		assertThat(serviceList).element(0).isInstanceOf(DocumentBuilderFactory.class);
 	}
 
