@@ -77,22 +77,12 @@ final class CompositeMap<K, V extends @Nullable Object> implements Map<K, V> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		if (this.first.containsKey(key)) {
-			return true;
-		}
-		else {
-			return this.second.containsKey(key);
-		}
+		return this.first.containsKey(key) || this.second.containsKey(key);
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-		if (this.first.containsValue(value)) {
-			return true;
-		}
-		else {
-			return this.second.containsValue(value);
-		}
+		return this.first.containsValue(value) || this.second.containsValue(value);
 	}
 
 	@Override
