@@ -25,6 +25,16 @@ import org.jspecify.annotations.Nullable;
  * The {@code <input>} tag renders an HTML 'input' tag with type 'text' using
  * the bound value.
  *
+ * <p>A different {@code type}, such as {@code email}, {@code tel}, {@code date},
+ * or {@code range}, may be supplied as a dynamic attribute. The bound value is
+ * rendered as-is for any supported {@code type}. {@code checkbox} and
+ * {@code radio} are not supported; use the {@code <checkbox>} and {@code <radio>}
+ * tags instead.
+ *
+ * <p><strong>NOTE:</strong> Do not use this tag with {@code type="password"}.
+ * Use the {@code <password>} tag ({@link PasswordInputTag}) for password fields,
+ * since it does not render the bound value unless explicitly configured to do so.
+ *
  * <h3>Attribute Summary</h3>
  * <table>
  * <thead>
@@ -381,6 +391,8 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Flags {@code type="checkbox"} and {@code type="radio"} as illegal
 	 * dynamic attributes.
+	 * <p>Any other {@code type} is permitted, but {@code type="password"} should
+	 * not be used with this tag. Use {@link PasswordInputTag} instead.
 	 */
 	@Override
 	protected boolean isValidDynamicAttribute(String localName, Object value) {
