@@ -206,5 +206,7 @@ class CompositeCollectionTests {
 		CompositeCollection<@Nullable String> composite = new CompositeCollection<>(first, second);
 
 		assertThat(composite).containsExactly("foo", null, "bar", null);
+		assertThat(composite.contains(null)).isTrue();
+		assertThat(composite.remove(null)).isTrue();
 	}
 }

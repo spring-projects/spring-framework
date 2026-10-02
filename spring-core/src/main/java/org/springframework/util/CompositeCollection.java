@@ -58,7 +58,7 @@ class CompositeCollection<E extends @Nullable Object> implements Collection<E> {
 	}
 
 	@Override
-	public boolean contains(Object o) {
+	public boolean contains(@Nullable Object o) {
 		if (this.first.contains(o)) {
 			return true;
 		}
@@ -113,7 +113,7 @@ class CompositeCollection<E extends @Nullable Object> implements Collection<E> {
 	}
 
 	@Override
-	public boolean remove(Object o) {
+	public boolean remove(@Nullable Object o) {
 		boolean firstResult = this.first.remove(o);
 		boolean secondResult = this.second.remove(o);
 		return firstResult || secondResult;

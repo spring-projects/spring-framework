@@ -231,6 +231,8 @@ class CompositeMapTests {
 		CompositeMap<String, @Nullable String> composite = new CompositeMap<>(first, second);
 
 		assertThat(composite).containsExactly(entry("foo", "bar"), entry("baz", null));
+		assertThat(composite.get("missing")).isNull();
+		assertThat(composite.containsValue(null)).isTrue();
 	}
 
 	@Nested
