@@ -45,10 +45,10 @@ or see the tag library description.
 [[mvc-view-jsp-formtaglib]]
 == Spring's form tag library
 
-As of version 2.0, Spring provides a comprehensive set of data binding-aware tags for
-handling form elements when using JSP and Spring Web MVC. Each tag provides support for
-the set of attributes of its corresponding HTML tag counterpart, making the tags
-familiar and intuitive to use. The tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.
+Spring provides a comprehensive set of data binding-aware tags for handling form elements
+when using JSP and Spring Web MVC. Each tag provides support for the set of attributes of
+its corresponding HTML tag counterpart, making the tags familiar and intuitive to use.
+The tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.
 
 Unlike other form/input tag libraries, Spring's form tag library is integrated with
 Spring Web MVC, giving the tags access to the command object and reference data your
@@ -74,7 +74,7 @@ page:
 where `form` is the tag name prefix you want to use for the tags from this library.
 
 [[mvc-view-jsp-formtaglib-formtag]]
-=== The Form Tag
+=== The `form` Tag
 
 This tag renders an HTML 'form' element and exposes a binding path to inner tags for
 binding. It puts the command object in the `PageContext` so that the command object can
@@ -163,9 +163,14 @@ following example shows:
 [[mvc-view-jsp-formtaglib-inputtag]]
 === The `input` Tag
 
-This tag renders an HTML `input` element with the bound value and `type='text'` by default.
-For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag,The Form Tag>>. You can also use
-HTML5-specific types, such as `email`, `tel`, `date`, and others.
+This tag renders an HTML `input` element with the bound value and `type='text'` by
+default. For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag>>. You can
+also use HTML5-specific types, such as `email`, `tel`, `date`, and others, by supplying a
+`type` attribute. See <<mvc-view-jsp-formtaglib-html5>> for details.
+
+NOTE: Do not use the `input` tag with `type='password'`. Use the
+<<mvc-view-jsp-formtaglib-passwordtag,`password` tag>> instead, since it does not render
+the bound value by default.
 
 [[mvc-view-jsp-formtaglib-checkboxtag]]
 === The `checkbox` Tag
@@ -374,6 +379,8 @@ by using `itemValue` and the label by using `itemLabel`, as the following exampl
 === The `password` Tag
 
 This tag renders an HTML `input` tag with the type set to `password` with the bound value.
+Use this tag, instead of the <<mvc-view-jsp-formtaglib-inputtag,`input` tag>> with
+`type='password'`, for password fields.
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -805,7 +812,15 @@ Kotlin::
 The Spring form tag library allows entering dynamic attributes, which means you can
 enter any HTML5 specific attributes.
 
-The form `input` tag supports entering a type attribute other than `text`. This is
-intended to allow rendering new HTML5 specific input types, such as `email`, `date`,
-`range`, and others. Note that entering `type='text'` is not required, since `text`
-is the default type.
+The form `input` tag supports entering a `type` attribute other than `text`. This is
+intended to allow rendering HTML5 specific input types, such as `email`, `date`, `range`,
+and others. Note that entering `type='text'` is not required, since `text` is the default
+type.
+
+The `input` tag does not support `type='checkbox'` or `type='radio'`. Use the
+<<mvc-view-jsp-formtaglib-checkboxtag,`checkbox`>> and
+<<mvc-view-jsp-formtaglib-radiobuttontag,`radiobutton`>> tags instead. For any supported
+type, the bound value is rendered as-is.
+
+NOTE: Do not use `type='password'` with the `input` tag. Use the
+<<mvc-view-jsp-formtaglib-passwordtag,`password` tag>> for password fields.

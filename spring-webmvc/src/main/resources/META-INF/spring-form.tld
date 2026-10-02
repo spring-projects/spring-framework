@@ -198,7 +198,7 @@
 	</tag>
 
 	<tag>
-		<description>Renders an HTML 'input' tag with type 'text' using the bound value.</description>
+		<description>Renders an HTML 'input' tag with type 'text' using the bound value. A different type (for example, 'email' or 'date') may be supplied as a dynamic attribute, but 'checkbox' and 'radio' are not supported. Do not use this tag for passwords; use the 'password' tag instead.</description>
 		<name>input</name>
 		<tag-class>org.springframework.web.servlet.tags.form.InputTag</tag-class>
 		<body-content>empty</body-content>
@@ -395,7 +395,7 @@
 	</tag>
 
 	<tag>
-		<description>Renders an HTML 'input' tag with type 'password' using the bound value.</description>
+		<description>Renders an HTML 'input' tag with type 'password'. The bound value is not rendered unless 'showPassword' is true. Use this tag instead of 'input' with type 'password'.</description>
 		<name>password</name>
 		<tag-class>org.springframework.web.servlet.tags.form.PasswordInputTag</tag-class>
 		<body-content>empty</body-content>
