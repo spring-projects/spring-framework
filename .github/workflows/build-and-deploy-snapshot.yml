@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 7.0.x
+      - 7.0.x-internal
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
