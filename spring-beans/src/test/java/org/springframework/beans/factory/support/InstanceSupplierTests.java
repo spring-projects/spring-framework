@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.util.function.ThrowingBiFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
@@ -57,6 +58,26 @@ class InstanceSupplierTests {
 	}
 
 	@Test
+	void getWithEmptyExplicitArgumentsReturnsResult() throws Exception {
+		InstanceSupplier<String> supplier = registeredBean -> "test";
+		assertThat(supplier.get(this.registeredBean, new Object[0])).isEqualTo("test");
+	}
+
+	@Test
+	void getWithExplicitArgumentsWhenNotSupportedThrowsException() {
+		InstanceSupplier<String> supplier = registeredBean -> "test";
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> supplier.get(this.registeredBean, "test"))
+				.withMessageContaining("Retrieval with arguments not supported");
+	}
+
+	@Test
+	void supportsExplicitArgumentsReturnsFalse() {
+		InstanceSupplier<String> supplier = registeredBean -> "test";
+		assertThat(supplier.supportsExplicitArguments()).isFalse();
+	}
+
+	@Test
 	void andThenWhenFunctionIsNullThrowsException() {
 		InstanceSupplier<String> supplier = registeredBean -> "test";
 		ThrowingBiFunction<RegisteredBean, String, String> after = null;
@@ -70,6 +91,28 @@ class InstanceSupplierTests {
 		supplier = supplier.andThen(
 				(registeredBean, string) -> registeredBean.getBeanName() + "-" + string);
 		assertThat(supplier.get(this.registeredBean)).isEqualTo("test-bean");
+	}
+
+	@Test
+	void andThenAppliesFunctionToObtainResultWithExplicitArguments() throws Exception {
+		InstanceSupplier<String> supplier = new InstanceSupplier<>() {
+			@Override
+			public String get(RegisteredBean registeredBean) {
+				return "bean";
+			}
+			@Override
+			public String get(RegisteredBean registeredBean, Object... args) {
+				return (String) args[0];
+			}
+			@Override
+			public boolean supportsExplicitArguments(Object... args) {
+				return true;
+			}
+		};
+		supplier = supplier.andThen(
+				(registeredBean, string) -> registeredBean.getBeanName() + "-" + string);
+		assertThat(supplier.supportsExplicitArguments()).isTrue();
+		assertThat(supplier.get(this.registeredBean, "bean")).isEqualTo("test-bean");
 	}
 
 	@Test
