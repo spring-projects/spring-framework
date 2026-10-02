@@ -112,9 +112,9 @@ public class RequestContext {
 
 	/**
 	 * Return the model Map that this RequestContext encapsulates, if any.
-	 * @return the populated model Map, or {@code null} if none available
+	 * @return the populated model Map
 	 */
-	public @Nullable Map<String, Object> getModel() {
+	public Map<String, Object> getModel() {
 		return this.model;
 	}
 

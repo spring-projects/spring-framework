@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class HttpMessageNotReadableException extends HttpMessageConversionException {
 
-	private final @Nullable HttpInputMessage httpInputMessage;
+	private final HttpInputMessage httpInputMessage;
 
 
 	/**
@@ -43,6 +43,7 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 	 */
 	public HttpMessageNotReadableException(String msg, HttpInputMessage httpInputMessage) {
 		super(msg);
+		Assert.notNull(httpInputMessage, "httpInputMessage can not be null");
 		this.httpInputMessage = httpInputMessage;
 	}
 
@@ -55,6 +56,7 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 	 */
 	public HttpMessageNotReadableException(String msg, @Nullable Throwable cause, HttpInputMessage httpInputMessage) {
 		super(msg, cause);
+		Assert.notNull(httpInputMessage, "httpInputMessage can not be null");
 		this.httpInputMessage = httpInputMessage;
 	}
 
@@ -64,7 +66,6 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 	 * @since 5.1
 	 */
 	public HttpInputMessage getHttpInputMessage() {
-		Assert.state(this.httpInputMessage != null, "No HttpInputMessage available - use non-deprecated constructors");
 		return this.httpInputMessage;
 	}
 

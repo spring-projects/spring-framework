@@ -344,7 +344,7 @@ public class DefaultPersistenceUnitManager
 	 * persistence provider, resolving data source names in {@code persistence.xml}
 	 * against Spring-managed DataSource instances.
 	 */
-	public @Nullable DataSourceLookup getDataSourceLookup() {
+	public DataSourceLookup getDataSourceLookup() {
 		return this.dataSourceLookup;
 	}
 
