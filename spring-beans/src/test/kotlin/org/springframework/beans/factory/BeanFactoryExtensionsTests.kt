@@ -37,17 +37,17 @@ class BeanFactoryExtensionsTests {
 	@Test
 	fun `getBean with reified type parameters`() {
 		val foo = Foo()
-		every { bf.getBeanProvider<Foo>(ofType<ResolvableType>()).getObject() } returns foo
+		every { bf.getBeanProvider(object : ParameterizedTypeReference<Foo>() {}).getObject() } returns foo
 		assertThat(bf.getBean<Foo>()).isSameAs(foo)
-		verify { bf.getBeanProvider<ObjectProvider<Foo>>(ofType<ResolvableType>()).getObject() }
+		verify { bf.getBeanProvider(object : ParameterizedTypeReference<Foo>() {}).getObject() }
 	}
 
 	@Test
 	fun `getBean with reified generic type parameters`() {
 		val foo = listOf(Foo())
-		every { bf.getBeanProvider<List<Foo>>(ofType<ResolvableType>()).getObject() } returns foo
+		every { bf.getBeanProvider(object : ParameterizedTypeReference<List<Foo>>() {}).getObject() } returns foo
 		assertThat(bf.getBean<List<Foo>>()).isSameAs(foo)
-		verify { bf.getBeanProvider<ObjectProvider<List<Foo>>>(ofType<ResolvableType>()).getObject() }
+		verify { bf.getBeanProvider(object : ParameterizedTypeReference<List<Foo>>() {}).getObject() }
 	}
 
 	@Test
@@ -71,15 +71,15 @@ class BeanFactoryExtensionsTests {
 		val arg1 = "arg1"
 		val arg2 = "arg2"
 		val bar = Bar(arg1, arg2)
-		every { bf.getBeanProvider<Bar>(ofType<ResolvableType>()).getObject(arg1, arg2) } returns bar
+		every { bf.getBeanProvider(object : ParameterizedTypeReference<Bar>() {}).getObject(arg1, arg2) } returns bar
 		assertThat(bf.getBean<Bar>(arg1, arg2)).isSameAs(bar)
-		verify { bf.getBeanProvider<Bar>(ofType<ResolvableType>()).getObject(arg1, arg2) }
+		verify { bf.getBeanProvider(object : ParameterizedTypeReference<Bar>() {}).getObject(arg1, arg2) }
 	}
 
 	@Test
 	fun `getBeanProvider with reified type parameters`() {
 		bf.getBeanProvider<Foo>()
-		verify { bf.getBeanProvider<ObjectProvider<Foo>>(ofType<ResolvableType>()) }
+		verify { bf.getBeanProvider(object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	class Foo
