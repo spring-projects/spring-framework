@@ -62,6 +62,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 		this.status = other.statusCode();
 		this.headers.putAll(other.headers());
 		this.model.putAll(other.model());
+		this.cookies.addAll(other.cookies());
 	}
 
 	public DefaultRenderingResponseBuilder(String name) {

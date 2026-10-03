@@ -179,5 +179,27 @@ class DefaultRenderingResponseTests {
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_MODIFIED.value());
 	}
 
+	@Test  // gh-37378
+	void from() throws Exception {
+		Cookie cookie = new Cookie("currency", "USD");
+		RenderingResponse other = RenderingResponse.create("foo")
+				.status(HttpStatus.CREATED)
+				.header("foo", "bar")
+				.cookie(cookie)
+				.modelAttribute("model", "value")
+				.build();
+		RenderingResponse result = RenderingResponse.from(other).build();
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		ModelAndView mav = result.writeTo(request, response, EMPTY_CONTEXT);
+		assertThat(mav).isNotNull();
+		assertThat(mav.getViewName()).isEqualTo("foo");
+		assertThat(mav.getModel()).containsEntry("model", "value");
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
+		assertThat(response.getHeader("foo")).isEqualTo("bar");
+		assertThat(response.getCookies()).containsExactly(cookie);
+	}
 
 }
