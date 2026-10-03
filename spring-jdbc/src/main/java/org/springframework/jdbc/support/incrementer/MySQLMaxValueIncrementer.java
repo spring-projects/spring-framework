@@ -182,7 +182,9 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 							throw new DataAccessResourceFailureException(
 									"Unable to commit new sequence value changes for " + getIncrementerName());
 						}
-						JdbcUtils.closeConnection(con);
+						finally {
+							JdbcUtils.closeConnection(con);
+						}
 					}
 					else {
 						DataSourceUtils.releaseConnection(con, getDataSource());
