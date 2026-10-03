@@ -73,11 +73,12 @@ import org.jspecify.annotations.Nullable;
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Brian Clozel
+ * @author Yanming Zhou
  * @since 3.2
  * @param <K> the key type
  * @param <V> the value type
  */
-public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
+public class ConcurrentReferenceHashMap<K extends @Nullable Object, V extends @Nullable Object> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
 
 	private static final int DEFAULT_INITIAL_CAPACITY = 16;
 
@@ -380,7 +381,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public @Nullable V computeIfAbsent(@Nullable K key, Function<@Nullable ? super K, @Nullable ? extends V> mappingFunction) {
+	public @Nullable V computeIfAbsent(@Nullable K key, Function<@Nullable ? super K, ? extends V> mappingFunction) {
 		// Avoid locking if entry is present
 		Reference<K, V> ref = getReference(key, Restructure.NEVER);
 		Entry<K, V> entry = (ref != null ? ref.get() : null);
@@ -406,7 +407,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public @Nullable V computeIfPresent(@Nullable K key, BiFunction<@Nullable ? super K, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+	public @Nullable V computeIfPresent(@Nullable K key, BiFunction<@Nullable ? super K, ? super V, ? extends V> remappingFunction) {
 		// Avoid locking if entry is absent
 		Reference<K, V> ref = getReference(key, Restructure.NEVER);
 		Entry<K, V> entry = (ref != null ? ref.get() : null);
@@ -438,7 +439,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public @Nullable V compute(@Nullable K key, BiFunction<@Nullable ? super K, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+	public @Nullable V compute(@Nullable K key, BiFunction<@Nullable ? super K, ? super V, ? extends V> remappingFunction) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
@@ -471,7 +472,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	@Override
-	public @Nullable V merge(@Nullable K key, @Nullable V value, BiFunction<@Nullable ? super V, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+	public @Nullable V merge(@Nullable K key, @Nullable V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
@@ -577,7 +578,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		return values;
 	}
 
-	private <T> @Nullable T doTask(@Nullable Object key, Task<T> task) {
+	private <T extends @Nullable Object> @Nullable T doTask(@Nullable Object key, Task<T> task) {
 		int hash = getHash(key);
 		return getSegmentForHash(hash).doTask(hash, key, task);
 	}
@@ -674,7 +675,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * @param task the update operation
 		 * @return the result of the operation
 		 */
-		private <T> @Nullable T doTask(final int hash, final @Nullable Object key, final Task<T> task) {
+		private <T extends @Nullable Object> @Nullable T doTask(final int hash, final @Nullable Object key, final Task<T> task) {
 			boolean resize = task.hasOption(TaskOption.RESIZE);
 			if (task.hasOption(TaskOption.RESTRUCTURE_BEFORE)) {
 				restructureIfNecessary(resize);
@@ -863,7 +864,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 * @param <K> the key type
 	 * @param <V> the value type
 	 */
-	protected interface Reference<K, V> {
+	protected interface Reference<K extends @Nullable Object, V extends @Nullable Object> {
 
 		/**
 		 * Return the referenced entry, or {@code null} if the entry is no longer available.
@@ -893,7 +894,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 * @param <K> the key type
 	 * @param <V> the value type
 	 */
-	protected static final class Entry<K, V> implements Map.Entry<K, V> {
+	protected static final class Entry<K extends @Nullable Object, V extends @Nullable Object> implements Map.Entry<K, V> {
 
 		private final @Nullable K key;
 
@@ -943,7 +944,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * A task that can be {@link Segment#doTask run} against a {@link Segment}.
 	 */
-	private abstract class Task<T> {
+	private abstract class Task<T extends @Nullable Object> {
 
 		private final EnumSet<TaskOption> options;
 
@@ -992,7 +993,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Allows a task access to {@link ConcurrentReferenceHashMap.Segment} entries.
 	 */
-	private interface Entries<V> {
+	private interface Entries<V extends @Nullable Object> {
 
 		/**
 		 * Add a new entry with the specified value.
@@ -1301,7 +1302,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Internal {@link Reference} implementation for {@link SoftReference SoftReferences}.
 	 */
-	private static final class SoftEntryReference<K, V> extends SoftReference<Entry<K, V>> implements Reference<K, V> {
+	private static final class SoftEntryReference<K extends @Nullable Object, V extends @Nullable Object> extends SoftReference<Entry<K, V>> implements Reference<K, V> {
 
 		private final int hash;
 
@@ -1335,7 +1336,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Internal {@link Reference} implementation for {@link WeakReference WeakReferences}.
 	 */
-	private static final class WeakEntryReference<K, V> extends WeakReference<Entry<K, V>> implements Reference<K, V> {
+	private static final class WeakEntryReference<K extends @Nullable Object, V extends @Nullable Object> extends WeakReference<Entry<K, V>> implements Reference<K, V> {
 
 		private final int hash;
 
