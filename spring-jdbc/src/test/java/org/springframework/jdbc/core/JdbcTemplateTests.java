@@ -778,6 +778,7 @@ class JdbcTemplateTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void batchUpdateWithCollectionOfObjects() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final List<Integer> ids = Arrays.asList(100, 200, 300);
@@ -828,6 +829,7 @@ class JdbcTemplateTests {
 				}));
 	}
 
+	@SuppressWarnings("deprecation")
 	private void test3BatchesOf2ItemsFailing(Consumer<Exception> exception) throws Exception {
 		String sql = "INSERT INTO NOSUCHTABLE values (?)";
 		List<Integer> ids = Arrays.asList(1, 2, 3, 2, 4, 5);
