@@ -79,7 +79,10 @@ class ExceptionHandlingWebHandlerTests {
 
 	@Test
 	void thrownExceptionBecomesErrorSignal() {
-		createWebHandler(new BadRequestExceptionHandler()).handle(this.exchange).block();
+		new ExceptionHandlingWebHandler(
+				new StubWebHandler(new IllegalStateException("boo"), true),
+				Arrays.asList(new BadRequestExceptionHandler())).handle(this.exchange).block();
+
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
