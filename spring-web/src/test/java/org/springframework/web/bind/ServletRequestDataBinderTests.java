@@ -19,6 +19,7 @@ package org.springframework.web.bind;
 import java.beans.PropertyEditorSupport;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.ResolvableType;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -165,6 +167,19 @@ class ServletRequestDataBinderTests {
 	}
 
 	@Test
+	void constructWithEmptyArraySuffixParameter() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("names[]", "John", "Jane");
+
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(null);
+		binder.setTargetType(ResolvableType.forClass(NamesBean.class));
+		binder.construct(request);
+
+		NamesBean target = (NamesBean) binder.getTarget();
+		assertThat(target.names()).containsExactly("John", "Jane");
+	}
+
+	@Test
 	void bindingWithNestedObjectCreationAndWrongOrder() {
 		TestBean tb = new TestBean();
 
@@ -254,6 +269,9 @@ class ServletRequestDataBinderTests {
 			m.remove(element.getName());
 		}
 		assertThat(m.size()).as("Map size is 0").isEqualTo(0);
+	}
+
+	private record NamesBean(List<String> names) {
 	}
 
 }
