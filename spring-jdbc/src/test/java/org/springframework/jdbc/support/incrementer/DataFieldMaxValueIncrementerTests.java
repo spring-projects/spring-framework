@@ -25,8 +25,12 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.dao.DataAccessResourceFailureException;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -185,6 +189,52 @@ class DataFieldMaxValueIncrementerTests {
 		verify(resultSet, times(2)).close();
 		verify(statement, times(2)).close();
 		verify(connection, times(2)).close();
+	}
+
+	@Test
+	void mySQLMaxValueIncrementerClosesConnectionOnCommitFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L);
+		willThrow(new SQLException("commit failed")).given(connection).commit();
+
+		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue);
+
+		verify(connection).commit();
+		verify(connection).close();
+	}
+
+	@Test
+	void mySQLMaxValueIncrementerClosesConnectionOnAutoCommitRestoreFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.getAutoCommit()).willReturn(true);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L);
+		willThrow(new SQLException("autoCommit restore failed")).given(connection).setAutoCommit(true);
+
+		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue);
+
+		verify(connection).commit();
+		verify(connection).setAutoCommit(true);
+		verify(connection).close();
 	}
 
 	@Test
