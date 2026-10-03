@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,18 @@ class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTest
 		HttpURLConnection connection = new TestHttpURLConnection(uri.toURL());
 		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, httpMethod);
 		assertThat(connection.getDoOutput()).isEqualTo(allowed);
+	}
+
+	@Test
+	void timeoutsAsDurationExceedingIntegerRangeAreCapped() throws Exception {
+		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+		requestFactory.setConnectTimeout(Duration.ofDays(50));
+		requestFactory.setReadTimeout(Duration.ofDays(50));
+
+		HttpURLConnection connection = new TestHttpURLConnection(URI.create("https://example.com").toURL());
+		requestFactory.prepareConnection(connection, "GET");
+		assertThat(connection.getConnectTimeout()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(connection.getReadTimeout()).isEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Test
