@@ -44,6 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Chengang Guan
  */
 class AnnotationsScannerTests {
 
@@ -327,6 +328,12 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
+	void superclassStrategyOnMethodWithStaticMethodDoesNotScanSuperclassStaticMethod() {
+		Method source = methodFrom(StaticMethodChild.class);
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).isEmpty();
+	}
+
+	@Test
 	void typeHierarchyStrategyOnMethodWhenNotAnnotatedScansNone() {
 		Method source = methodFrom(WithNoAnnotations.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).isEmpty();
@@ -461,6 +468,12 @@ class AnnotationsScannerTests {
 					"0:TestAnnotation1", "1:TestAnnotation5", "1:TestInheritedAnnotation5",
 					"2:TestAnnotation6", "3:TestAnnotation2", "3:TestInheritedAnnotation2",
 					"4:TestAnnotation3", "5:TestAnnotation4");
+	}
+
+	@Test
+	void typeHierarchyStrategyOnMethodWithStaticMethodDoesNotScanSuperclassOrInterfaceStaticMethod() {
+		Method source = methodFrom(StaticMethodChild.class);
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).isEmpty();
 	}
 
 	@Test
@@ -838,6 +851,26 @@ class AnnotationsScannerTests {
 
 		@TestAnnotation2
 		void method(T argument);
+	}
+
+	static class StaticMethodSuperClass {
+
+		@TestAnnotation1
+		public static void method() {
+		}
+	}
+
+	interface StaticMethodInterface {
+
+		@TestAnnotation2
+		static void method() {
+		}
+	}
+
+	static class StaticMethodChild extends StaticMethodSuperClass implements StaticMethodInterface {
+
+		public static void method() {
+		}
 	}
 
 }
