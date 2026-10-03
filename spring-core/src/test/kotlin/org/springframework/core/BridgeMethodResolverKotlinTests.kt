@@ -16,6 +16,8 @@
 
 package org.springframework.core
 
+import kotlin.coroutines.Continuation
+
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -47,6 +49,22 @@ class BridgeMethodResolverKotlinTests {
 		assertThat(BridgeMethodResolver.findBridgedMethod(unbridged)).`as`("Unbridged method not returned directly").isEqualTo(unbridged)
 		assertThat(BridgeMethodResolver.findBridgedMethod(bridged)).`as`("Incorrect bridged method returned").isEqualTo(unbridged)
 	}
+
+	@Test
+	fun findBridgedMethodForMultiLevelGenericSuspendOverride() {
+		val unbridged = SuspendRepository::class.java.getDeclaredMethod(
+				"process", SampleValue::class.java, Continuation::class.java)
+		val specializedBridge = SuspendRepository::class.java.getDeclaredMethod(
+				"process", SpecializedValue::class.java, Continuation::class.java)
+		val rootBridge = SuspendRepository::class.java.getDeclaredMethod(
+				"process", RootValue::class.java, Continuation::class.java)
+		assertThat(unbridged.isBridge).isFalse
+		assertThat(specializedBridge.isBridge).isTrue
+		assertThat(rootBridge.isBridge).isTrue
+
+		assertThat(BridgeMethodResolver.findBridgedMethod(specializedBridge)).isEqualTo(unbridged)
+		assertThat(BridgeMethodResolver.findBridgedMethod(rootBridge)).isEqualTo(unbridged)
+	}
 }
 
 interface GenericInterface<ID> {
@@ -74,3 +92,23 @@ class GenericRepository : AbstractGenericClass<Int>() {
 	}
 }
 
+interface RootValue
+
+interface SpecializedValue : RootValue
+
+class SampleValue : SpecializedValue
+
+interface SuspendProcessor<T : RootValue> {
+
+	suspend fun <S : T> process(value: S): S
+}
+
+abstract class AbstractSuspendProcessor<T : SpecializedValue> : SuspendProcessor<T> {
+
+	override suspend fun <S : T> process(value: S): S = value
+}
+
+class SuspendRepository : AbstractSuspendProcessor<SampleValue>() {
+
+	override suspend fun <S : SampleValue> process(value: S): S = value
+}
