@@ -42,6 +42,7 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -326,6 +327,11 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		initBeanWrapper(bw);
 
 		T mappedObject = constructMappedInstance(rs, bw);
+		if (CollectionUtils.isEmpty(this.mappedProperties) &&
+				(!isCheckFullyPopulated() || CollectionUtils.isEmpty(this.mappedPropertyNames))) {
+			// Nothing left to populate via setters (for example, a record mapped through its constructor)
+			return mappedObject;
+		}
 		bw.setBeanInstance(mappedObject);
 
 		ResultSetMetaData rsmd = rs.getMetaData();
