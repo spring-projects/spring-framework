@@ -349,13 +349,64 @@ abstract class AnnotationsScanner {
 		return methods;
 	}
 
-	private static boolean isOverride(Method rootMethod, Method candidateMethod) {
+	/**
+	 * Determine if the supplied root method overrides the supplied candidate
+	 * method declared in a supertype of the root method's declaring class.
+	 * <p>Static methods never override or get overridden, and private candidate
+	 * methods cannot be overridden. A package-private candidate method can only
+	 * be overridden by a method declared in the same package or transitively via
+	 * a {@code public} or {@code protected} overriding method declared in an
+	 * intermediate superclass in that package (see JLS §8.4.8.1). Generic
+	 * parameter types of the candidate method are resolved against the root
+	 * method's declaring class.
+	 * @param rootMethod the potentially overriding method
+	 * @param candidateMethod the potentially overridden method
+	 * @return {@code true} if the root method overrides the candidate method
+	 * @since 7.1
+	 */
+	static boolean isOverride(Method rootMethod, Method candidateMethod) {
 		return (!Modifier.isPrivate(candidateMethod.getModifiers()) &&
 				!Modifier.isStatic(rootMethod.getModifiers()) &&
 				!Modifier.isStatic(candidateMethod.getModifiers()) &&
 				candidateMethod.getParameterCount() == rootMethod.getParameterCount() &&
 				candidateMethod.getName().equals(rootMethod.getName()) &&
-				hasSameParameterTypes(rootMethod, candidateMethod));
+				hasSameParameterTypes(rootMethod, candidateMethod) &&
+				isOverridable(rootMethod, candidateMethod));
+	}
+
+	private static boolean isOverridable(Method rootMethod, Method candidateMethod) {
+		if (isPublicOrProtected(candidateMethod)) {
+			return true;
+		}
+		Class<?> rootDeclaringClass = rootMethod.getDeclaringClass();
+		Class<?> candidateDeclaringClass = candidateMethod.getDeclaringClass();
+		String packageName = candidateDeclaringClass.getPackageName();
+		// Declared in the same package?
+		if (rootDeclaringClass.getPackageName().equals(packageName)) {
+			return true;
+		}
+		// Else, search for a public or protected override in an intermediate superclass
+		// in the same package as the package-private candidate method.
+		Class<?> clazz = rootDeclaringClass.getSuperclass();
+		while (clazz != null && clazz != candidateDeclaringClass) {
+			if (clazz.getPackageName().equals(packageName)) {
+				for (Method method : clazz.getDeclaredMethods()) {
+					if (isPublicOrProtected(method) && !Modifier.isStatic(method.getModifiers()) &&
+							method.getParameterCount() == rootMethod.getParameterCount() &&
+							method.getName().equals(rootMethod.getName()) &&
+							hasSameParameterTypes(rootMethod, method)) {
+						return true;
+					}
+				}
+			}
+			clazz = clazz.getSuperclass();
+		}
+		return false;
+	}
+
+	private static boolean isPublicOrProtected(Method method) {
+		int modifiers = method.getModifiers();
+		return (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers));
 	}
 
 	private static boolean hasSameParameterTypes(Method rootMethod, Method candidateMethod) {

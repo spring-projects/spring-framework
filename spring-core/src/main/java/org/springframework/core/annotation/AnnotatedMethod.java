@@ -18,7 +18,6 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +28,6 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -184,7 +182,7 @@ public class AnnotatedMethod {
 			while (clazz != null) {
 				for (Class<?> ifc : clazz.getInterfaces()) {
 					for (Method candidate : ifc.getMethods()) {
-						if (isOverrideFor(candidate)) {
+						if (AnnotationsScanner.isOverride(this.method, candidate)) {
 							parameterAnnotations.add(candidate.getParameterAnnotations());
 						}
 					}
@@ -195,7 +193,7 @@ public class AnnotatedMethod {
 				}
 				if (clazz != null) {
 					for (Method candidate : clazz.getDeclaredMethods()) {
-						if (isOverrideFor(candidate)) {
+						if (AnnotationsScanner.isOverride(this.method, candidate)) {
 							parameterAnnotations.add(candidate.getParameterAnnotations());
 						}
 					}
@@ -204,27 +202,6 @@ public class AnnotatedMethod {
 			this.inheritedParameterAnnotations = parameterAnnotations;
 		}
 		return parameterAnnotations;
-	}
-
-	private boolean isOverrideFor(Method candidate) {
-		if (Modifier.isPrivate(candidate.getModifiers()) ||
-				Modifier.isStatic(candidate.getModifiers()) ||
-				Modifier.isStatic(this.method.getModifiers()) ||
-				!candidate.getName().equals(this.method.getName()) ||
-				(candidate.getParameterCount() != this.method.getParameterCount())) {
-			return false;
-		}
-		Class<?>[] paramTypes = this.method.getParameterTypes();
-		if (Arrays.equals(candidate.getParameterTypes(), paramTypes)) {
-			return true;
-		}
-		for (int i = 0; i < paramTypes.length; i++) {
-			if (paramTypes[i] !=
-					ResolvableType.forMethodParameter(candidate, i, this.method.getDeclaringClass()).toClass()) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 

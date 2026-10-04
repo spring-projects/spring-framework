@@ -34,6 +34,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.core.annotation.subpackage.PackagePrivateMethodOverridingSubclass;
+import org.springframework.core.annotation.subpackage.PackagePrivateMethodSuperclass;
+import org.springframework.core.annotation.subpackage.PublicMethodOverridingSubclass;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -488,6 +491,24 @@ class AnnotationsScannerTests {
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly("0:TestAnnotation3");
 	}
 
+	@Test  // gh-37408
+	void typeHierarchyStrategyOnMethodDoesNotScanPackagePrivateMethodInDifferentPackage() {
+		Method source = ReflectionUtils.findMethod(PackagePrivateMethodChild.class, "process", String.class);
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).isEmpty();
+	}
+
+	@Test  // gh-37408
+	void typeHierarchyStrategyOnMethodScansPackagePrivateMethodInDifferentPackageOverriddenTransitively() {
+		Method source = ReflectionUtils.findMethod(PublicMethodOverridingChild.class, "process", String.class);
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly("1:Marker");
+	}
+
+	@Test  // gh-37408
+	void typeHierarchyStrategyOnMethodDoesNotScanPackagePrivateMethodInDifferentPackageViaPackagePrivateOverride() {
+		Method source = ReflectionUtils.findMethod(PackagePrivateMethodOverridingChild.class, "process", String.class);
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).isEmpty();
+	}
+
 	@Test
 	void scanWhenProcessorReturnsFromDoWithAggregateExitsEarly() {
 		String result = scan(this, WithSingleSuperclass.class, SearchStrategy.TYPE_HIERARCHY,
@@ -891,6 +912,29 @@ class AnnotationsScannerTests {
 
 		@TestAnnotation3
 		public static void method() {
+		}
+	}
+
+	static class PackagePrivateMethodChild extends PackagePrivateMethodSuperclass {
+
+		// Does not override PackagePrivateMethodSuperclass.process(String).
+		public void process(String value) {
+		}
+	}
+
+	static class PublicMethodOverridingChild extends PublicMethodOverridingSubclass {
+
+		// Overrides PackagePrivateMethodSuperclass.process(String) transitively.
+		@Override
+		public void process(String value) {
+		}
+	}
+
+	static class PackagePrivateMethodOverridingChild extends PackagePrivateMethodOverridingSubclass {
+
+		// Overrides neither PackagePrivateMethodOverridingSubclass.process(String)
+		// nor PackagePrivateMethodSuperclass.process(String).
+		public void process(String value) {
 		}
 	}
 
