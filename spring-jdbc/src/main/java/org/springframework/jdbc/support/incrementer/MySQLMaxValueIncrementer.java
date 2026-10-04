@@ -179,6 +179,7 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 							}
 						}
 						catch (SQLException ignore) {
+							this.nextId = this.maxId;
 							throw new DataAccessResourceFailureException(
 									"Unable to commit new sequence value changes for " + getIncrementerName());
 						}
