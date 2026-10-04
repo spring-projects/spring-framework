@@ -85,6 +85,18 @@ class AnnotatedMethodTests {
 		assertThat(methodParameters[1].hasParameterAnnotation(Param.class)).isTrue();
 	}
 
+	@Test  // gh-37390
+	void shouldNotInheritParameterAnnotationsFromStaticMethods() {
+		Method method = ReflectionUtils.findMethod(StaticMethodChild.class, "process", String.class);
+		assertThat(method).isNotNull();
+
+		AnnotatedMethod annotatedMethod = new AnnotatedMethod(method);
+		MethodParameter[] methodParameters = annotatedMethod.getMethodParameters();
+
+		assertThat(methodParameters).hasSize(1);
+		assertThat(methodParameters[0].hasParameterAnnotation(Param.class)).isFalse();
+	}
+
 
 	private static Method getMethod(String name, Class<?>...parameterTypes) {
 		Class<?> clazz = GenericInterfaceImpl.class;
@@ -127,6 +139,24 @@ class AnnotatedMethodTests {
 
 		@Override
 		void processTwo(String value) {
+		}
+	}
+
+	static class StaticMethodSuperclass {
+
+		static void process(@Param String value) {
+		}
+	}
+
+	interface StaticMethodInterface {
+
+		static void process(@Param String value) {
+		}
+	}
+
+	static class StaticMethodChild extends StaticMethodSuperclass implements StaticMethodInterface {
+
+		static void process(String value) {
 		}
 	}
 
