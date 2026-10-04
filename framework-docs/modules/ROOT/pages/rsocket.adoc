@@ -192,7 +192,7 @@ Kotlin::
 ----
 	val requester = RSocketRequester.builder().tcp("localhost", 7000)
 
-	URI url = URI.create("https://example.org:8080/rsocket");
+	val url = URI.create("https://example.org:8080/rsocket")
 	val requester = RSocketRequester.builder().webSocket(url)
 ----
 ======
@@ -304,7 +304,7 @@ Kotlin::
 			.build()
 
 	val responder =
-		RSocketMessageHandler.responder(strategies, new ClientHandler()); // <2>
+		RSocketMessageHandler.responder(strategies, ClientHandler()) // <2>
 
 	val requester = RSocketRequester.builder()
 			.rsocketConnector { it.acceptor(responder) } // <3>
@@ -503,7 +503,7 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	Mono<AirportLocation> location = requester.route("find.radar.EWR"))
+	Mono<AirportLocation> location = requester.route("find.radar.EWR")
 		.retrieveMono(AirportLocation.class);
 ----
 

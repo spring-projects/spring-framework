@@ -946,11 +946,11 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// create a startup step and start recording
-	try (val scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")) {
-        // add tagging information to the current step
-        scanPackages.tag("packages", () -> Arrays.toString(basePackages));
-        // perform the actual phase we're instrumenting
-        this.scanner.scan(basePackages);
+	getApplicationStartup().start("spring.context.base-packages.scan").use { scanPackages ->
+		// add tagging information to the current step
+		scanPackages.tag("packages") { Arrays.toString(basePackages) }
+		// perform the actual phase we're instrumenting
+		this.scanner.scan(basePackages)
 	}
 ----
 ======
