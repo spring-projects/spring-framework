@@ -295,7 +295,7 @@ The following example demonstrates collection merging:
 				</props>
 			</property>
 		</bean>
-	<beans>
+	</beans>
 ----
 
 Notice the use of the `merge=true` attribute on the `<props/>` element of the

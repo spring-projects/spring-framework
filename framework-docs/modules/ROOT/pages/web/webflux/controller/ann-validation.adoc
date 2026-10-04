@@ -87,6 +87,8 @@ Java::
 
 		@Override
 		public void modelAttribute(@Nullable ModelAttribute modelAttribute, ParameterErrors errors) {
+			// ...
+		}
 
 		// ...
 

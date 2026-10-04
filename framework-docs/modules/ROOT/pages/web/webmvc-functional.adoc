@@ -329,8 +329,10 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun sse(): RouterFunction<ServerResponse> = router {
-		GET("/sse") { request -> ServerResponse.sse { sseBuilder ->
-			// Save the sseBuilder object somewhere..
+		GET("/sse") { request ->
+			ServerResponse.sse { sseBuilder ->
+				// Save the sseBuilder object somewhere..
+			}
 		}
 	}
 

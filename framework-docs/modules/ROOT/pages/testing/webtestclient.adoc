@@ -158,16 +158,16 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	@ExtendWith(SpringExtension.class)
+	@ExtendWith(SpringExtension::class)
 	@WebAppConfiguration("classpath:META-INF/web-resources") // <1>
-	@ContextHierarchy({
-		@ContextConfiguration(classes = RootConfig.class),
-		@ContextConfiguration(classes = WebConfig.class)
-	})
+	@ContextHierarchy(
+		ContextConfiguration(classes = [RootConfig::class]),
+		ContextConfiguration(classes = [WebConfig::class])
+	)
 	class MyTests {
 
 		@Autowired
-		lateinit var wac: WebApplicationContext; // <2>
+		lateinit var wac: WebApplicationContext // <2>
 
 		lateinit var client: WebTestClient
 
@@ -394,8 +394,6 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	import org.springframework.test.web.reactive.server.expectBody
-
 	client.get().uri("/persons/1")
 			.exchange()
 			.expectStatus().isOk()
@@ -409,6 +407,8 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
+	import org.springframework.test.web.reactive.server.expectBody
+
 	client.get().uri("/persons/1")
 			.exchange()
 			.expectStatus().isOk()

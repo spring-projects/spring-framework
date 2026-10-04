@@ -360,7 +360,7 @@ Or you may pass in a parameter object with bean properties or record components:
 ----
 	// assuming id, name, age properties on Person
 	db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
-			.bindProperties(new Person("joe", "Joe", 34);
+			.bindProperties(new Person("joe", "Joe", 34));
 ----
 
 Alternatively, you can use positional parameters for binding values to statements.

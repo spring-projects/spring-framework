@@ -583,7 +583,7 @@ Kotlin::
 
 	@Transactional
 	@Test(expected = ...)
-	void updateWithEntityManagerFlush() {
+	fun updateWithEntityManagerFlush() {
 		updateEntityInJpaPersistenceContext()
 		// Manual flush is required to avoid false positive in test
 		entityManager.flush()

@@ -521,7 +521,7 @@ latter being used to access a file in the filesystem):
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<property name="template" value="classpath:some/resource/path/myTemplate.txt">
+	<property name="template" value="classpath:some/resource/path/myTemplate.txt"/>
 ----
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -597,7 +597,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
-	class MyBean(@Value("\${templates.path}") private val templates: Resource[])
+	class MyBean(@Value("\${templates.path}") private val templates: Array<Resource>)
 ----
 ======
 
