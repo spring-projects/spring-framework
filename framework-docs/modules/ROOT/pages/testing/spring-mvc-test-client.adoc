@@ -151,7 +151,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build()
-	restTemplate = RestTemplate(MockMvcClientHttpRequestFactory(mockMvc))
+	this.restTemplate = RestTemplate(MockMvcClientHttpRequestFactory(mockMvc))
 
 	// Test code that uses the above RestTemplate ...
 ----
@@ -188,7 +188,7 @@ Kotlin::
 	val restTemplate = RestTemplate()
 
 	// Create ExecutingResponseCreator with the original request factory
-	val withActualResponse = new ExecutingResponseCreator(restTemplate.getRequestFactory())
+	val withActualResponse = ExecutingResponseCreator(restTemplate.getRequestFactory())
 
 	val mockServer = MockRestServiceServer.bindTo(restTemplate).build()
 	mockServer.expect(requestTo("/profile")).andRespond(withSuccess())
