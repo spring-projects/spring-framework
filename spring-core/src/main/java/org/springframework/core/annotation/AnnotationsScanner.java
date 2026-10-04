@@ -291,7 +291,8 @@ abstract class AnnotationsScanner {
 					}
 				}
 			}
-			if (Modifier.isPrivate(rootMethod.getModifiers())) {
+			if (Modifier.isPrivate(rootMethod.getModifiers()) ||
+					Modifier.isStatic(rootMethod.getModifiers())) {
 				return null;
 			}
 			if (calledProcessor) {

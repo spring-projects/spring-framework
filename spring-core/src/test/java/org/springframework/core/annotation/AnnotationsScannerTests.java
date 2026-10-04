@@ -334,6 +334,12 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
+	void superclassStrategyOnAnnotatedStaticMethodScansOnlyDeclaredAnnotations() {
+		Method source = methodFrom(AnnotatedStaticMethodChild.class);
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly("0:TestAnnotation3");
+	}
+
+	@Test
 	void typeHierarchyStrategyOnMethodWhenNotAnnotatedScansNone() {
 		Method source = methodFrom(WithNoAnnotations.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).isEmpty();
@@ -474,6 +480,12 @@ class AnnotationsScannerTests {
 	void typeHierarchyStrategyOnMethodWithStaticMethodDoesNotScanSuperclassOrInterfaceStaticMethod() {
 		Method source = methodFrom(StaticMethodChild.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).isEmpty();
+	}
+
+	@Test
+	void typeHierarchyStrategyOnAnnotatedStaticMethodScansOnlyDeclaredAnnotations() {
+		Method source = methodFrom(AnnotatedStaticMethodChild.class);
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly("0:TestAnnotation3");
 	}
 
 	@Test
@@ -867,8 +879,17 @@ class AnnotationsScannerTests {
 		}
 	}
 
-	static class StaticMethodChild extends StaticMethodSuperClass implements StaticMethodInterface {
+	static class StaticMethodChild
+			extends StaticMethodSuperClass implements StaticMethodInterface {
 
+		public static void method() {
+		}
+	}
+
+	static class AnnotatedStaticMethodChild
+			extends StaticMethodSuperClass implements StaticMethodInterface {
+
+		@TestAnnotation3
 		public static void method() {
 		}
 	}
