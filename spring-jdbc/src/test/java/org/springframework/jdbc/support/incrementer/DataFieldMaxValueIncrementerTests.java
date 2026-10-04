@@ -198,7 +198,8 @@ class DataFieldMaxValueIncrementerTests {
 		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
 		given(resultSet.next()).willReturn(true);
 		given(resultSet.getLong(1)).willReturn(1L);
-		willThrow(new SQLException("commit failed")).given(connection).commit();
+		SQLException commitFailure = new SQLException("commit failed");
+		willThrow(commitFailure).given(connection).commit();
 
 		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
 		incrementer.setDataSource(dataSource);
@@ -207,7 +208,8 @@ class DataFieldMaxValueIncrementerTests {
 		incrementer.afterPropertiesSet();
 
 		assertThatExceptionOfType(DataAccessResourceFailureException.class)
-				.isThrownBy(incrementer::nextLongValue);
+				.isThrownBy(incrementer::nextLongValue)
+				.withCause(commitFailure);
 
 		verify(connection).commit();
 		verify(connection).close();
@@ -221,7 +223,8 @@ class DataFieldMaxValueIncrementerTests {
 		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
 		given(resultSet.next()).willReturn(true);
 		given(resultSet.getLong(1)).willReturn(1L);
-		willThrow(new SQLException("autoCommit restore failed")).given(connection).setAutoCommit(true);
+		SQLException autoCommitFailure = new SQLException("autoCommit restore failed");
+		willThrow(autoCommitFailure).given(connection).setAutoCommit(true);
 
 		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
 		incrementer.setDataSource(dataSource);
@@ -230,7 +233,8 @@ class DataFieldMaxValueIncrementerTests {
 		incrementer.afterPropertiesSet();
 
 		assertThatExceptionOfType(DataAccessResourceFailureException.class)
-				.isThrownBy(incrementer::nextLongValue);
+				.isThrownBy(incrementer::nextLongValue)
+				.withCause(autoCommitFailure);
 
 		verify(connection).commit();
 		verify(connection).setAutoCommit(true);
