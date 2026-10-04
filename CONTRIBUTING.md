@@ -85,6 +85,7 @@ Backports to prior versions will be considered on a case-by-case basis and refle
 
 1. Please do not submit pull requests:
    * With GitHub accounts managed by autonomous AI bots.
+   * For issues with the label `status: waiting-for-triage`, which indicates that the team has not yet triaged or decided on the issue.
    * For issues already assigned to someone else, since the assignee is working on it or plans to.
    * For straightforward or polish-style changes.
 
