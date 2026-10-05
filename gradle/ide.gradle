@@ -68,13 +68,109 @@ eclipse.classpath.file.whenMerged {
 	}
 }
 
-// Remove classpath entries for multi-release source sets (such as "src/main/java21")
-// and their Gradle output (such as "build/classes/java/java21"), since an Eclipse
-// project supports only a single Java compliance level. Consequently, features
-// managed via the multiReleaseJar plugin cannot be built or tested within Eclipse.
+// Since an Eclipse project supports only a single Java compliance level, projects
+// that use the multiReleaseJar plugin are configured with a single Java baseline
+// within Eclipse. By default, the highest multi-release version is used (such as
+// Java 24 for spring-core), so that the corresponding sources can be developed
+// and tested within Eclipse. A different baseline can be configured via the
+// "eclipseJavaBaseline" project property: for example, -PeclipseJavaBaseline=17.
+// Multi-release source folders for versions above the baseline are not configured
+// as source folders in Eclipse (the sources themselves remain untouched), and types
+// which are overridden by a multi-release source folder are excluded from lower
+// source folders in Eclipse.
+def javaBaseline = 17
+
+def multiReleaseVersions = {
+	sourceSets.names.findAll { it ==~ /java\d+/ }.collect { (it - 'java') as int }
+}
+
+def eclipseJavaBaseline = {
+	def releaseVersions = multiReleaseVersions()
+	if (releaseVersions.isEmpty()) {
+		return javaBaseline
+	}
+	return (project.hasProperty('eclipseJavaBaseline') ?
+			(project.property('eclipseJavaBaseline') as int) : releaseVersions.max())
+}
+
+// Return the Java version of the supplied source folder: 0 for "src/main/java",
+// 21 for "src/main/java21", or null if it is not a Java source folder.
+def javaVersionOf = { SourceFolder folder ->
+	def matcher = (folder.path =~ /^src\/(main|test)\/java(\d*)$/)
+	if (!matcher.matches()) {
+		return null
+	}
+	return (matcher.group(2) ? (matcher.group(2) as int) : 0)
+}
+
+// Return the paths of all Java source files in the supplied directory, relative to
+// that directory: for example, "org/springframework/core/task/VirtualThreadDelegate.java"
+// for "src/main/java21/org/springframework/core/task/VirtualThreadDelegate.java".
+def relativeJavaFiles = { String dir ->
+	def root = file(dir).toPath()
+	return fileTree(dir).matching { include '**/*.java' }.collect {
+		root.relativize(it.toPath()).toString().replace('\\', '/')
+	}
+}
+
+// Remove existing source folders, since their exclusion patterns depend on the
+// configured baseline and would otherwise result in duplicate entries.
+eclipse.classpath.file.beforeMerged { classpath ->
+	if (!multiReleaseVersions().isEmpty()) {
+		classpath.entries.removeAll { it instanceof SourceFolder }
+	}
+}
+
+eclipse.jdt.file.whenMerged { jdt ->
+	def baseline = JavaVersion.toVersion(eclipseJavaBaseline())
+	jdt.sourceCompatibility = baseline
+	jdt.targetCompatibility = baseline
+}
+
 eclipse.classpath.file.whenMerged { classpath ->
-	classpath.entries.removeAll { it.path =~ /src\/(main|test)\/java\d+/ }
+	def baseline = eclipseJavaBaseline()
+
+	// Remove Gradle output for multi-release source sets, such as
+	// "build/classes/java/java21".
 	classpath.entries.removeAll { it.path =~ /build\/classes\/[^\/]+\/java\d+(Test)?$/ }
+
+	// Remove classpath entries for multi-release source folders above the baseline.
+	classpath.entries.removeAll {
+		it instanceof SourceFolder && (javaVersionOf(it) ?: 0) > baseline
+	}
+
+	// Mark multi-release test source folders (such as "src/test/java21") as test
+	// sources, since they share the output folder with "src/test/java".
+	classpath.entries.findAll { it instanceof SourceFolder && it.path ==~ /src\/test\/java\d+/ }.each {
+		it.entryAttributes['test'] = 'true'
+	}
+
+	// Exclude types from lower source folders which are overridden in higher ones.
+	['main', 'test'].each { scope ->
+		def sourceFolders = classpath.entries.findAll {
+			it instanceof SourceFolder && it.path.startsWith("src/${scope}/") &&
+					javaVersionOf(it) != null
+		}
+		sourceFolders.each { folder ->
+			def overriddenTypes = sourceFolders
+					.findAll { javaVersionOf(it) > javaVersionOf(folder) }
+					.collectMany { relativeJavaFiles(it.path) }
+					.findAll { file("${folder.path}/${it}").exists() }
+			if (!overriddenTypes.isEmpty()) {
+				folder.excludes = (folder.excludes + overriddenTypes).unique()
+			}
+		}
+
+		// Place higher source folders before lower ones, so that the debugger's source
+		// lookup finds overriding types before excluded ones.
+		def multiReleaseFolders = sourceFolders.findAll { javaVersionOf(it) > 0 }
+				.sort { -javaVersionOf(it) }
+		def baseFolder = sourceFolders.find { javaVersionOf(it) == 0 }
+		if (baseFolder != null && !multiReleaseFolders.isEmpty()) {
+			classpath.entries.removeAll(multiReleaseFolders)
+			classpath.entries.addAll(classpath.entries.indexOf(baseFolder), multiReleaseFolders)
+		}
+	}
 }
 
 // Remove classpath entries for non-existent libraries added by the multiReleaseJar
