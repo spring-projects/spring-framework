@@ -31,8 +31,25 @@ import org.jspecify.annotations.Nullable;
  */
 final class CompositeSet<E extends @Nullable Object> extends CompositeCollection<E> implements Set<E> {
 
+	private final Set<E> first;
+
+	private final Set<E> second;
+
+
 	CompositeSet(Set<E> first, Set<E> second) {
 		super(first, second);
+		this.first = first;
+		this.second = second;
+	}
+
+
+	@Override
+	public boolean remove(Object o) {
+		// A set contains a given element at most once: remove it from both sets
+		// so that an element hidden in the second set does not become visible.
+		boolean firstResult = this.first.remove(o);
+		boolean secondResult = this.second.remove(o);
+		return (firstResult || secondResult);
 	}
 
 
