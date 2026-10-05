@@ -226,6 +226,82 @@ class AnnotationAttributesTests {
 		aliases.stream().forEach(alias -> assertThat(attributes.getStringArray(alias)).isEqualTo(new String[] {""}));
 	}
 
+	@Test
+	void toStringWithoutAttributes() {
+		assertThat(attributes).hasToString("{}");
+	}
+
+	@Test
+	void toStringWithScalarValues() {
+		attributes.put("name", "dave");
+		attributes.put("number", 42);
+		attributes.put("bool", true);
+		attributes.put("color", Color.RED);
+		attributes.put("class", Integer.class);
+		attributes.put("nullValue", null);
+
+		assertThat(attributes).hasToString(
+				"{name=dave, number=42, bool=true, color=RED, class=class java.lang.Integer, nullValue=null}");
+	}
+
+	@Test
+	void toStringWithSelfReference() {
+		attributes.put("self", attributes);
+		attributes.put("selfArray", new Object[] {attributes});
+
+		assertThat(attributes).hasToString("{self=(this Map), selfArray=[(this Map)]}");
+	}
+
+	@Test
+	void toStringWithObjectArrays() {
+		attributes.put("names", new String[] {"dave", "frank", "hal"});
+		attributes.put("classes", new Class<?>[] {Number.class, Runnable.class});
+		attributes.put("colors", new Color[] {Color.RED, Color.BLUE});
+		attributes.put("empty", new String[0]);
+
+		assertThat(attributes).hasToString("""
+				{names=[dave, frank, hal], classes=[class java.lang.Number, interface java.lang.Runnable], \
+				colors=[RED, BLUE], empty=[]}""");
+	}
+
+	@Test
+	void toStringWithPrimitiveArrays() {
+		attributes.put("booleans", new boolean[] {true, false});
+		attributes.put("bytes", new byte[] {1, 2});
+		attributes.put("chars", new char[] {'a', 'b'});
+		attributes.put("shorts", new short[] {3, 4});
+		attributes.put("ints", new int[] {5, 6});
+		attributes.put("longs", new long[] {7L, 8L});
+		attributes.put("floats", new float[] {1.5f, 2.5f});
+		attributes.put("doubles", new double[] {3.5, 4.5});
+		attributes.put("empty", new int[0]);
+
+		assertThat(attributes).hasToString("""
+				{booleans=[true, false], bytes=[1, 2], chars=[a, b], shorts=[3, 4], ints=[5, 6], \
+				longs=[7, 8], floats=[1.5, 2.5], doubles=[3.5, 4.5], empty=[]}""");
+	}
+
+	@Test
+	void toStringWithNestedArrays() {
+		attributes.put("ints", new int[][] {{1, 2}, {3}});
+		attributes.put("objects", new Object[] {"dave", new int[] {1, 2}, new String[] {"hal"}});
+
+		assertThat(attributes).hasToString("{ints=[[1, 2], [3]], objects=[dave, [1, 2], [hal]]}");
+	}
+
+	@Test
+	void toStringWithNestedAnnotationAttributes() {
+		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
+		nestedAttributes.put("value", 10);
+		nestedAttributes.put("names", new int[] {1, 2});
+
+		attributes.put("anno", nestedAttributes);
+		attributes.put("annoArray", new AnnotationAttributes[] {nestedAttributes, nestedAttributes});
+
+		assertThat(attributes).hasToString(
+				"{anno={value=10, names=[1, 2]}, annoArray=[{value=10, names=[1, 2]}, {value=10, names=[1, 2]}]}");
+	}
+
 
 	enum Color {
 
