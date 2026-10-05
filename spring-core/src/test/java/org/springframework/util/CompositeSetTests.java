@@ -47,6 +47,33 @@ class CompositeSetTests {
 	}
 
 	@Test
+	void remove() {
+		Set<String> first = new HashSet<>(Set.of("foo", "bar"));
+		Set<String> second = new HashSet<>(Set.of("bar", "baz"));
+		CompositeSet<String> composite = new CompositeSet<>(first, second);
+		// CompositeSet does not deduplicate elements, since CompositeMap guarantees
+		// disjoint sets, and since "bar" is present in both sets, it is seen twice.
+		assertThat(composite).containsExactlyInAnyOrder("foo", "bar", "bar", "baz");
+
+		assertThat(composite.remove("foo")).isTrue();
+		// "bar" is still present in both sets.
+		assertThat(composite).containsExactlyInAnyOrder("bar", "bar", "baz");
+		assertThat(first).containsExactly("bar");
+		assertThat(second).containsExactlyInAnyOrder("bar", "baz");
+
+		assertThat(composite.remove("bar")).isTrue();
+		assertThat(composite).containsExactlyInAnyOrder("baz");
+		assertThat(composite.contains("bar")).isFalse();
+		assertThat(first).isEmpty();
+		assertThat(second).containsExactly("baz");
+
+		assertThat(composite.remove("baz")).isTrue();
+		assertThat(composite).isEmpty();
+
+		assertThat(composite.remove("qux")).isFalse();
+	}
+
+	@Test
 	void nullable() {
 		Set<@Nullable String> first = new HashSet<>();
 		first.add("foo");
@@ -58,4 +85,5 @@ class CompositeSetTests {
 
 		assertThat(composite).containsExactlyInAnyOrder("foo", null, "bar");
 	}
+
 }

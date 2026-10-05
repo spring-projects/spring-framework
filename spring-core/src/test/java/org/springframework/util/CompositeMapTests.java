@@ -303,7 +303,6 @@ class CompositeMapTests {
 			assertThat(second).containsExactly(entry("corge", "grault"));
 		}
 
-
 		@Test
 		void values() {
 			Map<String, String> first = Map.of("foo", "bar", "baz", "qux");
@@ -324,6 +323,18 @@ class CompositeMapTests {
 			assertThat(entries).containsExactlyInAnyOrder(entry("foo", "bar"), entry("baz", "qux"), entry("corge", "grault"));
 		}
 
+		@Test
+		void entrySetRemoveWithIdenticalEntries() {
+			Map<String, String> first = new HashMap<>(Map.of("foo", "bar", "baz", "qux"));
+			Map<String, String> second = new HashMap<>(Map.of("baz", "qux", "corge", "grault"));
+			CompositeMap<String, String> composite = new CompositeMap<>(first, second);
+
+			assertThat(composite.entrySet().remove(entry("baz", "qux"))).isTrue();
+			assertThat(composite.containsKey("baz")).isFalse();
+			assertThat(composite.entrySet()).containsExactlyInAnyOrder(entry("foo", "bar"), entry("corge", "grault"));
+			assertThat(first).containsExactly(entry("foo", "bar"));
+			assertThat(second).containsExactly(entry("corge", "grault"));
+		}
 
 	}
 }

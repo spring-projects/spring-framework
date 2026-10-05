@@ -34,9 +34,9 @@ import org.jspecify.annotations.Nullable;
  */
 class CompositeCollection<E extends @Nullable Object> implements Collection<E> {
 
-	private final Collection<E> first;
+	final Collection<E> first;
 
-	private final Collection<E> second;
+	final Collection<E> second;
 
 
 	CompositeCollection(Collection<E> first, Collection<E> second) {
