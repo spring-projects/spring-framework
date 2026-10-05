@@ -35,6 +35,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.method.MethodValidationException;
@@ -112,6 +113,39 @@ class ResponseEntityExceptionHandlerTests {
 	@Test
 	void handlerMethodValidationException() {
 		testException(new HandlerMethodValidationException(mock(MethodValidationResult.class)));
+	}
+
+	@Test
+	void serverErrorIsRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+		ServerErrorException ex = new ServerErrorException("simulated failure", (Throwable) null);
+
+		testException(ex);
+		assertThat(context.getError()).isSameAs(ex);
+	}
+
+	@Test
+	void serverErrorResponseIsRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+		ErrorResponseException ex = new ErrorResponseException(HttpStatus.SERVICE_UNAVAILABLE);
+
+		testException(ex);
+		assertThat(context.getError()).isSameAs(ex);
+	}
+
+	@Test
+	void clientErrorIsNotRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+
+		testException(new ServerWebInputException(""));
+		testException(new ErrorResponseException(HttpStatus.CONFLICT));
+		assertThat(context.getError()).isNull();
+	}
+
+	@Test
+	void serverErrorWithoutObservation() {
+		testException(new ErrorResponseException(HttpStatus.SERVICE_UNAVAILABLE));
+		assertThat(ServerRequestObservationContext.findCurrent(this.exchange.getAttributes())).isEmpty();
 	}
 
 	@Test
@@ -201,6 +235,13 @@ class ResponseEntityExceptionHandlerTests {
 		assertThat(body.getDetail()).isEqualTo("Invalid state: A");
 	}
 
+
+	private ServerRequestObservationContext observationContext() {
+		ServerRequestObservationContext context = new ServerRequestObservationContext(
+				this.exchange.getRequest(), this.exchange.getResponse(), this.exchange.getAttributes());
+		this.exchange.getAttributes().put(ServerRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, context);
+		return context;
+	}
 
 	@SuppressWarnings("unchecked")
 	private ResponseEntity<ProblemDetail> testException(ErrorResponseException exception) {
