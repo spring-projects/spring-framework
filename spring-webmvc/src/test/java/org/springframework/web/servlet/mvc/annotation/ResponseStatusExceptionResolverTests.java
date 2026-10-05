@@ -32,7 +32,9 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
@@ -143,6 +145,65 @@ class ResponseStatusExceptionResolverTests {
 		assertThat(response.getHeader(HttpHeaders.ALLOW)).isEqualTo("POST,PUT");
 	}
 
+	@Test
+	void serverErrorResponseStatusExceptionIsRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+		ResponseStatusException ex = new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertResolved(mav, 503, null);
+		assertThat(context.getError()).isSameAs(ex);
+	}
+
+	@Test
+	void serverErrorResponseStatusIsRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+		ServerErrorException ex = new ServerErrorException();
+
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertResolved(mav, 500, null);
+		assertThat(context.getError()).isSameAs(ex);
+	}
+
+	@Test
+	void nestedServerErrorResponseStatusIsRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+		Exception cause = new ServerErrorException();
+		TypeMismatchException ex = new TypeMismatchException("value", ITestBean.class, cause);
+
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertResolved(mav, 500, null);
+		assertThat(context.getError()).isSameAs(cause);
+	}
+
+	@Test
+	void clientErrorIsNotRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+
+		exceptionResolver.resolveException(request, response, null, new StatusCodeException());
+		assertThat(context.getError()).isNull();
+	}
+
+	@Test
+	void clientErrorResponseStatusExceptionIsNotRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+
+		exceptionResolver.resolveException(request, response, null, new ResponseStatusException(HttpStatus.NOT_FOUND));
+		assertThat(context.getError()).isNull();
+	}
+
+	@Test
+	void serverErrorWithoutObservation() {
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, new ServerErrorException());
+		assertResolved(mav, 500, null);
+	}
+
+	private ServerRequestObservationContext observationContext() {
+		ServerRequestObservationContext context = new ServerRequestObservationContext(this.request, this.response);
+		this.request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, context);
+		return context;
+	}
+
 	private void assertResolved(ModelAndView mav, int status, String reason) {
 		assertThat(mav != null && mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).isEqualTo(status);
@@ -154,6 +215,11 @@ class ResponseStatusExceptionResolverTests {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@SuppressWarnings("serial")
 	private static class StatusCodeException extends Exception {
+	}
+
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	@SuppressWarnings("serial")
+	private static class ServerErrorException extends Exception {
 	}
 
 	@ResponseStatus(code = HttpStatus.GONE, reason = "You suck!")
