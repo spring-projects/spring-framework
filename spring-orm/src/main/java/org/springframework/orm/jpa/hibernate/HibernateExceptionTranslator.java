@@ -34,8 +34,6 @@ import org.hibernate.StaleStateException;
 import org.hibernate.TransientObjectException;
 import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
-import org.hibernate.dialect.lock.OptimisticEntityLockException;
-import org.hibernate.dialect.lock.PessimisticEntityLockException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
@@ -206,10 +204,10 @@ public class HibernateExceptionTranslator implements PersistenceExceptionTransla
 		if (exToCheck instanceof StaleStateException) {
 			return new ObjectOptimisticLockingFailureException(ex.getMessage(), ex);
 		}
-		if (exToCheck instanceof OptimisticEntityLockException) {
+		if (exToCheck.getClass().getSimpleName().equals("OptimisticEntityLockException")) {
 			return new ObjectOptimisticLockingFailureException(ex.getMessage(), ex);
 		}
-		if (exToCheck instanceof PessimisticEntityLockException) {
+		if (exToCheck.getClass().getSimpleName().equals("PessimisticEntityLockException")) {
 			if (ex.getCause() instanceof LockAcquisitionException) {
 				return new CannotAcquireLockException(ex.getMessage(), ex.getCause());
 			}

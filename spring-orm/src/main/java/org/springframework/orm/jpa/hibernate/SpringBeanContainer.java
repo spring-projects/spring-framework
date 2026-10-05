@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa.hibernate;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -24,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.resource.beans.container.spi.BeanContainer;
 import org.hibernate.resource.beans.container.spi.ContainedBean;
 import org.hibernate.resource.beans.spi.BeanInstanceProducer;
+import org.hibernate.resource.beans.spi.ManagedBean;
 import org.hibernate.type.spi.TypeBootstrapContext;
 import org.jspecify.annotations.Nullable;
 
@@ -133,6 +135,22 @@ public final class SpringBeanContainer implements BeanContainer {
 		return (SpringContainedBean<B>) bean;
 	}
 
+	// @Override - on Hibernate 8.0
+	public <B> ContainedBean<B> getBootstrapSafeBean(
+			Class<B> beanType, LifecycleOptions lifecycleOptions, BeanInstanceProducer fallbackProducer) {
+
+		// Fallback implementation for Hibernate 8.0 runtime compatibility
+		return getBean(beanType, lifecycleOptions, fallbackProducer);
+	}
+
+	// @Override - on Hibernate 8.0
+	public void releaseBean(ManagedBean<?> bean) {
+		if (bean instanceof SpringContainedBean<?> contained) {
+			this.beanCache.values().removeAll(Collections.singleton(contained));
+			contained.destroyIfNecessary();
+		}
+	}
+
 	@Override
 	public void stop() {
 		this.beanCache.values().forEach(SpringContainedBean::destroyIfNecessary);
@@ -207,9 +225,7 @@ public final class SpringBeanContainer implements BeanContainer {
 				else {
 					// No bean found by name -> construct by type using createBean
 					return new SpringContainedBean<>(
-							beanType,
-							this.beanFactory.createBean(beanType),
-							this.beanFactory::destroyBean);
+							beanType, this.beanFactory.createBean(beanType), this.beanFactory::destroyBean);
 				}
 			}
 			else {
@@ -270,6 +286,16 @@ public final class SpringBeanContainer implements BeanContainer {
 		@Override
 		public Class<B> getBeanClass() {
 			return this.beanClass;
+		}
+
+		// @Override - on Hibernate 8.0
+		public void initialize() {
+			getBeanInstance();
+		}
+
+		// @Override - on Hibernate 8.0
+		public void release() {
+			destroyIfNecessary();
 		}
 
 		public void destroyIfNecessary() {

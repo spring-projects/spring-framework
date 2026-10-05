@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import jakarta.persistence.FetchType;
@@ -262,20 +263,22 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 				// Fast path for SmartPersistenceUnitInfo JTA check
 				return (getTransactionType() == PersistenceUnitTransactionType.JTA);
 			}
-			else if (method.getName().equals("getAllClassNames")) {
-				// JPA 4.0 letting the container perform the scanning
-				if (excludeUnlistedClasses()) {  // typically coming from Spring default persistence unit
-					List<String> mergedClassesAndPackages =
-							new ArrayList<>(getManagedClassNames().size() + getManagedPackages().size());
-					mergedClassesAndPackages.addAll(getManagedClassNames());
-					for (String managedPackage : getManagedPackages()) {
-						mergedClassesAndPackages.add(managedPackage + ClassUtils.PACKAGE_INFO_SUFFIX);
-					}
-					return mergedClassesAndPackages;
-				}
+
+			if (method.getName().startsWith("getAll") && !excludeUnlistedClasses()) {
 				throw new UnsupportedOperationException(
-						"JPA 4.0 getAllClassNames only supported with Spring-configured packagesToScan or " +
+						"JPA 4.0 getAll* methods only supported with Spring-configured packagesToScan or " +
 								"with completely listed managed classes plus exclude-unlisted-classes=true");
+			}
+			switch (method.getName()) {
+				case "getAllClassNames" -> {
+					return getManagedClassNames();
+				}
+				case "getAllPackageDescriptors", "getManagedPackageDescriptors" -> {
+					return getManagedPackages();
+				}
+				case "getAllModuleDescriptors", "getManagedModuleDescriptors" -> {
+					return Collections.emptyList();
+				}
 			}
 
 			// Regular methods to be delegated to SpringPersistenceUnitInfo
