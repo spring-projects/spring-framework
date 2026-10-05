@@ -290,6 +290,19 @@ class CompositeMapTests {
 			assertThat(keySet).containsExactlyInAnyOrder("foo", "baz", "corge");
 		}
 
+		@Test
+		void keySetRemove() {
+			Map<String, String> first = new HashMap<>(Map.of("foo", "bar", "baz", "qux"));
+			Map<String, String> second = new HashMap<>(Map.of("baz", "quux", "corge", "grault"));
+			CompositeMap<String, String> composite = new CompositeMap<>(first, second);
+
+			assertThat(composite.keySet().remove("baz")).isTrue();
+			assertThat(composite.containsKey("baz")).isFalse();
+			assertThat(composite.keySet()).containsExactlyInAnyOrder("foo", "corge");
+			assertThat(first).containsExactly(entry("foo", "bar"));
+			assertThat(second).containsExactly(entry("corge", "grault"));
+		}
+
 
 		@Test
 		void values() {
