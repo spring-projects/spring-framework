@@ -138,6 +138,22 @@ public final class SpringBeanContainer implements BeanContainer {
 		}
 	}
 
+	// @Override - on Hibernate 8.0
+	public <B> ContainedBean<B> getBootstrapSafeBean(
+			Class<B> beanType, LifecycleOptions lifecycleOptions, BeanInstanceProducer fallbackProducer) {
+
+		// Fallback implementation for Hibernate 8.0 runtime compatibility
+		return getBean(beanType, lifecycleOptions, fallbackProducer);
+	}
+
+	// @Override - on Hibernate 8.0
+	public void releaseBean(ManagedBean<?> bean) {
+		if (bean instanceof SpringContainedBean<?> contained) {
+			this.beanCache.values().removeAll(Collections.singleton(contained));
+			contained.destroyIfNecessary();
+		}
+	}
+
 	@Override
 	public void stop() {
 		this.beanCache.values().forEach(SpringContainedBean::destroyIfNecessary);

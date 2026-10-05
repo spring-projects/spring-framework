@@ -20,6 +20,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.lang.Contract;
@@ -131,7 +132,7 @@ public class SingletonSupplier<T extends @Nullable Object> implements Supplier<T
 	 * @return the singleton instance (never {@code null})
 	 * @throws IllegalStateException in case of no instance
 	 */
-	public T obtain() {
+	public @NonNull T obtain() {
 		T instance = get();
 		Assert.state(instance != null, "No instance from Supplier");
 		return instance;
