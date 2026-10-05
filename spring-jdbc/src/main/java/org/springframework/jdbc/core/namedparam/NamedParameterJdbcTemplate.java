@@ -426,7 +426,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 				@Nullable Object[] values = NamedParameterUtils.buildValueArray(parsedSql, batchArgs[i], null);
 				pscf.newPreparedStatementSetter(values).setValues(ps);
 			}
-
 			@Override
 			public int getBatchSize() {
 				return batchArgs.length;
