@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
@@ -90,7 +91,7 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		assertThat(this.response.getStatus()).isEqualTo(500);
 		assertThat(this.response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
 		assertThat(this.response.getContentAsString())
-				.contains("\"status\":500", "\"instance\":\"/orders/42\"")
+				.contains("\"status\":500")
 				.doesNotContain("Secret");
 		assertThat(this.observationContext.getError()).isSameAs(ex);
 	}
@@ -111,14 +112,18 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
 		resolver.setRenderUnhandledExceptionsAsProblemDetails(true);
 		resolver.setMessageConverters(List.of(new JacksonJsonHttpMessageConverter()));
-		resolver.setErrorResponseInterceptors(List.of((detail, errorResponse) -> detail.setProperty("traceId", "123")));
+		resolver.setErrorResponseInterceptors(List.of((detail, errorResponse) -> {
+			detail.setInstance(URI.create("/orders/42/errors/7f3c2a91"));
+			detail.setProperty("traceId", "123");
+		}));
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.refresh();
 		resolver.setApplicationContext(context);
 		resolver.afterPropertiesSet();
 
 		resolve(resolver, handlerMethod(), new IllegalStateException());
-		assertThat(this.response.getContentAsString()).contains("\"traceId\":\"123\"");
+		assertThat(this.response.getContentAsString()).contains(
+				"\"instance\":\"/orders/42/errors/7f3c2a91\"", "\"traceId\":\"123\"");
 	}
 
 	@Test

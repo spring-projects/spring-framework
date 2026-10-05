@@ -44,6 +44,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ProblemDetail;
@@ -63,7 +64,10 @@ import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.ErrorResponseViewResolver;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -104,6 +108,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private final List<ErrorResponse.Interceptor> errorResponseInterceptors = new ArrayList<>();
 
 	private final Set<String> safeExtensions = new HashSet<>();
+
+	private @Nullable ErrorResponseViewResolver errorResponseViewResolver;
 
 
 	/**
@@ -151,6 +157,27 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 
 	/**
+	 * Configure an {@link ErrorResponseViewResolver} to render problem details
+	 * as views when the client prefers HTML.
+	 * @param errorResponseViewResolver the resolver to use, or {@code null} to
+	 * always write problem details with message converters
+	 * @since 7.1
+	 */
+	public void setErrorResponseViewResolver(@Nullable ErrorResponseViewResolver errorResponseViewResolver) {
+		this.errorResponseViewResolver = errorResponseViewResolver;
+	}
+
+	/**
+	 * Return the {@link #setErrorResponseViewResolver configured}
+	 * {@link ErrorResponseViewResolver}, if any.
+	 * @since 7.1
+	 */
+	public @Nullable ErrorResponseViewResolver getErrorResponseViewResolver() {
+		return this.errorResponseViewResolver;
+	}
+
+
+	/**
 	 * Create a new {@link HttpOutputMessage} from the given {@link NativeWebRequest}.
 	 * @param webRequest the web request to create an output message from
 	 * @return the output message
@@ -174,6 +201,73 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		catch (Throwable ex) {
 			// ignore
 		}
+	}
+
+	/**
+	 * Render the given problem detail as a view, if an
+	 * {@link #setErrorResponseViewResolver ErrorResponseViewResolver} is
+	 * configured, the client prefers HTML, and the resolver returns a view.
+	 * <p>In that case, the view, model and status are applied to the
+	 * {@code ModelAndViewContainer} and the response status is set.
+	 * The problem detail must not be written to the response.
+	 * @param problemDetail the problem detail to render
+	 * @param errorResponse the error response the problem detail is from, if any
+	 * @param status the status to use if the view does not declare one
+	 * @param mavContainer the container for the current request
+	 * @param webRequest the current request
+	 * @return {@code true} if the problem detail is rendered as a view,
+	 * {@code false} if it should be written with message converters
+	 * @since 7.1
+	 */
+	protected boolean resolveErrorView(ProblemDetail problemDetail, @Nullable ErrorResponse errorResponse,
+			HttpStatusCode status, ModelAndViewContainer mavContainer, NativeWebRequest webRequest) {
+
+		ErrorResponseViewResolver viewResolver = this.errorResponseViewResolver;
+		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+		if (viewResolver == null || request == null || response == null || !isHtmlPreferred(request)) {
+			return false;
+		}
+		ModelAndView mav = viewResolver.resolveErrorView(request, problemDetail, errorResponse);
+		if (mav == null) {
+			return false;
+		}
+		HttpStatusCode viewStatus = (mav.getStatus() != null ? mav.getStatus() : status);
+		mavContainer.setRequestHandled(false);
+		if (mav.isReference()) {
+			mavContainer.setViewName(mav.getViewName());
+		}
+		else {
+			mavContainer.setView(mav.getView());
+		}
+		mavContainer.addAllAttributes(mav.getModel());
+		mavContainer.setStatus(viewStatus);
+		response.setStatus(viewStatus.value());
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean isHtmlPreferred(HttpServletRequest request) {
+		Set<MediaType> producibleTypes =
+				(Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		if (!CollectionUtils.isEmpty(producibleTypes) &&
+				producibleTypes.stream().noneMatch(MediaType.TEXT_HTML::isCompatibleWith)) {
+			return false;
+		}
+		List<MediaType> acceptableTypes;
+		try {
+			acceptableTypes = getAcceptableMediaTypes(request);
+		}
+		catch (HttpMediaTypeNotAcceptableException ex) {
+			return false;
+		}
+		// Acceptable media types are sorted by quality and specificity
+		for (MediaType mediaType : acceptableTypes) {
+			if (mediaType.isConcrete()) {
+				return MediaType.TEXT_HTML.isCompatibleWith(mediaType);
+			}
+		}
+		return false;
 	}
 
 	/**

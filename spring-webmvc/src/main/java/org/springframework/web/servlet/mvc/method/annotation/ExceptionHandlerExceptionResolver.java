@@ -62,6 +62,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolverCompo
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.ErrorResponseViewResolver;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -130,6 +131,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			new LinkedHashMap<>();
 
 	private boolean renderUnhandledExceptionsAsProblemDetails;
+
+	private @Nullable ErrorResponseViewResolver errorResponseViewResolver;
 
 	private @Nullable ProblemDetailExceptionHandler problemDetailExceptionHandler;
 
@@ -309,6 +312,33 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		return this.renderUnhandledExceptionsAsProblemDetails;
 	}
 
+	/**
+	 * Configure an {@link ErrorResponseViewResolver} to render problem details
+	 * returned by {@code @ExceptionHandler} methods as views, typically HTML
+	 * error pages, when the client prefers HTML.
+	 * <p>This applies to {@code ProblemDetail}, {@code ErrorResponse} and
+	 * {@code ResponseEntity<ProblemDetail>} return values, including problem details
+	 * rendered for {@link #setRenderUnhandledExceptionsAsProblemDetails(boolean)
+	 * unhandled exceptions}. It is not applied to custom
+	 * {@link #setReturnValueHandlers(List) return value handlers}.
+	 * <p>By default, this is not set and problem details are always written
+	 * with message converters.
+	 * @param errorResponseViewResolver the resolver to use
+	 * @since 7.1
+	 */
+	public void setErrorResponseViewResolver(@Nullable ErrorResponseViewResolver errorResponseViewResolver) {
+		this.errorResponseViewResolver = errorResponseViewResolver;
+	}
+
+	/**
+	 * Return the {@link #setErrorResponseViewResolver configured}
+	 * {@link ErrorResponseViewResolver}, if any.
+	 * @since 7.1
+	 */
+	public @Nullable ErrorResponseViewResolver getErrorResponseViewResolver() {
+		return this.errorResponseViewResolver;
+	}
+
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -441,15 +471,19 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(
+		HttpEntityMethodProcessor httpEntityProcessor = new HttpEntityMethodProcessor(
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice,
-				this.errorResponseInterceptors));
+				this.errorResponseInterceptors);
+		httpEntityProcessor.setErrorResponseViewResolver(this.errorResponseViewResolver);
+		handlers.add(httpEntityProcessor);
 
 		// Annotation-based return value types
 		handlers.add(new ServletModelAttributeMethodProcessor(false));
-		handlers.add(new RequestResponseBodyMethodProcessor(
+		RequestResponseBodyMethodProcessor responseBodyProcessor = new RequestResponseBodyMethodProcessor(
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice,
-				this.errorResponseInterceptors));
+				this.errorResponseInterceptors);
+		responseBodyProcessor.setErrorResponseViewResolver(this.errorResponseViewResolver);
+		handlers.add(responseBodyProcessor);
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());

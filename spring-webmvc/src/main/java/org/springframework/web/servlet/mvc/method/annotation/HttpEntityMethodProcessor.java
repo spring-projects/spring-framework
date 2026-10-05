@@ -238,6 +238,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			});
 		}
 
+		if (httpEntity.getBody() instanceof ProblemDetail detail && !entityHeaders.containsHeader(HttpHeaders.CONTENT_TYPE)) {
+			HttpStatusCode status = (httpEntity instanceof ResponseEntity<?> responseEntity ?
+					responseEntity.getStatusCode() : HttpStatusCode.valueOf(detail.getStatus()));
+			ErrorResponse errorResponse = (returnValue instanceof ErrorResponse response ? response : null);
+			if (resolveErrorView(detail, errorResponse, status, mavContainer, webRequest)) {
+				return;
+			}
+		}
+
 		if (httpEntity instanceof ResponseEntity<?> responseEntity) {
 			HttpStatusCode returnStatus = responseEntity.getStatusCode();
 			outputMessage.getServletResponse().setStatus(returnStatus.value());

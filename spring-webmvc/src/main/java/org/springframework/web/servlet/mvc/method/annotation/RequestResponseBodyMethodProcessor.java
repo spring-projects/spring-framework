@@ -207,6 +207,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 				detail.setInstance(path);
 			}
 			invokeErrorResponseInterceptors(detail, null);
+			if (resolveErrorView(detail, null, HttpStatusCode.valueOf(detail.getStatus()), mavContainer, webRequest)) {
+				return;
+			}
 		}
 
 		// Try even with null return value. ResponseBodyAdvice could get involved.
