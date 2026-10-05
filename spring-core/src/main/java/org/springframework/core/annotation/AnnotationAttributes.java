@@ -396,6 +396,12 @@ public class AnnotationAttributes extends LinkedHashMap<String, @Nullable Object
 		if (value == this) {
 			return "(this Map)";
 		}
+		if (value instanceof Class<?> clazz) {
+			return ClassUtils.getCanonicalName(clazz) + ".class";
+		}
+		if (value instanceof Enum<?> enumValue) {
+			return enumValue.name();
+		}
 		if (value != null && value.getClass().isArray()) {
 			int length = Array.getLength(value);
 			StringJoiner sj = new StringJoiner(", ", "[", "]");
