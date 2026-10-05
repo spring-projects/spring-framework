@@ -53,6 +53,11 @@ within your locally cloned `spring-framework` working directory._
      compile `spring-core` and generate JAXB types for `spring-oxm`.
 1. `spring-aspects` does not compile due to references to aspect types unknown to Eclipse.
    - If you installed _AJDT_ into Eclipse it should work.
+1. The Java 21 and Java 24 multi-release sources in `spring-core` (`src/main/java21`,
+   `src/main/java24`, and `src/test/java21`) are not configured as source folders in
+   Eclipse, since an Eclipse project supports only a single Java compliance level.
+   - Use `./gradlew :spring-core:java21Test` or `./gradlew :spring-core:java24Test` to
+     build and test those sources from the command line.
 1. While JUnit tests pass from the command line with Gradle, some may fail when run from
    the IDE.
    - Resolving this is a work in progress.
