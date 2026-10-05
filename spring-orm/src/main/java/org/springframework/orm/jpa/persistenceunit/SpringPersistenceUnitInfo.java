@@ -168,8 +168,15 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	 */
 	public void apply(PersistenceManagedTypes managedTypes) {
 		Assert.notNull(managedTypes, "PersistenceManagedTypes must not be null");
+
 		managedTypes.getManagedClassNames().forEach(this::addManagedClassName);
-		managedTypes.getManagedPackages().forEach(this::addManagedPackage);
+		managedTypes.getManagedPackages().forEach(managedPackage -> {
+			addManagedPackage(managedPackage);
+			ModuleLayer.boot().modules().stream()
+					.filter(module -> module.isNamed() && module.getPackages().contains(managedPackage))
+					.forEach(this::addManagedModule);
+		});
+
 		URL persistenceUnitRootUrl = managedTypes.getPersistenceUnitRootUrl();
 		if (getPersistenceUnitRootUrl() == null && persistenceUnitRootUrl != null) {
 			setPersistenceUnitRootUrl(persistenceUnitRootUrl);
@@ -262,20 +269,22 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 				// Fast path for SmartPersistenceUnitInfo JTA check
 				return (getTransactionType() == PersistenceUnitTransactionType.JTA);
 			}
-			else if (method.getName().equals("getAllClassNames")) {
-				// JPA 4.0 letting the container perform the scanning
-				if (excludeUnlistedClasses()) {  // typically coming from Spring default persistence unit
-					List<String> mergedClassesAndPackages =
-							new ArrayList<>(getManagedClassNames().size() + getManagedPackages().size());
-					mergedClassesAndPackages.addAll(getManagedClassNames());
-					for (String managedPackage : getManagedPackages()) {
-						mergedClassesAndPackages.add(managedPackage + ClassUtils.PACKAGE_INFO_SUFFIX);
-					}
-					return mergedClassesAndPackages;
-				}
+
+			if (method.getName().startsWith("getAll") && !excludeUnlistedClasses()) {
 				throw new UnsupportedOperationException(
-						"JPA 4.0 getAllClassNames only supported with Spring-configured packagesToScan or " +
+						"JPA 4.0 getAll* methods only supported with Spring-configured packagesToScan or " +
 								"with completely listed managed classes plus exclude-unlisted-classes=true");
+			}
+			switch (method.getName()) {
+				case "getAllClassNames" -> {
+					return getManagedClassNames();
+				}
+				case "getAllPackageDescriptors", "getManagedPackageDescriptors" -> {
+					return getManagedPackages();
+				}
+				case "getAllModuleDescriptors", "getManagedModuleDescriptors" -> {
+					return getManagedModules();
+				}
 			}
 
 			// Regular methods to be delegated to SpringPersistenceUnitInfo

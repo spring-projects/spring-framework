@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -38,6 +39,7 @@ import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
 import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypesScanner;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a JPA
@@ -75,6 +77,12 @@ import org.springframework.util.ClassUtils;
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean implements ResourceLoaderAware {
 
 	private static final String NON_JTA_DATASOURCE_PROPERTY = "jakarta.persistence.nonJtaDataSource";
+
+	private static final @Nullable Method MANAGED_PACKAGE_DESCRIPTOR_METHOD =
+			ClassUtils.getMethodIfAvailable(PersistenceConfiguration.class, "managedPackageDescriptor", String.class);
+
+	private static final @Nullable Method MANAGED_MODULE_DESCRIPTOR_METHOD =
+			ClassUtils.getMethodIfAvailable(PersistenceConfiguration.class, "managedModuleDescriptor", String.class);
 
 	private @Nullable PersistenceConfiguration configuration;
 
@@ -242,18 +250,38 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 		}
 
 		if (this.packagesToScan != null) {
+			PersistenceConfiguration config = getPersistenceConfiguration();
 			PersistenceManagedTypesScanner scanner = new PersistenceManagedTypesScanner(this.resourcePatternResolver);
 			PersistenceManagedTypes result = scanner.scan(this.packagesToScan);
+
 			// Expose managed class names from scan result (on JPA 4.0+, this includes
 			// everything meta-annotated with @Discoverable, even package-info classes)
 			Set<String> classNameSet = new LinkedHashSet<>(result.getManagedClassNames());
+
 			// Expose managed packages as package-info class names if not included already
 			// (accepted by PersistenceConfiguration on Hibernate as well as EclipseLink)
-			for (String managedPackage : result.getManagedPackages()) {
-				classNameSet.add(managedPackage + ClassUtils.PACKAGE_INFO_SUFFIX);
+			if (MANAGED_PACKAGE_DESCRIPTOR_METHOD != null) {  // on JPA 4.0
+				Set<String> moduleNameSet = new LinkedHashSet<>();
+				for (String managedPackage : result.getManagedPackages()) {
+					ReflectionUtils.invokeMethod(MANAGED_PACKAGE_DESCRIPTOR_METHOD, config, managedPackage);
+					classNameSet.remove(managedPackage + ClassUtils.PACKAGE_INFO_SUFFIX);
+					ModuleLayer.boot().modules().stream()
+							.filter(module -> module.isNamed() && module.getPackages().contains(managedPackage))
+							.forEach(module -> moduleNameSet.add(module.getName()));
+				}
+				if (MANAGED_MODULE_DESCRIPTOR_METHOD != null) {
+					for (String managedModule :moduleNameSet) {
+						ReflectionUtils.invokeMethod(MANAGED_MODULE_DESCRIPTOR_METHOD, config, managedModule);
+					}
+				}
 			}
+			else {
+				for (String managedPackage : result.getManagedPackages()) {
+					classNameSet.add(managedPackage + ClassUtils.PACKAGE_INFO_SUFFIX);
+				}
+			}
+
 			// Expose pre-resolved Class references to PersistenceConfiguration.
-			PersistenceConfiguration config = getPersistenceConfiguration();
 			ClassLoader classLoader = this.resourcePatternResolver.getClassLoader();
 			for (String className : classNameSet) {
 				config.managedClass(ClassUtils.resolveClassName(className, classLoader));

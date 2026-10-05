@@ -77,6 +77,8 @@ public class MutablePersistenceUnitInfo {
 
 	private final List<String> managedPackages = new ArrayList<>();
 
+	private final List<String> managedModules = new ArrayList<>();
+
 	private boolean excludeUnlistedClasses = false;
 
 	private SharedCacheMode sharedCacheMode = SharedCacheMode.UNSPECIFIED;
@@ -190,6 +192,35 @@ public class MutablePersistenceUnitInfo {
 
 	public List<String> getManagedPackages() {
 		return this.managedPackages;
+	}
+
+	/**
+	 * Add a managed module to the persistence provider's metadata.
+	 * <p>Note: This refers to annotated {@code module-info.java} files. It does
+	 * <i>not</i> trigger entity scanning in the specified module.
+	 * @since 7.1
+	 * @see #addManagedPackage
+	 */
+	void addManagedModule(Module module) {
+		String moduleName = module.getName();
+		if (!this.managedModules.contains(moduleName)) {
+			this.managedModules.add(moduleName);
+		}
+	}
+
+	/**
+	 * Add a managed module to the persistence provider's metadata.
+	 * <p>Note: This refers to annotated {@code module-info.java} files. It does
+	 * <i>not</i> trigger entity scanning in the specified module.
+	 * @since 7.1
+	 * @see #addManagedPackage
+	 */
+	public void addManagedModule(String moduleName) {
+		this.managedModules.add(moduleName);
+	}
+
+	public List<String> getManagedModules() {
+		return this.managedModules;
 	}
 
 	public void setExcludeUnlistedClasses(boolean excludeUnlistedClasses) {
