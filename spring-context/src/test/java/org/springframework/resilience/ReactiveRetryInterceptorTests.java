@@ -208,7 +208,7 @@ class ReactiveRetryInterceptorTests {
 		CacheableAnnotatedBean target = (CacheableAnnotatedBean) AopProxyUtils.getSingletonTarget(proxy);
 
 		// Simulates a failure on the 1st subscription to the target Flux.
-		List<String> result = proxy.retryOperation().collectList().block(Duration.ofSeconds(5));
+		List<String> result = proxy.retryOperation().collectList().block(Duration.ofSeconds(1));
 		assertThat(result).containsExactly("a", "b");
 		// Subscribed twice: the 2nd attempt re-subscribed to the Flux returned from
 		// the cache interceptor and reached the target Flux again instead of hanging.
@@ -232,7 +232,7 @@ class ReactiveRetryInterceptorTests {
 		cache.put(SimpleKey.EMPTY, List.of("a", "b"));
 
 		// Simulates a failure on the 1st subscription to the target Flux.
-		List<String> result = proxy.retryOperation().collectList().block(Duration.ofSeconds(5));
+		List<String> result = proxy.retryOperation().collectList().block(Duration.ofSeconds(1));
 		assertThat(result).containsExactly("a", "b");
 		// Subscribed twice: the 2nd attempt re-subscribed to the Flux returned from
 		// the cache interceptor and reached the target Flux again instead of hanging.
