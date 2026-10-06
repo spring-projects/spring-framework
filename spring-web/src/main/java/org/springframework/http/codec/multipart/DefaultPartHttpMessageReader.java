@@ -40,6 +40,7 @@ import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.util.Assert;
+import org.springframework.util.unit.DataSize;
 
 /**
  * Default {@code HttpMessageReader} for parsing {@code "multipart/form-data"}
@@ -63,9 +64,9 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	private int maxHeadersSize = 10 * 1024;
 
-	private long maxDiskUsagePerPart = -1;
+	private long maxDiskUsagePerPart = DataSize.ofMegabytes(1).toBytes();
 
-	private int maxParts = -1;
+	private int maxParts = 50;
 
 	private @Nullable Scheduler blockingOperationScheduler;
 
@@ -105,9 +106,10 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	}
 
 	/**
-	 * Configure the maximum amount of disk space allowed for file parts.
-	 * <p>By default this is set to -1, meaning that there is no maximum.
-	 * <p>Note that this property is ignored when
+	 * Configure the maximum amount of disk space allowed for file parts
+	 * where -1 means no limit.
+	 * <p>By default, this is set to 1MB.
+	 * <p><strong>Note:</Strong> This property is ignored when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
 	 */
 	public void setMaxDiskUsagePerPart(long maxDiskUsagePerPart) {
@@ -115,8 +117,9 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	}
 
 	/**
-	 * Specify the maximum number of parts allowed in a given multipart request.
-	 * <p>By default this is set to -1, meaning that there is no maximum.
+	 * Specify the maximum number of parts allowed in a given multipart request
+	 * where -1 means no limit.
+	 * <p>By default, this is set to 50.
 	 */
 	public void setMaxParts(int maxParts) {
 		this.maxParts = maxParts;
