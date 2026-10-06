@@ -61,6 +61,26 @@ import org.springframework.util.StreamUtils;
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
  * that can read and write {@link Source} objects.
  *
+ * <p>Security considerations: {@link #setSupportDtd supportDtd}
+ * and {@link #setProcessExternalEntities processExternalEntities} only apply
+ * when <em>reading</em> a request body into a {@code DOMSource},
+ * {@code SAXSource} or {@code StAXSource}. They do not apply to <em>writing</em>.
+ * Spring Framework trusts the application and its data sources, so the XML being written
+ * is assumed to be application-controlled. Only reading untrusted XML is
+ * protected against XXE.
+ *
+ * <p>When a handler declares a {@code StreamSource} (or a plain {@code Source},
+ * which resolves to it), the application opts in to receiving the raw,
+ * <em>unparsed</em> request body. That body is not processed by this converter
+ * and the application is responsible for any later processing of it, including
+ * writing it back out in a response. Echoing untrusted XML back to the client
+ * is an application-level decision; the application must parse or sanitize
+ * that XML safely first (for example by declaring a {@code DOMSource}).
+ *
+ * <p>This behavior is by design and is not considered a vulnerability in
+ * Spring Framework. Reports of XXE on the <em>write</em> path, or from raw
+ * {@code StreamSource} pass-through, will be closed as such.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -102,8 +122,11 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 
 	/**
-	 * Indicate whether DTD parsing should be supported.
+	 * Indicate whether DTD parsing should be supported when reading
+	 * {@code DOMSource}, {@code SAXSource} and {@code StAXSource} request content.
 	 * <p>Default is {@code false} meaning that DTD is disabled.
+	 * <p>This setting does not apply to raw {@code StreamSource} content or to
+	 * writing {@code Source} instances; see the class-level documentation.
 	 */
 	public void setSupportDtd(boolean supportDtd) {
 		this.supportDtd = supportDtd;
@@ -122,6 +145,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	/**
 	 * Indicate whether external XML entities are processed when converting to a Source.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 * <p>This setting does not apply to raw {@code StreamSource} content or to
+	 * writing {@code Source} instances; see the class-level documentation.
 	 * <p><strong>Note:</strong> setting this option to {@code true} also
 	 * automatically sets {@link #setSupportDtd} to {@code true}.
 	 */
