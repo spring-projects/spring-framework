@@ -470,6 +470,11 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		@Override
 		public void onComplete() {
 			this.completed = true;
+			State state = PartGenerator.this.state.get();
+			// fileCreated might have changed our state to WritingFileState
+			if (state != this) {
+				state.onComplete();
+			}
 		}
 
 		public void createFile() {
