@@ -120,6 +120,11 @@ NOTE: Classes with a single constructor have their parameters automatically auto
 That's why there is no need for an explicit `@Autowired constructor` in the example shown
 above.
 
+NOTE: Constructor parameters with default values are not supported in `@Configuration`
+classes enhanced with CGLIB proxies (the default), and such classes are rejected at startup.
+Use `@Configuration(proxyBeanMethods = false)` without inter-bean references between
+`@Bean` methods instead.
+
 If you really need to use field injection, you can use the `lateinit var` construct,
 as the following example shows:
 
