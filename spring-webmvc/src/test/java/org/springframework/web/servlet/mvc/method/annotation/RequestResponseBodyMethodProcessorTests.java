@@ -395,7 +395,6 @@ class RequestResponseBodyMethodProcessorTests {
 			XmlAssert.assertThat(this.servletResponse.getContentAsString()).and("""
 						<problem xmlns="urn:ietf:rfc:7807">
 							<status>400</status>
-							<instance>/path</instance>
 							<title>Bad Request</title>
 						</problem>""")
 					.ignoreWhitespace()
@@ -405,8 +404,7 @@ class RequestResponseBodyMethodProcessorTests {
 			JSONAssert.assertEquals("""
 					{
 						"title":    "Bad Request",
-						"status":   400,
-						"instance": "/path"
+						"status":   400
 					}""", this.servletResponse.getContentAsString(), false);
 		}
 	}

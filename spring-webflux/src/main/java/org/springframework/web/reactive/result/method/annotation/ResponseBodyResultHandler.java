@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -109,10 +108,6 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 		MethodParameter bodyTypeParameter = result.getReturnTypeSource();
 		if (body instanceof ProblemDetail detail) {
 			exchange.getResponse().setStatusCode(HttpStatusCode.valueOf(detail.getStatus()));
-			if (detail.getInstance() == null) {
-				URI path = URI.create(exchange.getRequest().getPath().value());
-				detail.setInstance(path);
-			}
 			invokeErrorResponseInterceptors(detail, null);
 		}
 		return writeBody(body, bodyTypeParameter, exchange);

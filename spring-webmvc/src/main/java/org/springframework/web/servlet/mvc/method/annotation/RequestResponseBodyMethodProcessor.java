@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -202,10 +201,6 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 		if (returnValue instanceof ProblemDetail detail) {
 			outputMessage.setStatusCode(HttpStatusCode.valueOf(detail.getStatus()));
-			if (detail.getInstance() == null) {
-				URI path = URI.create(inputMessage.getServletRequest().getRequestURI());
-				detail.setInstance(path);
-			}
 			invokeErrorResponseInterceptors(detail, null);
 			if (resolveErrorView(detail, null, HttpStatusCode.valueOf(detail.getStatus()), mavContainer, webRequest)) {
 				return;

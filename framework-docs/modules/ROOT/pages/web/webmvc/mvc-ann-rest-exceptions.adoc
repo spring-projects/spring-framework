@@ -30,8 +30,6 @@ You can return `ProblemDetail` or `ErrorResponse` from any `@ExceptionHandler` o
 any `@RequestMapping` method to render an RFC 9457 response. This is processed as follows:
 
 - The `status` property of `ProblemDetail` determines the HTTP status.
-- The `instance` property of `ProblemDetail` is set from the current URL path, if not
-already set.
 - The Jackson JSON and XML codecs use "application/problem+json" or
 "application/problem+xml" respectively as the producible media types for `ProblemDetail`
 to ensure they are favored for content negotiation.
@@ -46,6 +44,10 @@ use a protected method to map any exception to a `ProblemDetail`.
 You can register `ErrorResponse` interceptors through the
 xref:web/webmvc/mvc-config.adoc[MVC Config] with a `WebMvcConfigurer`. Use that to intercept
 any RFC 9457 response and take some action.
+
+NOTE: As of version 7.1, the ProblemDetail instance field is no longer set to the path.
+The spec expects it to serve as a unique identifier for the specific occurrence of the
+problem, and when the URI is dereferenceable, to provide information about the problem.
 
 
 [[mvc-ann-rest-exceptions-non-standard]]

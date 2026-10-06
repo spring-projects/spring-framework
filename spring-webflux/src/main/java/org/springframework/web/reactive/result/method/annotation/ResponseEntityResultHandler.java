@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -168,10 +167,6 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			}
 
 			if (httpEntity.getBody() instanceof ProblemDetail detail) {
-				if (detail.getInstance() == null) {
-					URI path = URI.create(exchange.getRequest().getPath().value());
-					detail.setInstance(path);
-				}
 				if (logger.isWarnEnabled() && httpEntity instanceof ResponseEntity<?> responseEntity) {
 					if (responseEntity.getStatusCode().value() != detail.getStatus()) {
 						logger.warn(actualParameter.getExecutable().toGenericString() +
