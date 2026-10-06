@@ -241,13 +241,12 @@ class CompositeMapTests {
 		Map<String, String> expected = Map.of("foo", "bar", "baz", "qux");
 		Map<String, String> other = CollectionUtils.compositeMap(expected, Collections.emptyMap());
 
-		assertThat(composite.equals(composite)).isTrue();
-		assertThat(composite.equals(expected)).isTrue();
-		assertThat(expected.equals(composite)).isTrue();
-		assertThat(composite.equals(other)).isTrue();
-		assertThat(other.equals(composite)).isTrue();
-		assertThat(composite.hashCode()).isEqualTo(expected.hashCode());
-		assertThat(composite.hashCode()).isEqualTo(composite.entrySet().hashCode());
+		assertThat(composite).isEqualTo(expected);
+		assertThat(expected).isEqualTo(composite);
+		assertThat(composite).isEqualTo(other);
+		assertThat(other).isEqualTo(composite);
+		assertThat(composite).hasSameHashCodeAs(expected);
+		assertThat(composite).hasSameHashCodeAs(other);
 	}
 
 	@Test
@@ -255,11 +254,11 @@ class CompositeMapTests {
 		Map<String, String> composite = CollectionUtils.compositeMap(
 				Map.of("foo", "bar"), Collections.emptyMap());
 
-		assertThat(composite.equals(null)).isFalse();
-		assertThat(composite.equals("foo=bar")).isFalse();
-		assertThat(composite.equals(Collections.emptyMap())).isFalse();
-		assertThat(composite.equals(Map.of("foo", "baz"))).isFalse();
-		assertThat(composite.equals(Map.of("baz", "bar"))).isFalse();
+		assertThat(composite).isNotEqualTo(null);
+		assertThat(composite).isNotEqualTo("foo=bar");
+		assertThat(composite).isNotEqualTo(Collections.emptyMap());
+		assertThat(composite).isNotEqualTo(Map.of("foo", "baz"));
+		assertThat(composite).isNotEqualTo(Map.of("baz", "bar"));
 	}
 
 	@Test
@@ -268,9 +267,9 @@ class CompositeMapTests {
 				Collections.emptyMap(), Collections.emptyMap());
 		Map<String, String> expected = Collections.emptyMap();
 
-		assertThat(composite.equals(expected)).isTrue();
-		assertThat(expected.equals(composite)).isTrue();
-		assertThat(composite.hashCode()).isZero();
+		assertThat(composite).isEqualTo(expected);
+		assertThat(expected).isEqualTo(composite);
+		assertThat(composite).hasSameHashCodeAs(expected);
 	}
 
 	@Test
@@ -279,10 +278,10 @@ class CompositeMapTests {
 				Map.of("foo", "bar"), Map.of("foo", "hidden", "baz", "qux"));
 		Map<String, String> expected = Map.of("foo", "bar", "baz", "qux");
 
-		assertThat(composite.equals(expected)).isTrue();
-		assertThat(expected.equals(composite)).isTrue();
-		assertThat(composite.equals(Map.of("foo", "hidden", "baz", "qux"))).isFalse();
-		assertThat(composite.hashCode()).isEqualTo(expected.hashCode());
+		assertThat(composite).isEqualTo(expected);
+		assertThat(expected).isEqualTo(composite);
+		assertThat(composite).isNotEqualTo(Map.of("foo", "hidden", "baz", "qux"));
+		assertThat(composite).hasSameHashCodeAs(expected);
 	}
 
 	@Test
@@ -294,12 +293,12 @@ class CompositeMapTests {
 		Map<String, @Nullable String> expected = new HashMap<>(first);
 		expected.put("baz", "qux");
 
-		assertThat(composite.equals(expected)).isTrue();
-		assertThat(expected.equals(composite)).isTrue();
-		assertThat(composite.hashCode()).isEqualTo(expected.hashCode());
+		assertThat(composite).isEqualTo(expected);
+		assertThat(expected).isEqualTo(composite);
+		assertThat(composite).hasSameHashCodeAs(expected);
 		expected.remove("foo");
 		expected.put("other", null);
-		assertThat(composite.equals(expected)).isFalse();
+		assertThat(composite).isNotEqualTo(expected);
 	}
 
 	@Test
@@ -307,11 +306,12 @@ class CompositeMapTests {
 		Map<String, String> composite = CollectionUtils.compositeMap(
 				Map.of("foo", "bar"), Map.of("baz", "qux"));
 		Map<String, String> expected = Map.of("foo", "bar", "baz", "qux");
+
+		// Check whether equals/hashCode works in a HashSet.
 		Set<Map<String, String>> maps = new HashSet<>();
 		maps.add(expected);
-
-		assertThat(maps.contains(composite)).isTrue();
-		assertThat(maps.add(composite)).isFalse();
+		maps.add(composite);
+		assertThat(maps).hasSize(1);
 	}
 
 	@Nested
