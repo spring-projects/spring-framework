@@ -22,6 +22,7 @@ import java.nio.charset.MalformedInputException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystemException;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,6 +37,13 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.resilience.annotation.EnableResilientMethods;
@@ -187,6 +195,49 @@ class ReactiveRetryInterceptorTests {
 				.withCauseInstanceOf(IOException.class);
 		// 1 initial attempt + 1 retry
 		assertThat(target.counter).hasValue(2);
+	}
+
+	@Test  // gh-37403
+	void withCacheableAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(CacheableAnnotatedBean.class));
+		ctx.registerBeanDefinition("cacheManager", new RootBeanDefinition(ConcurrentMapCacheManager.class));
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(EnablingConfigWithCaching.class));
+		ctx.refresh();
+		CacheableAnnotatedBean proxy = ctx.getBean(CacheableAnnotatedBean.class);
+		CacheableAnnotatedBean target = (CacheableAnnotatedBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		// Simulates a failure on the 1st subscription to the target Flux.
+		List<String> result = proxy.retryOperation().collectList().block(Duration.ofSeconds(5));
+		assertThat(result).containsExactly("a", "b");
+		// Subscribed twice: the 2nd attempt re-subscribed to the Flux returned from
+		// the cache interceptor and reached the target Flux again instead of hanging.
+		assertThat(target.counter).hasValue(2);
+
+		Cache cache = ctx.getBean(CacheManager.class).getCache("tests");
+		assertThat(cache.get(SimpleKey.EMPTY).get()).isEqualTo(List.of("a", "b"));
+	}
+
+	@Test  // gh-37403
+	void withCacheEvictAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(CacheEvictAnnotatedBean.class));
+		ctx.registerBeanDefinition("cacheManager", new RootBeanDefinition(ConcurrentMapCacheManager.class));
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(EnablingConfigWithCaching.class));
+		ctx.refresh();
+		CacheEvictAnnotatedBean proxy = ctx.getBean(CacheEvictAnnotatedBean.class);
+		CacheEvictAnnotatedBean target = (CacheEvictAnnotatedBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		Cache cache = ctx.getBean(CacheManager.class).getCache("tests");
+		cache.put(SimpleKey.EMPTY, List.of("a", "b"));
+
+		// Simulates a failure on the 1st subscription to the target Flux.
+		List<String> result = proxy.retryOperation().collectList().block(Duration.ofSeconds(5));
+		assertThat(result).containsExactly("a", "b");
+		// Subscribed twice: the 2nd attempt re-subscribed to the Flux returned from
+		// the cache interceptor and reached the target Flux again instead of hanging.
+		assertThat(target.counter).hasValue(2);
+		assertThat(cache.get(SimpleKey.EMPTY)).isNull();
 	}
 
 	@Test
@@ -636,8 +687,48 @@ class ReactiveRetryInterceptorTests {
 	}
 
 
+	static class CacheableAnnotatedBean {
+
+		AtomicInteger counter = new AtomicInteger();
+
+		@Cacheable("tests")
+		@Retryable(maxRetries = 2, delay = 10)
+		public Flux<String> retryOperation() {
+			return Flux.defer(() -> {
+				if (counter.incrementAndGet() == 1) {
+					return Flux.error(new IOException(counter.toString()));
+				}
+				return Flux.just("a", "b");
+			});
+		}
+	}
+
+
+	static class CacheEvictAnnotatedBean {
+
+		AtomicInteger counter = new AtomicInteger();
+
+		@CacheEvict("tests")
+		@Retryable(maxRetries = 2, delay = 10)
+		public Flux<String> retryOperation() {
+			return Flux.defer(() -> {
+				if (counter.incrementAndGet() == 1) {
+					return Flux.error(new IOException(counter.toString()));
+				}
+				return Flux.just("a", "b");
+			});
+		}
+	}
+
+
 	@EnableResilientMethods
 	static class EnablingConfig {
+	}
+
+
+	@EnableCaching
+	@EnableResilientMethods
+	static class EnablingConfigWithCaching {
 	}
 
 

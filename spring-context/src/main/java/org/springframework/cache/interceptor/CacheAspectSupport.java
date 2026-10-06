@@ -1220,10 +1220,13 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {
-					Flux<?> source = Flux.from(adapter.toPublisher(result))
-							.publish().refCount(2);
-					source.subscribe(new CacheEvictListSubscriber(contexts));
-					return adapter.fromPublisher(source);
+					Flux<?> deferred = Flux.defer(() -> {
+						Flux<?> source = Flux.from(adapter.toPublisher(result))
+								.publish().refCount(2);
+						source.subscribe(new CacheEvictListSubscriber(contexts));
+						return source;
+					});
+					return adapter.fromPublisher(deferred);
 				}
 				else {
 					return adapter.fromPublisher(Mono.from(adapter.toPublisher(result))
@@ -1287,10 +1290,13 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {
-					Flux<?> source = Flux.from(adapter.toPublisher(result))
-							.publish().refCount(2);
-					source.subscribe(new CachePutListSubscriber(request));
-					return adapter.fromPublisher(source);
+					Flux<?> deferred = Flux.defer(() -> {
+						Flux<?> source = Flux.from(adapter.toPublisher(result))
+								.publish().refCount(2);
+						source.subscribe(new CachePutListSubscriber(request));
+						return source;
+					});
+					return adapter.fromPublisher(deferred);
 				}
 				else {
 					return adapter.fromPublisher(Mono.from(adapter.toPublisher(result))
