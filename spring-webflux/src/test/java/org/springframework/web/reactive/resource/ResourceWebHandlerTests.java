@@ -22,15 +22,19 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -49,6 +53,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.MethodNotAllowedException;
@@ -468,6 +473,119 @@ class ResourceWebHandlerTests {
 		}
 
 		@Test
+		void transformedCssEtag() throws Exception {
+			MockServerWebExchange exchange = versionedCssExchange(HttpMethod.GET, "v1");
+			this.handler.handle(exchange).block(TIMEOUT);
+
+			String body = exchange.getResponse().getBodyAsString().block(TIMEOUT);
+			assertThat(body).contains("/static/v1/images/image.png");
+			String etag = "W/\"" + DigestUtils.md5DigestAsHex(body.getBytes(UTF_8)) + "\"";
+			assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo(etag);
+
+			MockServerWebExchange headExchange = versionedCssExchange(HttpMethod.HEAD, "v1");
+			this.handler.handle(headExchange).block(TIMEOUT);
+
+			assertThat(headExchange.getResponse().getHeaders().getETag()).isEqualTo(etag);
+			assertThat(headExchange.getResponse().getHeaders().getContentLength())
+					.isEqualTo(body.getBytes(UTF_8).length);
+			assertResponseBodyIsEmpty(headExchange);
+
+			MockServerWebExchange rangeExchange = versionedCssExchange(HttpMethod.GET, "v1");
+			this.handler.handle(rangeExchange.mutate()
+					.request(request -> request.header(HttpHeaders.RANGE, "bytes=0-9")).build()).block(TIMEOUT);
+
+			assertThat(rangeExchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
+			assertThat(rangeExchange.getResponse().getHeaders().getETag()).isEqualTo(etag);
+			assertResponseBody(rangeExchange, body.substring(0, 10));
+		}
+
+		@Test
+		void transformedCssEtagChangesWhenReferencedVersionChanges() throws Exception {
+			MockServerWebExchange first = versionedCssExchange(HttpMethod.GET, "v1");
+			this.handler.handle(first).block(TIMEOUT);
+			String firstEtag = first.getResponse().getHeaders().getETag();
+			String firstBody = first.getResponse().getBodyAsString().block(TIMEOUT);
+
+			MockServerWebExchange second = versionedCssExchange(HttpMethod.GET, "v2");
+			this.handler.handle(second).block(TIMEOUT);
+
+			assertThat(second.getRequest().getURI()).isEqualTo(first.getRequest().getURI());
+			assertThat(second.getResponse().getBodyAsString().block(TIMEOUT))
+					.contains("/static/v2/images/image.png").isNotEqualTo(firstBody);
+			assertThat(second.getResponse().getHeaders().getETag()).isNotNull().isNotEqualTo(firstEtag);
+		}
+
+		@ParameterizedTest
+		@NullSource
+		@ValueSource(strings = {"\"custom\"", "W/\"custom\""})
+		void transformedCssRespectsEtagGenerator(@Nullable String etag) throws Exception {
+			this.handler.setEtagGenerator(resource -> {
+				assertThat(resource).isInstanceOf(TransformedResource.class);
+				return etag;
+			});
+			MockServerWebExchange exchange = versionedCssExchange(HttpMethod.GET, "v1");
+			this.handler.handle(exchange).block(TIMEOUT);
+
+			assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo(etag);
+			assertThat(exchange.getResponse().getBodyAsString().block(TIMEOUT))
+					.contains("/static/v1/images/image.png");
+		}
+
+		@Test
+		void transformedResourceHeadersAreNotMutatedWithEtagGenerator() throws Exception {
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("eTaG", "\"resource\"");
+			headers.add("X-Custom", "first");
+			headers.add("X-Custom", "second");
+			HttpHeaders readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+			this.handler.setResourceTransformers(List.of((exchange, resource, chain) ->
+					Mono.just(new TransformedResource(resource, "hello".getBytes(UTF_8)) {
+						@Override
+						public HttpHeaders getResponseHeaders() {
+							return readOnlyHeaders;
+						}
+					})));
+			this.handler.setEtagGenerator(resource -> "\"custom\"");
+			this.handler.afterPropertiesSet();
+			MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+			setPathWithinHandlerMapping(exchange, "foo.css");
+			setBestMachingPattern(exchange, "/**");
+			this.handler.handle(exchange).block(TIMEOUT);
+
+			assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo("\"custom\"");
+			assertThat(exchange.getResponse().getHeaders().get("X-Custom")).containsExactly("first", "second");
+			assertThat(headers.getETag()).isEqualTo("\"resource\"");
+		}
+
+		@Test
+		void transformedCssNotModifiedWithCustomEtag() throws Exception {
+			this.handler.setEtagGenerator(resource -> "\"custom\"");
+			MockServerWebExchange original = versionedCssExchange(HttpMethod.GET, "v1");
+			MockServerWebExchange exchange = MockServerWebExchange.from(
+					MockServerHttpRequest.get(original.getRequest().getURI().toString()).ifNoneMatch("\"custom\""));
+			exchange.getAttributes().putAll(original.getAttributes());
+			this.handler.handle(exchange).then(Mono.defer(() -> exchange.getResponse().setComplete())).block(TIMEOUT);
+
+			assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+			assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo("\"custom\"");
+			assertResponseBodyIsEmpty(exchange);
+		}
+
+		@Test
+		void versionedResourceEtagWithNullGenerator() throws Exception {
+			VersionResourceResolver resolver = new VersionResourceResolver().addFixedVersionStrategy("version", "/**");
+			this.handler.setResourceResolvers(List.of(resolver, new PathResourceResolver()));
+			this.handler.setEtagGenerator(resource -> null);
+			this.handler.afterPropertiesSet();
+			MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+			setPathWithinHandlerMapping(exchange, "version/foo.css");
+			setBestMachingPattern(exchange, "/**");
+			this.handler.handle(exchange).block(TIMEOUT);
+
+			assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo("W/\"version\"");
+		}
+
+		@Test
 		void shouldRespondWithNotModifiedWhenModifiedSince() throws Exception {
 			this.handler.afterPropertiesSet();
 			MockServerWebExchange exchange = MockServerWebExchange.from(
@@ -563,6 +681,27 @@ class ResourceWebHandlerTests {
 			assertThat(headers.getContentLength()).isEqualTo(17);
 			assertThat(headers.containsHeader("Last-Modified")).isFalse();
 			assertResponseBody(exchange, "h1 { color:red; }");
+		}
+
+
+		private MockServerWebExchange versionedCssExchange(HttpMethod method, String imageVersion) throws Exception {
+			Resource original = testResource.createRelative("main.css");
+			String version = new ContentVersionStrategy().getResourceVersion(original).block(TIMEOUT);
+			VersionResourceResolver resolver = new VersionResourceResolver()
+					.addFixedVersionStrategy(imageVersion, "/images/**")
+					.addContentVersionStrategy("/**");
+			this.handler.setResourceResolvers(List.of(resolver, new PathResourceResolver()));
+			ResourceUrlProvider urlProvider = new ResourceUrlProvider();
+			urlProvider.registerHandlers(Map.of("/static/**", this.handler));
+			CssLinkResourceTransformer transformer = new CssLinkResourceTransformer();
+			transformer.setResourceUrlProvider(urlProvider);
+			this.handler.setResourceTransformers(List.of(transformer));
+			this.handler.afterPropertiesSet();
+			MockServerWebExchange exchange = MockServerWebExchange.from(
+					MockServerHttpRequest.method(method, "/static/main-" + version + ".css"));
+			setPathWithinHandlerMapping(exchange, "main-" + version + ".css");
+			setBestMachingPattern(exchange, "/static/**");
+			return exchange;
 		}
 
 	}

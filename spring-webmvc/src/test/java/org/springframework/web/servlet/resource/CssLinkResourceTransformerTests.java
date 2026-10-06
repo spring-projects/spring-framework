@@ -98,6 +98,7 @@ class CssLinkResourceTransformerTests {
 		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
 		String result = new String(actual.getByteArray(), UTF_8);
 		assertThat(result).isEqualToNormalizingNewlines(expected);
+		assertThat(((HttpResource) actual).getResponseHeaders().isEmpty()).isTrue();
 	}
 
 	@Test
