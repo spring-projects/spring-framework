@@ -108,7 +108,7 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 		MethodParameter bodyTypeParameter = result.getReturnTypeSource();
 		if (body instanceof ProblemDetail detail) {
 			exchange.getResponse().setStatusCode(HttpStatusCode.valueOf(detail.getStatus()));
-			invokeErrorResponseInterceptors(detail, null);
+			invokeErrorResponseInterceptors(detail, null, exchange.getRequest());
 		}
 		return writeBody(body, bodyTypeParameter, exchange);
 	}

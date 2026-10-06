@@ -44,6 +44,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -61,6 +62,7 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
@@ -75,6 +77,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -372,6 +375,23 @@ class RequestResponseBodyMethodProcessorTests {
 	void problemDetailWhenNoMatchingMediaTypeRequested() throws Exception {
 		this.servletRequest.addHeader("Accept", MediaType.APPLICATION_PDF_VALUE);
 		testProblemDetailMediaType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+	}
+
+	@Test
+	void errorResponseInterceptorsWithRequest() throws Exception {
+		this.servletRequest.setRequestURI("/orders/42");
+		this.servletRequest.setQueryString("trace=on");
+		List<ErrorResponse.Interceptor> interceptors = List.of(
+				(detail, errorResponse) -> detail.setProperty("errorResponse", errorResponse != null),
+				new TraceParamInterceptor());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
+				List.of(new JacksonJsonHttpMessageConverter()), null, List.of(), interceptors);
+		MethodParameter returnType =
+				new MethodParameter(getClass().getDeclaredMethod("handleAndReturnProblemDetail"), -1);
+
+		processor.handleReturnValue(new MyProblemDetail(HttpStatus.BAD_REQUEST), returnType, this.container, this.request);
+
+		assertThat(this.servletResponse.getContentAsString()).contains("\"errorResponse\":false", "\"trace\":\"on\"");
 	}
 
 	private void testProblemDetailMediaType(String expectedContentType) throws Exception {
@@ -1434,6 +1454,20 @@ class RequestResponseBodyMethodProcessorTests {
 		@Override
 		public String handle(String arg) {
 			return arg;
+		}
+	}
+
+
+	private static class TraceParamInterceptor implements ErrorResponse.Interceptor {
+
+		@Override
+		public void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse) {
+		}
+
+		@Override
+		public void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse, HttpRequest request) {
+			MultiValueMap<String, String> params = UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
+			detail.setProperty("trace", params.getFirst("trace"));
 		}
 	}
 

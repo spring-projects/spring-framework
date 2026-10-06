@@ -43,6 +43,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpRange;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -191,11 +192,36 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	/**
 	 * Invoke the configured {@link ErrorResponse.Interceptor}'s.
 	 * @since 6.2
+	 * @deprecated as of 7.1, in favor of
+	 * {@link #invokeErrorResponseInterceptors(ProblemDetail, ErrorResponse, HttpRequest)}
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	protected void invokeErrorResponseInterceptors(ProblemDetail detail, @Nullable ErrorResponse errorResponse) {
 		try {
 			for (ErrorResponse.Interceptor handler : this.errorResponseInterceptors) {
 				handler.handleError(detail, errorResponse);
+			}
+		}
+		catch (Throwable ex) {
+			// ignore
+		}
+	}
+
+	/**
+	 * Invoke the configured {@link ErrorResponse.Interceptor}'s with the
+	 * current request.
+	 * @param detail the {@code ProblemDetail} to be rendered
+	 * @param errorResponse the {@code ErrorResponse}, or {@code null} if there isn't one
+	 * @param request the current request
+	 * @since 7.1
+	 * @see ErrorResponse.Interceptor#handleError(ProblemDetail, ErrorResponse, HttpRequest)
+	 */
+	protected void invokeErrorResponseInterceptors(
+			ProblemDetail detail, @Nullable ErrorResponse errorResponse, HttpRequest request) {
+
+		try {
+			for (ErrorResponse.Interceptor handler : this.errorResponseInterceptors) {
+				handler.handleError(detail, errorResponse, request);
 			}
 		}
 		catch (Throwable ex) {

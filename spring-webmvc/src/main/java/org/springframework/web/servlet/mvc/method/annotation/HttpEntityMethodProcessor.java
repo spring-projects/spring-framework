@@ -214,7 +214,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				}
 			}
 			invokeErrorResponseInterceptors(
-					detail, (returnValue instanceof ErrorResponse response ? response : null));
+					detail, (returnValue instanceof ErrorResponse response ? response : null), inputMessage);
 		}
 
 		HttpHeaders outputHeaders = outputMessage.getHeaders();

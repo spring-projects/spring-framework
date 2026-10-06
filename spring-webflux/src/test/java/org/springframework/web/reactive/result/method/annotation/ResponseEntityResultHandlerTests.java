@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,11 +38,13 @@ import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -52,6 +55,7 @@ import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.reactive.HandlerResult;
@@ -59,6 +63,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,6 +90,10 @@ class ResponseEntityResultHandlerTests {
 
 
 	private static ResponseEntityResultHandler createHandler() {
+		return createHandler(List.of());
+	}
+
+	private static ResponseEntityResultHandler createHandler(List<ErrorResponse.Interceptor> interceptors) {
 		List<HttpMessageWriter<?>> writerList = List.of(
 				new EncoderHttpMessageWriter<>(new ByteBufferEncoder()),
 				new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()),
@@ -93,7 +102,8 @@ class ResponseEntityResultHandlerTests {
 				new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()),
 				new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
-		return new ResponseEntityResultHandler(writerList, resolver);
+		return new ResponseEntityResultHandler(
+				writerList, resolver, ReactiveAdapterRegistry.getSharedInstance(), interceptors);
 	}
 
 
@@ -263,6 +273,20 @@ class ResponseEntityResultHandlerTests {
 				"status":400,\
 				"title":"Bad Request"\
 				}""");
+	}
+
+	@Test
+	void errorResponseInterceptorsWithRequest() {
+		ResponseEntityResultHandler handler = createHandler(List.of(
+				(detail, errorResponse) -> detail.setProperty("errorResponse", errorResponse != null),
+				new TraceParamInterceptor()));
+		MethodParameter returnType = on(TestController.class).resolveReturnType(ErrorResponse.class);
+		HandlerResult result = handlerResult(new ErrorResponseException(HttpStatus.BAD_REQUEST), returnType);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/orders/42?trace=on"));
+		handler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getBodyAsString().block(Duration.ofSeconds(5)))
+				.contains("\"errorResponse\":true", "\"trace\":\"on\"");
 	}
 
 	@Test
@@ -579,6 +603,20 @@ class ResponseEntityResultHandlerTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+
+
+	private static class TraceParamInterceptor implements ErrorResponse.Interceptor {
+
+		@Override
+		public void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse) {
+		}
+
+		@Override
+		public void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse, HttpRequest request) {
+			MultiValueMap<String, String> params = UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
+			detail.setProperty("trace", params.getFirst("trace"));
 		}
 	}
 

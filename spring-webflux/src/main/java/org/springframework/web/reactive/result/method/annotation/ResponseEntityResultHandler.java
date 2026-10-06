@@ -174,8 +174,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 								" doesn't match the ProblemDetail status: " + detail.getStatus());
 					}
 				}
-				invokeErrorResponseInterceptors(
-						detail, (returnValue instanceof ErrorResponse response ? response : null));
+				invokeErrorResponseInterceptors(detail,
+						(returnValue instanceof ErrorResponse response ? response : null), exchange.getRequest());
 			}
 
 			if (httpEntity instanceof ResponseEntity<?> responseEntity) {

@@ -201,7 +201,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 		if (returnValue instanceof ProblemDetail detail) {
 			outputMessage.setStatusCode(HttpStatusCode.valueOf(detail.getStatus()));
-			invokeErrorResponseInterceptors(detail, null);
+			invokeErrorResponseInterceptors(detail, null, inputMessage);
 			if (resolveErrorView(detail, null, HttpStatusCode.valueOf(detail.getStatus()), mavContainer, webRequest)) {
 				return;
 			}

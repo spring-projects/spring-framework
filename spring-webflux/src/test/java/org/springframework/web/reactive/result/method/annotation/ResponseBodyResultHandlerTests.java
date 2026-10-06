@@ -24,13 +24,14 @@ import java.util.List;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -40,6 +41,8 @@ import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
@@ -47,6 +50,7 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,11 +70,14 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  */
 class ResponseBodyResultHandlerTests {
 
-	private ResponseBodyResultHandler resultHandler;
+	private final ResponseBodyResultHandler resultHandler = createHandler();
 
 
-	@BeforeEach
-	void setup() throws Exception {
+	private static ResponseBodyResultHandler createHandler() {
+		return createHandler(List.of());
+	}
+
+	private static ResponseBodyResultHandler createHandler(List<ErrorResponse.Interceptor> interceptors) {
 		List<HttpMessageWriter<?>> writerList = new ArrayList<>(5);
 		writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		writerList.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
@@ -78,7 +85,7 @@ class ResponseBodyResultHandlerTests {
 		writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
-		this.resultHandler = new ResponseBodyResultHandler(writerList, resolver);
+		return new ResponseBodyResultHandler(writerList, resolver, ReactiveAdapterRegistry.getSharedInstance(), interceptors);
 	}
 
 
@@ -160,6 +167,21 @@ class ResponseBodyResultHandlerTests {
 		assertThat(this.resultHandler.getOrder()).isEqualTo(100);
 	}
 
+	@Test
+	void errorResponseInterceptorsWithRequest() {
+		List<ErrorResponse.Interceptor> interceptors = List.of(
+				(detail, errorResponse) -> detail.setProperty("errorResponse", errorResponse != null),
+				new TraceParamInterceptor());
+		ResponseBodyResultHandler handler = createHandler(interceptors);
+		Method method = on(TestRestController.class).returning(MyProblemDetail.class).resolveMethod();
+		HandlerResult result = getHandlerResult(new TestRestController(), new MyProblemDetail(HttpStatus.BAD_REQUEST), method);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/orders/42?trace=on"));
+		handler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getBodyAsString().block(Duration.ofSeconds(5)))
+				.contains("\"errorResponse\":false", "\"trace\":\"on\"");
+	}
+
 	private HandlerResult getHandlerResult(Object controller, @Nullable Object returnValue, Method method) {
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
 		return new HandlerResult(handlerMethod, returnValue, handlerMethod.getReturnType());
@@ -225,6 +247,20 @@ class ResponseBodyResultHandlerTests {
 
 		public MyProblemDetail(HttpStatus status) {
 			super(status.value());
+		}
+	}
+
+
+	private static class TraceParamInterceptor implements ErrorResponse.Interceptor {
+
+		@Override
+		public void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse) {
+		}
+
+		@Override
+		public void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse, HttpRequest request) {
+			MultiValueMap<String, String> params = UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
+			detail.setProperty("trace", params.getFirst("trace"));
 		}
 	}
 

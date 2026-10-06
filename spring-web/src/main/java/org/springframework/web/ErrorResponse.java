@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 
@@ -342,9 +343,14 @@ public interface ErrorResponse {
 	 * Callback to perform an action before an RFC-9457 {@link ProblemDetail}
 	 * response is rendered.
 	 *
+	 * <p>Implementations that need the current request, for example to read
+	 * request headers or parameters, can override
+	 * {@link #handleError(ProblemDetail, ErrorResponse, HttpRequest)}.
+	 *
 	 * @author Rossen Stoyanchev
 	 * @since 6.2
 	 */
+	@FunctionalInterface
 	interface Interceptor {
 
 		/**
@@ -354,6 +360,20 @@ public interface ErrorResponse {
 		 * @param errorResponse the {@code ErrorResponse}, or {@code null} if there isn't one
 		 */
 		void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse);
+
+		/**
+		 * Variant of {@link #handleError(ProblemDetail, ErrorResponse)} with
+		 * access to the current request.
+		 * <p>This is the method invoked by the framework. By default, it
+		 * delegates to {@link #handleError(ProblemDetail, ErrorResponse)}.
+		 * @param detail the {@code ProblemDetail} to be rendered
+		 * @param errorResponse the {@code ErrorResponse}, or {@code null} if there isn't one
+		 * @param request the current HTTP request
+		 * @since 7.1
+		 */
+		default void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse, HttpRequest request) {
+			handleError(detail, errorResponse);
+		}
 
 	}
 
