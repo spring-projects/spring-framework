@@ -301,11 +301,6 @@ public final class SpringBeanContainer implements BeanContainer {
 			this.destructionCallback = destructionCallback;
 		}
 
-		public SpringContainedBean(Class<B> beanClass, Supplier<B> beanSupplier) {
-			this.beanClass = beanClass;
-			this.beanSupplier = beanSupplier;
-		}
-
 		public SpringContainedBean(Class<B> beanClass, Supplier<B> beanSupplier, BeanInstanceProducer fallbackProducer) {
 			this.beanClass = beanClass;
 			this.beanSupplier = beanSupplier;
