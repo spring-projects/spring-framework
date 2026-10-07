@@ -241,6 +241,19 @@ class ClientHttpConnectorTests {
 
 	}
 
+	@Test
+	void readTimeoutZeroWithJdk() {
+		JdkClientHttpConnector connector = new JdkClientHttpConnector();
+		connector.setReadTimeout(Duration.ZERO);
+
+		prepareResponse(builder -> builder.code(200));
+		Mono<ClientHttpResponse> futureResponse =
+				connector.connect(HttpMethod.GET, this.server.url("/").uri(), ReactiveHttpOutputMessage::setComplete);
+		StepVerifier.create(futureResponse)
+				.assertNext(response -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK))
+				.verifyComplete();
+	}
+
 	private Buffer randomBody(int size) {
 		Buffer responseBody = new Buffer();
 		Random rnd = new Random();
