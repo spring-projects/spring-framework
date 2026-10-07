@@ -130,7 +130,7 @@ final class AnnotationTypeMapping {
 	}
 
 	private Method resolveAliasTarget(Method attribute, AliasFor aliasFor, boolean checkAliasPair) {
-		if (StringUtils.hasText(aliasFor.value()) && StringUtils.hasText(aliasFor.attribute())) {
+		if (StringUtils.hasLength(aliasFor.value()) && StringUtils.hasLength(aliasFor.attribute())) {
 			throw new AnnotationConfigurationException(String.format(
 					"In @AliasFor declared on %s, attribute 'attribute' and its alias 'value' " +
 					"are present with values of '%s' and '%s', but only one is permitted.",
