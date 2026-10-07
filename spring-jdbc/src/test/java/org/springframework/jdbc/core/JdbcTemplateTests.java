@@ -1283,6 +1283,49 @@ class JdbcTemplateTests {
 		verify(this.connection).close();
 	}
 
+	@Test
+	void retainAllRowsForZeroMaxRowsForRowMapper() throws Exception {
+		testRetainAllRowsForZeroMaxRows((template, sql) ->
+				template.query(sql, (rs, rowNum) -> rs.getString(1)));
+	}
+
+	@Test
+	void retainAllRowsForZeroMaxRowsForRowCallbackHandler() throws Exception {
+		testRetainAllRowsForZeroMaxRows((template, sql) -> {
+			List<String> list = new ArrayList<>();
+			template.query(sql, (RowCallbackHandler) rs -> list.add(rs.getString(1)));
+			return list;
+		});
+	}
+
+	@Test
+	void retainAllRowsForZeroMaxRowsForStream() throws Exception {
+		testRetainAllRowsForZeroMaxRows((template, sql) -> {
+			try (Stream<String> stream = template.queryForStream(sql, (rs, rowNum) -> rs.getString(1))) {
+				return stream.toList();
+			}
+		});
+	}
+
+	private void testRetainAllRowsForZeroMaxRows(BiFunction<JdbcTemplate,String,List<String>> function) throws Exception {
+		String sql = "SELECT FORENAME FROM CUSTMR";
+		String[] results = {"rod", "gary", " portia"};
+
+		given(this.resultSet.next()).willReturn(true, true, true, false);
+		given(this.resultSet.getString(1)).willReturn(results[0], results[1], results[2]);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
+
+		JdbcTemplate template = new JdbcTemplate();
+		template.setDataSource(this.dataSource);
+		template.setMaxRows(0);
+
+		assertThat(function.apply(template, sql)).containsExactly(results);
+
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
+	}
+
 	private void mockDatabaseMetaData(boolean supportsBatchUpdates) throws SQLException {
 		DatabaseMetaData databaseMetaData = mock();
 		given(databaseMetaData.getDatabaseProductName()).willReturn("MySQL");
