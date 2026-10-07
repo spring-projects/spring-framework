@@ -73,6 +73,7 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Chris Beams
  * @author Oleg Zhurakousky
  * @author Rossen Stoyanchev
+ * @author Chengang Guan
  * @see MergedAnnotationsRepeatableAnnotationTests
  * @see MergedAnnotationClassLoaderTests
  */
@@ -271,6 +272,188 @@ class MergedAnnotationsTests {
 			// Spring Framework 7.0. Otherwise, we would expect "/test".
 			testGetWithTypeHierarchyWebMapping(WebController.class.getMethod("postMappedWithPathAttribute"), "");
 		}
+	}
+
+	@Nested  // gh-37404
+	class AliasForValueAndAttributeLengthTests {
+
+		@Test
+		void bothNonBlankValueAndAttribute() {
+			assertOnlyOnePermitted(WithBothNonBlank.class);
+		}
+
+		@Test
+		void bothBlankValueAndAttribute() {
+			assertOnlyOnePermitted(WithBothBlank.class);
+		}
+
+		@Test
+		void blankValueAndNonBlankAttribute() {
+			assertOnlyOnePermitted(WithBlankValue.class);
+		}
+
+		@Test
+		void nonBlankValueAndBlankAttribute() {
+			assertOnlyOnePermitted(WithBlankAttribute.class);
+		}
+
+		@Test
+		void onlyBlankValue() {
+			assertThatExceptionOfType(AnnotationConfigurationException.class)
+					.isThrownBy(() -> MergedAnnotations.from(WithOnlyBlankValue.class).get(AliasedAnnotation.class))
+					.withMessageContaining("is declared as an @AliasFor nonexistent attribute ' '");
+		}
+
+		@Test
+		void onlyBlankAttribute() {
+			assertThatExceptionOfType(AnnotationConfigurationException.class)
+					.isThrownBy(() -> MergedAnnotations.from(WithOnlyBlankAttribute.class).get(AliasedAnnotation.class))
+					.withMessageContaining("is declared as an @AliasFor nonexistent attribute ' '");
+		}
+
+		@Test
+		void onlyValue() {
+			MergedAnnotation<AliasedAnnotation> merged =
+					MergedAnnotations.from(WithOnlyValue.class).get(AliasedAnnotation.class);
+			assertThat(merged.getString("foo")).isEqualTo("fromValue");
+		}
+
+		@Test
+		void onlyAttribute() {
+			MergedAnnotation<AliasedAnnotation> merged =
+					MergedAnnotations.from(WithOnlyAttribute.class).get(AliasedAnnotation.class);
+			assertThat(merged.getString("foo")).isEqualTo("fromAttribute");
+		}
+
+		@Test
+		void neitherValueNorAttribute() {
+			MergedAnnotation<AliasedAnnotation> merged =
+					MergedAnnotations.from(WithNeitherSet.class).get(AliasedAnnotation.class);
+			assertThat(merged.getString("foo")).isEqualTo("fromSelf");
+		}
+
+		private static void assertOnlyOnePermitted(Class<?> element) {
+			assertThatExceptionOfType(AnnotationConfigurationException.class)
+					.isThrownBy(() -> MergedAnnotations.from(element).get(AliasedAnnotation.class))
+					.withMessageContaining("but only one is permitted");
+		}
+
+
+		@Retention(RetentionPolicy.RUNTIME)
+		@Target(ElementType.ANNOTATION_TYPE)
+		@interface AliasedAnnotation {
+
+			String foo() default "";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface BothNonBlank {
+
+			@AliasFor(annotation = AliasedAnnotation.class, value = "foo", attribute = "foo")
+			String bar() default "bothNonBlank";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface BothBlank {
+
+			@AliasFor(annotation = AliasedAnnotation.class, value = " ", attribute = " ")
+			String bar() default "bothBlank";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface BlankValue {
+
+			@AliasFor(annotation = AliasedAnnotation.class, value = " ", attribute = "foo")
+			String bar() default "blankValue";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface BlankAttribute {
+
+			@AliasFor(annotation = AliasedAnnotation.class, value = "foo", attribute = " ")
+			String bar() default "blankAttribute";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface OnlyBlankValue {
+
+			@AliasFor(annotation = AliasedAnnotation.class, value = " ")
+			String bar() default "onlyBlankValue";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface OnlyBlankAttribute {
+
+			@AliasFor(annotation = AliasedAnnotation.class, attribute = " ")
+			String bar() default "onlyBlankAttribute";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface OnlyValue {
+
+			@AliasFor(annotation = AliasedAnnotation.class, value = "foo")
+			String bar() default "fromValue";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface OnlyAttribute {
+
+			@AliasFor(annotation = AliasedAnnotation.class, attribute = "foo")
+			String bar() default "fromAttribute";
+		}
+
+		@AliasedAnnotation
+		@Retention(RetentionPolicy.RUNTIME)
+		@interface NeitherSet {
+
+			@AliasFor(annotation = AliasedAnnotation.class)
+			String foo() default "fromSelf";
+		}
+
+		@BothNonBlank
+		static class WithBothNonBlank {
+		}
+
+		@BothBlank
+		static class WithBothBlank {
+		}
+
+		@BlankValue
+		static class WithBlankValue {
+		}
+
+		@BlankAttribute
+		static class WithBlankAttribute {
+		}
+
+		@OnlyBlankValue
+		static class WithOnlyBlankValue {
+		}
+
+		@OnlyBlankAttribute
+		static class WithOnlyBlankAttribute {
+		}
+
+		@OnlyValue
+		static class WithOnlyValue {
+		}
+
+		@OnlyAttribute
+		static class WithOnlyAttribute {
+		}
+
+		@NeitherSet
+		static class WithNeitherSet {
+		}
+
 	}
 
 
