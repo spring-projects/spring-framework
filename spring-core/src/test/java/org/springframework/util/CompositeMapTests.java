@@ -19,6 +19,7 @@ package org.springframework.util;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -231,6 +232,86 @@ class CompositeMapTests {
 		CompositeMap<String, @Nullable String> composite = new CompositeMap<>(first, second);
 
 		assertThat(composite).containsExactly(entry("foo", "bar"), entry("baz", null));
+	}
+
+	@Test
+	void equalsAndHashCode() {
+		Map<String, String> composite = CollectionUtils.compositeMap(
+				Map.of("foo", "bar"), Map.of("baz", "qux"));
+		Map<String, String> expected = Map.of("foo", "bar", "baz", "qux");
+		Map<String, String> other = CollectionUtils.compositeMap(expected, Collections.emptyMap());
+
+		assertThat(composite).isEqualTo(expected);
+		assertThat(expected).isEqualTo(composite);
+		assertThat(composite).isEqualTo(other);
+		assertThat(other).isEqualTo(composite);
+		assertThat(composite).hasSameHashCodeAs(expected);
+		assertThat(composite).hasSameHashCodeAs(other);
+	}
+
+	@Test
+	void equalsWithDifferentMappings() {
+		Map<String, String> composite = CollectionUtils.compositeMap(
+				Map.of("foo", "bar"), Collections.emptyMap());
+
+		assertThat(composite).isNotEqualTo(null);
+		assertThat(composite).isNotEqualTo("foo=bar");
+		assertThat(composite).isNotEqualTo(Collections.emptyMap());
+		assertThat(composite).isNotEqualTo(Map.of("foo", "baz"));
+		assertThat(composite).isNotEqualTo(Map.of("baz", "bar"));
+	}
+
+	@Test
+	void equalsAndHashCodeWithEmptyMaps() {
+		Map<String, String> composite = CollectionUtils.compositeMap(
+				Collections.emptyMap(), Collections.emptyMap());
+		Map<String, String> expected = Collections.emptyMap();
+
+		assertThat(composite).isEqualTo(expected);
+		assertThat(expected).isEqualTo(composite);
+		assertThat(composite).hasSameHashCodeAs(expected);
+	}
+
+	@Test
+	void equalsAndHashCodeWithCollidingKeys() {
+		Map<String, String> composite = CollectionUtils.compositeMap(
+				Map.of("foo", "bar"), Map.of("foo", "hidden", "baz", "qux"));
+		Map<String, String> expected = Map.of("foo", "bar", "baz", "qux");
+
+		assertThat(composite).isEqualTo(expected);
+		assertThat(expected).isEqualTo(composite);
+		assertThat(composite).isNotEqualTo(Map.of("foo", "hidden", "baz", "qux"));
+		assertThat(composite).hasSameHashCodeAs(expected);
+	}
+
+	@Test
+	void equalsAndHashCodeWithNullValues() {
+		Map<String, @Nullable String> first = new HashMap<>();
+		first.put("foo", null);
+		Map<String, @Nullable String> composite = CollectionUtils.compositeMap(
+				first, Map.of("foo", "hidden", "baz", "qux"));
+		Map<String, @Nullable String> expected = new HashMap<>(first);
+		expected.put("baz", "qux");
+
+		assertThat(composite).isEqualTo(expected);
+		assertThat(expected).isEqualTo(composite);
+		assertThat(composite).hasSameHashCodeAs(expected);
+		expected.remove("foo");
+		expected.put("other", null);
+		assertThat(composite).isNotEqualTo(expected);
+	}
+
+	@Test
+	void hashSetLookup() {
+		Map<String, String> composite = CollectionUtils.compositeMap(
+				Map.of("foo", "bar"), Map.of("baz", "qux"));
+		Map<String, String> expected = Map.of("foo", "bar", "baz", "qux");
+
+		// Check whether equals/hashCode works in a HashSet.
+		Set<Map<String, String>> maps = new HashSet<>();
+		maps.add(expected);
+		maps.add(composite);
+		assertThat(maps).hasSize(1);
 	}
 
 	@Nested

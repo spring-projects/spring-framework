@@ -153,6 +153,17 @@ final class CompositeMap<K, V extends @Nullable Object> implements Map<K, V> {
 	}
 
 	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other ||
+				other instanceof Map<?, ?> otherMap && entrySet().equals(otherMap.entrySet()));
+	}
+
+	@Override
+	public int hashCode() {
+		return entrySet().hashCode();
+	}
+
+	@Override
 	public String toString() {
 		Iterator<Entry<K, V>> i = entrySet().iterator();
 		if (!i.hasNext()) {
