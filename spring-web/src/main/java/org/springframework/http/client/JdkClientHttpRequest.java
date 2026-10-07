@@ -214,6 +214,9 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	 * {@code Content-Length}, {@code Expect}, {@code Host}, or {@code Upgrade}
 	 * headers to be set, but this can be overridden with the
 	 * {@code jdk.httpclient.allowRestrictedHeaders} system property.
+	 * <p>Note that only the system property is consulted. In contrast to the
+	 * JDK, a value configured in {@code $JAVA_HOME/conf/net.properties} is
+	 * not taken into account.
 	 * @see jdk.internal.net.http.common.Utils#getDisallowedHeaders()
 	 */
 	static Set<String> disallowedHeaders() {

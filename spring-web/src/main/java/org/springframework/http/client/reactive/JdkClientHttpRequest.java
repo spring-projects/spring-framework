@@ -21,8 +21,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,15 +44,20 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequest} for the Java {@link HttpClient}.
  *
  * @author Julien Eyraud
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 6.0
  */
 class JdkClientHttpRequest extends AbstractClientHttpRequest {
+
+	private static final Set<String> DISALLOWED_HEADERS = disallowedHeaders();
+
 
 	private final HttpMethod method;
 
@@ -144,6 +153,9 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 				// content-length is specified when writing
 				continue;
 			}
+			if (DISALLOWED_HEADERS.contains(entry.getKey().toLowerCase(Locale.ROOT))) {
+				continue;
+			}
 			for (String value : entry.getValue()) {
 				this.builder.header(entry.getKey(), value);
 			}
@@ -161,6 +173,28 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 		}
 		this.builder.header(HttpHeaders.COOKIE, cookies.values().stream()
 				.flatMap(List::stream).map(HttpCookie::toString).collect(Collectors.joining(";")));
+	}
+
+	/**
+	 * By default, {@link HttpRequest} does not allow {@code Connection},
+	 * {@code Content-Length}, {@code Expect}, {@code Host}, or {@code Upgrade}
+	 * headers to be set, but this can be overridden with the
+	 * {@code jdk.httpclient.allowRestrictedHeaders} system property.
+	 * <p>Note that only the system property is consulted. In contrast to the
+	 * JDK, a value configured in {@code $JAVA_HOME/conf/net.properties} is
+	 * not taken into account.
+	 * @see jdk.internal.net.http.common.Utils#getDisallowedHeaders()
+	 */
+	static Set<String> disallowedHeaders() {
+		TreeSet<String> headers = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+		headers.addAll(Set.of("connection", "content-length", "expect", "host", "upgrade"));
+
+		String headersToAllow = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
+		if (headersToAllow != null) {
+			Set<String> toAllow = StringUtils.commaDelimitedListToSet(headersToAllow);
+			headers.removeAll(toAllow);
+		}
+		return Collections.unmodifiableSet(headers);
 	}
 
 }
