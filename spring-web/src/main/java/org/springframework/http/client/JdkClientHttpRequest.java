@@ -216,7 +216,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	 * {@code jdk.httpclient.allowRestrictedHeaders} system property.
 	 * @see jdk.internal.net.http.common.Utils#getDisallowedHeaders()
 	 */
-	private static Set<String> disallowedHeaders() {
+	static Set<String> disallowedHeaders() {
 		TreeSet<String> headers = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		headers.addAll(Set.of("connection", "content-length", "expect", "host", "upgrade"));
 

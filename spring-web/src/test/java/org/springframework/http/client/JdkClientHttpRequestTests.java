@@ -24,16 +24,19 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -69,6 +72,53 @@ class JdkClientHttpRequestTests {
 
 		assertThatThrownBy(() -> createRequest(null).executeInternal(new HttpHeaders(), null))
 				.isExactlyInstanceOf(IOException.class);
+	}
+
+	@Test
+	void disallowedHeadersByDefault() {
+		assertThat(disallowedHeaders(null))
+				.containsExactlyInAnyOrder("connection", "content-length", "expect", "host", "upgrade");
+	}
+
+	@Test
+	void disallowedHeadersWithSingleHeaderAllowed() {
+		assertThat(disallowedHeaders("expect"))
+				.containsExactlyInAnyOrder("connection", "content-length", "host", "upgrade");
+	}
+
+	@Test
+	void disallowedHeadersWithMultipleHeadersAllowed() {
+		assertThat(disallowedHeaders("expect,host"))
+				.containsExactlyInAnyOrder("connection", "content-length", "upgrade");
+	}
+
+	@Test
+	void disallowedHeadersAreCaseInsensitive() {
+		// AssertJ's contains() uses equals(), so go through Set.contains() instead.
+		assertThat(disallowedHeaders(null).contains("EXPECT")).isTrue();
+		assertThat(disallowedHeaders("Expect").contains("expect")).isFalse();
+	}
+
+	private static Set<String> disallowedHeaders(@Nullable String allowRestrictedHeaders) {
+		String key = "jdk.httpclient.allowRestrictedHeaders";
+		String original = System.getProperty(key);
+		try {
+			if (allowRestrictedHeaders != null) {
+				System.setProperty(key, allowRestrictedHeaders);
+			}
+			else {
+				System.clearProperty(key);
+			}
+			return JdkClientHttpRequest.disallowedHeaders();
+		}
+		finally {
+			if (original != null) {
+				System.setProperty(key, original);
+			}
+			else {
+				System.clearProperty(key);
+			}
+		}
 	}
 
 	private JdkClientHttpRequest createRequest(Duration timeout) {
