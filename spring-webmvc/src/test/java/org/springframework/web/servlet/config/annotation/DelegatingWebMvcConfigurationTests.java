@@ -38,6 +38,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.servlet.ErrorResponseViewResolver;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
@@ -52,6 +53,7 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -221,6 +223,57 @@ class DelegatingWebMvcConfigurationTests {
 		assertThat(resolver.getErrorResponseInterceptors()).containsExactly(interceptor);
 	}
 
+	@Test
+	void problemDetailsAreNotConfiguredByDefault() {
+		webMvcConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
+
+		ExceptionHandlerExceptionResolver resolver = exceptionHandlerExceptionResolver();
+
+		verify(webMvcConfigurer).configureProblemDetails(any(ProblemDetailsConfigurer.class));
+		assertThat(resolver.isRenderUnhandledExceptionsAsProblemDetails()).isFalse();
+		assertThat(resolver.getErrorResponseViewResolver()).isNull();
+	}
+
+	@Test
+	void configureProblemDetails() {
+		ErrorResponseViewResolver viewResolver = (request, problemDetail, errorResponse) -> null;
+		WebMvcConfigurer configurer = new WebMvcConfigurer() {
+			@Override
+			public void configureProblemDetails(ProblemDetailsConfigurer configurer) {
+				configurer.renderUnhandledExceptions(true).viewResolver(viewResolver);
+			}
+		};
+		webMvcConfig.setConfigurers(Collections.singletonList(configurer));
+
+		ExceptionHandlerExceptionResolver resolver = exceptionHandlerExceptionResolver();
+
+		assertThat(resolver.isRenderUnhandledExceptionsAsProblemDetails()).isTrue();
+		assertThat(resolver.getErrorResponseViewResolver()).isSameAs(viewResolver);
+	}
+
+	@Test
+	void configureProblemDetailsWithMultipleConfigurers() {
+		ErrorResponseViewResolver viewResolver = (request, problemDetail, errorResponse) -> null;
+		WebMvcConfigurer first = new WebMvcConfigurer() {
+			@Override
+			public void configureProblemDetails(ProblemDetailsConfigurer configurer) {
+				configurer.renderUnhandledExceptions(true);
+			}
+		};
+		WebMvcConfigurer second = new WebMvcConfigurer() {
+			@Override
+			public void configureProblemDetails(ProblemDetailsConfigurer configurer) {
+				configurer.viewResolver(viewResolver);
+			}
+		};
+		webMvcConfig.setConfigurers(List.of(first, second));
+
+		ExceptionHandlerExceptionResolver resolver = exceptionHandlerExceptionResolver();
+
+		assertThat(resolver.isRenderUnhandledExceptionsAsProblemDetails()).isTrue();
+		assertThat(resolver.getErrorResponseViewResolver()).isSameAs(viewResolver);
+	}
+
 	@SuppressWarnings("removal")
 	@Test
 	void configurePathMatcher() {
@@ -356,6 +409,14 @@ class DelegatingWebMvcConfigurationTests {
 
 		assertThat(webMvcConfig.mvcResourceUrlProvider().getUrlPathHelper()).isSameAs(pathHelper);
 		assertThat(webMvcConfig.mvcResourceUrlProvider().getPathMatcher()).isSameAs(pathMatcher);
+	}
+
+
+	private ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver() {
+		HandlerExceptionResolverComposite composite =
+				(HandlerExceptionResolverComposite) this.webMvcConfig.handlerExceptionResolver(
+						this.webMvcConfig.mvcContentNegotiationManager());
+		return (ExceptionHandlerExceptionResolver) composite.getExceptionResolvers().get(0);
 	}
 
 }

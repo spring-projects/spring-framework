@@ -181,6 +181,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void configureProblemDetails(ProblemDetailsConfigurer configurer) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureProblemDetails(configurer);
+		}
+	}
+
+	@Override
 	public void addErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addErrorResponseInterceptors(interceptors);

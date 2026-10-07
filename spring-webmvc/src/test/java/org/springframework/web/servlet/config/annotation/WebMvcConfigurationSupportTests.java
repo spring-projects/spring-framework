@@ -62,6 +62,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -278,6 +279,35 @@ class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
+	void problemDetailsDisabledByDefault() {
+		ApplicationContext context = initContext(WebConfig.class);
+		ExceptionHandlerExceptionResolver resolver = exceptionHandlerExceptionResolver(context);
+
+		assertThat(resolver.isRenderUnhandledExceptionsAsProblemDetails()).isFalse();
+		assertThat(resolver.getErrorResponseViewResolver()).isNull();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertThat(resolver.resolveException(request, response, null, new IllegalStateException())).isNull();
+	}
+
+	@Test
+	void problemDetailsConfiguration() throws Exception {
+		ApplicationContext context = initContext(ProblemDetailsConfig.class);
+		ExceptionHandlerExceptionResolver resolver = exceptionHandlerExceptionResolver(context);
+
+		assertThat(resolver.isRenderUnhandledExceptionsAsProblemDetails()).isTrue();
+		assertThat(resolver.getErrorResponseViewResolver()).isNotNull();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertThat(resolver.resolveException(request, response, new HandlerMethod(
+				context.getBean(TestController.class), "handle"), new IllegalStateException())).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(500);
+		assertThat(response.getContentType()).isEqualTo("application/problem+json");
+	}
+
+	@Test
 	void customArgumentResolvers() {
 		ApplicationContext context = initContext(CustomArgumentResolverConfig.class);
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
@@ -376,6 +406,12 @@ class WebMvcConfigurationSupportTests {
 		assertThat(requestToViewNameTranslator).isInstanceOf(DefaultRequestToViewNameTranslator.class);
 	}
 
+	private ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver(ApplicationContext context) {
+		HandlerExceptionResolverComposite composite =
+				context.getBean("handlerExceptionResolver", HandlerExceptionResolverComposite.class);
+		return (ExceptionHandlerExceptionResolver) composite.getExceptionResolvers().get(0);
+	}
+
 	private ApplicationContext initContext(Class<?>... configClasses) {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
@@ -423,6 +459,23 @@ class WebMvcConfigurationSupportTests {
 			registry.order(123);
 		}
 	}
+
+	@EnableWebMvc
+	@Configuration
+	static class ProblemDetailsConfig implements WebMvcConfigurer {
+
+		@Bean("/testController")
+		public TestController testController() {
+			return new TestController();
+		}
+
+		@Override
+		public void configureProblemDetails(ProblemDetailsConfigurer configurer) {
+			configurer.renderUnhandledExceptions(true)
+					.viewResolver((request, problemDetail, errorResponse) -> null);
+		}
+	}
+
 
 	@EnableWebMvc
 	@Configuration
