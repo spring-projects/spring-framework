@@ -77,7 +77,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 	}
 
 	/**
-	 * Set the underlying connect timeout in milliseconds.
+	 * Set the underlying connect timeout as a {@code Duration}.
 	 * A value of 0 specifies an infinite timeout.
 	 * <p>Default is 5 seconds.
 	 */
@@ -96,7 +96,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 	}
 
 	/**
-	 * Set the underlying read timeout as {@code Duration}.
+	 * Set the underlying read timeout as a {@code Duration}.
 	 * <p>Default is 10 seconds.
 	 */
 	public void setReadTimeout(Duration readTimeout) {

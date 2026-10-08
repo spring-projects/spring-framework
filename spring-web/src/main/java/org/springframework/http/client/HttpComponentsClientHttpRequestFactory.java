@@ -124,8 +124,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
-	 * Set the timeout in milliseconds used when requesting a connection
-	 * from the connection manager using the underlying {@link RequestConfig}.
+	 * Set the timeout used when requesting a connection from the connection
+	 * manager using the underlying {@link RequestConfig}.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
