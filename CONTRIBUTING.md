@@ -670,6 +670,8 @@ The only exceptions to this rule are test classes in the `spring-test` module th
 * Each test class name must end with a `Tests` suffix.
 * Use [AssertJ](https://assertj.github.io/doc/) for assertions and assumptions, including specialized assertions such as `assertThatIllegalArgumentException()` instead of `assertThatExceptionOfType(IllegalArgumentException.class)`.
 * Use [Mockito](https://site.mockito.org/) for mocks and spies.
+Use the standard Mockito API (for example, `when(...).thenReturn(...)`) instead of `BDDMockito` (for example, `given(...).willReturn(...)`).
+Existing usage of `BDDMockito` does not need to be migrated.
 
 ### Reference Docs
 

@@ -41,6 +41,7 @@ Concise extract of [CONTRIBUTING.md](CONTRIBUTING.md), which remains the referen
 - Add or update tests for any code change.
 - JUnit Jupiter, AssertJ (including `assertThatIllegalArgumentException()` and similar), Mockito. No JUnit 4/Jupiter/TestNG assertions, no Hamcrest.
 - Test class names end with `Tests`.
+- Use the standard Mockito API (`when(...).thenReturn(...)`), not `BDDMockito` (`given(...)`), in new test code; do not migrate existing `BDDMockito` usage.
 
 ## Docs
 
