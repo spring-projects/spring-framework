@@ -18,30 +18,31 @@ package org.springframework.build.shadow;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.component.ModuleComponentSelector;
-import org.gradle.api.artifacts.query.ArtifactResolutionQuery;
-import org.gradle.api.artifacts.result.ArtifactResolutionResult;
-import org.gradle.api.artifacts.result.ComponentArtifactsResult;
-import org.gradle.api.artifacts.result.DependencyResult;
-import org.gradle.api.artifacts.result.ResolutionResult;
-import org.gradle.api.artifacts.result.ResolvedArtifactResult;
+import org.gradle.api.attributes.Bundling;
+import org.gradle.api.attributes.Category;
+import org.gradle.api.attributes.DocsType;
+import org.gradle.api.attributes.Usage;
+import org.gradle.api.file.ArchiveOperations;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileCopyDetails;
+import org.gradle.api.file.FileSystemOperations;
 import org.gradle.api.file.FileTree;
-import org.gradle.api.tasks.Classpath;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Nested;
-import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.jvm.JvmLibrary;
-import org.gradle.language.base.artifact.SourcesArtifact;
 
 /**
  * Gradle task to add source from shadowed jars into our own source jars.
@@ -49,23 +50,44 @@ import org.gradle.language.base.artifact.SourcesArtifact;
  * @author Phillip Webb
  * @author Andy Wilkinson
  */
-public class ShadowSource extends DefaultTask {
-
-	private final DirectoryProperty outputDirectory = getProject().getObjects().directoryProperty();
-
-	private List<Configuration> configurations = new ArrayList<>();
+public abstract class ShadowSource extends DefaultTask {
 
 	private final List<Relocation> relocations = new ArrayList<>();
 
 
-	@Classpath
-	@Optional
-	public List<Configuration> getConfigurations() {
-		return this.configurations;
-	}
+	@InputFiles
+	@PathSensitive(PathSensitivity.NONE)
+	public abstract ConfigurableFileCollection getSourceJars();
+
+	@OutputDirectory
+	public abstract DirectoryProperty getOutputDirectory();
+
+	@Inject
+	protected abstract FileSystemOperations getFileSystemOperations();
+
+	@Inject
+	protected abstract ArchiveOperations getArchiveOperations();
+
+	@Inject
+	protected abstract ObjectFactory getObjectFactory();
 
 	public void setConfigurations(List<Configuration> configurations) {
-		this.configurations = configurations;
+		for (Configuration configuration : configurations) {
+			getSourceJars().from(resolveSourceArtifacts(configuration));
+		}
+	}
+
+	private FileCollection resolveSourceArtifacts(Configuration configuration) {
+		ObjectFactory objects = getObjectFactory();
+		return configuration.getIncoming().artifactView(view -> {
+			view.withVariantReselection();
+			view.attributes(attributes -> {
+				attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.class, Usage.JAVA_RUNTIME));
+				attributes.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.class, Category.DOCUMENTATION));
+				attributes.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.class, Bundling.EXTERNAL));
+				attributes.attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType.class, DocsType.SOURCES));
+			});
+		}).getFiles();
 	}
 
 	@Nested
@@ -77,52 +99,15 @@ public class ShadowSource extends DefaultTask {
 		this.relocations.add(new Relocation(pattern, destination));
 	}
 
-	@OutputDirectory
-	public DirectoryProperty getOutputDirectory() {
-		return this.outputDirectory;
-	}
-
 	@TaskAction
 	void syncSourceJarFiles() {
-		sync(getSourceJarFiles());
-	}
-
-	private List<File> getSourceJarFiles() {
-		List<File> sourceJarFiles = new ArrayList<>();
-		for (Configuration configuration : this.configurations) {
-			ResolutionResult resolutionResult = configuration.getIncoming().getResolutionResult();
-			resolutionResult.getRootComponent().get().getDependencies().forEach(dependency -> {
-				Set<ComponentArtifactsResult> artifactsResults = resolveSourceArtifacts(dependency);
-				for (ComponentArtifactsResult artifactResult : artifactsResults) {
-					artifactResult.getArtifacts(SourcesArtifact.class).forEach(sourceArtifact -> {
-						sourceJarFiles.add(((ResolvedArtifactResult) sourceArtifact).getFile());
-					});
-				}
-			});
-		}
-		return Collections.unmodifiableList(sourceJarFiles);
-	}
-
-	private Set<ComponentArtifactsResult> resolveSourceArtifacts(DependencyResult dependency) {
-		ModuleComponentSelector componentSelector = (ModuleComponentSelector) dependency.getRequested();
-		ArtifactResolutionQuery query = getProject().getDependencies().createArtifactResolutionQuery()
-				.forModule(componentSelector.getGroup(), componentSelector.getModule(), componentSelector.getVersion());
-		return executeQuery(query).getResolvedComponents();
-	}
-
-	@SuppressWarnings("unchecked")
-	private ArtifactResolutionResult executeQuery(ArtifactResolutionQuery query) {
-		return query.withArtifacts(JvmLibrary.class, SourcesArtifact.class).execute();
-	}
-
-	private void sync(List<File> sourceJarFiles) {
-		getProject().sync(spec -> {
-			spec.into(this.outputDirectory);
+		getFileSystemOperations().sync(spec -> {
+			spec.into(getOutputDirectory());
 			spec.eachFile(this::relocateFile);
 			spec.filter(this::transformContent);
 			spec.exclude("META-INF/**");
 			spec.setIncludeEmptyDirs(false);
-			sourceJarFiles.forEach(sourceJar -> spec.from(zipTree(sourceJar)));
+			getSourceJars().forEach(sourceJar -> spec.from(zipTree(sourceJar)));
 		});
 	}
 
@@ -142,7 +127,7 @@ public class ShadowSource extends DefaultTask {
 	}
 
 	private FileTree zipTree(File sourceJar) {
-		return getProject().zipTree(sourceJar);
+		return getArchiveOperations().zipTree(sourceJar);
 	}
 
 
