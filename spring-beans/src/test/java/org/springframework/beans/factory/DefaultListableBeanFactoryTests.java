@@ -514,16 +514,15 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	private void testPropertiesPopulation(ListableBeanFactory lbf) {
-		assertThat(lbf.getBeanDefinitionCount() == 1).as("1 beans defined").isTrue();
+		assertThat(lbf.getBeanDefinitionCount()).as("1 beans defined").isEqualTo(1);
 		String[] names = lbf.getBeanDefinitionNames();
-		assertThat(names != lbf.getBeanDefinitionNames()).isTrue();
-		assertThat(names.length == 1).as("Array length == 1").isTrue();
-		assertThat(names[0]).as("0th element == test").isEqualTo("test");
+		assertThat(names).isNotSameAs(lbf.getBeanDefinitionNames());
+		assertThat(names).as("Array contains 'test' exactly").containsExactly("test");
 
 		TestBean tb = (TestBean) lbf.getBean("test");
-		assertThat(tb != null).as("Test is non null").isTrue();
-		assertThat("Tony").as("Test bean name is Tony").isEqualTo(tb.getName());
-		assertThat(tb.getAge() == 48).as("Test bean age is 48").isTrue();
+		assertThat(tb).as("Test is non null").isNotNull();
+		assertThat(tb.getName()).as("Test bean name is Tony").isEqualTo("Tony");
+		assertThat(tb.getAge()).as("Test bean age is 48").isEqualTo(48);
 	}
 
 	@Test
