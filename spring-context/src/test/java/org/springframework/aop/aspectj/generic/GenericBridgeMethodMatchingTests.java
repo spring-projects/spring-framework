@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Ramnivas Laddad
  * @author Chris Beams
+ * @author Yanming Zhou
  */
 class GenericBridgeMethodMatchingTests {
 
@@ -79,41 +80,39 @@ class GenericBridgeMethodMatchingTests {
 		assertThat(counterAspect.count).isEqualTo(1);
 	}
 
-}
+	interface BaseInterface<T> {
 
-
-interface BaseInterface<T> {
-
-	void genericBaseInterfaceMethod(T t);
-}
-
-
-interface DerivedInterface<T> extends BaseInterface<T> {
-
-	void genericDerivedInterfaceMethod(T t);
-}
-
-
-class DerivedStringParameterizedClass implements DerivedInterface<String> {
-
-	@Override
-	public void genericDerivedInterfaceMethod(String t) {
+		void genericBaseInterfaceMethod(T t);
 	}
 
-	@Override
-	public void genericBaseInterfaceMethod(String t) {
-	}
-}
 
-@Aspect
-class GenericCounterAspect {
+	interface DerivedInterface<T> extends BaseInterface<T> {
 
-	public int count;
-
-	@Before("execution(* *..BaseInterface+.*(..))")
-	public void increment() {
-		count++;
+		void genericDerivedInterfaceMethod(T t);
 	}
 
-}
 
+	static class DerivedStringParameterizedClass implements DerivedInterface<String> {
+
+		@Override
+		public void genericDerivedInterfaceMethod(String t) {
+		}
+
+		@Override
+		public void genericBaseInterfaceMethod(String t) {
+		}
+	}
+
+	@Aspect
+	static class GenericCounterAspect {
+
+		public int count;
+
+		@Before("execution(* *..BaseInterface+.*(..))")
+		public void increment() {
+			count++;
+		}
+
+	}
+
+}
