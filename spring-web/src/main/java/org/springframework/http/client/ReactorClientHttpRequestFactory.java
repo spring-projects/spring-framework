@@ -163,10 +163,12 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 
 	/**
 	 * Variant of {@link #setConnectTimeout(int)} with a {@link Duration} value.
+	 * <p>Values exceeding {@link Integer#MAX_VALUE} milliseconds (about 24.8 days)
+	 * are capped at that value.
 	 */
 	public void setConnectTimeout(Duration connectTimeout) {
 		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
-		setConnectTimeout((int) connectTimeout.toMillis());
+		setConnectTimeout((int) Math.min(connectTimeout.toMillis(), Integer.MAX_VALUE));
 	}
 
 	/**
