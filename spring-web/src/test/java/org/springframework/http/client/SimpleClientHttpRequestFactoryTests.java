@@ -23,9 +23,12 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,6 +36,7 @@ import org.springframework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -115,6 +119,47 @@ class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTest
 		SimpleClientHttpRequest.addHeaders(urlConnection, headers);
 
 		verify(urlConnection, times(1)).addRequestProperty("foo", "");
+	}
+
+	@Test
+	void durationTimeouts() throws Exception {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		factory.setConnectTimeout(Duration.ofSeconds(5));
+		factory.setReadTimeout(Duration.ofSeconds(10));
+
+		HttpURLConnection connection = prepareConnection(factory);
+		assertThat(connection.getConnectTimeout()).isEqualTo(5_000);
+		assertThat(connection.getReadTimeout()).isEqualTo(10_000);
+	}
+
+	@ParameterizedTest  // gh-37427
+	@ValueSource(strings = {"P25D", "P50D", "PT9223372036854775807S"})
+	void durationTimeoutsExceedingIntegerMaxValueAreLimited(Duration timeout) throws Exception {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		factory.setConnectTimeout(timeout);
+		factory.setReadTimeout(timeout);
+
+		HttpURLConnection connection = prepareConnection(factory);
+		assertThat(connection.getConnectTimeout()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(connection.getReadTimeout()).isEqualTo(Integer.MAX_VALUE);
+	}
+
+	@ParameterizedTest  // gh-37427
+	@ValueSource(strings = {"PT-0.001S", "P-25D", "P-50D"})
+	void negativeDurationTimeoutsAreRejected(Duration timeout) {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> factory.setConnectTimeout(timeout))
+				.withMessage("Timeout must be a non-negative value");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> factory.setReadTimeout(timeout))
+				.withMessage("Timeout must be a non-negative value");
+	}
+
+	private static HttpURLConnection prepareConnection(SimpleClientHttpRequestFactory factory) throws IOException {
+		HttpURLConnection connection = new TestHttpURLConnection(URI.create("https://example.com").toURL());
+		factory.prepareConnection(connection, "GET");
+		return connection;
 	}
 
 

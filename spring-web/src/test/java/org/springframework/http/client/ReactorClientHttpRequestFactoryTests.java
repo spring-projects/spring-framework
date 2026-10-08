@@ -16,14 +16,24 @@
 
 package org.springframework.http.client;
 
+import java.time.Duration;
 import java.util.function.Function;
 
+import io.netty.channel.ChannelOption;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import reactor.netty.http.client.HttpClient;
 
 import org.springframework.http.HttpMethod;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -97,6 +107,40 @@ class ReactorClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTes
 		assertThat(requestFactory.isRunning()).isFalse();
 		requestFactory.start();
 		assertThat(requestFactory.isRunning()).isTrue();
+	}
+
+	@Test
+	void durationConnectTimeout() {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		requestFactory.setConnectTimeout(Duration.ofSeconds(5));
+		verify(httpClient).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5_000);
+	}
+
+	@ParameterizedTest  // gh-37427
+	@ValueSource(strings = {"P25D", "P50D", "PT9223372036854775807S"})
+	void durationConnectTimeoutExceedingIntegerMaxValueIsLimited(Duration timeout) {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		requestFactory.setConnectTimeout(timeout);
+		verify(httpClient).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.MAX_VALUE);
+	}
+
+	@ParameterizedTest  // gh-37427
+	@ValueSource(strings = {"PT-0.001S", "P-25D", "P-50D"})
+	void negativeDurationConnectTimeoutIsRejected(Duration timeout) {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> requestFactory.setConnectTimeout(timeout))
+				.withMessage("Timeout must be a non-negative value");
+		verify(httpClient, never()).option(any(), any());
+	}
+
+	private static HttpClient mockHttpClient() {
+		HttpClient httpClient = mock();
+		when(httpClient.option(any(), any())).thenReturn(httpClient);
+		return httpClient;
 	}
 
 }

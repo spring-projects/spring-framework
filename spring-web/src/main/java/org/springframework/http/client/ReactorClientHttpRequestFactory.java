@@ -51,6 +51,8 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpRequestFactory.class);
 
+	private static final Duration MAX_CONNECT_TIMEOUT = Duration.ofMillis(Integer.MAX_VALUE);
+
 	private static final Function<HttpClient, HttpClient> defaultInitializer =
 			client -> client.compress(true)
 					.responseTimeout(Duration.ofSeconds(10))
@@ -163,10 +165,15 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 
 	/**
 	 * Variant of {@link #setConnectTimeout(int)} with a {@link Duration} value.
+	 * <p>Values exceeding {@link Integer#MAX_VALUE} milliseconds are limited to
+	 * {@code Integer.MAX_VALUE} milliseconds.
 	 */
 	public void setConnectTimeout(Duration connectTimeout) {
 		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
-		setConnectTimeout((int) connectTimeout.toMillis());
+		Assert.isTrue(!connectTimeout.isNegative(), "Timeout must be a non-negative value");
+		int millis = (connectTimeout.compareTo(MAX_CONNECT_TIMEOUT) > 0 ?
+				Integer.MAX_VALUE : (int) connectTimeout.toMillis());
+		setConnectTimeout(millis);
 	}
 
 	/**

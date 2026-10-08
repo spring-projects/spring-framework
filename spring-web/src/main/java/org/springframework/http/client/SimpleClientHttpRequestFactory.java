@@ -42,6 +42,8 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
+	private static final Duration MAX_TIMEOUT = Duration.ofMillis(Integer.MAX_VALUE);
+
 
 	private @Nullable Proxy proxy;
 
@@ -78,15 +80,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	/**
-	 * Set the underlying URLConnection's connect timeout as {@code Duration}.
+	 * Set the underlying URLConnection's connect timeout as a {@code Duration}.
 	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Negative values are not permitted, and values exceeding
+	 * {@link Integer#MAX_VALUE} milliseconds are limited to
+	 * {@code Integer.MAX_VALUE} milliseconds.
 	 * <p>Default is the system's default timeout.
 	 * @since 6.1
 	 * @see URLConnection#setConnectTimeout(int)
 	 */
 	public void setConnectTimeout(Duration connectTimeout) {
 		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
-		this.connectTimeout = (int) connectTimeout.toMillis();
+		this.connectTimeout = toMillis(connectTimeout);
 	}
 
 	/**
@@ -100,15 +105,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	/**
-	 * Set the underlying URLConnection's read timeout (in milliseconds).
+	 * Set the underlying URLConnection's read timeout as a {@code Duration}.
 	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Negative values are not permitted, and values exceeding
+	 * {@link Integer#MAX_VALUE} milliseconds are limited to
+	 * {@code Integer.MAX_VALUE} milliseconds.
 	 * <p>Default is the system's default timeout.
 	 * @since 6.1
 	 * @see URLConnection#setReadTimeout(int)
 	 */
 	public void setReadTimeout(Duration readTimeout) {
 		Assert.notNull(readTimeout, "ReadTimeout must not be null");
-		this.readTimeout = (int) readTimeout.toMillis();
+		this.readTimeout = toMillis(readTimeout);
 	}
 
 
@@ -161,6 +169,12 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		connection.setInstanceFollowRedirects("GET".equals(httpMethod));
 		connection.setDoOutput(mayWrite);
 		connection.setRequestMethod(httpMethod);
+	}
+
+
+	private static int toMillis(Duration timeout) {
+		Assert.isTrue(!timeout.isNegative(), "Timeout must be a non-negative value");
+		return (timeout.compareTo(MAX_TIMEOUT) > 0 ? Integer.MAX_VALUE : (int) timeout.toMillis());
 	}
 
 }
