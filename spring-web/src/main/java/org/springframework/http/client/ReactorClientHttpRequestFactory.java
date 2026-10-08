@@ -69,8 +69,6 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 
 	private @Nullable Duration readTimeout;
 
-	private @Nullable Duration exchangeTimeout;
-
 	private volatile @Nullable HttpClient httpClient;
 
 	private final Object lifecycleMonitor = new Object();
@@ -209,7 +207,7 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 					"Expected HttpClient or ResourceFactory and mapper");
 			client = createHttpClient(this.resourceFactory, this.mapper);
 		}
-		return new ReactorClientHttpRequest(client, httpMethod, uri, this.executor, this.exchangeTimeout);
+		return new ReactorClientHttpRequest(client, httpMethod, uri, this.executor);
 	}
 
 
