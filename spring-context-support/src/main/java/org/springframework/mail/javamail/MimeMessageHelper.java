@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
 import java.util.Date;
 
 import jakarta.activation.DataHandler;
@@ -761,6 +762,17 @@ public class MimeMessageHelper {
 	public void setSentDate(Date sentDate) throws MessagingException {
 		Assert.notNull(sentDate, "Sent date must not be null");
 		this.mimeMessage.setSentDate(sentDate);
+	}
+
+	/**
+	 * Set the sent-date of the message.
+	 * @param sentDate the date to set (never {@code null})
+	 * @throws MessagingException in case of errors
+	 * @since 7.1
+	 */
+	public void setSentDate(Instant sentDate) throws MessagingException {
+		Assert.notNull(sentDate, "Sent date must not be null");
+		this.mimeMessage.setSentDate(Date.from(sentDate));
 	}
 
 	/**
