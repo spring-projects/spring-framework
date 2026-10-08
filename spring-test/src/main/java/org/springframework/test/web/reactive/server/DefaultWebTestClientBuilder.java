@@ -90,7 +90,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	private @Nullable HttpHeaders defaultHeaders;
 
-	private @Nullable MultiValueMap<String, String> defaultCookies;
+	private @Nullable LinkedMultiValueMap<String, String> defaultCookies;
 
 	private @Nullable Object defaultApiVersion;
 
@@ -141,15 +141,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 		this.baseUrl = other.baseUrl;
 		this.uriBuilderFactory = other.uriBuilderFactory;
-		if (other.defaultHeaders != null) {
-			this.defaultHeaders = new HttpHeaders();
-			this.defaultHeaders.putAll(other.defaultHeaders);
-		}
-		else {
-			this.defaultHeaders = null;
-		}
-		this.defaultCookies = (other.defaultCookies != null ?
-				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.defaultHeaders = (other.defaultHeaders != null ? HttpHeaders.copyOf(other.defaultHeaders) : null);
+		this.defaultCookies = (other.defaultCookies != null ? other.defaultCookies.deepCopy() : null);
 		this.defaultApiVersion = other.defaultApiVersion;
 		this.apiVersionInserter = other.apiVersionInserter;
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
@@ -307,8 +300,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		};
 		return new DefaultWebTestClient(
 				connectorToUse, exchangeStrategies, exchangeFactory, initUriBuilderFactory(),
-				(this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null),
-				(this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null),
+				(this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(HttpHeaders.copyOf(this.defaultHeaders)) : null),
+				(this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies.deepCopy()) : null),
 				this.defaultApiVersion, this.apiVersionInserter, this.entityResultConsumer,
 				this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
