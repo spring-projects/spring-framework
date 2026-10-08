@@ -191,8 +191,10 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 
 		String headersToAllow = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
 		if (headersToAllow != null) {
-			Set<String> toAllow = StringUtils.commaDelimitedListToSet(headersToAllow);
-			headers.removeAll(toAllow);
+			String[] toAllow = StringUtils.commaDelimitedListToStringArray(headersToAllow.trim());
+			for (String header : toAllow) {
+				headers.remove(header);
+			}
 		}
 		return Collections.unmodifiableSet(headers);
 	}

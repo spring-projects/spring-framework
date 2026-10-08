@@ -56,6 +56,26 @@ class JdkClientHttpRequestTests {
 		assertThat(disallowedHeaders("Expect").contains("expect")).isFalse();
 	}
 
+	@Test  // gh-37422
+	void disallowedHeadersWithManyMixedCaseHeadersAllowed() {
+		assertThat(disallowedHeaders("Expect,Host,Connection,Upgrade,Content-Length")).isEmpty();
+	}
+
+	@Test  // gh-37422
+	void disallowedHeadersWithWhitespaceAroundPropertyValue() {
+		assertThat(disallowedHeaders(" expect,host "))
+				.containsExactlyInAnyOrder("connection", "content-length", "upgrade");
+	}
+
+	@Test  // gh-37422
+	void disallowedHeadersWithWhitespaceAroundIndividualHeaders() {
+		// Consistent with the JDK, whitespace around individual headers is not ignored.
+		assertThat(disallowedHeaders("expect, host"))
+				.containsExactlyInAnyOrder("connection", "content-length", "host", "upgrade");
+		assertThat(disallowedHeaders("expect ,host"))
+				.containsExactlyInAnyOrder("connection", "content-length", "expect", "upgrade");
+	}
+
 	private static Set<String> disallowedHeaders(@Nullable String allowRestrictedHeaders) {
 		String key = "jdk.httpclient.allowRestrictedHeaders";
 		String original = System.getProperty(key);
