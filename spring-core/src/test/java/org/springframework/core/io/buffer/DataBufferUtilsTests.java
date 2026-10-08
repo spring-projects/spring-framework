@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.FileChannel;
@@ -39,6 +40,9 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -61,11 +65,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -260,6 +267,58 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		finally {
 			executor.shutdown();
 		}
+	}
+
+	@Test
+	void readAsynchronousFileChannelCompletedTwiceAfterEof() throws Exception {
+		readAsynchronousFileChannelWithDuplicateCallbackOnClose(
+				(handler, attachment) -> handler.completed(-1, attachment));
+	}
+
+	@Test
+	void readAsynchronousFileChannelFailedAfterEof() throws Exception {
+		readAsynchronousFileChannelWithDuplicateCallbackOnClose(
+				(handler, attachment) -> handler.failed(new AsynchronousCloseException(), attachment));
+	}
+
+	private void readAsynchronousFileChannelWithDuplicateCallbackOnClose(
+			BiConsumer<CompletionHandler<Integer, Object>, Object> duplicateCallback) throws Exception {
+
+		DataBuffer delegate = DefaultDataBufferFactory.sharedInstance.allocateBuffer(3);
+		PooledDataBuffer dataBuffer = mock();
+		given(dataBuffer.writableByteBuffers()).willAnswer(invocation -> delegate.writableByteBuffers());
+		given(dataBuffer.isAllocated()).willReturn(true);
+
+		DataBufferFactory factory = mock();
+		given(factory.allocateBuffer(anyInt())).willReturn(dataBuffer);
+
+		AtomicReference<CompletionHandler<Integer, Object>> handlerRef = new AtomicReference<>();
+		AtomicReference<Object> attachmentRef = new AtomicReference<>();
+
+		AtomicBoolean open = new AtomicBoolean(true);
+		AsynchronousFileChannel channel = mock();
+		given(channel.isOpen()).willAnswer(invocation -> open.get());
+		willAnswer(invocation -> {
+			open.set(false);
+			duplicateCallback.accept(handlerRef.get(), attachmentRef.get());
+			return null;
+		}).given(channel).close();
+		willAnswer(invocation -> {
+			Object attachment = invocation.getArgument(2);
+			CompletionHandler<Integer, Object> handler = invocation.getArgument(3);
+			handlerRef.set(handler);
+			attachmentRef.set(attachment);
+			handler.completed(-1, attachment);
+			return null;
+		}).given(channel).read(any(), anyLong(), any(), any());
+
+		Flux<DataBuffer> result = DataBufferUtils.readAsynchronousFileChannel(() -> channel, factory, 3);
+
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		verify(dataBuffer, times(1)).release();
 	}
 
 	@ParameterizedDataBufferAllocatingTest
