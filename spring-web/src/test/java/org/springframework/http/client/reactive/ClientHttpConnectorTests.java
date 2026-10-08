@@ -60,6 +60,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.junit.jupiter.api.Named.named;
@@ -252,6 +253,14 @@ class ClientHttpConnectorTests {
 		StepVerifier.create(futureResponse)
 				.assertNext(response -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
+	}
+
+	@Test  // gh-37425
+	void negativeReadTimeoutIsRejectedWithJdk() {
+		JdkClientHttpConnector connector = new JdkClientHttpConnector();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> connector.setReadTimeout(Duration.ofMillis(-1)))
+				.withMessage("Timeout must be a non-negative value");
 	}
 
 	private Buffer randomBody(int size) {

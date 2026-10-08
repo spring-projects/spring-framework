@@ -38,6 +38,9 @@ import org.springframework.util.Assert;
  */
 public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, InitializingBean, DisposableBean {
 
+	private static final Duration ONE_MILLISECOND = Duration.ofMillis(1);
+
+
 	private final HttpClient httpClient;
 
 	private final boolean defaultClient;
@@ -68,7 +71,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	/**
 	 * Set the underlying connect timeout in milliseconds.
-	 * A value of 0 specifies an infinite timeout.
+	 * <p>A value of 0 specifies an infinite timeout.
 	 * <p>Default is 5 seconds.
 	 */
 	public void setConnectTimeout(int connectTimeout) {
@@ -78,29 +81,39 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	/**
 	 * Set the underlying connect timeout as a {@code Duration}.
-	 * A value of 0 specifies an infinite timeout.
+	 * <p>A value of 0 specifies an infinite timeout.
+	 * <p>Values less than one millisecond (other than 0) are not permitted.
 	 * <p>Default is 5 seconds.
 	 */
 	public void setConnectTimeout(Duration connectTimeout) {
 		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
+		Assert.isTrue(!connectTimeout.isNegative(), "Timeout must be a non-negative value");
+		Assert.isTrue(connectTimeout.isZero() || connectTimeout.compareTo(ONE_MILLISECOND) >= 0,
+				"Timeout must be zero or at least one millisecond");
 		this.httpClient.setConnectTimeout(connectTimeout.toMillis());
 	}
 
 	/**
 	 * Set the underlying read timeout in milliseconds.
+	 * <p>A value of 0 specifies an infinite timeout.
 	 * <p>Default is 10 seconds.
 	 */
 	public void setReadTimeout(long readTimeout) {
-		Assert.isTrue(readTimeout > 0, "Timeout must be a positive value");
+		Assert.isTrue(readTimeout >= 0, "Timeout must be a non-negative value");
 		this.readTimeout = readTimeout;
 	}
 
 	/**
 	 * Set the underlying read timeout as a {@code Duration}.
+	 * <p>A value of 0 specifies an infinite timeout.
+	 * <p>Values less than one millisecond (other than 0) are not permitted.
 	 * <p>Default is 10 seconds.
 	 */
 	public void setReadTimeout(Duration readTimeout) {
 		Assert.notNull(readTimeout, "ReadTimeout must not be null");
+		Assert.isTrue(!readTimeout.isNegative(), "Timeout must be a non-negative value");
+		Assert.isTrue(readTimeout.isZero() || readTimeout.compareTo(ONE_MILLISECOND) >= 0,
+				"Timeout must be zero or at least one millisecond");
 		this.readTimeout = readTimeout.toMillis();
 	}
 

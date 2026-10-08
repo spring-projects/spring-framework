@@ -32,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link JdkClientHttpRequestFactory}.
@@ -84,6 +85,17 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
+	}
+
+	@Test  // gh-37425
+	void negativeReadTimeoutIsRejected() {
+		JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> requestFactory.setReadTimeout(-1))
+				.withMessage("Timeout must be a non-negative value");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> requestFactory.setReadTimeout(Duration.ofMillis(-1)))
+				.withMessage("Timeout must be a non-negative value");
 	}
 
 	@Test

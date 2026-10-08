@@ -42,6 +42,8 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
+	private static final Duration ONE_MILLISECOND = Duration.ofMillis(1);
+
 	private static final Duration MAX_TIMEOUT = Duration.ofMillis(Integer.MAX_VALUE);
 
 
@@ -71,20 +73,22 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 	/**
 	 * Set the underlying URLConnection's connect timeout (in milliseconds).
-	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>A timeout value of 0 specifies an infinite timeout.
+	 * <p>Negative values are not permitted.
 	 * <p>Default is the system's default timeout.
 	 * @see URLConnection#setConnectTimeout(int)
 	 */
 	public void setConnectTimeout(int connectTimeout) {
+		Assert.isTrue(connectTimeout >= 0, "Timeout must be a non-negative value");
 		this.connectTimeout = connectTimeout;
 	}
 
 	/**
 	 * Set the underlying URLConnection's connect timeout as a {@code Duration}.
-	 * A timeout value of 0 specifies an infinite timeout.
-	 * <p>Negative values are not permitted, and values exceeding
-	 * {@link Integer#MAX_VALUE} milliseconds are limited to
-	 * {@code Integer.MAX_VALUE} milliseconds.
+	 * <p>A timeout value of 0 specifies an infinite timeout.
+	 * <p>Negative values and values less than one millisecond (other than 0) are
+	 * not permitted, and values exceeding {@link Integer#MAX_VALUE} milliseconds
+	 * are limited to {@code Integer.MAX_VALUE} milliseconds.
 	 * <p>Default is the system's default timeout.
 	 * @since 6.1
 	 * @see URLConnection#setConnectTimeout(int)
@@ -96,20 +100,22 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 	/**
 	 * Set the underlying URLConnection's read timeout (in milliseconds).
-	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>A timeout value of 0 specifies an infinite timeout.
+	 * <p>Negative values are not permitted.
 	 * <p>Default is the system's default timeout.
 	 * @see URLConnection#setReadTimeout(int)
 	 */
 	public void setReadTimeout(int readTimeout) {
+		Assert.isTrue(readTimeout >= 0, "Timeout must be a non-negative value");
 		this.readTimeout = readTimeout;
 	}
 
 	/**
 	 * Set the underlying URLConnection's read timeout as a {@code Duration}.
-	 * A timeout value of 0 specifies an infinite timeout.
-	 * <p>Negative values are not permitted, and values exceeding
-	 * {@link Integer#MAX_VALUE} milliseconds are limited to
-	 * {@code Integer.MAX_VALUE} milliseconds.
+	 * <p>A timeout value of 0 specifies an infinite timeout.
+	 * <p>Negative values and values less than one millisecond (other than 0) are
+	 * not permitted, and values exceeding {@link Integer#MAX_VALUE} milliseconds
+	 * are limited to {@code Integer.MAX_VALUE} milliseconds.
 	 * <p>Default is the system's default timeout.
 	 * @since 6.1
 	 * @see URLConnection#setReadTimeout(int)
@@ -174,6 +180,8 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 	private static int toMillis(Duration timeout) {
 		Assert.isTrue(!timeout.isNegative(), "Timeout must be a non-negative value");
+		Assert.isTrue(timeout.isZero() || timeout.compareTo(ONE_MILLISECOND) >= 0,
+				"Timeout must be zero or at least one millisecond");
 		return (timeout.compareTo(MAX_TIMEOUT) > 0 ? Integer.MAX_VALUE : (int) timeout.toMillis());
 	}
 

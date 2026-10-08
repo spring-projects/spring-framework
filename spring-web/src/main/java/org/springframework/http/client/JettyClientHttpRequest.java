@@ -97,7 +97,8 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			else {
 				this.request.send(responseListener);
 			}
-			Response response = responseListener.get(this.readTimeout, TimeUnit.MILLISECONDS);
+			long timeout = (this.readTimeout > 0 ? this.readTimeout : Long.MAX_VALUE);
+			Response response = responseListener.get(timeout, TimeUnit.MILLISECONDS);
 			return new JettyClientHttpResponse(response, responseListener.getInputStream());
 		}
 		catch (InterruptedException ex) {

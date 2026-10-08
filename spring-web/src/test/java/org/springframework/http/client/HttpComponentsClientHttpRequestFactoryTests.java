@@ -32,6 +32,7 @@ import org.apache.hc.core5.util.Timeout;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,6 +42,7 @@ import org.springframework.util.StreamUtils;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
@@ -202,6 +204,46 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 
 	static Stream<HttpMethod> safeHttpMethods() {
 		return Stream.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.TRACE);
+	}
+
+	@Test  // gh-37425
+	void readTimeoutZero() throws Exception {
+		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory();
+		hrf.setReadTimeout(0);
+		assertThat(retrieveRequestConfig(hrf).getResponseTimeout()).isEqualTo(Timeout.of(0, MILLISECONDS));
+
+		hrf = new HttpComponentsClientHttpRequestFactory();
+		hrf.setReadTimeout(Duration.ZERO);
+		assertThat(retrieveRequestConfig(hrf).getResponseTimeout()).isEqualTo(Timeout.of(0, MILLISECONDS));
+	}
+
+	@ParameterizedTest  // gh-37425
+	@ValueSource(strings = {"PT0.000000001S", "PT0.000999999S"})
+	void subMillisecondReadTimeoutIsRejected(Duration timeout) {
+		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> hrf.setReadTimeout(timeout))
+				.withMessage("Timeout must be zero or at least one millisecond");
+	}
+
+	@Test  // gh-37425
+	void connectionRequestTimeoutZero() throws Exception {
+		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory();
+		hrf.setConnectionRequestTimeout(0);
+		assertThat(retrieveRequestConfig(hrf).getConnectionRequestTimeout()).isEqualTo(Timeout.of(0, MILLISECONDS));
+
+		hrf = new HttpComponentsClientHttpRequestFactory();
+		hrf.setConnectionRequestTimeout(Duration.ZERO);
+		assertThat(retrieveRequestConfig(hrf).getConnectionRequestTimeout()).isEqualTo(Timeout.of(0, MILLISECONDS));
+	}
+
+	@ParameterizedTest  // gh-37425
+	@ValueSource(strings = {"PT0.000000001S", "PT0.000999999S"})
+	void subMillisecondConnectionRequestTimeoutIsRejected(Duration timeout) {
+		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> hrf.setConnectionRequestTimeout(timeout))
+				.withMessage("Timeout must be zero or at least one millisecond");
 	}
 
 	@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG

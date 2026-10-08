@@ -156,6 +156,62 @@ class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTest
 				.withMessage("Timeout must be a non-negative value");
 	}
 
+	@Test  // gh-37425
+	void readTimeoutZero() throws Exception {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		factory.setReadTimeout(0);
+		assertThat(prepareConnection(factory).getReadTimeout()).isZero();
+
+		factory = new SimpleClientHttpRequestFactory();
+		factory.setReadTimeout(Duration.ZERO);
+		assertThat(prepareConnection(factory).getReadTimeout()).isZero();
+	}
+
+	@Test  // gh-37425
+	void negativeReadTimeoutIsRejected() {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> factory.setReadTimeout(-1))
+				.withMessage("Timeout must be a non-negative value");
+	}
+
+	@ParameterizedTest  // gh-37425
+	@ValueSource(strings = {"PT0.000000001S", "PT0.000999999S"})
+	void subMillisecondReadTimeoutIsRejected(Duration timeout) {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> factory.setReadTimeout(timeout))
+				.withMessage("Timeout must be zero or at least one millisecond");
+	}
+
+	@Test  // gh-37425
+	void connectTimeoutZero() throws Exception {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		factory.setConnectTimeout(0);
+		assertThat(prepareConnection(factory).getConnectTimeout()).isZero();
+
+		factory = new SimpleClientHttpRequestFactory();
+		factory.setConnectTimeout(Duration.ZERO);
+		assertThat(prepareConnection(factory).getConnectTimeout()).isZero();
+	}
+
+	@Test  // gh-37425
+	void negativeConnectTimeoutIsRejected() {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> factory.setConnectTimeout(-1))
+				.withMessage("Timeout must be a non-negative value");
+	}
+
+	@ParameterizedTest  // gh-37425
+	@ValueSource(strings = {"PT0.000000001S", "PT0.000999999S"})
+	void subMillisecondConnectTimeoutIsRejected(Duration timeout) {
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> factory.setConnectTimeout(timeout))
+				.withMessage("Timeout must be zero or at least one millisecond");
+	}
+
 	private static HttpURLConnection prepareConnection(SimpleClientHttpRequestFactory factory) throws IOException {
 		HttpURLConnection connection = new TestHttpURLConnection(URI.create("https://example.com").toURL());
 		factory.prepareConnection(connection, "GET");

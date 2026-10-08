@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.LoopResources;
 
 import org.springframework.http.HttpMethod;
 
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -126,6 +128,25 @@ class ReactorClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTes
 		verify(httpClient).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.MAX_VALUE);
 	}
 
+	@Test  // gh-37425
+	void durationConnectTimeoutZero() {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		requestFactory.setConnectTimeout(Duration.ZERO);
+		verify(httpClient).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 0);
+	}
+
+	@ParameterizedTest  // gh-37425
+	@ValueSource(strings = {"PT0.000000001S", "PT0.000999999S"})
+	void subMillisecondConnectTimeoutIsRejected(Duration timeout) {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> requestFactory.setConnectTimeout(timeout))
+				.withMessage("Timeout must be zero or at least one millisecond");
+		verify(httpClient, never()).option(any(), any());
+	}
+
 	@ParameterizedTest  // gh-37427
 	@ValueSource(strings = {"PT-0.001S", "P-25D", "P-50D"})
 	void negativeDurationConnectTimeoutIsRejected(Duration timeout) {
@@ -137,9 +158,70 @@ class ReactorClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTes
 		verify(httpClient, never()).option(any(), any());
 	}
 
+	@Test
+	void readTimeout() {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		requestFactory.setReadTimeout(Duration.ofSeconds(5));
+		verify(httpClient).responseTimeout(Duration.ofSeconds(5));
+	}
+
+	@Test  // gh-37425
+	void readTimeoutZeroDisablesResponseTimeout() {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		requestFactory.setReadTimeout(Duration.ZERO);
+		requestFactory.setReadTimeout(0);
+		verify(httpClient, times(2)).responseTimeout(null);
+	}
+
+	@Test  // gh-37425
+	void readTimeoutZeroDisablesResponseTimeoutWithExternalResourceFactory() {
+		ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
+		resourceFactory.afterPropertiesSet();
+		try {
+			HttpClient httpClient = mockHttpClient();
+			ReactorClientHttpRequestFactory requestFactory =
+					new ReactorClientHttpRequestFactory(resourceFactory, client -> httpClient);
+			requestFactory.stop();
+			requestFactory.setReadTimeout(Duration.ZERO);
+			verify(httpClient, never()).responseTimeout(any());
+
+			requestFactory.start();
+			verify(httpClient).responseTimeout(null);
+		}
+		finally {
+			resourceFactory.destroy();
+		}
+	}
+
+	@ParameterizedTest  // gh-37425
+	@ValueSource(strings = {"PT-0.001S", "P-1D"})
+	void negativeReadTimeoutIsRejected(Duration timeout) {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> requestFactory.setReadTimeout(timeout))
+				.withMessage("Timeout must be a non-negative value");
+		verify(httpClient, never()).responseTimeout(any());
+	}
+
+	@ParameterizedTest  // gh-37425
+	@ValueSource(strings = {"PT0.000000001S", "PT0.000999999S"})
+	void subMillisecondReadTimeoutIsRejected(Duration timeout) {
+		HttpClient httpClient = mockHttpClient();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> requestFactory.setReadTimeout(timeout))
+				.withMessage("Timeout must be zero or at least one millisecond");
+		verify(httpClient, never()).responseTimeout(any());
+	}
+
 	private static HttpClient mockHttpClient() {
 		HttpClient httpClient = mock();
 		when(httpClient.option(any(), any())).thenReturn(httpClient);
+		when(httpClient.responseTimeout(any())).thenReturn(httpClient);
+		when(httpClient.runOn(any(LoopResources.class))).thenReturn(httpClient);
 		return httpClient;
 	}
 
