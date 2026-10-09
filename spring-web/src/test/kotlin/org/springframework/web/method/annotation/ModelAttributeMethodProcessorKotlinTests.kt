@@ -27,6 +27,7 @@ import org.mockito.Mockito.mock
 import org.springframework.core.MethodParameter
 import org.springframework.core.ResolvableType
 import org.springframework.core.annotation.SynthesizingMethodParameter
+import org.springframework.format.support.DefaultFormattingConversionService
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.bind.support.WebRequestDataBinder
@@ -47,6 +48,8 @@ class ModelAttributeMethodProcessorKotlinTests {
 
 	private lateinit var param: MethodParameter
 
+	private lateinit var valueClassParam: MethodParameter
+
 
 	@BeforeEach
 	fun setup() {
@@ -54,6 +57,9 @@ class ModelAttributeMethodProcessorKotlinTests {
 		processor = ModelAttributeMethodProcessor(false)
 		val method = ModelAttributeHandler::class.java.getDeclaredMethod("test", Param::class.java)
 		param = SynthesizingMethodParameter(method, 0)
+
+		val valueClassMethod = ModelAttributeHandler::class.java.getDeclaredMethod("valueClass", ValueClassParam::class.java)
+		valueClassParam = SynthesizingMethodParameter(valueClassMethod, 0)
 	}
 
 	@Test
@@ -87,11 +93,36 @@ class ModelAttributeMethodProcessorKotlinTests {
 			.hasMessageContaining("parameter a")
 	}
 
+	@Test
+	fun resolveArgumentWithValueClass() {
+		val mockRequest = MockHttpServletRequest().apply { addParameter("id", "1") }
+		val requestWithParam = ServletWebRequest(mockRequest)
+		val factory = mock<WebDataBinderFactory>()
+		given(factory.createBinder(any(), any(), eq("valueClassParam"), any()))
+			.willAnswer {
+				val binder = WebRequestDataBinder(it.getArgument(1))
+				binder.setTargetType(ResolvableType.forMethodParameter(this.valueClassParam))
+				binder.conversionService = DefaultFormattingConversionService()
+				binder
+			}
+
+		assertThat(processor.resolveArgument(this.valueClassParam, container, requestWithParam, factory))
+			.isEqualTo(ValueClassParam(ValueClass(1)))
+	}
+
 	private data class Param(val a: String)
+
+	private data class ValueClassParam(val id: ValueClass)
+
+	@JvmInline
+	value class ValueClass(val value: Long)
 
 	private class ModelAttributeHandler {
 		@Suppress("UNUSED_PARAMETER")
 		fun test(param: Param) { }
+
+		@Suppress("UNUSED_PARAMETER")
+		fun valueClass(valueClassParam: ValueClassParam) { }
 	}
 
 }
