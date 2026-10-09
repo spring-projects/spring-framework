@@ -29,6 +29,8 @@ public class CacheEvictOperation extends CacheOperation {
 
 	private final boolean beforeInvocation;
 
+	private final boolean immediate;
+
 
 	/**
 	 * Create a new {@link CacheEvictOperation} instance from the given builder.
@@ -38,6 +40,7 @@ public class CacheEvictOperation extends CacheOperation {
 		super(b);
 		this.cacheWide = b.cacheWide;
 		this.beforeInvocation = b.beforeInvocation;
+		this.immediate = b.immediate;
 	}
 
 
@@ -47,6 +50,10 @@ public class CacheEvictOperation extends CacheOperation {
 
 	public boolean isBeforeInvocation() {
 		return this.beforeInvocation;
+	}
+
+	public boolean isImmediate() {
+		return this.immediate;
 	}
 
 
@@ -60,12 +67,18 @@ public class CacheEvictOperation extends CacheOperation {
 
 		private boolean beforeInvocation = false;
 
+		private boolean immediate = false;
+
 		public void setCacheWide(boolean cacheWide) {
 			this.cacheWide = cacheWide;
 		}
 
 		public void setBeforeInvocation(boolean beforeInvocation) {
 			this.beforeInvocation = beforeInvocation;
+		}
+
+		public void setImmediate(boolean immediate) {
+			this.immediate = immediate;
 		}
 
 		@Override
@@ -75,6 +88,8 @@ public class CacheEvictOperation extends CacheOperation {
 			sb.append(this.cacheWide);
 			sb.append(',');
 			sb.append(this.beforeInvocation);
+			sb.append(',');
+			sb.append(this.immediate);
 			return sb;
 		}
 

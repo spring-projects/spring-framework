@@ -300,6 +300,14 @@
 	invoked (default) or before.]]></xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>
+									<xsd:attribute name="immediate" type="xsd:boolean" use="optional">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	Whether the eviction must be performed immediately, expecting all affected
+	entries to be invisible for subsequent lookups as soon as the operation
+	returns. A before-invocation eviction is always immediate.]]></xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
 								</xsd:extension>
 							</xsd:complexContent>
 						</xsd:complexType>
