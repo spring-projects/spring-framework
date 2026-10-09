@@ -769,7 +769,8 @@ common expressions that are likely to be used in performance-critical contexts. 
 following kinds of expressions cannot be compiled.
 
 * Expressions involving assignment
-* Expressions relying on the conversion service
+* Expressions relying on the conversion service (with the exception of String
+  concatenation, as described below)
 * Expressions using custom resolvers
 * Expressions using overloaded operators
 * Expressions using array construction syntax
@@ -777,3 +778,24 @@ following kinds of expressions cannot be compiled.
 * Expressions using bean references
 
 Compilation of additional kinds of expressions may be supported in the future.
+
+[NOTE]
+====
+String concatenation with a non-String operand (for example, `'Total: ' + order.total`)
+converts that operand to a `String` by using the `TypeConverter` configured in the
+`EvaluationContext`. Such an expression can be compiled once the `TypeConverter` has
+converted a non-null value of that operand to the same `String` as `String.valueOf()`
+during interpreted evaluation. However, such an expression is never compiled if the
+operand carries any annotations (for example, a field or getter annotated with
+`@NumberFormat`, `@Column`, or `@JsonProperty`), since the `TypeConverter` may apply
+annotation-driven formatting which typically depends on the value being formatted.
+Similarly, an expression cannot be compiled as long as the operand evaluates to `null`,
+and the compiler may eventually stop attempting to compile the expression if the
+operand repeatedly evaluates to `null`.
+
+Once compiled, the expression converts the operand by using `String.valueOf()` instead
+of the `TypeConverter`, which typically produces the same result for other values of
+the same type. If the operand later evaluates to a value of a different type,
+evaluation of the compiled expression fails, which is handled according to the
+configured compiler mode (see <<expressions-compiler-configuration>>).
+====
