@@ -134,6 +134,12 @@ public class RequestContext {
 
 	/**
 	 * Change the current locale to the specified one.
+	 * <p>This change is scoped to this {@code RequestContext} instance for the
+	 * current rendering operation and does not update the
+	 * {@link org.springframework.web.server.i18n.LocaleContextResolver}.
+	 * @param locale the new locale
+	 * @see #changeLocale(java.util.Locale, java.util.TimeZone)
+	 * @see org.springframework.web.server.i18n.LocaleContextResolver#setLocaleContext
 	 */
 	public void changeLocale(Locale locale) {
 		this.locale = locale;
@@ -141,6 +147,13 @@ public class RequestContext {
 
 	/**
 	 * Change the current locale to the specified locale and time zone context.
+	 * <p>This change is scoped to this {@code RequestContext} instance for the
+	 * current rendering operation and does not update the
+	 * {@link org.springframework.web.server.i18n.LocaleContextResolver}.
+	 * @param locale the new locale
+	 * @param timeZone the new time zone
+	 * @see org.springframework.context.i18n.SimpleTimeZoneAwareLocaleContext
+	 * @see org.springframework.web.server.i18n.LocaleContextResolver#setLocaleContext
 	 */
 	public void changeLocale(Locale locale, TimeZone timeZone) {
 		this.locale = locale;
