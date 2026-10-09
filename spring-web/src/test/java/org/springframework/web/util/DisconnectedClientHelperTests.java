@@ -34,6 +34,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -97,6 +98,13 @@ class DisconnectedClientHelperTests {
 	@Test // gh-34533
 	void nullException() {
 		assertThat(DisconnectedClientHelper.isClientDisconnectedException(null)).isFalse();
+	}
+
+	@Test // gh-36421
+	void httpMessageNotWritableFromClosedConnection() {
+		IOException cause = new IOException("The response may not be written to once it has been closed");
+		Exception ex = new HttpMessageNotWritableException("Could not write JSON", cause);
+		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isTrue();
 	}
 
 }
