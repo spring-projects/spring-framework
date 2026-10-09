@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Yanming Zhou
  */
 class LinkedCaseInsensitiveMapTests {
 
@@ -278,6 +279,23 @@ class LinkedCaseInsensitiveMapTests {
 		map.put("Key", "value");
 		assertThat(map.entrySet().remove(Map.entry("KEY", "value"))).isTrue();
 		assertThat(map).isEmpty();
+	}
+
+	@Test
+	void containsValue() {
+		assertThat(map.containsValue("value")).isFalse();
+
+		map.put("key", "value");
+		assertThat(map.containsValue("value")).isTrue();
+		assertThat(map.containsValue("VALUE")).isFalse();
+	}
+
+	@Test
+	void containsNullValue() {
+		assertThat(map.containsValue(null)).isFalse();
+
+		map.put("key", null);
+		assertThat(map.containsValue(null)).isTrue();
 	}
 
 	private void nextAndRemove(Iterator<?> iterator) {
