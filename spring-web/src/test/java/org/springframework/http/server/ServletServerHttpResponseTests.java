@@ -16,6 +16,7 @@
 
 package org.springframework.http.server;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -81,6 +83,19 @@ class ServletServerHttpResponseTests {
 		assertThat(mockResponse.getHeader("Content-Type")).as("Invalid Content-Type").isEqualTo("text/plain;charset=UTF-8");
 		assertThat(mockResponse.getContentType()).as("Invalid Content-Type").isEqualTo("text/plain;charset=UTF-8");
 		assertThat(mockResponse.getCharacterEncoding()).as("Invalid Content-Type").isEqualTo("UTF-8");
+	}
+
+	@Test
+	void contentTypeHeaderNotCopiedToProperties() {
+		HttpServletResponse mockResponse = mock();
+		this.response = new ServletServerHttpResponse(mockResponse);
+		this.response.getHeaders().setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
+		this.response.close();
+
+		verify(mockResponse).setHeader(HttpHeaders.CONTENT_TYPE, "text/plain;charset=UTF-8");
+		verify(mockResponse, never()).setContentType(any());
+		verify(mockResponse, never()).setCharacterEncoding(any(String.class));
+		verify(mockResponse, never()).setCharacterEncoding(any(Charset.class));
 	}
 
 	@Test

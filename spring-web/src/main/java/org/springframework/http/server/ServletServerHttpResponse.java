@@ -18,7 +18,6 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
@@ -26,7 +25,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.SpringProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
@@ -133,28 +131,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	private void writeHeaders() {
-		if (!this.headersWritten) {
-			// HttpServletResponse exposes some headers as properties: we should include those if not already present
-			if (this.servletResponse.getContentType() == null && this.headers.containsHeader(HttpHeaders.CONTENT_TYPE)) {
-				this.servletResponse.setContentType(this.headers.getFirst(HttpHeaders.CONTENT_TYPE));
-			}
-			if (this.servletResponse.getCharacterEncoding() == null && this.headers.containsHeader(HttpHeaders.CONTENT_TYPE)) {
-				try {
-					// Lazy parsing into MediaType
-					MediaType contentType = this.headers.getContentType();
-					if (contentType != null) {
-						Charset charset = contentType.getCharset();
-						if (charset != null) {
-							this.servletResponse.setCharacterEncoding(charset);
-						}
-					}
-				}
-				catch (Exception ex) {
-					// Leave character encoding unspecified
-				}
-			}
-			this.headersWritten = true;
-		}
+		this.headersWritten = true;
 	}
 
 }
