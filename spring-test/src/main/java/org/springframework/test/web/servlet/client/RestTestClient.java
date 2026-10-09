@@ -286,7 +286,12 @@ public interface RestTestClient {
 
 		/**
 		 * Configure the message converters to use for the request and response body.
-		 * @param configurer the configurer to apply on an empty {@link HttpMessageConverters.ClientBuilder}.
+		 * <p>As of 7.1, the builder is initialized with
+		 * {@link HttpMessageConverters.ClientBuilder#registerDefaults() default
+		 * converters}. Use {@link HttpMessageConverters.ClientBuilder#disableDefaults()}
+		 * to only use the converters configured explicitly.
+		 * @param configurer the configurer to apply on the
+		 * {@link HttpMessageConverters.ClientBuilder}
 		 * @return this builder
 		 */
 		<T extends B> T configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer);
