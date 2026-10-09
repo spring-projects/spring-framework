@@ -454,7 +454,7 @@ public class HttpHeaders implements Serializable {
 	 */
 	public HttpHeaders(MultiValueMap<String, String> headers) {
 		Assert.notNull(headers, "MultiValueMap must not be null");
-		this.headers = headers;
+		this.headers = (headers instanceof HttpHeaders httpHeaders ? unwrap(httpHeaders) : headers);
 	}
 
 	/**
@@ -2115,6 +2115,11 @@ public class HttpHeaders implements Serializable {
 	 * @since 5.1.4
 	 */
 	public static String formatHeaders(MultiValueMap<String, String> headers) {
+		return doFormatHeaders(headers instanceof HttpHeaders httpHeaders ?
+				unwrap(httpHeaders) : headers);
+	}
+
+	private static String doFormatHeaders(MultiValueMap<String, String> headers) {
 		Set<String> headerNames = new CaseInsensitiveHeaderNameSet(headers);
 		String suffix = "]";
 		if (headerNames.size() != headers.size()) {
