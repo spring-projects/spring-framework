@@ -237,7 +237,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		if (this.compression) {
 			return headers -> {
 				String encoding = headers.getFirst(HttpHeaders.CONTENT_ENCODING);
-				if (encoding != null && SUPPORTED_ENCODINGS.contains(encoding)) {
+				if (encoding != null && SUPPORTED_ENCODINGS.contains(encoding.toLowerCase(Locale.ROOT))) {
 					headers.remove(HttpHeaders.CONTENT_ENCODING);
 					headers.remove(HttpHeaders.CONTENT_LENGTH);
 				}
