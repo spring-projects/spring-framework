@@ -76,13 +76,31 @@ public class CompositeFilter implements Filter {
 
 	/**
 	 * Clean up all the filters supplied, calling each one's destroy method in turn, but in reverse order.
+	 * Continue invoking {@code destroy()} on the remaining filters if one filter fails.
 	 * @see Filter#init(FilterConfig)
 	 */
 	@Override
 	public void destroy() {
+		Throwable firstFailure = null;
 		for (int i = this.filters.size(); i-- > 0;) {
 			Filter filter = this.filters.get(i);
-			filter.destroy();
+			try {
+				filter.destroy();
+			}
+			catch (Throwable ex) {
+				if (firstFailure == null) {
+					firstFailure = ex;
+				}
+				else if (firstFailure != ex) {
+					firstFailure.addSuppressed(ex);
+				}
+			}
+		}
+		if (firstFailure instanceof RuntimeException runtimeException) {
+			throw runtimeException;
+		}
+		if (firstFailure instanceof Error error) {
+			throw error;
 		}
 	}
 
