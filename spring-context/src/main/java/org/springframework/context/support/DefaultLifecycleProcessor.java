@@ -19,7 +19,6 @@ package org.springframework.context.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,11 +27,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -456,13 +456,16 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @param beanName the name of the bean to stop
 	 */
 	private void doStop(Map<String, ? extends Lifecycle> lifecycleBeans, final String beanName,
-			boolean pauseableOnly, final CountDownLatch latch, final Set<String> countDownBeanNames) {
+			boolean pauseableOnly, final Phaser phaser, final Set<String> countDownBeanNames) {
 
 		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null) {
+			if (bean instanceof SmartLifecycle) {
+				phaser.register();
+			}
 			String[] dependentBeans = getBeanFactory().getDependentBeans(beanName);
 			for (String dependentBean : dependentBeans) {
-				doStop(lifecycleBeans, dependentBean, pauseableOnly, latch, countDownBeanNames);
+				doStop(lifecycleBeans, dependentBean, pauseableOnly, phaser, countDownBeanNames);
 			}
 			try {
 				if (bean.isRunning()) {
@@ -478,7 +481,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 							}
 							countDownBeanNames.add(beanName);
 							smartLifecycle.stop(() -> {
-								latch.countDown();
+								phaser.arriveAndDeregister();
 								countDownBeanNames.remove(beanName);
 								if (logger.isDebugEnabled()) {
 									logger.debug("Bean '" + beanName + "' completed its stop procedure");
@@ -487,7 +490,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 						}
 						else {
 							// Don't wait for beans that aren't pauseable...
-							latch.countDown();
+							phaser.arriveAndDeregister();
 						}
 					}
 					else if (!pauseableOnly) {
@@ -503,7 +506,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				}
 				else if (bean instanceof SmartLifecycle) {
 					// Don't wait for beans that aren't running...
-					latch.countDown();
+					phaser.arriveAndDeregister();
 				}
 			}
 			catch (Throwable ex) {
@@ -511,7 +514,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					logger.warn("Failed to stop bean '" + beanName + "'", ex);
 				}
 				if (bean instanceof SmartLifecycle) {
-					latch.countDown();
+					phaser.arriveAndDeregister();
 				}
 			}
 		}
@@ -582,8 +585,6 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		private final List<LifecycleGroupMember> members = new ArrayList<>();
 
-		private int smartMemberCount;
-
 		public LifecycleGroup(int phase, Map<String, ? extends Lifecycle> lifecycleBeans,
 				boolean autoStartupOnly, boolean pauseableOnly) {
 
@@ -595,9 +596,6 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		public void add(String name, Lifecycle bean) {
 			this.members.add(new LifecycleGroupMember(name, bean));
-			if (bean instanceof SmartLifecycle) {
-				this.smartMemberCount++;
-			}
 		}
 
 		public void start() {
@@ -637,27 +635,22 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if (logger.isDebugEnabled()) {
 				logger.debug("Stopping beans in phase " + this.phase);
 			}
-			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
+			// Keep one party registered until all beans and their dependents have been asked to stop.
+			Phaser phaser = new Phaser(1);
 			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<>());
-			Set<String> lifecycleBeanNames = new HashSet<>(this.lifecycleBeans.keySet());
 			for (LifecycleGroupMember member : this.members) {
-				if (lifecycleBeanNames.contains(member.name)) {
-					doStop(this.lifecycleBeans, member.name, this.pauseableOnly, latch, countDownBeanNames);
-				}
-				else if (member.bean instanceof SmartLifecycle) {
-					// Already removed: must have been a dependent bean from another phase
-					latch.countDown();
-				}
+				doStop(this.lifecycleBeans, member.name, this.pauseableOnly, phaser, countDownBeanNames);
 			}
+			int shutdownPhase = phaser.arriveAndDeregister();
+			long shutdownTimeout = determineShutdownTimeout(this.phase);
 			try {
-				long shutdownTimeout = determineShutdownTimeout(this.phase);
-				if (!latch.await(shutdownTimeout, TimeUnit.MILLISECONDS)) {
-					// Count is still >0 after timeout
-					if (!countDownBeanNames.isEmpty() && logger.isInfoEnabled()) {
-						logger.info("Shutdown phase " + this.phase + " ends with " + countDownBeanNames.size() +
-								" bean" + (countDownBeanNames.size() > 1 ? "s" : "") +
-								" still running after timeout of " + shutdownTimeout + "ms: " + countDownBeanNames);
-					}
+				phaser.awaitAdvanceInterruptibly(shutdownPhase, shutdownTimeout, TimeUnit.MILLISECONDS);
+			}
+			catch (TimeoutException ex) {
+				if (!countDownBeanNames.isEmpty() && logger.isInfoEnabled()) {
+					logger.info("Shutdown phase " + this.phase + " ends with " + countDownBeanNames.size() +
+							" bean" + (countDownBeanNames.size() > 1 ? "s" : "") +
+							" still running after timeout of " + shutdownTimeout + "ms: " + countDownBeanNames);
 				}
 			}
 			catch (InterruptedException ex) {
