@@ -46,7 +46,6 @@ import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
 import org.eclipse.jetty.client.Request;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -1323,10 +1322,12 @@ class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(3));
 	}
 
-	@Disabled("Disabled because it's flaky (gh-36589)")
 	@Test  // gh-36158
 	void reactorNettyAttributes() throws IOException {
-		startServer(new ReactorClientHttpConnector());
+		Sinks.Empty<Void> connectionReleased = Sinks.empty();
+		HttpClient httpClient = HttpClient.create()
+				.doOnDisconnected(connection -> connectionReleased.tryEmitEmpty());
+		startServer(new ReactorClientHttpConnector(httpClient));
 
 		prepareResponse(builder ->
 				builder.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
@@ -1342,6 +1343,7 @@ class WebClientIntegrationTests {
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result).expectNext("Hello Spring!").expectComplete().verify(Duration.ofSeconds(3));
+		StepVerifier.create(connectionReleased.asMono()).expectComplete().verify(Duration.ofSeconds(3));
 
 		assertThat(channelRef.get().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY).get()).isNull();
 	}
