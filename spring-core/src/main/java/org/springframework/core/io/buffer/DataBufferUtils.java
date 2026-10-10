@@ -711,7 +711,7 @@ public abstract class DataBufferUtils extends DataBuffers {
 			DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers();
 			Assert.state(iterator.hasNext(), "No ByteBuffer available");
 			ByteBuffer byteBuffer = iterator.next();
-			Attachment attachment = new Attachment(dataBuffer, iterator);
+			Attachment attachment = new Attachment(dataBuffer, iterator, new AtomicBoolean());
 			try {
 				this.channel.read(byteBuffer, this.position.get(), attachment, this);
 			}
@@ -724,6 +724,9 @@ public abstract class DataBufferUtils extends DataBuffers {
 
 		@Override
 		public void completed(Integer read, Attachment attachment) {
+			if (!attachment.completed().compareAndSet(false, true)) {
+				return;
+			}
 			attachment.iterator().close();
 			DataBuffer dataBuffer = attachment.dataBuffer();
 
@@ -771,7 +774,8 @@ public abstract class DataBufferUtils extends DataBuffers {
 			IDLE, READING, DISPOSED
 		}
 
-		private record Attachment(DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {}
+		private record Attachment(
+				DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator, AtomicBoolean completed) {}
 	}
 
 
