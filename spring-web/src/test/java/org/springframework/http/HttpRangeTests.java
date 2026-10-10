@@ -106,6 +106,74 @@ class HttpRangeTests {
 	}
 
 	@Test
+	void parseRangesWithMatchingIfRangeETag() {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setRange(List.of(HttpRange.createByteRange(0, 1)));
+		requestHeaders.set(HttpHeaders.IF_RANGE, "\"current\"");
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setETag("\"current\"");
+
+		assertThat(HttpRange.parseRanges(requestHeaders, responseHeaders)).hasSize(1);
+	}
+
+	@Test
+	void parseRangesWithNonMatchingIfRangeETag() {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setRange(List.of(HttpRange.createByteRange(0, 1)));
+		requestHeaders.set(HttpHeaders.IF_RANGE, "\"stale\"");
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setETag("\"current\"");
+
+		assertThat(HttpRange.parseRanges(requestHeaders, responseHeaders)).isEmpty();
+	}
+
+	@Test
+	void parseRangesWithWeakIfRangeETag() {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setRange(List.of(HttpRange.createByteRange(0, 1)));
+		requestHeaders.set(HttpHeaders.IF_RANGE, "W/\"current\"");
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setETag("W/\"current\"");
+
+		assertThat(HttpRange.parseRanges(requestHeaders, responseHeaders)).isEmpty();
+	}
+
+	@Test
+	void parseRangesWithMatchingIfRangeDate() {
+		long lastModified = 1660000000000L;
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setRange(List.of(HttpRange.createByteRange(0, 1)));
+		requestHeaders.setDate(HttpHeaders.IF_RANGE, lastModified);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setLastModified(lastModified);
+
+		assertThat(HttpRange.parseRanges(requestHeaders, responseHeaders)).hasSize(1);
+	}
+
+	@Test
+	void parseRangesWithNonMatchingIfRangeDate() {
+		long lastModified = 1660000000000L;
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setRange(List.of(HttpRange.createByteRange(0, 1)));
+		requestHeaders.setDate(HttpHeaders.IF_RANGE, lastModified - 1000);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setLastModified(lastModified);
+
+		assertThat(HttpRange.parseRanges(requestHeaders, responseHeaders)).isEmpty();
+	}
+
+	@Test
+	void invalidRangeIsIgnoredWhenIfRangeDoesNotMatch() {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set(HttpHeaders.RANGE, "invalid");
+		requestHeaders.set(HttpHeaders.IF_RANGE, "\"stale\"");
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setETag("\"current\"");
+
+		assertThat(HttpRange.parseRanges(requestHeaders, responseHeaders)).isEmpty();
+	}
+
+	@Test
 	void parseRangesValidations() {
 
 		// 1. At limit..
