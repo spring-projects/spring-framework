@@ -104,7 +104,8 @@ SpEL also supports nested properties by using the standard dot notation (such as
 `prop1.prop2.prop3`) as well as the corresponding setting of property values.
 Public fields may also be accessed.
 
-The following example shows how to use dot notation to get the length of a string literal.
+The following example shows how to use dot notation to get the number of bytes in the
+platform-encoded form of a string literal.
 
 [tabs]
 ======
@@ -118,7 +119,7 @@ Java::
 	Expression exp = parser.parseExpression("'Hello World'.bytes.length"); // <1>
 	int length = (Integer) exp.getValue();
 ----
-<1> `'Hello World'.bytes.length` gives the length of the literal.
+<1> `'Hello World'.bytes.length` gives the number of bytes in the literal's byte array.
 
 Kotlin::
 +
@@ -130,7 +131,7 @@ Kotlin::
 	val exp = parser.parseExpression("'Hello World'.bytes.length") // <1>
 	val length = exp.value as Int
 ----
-<1> `'Hello World'.bytes.length` gives the length of the literal.
+<1> `'Hello World'.bytes.length` gives the number of bytes in the literal's byte array.
 ======
 
 The String's constructor can be called instead of using a string literal, as the following
