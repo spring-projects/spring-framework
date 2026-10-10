@@ -2471,6 +2471,35 @@ class MergedAnnotationsTests {
 		assertThat(attributes.annotationType()).isEqualTo(SpringApplicationConfiguration.class);
 	}
 
+	@Test
+	void repeatableContainersAndAnnotationFilterArePropagated() {
+		MergedAnnotations notUnwrapped = MergedAnnotations.from(
+				MetaAnnotatedClass.class,
+				SearchStrategy.DIRECT,
+				RepeatableContainers.none(),
+				AnnotationFilter.PLAIN);
+
+		MergedAnnotations unwrapped = MergedAnnotations.from(
+				MetaAnnotatedClass.class,
+				SearchStrategy.DIRECT,
+				RepeatableContainers.standardRepeatables(),
+				AnnotationFilter.PLAIN);
+
+		assertThat(notUnwrapped.isPresent(MyRepeatable.class)).isFalse();
+		assertThat(notUnwrapped.get(MyRepeatable.class).isPresent()).isFalse();
+		assertThat(notUnwrapped.stream(MyRepeatable.class)).isEmpty();
+
+		assertThat(unwrapped.isPresent(MyRepeatable.class)).isTrue();
+		assertThat(unwrapped.get(MyRepeatable.class).isPresent()).isTrue();
+		List<MergedAnnotation<MyRepeatable>> repeatables = unwrapped.stream(MyRepeatable.class).toList();
+		assertThat(repeatables).hasSize(2);
+		assertThat(repeatables).allSatisfy(annotation ->
+				assertThat(annotation.getType()).isEqualTo(MyRepeatable.class));
+		assertThat(repeatables)
+				.extracting(annotation -> annotation.getValue("value", String.class).get())
+				.containsExactlyInAnyOrder("a", "b");
+	}
+
 
 	// @formatter:off
 
@@ -3391,6 +3420,15 @@ class MergedAnnotationsTests {
 
 	@SingleMyRepeatable
 	static class SingleMyRepeatableClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@MyRepeatableContainer({ @MyRepeatable("a"), @MyRepeatable("b") })
+	@interface MetaAnnotatedWithRepeatableContainer {
+	}
+
+	@MetaAnnotatedWithRepeatableContainer
+	static class MetaAnnotatedClass {
 	}
 
 	static class SubMyRepeatableClass extends MyRepeatableClass {
