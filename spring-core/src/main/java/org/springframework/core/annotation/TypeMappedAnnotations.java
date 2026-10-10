@@ -37,6 +37,7 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Chengang Guan
  * @since 5.2
  */
 final class TypeMappedAnnotations implements MergedAnnotations {
@@ -328,7 +329,8 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 							}
 						}
 						if (!this.directOnly) {
-							AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(type);
+							AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
+									type, this.repeatableContainers, this.annotationFilter);
 							for (int i = 0; i < mappings.size(); i++) {
 								AnnotationTypeMapping mapping = mappings.get(i);
 								if (isMappingForType(mapping, this.annotationFilter, requiredType)) {
@@ -458,7 +460,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 		private Aggregate createAggregate(int aggregateIndex, @Nullable Object source, @Nullable Annotation[] annotations) {
 			List<Annotation> aggregateAnnotations = getAggregateAnnotations(annotations);
-			return new Aggregate(aggregateIndex, source, aggregateAnnotations);
+			return new Aggregate(aggregateIndex, source, aggregateAnnotations, repeatableContainers, annotationFilter);
 		}
 
 		private List<Annotation> getAggregateAnnotations(@Nullable Annotation[] annotations) {
@@ -498,13 +500,15 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 		private final AnnotationTypeMappings[] mappings;
 
-		Aggregate(int aggregateIndex, @Nullable Object source, List<Annotation> annotations) {
+		Aggregate(int aggregateIndex, @Nullable Object source, List<Annotation> annotations,
+				RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 			this.aggregateIndex = aggregateIndex;
 			this.source = source;
 			this.annotations = annotations;
 			this.mappings = new AnnotationTypeMappings[annotations.size()];
 			for (int i = 0; i < annotations.size(); i++) {
-				this.mappings[i] = AnnotationTypeMappings.forAnnotationType(annotations.get(i).annotationType());
+				this.mappings[i] = AnnotationTypeMappings.forAnnotationType(
+						annotations.get(i).annotationType(), repeatableContainers, annotationFilter);
 			}
 		}
 
