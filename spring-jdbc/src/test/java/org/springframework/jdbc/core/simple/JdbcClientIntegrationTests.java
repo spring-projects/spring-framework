@@ -567,6 +567,17 @@ class JdbcClientIntegrationTests {
 		}
 
 		@Test
+		void selectWithReusedNamedParameterAndZeroMaxRows() {
+			List<User> users = jdbcClient.sql(QUERY1)
+					.withMaxRows(0)
+					.param("name", "John")
+					.query(User.class)
+					.list();
+
+			assertResults(users);
+		}
+
+		@Test
 		void selectWithReusedNamedParameterList() {
 			List<User> users = jdbcClient.sql(QUERY2)
 					.param("names", List.of("John", "Bogus"))
