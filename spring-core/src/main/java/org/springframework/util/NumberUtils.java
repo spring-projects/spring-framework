@@ -170,7 +170,8 @@ public abstract class NumberUtils {
 	 * target class, using the corresponding {@code decode} / {@code valueOf} method.
 	 * <p>Trims all whitespace (leading, trailing, and in between characters) from
 	 * the input {@code String} before attempting to parse the number.
-	 * <p>Supports numbers in hex format (with leading "0x", "0X", or "#") as well.
+	 * <p>Supports numbers in hex format (with leading "0x", "0X", or "#",
+	 * optionally preceded by a "+" or "-" sign) as well.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
@@ -291,8 +292,10 @@ public abstract class NumberUtils {
 		boolean negative = false;
 
 		// Handle sign, if present.
-		if (value.startsWith("-") || value.startsWith("+")) {
-			negative = value.startsWith("-");
+		// Note: value is never empty here, since isHexNumber() has already matched it.
+		char firstChar = value.charAt(0);
+		if (firstChar == '-' || firstChar == '+') {
+			negative = (firstChar == '-');
 			index++;
 		}
 

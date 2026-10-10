@@ -117,7 +117,7 @@ class NumberUtilsTests {
 		assertThat(NumberUtils.parseNumber("0x" + aReallyBigInt, BigInteger.class)).as("BigInteger did not parse").isEqualTo(new BigInteger(aReallyBigInt, 16));
 	}
 
-	@Test
+	@Test  // gh-37434
 	void parseNumberAsPositiveHex() {
 		assertThat(NumberUtils.parseNumber("+0x7f", Byte.class)).isEqualTo((byte) 127);
 		assertThat(NumberUtils.parseNumber("+0X7fff", Short.class)).isEqualTo((short) 32767);
