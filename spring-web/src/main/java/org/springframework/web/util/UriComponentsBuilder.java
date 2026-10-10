@@ -286,7 +286,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			result = new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
-			MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(this.queryParams);
+			MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(this.queryParams.size());
+			queryParams.addAll(this.queryParams);
 			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
 					this.userInfo, this.host, this.port, this.pathBuilder.build(), queryParams,
 					hint == EncodingHint.FULLY_ENCODED);
