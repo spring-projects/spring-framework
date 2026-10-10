@@ -18,6 +18,8 @@ package org.springframework.r2dbc.connection;
 
 import java.util.List;
 
+import io.r2dbc.spi.Connection;
+import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.R2dbcBadGrammarException;
 import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import io.r2dbc.spi.R2dbcException;
@@ -26,10 +28,14 @@ import io.r2dbc.spi.R2dbcPermissionDeniedException;
 import io.r2dbc.spi.R2dbcRollbackException;
 import io.r2dbc.spi.R2dbcTimeoutException;
 import io.r2dbc.spi.R2dbcTransientResourceException;
+import io.r2dbc.spi.TransactionDefinition;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.FieldSource;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
+import reactor.test.StepVerifier;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -41,15 +47,22 @@ import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.r2dbc.BadSqlGrammarException;
 import org.springframework.r2dbc.UncategorizedR2dbcException;
+import org.springframework.transaction.reactive.TransactionalOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link ConnectionFactoryUtils}.
  *
  * @author Mark Paluch
  * @author Juergen Hoeller
+ * @author Sharang Gupta
  */
 class ConnectionFactoryUtilsTests {
 
@@ -157,6 +170,50 @@ class ConnectionFactoryUtilsTests {
 		assertThat(exception)
 				.isExactlyInstanceOf(TransientDataAccessResourceException.class)
 				.hasMessage("TASK; SQL [SOME-SQL]; null");
+	}
+
+	@Test  // gh-37274
+	void concurrentFirstAcquisitionsShareTheTransactionalConnection() {
+		TransactionalOperator operator = TransactionalOperator.create(
+				new R2dbcTransactionManager(transactionConnectionFactory()));
+		ConnectionFactory connectionFactory = mock();
+		Connection firstConnection = closeableConnection();
+		Connection secondConnection = closeableConnection();
+		Sinks.One<Connection> firstCreation = Sinks.one();
+		Sinks.One<Connection> secondCreation = Sinks.one();
+		doReturn(firstCreation.asMono(), secondCreation.asMono()).when(connectionFactory).create();
+
+		Mono.zip(ConnectionFactoryUtils.getConnection(connectionFactory),
+				ConnectionFactoryUtils.getConnection(connectionFactory))
+				.as(operator::transactional)
+				.as(StepVerifier::create)
+				.then(() -> firstCreation.tryEmitValue(firstConnection))
+				.then(() -> secondCreation.tryEmitValue(secondConnection))
+				.assertNext(connections -> {
+					assertThat(connections.getT1()).isSameAs(firstConnection);
+					assertThat(connections.getT2()).isSameAs(firstConnection);
+				})
+				.verifyComplete();
+
+		verify(firstConnection).close();
+		verify(secondConnection).close();
+	}
+
+	private static ConnectionFactory transactionConnectionFactory() {
+		Connection connection = mock();
+		when(connection.beginTransaction(any(TransactionDefinition.class))).thenReturn(Mono.empty());
+		when(connection.commitTransaction()).thenReturn(Mono.empty());
+		when(connection.rollbackTransaction()).thenReturn(Mono.empty());
+		when(connection.close()).thenReturn(Mono.empty());
+		ConnectionFactory connectionFactory = mock();
+		doReturn(Mono.just(connection)).when(connectionFactory).create();
+		return connectionFactory;
+	}
+
+	private static Connection closeableConnection() {
+		Connection connection = mock();
+		when(connection.close()).thenReturn(Mono.empty());
+		return connection;
 	}
 
 

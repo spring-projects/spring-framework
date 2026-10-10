@@ -60,6 +60,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  * @author Christoph Strobl
+ * @author Sharang Gupta
  * @since 5.3
  * @see R2dbcTransactionManager
  * @see org.springframework.transaction.reactive.TransactionSynchronizationManager
@@ -127,25 +128,35 @@ public abstract class ConnectionFactoryUtils {
 
 			Mono<Connection> con = fetchConnection(connectionFactory);
 			if (synchronizationManager.isSynchronizationActive()) {
-				return con.flatMap(connection -> Mono.just(connection).doOnNext(conn -> {
-					// Use same Connection for further R2DBC actions within the transaction.
-					// Thread-bound object will get removed by synchronization at transaction completion.
-					ConnectionHolder holderToUse = conHolder;
-					if (holderToUse == null) {
-						holderToUse = new ConnectionHolder(conn);
+				return con.flatMap(connection -> {
+					ConnectionHolder boundHolder = (ConnectionHolder) synchronizationManager.getResource(connectionFactory);
+					if (boundHolder != null && boundHolder.hasConnection()) {
+						// A concurrent acquisition bound its Connection to the transaction while we
+						// were fetching ours: use the bound Connection and close the superfluous one.
+						boundHolder.requested();
+						return releaseConnection(connection, connectionFactory)
+								.thenReturn(boundHolder.getConnection());
 					}
-					else {
-						holderToUse.setConnection(conn);
-					}
-					holderToUse.requested();
-					synchronizationManager.registerSynchronization(
-							new ConnectionSynchronization(holderToUse, connectionFactory));
-					holderToUse.setSynchronizedWithTransaction(true);
-					if (holderToUse != conHolder) {
-						synchronizationManager.bindResource(connectionFactory, holderToUse);
-					}
-				})      // Unexpected exception from external delegation call -> close Connection and rethrow.
-				.onErrorResume(ex -> releaseConnection(connection, connectionFactory).then(Mono.error(ex))));
+					return Mono.just(connection).doOnNext(conn -> {
+						// Use same Connection for further R2DBC actions within the transaction.
+						// Thread-bound object will get removed by synchronization at transaction completion.
+						ConnectionHolder holderToUse = conHolder;
+						if (holderToUse == null) {
+							holderToUse = new ConnectionHolder(conn);
+						}
+						else {
+							holderToUse.setConnection(conn);
+						}
+						holderToUse.requested();
+						synchronizationManager.registerSynchronization(
+								new ConnectionSynchronization(holderToUse, connectionFactory));
+						holderToUse.setSynchronizedWithTransaction(true);
+						if (holderToUse != conHolder) {
+							synchronizationManager.bindResource(connectionFactory, holderToUse);
+						}
+					})      // Unexpected exception from external delegation call -> close Connection and rethrow.
+					.onErrorResume(ex -> releaseConnection(connection, connectionFactory).then(Mono.error(ex)));
+				});
 			}
 			return con;
 		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connectionFactory.create()));
