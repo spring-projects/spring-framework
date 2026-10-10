@@ -1433,6 +1433,8 @@ public abstract class StringUtils {
 	 * subsequence} of the {@code CharSequence} (up to the threshold) appended
 	 * with the suffix {@code " (truncated)..."}. Otherwise, this method returns
 	 * {@code charSequence.toString()}.
+	 * <p>The subsequence is never cut in the middle of a UTF-16 surrogate pair,
+	 * so its length may be one {@code char} shorter than the threshold.
 	 * @param charSequence the {@code CharSequence} to truncate
 	 * @param threshold the maximum length after which to truncate; must be a
 	 * positive number
@@ -1444,7 +1446,11 @@ public abstract class StringUtils {
 		Assert.isTrue(threshold > 0,
 				() -> "Truncation threshold must be a positive number: " + threshold);
 		if (charSequence.length() > threshold) {
-			return charSequence.subSequence(0, threshold) + TRUNCATION_SUFFIX;
+			int end = threshold;
+			if (Character.isSurrogatePair(charSequence.charAt(end - 1), charSequence.charAt(end))) {
+				end--;
+			}
+			return charSequence.subSequence(0, end) + TRUNCATION_SUFFIX;
 		}
 		return charSequence.toString();
 	}
