@@ -724,6 +724,10 @@ public abstract class DataBufferUtils extends DataBuffers {
 
 		@Override
 		public void completed(Integer read, Attachment attachment) {
+			if (!attachment.markHandled()) {
+				return;
+			}
+
 			attachment.iterator().close();
 			DataBuffer dataBuffer = attachment.dataBuffer();
 
@@ -735,8 +739,8 @@ public abstract class DataBufferUtils extends DataBuffers {
 
 			if (read == -1) {
 				release(dataBuffer);
-				closeChannel(this.channel);
 				this.state.set(State.DISPOSED);
+				closeChannel(this.channel);
 				this.sink.complete();
 				return;
 			}
@@ -759,11 +763,15 @@ public abstract class DataBufferUtils extends DataBuffers {
 
 		@Override
 		public void failed(Throwable ex, Attachment attachment) {
+			if (!attachment.markHandled()) {
+				return;
+			}
+
 			attachment.iterator().close();
 			release(attachment.dataBuffer());
 
-			closeChannel(this.channel);
 			this.state.set(State.DISPOSED);
+			closeChannel(this.channel);
 			this.sink.error(ex);
 		}
 
@@ -771,7 +779,17 @@ public abstract class DataBufferUtils extends DataBuffers {
 			IDLE, READING, DISPOSED
 		}
 
-		private record Attachment(DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {}
+		private record Attachment(DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator,
+				AtomicBoolean handled) {
+
+			Attachment(DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {
+				this(dataBuffer, iterator, new AtomicBoolean());
+			}
+
+			boolean markHandled() {
+				return this.handled.compareAndSet(false, true);
+			}
+		}
 	}
 
 
