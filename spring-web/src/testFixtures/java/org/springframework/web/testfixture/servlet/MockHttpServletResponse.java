@@ -737,7 +737,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				setContentType(null);
 			}
 			else if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-				this.contentLength = 0;
+				if (replaceHeader && !this.committed) {
+					this.contentLength = 0;
+					this.headers.remove(name);
+				}
 			}
 			else {
 				this.headers.remove(name);

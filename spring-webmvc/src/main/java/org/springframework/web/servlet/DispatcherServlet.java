@@ -1209,11 +1209,12 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Success and error responses may use different content types
 		request.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		// Reset the response content-type header and body buffer if the response is not committed already,
+		// Reset the response content headers and body buffer if the response is not committed already,
 		// leaving the other response headers in place.
 		try {
 			response.setHeader(HttpHeaders.CONTENT_TYPE, null);
 			response.setHeader(HttpHeaders.CONTENT_DISPOSITION, null);
+			response.setHeader(HttpHeaders.CONTENT_LENGTH, null);
 			response.resetBuffer();
 		}
 		catch (IllegalStateException illegalStateException) {

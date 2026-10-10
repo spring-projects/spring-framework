@@ -230,6 +230,31 @@ class MockHttpServletResponseTests {
 		}
 
 		@Test
+		void setContentLengthHeaderWithNullValueShouldRemoveHeader() {
+			response.setContentLength(66);
+			response.setHeader("content-length", null);
+			assertThat(response.getContentLength()).isZero();
+			assertThat(response.containsHeader(HttpHeaders.CONTENT_LENGTH)).isFalse();
+		}
+
+		@Test
+		void setContentLengthHeaderWithNullValueShouldHaveNoEffectWhenCommitted() {
+			response.setContentLength(66);
+			response.flushBuffer();
+			response.setHeader(HttpHeaders.CONTENT_LENGTH, null);
+			assertThat(response.getContentLength()).isEqualTo(66);
+			assertThat(response.getHeader(HttpHeaders.CONTENT_LENGTH)).isEqualTo("66");
+		}
+
+		@Test
+		void addContentLengthHeaderWithNullValueShouldHaveNoEffect() {
+			response.setContentLength(66);
+			response.addHeader(HttpHeaders.CONTENT_LENGTH, null);
+			assertThat(response.getContentLength()).isEqualTo(66);
+			assertThat(response.getHeader(HttpHeaders.CONTENT_LENGTH)).isEqualTo("66");
+		}
+
+		@Test
 		void shouldSetContentType() {
 			String contentType = "text/plain";
 			response.setContentType(contentType);

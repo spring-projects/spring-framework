@@ -897,6 +897,7 @@ class DispatcherServletTests {
 		assertThat(response.getContentAsByteArray()).isNotEmpty();
 		assertThat(response.getStatus()).isEqualTo(400);
 		assertThat(response.getHeader("Test-Header")).isEqualTo("spring");
+		assertThat(response.getHeader(HttpHeaders.CONTENT_LENGTH)).isEqualTo("1000");
 	}
 
 	@Test // gh-34366, gh-35116
@@ -918,6 +919,7 @@ class DispatcherServletTests {
 		assertThat(response.getStatus()).isEqualTo(400);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_TYPE);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_DISPOSITION);
+		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_LENGTH);
 	}
 
 
@@ -974,6 +976,7 @@ class DispatcherServletTests {
 			response.setHeader("Test-Header", "spring");
 			response.addHeader("Content-Type", "application/json");
 			response.addHeader("Content-Disposition", "attachment; filename=\"report.txt\"");
+			response.setContentLength(1000);
 			if (request.getAttribute("commit") != null) {
 				response.flushBuffer();
 			}
