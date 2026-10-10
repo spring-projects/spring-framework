@@ -276,7 +276,7 @@ public abstract class NumberUtils {
 	 * {@code Integer.valueOf}, etc.
 	 */
 	private static boolean isHexNumber(String value) {
-		int index = (value.startsWith("-") ? 1 : 0);
+		int index = (value.startsWith("-") || value.startsWith("+") ? 1 : 0);
 		return (value.startsWith("0x", index) || value.startsWith("0X", index) || value.startsWith("#", index));
 	}
 
@@ -290,9 +290,9 @@ public abstract class NumberUtils {
 		int index = 0;
 		boolean negative = false;
 
-		// Handle minus sign, if present.
-		if (value.startsWith("-")) {
-			negative = true;
+		// Handle sign, if present.
+		if (value.startsWith("-") || value.startsWith("+")) {
+			negative = value.startsWith("-");
 			index++;
 		}
 

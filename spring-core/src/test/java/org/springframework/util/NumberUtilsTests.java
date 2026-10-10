@@ -118,6 +118,16 @@ class NumberUtilsTests {
 	}
 
 	@Test
+	void parseNumberAsPositiveHex() {
+		assertThat(NumberUtils.parseNumber("+0x7f", Byte.class)).isEqualTo((byte) 127);
+		assertThat(NumberUtils.parseNumber("+0X7fff", Short.class)).isEqualTo((short) 32767);
+		assertThat(NumberUtils.parseNumber("+#2a", Integer.class)).isEqualTo(42);
+		assertThat(NumberUtils.parseNumber("+0x2a", Long.class)).isEqualTo(42L);
+		assertThat(NumberUtils.parseNumber("+0xFEBD4E677898DFEBFFEE44", BigInteger.class))
+				.isEqualTo(new BigInteger("FEBD4E677898DFEBFFEE44", 16));
+	}
+
+	@Test
 	void parseNumberAsNegativeHex() {
 		String aByte = "-0x80";
 		String aShort = "-0x8000";
