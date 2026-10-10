@@ -157,7 +157,7 @@ class HttpEntityMethodProcessorTests {
 		HttpEntity<byte[]> result = (HttpEntity<byte[]>) processor.resolveArgument(requestEntity,
 				this.mavContainer, this.webRequest, this.binderFactory);
 
-		assertThat(result.getBody().length).isEqualTo(result.getHeaders().getContentLength());
+		assertThat(result.getBody()).hasSize((int) result.getHeaders().getContentLength());
 	}
 
 	@Test

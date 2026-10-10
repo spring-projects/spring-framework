@@ -226,12 +226,12 @@ class WebSocketStompClientTests {
 		TextMessage textMessage = textMessageCaptor.getAllValues().get(0);
 		assertThat(textMessage).isNotNull();
 		assertThat(textMessage.getPayload()).isEqualTo("SEND\ndestination:/topic/foo\nco");
-		assertThat(textMessage.getPayload().getBytes().length).isEqualTo(30);
+		assertThat(textMessage.getPayload().getBytes()).hasSize(30);
 
 		textMessage = textMessageCaptor.getAllValues().get(1);
 		assertThat(textMessage).isNotNull();
 		assertThat(textMessage.getPayload()).isEqualTo("ntent-length:7\n\npayload\0");
-		assertThat(textMessage.getPayload().getBytes().length).isEqualTo(24);
+		assertThat(textMessage.getPayload().getBytes()).hasSize(24);
 	}
 
 
@@ -268,13 +268,13 @@ class WebSocketStompClientTests {
 		assertThat(binaryMessage).isNotNull();
 		assertThat(new String(binaryMessage.getPayload().array(), StandardCharsets.UTF_8))
 				.isEqualTo("SEND\ndestination:/b\ncontent-type:application/octet");
-		assertThat(binaryMessage.getPayload().array().length).isEqualTo(50);
+		assertThat(binaryMessage.getPayload().array()).hasSize(50);
 
 		binaryMessage = binaryMessageCaptor.getAllValues().get(1);
 		assertThat(binaryMessage).isNotNull();
 		assertThat(new String(binaryMessage.getPayload().array(), StandardCharsets.UTF_8))
 				.isEqualTo("-stream\ncontent-length:7\n\npayload\0");
-		assertThat(binaryMessage.getPayload().array().length).isEqualTo(34);
+		assertThat(binaryMessage.getPayload().array()).hasSize(34);
 	}
 
 	@Test

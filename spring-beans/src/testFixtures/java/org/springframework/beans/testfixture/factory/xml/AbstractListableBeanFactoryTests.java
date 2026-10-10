@@ -50,13 +50,13 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 
 	protected final void assertCount(int count) {
 		String[] defnames = getListableBeanFactory().getBeanDefinitionNames();
-		assertThat(defnames.length).as("We should have " + count + " beans, not " + defnames.length).isEqualTo(count);
+		assertThat(defnames).as("We should have " + count + " beans, not " + defnames.length).hasSize(count);
 	}
 
 	protected void assertTestBeanCount(int count) {
 		String[] defNames = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, false);
-		assertThat(defNames.length).as("We should have " + count + " beans for class org.springframework.beans.testfixture.beans.TestBean, not " +
-				defNames.length).isEqualTo(count);
+		assertThat(defNames).as("We should have " + count + " beans for class org.springframework.beans.testfixture.beans.TestBean, not " +
+				defNames.length).hasSize(count);
 
 		int countIncludingFactoryBeans = count + 2;
 		String[] names = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, true);
@@ -68,7 +68,7 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	@Test
 	protected void getDefinitionsForNoSuchClass() {
 		String[] defnames = getListableBeanFactory().getBeanNamesForType(String.class);
-		assertThat(defnames.length).as("No string definitions").isEqualTo(0);
+		assertThat(defnames).as("No string definitions").isEmpty();
 	}
 
 	/**
@@ -77,11 +77,11 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 	 */
 	@Test
 	protected void getCountForFactoryClass() {
-		assertThat(getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length).as("Should have 2 factories, not " +
-				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length).isEqualTo(2);
+		assertThat(getListableBeanFactory().getBeanNamesForType(FactoryBean.class)).as("Should have 2 factories, not " +
+				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length).hasSize(2);
 
-		assertThat(getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length).as("Should have 2 factories, not " +
-				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length).isEqualTo(2);
+		assertThat(getListableBeanFactory().getBeanNamesForType(FactoryBean.class)).as("Should have 2 factories, not " +
+				getListableBeanFactory().getBeanNamesForType(FactoryBean.class).length).hasSize(2);
 	}
 
 	@Test

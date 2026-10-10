@@ -474,9 +474,7 @@ class NamedParameterJdbcTemplateTests {
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 		verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 100);
 		verify(preparedStatement).setObject(1, 200);
@@ -493,7 +491,7 @@ class NamedParameterJdbcTemplateTests {
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertThat(actualRowsAffected.length).as("executed 0 updates").isEqualTo(0);
+		assertThat(actualRowsAffected).as("executed 0 updates").isEmpty();
 	}
 
 	@Test
@@ -509,9 +507,7 @@ class NamedParameterJdbcTemplateTests {
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 		verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
 		verify(preparedStatement).setObject(1, 100);
 		verify(preparedStatement).setObject(1, 200);
@@ -540,7 +536,7 @@ class NamedParameterJdbcTemplateTests {
 				parameters
 		);
 
-		assertThat(actualRowsAffected.length).as("executed 3 updates").isEqualTo(3);
+		assertThat(actualRowsAffected).as("executed 3 updates").isEqualTo(rowsAffected);
 
 		InOrder inOrder = inOrder(preparedStatement);
 
@@ -574,10 +570,7 @@ class NamedParameterJdbcTemplateTests {
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertThat(actualRowsAffected.length).as("executed 3 updates").isEqualTo(3);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
-		assertThat(actualRowsAffected[2]).isEqualTo(rowsAffected[2]);
+		assertThat(actualRowsAffected).as("executed 3 updates").isEqualTo(rowsAffected);
 		verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
 		verify(preparedStatement).setNull(1, Types.NULL);
 		verify(preparedStatement).setObject(1, 100, Types.NUMERIC);
@@ -600,9 +593,7 @@ class NamedParameterJdbcTemplateTests {
 		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(INSERT_NAMED_PARAMETERS, batchArgs, new GeneratedKeyHolder());
-		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 		verify(connection).prepareStatement("insert into custmr(forename,country) values (?,?)", Statement.RETURN_GENERATED_KEYS);
 		verify(preparedStatement).setString(1, "foo");
 		verify(preparedStatement).setString(2, "UK");
