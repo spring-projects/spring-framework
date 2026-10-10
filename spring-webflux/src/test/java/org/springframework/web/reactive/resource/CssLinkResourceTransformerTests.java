@@ -95,6 +95,7 @@ class CssLinkResourceTransformerTests {
 				.consumeNextWith(transformedResource -> {
 					String result = new String(transformedResource.getByteArray(), UTF_8);
 					assertThat(result).isEqualToNormalizingNewlines(expected);
+					assertThat(((HttpResource) transformedResource).getResponseHeaders().isEmpty()).isTrue();
 				})
 				.expectComplete()
 				.verify();

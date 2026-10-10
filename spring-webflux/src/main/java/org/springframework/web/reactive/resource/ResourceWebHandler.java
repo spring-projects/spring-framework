@@ -556,7 +556,12 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		}
 
 		if (resource instanceof HttpResource httpResource) {
-			exchange.getResponse().getHeaders().putAll(httpResource.getResponseHeaders());
+			HttpHeaders resourceHeaders = httpResource.getResponseHeaders();
+			if (resource instanceof TransformedResource && getEtagGenerator() != null) {
+				resourceHeaders = HttpHeaders.copyOf(resourceHeaders);
+				resourceHeaders.remove(HttpHeaders.ETAG);
+			}
+			headers.putAll(resourceHeaders);
 		}
 	}
 
