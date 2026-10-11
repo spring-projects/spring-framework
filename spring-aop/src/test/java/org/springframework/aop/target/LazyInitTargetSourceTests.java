@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,17 +69,16 @@ class LazyInitTargetSourceTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void lazyInitFactoryBeanTargetSource() {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(FACTORY_BEAN_CONTEXT);
 		bf.preInstantiateSingletons();
 
-		Set<Object> set1 = (Set<Object>) bf.getBean("proxy1");
+		Set<Object> set1 = bf.getBean("proxy1", new ParameterizedTypeReference<>() {});
 		assertThat(bf.containsSingleton("target1")).isFalse();
 		assertThat(set1).contains("10");
 		assertThat(bf.containsSingleton("target1")).isTrue();
 
-		Set<Object> set2 = (Set<Object>) bf.getBean("proxy2");
+		Set<Object> set2 = bf.getBean("proxy2", new ParameterizedTypeReference<>() {});
 		assertThat(bf.containsSingleton("target2")).isFalse();
 		assertThat(set2).contains("20");
 		assertThat(bf.containsSingleton("target2")).isTrue();
