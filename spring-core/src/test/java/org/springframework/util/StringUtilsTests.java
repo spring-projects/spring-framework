@@ -19,13 +19,10 @@ package org.springframework.util;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -800,26 +797,6 @@ class StringUtilsTests {
 		assertThat(StringUtils.applyRelativePath("mypath/myfile", "")).isEqualTo("mypath/");
 	}
 
-	@ParameterizedTest
-	@MethodSource("surrogatePairTruncationArguments")
-	void truncateSurrogatePairs(CharSequence text, int threshold, String expected) {
-		assertThat(StringUtils.truncate(text, threshold)).isEqualTo(expected);
-	}
-
-	static Stream<Arguments> surrogatePairTruncationArguments() {
-		return Stream.of(
-				Arguments.of("a\uD83D\uDE00b", 2, "a (truncated)..."),
-				Arguments.of("a\uD83D\uDE00b", 3, "a\uD83D\uDE00 (truncated)..."),
-				Arguments.of("a\uD83Db", 2, "a\uD83D (truncated)..."),
-				Arguments.of("a\uDE00b", 2, "a\uDE00 (truncated)..."),
-				Arguments.of("a\uDE00b", 1, "a (truncated)..."),
-				Arguments.of("a\uD83D\uDE00", 3, "a\uD83D\uDE00"),
-				Arguments.of("\uD83D\uDE00b", 1, " (truncated)..."),
-				Arguments.of(new StringBuilder("a\uD83D\uDE00b"), 2, "a (truncated)..."),
-				Arguments.of(new StringBuilder("a\uD83D\uDE00"), 3, "a\uD83D\uDE00")
-		);
-	}
-
 	@Test
 	void truncatePreconditions() {
 		assertThatIllegalArgumentException()
@@ -841,6 +818,24 @@ class StringUtilsTests {
 	)
 	void truncate(String text, String truncated) {
 		assertThat(StringUtils.truncate(text, 10)).isEqualTo(truncated);
+	}
+
+	@ParameterizedTest  // gh37435
+	@CsvSource(delimiter = '|', textBlock = """
+			a\uD83D\uDE00  | 3 | a\uD83D\uDE00
+			a\uD83D\uDE00b | 4 | a\uD83D\uDE00b
+			a\uD83D\uDE00b | 3 | a\uD83D\uDE00 (truncated)...
+			a\uD83D\uDE00b | 2 | a (truncated)...
+			\uD83D\uDE00b  | 1 | ' (truncated)...'
+			a\uD83Db       | 2 | a\uD83D (truncated)...
+			a\uDE00b       | 2 | a\uDE00 (truncated)...
+			a\uDE00b       | 1 | a (truncated)...
+			"""
+	)
+	// \uD83D\uDE00 is the "Grinning Face" emoji.
+	void truncateSurrogatePairs(String text, int threshold, String truncated) {
+		assertThat(StringUtils.truncate(text, threshold)).isEqualTo(truncated);
+		assertThat(StringUtils.truncate(new StringBuilder(text), threshold)).isEqualTo(truncated);
 	}
 
 }
