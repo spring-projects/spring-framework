@@ -75,8 +75,13 @@ public class CompositeFilter implements Filter {
 	}
 
 	/**
-	 * Clean up all the filters supplied, calling each one's destroy method in turn, but in reverse order.
-	 * Continue invoking {@code destroy()} on the remaining filters if one filter fails.
+	 * Clean up all the filters supplied, calling each one's {@code destroy()}
+	 * method in turn, but in reverse order.
+	 * <p>If a filter's {@code destroy()} method throws a {@link RuntimeException}
+	 * or {@link Error}, the remaining filters are still destroyed. Once all
+	 * filters have been processed, the first failure is rethrown as is, with any
+	 * subsequent failures added to it as {@linkplain Throwable#addSuppressed
+	 * suppressed exceptions}.
 	 * @see Filter#destroy()
 	 */
 	@Override

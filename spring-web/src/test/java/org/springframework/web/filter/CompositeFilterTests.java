@@ -42,6 +42,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link CompositeFilter}.
+ *
  * @author Dave Syer
  */
 class CompositeFilterTests {
@@ -67,7 +69,7 @@ class CompositeFilterTests {
 		assertThat(targetFilter.filterConfig).isNull();
 	}
 
-	@Test
+	@Test  // gh-37445
 	void destroyInvokesFiltersInReverseOrder() {
 		Filter firstFilter = mock();
 		Filter secondFilter = mock();
@@ -84,7 +86,7 @@ class CompositeFilterTests {
 		inOrder.verify(firstFilter).destroy();
 	}
 
-	@Test
+	@Test  // gh-37445
 	void destroyInvokesRemainingFilterAfterRuntimeException() {
 		Filter remainingFilter = mock();
 		Filter failingFilter = mock();
@@ -99,7 +101,7 @@ class CompositeFilterTests {
 		verify(remainingFilter).destroy();
 	}
 
-	@Test
+	@Test  // gh-37445
 	void destroyAddsLaterRuntimeExceptionsAsSuppressed() {
 		Filter firstFilter = mock();
 		Filter secondFilter = mock();
@@ -119,7 +121,7 @@ class CompositeFilterTests {
 		assertThat(thirdFilterException.getSuppressed()).containsExactly(secondFilterException, firstFilterException);
 	}
 
-	@Test
+	@Test  // gh-37445
 	void destroyContinuesWhenSameExceptionInstanceIsThrown() {
 		Filter firstFilter = mock();
 		Filter secondFilter = mock();
@@ -139,7 +141,7 @@ class CompositeFilterTests {
 		verify(thirdFilter).destroy();
 	}
 
-	@Test
+	@Test  // gh-37445
 	void destroySuppressesErrorAfterRuntimeException() {
 		Filter firstFilter = mock();
 		Filter secondFilter = mock();
@@ -158,7 +160,7 @@ class CompositeFilterTests {
 		verify(firstFilter).destroy();
 	}
 
-	@Test
+	@Test  // gh-37445
 	void destroyContinuesAfterErrorAndRethrowsIt() {
 		Filter firstFilter = mock();
 		Filter secondFilter = mock();
