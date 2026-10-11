@@ -19,10 +19,13 @@ package org.springframework.util;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -795,6 +798,26 @@ class StringUtilsTests {
 		assertThat(StringUtils.applyRelativePath("mypath/", "otherfile")).isEqualTo("mypath/otherfile");
 		// Empty relative path
 		assertThat(StringUtils.applyRelativePath("mypath/myfile", "")).isEqualTo("mypath/");
+	}
+
+	@ParameterizedTest
+	@MethodSource("surrogatePairTruncationArguments")
+	void truncateSurrogatePairs(CharSequence text, int threshold, String expected) {
+		assertThat(StringUtils.truncate(text, threshold)).isEqualTo(expected);
+	}
+
+	static Stream<Arguments> surrogatePairTruncationArguments() {
+		return Stream.of(
+				Arguments.of("a\uD83D\uDE00b", 2, "a (truncated)..."),
+				Arguments.of("a\uD83D\uDE00b", 3, "a\uD83D\uDE00 (truncated)..."),
+				Arguments.of("a\uD83Db", 2, "a\uD83D (truncated)..."),
+				Arguments.of("a\uDE00b", 2, "a\uDE00 (truncated)..."),
+				Arguments.of("a\uDE00b", 1, "a (truncated)..."),
+				Arguments.of("a\uD83D\uDE00", 3, "a\uD83D\uDE00"),
+				Arguments.of("\uD83D\uDE00b", 1, " (truncated)..."),
+				Arguments.of(new StringBuilder("a\uD83D\uDE00b"), 2, "a (truncated)..."),
+				Arguments.of(new StringBuilder("a\uD83D\uDE00"), 3, "a\uD83D\uDE00")
+		);
 	}
 
 	@Test
