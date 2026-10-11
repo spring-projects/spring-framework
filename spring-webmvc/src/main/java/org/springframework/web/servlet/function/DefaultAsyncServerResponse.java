@@ -66,7 +66,9 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 	@Override
 	public ServerResponse block() {
 		try {
-			if (this.timeout != null) {
+			// Consistent with DeferredResult and the Servlet AsyncContext,
+			// a timeout of zero or less specifies an infinite timeout.
+			if (this.timeout != null && this.timeout.toMillis() > 0) {
 				return this.futureResponse.get(this.timeout.toMillis(), TimeUnit.MILLISECONDS);
 			}
 			else {

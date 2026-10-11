@@ -262,6 +262,9 @@ public interface ServerResponse {
 	 * <p>This method can be used to set the response status code, headers, and
 	 * body based on an asynchronous result. If only the body is asynchronous,
 	 * {@link BodyBuilder#body(Object)} can be used instead.
+	 * <p>A timeout value of zero or less specifies an infinite timeout. Since
+	 * the timeout is applied with millisecond precision, a value of less than
+	 * one millisecond also specifies an infinite timeout.
 	 * @param asyncResponse a {@code CompletableFuture<ServerResponse>} or
 	 * {@code Publisher<ServerResponse>}
 	 * @param timeout maximum time period to wait for before timing out
