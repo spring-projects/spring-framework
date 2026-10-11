@@ -49,6 +49,11 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.events.CacheClearEvent;
+import org.springframework.cache.interceptor.events.CacheEvictEvent;
+import org.springframework.cache.interceptor.events.CacheOperationEvent;
+import org.springframework.cache.interceptor.events.CachePutEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.BridgeMethodResolver;
@@ -139,6 +144,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	private @Nullable SingletonSupplier<CacheResolver> cacheResolver;
 
+	private @Nullable ApplicationEventPublisher applicationEventPublisher;
+
 	private @Nullable BeanFactory beanFactory;
 
 	private boolean initialized = false;
@@ -163,6 +170,15 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		this.keyGenerator = new SingletonSupplier<>(keyGenerator, SimpleKeyGenerator::new);
 		this.cacheResolver = new SingletonSupplier<>(cacheResolver,
 				() -> SimpleCacheResolver.of(SupplierUtils.resolve(cacheManager)));
+	}
+
+	/**
+	 * Set the {@link ApplicationEventPublisher} to use for publishing cache operation events.
+	 * @since 7.1
+	 * @see CacheInterceptor#setApplicationEventPublisher(ApplicationEventPublisher)
+	 */
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 
@@ -678,6 +694,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					if (operation.isCacheWide()) {
 						logInvalidating(context, operation, null);
 						doClear(cache, operation.isBeforeInvocation());
+						publishEvent(new CacheClearEvent(context.metadata.method, cache));
 					}
 					else {
 						if (key == null) {
@@ -685,7 +702,21 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 						}
 						logInvalidating(context, operation, key);
 						doEvict(cache, key, operation.isBeforeInvocation());
+						publishEvent(new CacheEvictEvent(context.metadata.method, cache, key));
 					}
+				}
+			}
+		}
+	}
+
+	private void publishEvent(final CacheOperationEvent event) {
+		if (this.applicationEventPublisher != null) {
+			try {
+				this.applicationEventPublisher.publishEvent(event);
+			}
+			catch (Throwable ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to publish " + event, ex);
 				}
 			}
 		}
@@ -1049,6 +1080,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 				for (Cache cache : this.context.getCaches()) {
 					doPut(cache, key, value);
+					publishEvent(new CachePutEvent(this.context.metadata.method, cache, key, value));
 				}
 			}
 		}
