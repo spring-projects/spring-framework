@@ -7,8 +7,8 @@
 
 	<aop:aspectj-autoproxy/>
 
-	<bean id="counterAspect" class="org.springframework.aop.aspectj.generic.CounterAspect"/>
+	<bean id="counterAspect" class="org.springframework.aop.aspectj.generic.AfterReturningGenericTypeMatchingTests$CounterAspect"/>
 
-	<bean id="testBean" class="org.springframework.aop.aspectj.generic.GenericReturnTypeVariationClass"/>
+	<bean id="testBean" class="org.springframework.aop.aspectj.generic.AfterReturningGenericTypeMatchingTests$GenericReturnTypeVariationClass"/>
 
 </beans>
