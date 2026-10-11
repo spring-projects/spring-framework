@@ -76,7 +76,7 @@ public class CompositeFilter implements Filter {
 
 	/**
 	 * Clean up all the filters supplied, calling each one's destroy method in turn, but in reverse order.
-	 * @see Filter#init(FilterConfig)
+	 * @see Filter#destroy()
 	 */
 	@Override
 	public void destroy() {
