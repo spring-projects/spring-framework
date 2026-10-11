@@ -9,23 +9,23 @@ TestContext framework will attempt to locate _default_ context configuration if 
 not explicitly specify `@Configuration` classes, XML configuration files, or Groovy
 scripts from which the test's `ApplicationContext` should be loaded.
 
-However, due to a bug in the detection algorithm, default context configuration for a
-superclass or enclosing class is currently ignored if the type hierarchy or enclosing
-class hierarchy (for `@Nested` test classes) does not declare `@ContextConfiguration`.
+As of Spring Framework 7.1, the TestContext framework reliably detects **all** _default_
+context configuration within a type hierarchy or enclosing class hierarchy (for `@Nested`
+test classes) above a given test class, even if `@ContextConfiguration` is not declared
+within those hierarchies.
 
-Beginning with Spring Framework 7.1, the TestContext framework will reliably detect
-**all** _default_ context configuration within a type hierarchy or enclosing class
-hierarchy above a given test class in such scenarios. Consequently, test suites may
-encounter issues after the upgrade to 7.1. For example, if a static nested
-`@Configuration` class in a superclass or enclosing class is ignored due to the
-aforementioned bug, after the bug has been fixed in 7.1 that `@Configuration` class will
-no longer be ignored, which may lead to unexpected beans in the resulting
-`ApplicationContext` our outright failures in tests.
+Prior to Spring Framework 7.1, due to a bug in the detection algorithm, default context
+configuration for a superclass or enclosing class was ignored if the type hierarchy or
+enclosing class hierarchy did not declare `@ContextConfiguration`. Consequently, test
+suites may encounter issues after the upgrade to 7.1. For example, a static nested
+`@Configuration` class in a superclass or enclosing class that was previously ignored is
+now processed, which may lead to unexpected beans in the resulting `ApplicationContext`
+or outright failures in tests.
 
-In the interim, the TestContext framework logs a warning whenever it encounters _default_
-context configuration that is currently ignored — for example, a `@Configuration` class
-or XML configuration file. The remainder of this section provides guidance on how to
-address such issues if you encounter warnings in your test suite.
+To help you identify affected tests before upgrading, Spring Framework 7.0.6 and later
+7.0.x versions log a warning whenever they encounter _default_ context configuration that
+is ignored — for example, a `@Configuration` class or XML configuration file. The
+remainder of this section provides guidance on how to address such issues.
 
 [TIP]
 ====
