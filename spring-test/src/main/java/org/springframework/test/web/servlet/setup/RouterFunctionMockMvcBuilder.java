@@ -180,6 +180,9 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 	 * <p>In Spring MVC Test, this value is used to determine how long to wait
 	 * for async execution to complete so that a test can verify the results
 	 * synchronously.
+	 * <p>As defined by the Servlet API, a timeout of zero or less specifies
+	 * no timeout, in which case Spring MVC Test waits indefinitely for async
+	 * execution to complete.
 	 * @param timeout the timeout value in milliseconds
 	 */
 	public RouterFunctionMockMvcBuilder setAsyncRequestTimeout(long timeout) {
