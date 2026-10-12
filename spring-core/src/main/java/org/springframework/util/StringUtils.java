@@ -652,6 +652,7 @@ public abstract class StringUtils {
 	 * <li>{@code "myfile.txt"} &rarr; {@code "txt"}
 	 * <li>{@code "my/path/myfile."} &rarr; {@code ""}
 	 * <li>{@code "myfile"} &rarr; {@code null}
+	 * <li>{@code "my/path/.hidden"} &rarr; {@code null}
 	 * <li>{@code ""} &rarr; {@code null}
 	 * <li>{@code null} &rarr; {@code null}
 	 * </ul>
@@ -666,37 +667,35 @@ public abstract class StringUtils {
 			return null;
 		}
 
-		int extIndex = path.lastIndexOf(DOT_CHAR);
-		if (extIndex == -1) {
-			return null;
-		}
-
 		int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR_CHAR);
-		if (folderIndex > extIndex) {
+		String filename = path.substring(folderIndex + 1);
+
+		int extIndex = filename.lastIndexOf(DOT_CHAR);
+		if (extIndex <= 0) {
 			return null;
 		}
 
-		return path.substring(extIndex + 1);
+		return filename.substring(extIndex + 1);
 	}
 
 	/**
 	 * Strip the filename extension from the given Java resource path,
 	 * for example, "mypath/myfile.txt" &rarr; "mypath/myfile".
+	 * <p>A dotfile such as ".hidden" or "mypath/.hidden" is considered to
+	 * have no extension and is returned as is.
 	 * @param path the file path
 	 * @return the path with stripped filename extension
 	 */
 	public static String stripFilenameExtension(String path) {
-		int extIndex = path.lastIndexOf(DOT_CHAR);
-		if (extIndex == -1) {
-			return path;
-		}
-
 		int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR_CHAR);
-		if (folderIndex > extIndex) {
+		String filename = path.substring(folderIndex + 1);
+
+		int extIndex = filename.lastIndexOf(DOT_CHAR);
+		if (extIndex <= 0) {
 			return path;
 		}
 
-		return path.substring(0, extIndex);
+		return path.substring(0, path.length() - (filename.length() - extIndex));
 	}
 
 	/**
