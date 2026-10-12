@@ -39,7 +39,6 @@ import org.springframework.util.NumberUtils;
  * <p>Useful with any data access technology.
  *
  * @author Juergen Hoeller
- * @author Yanming Zhou
  * @since 1.0.2
  */
 public abstract class DataAccessUtils {
