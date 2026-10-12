@@ -73,7 +73,7 @@ runs:
         COMMERCIAL_REPO_PASSWORD: ${{ inputs.commercial-repository-password }}
         COMMERCIAL_REPO_USERNAME: ${{ inputs.commercial-repository-username }}
         COMMERCIAL_SNAPSHOT_REPO_URL: ${{ inputs.commercial-snapshot-repository-url }}
-      run: ./gradlew -PdeploymentRepository=$(pwd)/deployment-repository --no-build-cache build publishAllPublicationsToDeploymentRepository
+      run: ./gradlew -PdeploymentRepository=$(pwd)/deployment-repository build publishAllPublicationsToDeploymentRepository
     - name: Read Version From gradle.properties
       id: read-version
       shell: bash
