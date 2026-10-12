@@ -190,7 +190,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForObject(String, Class, Object...)
 	 */
-	<T> @Nullable T queryForObject(String sql, Class<T> requiredType) throws DataAccessException;
+	<T extends @Nullable Object> @Nullable T queryForObject(String sql, Class<T> requiredType) throws DataAccessException;
 
 	/**
 	 * Execute a query for a result map, given static SQL.
@@ -225,7 +225,7 @@ public interface JdbcOperations {
 	 * @see #queryForList(String, Class, Object...)
 	 * @see SingleColumnRowMapper
 	 */
-	<T> List<@Nullable T> queryForList(String sql, Class<T> elementType) throws DataAccessException;
+	<T extends @Nullable Object> List<@Nullable T> queryForList(String sql, Class<T> elementType) throws DataAccessException;
 
 	/**
 	 * Execute a query for a result list, given static SQL.
@@ -664,7 +664,7 @@ public interface JdbcOperations {
 	 * @see #queryForObject(String, Class)
 	 * @see java.sql.Types
 	 */
-	<T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, int[] argTypes, Class<T> requiredType)
+	<T extends @Nullable Object> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, int[] argTypes, Class<T> requiredType)
 			throws DataAccessException;
 
 	/**
@@ -688,7 +688,7 @@ public interface JdbcOperations {
 	 * @deprecated in favor of {@link #queryForObject(String, Class, Object...)}
 	 */
 	@Deprecated(since = "5.3")
-	<T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, Class<T> requiredType) throws DataAccessException;
+	<T extends @Nullable Object> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, Class<T> requiredType) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -710,7 +710,7 @@ public interface JdbcOperations {
 	 * @since 3.0.1
 	 * @see #queryForObject(String, Class)
 	 */
-	<T> @Nullable T queryForObject(String sql, Class<T> requiredType, @Nullable Object @Nullable ... args) throws DataAccessException;
+	<T extends @Nullable Object> @Nullable T queryForObject(String sql, Class<T> requiredType, @Nullable Object @Nullable ... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -770,7 +770,7 @@ public interface JdbcOperations {
 	 * @see #queryForList(String, Class)
 	 * @see SingleColumnRowMapper
 	 */
-	<T> List<@Nullable T> queryForList(String sql, @Nullable Object @Nullable [] args, int[] argTypes, Class<T> elementType)
+	<T extends @Nullable Object> List<@Nullable T> queryForList(String sql, @Nullable Object @Nullable [] args, int[] argTypes, Class<T> elementType)
 			throws DataAccessException;
 
 	/**
@@ -792,7 +792,7 @@ public interface JdbcOperations {
 	 * @deprecated in favor of {@link #queryForList(String, Class, Object...)}
 	 */
 	@Deprecated(since = "5.3")
-	<T> List<@Nullable T> queryForList(String sql, @Nullable Object @Nullable [] args, Class<T> elementType) throws DataAccessException;
+	<T extends @Nullable Object> List<@Nullable T> queryForList(String sql, @Nullable Object @Nullable [] args, Class<T> elementType) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -812,7 +812,7 @@ public interface JdbcOperations {
 	 * @see #queryForList(String, Class)
 	 * @see SingleColumnRowMapper
 	 */
-	<T> List<@Nullable T> queryForList(String sql, Class<T> elementType, @Nullable Object @Nullable ... args) throws DataAccessException;
+	<T extends @Nullable Object> List<@Nullable T> queryForList(String sql, Class<T> elementType, @Nullable Object @Nullable ... args) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
