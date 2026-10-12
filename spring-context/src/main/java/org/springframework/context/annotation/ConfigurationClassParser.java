@@ -1113,10 +1113,13 @@ class ConfigurationClassParser {
 
 		public Collection<SourceClass> getAnnotationAttributes(String annType, String attribute) throws IOException {
 			Map<String, @Nullable Object> annotationAttributes = this.metadata.getAnnotationAttributes(annType, true);
-			if (annotationAttributes == null || !annotationAttributes.containsKey(attribute)) {
+			if (annotationAttributes == null) {
 				return Collections.emptySet();
 			}
 			String[] classNames = (String[]) annotationAttributes.get(attribute);
+			if (classNames == null) {
+				return Collections.emptySet();
+			}
 			Set<SourceClass> result = CollectionUtils.newLinkedHashSet(classNames.length);
 			for (String className : classNames) {
 				result.add(getRelated(className));
