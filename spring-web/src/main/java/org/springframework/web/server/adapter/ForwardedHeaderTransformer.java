@@ -214,8 +214,8 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		}
 		else {
 			return (useStandardHeader ?
-					ForwardedHeaderUtils.parseStandardHeader(uri, headers, remoteAddress, localAddress) :
-					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, remoteAddress, localAddress));
+					ForwardedHeaderUtils.parseStandardHeader(uri, headers) :
+					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers));
 		}
 	}
 

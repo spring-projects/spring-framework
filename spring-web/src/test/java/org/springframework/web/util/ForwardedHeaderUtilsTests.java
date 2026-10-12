@@ -531,7 +531,7 @@ class ForwardedHeaderUtilsTests {
 
 		HttpRequest httpRequest = new ServletServerHttpRequest(request);
 		ForwardedHeaderUtils.ForwardedInfo info =
-				ForwardedHeaderUtils.parseStandardHeader(httpRequest.getURI(), httpRequest.getHeaders(), null, null);
+				ForwardedHeaderUtils.parseStandardHeader(httpRequest.getURI(), httpRequest.getHeaders());
 
 		assertThat(info.forAddress()).isNotNull();
 		assertThat(info.forAddress().getHostString()).isEqualTo("192.0.2.0");
@@ -549,7 +549,7 @@ class ForwardedHeaderUtilsTests {
 		headers.add("X-Forwarded-For", "fd00:fefe:1::4, 192.168.0.1");
 
 		InetSocketAddress address = ForwardedHeaderUtils.parseXForwardedHeaders(
-				URI.create("https://example.com"), headers, null, null).forAddress();
+				URI.create("https://example.com"), headers).forAddress();
 
 		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
 	}
@@ -560,19 +560,92 @@ class ForwardedHeaderUtilsTests {
 		headers.add("Forwarded", "by=[fd00:fefe:1::4], 192.168.0.1");
 
 		InetSocketAddress address = ForwardedHeaderUtils.parseStandardHeader(
-				URI.create("https://example.com"), headers, null, null).byAddress();
+				URI.create("https://example.com"), headers).byAddress();
 
 		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
 	}
 
+	@Test  // gh-37114
+	void parseForwardedForAndByWithoutPort() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Forwarded", "for=192.0.2.0;by=203.0.113.43");
+
+		ForwardedHeaderUtils.ForwardedInfo info =
+				ForwardedHeaderUtils.parseStandardHeader(URI.create("https://example.com"), headers);
+
+		assertThat(info.forAddress()).isNotNull();
+		assertThat(info.forAddress().getHostString()).isEqualTo("192.0.2.0");
+		assertThat(info.forAddress().getPort()).isEqualTo(0);
+		assertThat(info.byAddress()).isNotNull();
+		assertThat(info.byAddress().getHostString()).isEqualTo("203.0.113.43");
+		assertThat(info.byAddress().getPort()).isEqualTo(0);
+	}
+
+	@Test  // gh-37114
+	void parseForwardedForAndByWithPort() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Forwarded", "for=\"192.0.2.0:4711\";by=\"[2001:db8:cafe::17]:4712\"");
+
+		ForwardedHeaderUtils.ForwardedInfo info =
+				ForwardedHeaderUtils.parseStandardHeader(URI.create("https://example.com"), headers);
+
+		assertThat(info.forAddress()).isNotNull();
+		assertThat(info.forAddress().getPort()).isEqualTo(4711);
+		assertThat(info.byAddress()).isNotNull();
+		assertThat(info.byAddress().getPort()).isEqualTo(4712);
+	}
+
+	@Test  // gh-37114
+	void parseXForwardedForWithoutPort() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-For", "192.0.2.0");
+
+		InetSocketAddress address = ForwardedHeaderUtils.parseXForwardedHeaders(
+				URI.create("https://example.com"), headers).forAddress();
+
+		assertThat(address).isNotNull();
+		assertThat(address.getHostString()).isEqualTo("192.0.2.0");
+		assertThat(address.getPort()).isEqualTo(0);
+	}
+
+	@Test  // gh-37114
+	@SuppressWarnings("removal")
+	void parseWithDeprecatedMethodsUsesFallbackPort() {
+		URI uri = URI.create("https://example.com");
+		InetSocketAddress remoteAddress = new InetSocketAddress("example.client", 47011);
+		InetSocketAddress localAddress = new InetSocketAddress("example.server", 47012);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Forwarded", "for=192.0.2.0;by=203.0.113.43");
+
+		ForwardedHeaderUtils.ForwardedInfo info =
+				ForwardedHeaderUtils.parseStandardHeader(uri, headers, remoteAddress, localAddress);
+
+		assertThat(info.forAddress()).isNotNull();
+		assertThat(info.forAddress().getPort()).isEqualTo(47011);
+		assertThat(info.byAddress()).isNotNull();
+		assertThat(info.byAddress().getPort()).isEqualTo(47012);
+
+		info = ForwardedHeaderUtils.parseStandardHeader(uri, headers, null, null);
+		assertThat(info.forAddress()).isNotNull();
+		assertThat(info.forAddress().getPort()).isEqualTo(443);
+
+		headers = new HttpHeaders();
+		headers.add("X-Forwarded-For", "192.0.2.0");
+
+		info = ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, remoteAddress, null);
+		assertThat(info.forAddress()).isNotNull();
+		assertThat(info.forAddress().getPort()).isEqualTo(47011);
+	}
+
 
 	private static UriComponents adaptFromForwardedHeader(URI uri, HttpHeaders headers) {
-		return ForwardedHeaderUtils.parseStandardHeader(uri, headers, null, null)
+		return ForwardedHeaderUtils.parseStandardHeader(uri, headers)
 				.uriComponentsBuilder().build();
 	}
 
 	private static UriComponents adaptFromXForwardedHeaders(URI uri, HttpHeaders headers) {
-		return ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, null, null)
+		return ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers)
 				.uriComponentsBuilder().build();
 	}
 

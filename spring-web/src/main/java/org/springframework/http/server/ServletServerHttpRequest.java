@@ -204,14 +204,16 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		return new InetSocketAddress(this.servletRequest.getLocalAddr(), this.servletRequest.getLocalPort());
+		int port = Math.max(this.servletRequest.getLocalPort(), 0);
+		return new InetSocketAddress(this.servletRequest.getLocalAddr(), port);
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		String addressOrHost = this.servletRequest.getRemoteAddr();
 		addressOrHost = (addressOrHost != null ? addressOrHost : this.servletRequest.getRemoteHost());
-		return new InetSocketAddress(addressOrHost, this.servletRequest.getRemotePort());
+		int port = Math.max(this.servletRequest.getRemotePort(), 0);
+		return new InetSocketAddress(addressOrHost, port);
 	}
 
 	@Override

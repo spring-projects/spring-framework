@@ -213,12 +213,14 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		return new InetSocketAddress(this.request.getLocalAddr(), this.request.getLocalPort());
+		int port = Math.max(this.request.getLocalPort(), 0);
+		return new InetSocketAddress(this.request.getLocalAddr(), port);
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
+		int port = Math.max(this.request.getRemotePort(), 0);
+		return new InetSocketAddress(this.request.getRemoteHost(), port);
 	}
 
 	@Override

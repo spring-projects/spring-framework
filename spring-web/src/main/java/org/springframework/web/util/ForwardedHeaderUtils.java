@@ -63,6 +63,20 @@ public abstract class ForwardedHeaderUtils {
 
 	/**
 	 * Parse the "Forwarded" header.
+	 * <p>If the parsed "for" or "by" value does not include a port, the
+	 * resulting {@code InetSocketAddress} has port 0 to indicate it is unknown.
+	 * @param uri the request {@code URI}
+	 * @param headers the HTTP headers to get the "Forwarded" header from
+	 * @return a {@link ForwardedInfo} with the parse results
+	 * @since 7.1
+	 * @see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>
+	 */
+	public static ForwardedInfo parseStandardHeader(URI uri, HttpHeaders headers) {
+		return parseStandardHeader(uri, headers, 0, 0);
+	}
+
+	/**
+	 * Parse the "Forwarded" header.
 	 * @param uri the request {@code URI}
 	 * @param headers the HTTP headers to get the "Forwarded" header from
 	 * @param remoteAddress for a default port for the parsed "for" value
@@ -70,9 +84,19 @@ public abstract class ForwardedHeaderUtils {
 	 * @return a {@link ForwardedInfo} with the parse results
 	 * @since 6.1.29
 	 * @see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>
+	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader(URI, HttpHeaders)}
+	 * which does not use a fallback port from the remote or local address
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public static ForwardedInfo parseStandardHeader(URI uri, HttpHeaders headers,
 			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
+
+		return parseStandardHeader(uri, headers,
+				getPortToUse(remoteAddress, uri), getPortToUse(localAddress, uri));
+	}
+
+	private static ForwardedInfo parseStandardHeader(
+			URI uri, HttpHeaders headers, int defaultForPort, int defaultByPort) {
 
 		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(uri);
 		InetSocketAddress forAddress = null;
@@ -95,11 +119,11 @@ public abstract class ForwardedHeaderUtils {
 
 			String forValue = pairs.get("for");
 			if (forValue != null) {
-				forAddress = parseInetSocketAddress(forValue, getPortToUse(remoteAddress, uri));
+				forAddress = parseInetSocketAddress(forValue, defaultForPort);
 			}
 			String byValue = pairs.get("by");
 			if (byValue != null) {
-				byAddress = parseInetSocketAddress(byValue, getPortToUse(localAddress, uri));
+				byAddress = parseInetSocketAddress(byValue, defaultByPort);
 			}
 		}
 
@@ -243,6 +267,24 @@ public abstract class ForwardedHeaderUtils {
 	/**
 	 * Parse the "X-Forwarded-Proto", "X-Forwarded-Host", "X-Forwarded-Port", and
 	 * "X-Forwarded-For" headers, the alternative to the "Forwarded" header.
+	 * <p>The "X-Forwarded-For" value does not include a port, and therefore
+	 * the resulting {@code InetSocketAddress} has port 0 to indicate that the
+	 * port is not known.
+	 * <p>There is no parsing of "X-Forwarded-By" currently, so the
+	 * {@code byAddress} in {@link ForwardedInfo} is always {@code null}.
+	 * @param uri the request {@code URI}
+	 * @param headers the HTTP headers to get the "X-Forwarded-*" headers from
+	 * @return a {@link ForwardedInfo} with the scheme, host, and port adapted
+	 * from the "X-Forwarded-*" headers, and the parsed "for" address
+	 * @since 7.1
+	 */
+	public static ForwardedInfo parseXForwardedHeaders(URI uri, HttpHeaders headers) {
+		return parseXForwardedHeaders(uri, headers, 0);
+	}
+
+	/**
+	 * Parse the "X-Forwarded-Proto", "X-Forwarded-Host", "X-Forwarded-Port", and
+	 * "X-Forwarded-For" headers, the alternative to the "Forwarded" header.
 	 * <p>There is no parsing of "X-Forwarded-By" currently, so the
 	 * {@code byAddress} in {@link ForwardedInfo} is always {@code null}.
 	 * @param uri the request {@code URI}
@@ -253,10 +295,17 @@ public abstract class ForwardedHeaderUtils {
 	 * @return a {@link ForwardedInfo} with the scheme, host, and port adapted
 	 * from the "X-Forwarded-*" headers, and the parsed "for" address
 	 * @since 6.1.29
+	 * @deprecated as of 7.1 in favor of {@link #parseXForwardedHeaders(URI, HttpHeaders)}
+	 * which does not use a fallback port from the remote address
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public static ForwardedInfo parseXForwardedHeaders(URI uri, HttpHeaders headers,
 			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
 
+		return parseXForwardedHeaders(uri, headers, getPortToUse(remoteAddress, uri));
+	}
+
+	private static ForwardedInfo parseXForwardedHeaders(URI uri, HttpHeaders headers, int defaultForPort) {
 		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(uri);
 
 		String protocolHeader = headers.getFirst("X-Forwarded-Proto");
@@ -289,8 +338,7 @@ public abstract class ForwardedHeaderUtils {
 			String host = getLeftMostValue(forHeader);
 			boolean ipv6 = (host.indexOf(':') != -1);
 			host = (ipv6 && !host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
-			int port = getPortToUse(remoteAddress, uri);
-			forAddress = InetSocketAddress.createUnresolved(host, port);
+			forAddress = InetSocketAddress.createUnresolved(host, defaultForPort);
 		}
 
 		return new ForwardedInfo(uriComponentsBuilder, forAddress, null);
@@ -314,8 +362,8 @@ public abstract class ForwardedHeaderUtils {
 	 * @param headers the HTTP headers to consider
 	 * @return a {@link UriComponentsBuilder} that reflects the request URI and
 	 * additional updates from forwarded headers
-	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader} and
-	 * {@link #parseXForwardedHeaders}
+	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader(URI, HttpHeaders)}
+	 * and {@link #parseXForwardedHeaders(URI, HttpHeaders)}
 	 */
 	@Deprecated(since = "7.1", forRemoval = true)
 	public static UriComponentsBuilder adaptFromForwardedHeaders(URI uri, HttpHeaders headers) {
@@ -376,8 +424,8 @@ public abstract class ForwardedHeaderUtils {
 	 * @param remoteAddress the current remote address
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
 	 * {@code null} if the headers are not present
-	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader} and
-	 * {@link #parseXForwardedHeaders}
+	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader(URI, HttpHeaders)}
+	 * and {@link #parseXForwardedHeaders(URI, HttpHeaders)}
 	 */
 	@Deprecated(since = "7.1", forRemoval = true)
 	public static @Nullable InetSocketAddress parseForwardedFor(
@@ -413,8 +461,8 @@ public abstract class ForwardedHeaderUtils {
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
 	 * {@code null} if the headers are not present
 	 * @since 7.0
-	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader} and
-	 * {@link #parseXForwardedHeaders}
+	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader(URI, HttpHeaders)}
+	 * and {@link #parseXForwardedHeaders(URI, HttpHeaders)}
 	 */
 	@Deprecated(since = "7.1", forRemoval = true)
 	public static @Nullable InetSocketAddress parseForwardedBy(
@@ -444,7 +492,8 @@ public abstract class ForwardedHeaderUtils {
 	 * "X-Forwarded-For" value, representing the client, or {@code null} if not present
 	 * @param byAddress the address parsed from the "Forwarded" header "by",
 	 * representing the server, or {@code null} if not present;
-	 * always {@code null} when returned from {@link #parseXForwardedHeaders}
+	 * always {@code null} when returned from
+	 * {@link #parseXForwardedHeaders(URI, HttpHeaders)}
 	 */
 	public record ForwardedInfo(UriComponentsBuilder uriComponentsBuilder,
 			@Nullable InetSocketAddress forAddress, @Nullable InetSocketAddress byAddress) {
