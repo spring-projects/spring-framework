@@ -20,12 +20,15 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.ResolvableType
 import kotlin.reflect.full.createInstance
 
 /**
  * Mock object based tests for ListableBeanFactory Kotlin extensions
  *
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  */
 class ListableBeanFactoryExtensionsTests {
 
@@ -34,19 +37,27 @@ class ListableBeanFactoryExtensionsTests {
 	@Test
 	fun `getBeanNamesForType with reified type parameters`() {
 		lbf.getBeanNamesForType<Foo>()
-		verify { lbf.getBeanNamesForType(Foo::class.java, true , true) }
+		verify { lbf.getBeanNamesForType(ResolvableType.forClass(Foo::class.java), true , true) }
+	}
+
+	@Test
+	fun `getBeanNamesForType with reified generic type parameters`() {
+		val foo = listOf(Foo())
+		lbf.getBeanNamesForType<List<Foo>>()
+		verify { lbf.getBeanNamesForType(ResolvableType.forType(object : ParameterizedTypeReference<List<Foo>>() {}),
+			true , true) }
 	}
 
 	@Test
 	fun `getBeanNamesForType with reified type parameters and Boolean`() {
 		lbf.getBeanNamesForType<Foo>(false)
-		verify { lbf.getBeanNamesForType(Foo::class.java, false , true) }
+		verify { lbf.getBeanNamesForType(ResolvableType.forClass(Foo::class.java), false , true) }
 	}
 
 	@Test
 	fun `getBeanNamesForType with reified type parameters, Boolean and Boolean`() {
 		lbf.getBeanNamesForType<Foo>(false, false)
-		verify { lbf.getBeanNamesForType(Foo::class.java, false , false) }
+		verify { lbf.getBeanNamesForType(ResolvableType.forClass(Foo::class.java), false , false) }
 	}
 
 	@Test
