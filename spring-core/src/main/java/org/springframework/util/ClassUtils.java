@@ -67,6 +67,7 @@ import org.springframework.lang.Contract;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  * @author Sungbin Yang
+ * @author Chengang Guan
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -272,6 +273,10 @@ public abstract class ClassUtils {
 	 * for primitives (for example, "int") and array class names (for example, "String[]").
 	 * Furthermore, it is also capable of resolving nested class names in Java source
 	 * style (for example, "java.lang.Thread.State" instead of "java.lang.Thread$State").
+	 * <p>Note: When using the Java source style, it assumes standard naming conventions,
+	 * package names all lowercase and class names starting with uppercase. If your class
+	 * or package name deviates from these conventions, use the fully qualified binary
+	 * name instead to ensure correct resolution.
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * (can be {@code null}, which indicates the default class loader)
@@ -308,13 +313,36 @@ public abstract class ClassUtils {
 			return Class.forName(name, false, clToUse);
 		}
 		catch (ClassNotFoundException ex) {
-			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
-			int previousDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR, lastDotIndex - 1);
-			if (lastDotIndex != -1 && previousDotIndex != -1 && Character.isUpperCase(name.charAt(previousDotIndex + 1))) {
-				String nestedClassName =
-						name.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
+			if (!name.isEmpty() && name.charAt(name.length() - 1) != PACKAGE_SEPARATOR) {
+				StringBuilder nestedClassName = new StringBuilder(name);
+				int lastDotIndex = -1;
+				int i = nestedClassName.length() - 1;
+				for (; i >= 0; i--) {
+					if (nestedClassName.charAt(i) == PACKAGE_SEPARATOR) {
+						char next = nestedClassName.charAt(i + 1);
+						if (Character.isUpperCase(next)) {
+							lastDotIndex = i;
+							nestedClassName.setCharAt(i, NESTED_CLASS_SEPARATOR);
+						}
+						else {
+							// Package name has been encountered
+							if (lastDotIndex == -1) {
+								throw ex;
+							}
+							else {
+								// Replace the $ before the top-level class name with dot(.)
+								nestedClassName.setCharAt(lastDotIndex, PACKAGE_SEPARATOR);
+							}
+							break;
+						}
+					}
+				}
+				if (i == -1 && lastDotIndex != -1 && !Character.isUpperCase(nestedClassName.charAt(0))) {
+					// Single package name, such as a.ClassA
+					nestedClassName.setCharAt(lastDotIndex, PACKAGE_SEPARATOR);
+				}
 				try {
-					return Class.forName(nestedClassName, false, clToUse);
+					return Class.forName(nestedClassName.toString(), false, clToUse);
 				}
 				catch (ClassNotFoundException ex2) {
 					// Swallow - let original exception get through
