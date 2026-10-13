@@ -144,7 +144,8 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		StringBuilder comment = null;
 
 		for (String line : lines) {
-			if (line.startsWith("data:")) {
+			// A line without a colon is a field name with an empty value (WHATWG SSE).
+			if ("data".equals(line) || line.startsWith("data:")) {
 				data = (data != null ? data : new StringBuilder());
 				int length = line.length();
 				if (length > 5) {
@@ -156,14 +157,14 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 				data.append('\n');
 			}
 			else if (shouldWrap) {
-				if (line.startsWith("id:")) {
-					sseBuilder.id(line.substring(3).trim());
+				if ("id".equals(line) || line.startsWith("id:")) {
+					sseBuilder.id(line.startsWith("id:") ? line.substring(3).trim() : "");
 				}
-				else if (line.startsWith("event:")) {
-					sseBuilder.event(line.substring(6).trim());
+				else if ("event".equals(line) || line.startsWith("event:")) {
+					sseBuilder.event(line.startsWith("event:") ? line.substring(6).trim() : "");
 				}
-				else if (line.startsWith("retry:")) {
-					Long retry = parseRetry(line.substring(6).trim());
+				else if ("retry".equals(line) || line.startsWith("retry:")) {
+					Long retry = parseRetry(line.startsWith("retry:") ? line.substring(6).trim() : "");
 					if (retry != null) {
 						sseBuilder.retry(Duration.ofMillis(retry));
 					}

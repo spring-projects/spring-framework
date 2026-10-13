@@ -177,6 +177,35 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 		StepVerifier.create(data).expectNext("\n\n").verifyComplete();
 	}
 
+	@Test // gh-37461
+	@SuppressWarnings("rawtypes")
+	void readServerSentEventsDataWithoutColon() {
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer(
+						"id:c42\nevent:foo\ndata\ndata\n\n" +
+								"id\nevent\ndata\n\n" +
+								"data\n\n")));
+
+		Flux<ServerSentEvent> events = this.reader
+				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),
+						request, Collections.emptyMap()).cast(ServerSentEvent.class);
+
+		StepVerifier.create(events)
+				.expectNext(ServerSentEvent.builder()
+						.id("c42")
+						.event("foo")
+						.data("\n")
+						.build())
+				.expectNext(ServerSentEvent.builder()
+						.id("")
+						.event("")
+						.data("")
+						.build())
+				.consumeNextWith(event -> assertThat(event.data()).isEqualTo(""))
+				.expectComplete()
+				.verify();
+	}
+
 	@Test
 	void readPojo() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
