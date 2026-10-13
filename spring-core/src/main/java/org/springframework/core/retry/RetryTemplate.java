@@ -177,7 +177,7 @@ public class RetryTemplate implements RetryOperations {
 					logger.debug(currentException, () -> "Retry attempt for operation '%s' failed due to '%s'"
 							.formatted(retryableName, currentException));
 					retryState.addException(currentException);
-					this.retryListener.onRetryFailure(this.retryPolicy, retryable, currentException);
+					this.retryListener.onRetryFailure(this.retryPolicy, retryable, retryState, currentException);
 					this.retryListener.onRetryableExecution(this.retryPolicy, retryable, retryState);
 					lastException = currentException;
 					continue;
@@ -186,7 +186,7 @@ public class RetryTemplate implements RetryOperations {
 				// Did not enter catch block above -> retry success.
 				logger.debug(() -> "Retryable operation '%s' completed successfully after retry"
 						.formatted(retryableName));
-				this.retryListener.onRetrySuccess(this.retryPolicy, retryable, result);
+				this.retryListener.onRetrySuccess(this.retryPolicy, retryable, retryState, result);
 				this.retryListener.onRetryableExecution(this.retryPolicy, retryable, retryState);
 				return result;
 			}
