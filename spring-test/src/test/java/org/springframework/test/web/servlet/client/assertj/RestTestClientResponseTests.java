@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.client.assertj;
 
 
+import java.time.Duration;
 import java.util.Map;
 
 import jakarta.servlet.http.Cookie;
@@ -24,8 +25,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverters;
+import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.test.web.servlet.client.RestTestClient.ResponseSpec;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -82,6 +86,22 @@ class RestTestClientResponseTests {
 		assertThat(response).hasStatusOk();
 		assertThat(response).cookies().hasValue("foo", "bar");
 		assertThat(response).body().isEmpty();
+	}
+
+	@Test
+	void cookieWithMaxAgeExceedingIntegerRange() {
+		RestTestClient client = RestTestClient.bindToServer((uri, httpMethod) -> {
+			MockClientHttpResponse response = new MockClientHttpResponse(new byte[0], HttpStatus.OK);
+			response.getHeaders().add(HttpHeaders.SET_COOKIE, "remember=1; Max-Age=3153600000");
+			MockClientHttpRequest request = new MockClientHttpRequest(httpMethod, uri);
+			request.setResponse(response);
+			return request;
+		}).build();
+
+		ResponseSpec spec = client.get().uri("http://localhost/").exchange();
+
+		assertThat(RestTestClientResponse.from(spec)).cookies()
+				.hasMaxAge("remember", Duration.ofSeconds(Integer.MAX_VALUE));
 	}
 
 	@Test
