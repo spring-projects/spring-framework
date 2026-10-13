@@ -22,7 +22,7 @@ As the version is typically at the start of the path, consider configuring it ex
 as a common path prefix for all handlers through the
 xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching] options.
 
-By default, the version is parsed with `SemanticVersionParser`, but you can also configure
+By default, the version is parsed with `SemanticApiVersionParser`, but you can also configure
 a custom xref:web/webmvc-versioning.adoc#mvc-versioning-parser[ApiVersionParser].
 
 Supported versions are transparently detected from versions declared in request mappings
