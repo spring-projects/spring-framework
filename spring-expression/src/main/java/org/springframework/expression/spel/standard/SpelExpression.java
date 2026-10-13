@@ -533,8 +533,10 @@ public class SpelExpression implements Expression {
 					return false;
 				}
 			}
-			catch (Exception ex) {
-				// Failed to compile
+			catch (RuntimeException | Error ex) {
+				// Failed to compile (for example, class definition is not
+				// supported in a GraalVM native image without runtime class
+				// loading support - see gh-29548)
 				this.failedAttempts.incrementAndGet();
 
 				// If running in mixed mode, revert to interpreted
