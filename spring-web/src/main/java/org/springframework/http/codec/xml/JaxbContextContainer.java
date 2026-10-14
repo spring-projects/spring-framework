@@ -16,8 +16,8 @@
 
 package org.springframework.http.codec.xml;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -35,7 +35,7 @@ import org.springframework.core.codec.CodecException;
  */
 final class JaxbContextContainer {
 
-	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
+	private final Map<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
 
 
 	public Marshaller createMarshaller(Class<?> clazz) throws CodecException, JAXBException {

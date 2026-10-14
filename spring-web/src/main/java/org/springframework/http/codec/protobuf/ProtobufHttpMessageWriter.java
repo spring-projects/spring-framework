@@ -19,7 +19,6 @@ package org.springframework.http.codec.protobuf;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
@@ -55,7 +54,7 @@ public class ProtobufHttpMessageWriter extends EncoderHttpMessageWriter<Message>
 
 	private static final String X_PROTOBUF_MESSAGE_HEADER = "X-Protobuf-Message";
 
-	private static final ConcurrentMap<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
+	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
 
 	/**

@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -112,13 +111,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	// Cache to hold filename lists per Locale.
-	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames = new ConcurrentHashMap<>();
+	private final Map<String, Map<Locale, List<String>>> cachedFilenames = new ConcurrentHashMap<>();
 
 	// Cache to hold already loaded properties per filename.
-	private final ConcurrentMap<String, PropertiesHolder> cachedProperties = new ConcurrentHashMap<>();
+	private final Map<String, PropertiesHolder> cachedProperties = new ConcurrentHashMap<>();
 
 	// Cache to hold already merged properties per Locale.
-	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
+	private final Map<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
 
 	// Cache to hold merged properties per non-JVM Locale.
 	private final ConcurrentLruCache<Locale, PropertiesHolder> customLocaleProperties =
@@ -679,8 +678,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		private final Lock refreshLock = new ReentrantLock();
 
 		/** Cache to hold already generated MessageFormats per message code. */
-		private final ConcurrentMap<String, Map<Locale, MessageFormat>> cachedMessageFormats =
-				new ConcurrentHashMap<>();
+		private final Map<String, Map<Locale, MessageFormat>> cachedMessageFormats = new ConcurrentHashMap<>();
 
 		public PropertiesHolder() {
 			this.properties = null;

@@ -22,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 import com.google.protobuf.CodedInputStream;
@@ -76,7 +75,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	/** The default max size for aggregating messages. */
 	protected static final int DEFAULT_MESSAGE_MAX_SIZE = 256 * 1024;
 
-	private static final ConcurrentMap<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
+	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
 
 	private final ExtensionRegistry extensionRegistry;

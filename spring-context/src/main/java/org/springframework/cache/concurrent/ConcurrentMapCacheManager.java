@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
@@ -53,7 +52,7 @@ import org.springframework.core.serializer.support.SerializationDelegate;
  */
 public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderAware {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
+	private final Map<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
 	private volatile boolean dynamic = true;
 

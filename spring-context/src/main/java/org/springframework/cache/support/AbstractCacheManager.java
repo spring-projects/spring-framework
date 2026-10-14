@@ -19,9 +19,9 @@ package org.springframework.cache.support;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.jspecify.annotations.Nullable;
 
@@ -41,7 +41,7 @@ import org.springframework.util.CollectionUtils;
  */
 public abstract class AbstractCacheManager implements CacheManager, InitializingBean {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
+	private final Map<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
 	private volatile Set<String> cacheNames = Collections.emptySet();
 

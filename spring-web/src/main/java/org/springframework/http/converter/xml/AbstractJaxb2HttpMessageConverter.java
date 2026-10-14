@@ -17,8 +17,8 @@
 package org.springframework.http.converter.xml;
 
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -41,7 +41,7 @@ import org.springframework.http.converter.HttpMessageConversionException;
  */
 public abstract class AbstractJaxb2HttpMessageConverter<T> extends AbstractXmlHttpMessageConverter<T> {
 
-	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
+	private final Map<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
 
 
 	/**

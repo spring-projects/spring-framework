@@ -21,7 +21,6 @@ import java.nio.charset.CoderMalfunctionError;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
@@ -51,7 +50,7 @@ public final class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private final ConcurrentMap<Charset, Float> charsetToMaxBytesPerChar = new ConcurrentHashMap<>(3);
+	private final Map<Charset, Float> charsetToMaxBytesPerChar = new ConcurrentHashMap<>(3);
 
 
 	private CharSequenceEncoder(MimeType... mimeTypes) {

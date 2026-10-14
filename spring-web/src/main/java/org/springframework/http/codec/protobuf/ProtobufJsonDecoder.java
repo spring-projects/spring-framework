@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
@@ -71,7 +70,7 @@ public class ProtobufJsonDecoder implements Decoder<Message> {
 	private static final List<MimeType> defaultMimeTypes = List.of(MediaType.APPLICATION_JSON,
 			new MediaType("application", "*+json"));
 
-	private static final ConcurrentMap<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
+	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
 	private final JsonFormat.Parser parser;
 
