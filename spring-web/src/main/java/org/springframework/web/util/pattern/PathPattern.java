@@ -136,6 +136,11 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean endsWithSeparatorWildcard = false;
 
 	/**
+	 * Does the pattern end with '&lt;separator&gt;**'.
+	 */
+	private boolean endsWithWildcardSegments = false;
+
+	/**
 	 * Score is used to quickly compare patterns. Different pattern components are given different
 	 * weights. A 'lower score' is more specific. Current weights:
 	 * <ul>
@@ -167,6 +172,9 @@ public class PathPattern implements Comparable<PathPattern> {
 			}
 			if (elem instanceof SeparatorPathElement && elem.next instanceof WildcardPathElement && elem.next.next == null) {
 				this.endsWithSeparatorWildcard = true;
+			}
+			if (elem instanceof WildcardSegmentsPathElement && elem.next == null) {
+				this.endsWithWildcardSegments = true;
 			}
 			elem = elem.next;
 		}
@@ -429,10 +437,13 @@ public class PathPattern implements Comparable<PathPattern> {
 			return this.parser.parse(concat(prefix, otherPattern.patternString));
 		}
 
-		// /hotels/** +  "/booking/rooms => /hotels/booking/rooms
-		if (this.catchAll) {
-			return this.parser.parse(concat(this.patternString.substring(0, this.patternString.length() - 3),
-					otherPattern.patternString));
+		// /hotels/** + /booking/rooms => /hotels/booking/rooms
+		// /** + /** => /**
+		if (this.endsWithWildcardSegments) {
+			String prefix = (this.patternString.length() > 3 ?
+					this.patternString.substring(0, this.patternString.length() - 3) :
+					String.valueOf(getSeparator()));
+			return this.parser.parse(concat(prefix, otherPattern.patternString));
 		}
 
 		// /hotels + /booking => /hotels/booking

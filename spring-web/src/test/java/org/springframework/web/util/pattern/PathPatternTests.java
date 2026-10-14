@@ -804,6 +804,10 @@ class PathPatternTests {
 		assertThat(pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")).isEqualTo("/{foo:.*[^0-9].*}/edit/");
 		// SPR-8858
 		assertThat(pathMatcher.combine("/{foo}", "/bar")).isEqualTo("/{foo}/bar");
+		// gh-37480
+		assertThat(pathMatcher.combine("/**/foo", "/bar")).isEqualTo("/**/foo/bar");
+		assertThat(pathMatcher.combine("/**/index.html", "/bar")).isEqualTo("/**/index.html/bar");
+		assertThat(pathMatcher.combine("/{*path}/foo", "/bar")).isEqualTo("/{*path}/foo/bar");
 	}
 
 	@Test
@@ -815,6 +819,9 @@ class PathPatternTests {
 		assertThat(pathMatcher.combine("/**", "/*.html")).isEqualTo("/*.html");
 		assertThat(pathMatcher.combine("/*", "/*.html")).isEqualTo("/*.html");
 		assertThat(pathMatcher.combine("/*.*", "/*.html")).isEqualTo("/*.html");
+		// gh-37480
+		assertThat(pathMatcher.combine("/**", "/**")).isEqualTo("/**");
+		assertThat(pathMatcher.combine("**", "**")).isEqualTo("/**");
 	}
 
 	@Test
