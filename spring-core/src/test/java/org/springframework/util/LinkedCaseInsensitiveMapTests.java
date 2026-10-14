@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -198,9 +199,27 @@ class LinkedCaseInsensitiveMapTests {
 	@Test
 	void removeFromKeySet() {
 		map.put("key", "value");
-		map.keySet().remove("key");
+		assertThat(map.keySet().remove("key")).isTrue();
 		map.computeIfAbsent("key", k -> "newvalue");
 		assertThat(map.get("key")).isEqualTo("newvalue");
+	}
+
+	@Test
+	void removeNullValuedKeyFromKeySet() {
+		map.put("Key", null);
+		assertThat(map.keySet().remove("KEY")).isTrue();
+		assertThat(map).isEmpty();
+		assertThat(map.containsKey("key")).isFalse();
+		assertThat(map.keySet().remove("KEY")).isFalse();
+	}
+
+	@Test
+	void removeAllNullValuedKeysFromKeySet() {
+		map.put("Key", null);
+		map.put("other", "value");
+		assertThat(map.keySet().removeAll(Set.of("KEY"))).isTrue();
+		assertThat(map).containsOnlyKeys("other");
+		assertThat(map.keySet().removeAll(Set.of("KEY"))).isFalse();
 	}
 
 	@Test
