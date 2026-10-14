@@ -21,8 +21,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,8 +64,7 @@ public final class CandidateComponentsIndexLoader {
 
 	private static final Log logger = LogFactory.getLog(CandidateComponentsIndexLoader.class);
 
-	private static final ConcurrentMap<ClassLoader, CandidateComponentsIndex> cache =
-			new ConcurrentReferenceHashMap<>();
+	private static final Map<ClassLoader, CandidateComponentsIndex> cache = new ConcurrentReferenceHashMap<>();
 
 
 	private CandidateComponentsIndexLoader() {

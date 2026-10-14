@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
@@ -392,7 +391,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	 */
 	private static final class SessionRegistry {
 
-		private final ConcurrentMap<String, SessionInfo> sessions = new ConcurrentHashMap<>();
+		private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<>();
 
 		public @Nullable SessionInfo getSession(String sessionId) {
 			return this.sessions.get(sessionId);

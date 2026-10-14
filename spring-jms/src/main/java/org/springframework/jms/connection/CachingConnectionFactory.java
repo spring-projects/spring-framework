@@ -28,7 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
@@ -106,7 +105,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 	private volatile boolean active = true;
 
-	private final ConcurrentMap<Integer, Deque<Session>> cachedSessions = new ConcurrentHashMap<>();
+	private final Map<Integer, Deque<Session>> cachedSessions = new ConcurrentHashMap<>();
 
 
 	/**
