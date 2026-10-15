@@ -24,6 +24,7 @@ import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
@@ -414,6 +415,18 @@ class NumberUtilsTests {
 		assertThatIllegalArgumentException().as(msg).isThrownBy(() ->
 				NumberUtils.convertNumberToTargetClass(number, targetClass))
 			.withMessageEndingWith("overflow");
+	}
+
+	@Test
+	void parseBigIntegerWithSignAfterRadixPrefixIsRejected() {
+		for (String value : new String[] {"-0x-1", "0x-1", "-#-1", "#-1", "0x+1", "+0x+1", "-0X-1"}) {
+			assertThatExceptionOfType(NumberFormatException.class)
+					.as(value).isThrownBy(() -> NumberUtils.parseNumber(value, BigInteger.class));
+			assertThatExceptionOfType(NumberFormatException.class)
+					.as(value).isThrownBy(() -> NumberUtils.parseNumber(value, Long.class));
+		}
+		assertThat(NumberUtils.parseNumber("-0x1", BigInteger.class)).isEqualTo(BigInteger.ONE.negate());
+		assertThat(NumberUtils.parseNumber("+#1", BigInteger.class)).isEqualTo(BigInteger.ONE);
 	}
 
 }
