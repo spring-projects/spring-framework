@@ -130,7 +130,7 @@ public abstract class CoroutinesUtils {
 					for (KParameter parameter : function.getParameters()) {
 						switch (parameter.getKind()) {
 							case INSTANCE -> argMap.put(parameter, target);
-							case VALUE, EXTENSION_RECEIVER -> {
+							case CONTEXT, VALUE, EXTENSION_RECEIVER -> {
 								Object arg = args[index];
 								if (!(parameter.isOptional() && arg == null)) {
 									KType type = parameter.getType();
