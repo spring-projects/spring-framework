@@ -442,16 +442,10 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 		@Override
 		public long skip(long n) throws IOException {
-			if (n > Integer.MAX_VALUE) {
-				throw new IllegalArgumentException("n exceeds maximum (" + Integer.MAX_VALUE + "): " + n);
-			}
-			else if (n == 0) {
+			if (n <= 0) {
 				return 0;
 			}
-			else if (n < 0) {
-				throw new IllegalArgumentException("n must be 0 or greater: " + n);
-			}
-			int len = (int) n;
+			int len = (int) Math.min(n, available());
 			if (this.currentBuffer == null) {
 				// This stream doesn't have any data in it...
 				return 0;
