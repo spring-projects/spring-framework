@@ -431,8 +431,10 @@ public class PathPattern implements Comparable<PathPattern> {
 
 		// /hotels/** +  "/booking/rooms => /hotels/booking/rooms
 		if (this.catchAll) {
-			return this.parser.parse(concat(this.patternString.substring(0, this.patternString.length() - 3),
-					otherPattern.patternString));
+			String prefix = (this.patternString.length() > 3 ?
+					this.patternString.substring(0, this.patternString.length() - 3) :
+					String.valueOf(getSeparator()));
+			return this.parser.parse(concat(prefix, otherPattern.patternString));
 		}
 
 		// /hotels + /booking => /hotels/booking
