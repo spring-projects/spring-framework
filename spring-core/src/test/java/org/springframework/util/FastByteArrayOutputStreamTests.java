@@ -198,6 +198,19 @@ class FastByteArrayOutputStreamTests {
 		assertThat(inputStream.available()).isEqualTo((this.helloBytes.length - 3));
 	}
 
+
+	@Test
+	void getInputStreamSkipNegativeAndLargeAmounts() throws Exception {
+		this.os.write(new byte[] {1, 2, 3});
+		InputStream negativeSkipStream = this.os.getInputStream();
+		assertThat(negativeSkipStream.skip(-1)).isZero();
+		assertThat(negativeSkipStream.available()).isEqualTo(3);
+
+		InputStream largeSkipStream = this.os.getInputStream();
+		assertThat(largeSkipStream.skip((long) Integer.MAX_VALUE + 1)).isEqualTo(3);
+		assertThat(largeSkipStream.available()).isZero();
+	}
+
 	@Test
 	void getInputStreamSkipAll() throws Exception {
 		this.os.write(this.helloBytes);
