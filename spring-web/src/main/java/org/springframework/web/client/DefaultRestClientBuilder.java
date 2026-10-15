@@ -90,7 +90,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private @Nullable HttpHeaders defaultHeaders;
 
-	private @Nullable MultiValueMap<String, String> defaultCookies;
+	private @Nullable LinkedMultiValueMap<String, String> defaultCookies;
 
 	private @Nullable Object defaultApiVersion;
 
@@ -126,14 +126,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.baseUrl = other.baseUrl;
 		this.defaultUriVariables = (other.defaultUriVariables != null ? new LinkedHashMap<>(other.defaultUriVariables) : null);
 		this.uriBuilderFactory = other.uriBuilderFactory;
-		if (other.defaultHeaders != null) {
-			this.defaultHeaders = new HttpHeaders();
-			this.defaultHeaders.putAll(other.defaultHeaders);
-		}
-		else {
-			this.defaultHeaders = null;
-		}
-		this.defaultCookies = (other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.defaultHeaders = (other.defaultHeaders != null ? HttpHeaders.copyOf(other.defaultHeaders) : null);
+		this.defaultCookies = (other.defaultCookies != null ? other.defaultCookies.deepCopy() : null);
 		this.defaultApiVersion = other.defaultApiVersion;
 		this.apiVersionInserter = other.apiVersionInserter;
 		this.defaultRequest = other.defaultRequest;
