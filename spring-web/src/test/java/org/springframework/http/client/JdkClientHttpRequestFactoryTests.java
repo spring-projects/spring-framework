@@ -127,26 +127,10 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		}
 	}
 
-	@Test
-	void compressionGzip() throws IOException {
-		URI uri = URI.create(baseUrl + "/compress/gzip");
-		JdkClientHttpRequestFactory requestFactory = (JdkClientHttpRequestFactory) this.factory;
-		requestFactory.enableCompression(true);
-		ClientHttpRequest request = requestFactory.createRequest(uri, HttpMethod.POST);
-		StreamUtils.copy("Payload to compress", StandardCharsets.UTF_8, request.getBody());
-		try (ClientHttpResponse response = request.execute()) {
-			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
-			assertThat(response.getHeaders().getFirst("Content-Encoding"))
-					.as("Content Encoding should be removed").isNull();
-			assertThat(response.getHeaders().getFirst("Content-Length"))
-					.as("Content-Length should be removed").isNull();
-			assertThat(response.getBody()).as("Invalid request body").hasContent("Payload to compress");
-		}
-	}
-
-	@Test
-	void compressionDeflate() throws IOException {
-		URI uri = URI.create(baseUrl + "/compress/deflate");
+	@ParameterizedTest
+	@ValueSource(strings = {"gzip", "GZIP", "GzIp", "deflate", "DEFLATE", "DeFlAtE"})
+	void compression(String encoding) throws IOException {
+		URI uri = URI.create(this.baseUrl + "/compress/" + encoding);
 		JdkClientHttpRequestFactory requestFactory = (JdkClientHttpRequestFactory) this.factory;
 		requestFactory.enableCompression(true);
 		ClientHttpRequest request = requestFactory.createRequest(uri, HttpMethod.POST);
@@ -162,9 +146,9 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {"gzip", "deflate"})
-	void gzipCompressionWithHeadRequest(String compression) throws IOException {
-		URI uri = URI.create(baseUrl + "/headforcompress/" + compression);
+	@ValueSource(strings = {"gzip", "GZIP", "GzIp", "deflate", "DEFLATE", "DeFlAtE"})
+	void compressionWithHeadRequest(String encoding) throws IOException {
+		URI uri = URI.create(this.baseUrl + "/headforcompress/" + encoding);
 		JdkClientHttpRequestFactory requestFactory = (JdkClientHttpRequestFactory) this.factory;
 		requestFactory.enableCompression(true);
 		ClientHttpRequest request = requestFactory.createRequest(uri, HttpMethod.HEAD);
