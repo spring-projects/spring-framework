@@ -18,7 +18,7 @@ package org.springframework.web.accept;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -236,10 +236,11 @@ public class StandardApiVersionDeprecationHandler implements ApiVersionDeprecati
 					sunsetDate(), sunsetLink());
 		}
 
-		public VersionInfo withSunsetDate(ZonedDateTime sunsetDate) {
+				public VersionInfo withSunsetDate(ZonedDateTime sunsetDate) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setZonedDateTime("Sunset", sunsetDate.withZoneSameInstant(ZoneOffset.UTC));
 			return new VersionInfo(version(), requestPredicate(),
-					deprecationDate(), deprecationLink(),
-					sunsetDate.format(DateTimeFormatter.RFC_1123_DATE_TIME), sunsetLink());
+					deprecationDate(), deprecationLink(), headers.getFirst("Sunset"), sunsetLink());
 		}
 
 		public VersionInfo withSunsetLink(URI uri, MediaType mediaType) {
