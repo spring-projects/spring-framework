@@ -199,6 +199,33 @@ class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
+	void getInputStreamSkipNegative() throws IOException {
+		this.os.write(this.helloBytes);
+		InputStream inputStream = this.os.getInputStream();
+		assertThat(inputStream.skip(-1)).isEqualTo(0);
+		assertThat(inputStream.skip(0)).isEqualTo(0);
+		assertThat(inputStream.available()).isEqualTo(this.helloBytes.length);
+	}
+
+	@Test
+	void getInputStreamSkipExceedsIntegerMaxValue() throws IOException {
+		this.os.write(this.helloBytes);
+		InputStream inputStream = this.os.getInputStream();
+		assertThat(inputStream.skip(2147483648L)).isEqualTo(this.helloBytes.length);
+		assertThat(inputStream.available()).isEqualTo(0);
+	}
+
+	@Test
+	void getInputStreamSkipExceedsIntegerMaxValueMultipleBuffers() throws IOException {
+		FastByteArrayOutputStream byteArray = new FastByteArrayOutputStream(5);
+		byteArray.write(this.helloBytes, 0, 5);
+		byteArray.write(this.helloBytes, 5, 6);
+		InputStream inputStream = byteArray.getInputStream();
+		assertThat(inputStream.skip(2147483648L)).isEqualTo(helloBytes.length);
+		assertThat(inputStream.available()).isEqualTo(0);
+	}
+
+	@Test
 	void getInputStreamSkipAll() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
