@@ -108,6 +108,27 @@ class MultiToSingleValueMapAdapterTests {
 	}
 
 	@Test
+	void traversalHandlesEmptyValueLists() {
+		this.delegate.put("empty", List.of());
+
+		assertThat(this.adapter.values()).containsExactly("bar", "quux", (String) null);
+		assertThat(this.adapter.entrySet()).containsExactly(
+				entry("foo", "bar"), entry("qux", "quux"), entry("empty", null));
+	}
+
+	@Test
+	void traversalHandlesNullValues() {
+		this.adapter.put("nullable", null);
+
+		assertThat(this.adapter.get("nullable")).isNull();
+		assertThat(this.adapter.values()).containsExactly("bar", "quux", null);
+		assertThat(this.adapter.entrySet()).contains(entry("nullable", null));
+		Map<String, String> visited = new LinkedHashMap<>();
+		this.adapter.forEach(visited::put);
+		assertThat(visited).containsEntry("nullable", null);
+	}
+
+	@Test
 	void clear() {
 		this.adapter.clear();
 		assertThat(this.adapter).isEmpty();
