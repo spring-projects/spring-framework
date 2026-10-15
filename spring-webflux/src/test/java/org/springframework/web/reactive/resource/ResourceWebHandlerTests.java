@@ -267,6 +267,24 @@ class ResourceWebHandlerTests {
 		}
 
 		@Test
+		void ignoreRangeWhenIfRangeETagDoesNotMatch() {
+			this.handler.setEtagGenerator(resource -> "\"current\"");
+			MockServerHttpRequest request = MockServerHttpRequest.get("")
+					.header(HttpHeaders.RANGE, "bytes=0-1")
+					.header(HttpHeaders.IF_RANGE, "\"stale\"")
+					.build();
+			MockServerWebExchange exchange = MockServerWebExchange.from(request);
+			setPathWithinHandlerMapping(exchange, "foo.txt");
+			setBestMachingPattern(exchange, "/**");
+			this.handler.handle(exchange).block(TIMEOUT);
+
+			assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo("\"current\"");
+			assertThat(exchange.getResponse().getHeaders().getFirst(HttpHeaders.CONTENT_RANGE)).isNull();
+			assertThat(exchange.getResponse().getHeaders().getContentLength()).isEqualTo(10);
+			assertResponseBody(exchange, "Some text.");
+		}
+
+		@Test
 		void partialContentByteRangeNoEnd() {
 			MockServerHttpRequest request = MockServerHttpRequest.get("").header("range", "bytes=9-").build();
 			MockServerWebExchange exchange = MockServerWebExchange.from(request);
