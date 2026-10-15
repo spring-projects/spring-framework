@@ -18,7 +18,9 @@ package org.springframework.jdbc.core;
 
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
@@ -27,7 +29,9 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link RowMapper} implementation that converts a row into a new instance
@@ -68,6 +72,12 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 
 	private TypeDescriptor @Nullable [] constructorParameterTypes;
 
+	/** Map from underscored parameter names to constructor parameter indexes. */
+	private @Nullable Map<String, Integer> underscoredParameterIndexes;
+
+	/** Map from lower-case parameter names to constructor parameter indexes. */
+	private @Nullable Map<String, Integer> lowerCaseParameterIndexes;
+
 
 	/**
 	 * Create a new {@code DataClassRowMapper} for bean-style configuration.
@@ -94,8 +104,13 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		int paramCount = this.mappedConstructor.getParameterCount();
 		if (paramCount > 0) {
 			this.constructorParameterNames = BeanUtils.getParameterNames(this.mappedConstructor);
-			for (String name : this.constructorParameterNames) {
+			this.underscoredParameterIndexes = CollectionUtils.newHashMap(paramCount);
+			this.lowerCaseParameterIndexes = CollectionUtils.newHashMap(paramCount);
+			for (int i = 0; i < paramCount; i++) {
+				String name = this.constructorParameterNames[i];
 				suppressProperty(name);
+				this.underscoredParameterIndexes.putIfAbsent(underscoreName(name), i);
+				this.lowerCaseParameterIndexes.putIfAbsent(lowerCaseName(name), i);
 			}
 			this.constructorParameterTypes = new TypeDescriptor[paramCount];
 			for (int i = 0; i < paramCount; i++) {
@@ -111,19 +126,10 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		@Nullable Object[] args;
 		if (this.constructorParameterNames != null && this.constructorParameterTypes != null) {
 			args = new Object[this.constructorParameterNames.length];
+			int[] columnIndexes = findColumnIndexes(rs, this.constructorParameterNames);
 			for (int i = 0; i < args.length; i++) {
-				String name = this.constructorParameterNames[i];
-				int index;
-				try {
-					// Try direct name match first
-					index = rs.findColumn(lowerCaseName(name));
-				}
-				catch (SQLException ex) {
-					// Try underscored name match instead
-					index = rs.findColumn(underscoreName(name));
-				}
 				TypeDescriptor td = this.constructorParameterTypes[i];
-				Object value = getColumnValue(rs, index, td.getType());
+				Object value = getColumnValue(rs, columnIndexes[i], td.getType());
 				args[i] = tc.convertIfNecessary(value, td.getType(), td);
 			}
 		}
@@ -132,6 +138,55 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		}
 
 		return BeanUtils.instantiateClass(this.mappedConstructor, args);
+	}
+
+	/**
+	 * Determine the column index for each constructor parameter from the
+	 * column labels of the given {@code ResultSet}, trying the common
+	 * underscored name match first and a direct name match (typically with
+	 * camelCase) second. For duplicate labels, the first column is used in
+	 * line with {@link ResultSet#findColumn}.
+	 */
+	private int[] findColumnIndexes(ResultSet rs, @Nullable String[] parameterNames) throws SQLException {
+		Assert.state(this.underscoredParameterIndexes != null && this.lowerCaseParameterIndexes != null,
+				"Parameter indexes were not initialized");
+		int[] underscoredMatches = new int[parameterNames.length];
+		int[] directMatches = new int[parameterNames.length];
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnCount = rsmd.getColumnCount();
+		for (int index = 1; index <= columnCount; index++) {
+			String column = lowerCaseName(JdbcUtils.lookupColumnName(rsmd, index));
+			Integer param = this.underscoredParameterIndexes.get(column);
+			if (param != null && underscoredMatches[param] == 0) {
+				underscoredMatches[param] = index;
+			}
+			param = this.lowerCaseParameterIndexes.get(column);
+			if (param != null && directMatches[param] == 0) {
+				directMatches[param] = index;
+			}
+		}
+		for (int i = 0; i < parameterNames.length; i++) {
+			if (underscoredMatches[i] == 0) {
+				underscoredMatches[i] = (directMatches[i] != 0 ? directMatches[i] : findColumn(rs, parameterNames[i]));
+			}
+		}
+		return underscoredMatches;
+	}
+
+	/**
+	 * Fall back to {@link ResultSet#findColumn} for a constructor parameter
+	 * without a matching column label, exposing the driver's exception
+	 * if the column cannot be found.
+	 */
+	private int findColumn(ResultSet rs, @Nullable String name) throws SQLException {
+		try {
+			// Try common underscored name match first
+			return rs.findColumn(underscoreName(name));
+		}
+		catch (SQLException ex) {
+			// Try direct name match (typically with camelCase) instead
+			return rs.findColumn(lowerCaseName(name));
+		}
 	}
 
 
