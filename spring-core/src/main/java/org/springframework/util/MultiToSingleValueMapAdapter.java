@@ -147,7 +147,7 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 
 						@Override
 						public V next() {
-							return targetIterator.next().get(0);
+							return adaptValue(targetIterator.next());
 						}
 					};
 				}
@@ -180,7 +180,7 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 						@Override
 						public Entry<K, V> next() {
 							Entry<K, List<V>> entry = targetIterator.next();
-							return new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), entry.getValue().get(0));
+							return new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), adaptValue(entry.getValue()));
 						}
 					};
 				}
@@ -197,7 +197,7 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 
 	@Override
 	public void forEach(BiConsumer<? super K, ? super V> action) {
-		this.targetMap.forEach((k, vs) -> action.accept(k, vs.get(0)));
+		this.targetMap.forEach((k, vs) -> action.accept(k, adaptValue(vs)));
 	}
 
 	private @Nullable V adaptValue(@Nullable List<V> values) {
@@ -209,13 +209,8 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 		}
 	}
 
-	private @Nullable List<V> adaptValue(@Nullable V value) {
-		if (value != null) {
-			return Collections.singletonList(value);
-		}
-		else {
-			return null;
-		}
+	private List<V> adaptValue(@Nullable V value) {
+		return Collections.singletonList(value);
 	}
 
 
