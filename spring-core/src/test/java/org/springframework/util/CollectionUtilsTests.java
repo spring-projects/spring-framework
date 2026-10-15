@@ -392,6 +392,23 @@ class CollectionUtilsTests {
 		assertThat(compositeMap).containsValues("value1", "value2", "value3", "value4");
 	}
 
+	@Test
+	void compositeMapEntrySetRemovalOfHiddenEntry() {
+		Map<String, String> first = new HashMap<>();
+		first.put("key", "visible");
+
+		Map<String, String> second = new HashMap<>();
+		second.put("key", "hidden");
+
+		Map<String, String> compositeMap = CollectionUtils.compositeMap(first, second);
+		Map.Entry<String, String> hiddenEntry = Map.entry("key", "hidden");
+
+		assertThat(compositeMap.entrySet()).doesNotContain(hiddenEntry);
+		assertThat(compositeMap.entrySet().remove(hiddenEntry)).isFalse();
+		assertThat(compositeMap.get("key")).isEqualTo("visible");
+		assertThat(second).containsEntry("key", "hidden");
+	}
+
 
 	private static final class Instance {
 
