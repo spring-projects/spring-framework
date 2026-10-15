@@ -46,7 +46,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.util.AssertionErrors;
@@ -727,7 +726,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public BodyContentSpec json(String expectedJson, JsonCompareMode compareMode) {
-			return json(expectedJson, JsonAssert.comparator(compareMode));
+			return json(expectedJson, JsonComparator.of(compareMode));
 		}
 
 		@Override

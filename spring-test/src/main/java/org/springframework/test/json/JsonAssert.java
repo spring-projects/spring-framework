@@ -16,12 +16,7 @@
 
 package org.springframework.test.json;
 
-import org.json.JSONException;
-import org.jspecify.annotations.Nullable;
-import org.skyscreamer.jsonassert.JSONCompare;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.JSONCompareResult;
-import org.skyscreamer.jsonassert.comparator.DefaultComparator;
 import org.skyscreamer.jsonassert.comparator.JSONComparator;
 
 /**
@@ -29,7 +24,12 @@ import org.skyscreamer.jsonassert.comparator.JSONComparator;
  *
  * @author Phillip Webb
  * @since 6.2
+ * @deprecated as of 7.1 in favor of {@link JsonComparator#of(JsonCompareMode)},
+ * which supports both <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a>
+ * and <a href="https://jsonassert.skyscreamer.org/">JSONassert</a>, or a custom
+ * {@link JsonComparator} implementation
  */
+@Deprecated(since = "7.1", forRemoval = true)
 public abstract class JsonAssert {
 
 	/**
@@ -40,9 +40,7 @@ public abstract class JsonAssert {
 	 * @see JSONCompareMode#LENIENT
 	 */
 	public static JsonComparator comparator(JsonCompareMode compareMode) {
-		JSONCompareMode jsonAssertCompareMode = (compareMode != JsonCompareMode.LENIENT ?
-				JSONCompareMode.STRICT : JSONCompareMode.LENIENT);
-		return comparator(jsonAssertCompareMode);
+		return new JsonAssertJsonComparator(compareMode);
 	}
 
 	/**
@@ -63,36 +61,6 @@ public abstract class JsonAssert {
 	 */
 	public static JsonComparator comparator(JSONCompareMode mode) {
 		return new JsonAssertJsonComparator(mode);
-	}
-
-	private static class JsonAssertJsonComparator implements JsonComparator {
-
-		private final JSONComparator jsonAssertComparator;
-
-		JsonAssertJsonComparator(JSONComparator jsonAssertComparator) {
-			this.jsonAssertComparator = jsonAssertComparator;
-		}
-
-		JsonAssertJsonComparator(JSONCompareMode compareMode) {
-			this(new DefaultComparator(compareMode));
-		}
-
-		@Override
-		public JsonComparison compare(@Nullable String expectedJson, @Nullable String actualJson) {
-			if (actualJson == null) {
-				return (expectedJson != null) ? JsonComparison.mismatch("Expected null JSON") : JsonComparison.match();
-			}
-			if (expectedJson == null) {
-				return JsonComparison.mismatch("Expected non-null JSON");
-			}
-			try {
-				JSONCompareResult result = JSONCompare.compareJSON(expectedJson, actualJson, this.jsonAssertComparator);
-				return (!result.passed()) ? JsonComparison.mismatch(result.getMessage()) : JsonComparison.match();
-			}
-			catch (JSONException ex) {
-				throw new IllegalStateException(ex);
-			}
-		}
 	}
 
 }

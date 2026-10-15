@@ -519,7 +519,8 @@ Kotlin::
 You can use `expectBody()` without a target type to perform assertions on the raw
 content rather than through higher level Object(s).
 
-To verify the full JSON content with https://jsonassert.skyscreamer.org[JSONAssert]:
+To verify the full JSON content with https://github.com/lukas-krecan/JsonUnit[JsonUnit] or
+https://jsonassert.skyscreamer.org[JSONassert]:
 
 [tabs]
 ======
@@ -545,6 +546,12 @@ Kotlin::
 			.json("{\"name\":\"Jane\"}")
 ----
 ======
+
+This requires either JsonUnit (`net.javacrumbs.json-unit:json-unit-core`) or JSONassert
+(`org.skyscreamer:jsonassert`) on the classpath. If both are present, JsonUnit is used.
+You can also provide your own
+{spring-framework-api}/test/json/JsonComparator.html[`JsonComparator`] to use another
+library or a custom configuration.
 
 To verify JSON content with https://github.com/jayway/JsonPath[JSONPath]:
 

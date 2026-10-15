@@ -82,6 +82,7 @@ dependencies {
 		api("javax.money:money-api:1.1")
 		api("jaxen:jaxen:1.2.0")
 		api("junit:junit:4.13.2")
+		api("net.javacrumbs.json-unit:json-unit-core:6.3.0")
 		api("net.sf.jopt-simple:jopt-simple:5.0.4")
 		api("org.apache-extras.beanshell:bsh:2.0b6")
 		api("org.apache.activemq:activemq-broker:5.17.7")

@@ -87,7 +87,7 @@ class AbstractJsonContentAssertTests {
 	private static final JsonConverterDelegate jsonContentConverter =
 			JsonConverterDelegate.of(List.of(new JacksonJsonHttpMessageConverter(new JsonMapper())));
 
-	private static final JsonComparator comparator = JsonAssert.comparator(JsonCompareMode.LENIENT);
+	private static final JsonComparator comparator = JsonComparator.of(JsonCompareMode.LENIENT);
 
 	@Test
 	void isNullWhenActualIsNullShouldPass() {
@@ -771,6 +771,7 @@ class AbstractJsonContentAssertTests {
 		}
 
 		@Test
+		@SuppressWarnings("removal")
 		void isEqualToWithCustomCompareMode() {
 			String differentOrder = """
 				{
@@ -784,6 +785,7 @@ class AbstractJsonContentAssertTests {
 		}
 
 		@Test
+		@SuppressWarnings("removal")
 		void isEqualToWithCustomJsonComparator() throws JSONException {
 			String empty = "{}";
 			JSONComparator comparator = mock(JSONComparator.class);

@@ -43,7 +43,6 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverters;
-import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonConverterDelegate;
@@ -459,7 +458,7 @@ class DefaultRestTestClient implements RestTestClient {
 
 		@Override
 		public BodyContentSpec json(String expectedJson, JsonCompareMode compareMode) {
-			return json(expectedJson, JsonAssert.comparator(compareMode));
+			return json(expectedJson, JsonComparator.of(compareMode));
 		}
 
 		@Override

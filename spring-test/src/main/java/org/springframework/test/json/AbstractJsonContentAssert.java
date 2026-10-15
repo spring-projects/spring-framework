@@ -484,7 +484,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	}
 
 	private JsonComparison compare(@Nullable CharSequence expectedJson, JsonCompareMode compareMode) {
-		return compare(expectedJson, JsonAssert.comparator(compareMode));
+		return compare(expectedJson, JsonComparator.of(compareMode));
 	}
 
 	private JsonComparison compare(@Nullable CharSequence expectedJson, JsonComparator comparator) {
