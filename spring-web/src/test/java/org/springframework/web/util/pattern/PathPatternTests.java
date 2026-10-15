@@ -790,6 +790,8 @@ class PathPatternTests {
 		assertThat(pathMatcher.combine("/hotels/*", "booking")).isEqualTo("/hotels/booking");
 		assertThat(pathMatcher.combine("/hotels/*", "/booking")).isEqualTo("/hotels/booking");
 		assertThat(pathMatcher.combine("/hotels/**", "/booking/rooms")).isEqualTo("/hotels/booking/rooms");
+		// gh-37480
+		assertThat(pathMatcher.combine("/**", "/**")).isEqualTo("/**");
 		assertThat(pathMatcher.combine("/*.html", "/hotel.html")).isEqualTo("/hotel.html");
 		assertThat(pathMatcher.combine("/*.html", "/hotel")).isEqualTo("/hotel.html");
 		// gh-34986
