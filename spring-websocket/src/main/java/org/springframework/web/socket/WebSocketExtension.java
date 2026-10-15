@@ -52,6 +52,8 @@ import org.springframework.util.StringUtils;
  */
 public class WebSocketExtension {
 
+	private static final String TOKEN_SEPARATORS = "()<>@,;:\\\"/[]?={} \t";
+
 	private final String name;
 
 	private final Map<String, String> parameters;
@@ -131,8 +133,8 @@ public class WebSocketExtension {
 	 */
 	public static List<WebSocketExtension> parseExtensions(String extensions) {
 		if (StringUtils.hasText(extensions)) {
-			String[] tokens = StringUtils.tokenizeToStringArray(extensions, ",");
-			List<WebSocketExtension> result = new ArrayList<>(tokens.length);
+			List<String> tokens = tokenize(extensions, ',');
+			List<WebSocketExtension> result = new ArrayList<>(tokens.size());
 			for (String token : tokens) {
 				result.add(parseExtension(token));
 			}
@@ -144,27 +146,91 @@ public class WebSocketExtension {
 	}
 
 	private static WebSocketExtension parseExtension(String extension) {
-		if (extension.contains(",")) {
-			throw new IllegalArgumentException("Expected single extension value: [" + extension + "]");
+		List<String> parts = tokenize(extension, ';');
+		if (parts.isEmpty()) {
+			throw new IllegalArgumentException("Expected an extension value: [" + extension + "]");
 		}
-		String[] parts = StringUtils.tokenizeToStringArray(extension, ";");
-		String name = parts[0].trim();
+		String name = parts.get(0);
 
 		Map<String, String> parameters = null;
-		if (parts.length > 1) {
-			parameters = CollectionUtils.newLinkedHashMap(parts.length - 1);
-			for (int i = 1; i < parts.length; i++) {
-				String parameter = parts[i];
+		if (parts.size() > 1) {
+			parameters = CollectionUtils.newLinkedHashMap(parts.size() - 1);
+			for (int i = 1; i < parts.size(); i++) {
+				String parameter = parts.get(i);
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex != -1) {
 					String attribute = parameter.substring(0, eqIndex);
-					String value = parameter.substring(eqIndex + 1);
+					String value = parseParameterValue(parameter.substring(eqIndex + 1));
 					parameters.put(attribute, value);
 				}
 			}
 		}
 
 		return new WebSocketExtension(name, parameters);
+	}
+
+	private static List<String> tokenize(String value, char delimiter) {
+		List<String> tokens = new ArrayList<>();
+		boolean inQuotes = false;
+		int startIndex = 0;
+		for (int i = 0; i < value.length(); i++) {
+			char ch = value.charAt(i);
+			if (ch == '\\' && inQuotes) {
+				i++;
+			}
+			else if (ch == '"') {
+				inQuotes = !inQuotes;
+			}
+			else if (ch == delimiter && !inQuotes) {
+				addToken(value, startIndex, i, tokens);
+				startIndex = i + 1;
+			}
+		}
+		if (inQuotes) {
+			throw new IllegalArgumentException("Unterminated quoted string in extension value: [" + value + "]");
+		}
+		addToken(value, startIndex, value.length(), tokens);
+		return tokens;
+	}
+
+	private static void addToken(String value, int startIndex, int endIndex, List<String> tokens) {
+		String token = value.substring(startIndex, endIndex).trim();
+		if (!token.isEmpty()) {
+			tokens.add(token);
+		}
+	}
+
+	private static String parseParameterValue(String value) {
+		if (!value.startsWith("\"")) {
+			return value;
+		}
+		StringBuilder unquoted = new StringBuilder(value.length() - 2);
+		for (int i = 1; i < value.length() - 1; i++) {
+			char ch = value.charAt(i);
+			if (ch == '\\') {
+				ch = value.charAt(++i);
+			}
+			unquoted.append(ch);
+		}
+		String result = unquoted.toString();
+		if (!isToken(result)) {
+			throw new IllegalArgumentException(
+					"Quoted extension parameter value must conform to the 'token' ABNF: [" + value + "]");
+		}
+		return result;
+	}
+
+	private static boolean isToken(String value) {
+		if (value.isEmpty()) {
+			return false;
+		}
+		for (int i = 0; i < value.length(); i++) {
+			char ch = value.charAt(i);
+			if (ch <= 31 || ch >= 127 || TOKEN_SEPARATORS.indexOf(ch) != -1) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
