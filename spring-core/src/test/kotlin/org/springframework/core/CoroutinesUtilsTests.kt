@@ -274,6 +274,14 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	suspend fun invokeSuspendingFunctionWithContextParameter() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod(
+			"suspendingFunctionWithContextParameter", String::class.java, Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "context-value", null) as Mono
+		Assertions.assertThat(mono.awaitSingle()).isEqualTo("context-value")
+	}
+
+	@Test
 	suspend fun invokeSuspendingFunctionWithGenericParameter() {
 		val method = GenericController::class.java.declaredMethods.first { it.name.startsWith("handle") }
 		val horse = Animal("horse")
@@ -297,6 +305,12 @@ class CoroutinesUtilsTests {
 	}
 
 	suspend fun suspendingFunction(value: String): String {
+		delay(1)
+		return value
+	}
+
+	context(value: String)
+	suspend fun suspendingFunctionWithContextParameter(): String {
 		delay(1)
 		return value
 	}
