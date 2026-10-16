@@ -1141,4 +1141,80 @@ class ObjectUtilsTests {
 			.withMessage("Multi-level Optional usage not supported");
 	}
 
+	@Nested
+	class NullSafeGetValueTests {
+
+		@Test
+		void nullSafeGetValueWithNullObject() {
+			Person person = null;
+			// the get method must not be invoked if the given object is null
+			assertThat(ObjectUtils.nullSafeGetValue(person, () -> person.getName())).isNull();
+		}
+
+		@Test
+		void nullSafeGetValueWithNonNullObject() {
+			Person person = new Person("some name", 42);
+			assertThat(ObjectUtils.nullSafeGetValue(person, person::getName)).isEqualTo("some name");
+			assertThat(ObjectUtils.nullSafeGetValue(person, person::getAge)).isEqualTo(42);
+		}
+
+		@Test
+		void nullSafeGetValueWithDefaultValueAndNullObject() {
+			Person person = null;
+			// the get method must not be invoked if the given object is null
+			assertThat(ObjectUtils.nullSafeGetValue(person, () -> person.getName(), "default name"))
+				.isEqualTo("default name");
+		}
+
+		@Test
+		void nullSafeGetValueWithDefaultValueAndNullResult() {
+			Person person = new Person(null, 42);
+			assertThat(ObjectUtils.nullSafeGetValue(person, person::getName, "default name"))
+				.isEqualTo("default name");
+		}
+
+		@Test
+		void nullSafeGetValueWithDefaultValueAndNonNullResult() {
+			Person person = new Person("some name", 42);
+			assertThat(ObjectUtils.nullSafeGetValue(person, person::getName, "default name"))
+				.isEqualTo("some name");
+		}
+
+		@Test
+		void nullSafeGetValueWithNullDefaultValue() {
+			Person nullPerson = null;
+			Person person = new Person("some name", 42);
+			assertThat(ObjectUtils.nullSafeGetValue(nullPerson, () -> nullPerson.getName(), null)).isNull();
+			assertThat(ObjectUtils.<String>nullSafeGetValue(person, () -> null, null)).isNull();
+		}
+
+		private static class Person {
+
+			private String name;
+
+			private int age;
+
+			Person(String name, int age) {
+				this.name = name;
+				this.age = age;
+			}
+
+			public String getName() {
+				return this.name;
+			}
+
+			public void setName(String name) {
+				this.name = name;
+			}
+
+			public int getAge() {
+				return this.age;
+			}
+
+			public void setAge(int age) {
+				this.age = age;
+			}
+		}
+	}
+
 }

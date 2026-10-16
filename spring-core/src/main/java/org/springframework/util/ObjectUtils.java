@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.TimeZone;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
@@ -45,6 +46,7 @@ import org.springframework.lang.Contract;
  * @author Rob Harrop
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Long Tanfei
  * @since 19.03.2004
  * @see ClassUtils
  * @see CollectionUtils
@@ -936,6 +938,40 @@ public abstract class ObjectUtils {
 			}
 		}
 		return type.getTypeName() + "@" + getIdentityHexString(obj);
+	}
+
+	/**
+	 * Get a value from the given object through the supplied get method,
+	 * returning {@code null} if the given object is {@code null}.
+	 * @param obj the object to get the value from (may be {@code null})
+	 * @param getMethod the supplier of the value to get
+	 * @return the value from the supplied get method, or {@code null}
+	 * if the given object is {@code null}
+	 * @since 7.0
+	 */
+	public static <R> @Nullable R nullSafeGetValue(@Nullable Object obj, Supplier<R> getMethod) {
+		return nullSafeGetValue(obj, getMethod, null);
+	}
+
+	/**
+	 * Get a value from the given object through the supplied get method,
+	 * returning the given default value if the given object is {@code null}
+	 * or the supplied get method produced a {@code null} value.
+	 * @param obj the object to get the value from (may be {@code null})
+	 * @param getMethod the supplier of the value to get
+	 * @param defaultValue the value to return if the given object is {@code null}
+	 * or the supplied get method produced a {@code null} value (may be {@code null})
+	 * @return the value from the supplied get method, or the given default value
+	 * @since 7.0
+	 */
+	public static <R> @Nullable R nullSafeGetValue(@Nullable Object obj, Supplier<R> getMethod,
+			@Nullable R defaultValue) {
+
+		if (obj == null) {
+			return defaultValue;
+		}
+		R returnValue = getMethod.get();
+		return (returnValue != null ? returnValue : defaultValue);
 	}
 
 }
