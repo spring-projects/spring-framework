@@ -66,6 +66,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -142,6 +143,39 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 				.consumeNextWith(stringConsumer("foo"))
 				.thenCancel()
 				.verify();
+	}
+
+	@Test
+	void readAsynchronousFileChannelDuplicateCompletion() {
+		PooledDataBuffer dataBuffer = mock();
+		DataBuffer.ByteBufferIterator iterator = mock();
+		DataBufferFactory bufferFactory = mock();
+
+		given(bufferFactory.allocateBuffer(3)).willReturn(dataBuffer);
+		given(dataBuffer.isAllocated()).willReturn(true);
+		given(dataBuffer.writableByteBuffers()).willReturn(iterator);
+		given(iterator.hasNext()).willReturn(true);
+		given(iterator.next()).willReturn(ByteBuffer.allocate(3));
+
+		AsynchronousFileChannel channel = mock();
+
+		willAnswer(invocation -> {
+			Object attachment = invocation.getArgument(2);
+			CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
+
+			completionHandler.completed(-1, attachment);
+			completionHandler.completed(-1, attachment);
+
+			return null;
+		}).given(channel).read(any(), anyLong(), any(), any());
+
+		Flux<DataBuffer> result = DataBufferUtils.readAsynchronousFileChannel(
+				() -> channel, bufferFactory, 3);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+
+		verify(dataBuffer).release();
 	}
 
 	@ParameterizedDataBufferAllocatingTest
