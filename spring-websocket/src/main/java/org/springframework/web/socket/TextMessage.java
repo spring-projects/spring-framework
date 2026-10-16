@@ -76,7 +76,14 @@ public final class TextMessage extends AbstractWebSocketMessage<String> {
 	@Override
 	protected String toStringPayload() {
 		String payload = getPayload();
-		return (payload.length() > 10 ? payload.substring(0, 10) + ".." : payload);
+		if (payload.length() <= 10) {
+			return payload;
+		}
+		int end = 10;
+		if (Character.isSurrogatePair(payload.charAt(end - 1), payload.charAt(end))) {
+			end--;
+		}
+		return payload.substring(0, end) + "..";
 	}
 
 }
