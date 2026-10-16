@@ -101,6 +101,20 @@ suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange
 }
 
 /**
+ * Coroutines variant of [WebClient.RequestHeadersSpec.exchangeToMono] providing a
+ * `awaitExchangeWithRetry(Retry) { }` variant.
+ *
+ * @param retrySpec the [Retry] strategy passed to the [Mono.retryWhen]
+ * @since 7.0.10
+ */
+suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeWithRetry(retrySpec: Retry, responseHandler: suspend (ClientResponse) -> T): T {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		exchangeToMono { mono(context) { responseHandler.invoke(it) } }.retryWhen(retrySpec).awaitSingle()
+	}
+}
+
+/**
  * Variant of [WebClient.RequestHeadersSpec.awaitExchange] that allows a nullable return
  *
  * @since 5.3.8
@@ -109,6 +123,19 @@ suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange
 	val context = currentCoroutineContext().minusKey(Job.Key)
 	return withContext(context.toReactorContext()) {
 		exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingleOrNull()
+	}
+}
+
+/**
+ * Variant of [WebClient.RequestHeadersSpec.awaitExchangeWithRetry] that allows a nullable return
+ *
+ * @param retrySpec the [Retry] strategy passed to the [Mono.retryWhen]
+ * @since 7.0.10
+ */
+suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeOrNullWithRetry(retrySpec: Retry, responseHandler: suspend (ClientResponse) -> T?): T? {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		exchangeToMono { mono(context) { responseHandler.invoke(it) } }.retryWhen(retrySpec).awaitSingleOrNull()
 	}
 }
 
@@ -171,6 +198,25 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T {
 }
 
 /**
+ * Coroutines variant of [WebClient.ResponseSpec.bodyToMono] providing a
+ * `awaitBodyWithRetry<Foo>(Retry)` variant.
+ *
+ * @param retrySpec the [Retry] strategy passed to the [Mono.retryWhen]
+ * @param T the type of the body
+ * @throws NoSuchElementException if the underlying [Mono] does not emit any value
+ * @since 7.0.10
+ */
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyWithRetry(retrySpec: Retry) : T {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		when (T::class) {
+			Unit::class -> toBodilessEntity().retryWhen(retrySpec).awaitSingle().let { Unit as T }
+			else -> bodyToMono<T>().retryWhen(retrySpec).awaitSingle()
+		}
+	}
+}
+
+/**
  * Coroutines variant of [WebClient.ResponseSpec.bodyToMono].
  *
  * @author Valentin Shakhov
@@ -187,12 +233,44 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNull() : 
 }
 
 /**
+ * Coroutines variant of [WebClient.ResponseSpec.bodyToMono] providing a
+ * `awaitBodyOrNullWithRetry<Foo>(Retry)` variant.
+ *
+ * @param retrySpec the [Retry] strategy passed to the [Mono.retryWhen]
+ * @param T the type of the body
+ * @since 7.0.10
+ */
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNullWithRetry(retrySpec: Retry) : T? {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		when (T::class) {
+			Unit::class -> toBodilessEntity().retryWhen(retrySpec).awaitSingle().let { Unit as T? }
+			else -> bodyToMono<T>().retryWhen(retrySpec).awaitSingleOrNull()
+		}
+	}
+}
+
+/**
  * Coroutines variant of [WebClient.ResponseSpec.toBodilessEntity].
  */
 suspend fun WebClient.ResponseSpec.awaitBodilessEntity(): ResponseEntity<Void> {
 	val context = currentCoroutineContext().minusKey(Job.Key)
 	return withContext(context.toReactorContext()) {
 		toBodilessEntity().awaitSingle()
+	}
+}
+
+/**
+ * Coroutines variant of [WebClient.ResponseSpec.toBodilessEntity] providing a
+ * `awaitBodilessEntityWithRetry(Retry)` variant.
+ *
+ * @param retrySpec the [Retry] strategy passed to the [Mono.retryWhen]
+ * @since 7.0.10
+ */
+suspend fun WebClient.ResponseSpec.awaitBodilessEntityWithRetry(retrySpec: Retry): ResponseEntity<Void> {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		toBodilessEntity().retryWhen(retrySpec).awaitSingle()
 	}
 }
 
