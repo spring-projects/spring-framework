@@ -160,6 +160,7 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 						!Iterable.class.isAssignableFrom(type) && !Optional.class.isAssignableFrom(type) &&
 						!Map.class.isAssignableFrom(type)) {
 					validatedClasses.add(clazz);
+					validatedClasses.add(type);
 					processAheadOfTime(type, visitedClasses, validatedClasses, constraintValidatorClasses);
 				}
 				if (Iterable.class.isAssignableFrom(type) || Optional.class.isAssignableFrom(type)) {
