@@ -72,6 +72,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -582,6 +583,42 @@ class WebClientIntegrationTests {
 			assertThat(request.getHeaders().get(HttpHeaders.ACCEPT)).isEqualTo("*/*");
 			assertThat(request.getTarget()).isEqualTo("/greeting");
 		});
+	}
+
+	@ParameterizedWebClientTest // gh-37503
+	void problemDetailErrorResponsePreservesExtensionMembers(ClientHttpConnector connector) throws IOException {
+		startServer(connector);
+
+		prepareResponse(builder -> builder.code(404)
+				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+				.body("""
+						{
+						  "type": "https://example.com/problems/order-not-found",
+						  "title": "Order Not Found",
+						  "status": 404,
+						  "detail": "Order 42 does not exist",
+						  "errorCode": "ORDER_NOT_FOUND",
+						  "orderId": 42
+						}
+						"""));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/orders/42")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertThat(throwable).isInstanceOf(WebClientResponseException.NotFound.class);
+					WebClientResponseException ex = (WebClientResponseException) throwable;
+					ProblemDetail problemDetail = ex.getResponseBodyAs(ProblemDetail.class);
+					assertThat(problemDetail.getTitle()).isEqualTo("Order Not Found");
+					assertThat(problemDetail.getStatus()).isEqualTo(404);
+					assertThat(problemDetail.getProperties())
+							.containsEntry("errorCode", "ORDER_NOT_FOUND")
+							.containsEntry("orderId", 42);
+				})
+				.verify(Duration.ofSeconds(3));
 	}
 
 	@ParameterizedWebClientTest
