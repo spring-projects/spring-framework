@@ -121,6 +121,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 				"$L.setBackgroundInit($L)");
 		addStatementForValue(code, beanDefinition, AbstractBeanDefinition::getLazyInit,
 				"$L.setLazyInit($L)");
+		addStatementForValue(code, beanDefinition, AbstractBeanDefinition::getAutowireMode,
+				"$L.setAutowireMode($L)");
 		addStatementForValue(code, beanDefinition, BeanDefinition::getDependsOn,
 				this::hasDependsOn, "$L.setDependsOn($L)", this::toStringVarArgs);
 		addStatementForValue(code, beanDefinition, BeanDefinition::isAutowireCandidate,
