@@ -46,6 +46,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
@@ -170,6 +171,45 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		compile((actual, compiled) -> {
 			assertThat(actual.isLazyInit()).isTrue();
 			assertThat(actual.getLazyInit()).isTrue();
+		});
+	}
+
+	@Test
+	void autowireModeDefaultsToNoAutowiring() {
+		compile((actual, compiled) -> {
+			assertThat(compiled.getSourceFile()).doesNotContain("setAutowireMode");
+			assertThat(actual.getAutowireMode()).isEqualTo(AbstractBeanDefinition.AUTOWIRE_NO);
+		});
+	}
+
+	@Test
+	void autowireModeByName() {
+		this.beanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
+		compile((actual, compiled) -> {
+			assertThat(compiled.getSourceFile()).contains("setAutowireMode(1)");
+			assertThat(actual.getAutowireMode()).isEqualTo(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
+		});
+	}
+
+	@Test
+	void autowireModeByType() {
+		this.beanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+		compile((actual, compiled) -> {
+			assertThat(compiled.getSourceFile()).contains("setAutowireMode(2)");
+			assertThat(actual.getAutowireMode()).isEqualTo(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+		});
+	}
+
+	@Test
+	void autowireModeByTypeWiresPropertiesOfGeneratedBeanDefinition() {
+		this.beanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+		compile((actual, compiled) -> {
+			PropertyDependency dependency = new PropertyDependency();
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			beanFactory.registerSingleton("dependency", dependency);
+			actual.setBeanClass(PropertyWiredBean.class);
+			beanFactory.registerBeanDefinition("target", actual);
+			assertThat(beanFactory.getBean(PropertyWiredBean.class).getDependency()).isSameAs(dependency);
 		});
 	}
 
@@ -654,6 +694,22 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		public void dispose() {
 		}
 
+	}
+
+	static class PropertyDependency {
+	}
+
+	static class PropertyWiredBean {
+
+		private PropertyDependency dependency;
+
+		public PropertyDependency getDependency() {
+			return this.dependency;
+		}
+
+		public void setDependency(PropertyDependency dependency) {
+			this.dependency = dependency;
+		}
 	}
 
 	static class PropertyValuesBean {
