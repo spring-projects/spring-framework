@@ -24,6 +24,7 @@ import java.util.Set;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.NoProviderFoundException;
+import jakarta.validation.Valid;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -155,6 +156,12 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 			ReflectionUtils.doWithFields(clazz, field -> {
 				Class<?> type = field.getType();
+				if (field.isAnnotationPresent(Valid.class) && shouldProcess(type) &&
+						!Iterable.class.isAssignableFrom(type) && !Optional.class.isAssignableFrom(type) &&
+						!Map.class.isAssignableFrom(type)) {
+					validatedClasses.add(clazz);
+					processAheadOfTime(type, visitedClasses, validatedClasses, constraintValidatorClasses);
+				}
 				if (Iterable.class.isAssignableFrom(type) || Optional.class.isAssignableFrom(type)) {
 					ResolvableType resolvableType = ResolvableType.forField(field);
 					Class<?> genericType = resolvableType.getGeneric(0).toClass();
