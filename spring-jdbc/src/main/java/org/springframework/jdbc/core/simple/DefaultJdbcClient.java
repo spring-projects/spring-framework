@@ -367,6 +367,14 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			@Override
+			public BatchSpec entry(@Nullable Object... values) {
+				DefaultBatchEntry entry = new DefaultBatchEntry();
+				Collections.addAll(entry.indexedParams, values);
+				addEntry(entry);
+				return this;
+			}
+
+			@Override
 			public BatchSpec entry(List<?> values) {
 				DefaultBatchEntry entry = new DefaultBatchEntry();
 				entry.indexedParams.addAll(values);

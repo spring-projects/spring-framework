@@ -156,6 +156,20 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
+	void batchUpdateWithIndexedParameters() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
+				.batch()
+				.entry("Jane", "Smith")
+				.entry("John", "Doe")
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
 	void batchUpdateWithIndexedParameterList() {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
 				.batch()

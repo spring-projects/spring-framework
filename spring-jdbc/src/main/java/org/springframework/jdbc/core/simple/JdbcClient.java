@@ -413,6 +413,19 @@ public interface JdbcClient {
 		 * <p>Each element of the list will be bound as a JDBC positional parameter
 		 * with a corresponding JDBC index (i.e. list index + 1).
 		 * <p>Note that the given list represents the parameters of a <em>single</em>
+		 * entry; see {@link #entries(Object[])} for defining several entries at once.
+		 * @param values the parameter values to bind
+		 * @return this batch specification (for chaining)
+		 * @see #entry(List)
+		 */
+		BatchSpec entry(@Nullable Object... values);
+
+		/**
+		 * Define a batch entry with the given list of positional parameters for
+		 * "?" placeholder resolution.
+		 * <p>Each element of the list will be bound as a JDBC positional parameter
+		 * with a corresponding JDBC index (i.e. list index + 1).
+		 * <p>Note that the given list represents the parameters of a <em>single</em>
 		 * entry; see {@link #entries(List)} for defining several entries at once.
 		 * @param values the parameter values to bind
 		 * @return this batch specification (for chaining)
