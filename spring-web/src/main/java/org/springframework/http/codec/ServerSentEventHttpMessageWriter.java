@@ -40,7 +40,6 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.web.util.SseUtils;
 
 /**
  * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -143,7 +142,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	private void writeStringData(String input, StringBuilder sb) {
-		SseUtils.appendFieldValue("data", input, sb);
+		ServerSentEvent.appendFieldValue("data", input, sb);
 		sb.append("\n\n");
 	}
 
