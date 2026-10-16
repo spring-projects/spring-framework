@@ -33,7 +33,9 @@ import org.springframework.core.codec.CharBufferDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.AbstractJacksonDecoder;
+import org.springframework.http.converter.json.ProblemDetailJacksonMixin;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -63,20 +65,22 @@ public class JacksonJsonDecoder extends AbstractJacksonDecoder<JsonMapper> {
 	/**
 	 * Construct a new instance with a {@link JsonMapper} customized with the
 	 * {@link tools.jackson.databind.JacksonModule}s found by
-	 * {@link MapperBuilder#findModules(ClassLoader)}.
+	 * {@link MapperBuilder#findModules(ClassLoader)} and
+	 * {@link ProblemDetailJacksonMixin}.
 	 */
 	public JacksonJsonDecoder() {
-		super(JsonMapper.builder(), DEFAULT_JSON_MIME_TYPES);
+		this(JsonMapper.builder(), DEFAULT_JSON_MIME_TYPES);
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link JsonMapper.Builder}
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s
-	 * found by {@link MapperBuilder#findModules(ClassLoader)}.
+	 * found by {@link MapperBuilder#findModules(ClassLoader)} and
+	 * {@link ProblemDetailJacksonMixin}.
 	 * @see JsonMapper#builder()
 	 */
 	public JacksonJsonDecoder(JsonMapper.Builder builder) {
-		super(builder, DEFAULT_JSON_MIME_TYPES);
+		this(builder, DEFAULT_JSON_MIME_TYPES);
 	}
 
 	/**
@@ -90,12 +94,12 @@ public class JacksonJsonDecoder extends AbstractJacksonDecoder<JsonMapper> {
 	/**
 	 * Construct a new instance with the provided {@link JsonMapper.Builder}
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s
-	 * found by {@link MapperBuilder#findModules(ClassLoader)}, and
-	 * {@link MimeType}s.
+	 * found by {@link MapperBuilder#findModules(ClassLoader)},
+	 * {@link ProblemDetailJacksonMixin}, and {@link MimeType}s.
 	 * @see JsonMapper#builder()
 	 */
 	public JacksonJsonDecoder(JsonMapper.Builder builder, MimeType... mimeTypes) {
-		super(builder, mimeTypes);
+		super(builder.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class), mimeTypes);
 	}
 
 	/**

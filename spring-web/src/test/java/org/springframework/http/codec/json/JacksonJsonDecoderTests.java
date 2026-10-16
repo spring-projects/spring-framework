@@ -42,6 +42,7 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
 import org.springframework.util.MimeType;
@@ -109,6 +110,21 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_JSON)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), halFormsJsonMediaType)).isFalse();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Map.class), MediaType.APPLICATION_JSON)).isTrue();
+	}
+
+	@Test  // gh-37503
+	void problemDetailWithDefaultMapper() {
+		assertProblemDetailProperties(new JacksonJsonDecoder());
+	}
+
+	@Test  // gh-37503
+	void problemDetailWithMapperBuilder() {
+		assertProblemDetailProperties(new JacksonJsonDecoder(JsonMapper.builder()));
+	}
+
+	@Test  // gh-37503
+	void problemDetailWithMapperBuilderAndMimeType() {
+		assertProblemDetailProperties(new JacksonJsonDecoder(JsonMapper.builder(), MediaType.APPLICATION_PROBLEM_JSON));
 	}
 
 	@Test  // SPR-15866
@@ -344,6 +360,23 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 		testDecodeCancel(input, ResolvableType.forClass(Pojo.class), null, null);
 	}
 
+
+	private void assertProblemDetailProperties(JacksonJsonDecoder decoder) {
+		Mono<DataBuffer> input = stringBuffer(
+				"{\"title\":\"Order Not Found\",\"status\":404,\"errorCode\":\"ORDER_NOT_FOUND\",\"orderId\":42}");
+
+		StepVerifier.create(decoder.decodeToMono(input, ResolvableType.forClass(ProblemDetail.class),
+				MediaType.APPLICATION_PROBLEM_JSON, null))
+				.assertNext(value -> {
+					ProblemDetail problemDetail = (ProblemDetail) value;
+					assertThat(problemDetail.getTitle()).isEqualTo("Order Not Found");
+					assertThat(problemDetail.getStatus()).isEqualTo(404);
+					assertThat(problemDetail.getProperties())
+							.containsEntry("errorCode", "ORDER_NOT_FOUND")
+							.containsEntry("orderId", 42);
+				})
+				.verifyComplete();
+	}
 
 	private Mono<DataBuffer> stringBuffer(String value) {
 		return stringBuffer(value, StandardCharsets.UTF_8);
