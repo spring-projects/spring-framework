@@ -202,12 +202,9 @@ final class DefaultJdbcClient implements JdbcClient {
 			return this;
 		}
 
-		@SuppressWarnings({"rawtypes", "unchecked"})
 		@Override
 		public StatementSpec paramSource(Object namedParamObject) {
-			this.namedParamSource = (namedParamObject instanceof Map map ?
-					new MapSqlParameterSource(map) :
-					new SimplePropertySqlParameterSource(namedParamObject));
+			this.namedParamSource = toSqlParameterSource(namedParamObject);
 			return this;
 		}
 
