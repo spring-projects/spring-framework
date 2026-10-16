@@ -30,6 +30,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.internal.constraintvalidators.bv.PatternValidator;
 import org.jspecify.annotations.Nullable;
@@ -124,6 +125,28 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 		assertThat(RuntimeHintsPredicates.reflection().onType(PatternValidator.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
+	}
+
+	@Test  // gh-37428
+	void shouldProcessDirectlyCascadedRecord() {
+		process(BeanWithCascadedRecord.class);
+		assertThat(RuntimeHintsPredicates.reflection().onType(BeanWithCascadedRecord.class)
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+		assertThat(RuntimeHintsPredicates.reflection().onType(LimitsRecord.class)
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
+	}
+
+	@Test  // gh-37428
+	void shouldNotProcessDirectlyNestedRecordWithoutValid() {
+		process(BeanWithNonCascadedRecord.class);
+		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).isEmpty();
+	}
+
+	@Test  // gh-37428
+	void shouldProcessRecursiveDirectValidationWithoutInfiniteRecursion() {
+		process(BeanWithRecursiveDirectValidation.class);
+		assertThat(RuntimeHintsPredicates.reflection().onType(BeanWithRecursiveDirectValidation.class)
+				.withMemberCategory(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	@ParameterizedTest  // gh-33936
@@ -263,6 +286,29 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		public void setExclude(List<Exclude> exclude) {
 			this.exclude = exclude;
 		}
+	}
+
+	static class BeanWithCascadedRecord {
+
+		@Valid
+		private final LimitsRecord limits = new LimitsRecord(-1, -1);
+	}
+
+	static class BeanWithNonCascadedRecord {
+
+		private final LimitsRecord limits = new LimitsRecord(-1, -1);
+	}
+
+	record LimitsRecord(@Min(0) int timeToLiveSeconds, @Min(0) int maxSize) {
+	}
+
+	static class BeanWithRecursiveDirectValidation {
+
+		@Valid
+		private BeanWithRecursiveDirectValidation nested;
+
+		@Pattern(regexp = ".*")
+		private String name;
 	}
 
 	static class BeanWithRecursiveIterable {
