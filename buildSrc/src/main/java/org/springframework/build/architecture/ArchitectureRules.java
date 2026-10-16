@@ -99,14 +99,21 @@ public enum ArchitectureRules {
 
 		@Override
 		public SliceIdentifier getIdentifierOf(JavaClass javaClass) {
-
 			String packageName = javaClass.getPackageName();
 			for (String ignoredPackage : ignoredPackages) {
 				if (packageName.startsWith(ignoredPackage)) {
 					return SliceIdentifier.ignore();
 				}
 			}
-			return SliceIdentifier.of("spring framework");
+			return SliceIdentifier.of(topLevelArea(packageName));
+		}
+
+		/**
+		 * Return the top-level area of the given package, its first four segments.
+		 */
+		private static String topLevelArea(String packageName) {
+			String[] segments = packageName.split("\\.");
+			return (segments.length > 4 ? String.join(".", List.of(segments).subList(0, 4)) : packageName);
 		}
 
 		@Override
