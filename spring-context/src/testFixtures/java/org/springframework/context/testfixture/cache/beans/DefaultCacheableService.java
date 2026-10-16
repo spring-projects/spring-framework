@@ -80,6 +80,11 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
+	@CacheEvict(cacheNames = "testCache", key = "#p0", immediate = true)
+	public void evictImmediate(Object arg1) {
+	}
+
+	@Override
 	@CacheEvict(cacheNames = "testCache", allEntries = true)
 	public void evictAll(Object arg1) {
 	}
@@ -88,6 +93,11 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@CacheEvict(cacheNames = "testCache", allEntries = true, beforeInvocation = true)
 	public void evictAllEarly(Object arg1) {
 		throw new RuntimeException("exception thrown - evict should still occur");
+	}
+
+	@Override
+	@CacheEvict(cacheNames = "testCache", allEntries = true, immediate = true)
+	public void evictAllImmediate(Object arg1) {
 	}
 
 	@Override
