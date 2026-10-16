@@ -144,33 +144,35 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		StringBuilder comment = null;
 
 		for (String line : lines) {
-			if (line.startsWith("data:")) {
+			// A line without a colon is a field name with an empty value,
+			// and the first colon separates the field name from its value.
+			int colonIndex = line.indexOf(':');
+			String field = (colonIndex != -1 ? line.substring(0, colonIndex) : line);
+			String value = (colonIndex != -1 ? line.substring(colonIndex + 1) : "");
+			if (value.startsWith(" ")) {
+				value = value.substring(1);
+			}
+
+			if ("data".equals(field)) {
 				data = (data != null ? data : new StringBuilder());
-				int length = line.length();
-				if (length > 5) {
-					int index = (line.charAt(5) != ' ' ? 5 : 6);
-					if (length > index) {
-						data.append(line, index, line.length());
-					}
-				}
-				data.append('\n');
+				data.append(value).append('\n');
 			}
 			else if (shouldWrap) {
-				if (line.startsWith("id:")) {
-					sseBuilder.id(line.substring(3).trim());
+				if ("id".equals(field)) {
+					sseBuilder.id(value.trim());
 				}
-				else if (line.startsWith("event:")) {
-					sseBuilder.event(line.substring(6).trim());
+				else if ("event".equals(field)) {
+					sseBuilder.event(value.trim());
 				}
-				else if (line.startsWith("retry:")) {
-					Long retry = parseRetry(line.substring(6).trim());
+				else if ("retry".equals(field)) {
+					Long retry = parseRetry(value.trim());
 					if (retry != null) {
 						sseBuilder.retry(Duration.ofMillis(retry));
 					}
 				}
-				else if (line.startsWith(":")) {
+				else if (colonIndex == 0) {
 					comment = (comment != null ? comment : new StringBuilder());
-					comment.append(line.substring(1).trim()).append('\n');
+					comment.append(value.trim()).append('\n');
 				}
 			}
 		}
