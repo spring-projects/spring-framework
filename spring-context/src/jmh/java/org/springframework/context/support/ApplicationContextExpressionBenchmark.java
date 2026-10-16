@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.expression;
+package org.springframework.context.support;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -28,7 +28,6 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * Benchmark for application context expressions resolution during prototype bean creation.
