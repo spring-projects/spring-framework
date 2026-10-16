@@ -218,6 +218,21 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	}
 
 	@Test
+	void autowireModeByTypeWiresPropertiesOfFactoryBean() {
+		this.beanDefinition.setBeanClass(PropertyWiredFactoryBean.class);
+		this.beanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+		compile((actual, compiled) -> {
+			PropertyDependency dependency = new PropertyDependency();
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			beanFactory.registerSingleton("dependency", dependency);
+			actual.setBeanClass(PropertyWiredFactoryBean.class);
+			beanFactory.registerBeanDefinition("target", actual);
+			assertThat(beanFactory.getBean("&target", PropertyWiredFactoryBean.class).getDependency()).isSameAs(dependency);
+		});
+		assertHasMethodInvokeHints(PropertyWiredFactoryBean.class, "setDependency");
+	}
+
+	@Test
 	void setAutowireCandidateWhenFalse() {
 		this.beanDefinition.setAutowireCandidate(false);
 		compile((actual, compiled) -> assertThat(actual.isAutowireCandidate()).isFalse());
@@ -713,6 +728,29 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 		public void setDependency(PropertyDependency dependency) {
 			this.dependency = dependency;
+		}
+	}
+
+	static class PropertyWiredFactoryBean implements FactoryBean<String> {
+
+		private PropertyDependency dependency;
+
+		public PropertyDependency getDependency() {
+			return this.dependency;
+		}
+
+		public void setDependency(PropertyDependency dependency) {
+			this.dependency = dependency;
+		}
+
+		@Override
+		public String getObject() {
+			return "test";
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
 		}
 	}
 
