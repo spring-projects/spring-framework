@@ -274,6 +274,26 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithContextParameter() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithContextParameter",
+			CustomException::class.java, Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, CustomException("foo")) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
+		}
+	}
+
+	@Test
+	fun invokeSuspendingFunctionWithContextParameterAndParameter() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithContextParameterAndParameter",
+			CustomException::class.java, Int::class.java, Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, CustomException("foo"), 20) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo-20")
+		}
+	}
+
+	@Test
 	suspend fun invokeSuspendingFunctionWithGenericParameter() {
 		val method = GenericController::class.java.declaredMethods.first { it.name.startsWith("handle") }
 		val horse = Animal("horse")
@@ -386,6 +406,18 @@ class CoroutinesUtilsTests {
 	suspend fun CustomException.suspendingFunctionWithExtensionAndParameter(limit: Int): String {
 		delay(1)
 		return "${this.message}-$limit"
+	}
+
+	context(value: CustomException)
+	suspend fun suspendingFunctionWithContextParameter(): String {
+		delay(1)
+		return "${value.message}"
+	}
+
+	context(value: CustomException)
+	suspend fun suspendingFunctionWithContextParameterAndParameter(limit: Int): String {
+		delay(1)
+		return "${value.message}-$limit"
 	}
 
 	interface Named {
