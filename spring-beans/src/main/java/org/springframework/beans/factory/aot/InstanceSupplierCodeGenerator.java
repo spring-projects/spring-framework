@@ -439,8 +439,8 @@ public class InstanceSupplierCodeGenerator {
 
 		private void registerProxyIfNecessary(RuntimeHints runtimeHints, DependencyDescriptor dependencyDescriptor) {
 			Class<?> proxyType = this.candidateResolver.getLazyResolutionProxyClass(dependencyDescriptor, null);
-			if (proxyType != null && Proxy.isProxyClass(proxyType)) {
-				runtimeHints.proxies().registerJdkProxy(proxyType.getInterfaces());
+			if (proxyType != null ) {
+				ClassHintUtils.registerProxyIfNecessary(proxyType, runtimeHints);
 			}
 		}
 	}
