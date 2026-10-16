@@ -156,7 +156,7 @@ public final class ServerSentEvent<T> {
 			output.append(value);
 			return;
 		}
-		String lineSeparatorReplacement = "\n" + field + ":";
+		String lineSeparatorReplacement = "\n" + field + (field.isEmpty() ? ":" : ": ");
 		int length = value.length();
 		for (int i = 0; i < length; i++) {
 			char c = value.charAt(i);
