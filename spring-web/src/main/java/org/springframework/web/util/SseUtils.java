@@ -21,12 +21,15 @@ import org.springframework.util.Assert;
 /**
  * Utility methods for writing content as
  * <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html">Server-Sent Events</a>,
- * shared by the Servlet and Reactive SSE support.
+ * shared by the Web MVC and WebFlux SSE support.
  *
  * @author Brian Clozel
  * @since 7.0.9
  */
 public abstract class SseUtils {
+
+	// NOTE: There is a local copy to be kept in sync in the
+	// org.springframework.http.codec.ServerSentEvent class.
 
 	/**
 	 * Append {@code value} to {@code output}, replacing each line separator
