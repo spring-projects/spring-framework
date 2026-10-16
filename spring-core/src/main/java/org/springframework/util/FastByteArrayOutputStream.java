@@ -513,6 +513,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 				if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
 					int bytesToCopy = Math.min(len, this.currentBufferLength - this.nextIndexInCurrentBuffer);
 					messageDigest.update(this.currentBuffer, this.nextIndexInCurrentBuffer, bytesToCopy);
+					this.totalBytesRead += bytesToCopy;
 					this.nextIndexInCurrentBuffer += bytesToCopy;
 					updateMessageDigest(messageDigest, len - bytesToCopy);
 				}
