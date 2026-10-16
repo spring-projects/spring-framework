@@ -896,7 +896,7 @@ class DispatcherServletTests {
 
 		assertThat(response.getStatus()).isEqualTo(500);
 		assertThat(response.getContentAsString()).isEqualTo("{\"error\":\"Download failed\"}");
-		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_LENGTH);
+		assertThat(response.getContentLength()).isZero();
 		assertThat(response.getHeader("Test-Header")).isEqualTo("spring");
 	}
 
@@ -938,7 +938,7 @@ class DispatcherServletTests {
 		assertThat(response.getStatus()).isEqualTo(400);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_TYPE);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_DISPOSITION);
-		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_LENGTH);
+		assertThat(response.getContentLength()).isZero();
 	}
 
 
