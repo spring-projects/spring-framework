@@ -54,15 +54,6 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 		this.converterDelegate = converterDelegate;
 	}
 
-	@SuppressWarnings("removal")
-	@Deprecated(since = "7.0", forRemoval = true)
-	protected AbstractMockHttpServletResponseAssert(
-			org.springframework.test.http.@Nullable HttpMessageContentConverter converter,
-			ACTUAL actual, Class<?> selfType) {
-
-		this((JsonConverterDelegate) converter, actual, selfType);
-	}
-
 
 	/**
 	 * Return a new {@linkplain AbstractStringAssert assertion} object that uses
