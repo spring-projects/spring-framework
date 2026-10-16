@@ -30,6 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -992,7 +993,7 @@ class DispatcherServletTests {
 
 		@Override
 		public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
-				Object handler, Exception ex) {
+				@Nullable Object handler, Exception ex) {
 
 			response.setStatus(500);
 			response.setContentType("application/json");
