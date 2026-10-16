@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 
-import org.springframework.core.io.Resource;
-
 /**
  * Common functional interface for I/O content consumption, for example
  * consuming an {@link java.io.InputStream} or a {@link java.io.Reader}.
@@ -29,7 +27,7 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @since 7.1
  * @param <C> the type of stream/reader
- * @see Resource#consumeContent
+ * @see org.springframework.core.io.Resource#consumeContent
  * @see org.springframework.core.io.support.EncodedResource#consumeContent
  * @see ThrowingConsumer
  */
