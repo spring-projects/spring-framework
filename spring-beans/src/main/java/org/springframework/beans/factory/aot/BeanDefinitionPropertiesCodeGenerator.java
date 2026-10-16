@@ -147,6 +147,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 		}
 		addConstructorArgumentValues(code, beanDefinition);
 		addPropertyValues(code, beanDefinition);
+		registerAutowiringHints(beanDefinition);
 		addAttributes(code, beanDefinition);
 		addQualifiers(code, beanDefinition);
 		addMethodOverrides(code, beanDefinition);
@@ -248,6 +249,19 @@ class BeanDefinitionPropertiesCodeGenerator {
 				if (writeMethod != null) {
 					registerReflectionHints(beanDefinition, writeMethod);
 				}
+			}
+		}
+	}
+
+	private void registerAutowiringHints(RootBeanDefinition beanDefinition) {
+		int autowireMode = beanDefinition.getAutowireMode();
+		if (autowireMode == AbstractBeanDefinition.AUTOWIRE_BY_NAME ||
+				autowireMode == AbstractBeanDefinition.AUTOWIRE_BY_TYPE) {
+			Class<?> infrastructureType = getInfrastructureType(beanDefinition);
+			if (infrastructureType != Object.class) {
+				getWriteMethods(infrastructureType).values().stream()
+						.filter(Objects::nonNull)
+						.forEach(writeMethod -> registerReflectionHints(beanDefinition, writeMethod));
 			}
 		}
 	}
