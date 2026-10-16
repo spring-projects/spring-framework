@@ -184,11 +184,13 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	@Test
 	void autowireModeByName() {
+		this.beanDefinition.setBeanClass(PropertyWiredBean.class);
 		this.beanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
 		compile((actual, compiled) -> {
 			assertThat(compiled.getSourceFile()).contains("setAutowireMode(1)");
 			assertThat(actual.getAutowireMode()).isEqualTo(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
 		});
+		assertHasMethodInvokeHints(PropertyWiredBean.class, "setDependency");
 	}
 
 	@Test
@@ -202,6 +204,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	@Test
 	void autowireModeByTypeWiresPropertiesOfGeneratedBeanDefinition() {
+		this.beanDefinition.setBeanClass(PropertyWiredBean.class);
 		this.beanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
 		compile((actual, compiled) -> {
 			PropertyDependency dependency = new PropertyDependency();
@@ -211,6 +214,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			beanFactory.registerBeanDefinition("target", actual);
 			assertThat(beanFactory.getBean(PropertyWiredBean.class).getDependency()).isSameAs(dependency);
 		});
+		assertHasMethodInvokeHints(PropertyWiredBean.class, "setDependency");
 	}
 
 	@Test
