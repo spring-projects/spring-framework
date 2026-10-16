@@ -881,6 +881,25 @@ class DispatcherServletTests {
 		assertThat(response.getHeader("Test-Header")).isEqualTo("spring");
 	}
 
+	@Test // gh-37443
+	void shouldNotInheritResourceContentLengthForResolvedError() throws Exception {
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.setServletContext(getServletContext());
+		context.registerSingleton("/error", ErrorController.class);
+		context.registerSingleton("errorResolver", JsonErrorExceptionResolver.class);
+		DispatcherServlet servlet = new DispatcherServlet(context);
+		servlet.init(servletConfig);
+
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/error");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertThat(response.getStatus()).isEqualTo(500);
+		assertThat(response.getContentAsString()).isEqualTo("{\"error\":\"Download failed\"}");
+		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_LENGTH);
+		assertThat(response.getHeader("Test-Header")).isEqualTo("spring");
+	}
+
 	@Test
 	void shouldAttemptToResetResponseBufferIfCommitted() throws Exception {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
@@ -897,6 +916,7 @@ class DispatcherServletTests {
 		assertThat(response.getContentAsByteArray()).isNotEmpty();
 		assertThat(response.getStatus()).isEqualTo(400);
 		assertThat(response.getHeader("Test-Header")).isEqualTo("spring");
+		assertThat(response.getHeader(HttpHeaders.CONTENT_LENGTH)).isEqualTo("1000");
 	}
 
 	@Test // gh-34366, gh-35116
@@ -918,6 +938,7 @@ class DispatcherServletTests {
 		assertThat(response.getStatus()).isEqualTo(400);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_TYPE);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_DISPOSITION);
+		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_LENGTH);
 	}
 
 
@@ -967,6 +988,24 @@ class DispatcherServletTests {
 		}
 	}
 
+	private static class JsonErrorExceptionResolver implements HandlerExceptionResolver {
+
+		@Override
+		public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
+				Object handler, Exception ex) {
+
+			response.setStatus(500);
+			response.setContentType("application/json");
+			try {
+				response.getWriter().write("{\"error\":\"Download failed\"}");
+			}
+			catch (IOException ioException) {
+				throw new IllegalStateException(ioException);
+			}
+			return new ModelAndView();
+		}
+	}
+
 	private static class ErrorController implements Controller {
 		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -974,6 +1013,7 @@ class DispatcherServletTests {
 			response.setHeader("Test-Header", "spring");
 			response.addHeader("Content-Type", "application/json");
 			response.addHeader("Content-Disposition", "attachment; filename=\"report.txt\"");
+			response.setContentLength(1000);
 			if (request.getAttribute("commit") != null) {
 				response.flushBuffer();
 			}
