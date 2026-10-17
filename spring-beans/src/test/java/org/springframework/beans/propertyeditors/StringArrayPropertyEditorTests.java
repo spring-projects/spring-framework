@@ -52,7 +52,7 @@ class StringArrayPropertyEditorTests {
 		Object value = editor.getValue();
 		String[] array = (String[]) value;
 		for (int i = 0; i < array.length; ++i) {
-			assertThat(array[i].length()).isEqualTo(3);
+			assertThat(array[i]).hasSize(3);
 			assertThat(array[i].trim()).isEqualTo(("" + i));
 		}
 		assertThat(editor.getAsText()).isEqualTo("  0,1  , 2 ");
