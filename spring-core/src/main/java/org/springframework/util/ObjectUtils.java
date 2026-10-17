@@ -27,7 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.TimeZone;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 
@@ -941,36 +941,38 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Get a value from the given object through the supplied get method,
+	 * Get a value from the given object through the supplied get function,
 	 * returning {@code null} if the given object is {@code null}.
+	 * <p>The get function is not invoked if the given object is {@code null}.
 	 * @param obj the object to get the value from (may be {@code null})
-	 * @param getMethod the supplier of the value to get
-	 * @return the value from the supplied get method, or {@code null}
+	 * @param getMethod the function to get the value with
+	 * @return the value from the supplied get function, or {@code null}
 	 * if the given object is {@code null}
 	 * @since 7.0
 	 */
-	public static <R> @Nullable R nullSafeGetValue(@Nullable Object obj, Supplier<R> getMethod) {
+	public static <T, R> @Nullable R nullSafeGetValue(@Nullable T obj, Function<T, R> getMethod) {
 		return nullSafeGetValue(obj, getMethod, null);
 	}
 
 	/**
-	 * Get a value from the given object through the supplied get method,
+	 * Get a value from the given object through the supplied get function,
 	 * returning the given default value if the given object is {@code null}
-	 * or the supplied get method produced a {@code null} value.
+	 * or the supplied get function produced a {@code null} value.
+	 * <p>The get function is not invoked if the given object is {@code null}.
 	 * @param obj the object to get the value from (may be {@code null})
-	 * @param getMethod the supplier of the value to get
+	 * @param getMethod the function to get the value with
 	 * @param defaultValue the value to return if the given object is {@code null}
-	 * or the supplied get method produced a {@code null} value (may be {@code null})
-	 * @return the value from the supplied get method, or the given default value
+	 * or the supplied get function produced a {@code null} value (may be {@code null})
+	 * @return the value from the supplied get function, or the given default value
 	 * @since 7.0
 	 */
-	public static <R> @Nullable R nullSafeGetValue(@Nullable Object obj, Supplier<R> getMethod,
+	public static <T, R> @Nullable R nullSafeGetValue(@Nullable T obj, Function<T, R> getMethod,
 			@Nullable R defaultValue) {
 
 		if (obj == null) {
 			return defaultValue;
 		}
-		R returnValue = getMethod.get();
+		R returnValue = getMethod.apply(obj);
 		return (returnValue != null ? returnValue : defaultValue);
 	}
 

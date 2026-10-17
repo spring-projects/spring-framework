@@ -1147,36 +1147,35 @@ class ObjectUtilsTests {
 		@Test
 		void nullSafeGetValueWithNullObject() {
 			Person person = null;
-			// the get method must not be invoked if the given object is null
-			assertThat(ObjectUtils.nullSafeGetValue(person, () -> person.getName())).isNull();
+			// the get function must not be invoked if the given object is null
+			assertThat(ObjectUtils.nullSafeGetValue(person, NullSafeGetValueTests::explosiveGet)).isNull();
 		}
 
 		@Test
 		void nullSafeGetValueWithNonNullObject() {
 			Person person = new Person("some name", 42);
-			assertThat(ObjectUtils.nullSafeGetValue(person, person::getName)).isEqualTo("some name");
-			assertThat(ObjectUtils.nullSafeGetValue(person, person::getAge)).isEqualTo(42);
+			assertThat(ObjectUtils.nullSafeGetValue(person, Person::getName)).isEqualTo("some name");
+			assertThat(ObjectUtils.nullSafeGetValue(person, Person::getAge)).isEqualTo(42);
 		}
 
 		@Test
 		void nullSafeGetValueWithDefaultValueAndNullObject() {
 			Person person = null;
-			// the get method must not be invoked if the given object is null
-			assertThat(ObjectUtils.nullSafeGetValue(person, () -> person.getName(), "default name"))
+			assertThat(ObjectUtils.nullSafeGetValue(person, Person::getName, "default name"))
 				.isEqualTo("default name");
 		}
 
 		@Test
 		void nullSafeGetValueWithDefaultValueAndNullResult() {
 			Person person = new Person(null, 42);
-			assertThat(ObjectUtils.nullSafeGetValue(person, person::getName, "default name"))
+			assertThat(ObjectUtils.nullSafeGetValue(person, Person::getName, "default name"))
 				.isEqualTo("default name");
 		}
 
 		@Test
 		void nullSafeGetValueWithDefaultValueAndNonNullResult() {
 			Person person = new Person("some name", 42);
-			assertThat(ObjectUtils.nullSafeGetValue(person, person::getName, "default name"))
+			assertThat(ObjectUtils.nullSafeGetValue(person, Person::getName, "default name"))
 				.isEqualTo("some name");
 		}
 
@@ -1184,8 +1183,12 @@ class ObjectUtilsTests {
 		void nullSafeGetValueWithNullDefaultValue() {
 			Person nullPerson = null;
 			Person person = new Person("some name", 42);
-			assertThat(ObjectUtils.nullSafeGetValue(nullPerson, () -> nullPerson.getName(), null)).isNull();
-			assertThat(ObjectUtils.<String>nullSafeGetValue(person, () -> null, null)).isNull();
+			assertThat(ObjectUtils.nullSafeGetValue(nullPerson, Person::getName, null)).isNull();
+			assertThat(ObjectUtils.nullSafeGetValue(person, Person::getName, null)).isEqualTo("some name");
+		}
+
+		private static String explosiveGet(Object obj) {
+			throw new UnsupportedOperationException("no-go");
 		}
 
 		private static class Person {
