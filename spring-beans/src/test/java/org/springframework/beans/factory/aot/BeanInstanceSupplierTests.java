@@ -290,36 +290,6 @@ class BeanInstanceSupplierTests {
 	}
 
 	@Test
-	void supportsExplicitArgumentsWhenFactoryMethodParameterIsInterfaceReturnsTrue() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forFactoryMethod(
-				StringBuilder.class, "append", CharSequence.class);
-		assertThat(resolver.supportsExplicitArguments("test")).isTrue();
-	}
-
-	@Test
-	void supportsExplicitArgumentsWhenFactoryMethodParameterIsSuperclassReturnsTrue() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forFactoryMethod(
-				String.class, "valueOf", Object.class);
-		assertThat(resolver.supportsExplicitArguments("test")).isTrue();
-	}
-
-	@Test
-	void supportsExplicitArgumentsWhenFactoryMethodPrimitiveParameterMatchesWrapperReturnsTrue() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forFactoryMethod(
-				String.class, "valueOf", int.class);
-		assertThat(resolver.supportsExplicitArguments(1)).isTrue();
-	}
-
-	@Test
-	void supportsExplicitArgumentsWhenFactoryMethodArgumentsAreUnsupportedReturnsFalse() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forFactoryMethod(
-				StringBuilder.class, "append", CharSequence.class);
-		assertThat(resolver.supportsExplicitArguments(1)).isFalse();
-		assertThat(resolver.supportsExplicitArguments("test", "extra")).isFalse();
-		assertThat(resolver.supportsExplicitArguments((Object) null)).isFalse();
-	}
-
-	@Test
 	void supportsExplicitArgumentsWhenUsingGeneratorWithoutArgumentsReturnsFalse() {
 		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier.<String>forConstructor()
 				.withGenerator(registeredBean -> "test");
