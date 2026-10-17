@@ -16,6 +16,7 @@
 
 package org.springframework.mail.javamail;
 
+import java.time.Instant;
 import java.util.Date;
 
 import jakarta.mail.MessagingException;
@@ -155,6 +156,16 @@ public class MimeMailMessage implements MailMessage {
 
 	@Override
 	public void setSentDate(Date sentDate) throws MailParseException {
+		try {
+			this.helper.setSentDate(sentDate);
+		}
+		catch (MessagingException ex) {
+			throw new MailParseException(ex);
+		}
+	}
+
+	@Override
+	public void setSentDate(Instant sentDate) throws MailParseException {
 		try {
 			this.helper.setSentDate(sentDate);
 		}
