@@ -191,11 +191,15 @@ public final class RSocketServiceProxyFactory {
 		 * {@code ClientTransport} as well as RSocket keep-alive settings.
 		 * We recommend configuring timeout values at the RSocket level which
 		 * provides more control.
+		 * <p>A timeout value of {@code null} or 0 specifies an infinite timeout.
+		 * <p>Negative values are not permitted.
 		 * @param blockTimeout the timeout value
 		 * @return this same builder instance
 		 */
 		public Builder blockTimeout(@Nullable Duration blockTimeout) {
-			this.blockTimeout = blockTimeout;
+			Assert.isTrue(blockTimeout == null || !blockTimeout.isNegative(),
+					"Timeout must be a non-negative value");
+			this.blockTimeout = (blockTimeout != null && !blockTimeout.isZero() ? blockTimeout : null);
 			return this;
 		}
 

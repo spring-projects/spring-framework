@@ -4,4 +4,4 @@ runs:
   steps:
     - name: Build Release
       shell: bash
-      run:  ./gradlew -PdeploymentRepository=$(pwd)/deployment-repository publishAllPublicationsToDeploymentRepository
+      run:  ./gradlew -PdeploymentRepository=$(pwd)/deployment-repository --no-build-cache publishAllPublicationsToDeploymentRepository

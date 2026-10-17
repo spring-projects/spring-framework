@@ -495,6 +495,8 @@ public interface WebTestClient {
 		/**
 		 * Max amount of time to wait for responses.
 		 * <p>By default 5 seconds.
+		 * <p>A timeout value of 0 specifies an infinite timeout.
+		 * <p>Negative values are not permitted.
 		 * @param timeout the response timeout value
 		 */
 		Builder responseTimeout(Duration timeout);
@@ -1057,7 +1059,8 @@ public interface WebTestClient {
 		 * comparison verifying that they contain the same attribute-value pairs
 		 * regardless of formatting with <em>lenient</em> checking (extensible
 		 * and non-strict array ordering).
-		 * <p>Use of this method requires the
+		 * <p>Use of this method requires either the
+		 * <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a> or the
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * to be on the classpath.
 		 * @param expectedJson the expected JSON content
@@ -1076,7 +1079,8 @@ public interface WebTestClient {
 		 * <li>{@code true}: strict checking. Not extensible and strict array ordering.</li>
 		 * <li>{@code false}: lenient checking. Extensible and non-strict array ordering.</li>
 		 * </ul>
-		 * <p>Use of this method requires the
+		 * <p>Use of this method requires either the
+		 * <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a> or the
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * to be on the classpath.
 		 * @param expectedJson the expected JSON content
@@ -1093,7 +1097,8 @@ public interface WebTestClient {
 		 * comparison using the given {@linkplain JsonCompareMode mode}. If the
 		 * comparison failed, throws an {@link AssertionError} with the message
 		 * of the {@link JsonComparison}.
-		 * <p>Use of this method requires the
+		 * <p>Use of this method requires either the
+		 * <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a> or the
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * to be on the classpath.
 		 * @param expectedJson the expected JSON content

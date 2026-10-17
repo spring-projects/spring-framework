@@ -179,11 +179,14 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 								con.setAutoCommit(true);
 							}
 						}
-						catch (SQLException ignore) {
+						catch (SQLException ex) {
+							this.nextId = this.maxId;
 							throw new DataAccessResourceFailureException(
-									"Unable to commit new sequence value changes for " + getIncrementerName());
+									"Unable to commit new sequence value changes for " + getIncrementerName(), ex);
 						}
-						JdbcUtils.closeConnection(con);
+						finally {
+							JdbcUtils.closeConnection(con);
+						}
 					}
 					else {
 						DataSourceUtils.releaseConnection(con, dataSource);

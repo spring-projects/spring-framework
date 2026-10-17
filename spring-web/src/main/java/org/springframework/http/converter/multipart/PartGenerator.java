@@ -31,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBuffers;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -201,7 +201,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 		@Override
 		public void onBody(DataBuffer dataBuffer, boolean last) {
-			DataBufferUtils.release(dataBuffer);
+			DataBuffers.release(dataBuffer);
 			throw new HttpMessageConversionException("Body token not expected");
 		}
 
@@ -235,7 +235,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 				store(dataBuffer);
 			}
 			else {
-				DataBufferUtils.release(dataBuffer);
+				DataBuffers.release(dataBuffer);
 				throw new HttpMessageConversionException("Form field value exceeded the memory usage limit of " +
 						PartGenerator.this.maxInMemorySize + " bytes");
 			}
@@ -265,7 +265,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 				throw new HttpMessageConversionException("Cannot store multipart body", ex);
 			}
 			finally {
-				DataBufferUtils.release(dataBuffer);
+				DataBuffers.release(dataBuffer);
 			}
 		}
 
@@ -335,7 +335,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 				int len = buffer.readableByteCount();
 				buffer.read(bytes, idx, len);
 				idx += len;
-				DataBufferUtils.release(buffer);
+				DataBuffers.release(buffer);
 			}
 			this.content.clear();
 			DefaultDataBuffer content = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
@@ -345,7 +345,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 		@Override
 		public void dispose() {
-			this.content.forEach(DataBufferUtils::release);
+			this.content.forEach(DataBuffers::release);
 		}
 
 		@Override
@@ -446,7 +446,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 				throw new UncheckedIOException("Could not write to temp file ", exc);
 			}
 			finally {
-				DataBufferUtils.release(dataBuffer);
+				DataBuffers.release(dataBuffer);
 			}
 		}
 

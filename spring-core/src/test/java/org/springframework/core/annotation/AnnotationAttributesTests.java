@@ -226,10 +226,144 @@ class AnnotationAttributesTests {
 		aliases.stream().forEach(alias -> assertThat(attributes.getStringArray(alias)).isEqualTo(new String[] {""}));
 	}
 
+	@Test
+	void toStringWithoutAttributes() {
+		assertThat(attributes).hasToString("{}");
+	}
+
+	@Test
+	void toStringWithScalarValues() {
+		attributes.put("name", "dave");
+		attributes.put("number", 42);
+		attributes.put("bool", true);
+		attributes.put("color", Color.RED);
+		attributes.put("class", Integer.class);
+		attributes.put("nullValue", null);
+
+		assertThat(attributes).hasToString(
+				"{name=dave, number=42, bool=true, color=RED, class=java.lang.Integer.class, nullValue=null}");
+	}
+
+	@Test
+	void toStringWithSelfReference() {
+		attributes.put("self", attributes);
+		attributes.put("selfArray", new Object[] {attributes});
+
+		assertThat(attributes).hasToString("{self=(this Map), selfArray=[(this Map)]}");
+	}
+
+	@Test
+	void toStringWithObjectArrays() {
+		attributes.put("names", new String[] {"dave", "frank", "hal"});
+		attributes.put("classes", new Class<?>[] {Number.class, Runnable.class});
+		attributes.put("colors", new Color[] {Color.RED, Color.BLUE});
+		attributes.put("empty", new String[0]);
+
+		assertThat(attributes).hasToString("""
+				{names=[dave, frank, hal], classes=[java.lang.Number.class, java.lang.Runnable.class], \
+				colors=[RED, BLUE], empty=[]}""");
+	}
+
+	@Test
+	void toStringWithClassValues() {
+		attributes.put("primitive", int.class);
+		attributes.put("interface", Runnable.class);
+		attributes.put("nested", Color.class);
+		attributes.put("array", String[].class);
+		attributes.put("primitiveArray", int[][].class);
+
+		assertThat(attributes).hasToString("""
+				{primitive=int.class, interface=java.lang.Runnable.class, \
+				nested=org.springframework.core.annotation.AnnotationAttributesTests.Color.class, \
+				array=java.lang.String[].class, primitiveArray=int[][].class}""");
+	}
+
+	@Test
+	void toStringWithEnumValues() {
+		attributes.put("color", Color.RED);
+		attributes.put("shape", Shape.CIRCLE);
+		attributes.put("shapes", new Shape[] {Shape.CIRCLE, Shape.SQUARE});
+
+		assertThat(attributes).hasToString("{color=RED, shape=CIRCLE, shapes=[CIRCLE, SQUARE]}");
+	}
+
+	@Test
+	void toStringWithPrimitiveArrays() {
+		attributes.put("booleans", new boolean[] {true, false});
+		attributes.put("bytes", new byte[] {1, 2});
+		attributes.put("chars", new char[] {'a', 'b'});
+		attributes.put("shorts", new short[] {3, 4});
+		attributes.put("ints", new int[] {5, 6});
+		attributes.put("longs", new long[] {7L, 8L});
+		attributes.put("floats", new float[] {1.5f, 2.5f});
+		attributes.put("doubles", new double[] {3.5, 4.5});
+		attributes.put("empty", new int[0]);
+
+		assertThat(attributes).hasToString("""
+				{booleans=[true, false], bytes=[1, 2], chars=[a, b], shorts=[3, 4], ints=[5, 6], \
+				longs=[7, 8], floats=[1.5, 2.5], doubles=[3.5, 4.5], empty=[]}""");
+	}
+
+	@Test
+	void toStringWithNestedArrays() {
+		attributes.put("ints", new int[][] {{1, 2}, {3}});
+		attributes.put("objects", new Object[] {"dave", new int[] {1, 2}, new String[] {"hal"}});
+
+		assertThat(attributes).hasToString("{ints=[[1, 2], [3]], objects=[dave, [1, 2], [hal]]}");
+	}
+
+	@Test
+	void toStringWithNestedAnnotationAttributes() {
+		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
+		nestedAttributes.put("value", 10);
+		nestedAttributes.put("names", new int[] {1, 2});
+
+		attributes.put("anno", nestedAttributes);
+		attributes.put("annoArray", new AnnotationAttributes[] {nestedAttributes, nestedAttributes});
+
+		assertThat(attributes).hasToString(
+				"{anno={value=10, names=[1, 2]}, annoArray=[{value=10, names=[1, 2]}, {value=10, names=[1, 2]}]}");
+	}
+
+	@Test  // gh-37396
+	void toStringWithClassValuesFromAnnotation() {
+		ClassValues classValues = ClassValuesClass.class.getAnnotation(ClassValues.class);
+		attributes = AnnotationUtils.getAnnotationAttributes(ClassValuesClass.class, classValues, false, true);
+
+		assertThat(attributes).hasToString("""
+				{classes=[java.lang.String.class, int[].class, char[][].class], clazz=java.lang.Integer.class, \
+				nested={value=org.springframework.core.annotation.AnnotationAttributesTests.Color.class}, \
+				nestedArray=[{value=java.lang.Runnable.class}]}""");
+	}
+
+	@Test  // gh-37396
+	void toStringWithClassValuesAsStringsFromAnnotation() {
+		ClassValues classValues = ClassValuesClass.class.getAnnotation(ClassValues.class);
+		attributes = AnnotationUtils.getAnnotationAttributes(ClassValuesClass.class, classValues, true, true);
+
+		// Class values are converted to Strings via Class#getName() and therefore
+		// rendered as binary names without a ".class" suffix.
+		assertThat(attributes).hasToString("""
+				{classes=[java.lang.String, [I, [[C], clazz=java.lang.Integer, \
+				nested={value=org.springframework.core.annotation.AnnotationAttributesTests$Color}, \
+				nestedArray=[{value=java.lang.Runnable}]}""");
+	}
+
 
 	enum Color {
 
 		RED, WHITE, BLUE
+	}
+
+
+	enum Shape {
+
+		CIRCLE, SQUARE;
+
+		@Override
+		public String toString() {
+			return "custom toString() for " + name();
+		}
 	}
 
 
@@ -248,6 +382,32 @@ class AnnotationAttributesTests {
 
 	@Filter(pattern = "foo")
 	static class FilteredClass {
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ClassHolder {
+
+		Class<?> value();
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ClassValues {
+
+		Class<?> clazz();
+
+		Class<?>[] classes();
+
+		ClassHolder nested();
+
+		ClassHolder[] nestedArray();
+	}
+
+
+	@ClassValues(clazz = Integer.class, classes = {String.class, int[].class, char[][].class},
+			nested = @ClassHolder(Color.class), nestedArray = @ClassHolder(Runnable.class))
+	static class ClassValuesClass {
 	}
 
 }

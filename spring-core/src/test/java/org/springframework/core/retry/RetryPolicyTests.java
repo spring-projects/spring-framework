@@ -40,6 +40,7 @@ import static org.mockito.Mockito.mock;
  * Unit tests for {@link RetryPolicy} and its builder.
  *
  * @author Sam Brannen
+ * @author Chengang Guan
  * @since 7.0
  * @see RetryTemplateTests
  */
@@ -145,6 +146,8 @@ class RetryPolicyTests {
 			var policy = RetryPolicy.builder().timeout(timeout).build();
 
 			assertThat(policy.getTimeout()).isSameAs(timeout);
+
+			assertToString(policy, "", timeout, 1000, 0, 1.0, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -367,9 +370,20 @@ class RetryPolicyTests {
 		private static void assertToString(RetryPolicy policy, String filters, long initialInterval, long jitter,
 				double multiplier, long maxInterval, int maxAttempts) {
 
+			assertToString(policy, filters, Duration.ZERO, initialInterval, jitter, multiplier, maxInterval, maxAttempts);
+		}
+
+		private static void assertToString(RetryPolicy policy, String filters, Duration timeout,
+				long initialInterval, long jitter, double multiplier, long maxInterval, int maxAttempts) {
+
+			String timeoutText = (!timeout.isZero() ? "timeout=" + timeout + ", " : "");
+
 			assertThat(policy).asString()
 				.isEqualTo("""
-						DefaultRetryPolicy[%sbackOff=ExponentialBackOff[\
+						DefaultRetryPolicy[\
+						%s\
+						%s\
+						backOff=ExponentialBackOff[\
 						initialInterval=%d, \
 						jitter=%d, \
 						multiplier=%s, \
@@ -377,7 +391,7 @@ class RetryPolicyTests {
 						maxElapsedTime=%d, \
 						maxAttempts=%d\
 						]]""",
-						filters, initialInterval, jitter, multiplier, maxInterval, Long.MAX_VALUE, maxAttempts);
+						filters, timeoutText, initialInterval, jitter, multiplier, maxInterval, Long.MAX_VALUE, maxAttempts);
 		}
 
 		@SafeVarargs

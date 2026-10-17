@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.function;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -233,6 +234,23 @@ class DefaultServerResponseBuilderTests {
 		assertThat(mockResponse.getStatus()).isEqualTo(HttpStatus.CREATED.value());
 		assertThat(mockResponse.getHeader("MyKey")).isEqualTo("MyValue");
 		assertThat(mockResponse.getCookie("name").getValue()).isEqualTo("value");
+	}
+
+	@Test
+	void buildWithContentType() throws Exception {
+		ServerResponse response = ServerResponse.ok()
+				.contentType(new MediaType("text", "plain", StandardCharsets.UTF_8))
+				.build();
+
+		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "https://example.com");
+		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+
+		ModelAndView mav = response.writeTo(mockRequest, mockResponse, EMPTY_CONTEXT);
+		assertThat(mav).isNull();
+
+		assertThat(mockResponse.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("text/plain;charset=UTF-8");
+		assertThat(mockResponse.getContentType()).isEqualTo("text/plain;charset=UTF-8");
+		assertThat(mockResponse.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
 	@Test

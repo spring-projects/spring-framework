@@ -503,6 +503,20 @@ class GenericConversionServiceTests {
 		assertThat(conversionService.convert("base1", MyEnum.class)).isEqualTo(MyEnum.A);
 	}
 
+	@Test  // gh-34532
+	void canConvertToEnumDoesNotThrowForNonEnumTargetType() {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverterFactory(new IntegerToEnumConverterFactory());
+
+		assertThat(conversionService.canConvert(String.class, Enum.class)).isFalse();
+		assertThat(conversionService.canConvert(Integer.class, Enum.class)).isFalse();
+
+		assertThat(conversionService.canConvert(String.class, MyEnum.class)).isTrue();
+		assertThat(conversionService.canConvert(Integer.class, MyEnum.class)).isTrue();
+		assertThat(conversionService.convert("A", MyEnum.class)).isEqualTo(MyEnum.A);
+		assertThat(conversionService.convert(0, MyEnum.class)).isEqualTo(MyEnum.A);
+	}
+
 	@Test
 	void convertNullAnnotatedStringToString() throws Exception {
 		String source = null;
@@ -573,12 +587,12 @@ class GenericConversionServiceTests {
 		List<?> aList = (List<?>) conversionService.convert(List.of("foo"),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ARaw.class)));
-		assertThat(aList).allMatch(e -> e instanceof ARaw);
+		assertThat(aList).allMatch(ARaw.class::isInstance);
 
 		List<?> bList = (List<?>) conversionService.convert(List.of("foo"),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(BRaw.class)));
-		assertThat(bList).allMatch(e -> e instanceof BRaw);
+		assertThat(bList).allMatch(BRaw.class::isInstance);
 	}
 
 	@Test

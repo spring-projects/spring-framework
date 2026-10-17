@@ -294,9 +294,18 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 	void incompletelyQuotedKeyLeadsToPropertyException() {
 		TestBean target = new TestBean();
 		BeanWrapper accessor = createAccessor(target);
-		assertThatExceptionOfType(NotWritablePropertyException.class)
+		assertThatExceptionOfType(InvalidPropertyPathException.class)
 				.isThrownBy(() -> accessor.setPropertyValue("[']", "foobar"))
-				.satisfies(ex -> assertThat(ex.getPossibleMatches()).isNull());
+				.withMessageContaining("unterminated quote");
+	}
+
+	@Test  // gh-37275
+	void getPropertyDescriptorForMalformedPathThrowsInvalidPropertyException() {
+		TestBean target = new TestBean();
+		BeanWrapper accessor = createAccessor(target);
+		assertThatExceptionOfType(InvalidPropertyException.class)
+				.isThrownBy(() -> accessor.getPropertyDescriptor("map[unterminated"))
+				.withCauseInstanceOf(InvalidPropertyPathException.class);
 	}
 
 

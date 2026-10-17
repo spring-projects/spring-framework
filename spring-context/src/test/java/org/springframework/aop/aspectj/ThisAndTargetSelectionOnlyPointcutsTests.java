@@ -41,6 +41,7 @@ class ThisAndTargetSelectionOnlyPointcutsTests {
 	private Counter targetAsInterfaceCounter;
 	private Counter thisAsClassAndTargetAsClassCounter;
 	private Counter thisAsInterfaceAndTargetAsInterfaceCounter;
+	private Counter thisAsInterfaceAndTargetAsClassCounter;
 
 
 	@BeforeEach
@@ -53,6 +54,7 @@ class ThisAndTargetSelectionOnlyPointcutsTests {
 		targetAsInterfaceCounter = ctx.getBean("targetAsInterfaceCounter", Counter.class);
 		thisAsClassAndTargetAsClassCounter = ctx.getBean("thisAsClassAndTargetAsClassCounter", Counter.class);
 		thisAsInterfaceAndTargetAsInterfaceCounter = ctx.getBean("thisAsInterfaceAndTargetAsInterfaceCounter", Counter.class);
+		thisAsInterfaceAndTargetAsClassCounter = ctx.getBean("thisAsInterfaceAndTargetAsClassCounter", Counter.class);
 	}
 
 	@AfterEach
@@ -100,7 +102,7 @@ class ThisAndTargetSelectionOnlyPointcutsTests {
 	@Test
 	void thisAsInterfaceAndTargetAsClassCounterMatch() {
 		testBean.doIt();
-		assertThat(thisAsInterfaceAndTargetAsInterfaceCounter.getCount()).isEqualTo(1);
+		assertThat(thisAsInterfaceAndTargetAsClassCounter.getCount()).isEqualTo(1);
 	}
 
 }

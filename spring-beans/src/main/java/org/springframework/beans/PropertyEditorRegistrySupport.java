@@ -373,7 +373,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	public boolean hasCustomEditorForElement(@Nullable Class<?> elementType, @Nullable String propertyPath) {
 		if (propertyPath != null && this.customEditorsForPath != null) {
 			for (Map.Entry<String, CustomEditorHolder> entry : this.customEditorsForPath.entrySet()) {
-				if (PropertyAccessorUtils.matchesProperty(entry.getKey(), propertyPath) &&
+				if (matchesProperty(entry.getKey(), propertyPath) &&
 						entry.getValue().getPropertyEditor(elementType) != null) {
 					return true;
 				}
@@ -381,6 +381,26 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 		// No property-specific editor -> check type-specific editor.
 		return (elementType != null && this.customEditors != null && this.customEditors.containsKey(elementType));
+	}
+
+	/**
+	 * Whether {@code registeredPath} is {@code propertyPath} itself or one
+	 * indexed element of it.
+	 */
+	private static boolean matchesProperty(String registeredPath, String propertyPath) {
+		String canonicalRegisteredPath = PropertyPath.canonicalNameOrOriginal(registeredPath);
+		String canonicalPropertyPath = PropertyPath.canonicalNameOrOriginal(propertyPath);
+		if (!canonicalRegisteredPath.startsWith(canonicalPropertyPath)) {
+			return false;
+		}
+		if (canonicalRegisteredPath.length() == canonicalPropertyPath.length()) {
+			return true;
+		}
+		if (canonicalRegisteredPath.charAt(canonicalPropertyPath.length()) != PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR) {
+			return false;
+		}
+		return (canonicalRegisteredPath.indexOf(PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR, canonicalPropertyPath.length() + 1) ==
+				canonicalRegisteredPath.length() - 1);
 	}
 
 	/**
@@ -483,18 +503,25 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * will be copied. If this is null, all editors will be copied.
 	 */
 	protected void copyCustomEditorsTo(PropertyEditorRegistry target, @Nullable String nestedProperty) {
-		String actualPropertyName =
-				(nestedProperty != null ? PropertyAccessorUtils.getPropertyName(nestedProperty) : null);
+		String actualPropertyName = (nestedProperty != null ? actualPropertyNameOf(nestedProperty) : null);
 		if (this.customEditors != null) {
 			this.customEditors.forEach(target::registerCustomEditor);
 		}
 		if (this.customEditorsForPath != null) {
 			this.customEditorsForPath.forEach((editorPath, editorHolder) -> {
 				if (nestedProperty != null) {
-					int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(editorPath);
-					if (pos != -1) {
-						String editorNestedProperty = editorPath.substring(0, pos);
-						String editorNestedPath = editorPath.substring(pos + 1);
+					PropertyPath editorPropertyPath;
+					try {
+						editorPropertyPath = PropertyPath.parse(editorPath);
+					}
+					catch (InvalidPropertyPathException ex) {
+						// Not a well-formed path; nothing to nest into.
+						return;
+					}
+					List<PropertyPath.Segment> editorSegments = editorPropertyPath.segments();
+					if (editorSegments.size() > 1) {
+						String editorNestedProperty = editorSegments.get(0).toCanonicalName();
+						String editorNestedPath = editorPropertyPath.subPath(1).canonicalName();
 						if (editorNestedProperty.equals(nestedProperty) || editorNestedProperty.equals(actualPropertyName)) {
 							target.registerCustomEditor(
 									editorHolder.getRegisteredType(), editorNestedPath, editorHolder.getPropertyEditor());
@@ -506,6 +533,20 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 							editorHolder.getRegisteredType(), editorPath, editorHolder.getPropertyEditor());
 				}
 			});
+		}
+	}
+
+	/**
+	 * The raw name of {@code nestedProperty}'s single segment with its keys stripped,
+	 * or {@code null} if malformed.
+	 */
+	private static @Nullable String actualPropertyNameOf(String nestedProperty) {
+		try {
+			List<PropertyPath.Segment> segments = PropertyPath.parse(nestedProperty).segments();
+			return (segments.size() == 1 ? segments.get(0).name() : null);
+		}
+		catch (InvalidPropertyPathException ex) {
+			return null;
 		}
 	}
 

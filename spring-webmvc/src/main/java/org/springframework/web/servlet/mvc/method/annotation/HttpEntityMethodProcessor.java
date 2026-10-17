@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -207,10 +206,6 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		if (httpEntity.getBody() instanceof ProblemDetail detail) {
-			if (detail.getInstance() == null) {
-				URI path = URI.create(inputMessage.getServletRequest().getRequestURI());
-				detail.setInstance(path);
-			}
 			if (logger.isWarnEnabled() && httpEntity instanceof ResponseEntity<?> responseEntity) {
 				if (responseEntity.getStatusCode().value() != detail.getStatus()) {
 					logger.warn(returnType.getExecutable().toGenericString() +
@@ -219,7 +214,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				}
 			}
 			invokeErrorResponseInterceptors(
-					detail, (returnValue instanceof ErrorResponse response ? response : null));
+					detail, (returnValue instanceof ErrorResponse response ? response : null), inputMessage);
 		}
 
 		HttpHeaders outputHeaders = outputMessage.getHeaders();
@@ -236,6 +231,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 					outputHeaders.put(key, value);
 				}
 			});
+		}
+
+		if (httpEntity.getBody() instanceof ProblemDetail detail && !entityHeaders.containsHeader(HttpHeaders.CONTENT_TYPE)) {
+			HttpStatusCode status = (httpEntity instanceof ResponseEntity<?> responseEntity ?
+					responseEntity.getStatusCode() : HttpStatusCode.valueOf(detail.getStatus()));
+			ErrorResponse errorResponse = (returnValue instanceof ErrorResponse response ? response : null);
+			if (resolveErrorView(detail, errorResponse, status, mavContainer, webRequest)) {
+				return;
+			}
 		}
 
 		if (httpEntity instanceof ResponseEntity<?> responseEntity) {

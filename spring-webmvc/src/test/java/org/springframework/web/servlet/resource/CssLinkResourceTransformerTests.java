@@ -156,11 +156,22 @@ class CssLinkResourceTransformerTests {
 	@Test // https://github.com/spring-projects/spring-framework/issues/22602
 	void transformEmptyUrlFunction() throws Exception {
 		this.request = new MockHttpServletRequest("GET", "/static/empty_url_function.css");
-		Resource css = getResource("empty_url_function.css");
+		Resource expected = getResource("empty_url_function.css");
+
+		// An empty url() is not a link at all, so the resource is left untouched,
+		// exactly like a CSS file that has no link in it at all.
+		Resource actual = this.transformerChain.transform(this.request, expected);
+		assertThat(actual).isSameAs(expected);
+	}
+
+	@Test
+	void transformUnclosedUrlFunction() throws Exception {
+		this.request = new MockHttpServletRequest("GET", "/static/unclosed_url_function.css");
+		Resource css = getResource("unclosed_url_function.css");
 		String expected = """
-						.fooStyle {
-							background: transparent url() no-repeat left top;
-						}""";
+				body { background: url("/static/images/image-f448cd1d5dba82b774f3202c878230b3.png?#iefix") }
+				div { background: url(images/image.png
+				""";
 
 		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
 		String result = new String(actual.getByteArray(), UTF_8);

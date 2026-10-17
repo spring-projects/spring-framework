@@ -26,8 +26,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
@@ -46,6 +48,9 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * attribute overrides for {@code @ResponseStatus} in custom composed annotations.
  *
  * <p>As of 5.0 this resolver also supports {@link ResponseStatusException}.
+ *
+ * <p>As of 7.1, exceptions resolved to a 5xx server error status are recorded
+ * as the error of the current HTTP server observation, if any.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -71,12 +76,16 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 		try {
 			if (ex instanceof ResponseStatusException rse) {
-				return resolveResponseStatusException(rse, request, response, handler);
+				ModelAndView mav = resolveResponseStatusException(rse, request, response, handler);
+				recordServerError(rse.getStatusCode(), ex, request);
+				return mav;
 			}
 
 			ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
 			if (status != null) {
-				return resolveResponseStatus(status, request, response, handler, ex);
+				ModelAndView mav = resolveResponseStatus(status, request, response, handler, ex);
+				recordServerError(status.code(), ex, request);
+				return mav;
 			}
 
 			if (ex.getCause() instanceof Exception cause) {
@@ -89,6 +98,12 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			}
 		}
 		return null;
+	}
+
+	private void recordServerError(HttpStatusCode statusCode, Exception ex, HttpServletRequest request) {
+		if (statusCode.is5xxServerError()) {
+			ServerHttpObservationFilter.findObservationContext(request).ifPresent(context -> context.setError(ex));
+		}
 	}
 
 	/**

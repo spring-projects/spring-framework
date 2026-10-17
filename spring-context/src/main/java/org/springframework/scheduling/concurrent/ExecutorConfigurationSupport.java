@@ -366,6 +366,9 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 			logger.debug("Shutting down ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
 		if (this.executor != null) {
+			if (this.lifecycleDelegate != null && this.lateShutdown) {
+				this.lifecycleDelegate.markShutdown();
+			}
 			if (this.waitForTasksToCompleteOnShutdown) {
 				this.executor.shutdown();
 			}

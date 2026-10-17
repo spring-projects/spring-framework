@@ -46,7 +46,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.util.AssertionErrors;
@@ -77,6 +76,15 @@ import org.springframework.web.util.UriBuilderFactory;
  * @since 5.0
  */
 class DefaultWebTestClient implements WebTestClient {
+
+	private static final Duration DEFAULT_RESPONSE_TIMEOUT = Duration.ofSeconds(5);
+
+	/**
+	 * Effectively infinite timeout which can still be converted to nanoseconds,
+	 * as required by {@link reactor.core.publisher.Mono#block(Duration)}.
+	 */
+	private static final Duration INFINITE_RESPONSE_TIMEOUT = Duration.ofNanos(Long.MAX_VALUE);
+
 
 	private final WiretapConnector wiretapConnector;
 
@@ -122,8 +130,15 @@ class DefaultWebTestClient implements WebTestClient {
 		this.defaultApiVersion = defaultApiVersion;
 		this.apiVersionInserter = apiVersionInserter;
 		this.entityResultConsumer = entityResultConsumer;
-		this.responseTimeout = (responseTimeout != null ? responseTimeout : Duration.ofSeconds(5));
+		this.responseTimeout = initResponseTimeout(responseTimeout);
 		this.builder = clientBuilder;
+	}
+
+	private static Duration initResponseTimeout(@Nullable Duration responseTimeout) {
+		if (responseTimeout == null) {
+			return DEFAULT_RESPONSE_TIMEOUT;
+		}
+		return (!responseTimeout.isZero() ? responseTimeout : INFINITE_RESPONSE_TIMEOUT);
 	}
 
 
@@ -711,7 +726,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public BodyContentSpec json(String expectedJson, JsonCompareMode compareMode) {
-			return json(expectedJson, JsonAssert.comparator(compareMode));
+			return json(expectedJson, JsonComparator.of(compareMode));
 		}
 
 		@Override

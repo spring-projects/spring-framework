@@ -55,6 +55,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Chengang Guan
  * @since 7.0
  * @see RetryPolicyTests
  */
@@ -192,10 +193,12 @@ class RetryTemplateTests {
 		// RetryListener interactions:
 		inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 		inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-		inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, new CustomException("Boom 2"));
+		inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(RetryState.class),
+				eq(new CustomException("Boom 2")));
 		inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 		inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-		inOrder.verify(retryListener).onRetrySuccess(retryPolicy, retryable, "finally succeeded");
+		inOrder.verify(retryListener).onRetrySuccess(eq(retryPolicy), eq(retryable), any(RetryState.class),
+				eq("finally succeeded"));
 		inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable),
 				argThat(state -> state.isSuccessful() && state.getRetryCount() == 2));
 		verifyNoMoreInteractions(retryListener);
@@ -226,8 +229,8 @@ class RetryTemplateTests {
 					repeat(3, () -> {
 						inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 						inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-						inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable,
-								new CustomException("Boom " + counter.incrementAndGet()));
+						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable),
+								any(RetryState.class), eq(new CustomException("Boom " + counter.incrementAndGet())));
 					});
 					inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable),
 							argThat(state -> !state.isSuccessful() && state.getRetryCount() == 3));
@@ -304,7 +307,8 @@ class RetryTemplateTests {
 					repeat(5, () -> {
 						inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 						inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-						inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, exception);
+						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable),
+								any(RetryState.class), eq(exception));
 					});
 					inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable),
 							argThat(state -> !state.isSuccessful() && state.getRetryCount() == 5));
@@ -358,7 +362,8 @@ class RetryTemplateTests {
 					repeat(2, () -> {
 						inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 						inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(Exception.class));
+						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable),
+								any(RetryState.class), any(Exception.class));
 					});
 					inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable),
 							argThat(state -> !state.isSuccessful() && state.getRetryCount() == 2));
@@ -423,10 +428,12 @@ class RetryTemplateTests {
 				.satisfies(throwable -> {
 					inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 					inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-					inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(RuntimeException.class));
+					inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable),
+							any(RetryState.class), any(RuntimeException.class));
 					inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 					inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-					inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(CustomFileNotFoundException.class));
+					inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable),
+							any(RetryState.class), any(CustomFileNotFoundException.class));
 					inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable),
 							argThat(state -> !state.isSuccessful() && state.getRetryCount() == 2));
 					inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable);
@@ -479,6 +486,7 @@ class RetryTemplateTests {
 				any(RetryState.class));
 		inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy),
 				argThat(r -> r.getName().equals(retryable.getClass().getName())),
+				any(RetryState.class),
 				eq(new CustomException("Boom 2")));
 		inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy),
 				argThat(r -> r.getName().equals(retryable.getClass().getName())),
@@ -488,6 +496,7 @@ class RetryTemplateTests {
 				any(RetryState.class));
 		inOrder.verify(retryListener).onRetrySuccess(eq(retryPolicy),
 				argThat(r -> r.getName().equals(retryable.getClass().getName())),
+				any(RetryState.class),
 				eq("finally succeeded"));
 		inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy),
 				argThat(r -> r.getName().equals(retryable.getClass().getName())),
@@ -517,6 +526,7 @@ class RetryTemplateTests {
 								any(RetryState.class));
 						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy),
 								argThat(r -> r.getName().equals(retryable.getClass().getName())),
+								any(RetryState.class),
 								eq(new CustomException("Boom " + counter.incrementAndGet())));
 					});
 					inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy),
@@ -571,6 +581,7 @@ class RetryTemplateTests {
 				any(RetryState.class));
 		inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy),
 				argThat(r -> r.getName().equals(retryable.getClass().getName())),
+				any(RetryState.class),
 				eq(new CustomException("Boom 2")));
 		inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy),
 				argThat(r -> r.getName().equals(retryable.getClass().getName())),
@@ -580,6 +591,7 @@ class RetryTemplateTests {
 				any(RetryState.class));
 		inOrder.verify(retryListener).onRetrySuccess(eq(retryPolicy),
 				argThat(r -> r.getName().equals(retryable.getClass().getName())),
+				any(RetryState.class),
 				eq(null));
 		inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy),
 				argThat(r -> r.getName().equals(retryable.getClass().getName())),
@@ -609,6 +621,7 @@ class RetryTemplateTests {
 								any(RetryState.class));
 						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy),
 								argThat(r -> r.getName().equals(retryable.getClass().getName())),
+								any(RetryState.class),
 								eq(new CustomException("Boom " + counter.incrementAndGet())));
 					});
 					inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy),
@@ -766,7 +779,8 @@ class RetryTemplateTests {
 					.satisfies(throwable -> {
 						inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 						inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-						inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, new CustomException("Boom 2"));
+						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable),
+								any(RetryState.class), eq(new CustomException("Boom 2")));
 						inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable),
 								argThat(state -> !state.isSuccessful() && state.getRetryCount() == 1));
 						inOrder.verify(retryListener).onRetryPolicyTimeout(
@@ -780,7 +794,7 @@ class RetryTemplateTests {
 		@Test
 		void retryableWithTimeoutExceededAfterSecondRetry() {
 			RetryPolicy retryPolicy = RetryPolicy.builder()
-					.timeout(Duration.ofMillis(20))
+					.timeout(Duration.ofMillis(200))
 					.delay(Duration.ZERO)
 					.build();
 			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
@@ -790,7 +804,7 @@ class RetryTemplateTests {
 			Retryable<String> retryable = () -> {
 				int currentInvocation = invocationCount.incrementAndGet();
 				if (currentInvocation == 3) {
-					Thread.sleep(100);
+					Thread.sleep(500);
 				}
 				throw new CustomException("Boom " + currentInvocation);
 			};
@@ -798,15 +812,15 @@ class RetryTemplateTests {
 			assertThat(invocationCount).hasValue(0);
 			assertThatExceptionOfType(RetryException.class)
 					.isThrownBy(() -> retryTemplate.execute(retryable))
-					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(20ms\\); aborting execution")
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(200ms\\); aborting execution")
 					.withCause(new CustomException("Boom 3"))
 					.satisfies(throwable -> {
 						var counter = new AtomicInteger(1);
 						repeat(2, () -> {
 							inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable), any(RetryState.class));
 							inOrder.verify(retryListener).beforeRetry(eq(retryPolicy), eq(retryable), any(RetryState.class));
-							inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable,
-									new CustomException("Boom " + counter.incrementAndGet()));
+							inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable),
+									any(RetryState.class), eq(new CustomException("Boom " + counter.incrementAndGet())));
 						});
 						inOrder.verify(retryListener).onRetryableExecution(eq(retryPolicy), eq(retryable),
 								argThat(state -> !state.isSuccessful() && state.getRetryCount() == 2));

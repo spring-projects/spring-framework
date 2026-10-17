@@ -73,15 +73,6 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 		this.converterDelegate = converter;
 	}
 
-	@SuppressWarnings("removal")
-	@Deprecated(since = "7.0", forRemoval = true)
-	protected AbstractJsonValueAssert(
-			@Nullable Object actual, Class<?> selfType,
-			org.springframework.test.http.@Nullable HttpMessageContentConverter converter) {
-
-		this(actual, selfType, (JsonConverterDelegate) converter);
-	}
-
 
 	/**
 	 * Verify that the actual value is a non-{@code null} {@link String},

@@ -80,6 +80,10 @@ final class PersistenceUnitReader {
 
 	private static final String MANAGED_CLASS_NAME = "class";
 
+	private static final String MANAGED_PACKAGE_DESCRIPTOR = "package-descriptor";
+
+	private static final String MANAGED_MODULE_DESCRIPTOR = "module-descriptor";
+
 	private static final String EXCLUDE_UNLISTED_CLASSES = "exclude-unlisted-classes";
 
 	private static final String SHARED_CACHE_MODE = "shared-cache-mode";
@@ -255,6 +259,8 @@ final class PersistenceUnitReader {
 		parseMappingFiles(persistenceUnit, unitInfo);
 		parseJarFiles(persistenceUnit, unitInfo);
 		parseManagedClasses(persistenceUnit, unitInfo);
+		parseManagedPackages(persistenceUnit, unitInfo);
+		parseManagedModules(persistenceUnit, unitInfo);
 		parseProperties(persistenceUnit, unitInfo);
 
 		return unitInfo;
@@ -326,6 +332,32 @@ final class PersistenceUnitReader {
 			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value)) {
 				unitInfo.addManagedClassName(value);
+			}
+		}
+	}
+
+	/**
+	 * Parse the {@code class} XML elements.
+	 */
+	void parseManagedPackages(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
+		List<Element> packages = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_PACKAGE_DESCRIPTOR);
+		for (Element element : packages) {
+			String value = DomUtils.getTextValue(element).trim();
+			if (StringUtils.hasText(value)) {
+				unitInfo.addManagedPackage(value);
+			}
+		}
+	}
+
+	/**
+	 * Parse the {@code class} XML elements.
+	 */
+	void parseManagedModules(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
+		List<Element> modules = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_MODULE_DESCRIPTOR);
+		for (Element element : modules) {
+			String value = DomUtils.getTextValue(element).trim();
+			if (StringUtils.hasText(value)) {
+				unitInfo.addManagedModule(value);
 			}
 		}
 	}

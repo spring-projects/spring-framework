@@ -721,7 +721,6 @@ class ConcurrentReferenceHashMapTests {
 		private final LinkedList<MockReference<K, V>> queue = new LinkedList<>();
 
 		public TestWeakConcurrentCache() {
-			super();
 		}
 
 		public TestWeakConcurrentCache(int initialCapacity, float loadFactor, int concurrencyLevel) {

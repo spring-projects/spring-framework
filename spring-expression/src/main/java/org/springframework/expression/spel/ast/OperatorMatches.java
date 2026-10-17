@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -58,31 +57,6 @@ public class OperatorMatches extends Operator {
 
 	private final ConcurrentLruCache<String, Pattern> patternCache;
 
-
-	/**
-	 * Create a new {@link OperatorMatches} instance.
-	 * @deprecated as of Spring Framework 5.2.23; for removal in Spring Framework 7.1; invoke
-	 * {@link #OperatorMatches(ConcurrentLruCache, int, int, SpelNodeImpl...)} instead
-	 */
-	@Deprecated(since = "5.2.23", forRemoval = true)
-	public OperatorMatches(int startPos, int endPos, SpelNodeImpl... operands) {
-		this(new ConcurrentLruCache<>(MAX_PATTERN_CACHE_SIZE, Pattern::compile), startPos, endPos, operands);
-	}
-
-	/**
-	 * Create a new {@link OperatorMatches} instance with a shared pattern cache.
-	 * <p>As of Spring Framework 6.2.19, the supplied {@code patternCacheMap} will
-	 * be ignored.
-	 * @since 5.2.23
-	 * @deprecated as of Spring Framework 6.2.19; for removal in Spring Framework 7.1; invoke
-	 * {@link #OperatorMatches(ConcurrentLruCache, int, int, SpelNodeImpl...)} instead
-	 */
-	@Deprecated(since = "6.2.19", forRemoval = true)
-	public OperatorMatches(ConcurrentMap<String, Pattern> patternCacheMap,
-			int startPos, int endPos, SpelNodeImpl... operands) {
-
-		this(startPos, endPos, operands);
-	}
 
 	/**
 	 * Create a new {@link OperatorMatches} instance with a shared pattern cache.

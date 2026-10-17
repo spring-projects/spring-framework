@@ -86,8 +86,15 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 			return this.parentMessageSource.getMessage(resolvable, locale);
 		}
 		else {
-			if (resolvable.getDefaultMessage() != null) {
-				return renderDefaultMessage(resolvable.getDefaultMessage(), resolvable.getArguments(), locale);
+			String defaultMessage = resolvable.getDefaultMessage();
+			if (defaultMessage != null) {
+				if (resolvable instanceof DefaultMessageSourceResolvable defaultMessageSourceResolvable &&
+						!defaultMessageSourceResolvable.shouldRenderDefaultMessage()) {
+					// Given default message does not contain any argument placeholders
+					// (and isn't escaped for alwaysUseMessageFormat either) -> return as-is.
+					return defaultMessage;
+				}
+				return renderDefaultMessage(defaultMessage, resolvable.getArguments(), locale);
 			}
 			String[] codes = resolvable.getCodes();
 			String code = (codes != null && codes.length > 0 ? codes[0] : "");

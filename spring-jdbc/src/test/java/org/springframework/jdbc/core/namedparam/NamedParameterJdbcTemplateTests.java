@@ -21,6 +21,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,10 +44,12 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.inOrder;
@@ -60,6 +63,7 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Nikita Khateev
  * @author Fedor Bobin
+ * @author Yanming Zhou
  */
 class NamedParameterJdbcTemplateTests {
 
@@ -69,6 +73,9 @@ class NamedParameterJdbcTemplateTests {
 			"select id, forename from custmr where id = ? and country = ?";
 	private static final String SELECT_NO_PARAMETERS =
 			"select id, forename from custmr";
+
+	private static final String INSERT_NAMED_PARAMETERS =
+			"insert into custmr(forename,country) values (:forename,:country)";
 
 	private static final String UPDATE_NAMED_PARAMETERS =
 			"update seat_status set booking_id = null where performance_id = :perfId and price_band_id = :priceId";
@@ -576,6 +583,32 @@ class NamedParameterJdbcTemplateTests {
 		verify(preparedStatement).setObject(1, 100, Types.NUMERIC);
 		verify(preparedStatement).setObject(1, 200, Types.NUMERIC);
 		verify(preparedStatement, times(3)).addBatch();
+		verify(preparedStatement, atLeastOnce()).close();
+		verify(connection, atLeastOnce()).close();
+	}
+
+	@Test
+	void batchUpdateWithGeneratedKeys() throws Exception {
+		final SqlParameterSource[] batchArgs = new SqlParameterSource[2];
+		batchArgs[0] = new MapSqlParameterSource(Map.of("forename", "foo", "country", "UK"));
+		batchArgs[1] = new MapSqlParameterSource(Map.of("forename", "bar", "country", "US"));
+		final int[] rowsAffected = new int[] {1, 1};
+
+		given(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).willReturn(preparedStatement);
+		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
+		namedParameterTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(dataSource, false));
+
+		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(INSERT_NAMED_PARAMETERS, batchArgs, new GeneratedKeyHolder());
+		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		verify(connection).prepareStatement("insert into custmr(forename,country) values (?,?)", Statement.RETURN_GENERATED_KEYS);
+		verify(preparedStatement).setString(1, "foo");
+		verify(preparedStatement).setString(2, "UK");
+		verify(preparedStatement).setString(1, "bar");
+		verify(preparedStatement).setString(2, "US");
+		verify(preparedStatement, times(2)).addBatch();
 		verify(preparedStatement, atLeastOnce()).close();
 		verify(connection, atLeastOnce()).close();
 	}

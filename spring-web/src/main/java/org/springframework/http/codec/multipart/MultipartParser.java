@@ -40,6 +40,7 @@ import reactor.util.context.Context;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferMatcher;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 
@@ -306,7 +307,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 */
 	private final class PreambleState implements State {
 
-		private final DataBufferUtils.Matcher firstBoundary;
+		private final DataBufferMatcher firstBoundary;
 
 
 		public PreambleState() {
@@ -359,7 +360,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 */
 	private final class HeadersState implements State {
 
-		private final DataBufferUtils.Matcher endHeaders = DataBufferUtils.matcher(MultipartUtils.concat(CR_LF, CR_LF));
+		private final DataBufferMatcher endHeaders = DataBufferUtils.matcher(MultipartUtils.concat(CR_LF, CR_LF));
 
 		private final AtomicInteger byteCount = new AtomicInteger();
 
@@ -504,7 +505,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 */
 	private final class BodyState implements State {
 
-		private final DataBufferUtils.Matcher boundary;
+		private final DataBufferMatcher boundary;
 
 		private final int boundaryLength;
 
@@ -546,6 +547,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 					// iterate over buffers in reverse order
 					DataBufferUtils.release(boundaryBuffer);
 					DataBuffer prev;
+					boolean found = false;
 					while ((prev = this.queue.pollLast()) != null) {
 						int prevByteCount = prev.readableByteCount();
 						int prevLen = prevByteCount + len;
@@ -555,6 +557,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 							DataBufferUtils.release(prev);
 							enqueue(body);
 							flush();
+							found = true;
 							break;
 						}
 						else {
@@ -563,11 +566,21 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 							len += prevByteCount;
 						}
 					}
+					if (!found) {
+						// all buffered bytes were boundary bytes: the part had an empty body
+						emitBody(buffer.factory().allocateBuffer(0), true);
+					}
 				}
 				else /* if (len == 0) */ {
 					// buffer starts with complete delimiter, flush out the previous buffers
 					DataBufferUtils.release(boundaryBuffer);
-					flush();
+					if (this.queue.isEmpty()) {
+						// nothing was ever buffered for this part: the part had an empty body
+						emitBody(buffer.factory().allocateBuffer(0), true);
+					}
+					else {
+						flush();
+					}
 				}
 
 				changeState(this, new HeadersState(), buffer);

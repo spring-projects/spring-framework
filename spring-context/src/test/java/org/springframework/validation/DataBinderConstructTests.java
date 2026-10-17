@@ -27,16 +27,20 @@ import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.core.ResolvableType;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link DataBinder} with constructor binding.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 class DataBinderConstructTests {
 
@@ -271,6 +275,35 @@ class DataBinderConstructTests {
 		assertThat(target.integerMapList().get(1)).containsOnly(Map.entry("a", 3), Map.entry("b", 4));
 	}
 
+	@Test  // gh-37252
+	void maxNestedPathDepth() {
+		DataBinder binder = initDataBinder(NodeRecord.class);
+		binder.setMaxNestedPathDepth(2);
+
+		// depth == max
+		binder.construct(new MapValueResolver(Map.of("next.next.value", "enigma")));
+		NodeRecord target = getTarget(binder);
+		assertThat(target.next().next().value()).isEqualTo("enigma");
+
+		// depth > max
+		DataBinder tooDeep = initDataBinder(NodeRecord.class);
+		tooDeep.setMaxNestedPathDepth(2);
+		assertThatExceptionOfType(InvalidPropertyException.class)
+				.isThrownBy(() -> tooDeep.construct(new MapValueResolver(Map.of("next.next.next.value", "enigma"))))
+				.withMessageEndingWith("Nesting depth of property path exceeds the maximum of 2");
+	}
+
+	@Test  // gh-37252
+	void maxNestedPathDepthProtectsAgainstStackOverflow() {
+		DataBinder binder = initDataBinder(NodeRecord.class);
+
+		String propertyPath = "next.".repeat(100_000) + "value";
+		assertThatExceptionOfType(InvalidPropertyException.class)
+				.isThrownBy(() -> binder.construct(new MapValueResolver(Map.of(propertyPath, "enigma"))))
+				.withMessageEndingWith("Nesting depth of property path exceeds the maximum of " +
+						ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH);
+	}
+
 
 	@SuppressWarnings("SameParameterValue")
 	private static DataBinder initDataBinder(Class<?> targetType) {
@@ -338,6 +371,14 @@ class DataBinderConstructTests {
 		public @Nullable DataClass nestedParam2() {
 			return this.nestedParam2;
 		}
+	}
+
+
+	/**
+	 * A self-referential record, for which the nesting depth of a property path is
+	 * bounded by the supplied input rather than by the structure of the type.
+	 */
+	private record NodeRecord(@Nullable NodeRecord next, @Nullable String value) {
 	}
 
 

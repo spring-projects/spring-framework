@@ -81,7 +81,8 @@ final class AttributeMethods {
 				foundNestedAnnotation = true;
 			}
 			ReflectionUtils.makeAccessible(method);
-			this.canThrowTypeNotPresentException[i] = (type == Class.class || type == Class[].class || type.isEnum());
+			this.canThrowTypeNotPresentException[i] = (type == Class.class || type == Class[].class ||
+					type.isEnum() || (type.isArray() && type.componentType().isEnum()));
 		}
 		this.hasDefaultValueMethod = foundDefaultValueMethod;
 		this.hasNestedAnnotation = foundNestedAnnotation;
@@ -131,7 +132,7 @@ final class AttributeMethods {
 	 * {@code Class.getAnnotations() failure} on a regular JVM).
 	 * @param annotation the annotation to validate
 	 * @throws IllegalStateException if a declared {@code Class} attribute could not be read
-	 * @see #canLoad(Annotation)
+	 * @see #canLoad(Annotation, AnnotatedElement)
 	 */
 	void validate(Annotation annotation) {
 		assertAnnotation(annotation);

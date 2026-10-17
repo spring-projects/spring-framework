@@ -21,9 +21,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
@@ -32,10 +29,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link JdkClientHttpRequestFactory}.
@@ -44,26 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Brian Clozel
  */
 class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
-
-	private static @Nullable String originalPropertyValue;
-
-
-	@BeforeAll
-	static void setProperty() {
-		originalPropertyValue = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
-		System.setProperty("jdk.httpclient.allowRestrictedHeaders", "expect");
-	}
-
-	@AfterAll
-	static void restoreProperty() {
-		if (originalPropertyValue != null) {
-			System.setProperty("jdk.httpclient.allowRestrictedHeaders", originalPropertyValue);
-		}
-		else {
-			System.clearProperty("jdk.httpclient.allowRestrictedHeaders");
-		}
-	}
-
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -75,17 +52,6 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 	void httpMethods() throws Exception {
 		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
-	}
-
-	@Test
-	void customizeDisallowedHeaders() throws IOException {
-		URI uri = URI.create(this.baseUrl + "/status/299");
-		ClientHttpRequest request = this.factory.createRequest(uri, HttpMethod.PUT);
-		request.getHeaders().set("Expect", "299");
-
-		try (ClientHttpResponse response = request.execute()) {
-			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatusCode.valueOf(299));
-		}
 	}
 
 	@Test // gh-31451
@@ -119,6 +85,17 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		}
+	}
+
+	@Test  // gh-37425
+	void negativeReadTimeoutIsRejected() {
+		JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> requestFactory.setReadTimeout(-1))
+				.withMessage("Timeout must be a non-negative value");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> requestFactory.setReadTimeout(Duration.ofMillis(-1)))
+				.withMessage("Timeout must be a non-negative value");
 	}
 
 	@Test

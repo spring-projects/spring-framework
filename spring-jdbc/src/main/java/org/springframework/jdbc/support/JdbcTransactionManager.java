@@ -64,7 +64,6 @@ public class JdbcTransactionManager extends DataSourceTransactionManager {
 	 * @see #setDataSource
 	 */
 	public JdbcTransactionManager() {
-		super();
 	}
 
 	/**

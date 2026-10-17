@@ -134,7 +134,7 @@ Java::
 			protected Command createCommand() {
 				return asyncCommand();
 			}
-		}
+		};
 	}
 ----
 

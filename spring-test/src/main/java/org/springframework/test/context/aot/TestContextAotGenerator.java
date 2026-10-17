@@ -29,11 +29,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aot.AotDetector;
-import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedClasses;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.generate.NameGenerator;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
@@ -378,9 +378,9 @@ public class TestContextAotGenerator {
 	}
 
 	DefaultGenerationContext createGenerationContext(Class<?> testClass) {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(testClass));
+		NameGenerator nameGenerator = new NameGenerator(ClassName.get(testClass));
 		TestContextGenerationContext generationContext =
-				new TestContextGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+				new TestContextGenerationContext(nameGenerator, this.generatedFiles, this.runtimeHints);
 		return generationContext.withName(nextTestContextId());
 	}
 
@@ -389,9 +389,9 @@ public class TestContextAotGenerator {
 	}
 
 	private void generateAotTestContextInitializerMappings(MultiValueMap<ClassName, Class<?>> initializerClassMappings) {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(AotTestContextInitializers.class));
+		NameGenerator nameGenerator = new NameGenerator(ClassName.get(AotTestContextInitializers.class));
 		DefaultGenerationContext generationContext =
-				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+				new DefaultGenerationContext(nameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
 
 		AotTestContextInitializersCodeGenerator codeGenerator =
@@ -402,9 +402,9 @@ public class TestContextAotGenerator {
 	}
 
 	private void generateAotTestAttributeMappings() {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(AotTestAttributes.class));
+		NameGenerator nameGenerator = new NameGenerator(ClassName.get(AotTestAttributes.class));
 		DefaultGenerationContext generationContext =
-				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+				new DefaultGenerationContext(nameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
 
 		Map<String, String> attributes = AotTestAttributesFactory.getAttributes();

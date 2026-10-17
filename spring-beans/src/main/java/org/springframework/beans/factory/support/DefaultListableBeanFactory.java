@@ -91,6 +91,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.CompositeIterator;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -196,11 +197,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Map of bean definition names with a primary marker plus corresponding type. */
 	private final Map<String, Class<?>> primaryBeanNamesWithType = new ConcurrentHashMap<>(16);
 
-	/** Map of singleton and non-singleton bean names, keyed by dependency type. */
-	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
+	/** Cache of singleton and non-singleton bean names, keyed by dependency type. */
+	private final Map<Object, String[]> allBeanNamesByType = new ConcurrentReferenceHashMap<>(64);
 
-	/** Map of singleton-only bean names, keyed by dependency type. */
-	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
+	/** Cache of singleton-only bean names, keyed by dependency type. */
+	private final Map<Object, String[]> singletonBeanNamesByType = new ConcurrentReferenceHashMap<>(64);
 
 	/** List of bean definition names, in registration order. */
 	private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
@@ -225,7 +226,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Create a new DefaultListableBeanFactory.
 	 */
 	public DefaultListableBeanFactory() {
-		super();
 	}
 
 	/**
@@ -399,6 +399,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeanProvider(requiredType, true);
 	}
 
+	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
 		return getBeanProvider(ResolvableType.forType(requiredType), true);
 	}
@@ -588,9 +589,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (resolved != null && !type.hasGenerics()) {
 			return getBeanNamesForType(resolved, includeNonSingletons, allowEagerInit);
 		}
-		else {
+
+		// ResolvableType with actual generics to be matched...
+		if (!isConfigurationFrozen() || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		}
+		Map<Object, String[]> cache = (includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
+		return cache.computeIfAbsent(type, key -> doGetBeanNamesForType(type, includeNonSingletons, true));
 	}
 
 	@Override
@@ -603,17 +608,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, allowEagerInit);
 		}
-		Map<Class<?>, String[]> cache =
-				(includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
-		String[] resolvedBeanNames = cache.get(type);
-		if (resolvedBeanNames != null) {
-			return resolvedBeanNames;
-		}
-		resolvedBeanNames = doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, true);
-		if (ClassUtils.isCacheSafe(type, getBeanClassLoader())) {
-			cache.put(type, resolvedBeanNames);
-		}
-		return resolvedBeanNames;
+		Map<Object, String[]> cache = (includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
+		return cache.computeIfAbsent(type, key ->
+				doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, true));
 	}
 
 	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
@@ -1473,7 +1470,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	protected void addSingleton(String beanName, Object singletonObject) {
 		super.addSingleton(beanName, singletonObject);
 
-		Predicate<Class<?>> filter = (beanType -> beanType != Object.class && beanType.isInstance(singletonObject));
+		Predicate<Object> filter = (beanType -> beanType != Object.class &&
+				((beanType instanceof Class<?> clazz && clazz.isInstance(singletonObject)) ||
+						(beanType instanceof ResolvableType resolvable && resolvable.isInstance(singletonObject))));
 		this.allBeanNamesByType.keySet().removeIf(filter);
 		this.singletonBeanNamesByType.keySet().removeIf(filter);
 

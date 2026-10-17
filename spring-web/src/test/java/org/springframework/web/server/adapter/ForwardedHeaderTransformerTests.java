@@ -232,6 +232,27 @@ class ForwardedHeaderTransformerTests {
 		assertThat(request.getRemoteAddress().getPort()).isEqualTo(4711);
 	}
 
+	@Test  // gh-37114
+	void forwardedForAndByWithoutPort() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Forwarded", "for=203.0.113.195;by=203.0.113.43;host=84.198.58.199;proto=https");
+
+		ServerHttpRequest request = MockServerHttpRequest
+				.method(HttpMethod.GET, URI.create("https://example.com/a%20b?q=a%2Bb"))
+				.remoteAddress(new InetSocketAddress("example.client", 47011))
+				.localAddress(new InetSocketAddress("example.server", 47012))
+				.headers(headers)
+				.build();
+
+		request = new ForwardedHeaderTransformer(true).apply(request);
+		assertThat(request.getRemoteAddress()).isNotNull();
+		assertThat(request.getRemoteAddress().getHostString()).isEqualTo("203.0.113.195");
+		assertThat(request.getRemoteAddress().getPort()).isEqualTo(0);
+		assertThat(request.getLocalAddress()).isNotNull();
+		assertThat(request.getLocalAddress().getHostString()).isEqualTo("203.0.113.43");
+		assertThat(request.getLocalAddress().getPort()).isEqualTo(0);
+	}
+
 	@Test
 	void xForwardedFor() {
 		HttpHeaders headers = new HttpHeaders();

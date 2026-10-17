@@ -52,7 +52,8 @@ public abstract class DataAccessUtils {
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Collection
 	 */
-	public static <T> @Nullable T singleResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T extends @Nullable Object> @Nullable T singleResult(@Nullable Collection<T> results)
+			throws IncorrectResultSizeDataAccessException {
 		if (CollectionUtils.isEmpty(results)) {
 			return null;
 		}
@@ -72,7 +73,8 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Stream
 	 * @since 6.1
 	 */
-	public static <T> @Nullable T singleResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T extends @Nullable Object> @Nullable T singleResult(@Nullable Stream<T> results)
+			throws IncorrectResultSizeDataAccessException {
 		if (results == null) {
 			return null;
 		}
@@ -95,7 +97,8 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Iterator
 	 * @since 6.1
 	 */
-	public static <T> @Nullable T singleResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T extends @Nullable Object> @Nullable T singleResult(@Nullable Iterator<T> results)
+			throws IncorrectResultSizeDataAccessException {
 		if (results == null) {
 			return null;
 		}
@@ -132,7 +135,8 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Stream
 	 * @since 6.1
 	 */
-	public static <T> Optional<T> optionalResult(@Nullable Stream<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T> Optional<T> optionalResult(@Nullable Stream<? extends @Nullable T> results)
+			throws IncorrectResultSizeDataAccessException {
 		return Optional.ofNullable(singleResult(results));
 	}
 
@@ -146,7 +150,8 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Iterator
 	 * @since 6.1
 	 */
-	public static <T> Optional<T> optionalResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T> Optional<T> optionalResult(@Nullable Iterator<? extends @Nullable T> results)
+			throws IncorrectResultSizeDataAccessException {
 		return Optional.ofNullable(singleResult(results));
 	}
 
@@ -213,7 +218,8 @@ public abstract class DataAccessUtils {
 	 * result object has been found in the given Collection
 	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
 	 */
-	public static <T> @Nullable T uniqueResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T extends @Nullable Object> @Nullable T uniqueResult(@Nullable Collection<T> results)
+			throws IncorrectResultSizeDataAccessException {
 		if (CollectionUtils.isEmpty(results)) {
 			return null;
 		}
@@ -235,7 +241,8 @@ public abstract class DataAccessUtils {
 	 * has been found in the given Collection
 	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
 	 */
-	public static <T> T requiredUniqueResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T extends @Nullable Object> @NonNull T requiredUniqueResult(@Nullable Collection<T> results)
+			throws IncorrectResultSizeDataAccessException {
 		if (CollectionUtils.isEmpty(results)) {
 			throw new EmptyResultDataAccessException(1);
 		}

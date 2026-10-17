@@ -174,7 +174,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val actors = jdbcTemplate.query("select first_name, last_name from t_actor") { rs, _ ->
-			Actor(rs.getString("first_name"), rs.getString("last_name"))
+			Actor(rs.getString("first_name"), rs.getString("last_name")) }
 ----
 ======
 
@@ -557,8 +557,6 @@ Kotlin::
 	// some JDBC-backed DAO class...
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
 
-	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
-
 	fun countOfActors(exampleActor: Actor): Int {
 		// notice how the named parameters match the properties of the above 'Actor' class
 		val sql = "select count(*) from t_actor where first_name = :firstName and last_name = :lastName"
@@ -680,6 +678,34 @@ provides `firstName` and `lastName` properties, such as the `Actor` class from a
 			.update();
 ----
 
+For batch updates, accumulate the batch entries in a fluent fashion through `batch()`,
+defining each entry through `entry(...)` – either with a callback that binds positional
+or named parameters as for a single update, or with a `List` of positional parameters
+or a `Map` of named parameters. The accumulated entries are executed as a single JDBC
+batch by `update()`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
+			.batch()
+				.entry(entry -> entry.param("firstName", "Leonor").param("lastName", "Watling"))
+				.entry(entry -> entry.param("firstName", "Christian").param("lastName", "Bale"))
+			.update();
+----
+
+Alternatively, define several entries at once through `entries(...)`, with each given
+parameter source object – for example, an `Actor` record – representing one entry.
+`entry(...)` and `entries(...)` calls may be freely combined within the same batch:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	List<Actor> actors = ...;
+	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
+			.batch()
+				.entries(actors)
+			.update();
+----
+
 The automatic `Actor` class mapping for parameters as well as the query results above is
 provided through implicit `SimplePropertySqlParameterSource` and `SimplePropertyRowMapper`
 strategies which are also available for direct use. They can serve as a common replacement
@@ -687,9 +713,9 @@ for `BeanPropertySqlParameterSource` and `BeanPropertyRowMapper`/`DataClassRowMa
 also with `JdbcTemplate` and `NamedParameterJdbcTemplate` themselves.
 
 NOTE: `JdbcClient` is a flexible but simplified facade for JDBC query/update statements.
-Advanced capabilities such as batch inserts and stored procedure calls typically require
-extra customization: consider Spring's `SimpleJdbcInsert` and `SimpleJdbcCall` classes or
-plain direct `JdbcTemplate` usage for any such capabilities not available in `JdbcClient`.
+Advanced capabilities such as stored procedure calls typically require extra customization:
+consider Spring's `SimpleJdbcInsert` and `SimpleJdbcCall` classes or plain direct
+`JdbcTemplate` usage for any such capabilities not available in `JdbcClient`.
 
 
 [[jdbc-SQLExceptionTranslator]]

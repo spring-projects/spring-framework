@@ -387,11 +387,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 
 		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
-			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC Connection found! JpaTransactionManager does not support " +
-					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
-					"It is recommended to use a single JpaTransactionManager for all transactions " +
-					"on a single DataSource, no matter whether JPA or JDBC access.");
+			throw new IllegalTransactionStateException("""
+					Pre-bound JDBC Connection found! JpaTransactionManager does not support running within \
+					another transaction manager that exposes a JDBC Connection for the same DataSource \
+					(or after a leaked Connection binding) if told to manage the DataSource itself. \
+					Use a single JpaTransactionManager for all transactions on a single DataSource.""");
 		}
 
 		try {

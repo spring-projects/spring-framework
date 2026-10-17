@@ -108,7 +108,6 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	@Deprecated(since = "6.1")
 	public ConcurrentTaskScheduler() {
-		super();
 		this.scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 		this.enterpriseConcurrentScheduler = false;
 	}

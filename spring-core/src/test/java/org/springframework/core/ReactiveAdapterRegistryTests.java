@@ -301,6 +301,20 @@ class ReactiveAdapterRegistryTests {
 		}
 
 		@Test
+		void fromNullValue() {
+			Object target = getAdapter(Uni.class).toPublisher(null);
+			assertThat(target).isInstanceOf(Mono.class);
+			assertThat(((Mono<Integer>) target).block(FIVE_SECONDS)).isNull();
+		}
+
+		@Test
+		void toUniFromEmptyPublisher() {
+			Object target = getAdapter(Uni.class).fromPublisher(Mono.empty());
+			assertThat(target).isInstanceOf(Uni.class);
+			assertThat(((Uni<Integer>) target).await().atMost(FIVE_SECONDS)).isNull();
+		}
+
+		@Test
 		void toMulti() {
 			List<Integer> sequence = Arrays.asList(1, 2, 3);
 			Publisher<Integer> source = Flux.fromIterable(sequence);

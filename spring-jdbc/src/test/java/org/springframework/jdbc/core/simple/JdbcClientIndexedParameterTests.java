@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -33,6 +34,9 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InOrder;
 
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.SqlParameterValue;
@@ -42,11 +46,13 @@ import org.springframework.jdbc.support.KeyHolder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 6.1
  */
 class JdbcClientIndexedParameterTests {
@@ -66,21 +72,21 @@ class JdbcClientIndexedParameterTests {
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
 
 
-	private Connection connection = mock();
+	private final Connection connection = mock();
 
-	private DataSource dataSource = mock();
+	private final DataSource dataSource = mock();
 
-	private PreparedStatement preparedStatement = mock();
+	private final PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet = mock();
+	private final ResultSet resultSet = mock();
 
-	private ResultSetMetaData resultSetMetaData = mock();
+	private final ResultSetMetaData resultSetMetaData = mock();
 
-	private DatabaseMetaData databaseMetaData = mock();
+	private final DatabaseMetaData databaseMetaData = mock();
 
-	private JdbcClient client = JdbcClient.create(dataSource);
+	private final JdbcClient client = JdbcClient.create(dataSource);
 
-	private List<Object> params = new ArrayList<>();
+	private final List<Object> params = new ArrayList<>();
 
 
 	@BeforeEach
@@ -322,6 +328,66 @@ class JdbcClientIndexedParameterTests {
 		verify(connection).close();
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateSingleRow(boolean supportsBatchUpdates) throws SQLException {
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(new int[] {1});
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(1);
+		}
+
+		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
+				.entry(entry -> entry.param(1, 1).param(2, 1))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement(UPDATE_INDEXED_PARAMETERS);
+		inOrder.verify(preparedStatement).setObject(1, 1);
+		inOrder.verify(preparedStatement).setObject(2, 1);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateMultipleRows(boolean supportsBatchUpdates) throws SQLException {
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(new int[] {1, 1});
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(1);
+		}
+
+		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
+				.entry(entry -> entry.param(1, 1).param(2, 1))
+				.entry(entry -> entry.param(1, 2).param(2, 2))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement(UPDATE_INDEXED_PARAMETERS);
+		inOrder.verify(preparedStatement).setObject(1, 1);
+		inOrder.verify(preparedStatement).setObject(2, 1);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setObject(1, 2);
+		inOrder.verify(preparedStatement).setObject(2, 2);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
+	}
+
 	@Test
 	void updateWithTypedParameters() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
@@ -338,10 +404,76 @@ class JdbcClientIndexedParameterTests {
 		verify(connection).close();
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithTypedParameters(boolean supportsBatchUpdates) throws SQLException {
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(new int[] {1, 1});
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(1);
+		}
+
+		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
+				.entry(entry -> entry.param(1, new SqlParameterValue(Types.DECIMAL, 1)).param(2, new SqlParameterValue(Types.INTEGER, 1)))
+				.entry(entry -> entry.param(1, new SqlParameterValue(Types.DECIMAL, 2)).param(2, new SqlParameterValue(Types.INTEGER, 2)))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement(UPDATE_INDEXED_PARAMETERS);
+		inOrder.verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
+		inOrder.verify(preparedStatement).setObject(2, 1, Types.INTEGER);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setObject(1, 2, Types.DECIMAL);
+		inOrder.verify(preparedStatement).setObject(2, 2, Types.INTEGER);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithParametersAndSqlType(boolean supportsBatchUpdates) throws SQLException {
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(new int[] {1, 1});
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(1);
+		}
+
+		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
+				.entry(entry -> entry.param(1, 1, Types.DECIMAL).param(2, 1, Types.INTEGER))
+				.entry(entry -> entry.param(1, 2, Types.DECIMAL).param(2, 2, Types.INTEGER))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		InOrder inOrder = inOrder(connection, preparedStatement);
+		inOrder.verify(connection).prepareStatement(UPDATE_INDEXED_PARAMETERS);
+		inOrder.verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
+		inOrder.verify(preparedStatement).setObject(2, 1, Types.INTEGER);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).setObject(1, 2, Types.DECIMAL);
+		inOrder.verify(preparedStatement).setObject(2, 2, Types.INTEGER);
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
+	}
+
 	@Test
 	void updateWithGeneratedKeys() throws SQLException {
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
-		given(resultSetMetaData.getColumnLabel(1)).willReturn("1");
+		given(resultSetMetaData.getColumnLabel(1)).willReturn("id");
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getObject(1)).willReturn(11);
@@ -354,7 +486,7 @@ class JdbcClientIndexedParameterTests {
 		int rowsAffected = client.sql(INSERT_GENERATE_KEYS).param("rod").update(generatedKeyHolder);
 
 		assertThat(rowsAffected).isEqualTo(1);
-		assertThat(generatedKeyHolder.getKeyList()).hasSize(1);
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("id", 11));
 		assertThat(generatedKeyHolder.getKey()).isEqualTo(11);
 		verify(preparedStatement).setString(1, "rod");
 		verify(resultSet).close();
@@ -362,10 +494,55 @@ class JdbcClientIndexedParameterTests {
 		verify(connection).close();
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithGeneratedKeys(boolean supportsBatchUpdates) throws SQLException {
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(new int[] {1, 1});
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(1);
+		}
+		given(resultSetMetaData.getColumnCount()).willReturn(1);
+		given(resultSetMetaData.getColumnLabel(1)).willReturn("id");
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, true, false);
+		given(resultSet.getObject(1)).willReturn(11, 12);
+		given(preparedStatement.getGeneratedKeys()).willReturn(resultSet);
+		given(connection.prepareStatement(INSERT_GENERATE_KEYS, PreparedStatement.RETURN_GENERATED_KEYS))
+				.willReturn(preparedStatement);
+
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int[] rowsAffected = client.sql(INSERT_GENERATE_KEYS).batch()
+				.entry(entry -> entry.param("rod"))
+				.entry(entry -> entry.param("johnson"))
+				.update(generatedKeyHolder);
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("id", 11), Map.of("id", 12));
+		InOrder inOrder = inOrder(connection, preparedStatement, resultSet);
+		inOrder.verify(connection).prepareStatement(INSERT_GENERATE_KEYS, PreparedStatement.RETURN_GENERATED_KEYS);
+		inOrder.verify(preparedStatement).setString(1, "rod");
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		else {
+			inOrder.verify(resultSet).close();
+		}
+		inOrder.verify(preparedStatement).setString(1, "johnson");
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(resultSet).close();
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
+	}
+
 	@Test
 	void updateWithGeneratedKeysAndKeyColumnNames() throws SQLException {
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
-		given(resultSetMetaData.getColumnLabel(1)).willReturn("1");
+		given(resultSetMetaData.getColumnLabel(1)).willReturn("id");
 		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getObject(1)).willReturn(11);
@@ -378,12 +555,57 @@ class JdbcClientIndexedParameterTests {
 		int rowsAffected = client.sql(INSERT_GENERATE_KEYS).param("rod").update(generatedKeyHolder, "id");
 
 		assertThat(rowsAffected).isEqualTo(1);
-		assertThat(generatedKeyHolder.getKeyList()).hasSize(1);
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("id", 11));
 		assertThat(generatedKeyHolder.getKey()).isEqualTo(11);
 		verify(preparedStatement).setString(1, "rod");
 		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void batchUpdateWithGeneratedKeysAndKeyColumnNames(boolean supportsBatchUpdates) throws SQLException {
+		if (supportsBatchUpdates) {
+			given(connection.getMetaData()).willReturn(databaseMetaData);
+			given(preparedStatement.executeBatch()).willReturn(new int[] {1, 1});
+		}
+		else {
+			given(preparedStatement.executeUpdate()).willReturn(1);
+		}
+		given(resultSetMetaData.getColumnCount()).willReturn(1);
+		given(resultSetMetaData.getColumnLabel(1)).willReturn("id");
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, true, false);
+		given(resultSet.getObject(1)).willReturn(11, 12);
+		given(preparedStatement.getGeneratedKeys()).willReturn(resultSet);
+		given(connection.prepareStatement(INSERT_GENERATE_KEYS, new String[] {"id"}))
+				.willReturn(preparedStatement);
+
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int[] rowsAffected = client.sql(INSERT_GENERATE_KEYS).batch()
+				.entry(entry -> entry.param("rod"))
+				.entry(entry -> entry.param("johnson"))
+				.update(generatedKeyHolder, "id");
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("id", 11), Map.of("id", 12));
+		InOrder inOrder = inOrder(connection, preparedStatement, resultSet);
+		inOrder.verify(connection).prepareStatement(INSERT_GENERATE_KEYS, new String[] {"id"});
+		inOrder.verify(preparedStatement).setString(1, "rod");
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		else {
+			inOrder.verify(resultSet).close();
+		}
+		inOrder.verify(preparedStatement).setString(1, "johnson");
+		if (supportsBatchUpdates) {
+			inOrder.verify(preparedStatement).addBatch();
+		}
+		inOrder.verify(resultSet).close();
+		inOrder.verify(preparedStatement).close();
+		inOrder.verify(connection).close();
 	}
 
 }

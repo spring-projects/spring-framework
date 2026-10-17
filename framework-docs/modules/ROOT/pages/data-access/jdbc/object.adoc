@@ -556,7 +556,7 @@ Java::
 
 		public TitlesAfterDateStoredProcedure(DataSource dataSource) {
 			super(dataSource, SPROC_NAME);
-			declareParameter(new SqlParameter(CUTOFF_DATE_PARAM, Types.DATE);
+			declareParameter(new SqlParameter(CUTOFF_DATE_PARAM, Types.DATE));
 			declareParameter(new SqlOutParameter("titles", OracleTypes.CURSOR, new TitleMapper()));
 			compile();
 		}

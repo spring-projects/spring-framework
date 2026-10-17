@@ -41,12 +41,14 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.beans.InvalidPropertyException;
+import org.springframework.beans.InvalidPropertyPathException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
-import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.PropertyPath;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.SimpleTypeConverter;
@@ -166,6 +168,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	private boolean autoGrowNestedPaths = true;
 
 	private int autoGrowCollectionLimit = DEFAULT_AUTO_GROW_COLLECTION_LIMIT;
+
+	private int maxNestedPathDepth = ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH;
 
 	private String @Nullable [] allowedFields;
 
@@ -293,6 +297,37 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
+	 * Specify the maximum nesting depth permitted for a nested property path.
+	 * <p>The nesting depth of a property path corresponds to the number of
+	 * intermediate properties that must be traversed in order to reach the final
+	 * property. For example, {@code "address.country.name"} has a nesting depth
+	 * of 2, since the {@code address} and {@code country} properties must be
+	 * traversed in order to reach the {@code name} property.
+	 * <p>Default is {@link ConfigurablePropertyAccessor#DEFAULT_MAX_NESTED_PATH_DEPTH}.
+	 * <p>Applies to setter and field injection via {@link #bind(PropertyValues)}
+	 * as well as to constructor binding via {@link #construct}, since a
+	 * constructor parameter which is itself an object is constructed recursively
+	 * through a nested property path.
+	 * @param maxNestedPathDepth the maximum nesting depth; must not be negative
+	 * @since 7.1
+	 * @see ConfigurablePropertyAccessor#setMaxNestedPathDepth(int)
+	 */
+	public void setMaxNestedPathDepth(int maxNestedPathDepth) {
+		Assert.state(this.bindingResult == null,
+				"DataBinder is already initialized - call setMaxNestedPathDepth before other configuration methods");
+		Assert.isTrue(maxNestedPathDepth >= 0, "'maxNestedPathDepth' must not be negative");
+		this.maxNestedPathDepth = maxNestedPathDepth;
+	}
+
+	/**
+	 * Return the maximum nesting depth permitted for a nested property path.
+	 * @since 7.1
+	 */
+	public int getMaxNestedPathDepth() {
+		return this.maxNestedPathDepth;
+	}
+
+	/**
 	 * Initialize standard JavaBean property access for this DataBinder.
 	 * <p>This is the default; an explicit call just leads to eager initialization.
 	 * @see #initDirectFieldAccess()
@@ -310,8 +345,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @since 4.2.1
 	 */
 	protected AbstractPropertyBindingResult createBeanPropertyBindingResult() {
-		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(),
-				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(), getObjectName(),
+				isAutoGrowNestedPaths(), getAutoGrowCollectionLimit(), getMaxNestedPathDepth());
 
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
@@ -343,8 +378,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @since 4.2.1
 	 */
 	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
-		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
-				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(), getObjectName(),
+				isAutoGrowNestedPaths(), getAutoGrowCollectionLimit(), getMaxNestedPathDepth());
 
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
@@ -506,9 +541,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts), as
 	 * well as direct equality.
 	 * <p>The default implementation of this method stores allowed field patterns
-	 * in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String) canonical}
-	 * form. Subclasses which override this method must therefore take this into
-	 * account.
+	 * in {@linkplain PropertyPath#canonicalName() canonical} form. Subclasses
+	 * which override this method must therefore take this into account.
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Used for binding to fields with {@link #bind(PropertyValues)}, and not
@@ -518,7 +552,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #isAllowed(String)
 	 */
 	public void setAllowedFields(String @Nullable ... allowedFields) {
-		this.allowedFields = PropertyAccessorUtils.canonicalPropertyNames(allowedFields);
+		this.allowedFields = canonicalPropertyNames(allowedFields);
 	}
 
 	/**
@@ -539,9 +573,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts),
 	 * as well as direct equality.
 	 * <p>The default implementation of this method stores disallowed field
-	 * patterns in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String)
-	 * canonical} form, and subsequently pattern matching in {@link #isAllowed}
-	 * is case-insensitive. Subclasses that override this method must therefore
+	 * patterns in {@linkplain PropertyPath#canonicalName() canonical} form,
+	 * and subsequently pattern matching in {@link #isAllowed} is
+	 * case-insensitive. Subclasses that override this method must therefore
 	 * take this transformation into account.
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
@@ -558,16 +592,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	@Deprecated(since = "7.1", forRemoval = true)
 	public void setDisallowedFields(String @Nullable ... disallowedFields) {
-		if (disallowedFields == null) {
-			this.disallowedFields = null;
-		}
-		else {
-			String[] fieldPatterns = new String[disallowedFields.length];
-			for (int i = 0; i < fieldPatterns.length; i++) {
-				fieldPatterns[i] = PropertyAccessorUtils.canonicalPropertyName(disallowedFields[i]);
-			}
-			this.disallowedFields = fieldPatterns;
-		}
+		this.disallowedFields = canonicalPropertyNames(disallowedFields);
 	}
 
 	/**
@@ -594,7 +619,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see DefaultBindingErrorProcessor#MISSING_FIELD_ERROR_CODE
 	 */
 	public void setRequiredFields(String @Nullable ... requiredFields) {
-		this.requiredFields = PropertyAccessorUtils.canonicalPropertyNames(requiredFields);
+		this.requiredFields = canonicalPropertyNames(requiredFields);
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder requires binding of required fields [" +
 					StringUtils.arrayToCommaDelimitedString(requiredFields) + "]");
@@ -887,7 +912,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.state(this.target == null, "Target instance already available");
 		Assert.state(this.targetType != null, "Target type not set");
 
-		this.target = createObject(this.targetType, "", valueResolver);
+		this.target = createObject(this.targetType, "", valueResolver, 0);
 
 		if (!getBindingResult().hasErrors()) {
 			this.bindingResult = null;
@@ -897,13 +922,23 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 	}
 
-	private @Nullable Object createObject(ResolvableType objectType, String nestedPath, ValueResolver valueResolver) {
+	private @Nullable Object createObject(ResolvableType objectType, String nestedPath,
+			ValueResolver valueResolver, int depth) {
+
 		Class<?> clazz = objectType.resolve();
 		boolean isOptional = (clazz == Optional.class);
 		clazz = (isOptional ? objectType.resolveGeneric(0) : clazz);
 		if (clazz == null) {
 			throw new IllegalStateException(
 					"Insufficient type information to create instance of " + objectType);
+		}
+
+		int maxNestedPathDepth = getMaxNestedPathDepth();
+		if (depth > maxNestedPathDepth) {
+			// The nested path always ends with a separator at this point, since the
+			// depth can only exceed the limit for a nested constructor argument.
+			throw new InvalidPropertyException(clazz, nestedPath.substring(0, nestedPath.length() - 1),
+					"Nesting depth of property path exceeds the maximum of " + maxNestedPathDepth);
 		}
 
 		Object result = null;
@@ -938,18 +973,18 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 				if (value == null) {
 					if (List.class.isAssignableFrom(paramType)) {
-						value = createList(paramPath, paramType, resolvableType, valueResolver);
+						value = createList(paramPath, paramType, resolvableType, valueResolver, depth);
 					}
 					else if (Map.class.isAssignableFrom(paramType)) {
-						value = createMap(paramPath, paramType, resolvableType, valueResolver);
+						value = createMap(paramPath, paramType, resolvableType, valueResolver, depth);
 					}
 					else if (paramType.isArray()) {
-						value = createArray(paramPath, paramType, resolvableType, valueResolver);
+						value = createArray(paramPath, paramType, resolvableType, valueResolver, depth);
 					}
 				}
 
 				if (value == null && shouldConstructArgument(param) && hasValuesFor(paramPath, valueResolver)) {
-					args[i] = createObject(resolvableType, paramPath + ".", valueResolver);
+					args[i] = createObject(resolvableType, paramPath + ".", valueResolver, depth + 1);
 				}
 				else {
 					try {
@@ -1026,8 +1061,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return false;
 	}
 
-	private @Nullable List<?> createList(
-			String paramPath, Class<?> paramType, ResolvableType type, ValueResolver valueResolver) {
+	private @Nullable List<?> createList(String paramPath, Class<?> paramType, ResolvableType type,
+			ValueResolver valueResolver, int depth) {
 
 		ResolvableType elementType = type.getNested(2);
 		SortedSet<Integer> indexes = getIndexes(paramPath, valueResolver);
@@ -1045,14 +1080,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		for (int index : indexes) {
 			String indexedPath = paramPath + "[" + (index != NO_INDEX ? index : "") + "]";
 			list.set(Math.max(index, 0),
-					createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver));
+					createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver, depth));
 		}
 
 		return list;
 	}
 
-	private <V> @Nullable Map<String, V> createMap(
-			String paramPath, Class<?> paramType, ResolvableType type, ValueResolver valueResolver) {
+	private <V> @Nullable Map<String, V> createMap(String paramPath, Class<?> paramType, ResolvableType type,
+			ValueResolver valueResolver, int depth) {
 
 		ResolvableType elementType = type.getNested(2);
 		Map<String, V> map = null;
@@ -1074,15 +1109,15 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			}
 
 			String indexedPath = name.substring(0, endIdx + 1);
-			map.put(key, createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver));
+			map.put(key, createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver, depth));
 		}
 
 		return map;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <V> @Nullable V @Nullable [] createArray(
-			String paramPath, Class<?> paramType, ResolvableType type, ValueResolver valueResolver) {
+	private <V> @Nullable V @Nullable [] createArray(String paramPath, Class<?> paramType, ResolvableType type,
+			ValueResolver valueResolver, int depth) {
 
 		ResolvableType elementType = type.getNested(2);
 		SortedSet<Integer> indexes = getIndexes(paramPath, valueResolver);
@@ -1097,7 +1132,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		for (int index : indexes) {
 			String indexedPath = paramPath + "[" + (index != NO_INDEX ? index : "") + "]";
 			array[Math.max(index, 0)] =
-					createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver);
+					createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver, depth);
 		}
 
 		return array;
@@ -1129,19 +1164,19 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	@SuppressWarnings("unchecked")
 	private <V> @Nullable V createIndexedValue(
 			String paramPath, Class<?> containerType, ResolvableType elementType,
-			String indexedPath, ValueResolver valueResolver) {
+			String indexedPath, ValueResolver valueResolver, int depth) {
 
 		Object value = null;
 		Class<?> elementClass = elementType.resolve(Object.class);
 
 		if (List.class.isAssignableFrom(elementClass)) {
-			value = createList(indexedPath, elementClass, elementType, valueResolver);
+			value = createList(indexedPath, elementClass, elementType, valueResolver, depth);
 		}
 		else if (Map.class.isAssignableFrom(elementClass)) {
-			value = createMap(indexedPath, elementClass, elementType, valueResolver);
+			value = createMap(indexedPath, elementClass, elementType, valueResolver, depth);
 		}
 		else if (elementClass.isArray()) {
-			value = createArray(indexedPath, elementClass, elementType, valueResolver);
+			value = createArray(indexedPath, elementClass, elementType, valueResolver, depth);
 		}
 		else {
 			Object rawValue = valueResolver.resolveValue(indexedPath, elementClass);
@@ -1154,7 +1189,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				}
 			}
 			else {
-				value = createObject(elementType, indexedPath + ".", valueResolver);
+				value = createObject(elementType, indexedPath + ".", valueResolver, depth + 1);
 			}
 		}
 
@@ -1250,6 +1285,17 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		applyPropertyValues(mpvs);
 	}
 
+	private static String @Nullable [] canonicalPropertyNames(String @Nullable [] fields) {
+		if (fields == null) {
+			return null;
+		}
+		String[] result = new String[fields.length];
+		for (int i = 0; i < fields.length; i++) {
+			result[i] = PropertyPath.canonicalNameOrOriginal(fields[i]);
+		}
+		return result;
+	}
+
 	/**
 	 * Check the given property values against the allowed fields,
 	 * removing values for fields that are not allowed.
@@ -1259,11 +1305,23 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected void checkAllowedFields(MutablePropertyValues mpvs) {
 		PropertyValue[] pvs = mpvs.getPropertyValues();
+		PropertyPath.Options options = PropertyPath.Options.withMaxNestedPathDepth(getMaxNestedPathDepth());
 		for (PropertyValue pv : pvs) {
-			String field = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
-			if (!isAllowed(field)) {
+			PropertyPath field;
+			try {
+				field = PropertyPath.parse(pv.getName(), options);
+			}
+			catch (InvalidPropertyPathException ex) {
 				mpvs.removePropertyValue(pv);
-				getBindingResult().recordSuppressedField(field);
+				Object target = getTarget();
+				getBindingErrorProcessor().processPropertyAccessException(
+						new InvalidPropertyPathException(target != null ? target : this, pv.getName(), pv.getValue(), ex),
+						getInternalBindingResult());
+				continue;
+			}
+			if (!isAllowed(field.canonicalName())) {
+				mpvs.removePropertyValue(pv);
+				getBindingResult().recordSuppressedField(field.canonicalName());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Field [" + field + "] has been removed from PropertyValues " +
 							"and will not be bound, because it has not been found in the list of allowed fields");
@@ -1283,12 +1341,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * matching against disallowed field patterns is case-insensitive.
 	 * <p>A field matching a disallowed pattern will not be accepted even if it
 	 * also happens to match a pattern in the allowed list.
+	 * <p>{@code field} is matched as-is, but it must already have been validated
+	 * and canonicalized via {@link PropertyPath} by the caller first.
 	 * <p>Can be overridden in subclasses, but care must be taken to honor the
 	 * aforementioned contract.
-	 * @param field the field to check
+	 * @param field the field to check, expected to already be in canonical form
 	 * @return {@code true} if the field is allowed
 	 * @see #setAllowedFields
-	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String[], String)
 	 */
 	protected boolean isAllowed(String field) {
 		String[] allowed = getAllowedFields();
@@ -1317,7 +1377,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			Map<String, PropertyValue> propertyValues = new HashMap<>();
 			PropertyValue[] pvs = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvs) {
-				String canonicalName = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
+				String canonicalName = PropertyPath.canonicalNameOrOriginal(pv.getName());
 				propertyValues.put(canonicalName, pv);
 			}
 			for (String field : requiredFields) {

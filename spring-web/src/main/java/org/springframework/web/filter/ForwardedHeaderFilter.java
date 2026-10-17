@@ -249,8 +249,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 		else {
 			return (useStandardHeader ?
-					ForwardedHeaderUtils.parseStandardHeader(uri, headers, remoteAddress, localAddress) :
-					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, remoteAddress, localAddress));
+					ForwardedHeaderUtils.parseStandardHeader(uri, headers) :
+					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers));
 		}
 	}
 
@@ -400,7 +400,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@Override
 		public int getRemotePort() {
-			return (this.remoteAddress != null ? this.remoteAddress.getPort() : super.getRemotePort());
+			return (this.remoteAddress != null ? getPortToUse(this.remoteAddress) : super.getRemotePort());
 		}
 
 		@Override
@@ -410,7 +410,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@Override
 		public int getLocalPort() {
-			return (this.localAddress != null ? this.localAddress.getPort() : super.getLocalPort());
+			return (this.localAddress != null ? getPortToUse(this.localAddress) : super.getLocalPort());
+		}
+
+		private static int getPortToUse(InetSocketAddress address) {
+			// The port or -1 if not included in forwarded headers
+			return (address.getPort() != 0 ? address.getPort() : -1);
 		}
 
 		@SuppressWarnings("DataFlowIssue")

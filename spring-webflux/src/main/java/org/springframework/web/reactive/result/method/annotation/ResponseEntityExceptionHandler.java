@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
@@ -382,8 +383,10 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * <p>The default implementation does the following:
 	 * <ul>
 	 * <li>return {@code null} if response is already committed
-	 * <li>set the {@code "jakarta.servlet.error.exception"} request attribute
-	 * if the response status is 500 (INTERNAL_SERVER_ERROR).
+	 * <li>record the exception as the error of the current HTTP server observation,
+	 * if any, when the response status is a 5xx server error, since it signals
+	 * a server failure. Exceptions resulting in other statuses, for example, 4xx
+	 * client errors, are not recorded as errors.
 	 * <li>extract the {@link ErrorResponse#getBody() body} from
 	 * {@link ErrorResponse} exceptions, if the {@code body} is {@code null}.
 	 * </ul>
@@ -404,6 +407,11 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 
 		if (body == null && ex instanceof ErrorResponse errorResponse) {
 			body = errorResponse.updateAndGetBody(this.messageSource, getLocale(exchange));
+		}
+
+		if (status.is5xxServerError()) {
+			ServerRequestObservationContext.findCurrent(exchange.getAttributes())
+					.ifPresent(context -> context.setError(ex));
 		}
 
 		return createResponseEntity(body, headers, status, exchange);

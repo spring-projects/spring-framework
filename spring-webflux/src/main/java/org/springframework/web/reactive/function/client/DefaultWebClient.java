@@ -681,14 +681,14 @@ final class DefaultWebClient implements WebClient {
 		}
 
 		private <T> Publisher<T> handleBodyFlux(ClientResponse response, Flux<T> body) {
-			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response));
+			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, this.<T>exceptionWrappingFunction(response));
 			Mono<T> result = applyStatusHandlers(response);
 			return (result != null ? result.flux().switchIfEmpty(body) : body);
 		}
 
 		private <T> Mono<? extends ResponseEntity<Flux<T>>> handlerEntityFlux(ClientResponse response, Flux<T> body) {
 			ResponseEntity<Flux<T>> entity = new ResponseEntity<>(
-					body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response)),
+					body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, this.<T>exceptionWrappingFunction(response)),
 					response.headers().asHttpHeaders(),
 					response.statusCode());
 

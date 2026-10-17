@@ -40,11 +40,16 @@ possible:
 
 include-code::./FamilyControllerTests[tag=extract-convert-assert-factory,indent=0]
 
-https://jsonassert.skyscreamer.org[JSONAssert] is also supported. The body of the
+Comparing the full JSON document is also supported, using either
+https://github.com/lukas-krecan/JsonUnit[JsonUnit] or
+https://jsonassert.skyscreamer.org[JSONassert]. The body of the
 response can be matched against a `Resource` or a content. If the content ends with
-`.json ` we look for a file matching that name on the classpath:
+`.json` we look for a file matching that name on the classpath:
 
 include-code::./FamilyControllerTests[tag=assert-file,indent=0]
 
-If you prefer to use another library, you can provide an implementation of
-{spring-framework-api}/test/json/JsonComparator.html[`JsonComparator`].
+This requires either JsonUnit (`net.javacrumbs.json-unit:json-unit-core`) or JSONassert
+(`org.skyscreamer:jsonassert`) on the classpath. If both are present, JsonUnit is used.
+You can also provide your own
+{spring-framework-api}/test/json/JsonComparator.html[`JsonComparator`] to use another
+library or a custom configuration.

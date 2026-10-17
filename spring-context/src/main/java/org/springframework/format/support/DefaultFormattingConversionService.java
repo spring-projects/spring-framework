@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.format.datetime.DateFormatterRegistrar;
+import org.springframework.format.datetime.DateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
 import org.springframework.format.number.money.CurrencyUnitFormatter;
@@ -115,11 +115,12 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 
 		// Default handling of date-time values
 
-		// just handling JSR-310 specific date and time types
+		// Handling of JSR-310 specific date and time types, along with the legacy
+		// Date/Calendar/Long converters (see DateTimeConverters).
 		new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
 
-		// regular DateFormat-based Date, Calendar, Long converters
-		new DateFormatterRegistrar().registerFormatters(formatterRegistry);
+		// Support for the @DateTimeFormat annotation on legacy Date/Calendar fields
+		formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
 	}
 
 }

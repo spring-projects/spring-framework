@@ -24,6 +24,10 @@ import java.lang.reflect.Modifier;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationsScannerTests.PackagePrivateMethodChild;
+import org.springframework.core.annotation.AnnotationsScannerTests.PackagePrivateMethodOverridingChild;
+import org.springframework.core.annotation.AnnotationsScannerTests.PublicMethodOverridingChild;
+import org.springframework.core.annotation.subpackage.PackagePrivateMethodSuperclass.Marker;
 import org.springframework.util.ReflectionUtils;
 
 import static java.util.Arrays.stream;
@@ -85,6 +89,57 @@ class AnnotatedMethodTests {
 		assertThat(methodParameters[1].hasParameterAnnotation(Param.class)).isTrue();
 	}
 
+	@Test  // gh-37390
+	void shouldNotInheritParameterAnnotationsFromStaticMethods() {
+		Method method = ReflectionUtils.findMethod(StaticMethodChild.class, "process", String.class);
+		assertThat(method).isNotNull();
+
+		AnnotatedMethod annotatedMethod = new AnnotatedMethod(method);
+		MethodParameter[] methodParameters = annotatedMethod.getMethodParameters();
+
+		assertThat(methodParameters).hasSize(1);
+		assertThat(methodParameters[0].hasParameterAnnotation(Param.class)).isFalse();
+	}
+
+	@Test  // gh-37408
+	void shouldNotInheritAnnotationsFromPackagePrivateMethodInDifferentPackage() {
+		Method method = ReflectionUtils.findMethod(PackagePrivateMethodChild.class, "process", String.class);
+		assertThat(method).isNotNull();
+
+		AnnotatedMethod annotatedMethod = new AnnotatedMethod(method);
+		MethodParameter[] methodParameters = annotatedMethod.getMethodParameters();
+
+		assertThat(annotatedMethod.hasMethodAnnotation(Marker.class)).isFalse();
+		assertThat(methodParameters).hasSize(1);
+		assertThat(methodParameters[0].hasParameterAnnotation(Marker.class)).isFalse();
+	}
+
+	@Test  // gh-37408
+	void shouldInheritAnnotationsFromPackagePrivateMethodInDifferentPackageOverriddenTransitively() {
+		Method method = ReflectionUtils.findMethod(PublicMethodOverridingChild.class, "process", String.class);
+		assertThat(method).isNotNull();
+
+		AnnotatedMethod annotatedMethod = new AnnotatedMethod(method);
+		MethodParameter[] methodParameters = annotatedMethod.getMethodParameters();
+
+		assertThat(annotatedMethod.hasMethodAnnotation(Marker.class)).isTrue();
+		assertThat(methodParameters).hasSize(1);
+		assertThat(methodParameters[0].hasParameterAnnotation(Marker.class)).isTrue();
+	}
+
+	@Test  // gh-37408
+	void shouldNotInheritAnnotationsFromPackagePrivateMethodInDifferentPackageViaPackagePrivateOverride() {
+		Method method = ReflectionUtils.findMethod(PackagePrivateMethodOverridingChild.class, "process", String.class);
+		assertThat(method).isNotNull();
+
+		AnnotatedMethod annotatedMethod = new AnnotatedMethod(method);
+		MethodParameter[] methodParameters = annotatedMethod.getMethodParameters();
+
+		assertThat(annotatedMethod.hasMethodAnnotation(Marker.class)).isFalse();
+		assertThat(methodParameters).hasSize(1);
+		assertThat(methodParameters[0].hasParameterAnnotation(Marker.class)).isFalse();
+	}
+
 
 	private static Method getMethod(String name, Class<?>...parameterTypes) {
 		Class<?> clazz = GenericInterfaceImpl.class;
@@ -127,6 +182,24 @@ class AnnotatedMethodTests {
 
 		@Override
 		void processTwo(String value) {
+		}
+	}
+
+	static class StaticMethodSuperclass {
+
+		static void process(@Param String value) {
+		}
+	}
+
+	interface StaticMethodInterface {
+
+		static void process(@Param String value) {
+		}
+	}
+
+	static class StaticMethodChild extends StaticMethodSuperclass implements StaticMethodInterface {
+
+		static void process(String value) {
 		}
 	}
 

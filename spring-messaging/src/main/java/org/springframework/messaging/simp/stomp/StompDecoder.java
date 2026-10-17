@@ -134,7 +134,7 @@ public class StompDecoder {
 		byteBuffer.mark();
 
 		String command = readCommand(byteBuffer);
-		if (command.length() > 0) {
+		if (!command.isEmpty()) {
 			StompHeaderAccessor headerAccessor = null;
 			byte[] payload = null;
 			if (byteBuffer.remaining() > 0) {

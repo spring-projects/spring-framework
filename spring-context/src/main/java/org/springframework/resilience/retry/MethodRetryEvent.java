@@ -66,6 +66,7 @@ public class MethodRetryEvent extends MethodFailureEvent {
 	 * @see reactor.core.Exceptions#isRetryExhausted
 	 * @see java.util.concurrent.TimeoutException
 	 */
+	@Override
 	public Throwable getFailure() {
 		return super.getFailure();
 	}

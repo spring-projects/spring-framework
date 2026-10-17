@@ -272,6 +272,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	@Override
 	public WebTestClient.Builder responseTimeout(Duration timeout) {
+		Assert.notNull(timeout, "Timeout must not be null");
+		Assert.isTrue(!timeout.isNegative(), "Timeout must be a non-negative value");
 		this.responseTimeout = timeout;
 		return this;
 	}

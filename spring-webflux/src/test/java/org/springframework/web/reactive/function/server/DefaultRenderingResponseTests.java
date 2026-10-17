@@ -273,5 +273,26 @@ class DefaultRenderingResponseTests {
 				.verify();
 	}
 
+	@Test  // gh-37378
+	void from() {
+		ResponseCookie cookie = ResponseCookie.from("currency", "USD").build();
+		RenderingResponse other = RenderingResponse.create("foo")
+				.status(HttpStatus.CREATED)
+				.header("foo", "bar")
+				.cookie(cookie)
+				.modelAttribute("model", "value")
+				.build().block();
+
+		Mono<RenderingResponse> result = RenderingResponse.from(other).build();
+		StepVerifier.create(result)
+				.assertNext(response -> {
+					assertThat(response.name()).isEqualTo("foo");
+					assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED);
+					assertThat(response.headers().getFirst("foo")).isEqualTo("bar");
+					assertThat(response.cookies()).containsEntry("currency", List.of(cookie));
+					assertThat(response.model()).containsEntry("model", "value");
+				})
+				.verifyComplete();
+	}
 
 }

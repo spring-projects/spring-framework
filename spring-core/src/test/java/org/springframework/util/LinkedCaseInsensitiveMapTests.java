@@ -22,12 +22,14 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link LinkedCaseInsensitiveMap}.
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Yanming Zhou
  */
 class LinkedCaseInsensitiveMapTests {
 
@@ -106,6 +108,7 @@ class LinkedCaseInsensitiveMapTests {
 		assertThat(map.put("null", null)).isEqualTo("value");
 		assertThat(map.computeIfAbsent("NULL", s -> "value")).isEqualTo("value");
 		assertThat(map.get("null")).isEqualTo("value");
+		assertThat(map.keySet()).containsExactly("Key", "null");
 	}
 
 	@Test
@@ -113,6 +116,50 @@ class LinkedCaseInsensitiveMapTests {
 		assertThat(map.computeIfAbsent("key", key2 -> "value1")).isEqualTo("value1");
 		assertThat(map.computeIfAbsent("KEY", key1 -> "value2")).isEqualTo("value1");
 		assertThat(map.computeIfAbsent("Key", key -> "value3")).isEqualTo("value1");
+	}
+
+	@Test
+	void computeIfAbsentWithNullComputedValue() {
+		assertThat(map.computeIfAbsent("Key", key -> null)).isNull();
+		assertThat(map).isEmpty();
+		assertThat(map.containsKey("key")).isFalse();
+	}
+
+	@Test
+	void computeIfAbsentAfterNullComputedValueUsesGivenKey() {
+		assertThat(map.computeIfAbsent("Key", key -> null)).isNull();
+		assertThat(map.computeIfAbsent("KEY", key -> "value")).isEqualTo("value");
+		assertThat(map.keySet()).containsExactly("KEY");
+	}
+
+	@Test
+	void computeIfAbsentWithFailingMappingFunction() {
+		assertThatIllegalStateException().isThrownBy(() ->
+				map.computeIfAbsent("Key", key -> { throw new IllegalStateException(); }));
+		assertThat(map).isEmpty();
+		assertThat(map.containsKey("key")).isFalse();
+	}
+
+	@Test
+	void computeIfAbsentWithNullComputedValueForExistingNullValue() {
+		assertThat(map.put("Key", null)).isNull();
+		assertThat(map.computeIfAbsent("KEY", key -> null)).isNull();
+		assertThat(map).hasSize(1);
+		assertThat(map.containsKey("key")).isTrue();
+		assertThat(map.keySet()).containsExactly("Key");
+	}
+
+	@Test
+	void computeIfAbsentWithImmediatelyEvictedEntry() {
+		LinkedCaseInsensitiveMap<String> evictingMap = new LinkedCaseInsensitiveMap<>() {
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+				return true;
+			}
+		};
+		assertThat(evictingMap.computeIfAbsent("Key", key -> "value")).isEqualTo("value");
+		assertThat(evictingMap).isEmpty();
+		assertThat(evictingMap.containsKey("key")).isFalse();
 	}
 
 	@Test
@@ -232,6 +279,23 @@ class LinkedCaseInsensitiveMapTests {
 		map.put("Key", "value");
 		assertThat(map.entrySet().remove(Map.entry("KEY", "value"))).isTrue();
 		assertThat(map).isEmpty();
+	}
+
+	@Test
+	void containsValue() {
+		assertThat(map.containsValue("value")).isFalse();
+
+		map.put("key", "value");
+		assertThat(map.containsValue("value")).isTrue();
+		assertThat(map.containsValue("VALUE")).isFalse();
+	}
+
+	@Test
+	void containsNullValue() {
+		assertThat(map.containsValue(null)).isFalse();
+
+		map.put("key", null);
+		assertThat(map.containsValue(null)).isTrue();
 	}
 
 	private void nextAndRemove(Iterator<?> iterator) {

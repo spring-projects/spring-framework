@@ -119,7 +119,7 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 		int capacity = dataBuffers.stream().mapToInt(DataBuffer::readableByteCount).sum();
 		DefaultDataBuffer result = allocateBuffer(capacity);
 		dataBuffers.forEach(result::write);
-		dataBuffers.forEach(DataBufferUtils::release);
+		dataBuffers.forEach(DataBuffers::release);
 		return result;
 	}
 

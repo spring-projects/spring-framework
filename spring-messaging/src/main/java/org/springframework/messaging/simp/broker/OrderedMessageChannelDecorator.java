@@ -89,7 +89,7 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 	}
 
 	private void sendNextMessage() {
-		for (;;) {
+		while (true) {
 			Message<?> message = this.messages.peek();
 			if (message != null) {
 				try {

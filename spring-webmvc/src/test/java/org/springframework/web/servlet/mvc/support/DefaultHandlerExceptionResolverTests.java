@@ -32,11 +32,14 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -44,6 +47,7 @@ import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -277,6 +281,52 @@ class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Should attempt to send server error").isEqualTo(500);
+	}
+
+	@Test
+	void serverErrorResponseIsRecordedOnObservation() throws NoSuchMethodException {
+		ServerRequestObservationContext context = observationContext();
+		Method method = getClass().getMethod("handle", String.class);
+		MissingPathVariableException ex = new MissingPathVariableException("foo", new MethodParameter(method, 0));
+
+		exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(response.getStatus()).isEqualTo(500);
+		assertThat(context.getError()).isSameAs(ex);
+	}
+
+	@Test
+	void serviceUnavailableErrorResponseIsRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+		ErrorResponseException ex = new ErrorResponseException(HttpStatus.SERVICE_UNAVAILABLE);
+
+		exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(response.getStatus()).isEqualTo(503);
+		assertThat(context.getError()).isSameAs(ex);
+	}
+
+	@Test
+	void clientErrorResponseIsNotRecordedOnObservation() {
+		ServerRequestObservationContext context = observationContext();
+		MissingServletRequestParameterException ex = new MissingServletRequestParameterException("foo", "bar");
+
+		exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(response.getStatus()).isEqualTo(400);
+		assertThat(context.getError()).isNull();
+	}
+
+	@Test
+	void serverErrorResponseWithoutObservation() {
+		ErrorResponseException ex = new ErrorResponseException(HttpStatus.SERVICE_UNAVAILABLE);
+
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).isNotNull();
+		assertThat(response.getStatus()).isEqualTo(503);
+	}
+
+	private ServerRequestObservationContext observationContext() {
+		ServerRequestObservationContext context = new ServerRequestObservationContext(this.request, this.response);
+		this.request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, context);
+		return context;
 	}
 
 	@SuppressWarnings("unused")

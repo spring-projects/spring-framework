@@ -301,7 +301,6 @@ Java::
 		public Mono<Object> doInTransaction(ReactiveTransaction status) {
 			return updateOperation1().then(updateOperation2)
 						.doOnError(SomeBusinessException.class, e -> status.setRollbackOnly());
-			}
 		}
 	});
 ----
@@ -310,11 +309,11 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	transactionalOperator.execute(object : TransactionCallback() {
+	transactionalOperator.execute(object : TransactionCallback<Any> {
 
-		override fun doInTransactionWithoutResult(status: ReactiveTransaction) {
-			updateOperation1().then(updateOperation2)
-						.doOnError(SomeBusinessException.class, e -> status.setRollbackOnly())
+		override fun doInTransaction(status: ReactiveTransaction): Mono<Any> {
+			return updateOperation1().then(updateOperation2)
+						.doOnError(SomeBusinessException::class.java) { status.setRollbackOnly() }
 		}
 	})
 ----

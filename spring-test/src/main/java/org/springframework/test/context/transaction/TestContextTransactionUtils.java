@@ -275,7 +275,7 @@ public abstract class TestContextTransactionUtils {
 		}
 
 		@Override
-		public @Nullable String getName() {
+		public String getName() {
 			return this.name;
 		}
 	}

@@ -173,7 +173,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		}
 		catch (URISyntaxException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to get request  URL: " + ex.getMessage());
+				logger.debug("Failed to get request URL: " + ex.getMessage());
 			}
 			((HttpServletResponse) response).setStatus(400);
 			asyncContext.complete();

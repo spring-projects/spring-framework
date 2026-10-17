@@ -28,6 +28,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,12 @@ import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -61,6 +68,7 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 /**
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Juhwan Lee
  * @since 7.0
  */
 class RetryInterceptorTests {
@@ -313,6 +321,25 @@ class RetryInterceptorTests {
 		assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> proxy.retryOperation().join())
 				.withCauseInstanceOf(IllegalStateException.class);
 		assertThat(target.counter).hasValue(3);
+	}
+
+	@Test
+	void withCacheableAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(CacheableAnnotatedBean.class));
+		ctx.registerBeanDefinition("cacheManager", new RootBeanDefinition(ConcurrentMapCacheManager.class));
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(EnablingConfigWithCaching.class));
+		ctx.refresh();
+		CacheableAnnotatedBean proxy = ctx.getBean(CacheableAnnotatedBean.class);
+		CacheableAnnotatedBean target = (CacheableAnnotatedBean) AopProxyUtils.getSingletonTarget(proxy);
+		target.cache = ctx.getBean(CacheManager.class).getCache("tests");
+
+		// Simulates the cache being concurrently populated between retry attempts.
+		String result = proxy.retryOperation();
+		assertThat(result).isEqualTo("concurrently cached value");
+		// Only invoked once: the 2nd attempt found the cached value instead of
+		// invoking the target again, proving that retry wraps the cache check.
+		assertThat(target.counter).hasValue(1);
 	}
 
 	@Test
@@ -639,6 +666,24 @@ class RetryInterceptorTests {
 	}
 
 
+	static class CacheableAnnotatedBean {
+
+		AtomicInteger counter = new AtomicInteger();
+
+		@Nullable Cache cache;
+
+		@Cacheable("tests")
+		@Retryable(maxRetries = 2, delay = 10)
+		public String retryOperation() {
+			if (counter.incrementAndGet() == 1) {
+				this.cache.put(SimpleKey.EMPTY, "concurrently cached value");
+				throw new IllegalStateException();
+			}
+			return "result";
+		}
+	}
+
+
 	@EnableResilientMethods
 	static class EnablingConfig {
 	}
@@ -647,6 +692,12 @@ class RetryInterceptorTests {
 	@EnableAsync
 	@EnableResilientMethods
 	static class EnablingConfigWithAsync {
+	}
+
+
+	@EnableCaching
+	@EnableResilientMethods
+	static class EnablingConfigWithCaching {
 	}
 
 }

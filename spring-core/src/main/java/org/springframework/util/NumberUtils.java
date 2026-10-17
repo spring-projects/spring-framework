@@ -170,7 +170,8 @@ public abstract class NumberUtils {
 	 * target class, using the corresponding {@code decode} / {@code valueOf} method.
 	 * <p>Trims all whitespace (leading, trailing, and in between characters) from
 	 * the input {@code String} before attempting to parse the number.
-	 * <p>Supports numbers in hex format (with leading "0x", "0X", or "#") as well.
+	 * <p>Supports numbers in hex format (with leading "0x", "0X", or "#",
+	 * optionally preceded by a "+" or "-" sign) as well.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
@@ -276,7 +277,7 @@ public abstract class NumberUtils {
 	 * {@code Integer.valueOf}, etc.
 	 */
 	private static boolean isHexNumber(String value) {
-		int index = (value.startsWith("-") ? 1 : 0);
+		int index = (value.startsWith("-") || value.startsWith("+") ? 1 : 0);
 		return (value.startsWith("0x", index) || value.startsWith("0X", index) || value.startsWith("#", index));
 	}
 
@@ -290,9 +291,11 @@ public abstract class NumberUtils {
 		int index = 0;
 		boolean negative = false;
 
-		// Handle minus sign, if present.
-		if (value.startsWith("-")) {
-			negative = true;
+		// Handle sign, if present.
+		// Note: value is never empty here, since isHexNumber() has already matched it.
+		char firstChar = value.charAt(0);
+		if (firstChar == '-' || firstChar == '+') {
+			negative = (firstChar == '-');
 			index++;
 		}
 

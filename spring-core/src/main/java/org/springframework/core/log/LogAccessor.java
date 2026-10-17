@@ -120,16 +120,20 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void fatal(CharSequence message) {
-		this.log.fatal(message);
+		if (this.log.isFatalEnabled()) {
+			this.log.fatal(message);
+		}
 	}
 
 	/**
-	 * Log an error with fatal log level.
+	 * Log an exception with fatal log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
 	public void fatal(Throwable cause, CharSequence message) {
-		this.log.fatal(message, cause);
+		if (this.log.isFatalEnabled()) {
+			this.log.fatal(message, cause);
+		}
 	}
 
 	/**
@@ -137,16 +141,20 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void error(CharSequence message) {
-		this.log.error(message);
+		if (this.log.isErrorEnabled()) {
+			this.log.error(message);
+		}
 	}
 
 	/**
-	 * Log an error with error log level.
+	 * Log an exception with error log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
 	public void error(Throwable cause, CharSequence message) {
-		this.log.error(message, cause);
+		if (this.log.isErrorEnabled()) {
+			this.log.error(message, cause);
+		}
 	}
 
 	/**
@@ -154,16 +162,20 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void warn(CharSequence message) {
-		this.log.warn(message);
+		if (this.log.isWarnEnabled()) {
+			this.log.warn(message);
+		}
 	}
 
 	/**
-	 * Log an error with warn log level.
+	 * Log an exception with warn log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
 	public void warn(Throwable cause, CharSequence message) {
-		this.log.warn(message, cause);
+		if (this.log.isWarnEnabled()) {
+			this.log.warn(message, cause);
+		}
 	}
 
 	/**
@@ -171,16 +183,20 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void info(CharSequence message) {
-		this.log.info(message);
+		if (this.log.isInfoEnabled()) {
+			this.log.info(message);
+		}
 	}
 
 	/**
-	 * Log an error with info log level.
+	 * Log an exception with info log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
 	public void info(Throwable cause, CharSequence message) {
-		this.log.info(message, cause);
+		if (this.log.isInfoEnabled()) {
+			this.log.info(message, cause);
+		}
 	}
 
 	/**
@@ -188,16 +204,20 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void debug(CharSequence message) {
-		this.log.debug(message);
+		if (this.log.isDebugEnabled()) {
+			this.log.debug(message);
+		}
 	}
 
 	/**
-	 * Log an error with debug log level.
+	 * Log an exception with debug log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
 	public void debug(Throwable cause, CharSequence message) {
-		this.log.debug(message, cause);
+		if (this.log.isDebugEnabled()) {
+			this.log.debug(message, cause);
+		}
 	}
 
 	/**
@@ -205,16 +225,20 @@ public class LogAccessor {
 	 * @param message the message to log
 	 */
 	public void trace(CharSequence message) {
-		this.log.trace(message);
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(message);
+		}
 	}
 
 	/**
-	 * Log an error with trace log level.
+	 * Log an exception with trace log level.
 	 * @param cause the exception to log
 	 * @param message the message to log
 	 */
 	public void trace(Throwable cause, CharSequence message) {
-		this.log.trace(message, cause);
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(message, cause);
+		}
 	}
 
 
@@ -231,7 +255,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with fatal log level.
+	 * Log an exception with fatal log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -252,7 +276,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with error log level.
+	 * Log an exception with error log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -273,7 +297,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with warn log level.
+	 * Log an exception with warn log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -294,7 +318,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with info log level.
+	 * Log an exception with info log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -315,7 +339,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with debug log level.
+	 * Log an exception with debug log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */
@@ -336,7 +360,7 @@ public class LogAccessor {
 	}
 
 	/**
-	 * Log an error with trace log level.
+	 * Log an exception with trace log level.
 	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
 	 */

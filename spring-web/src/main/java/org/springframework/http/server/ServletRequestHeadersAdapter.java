@@ -16,6 +16,7 @@
 
 package org.springframework.http.server;
 
+import java.nio.charset.Charset;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,10 +34,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code MultiValueMap} implementation for wrapping Servlet request headers.
@@ -48,6 +51,10 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	private final HttpServletRequest request;
 
+	private @Nullable String contentType;
+
+	private boolean contentTypeResolved;
+
 
 	private ServletRequestHeadersAdapter(HttpServletRequest request) {
 		this.request = request;
@@ -56,7 +63,47 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	@Override
 	public @Nullable String getFirst(String key) {
+		if (isContentTypeHeader(key)) {
+			return getContentType();
+		}
 		return this.request.getHeader(key);
+	}
+
+	private static boolean isContentTypeHeader(String key) {
+		if (!key.isEmpty()) {
+			char c = key.charAt(0);
+			if (c == 'C' || c == 'c') {
+				return key.equalsIgnoreCase(HttpHeaders.CONTENT_TYPE);
+			}
+		}
+		return false;
+	}
+
+	private @Nullable String getContentType() {
+		if (!this.contentTypeResolved) {
+			String contentType = this.request.getHeader(HttpHeaders.CONTENT_TYPE);
+			this.contentType = (contentType != null ? appendCharsetIfNecessary(contentType) : null);
+			this.contentTypeResolved = true;
+		}
+		return this.contentType;
+	}
+
+	private String appendCharsetIfNecessary(String contentType) {
+		String encoding = this.request.getCharacterEncoding();
+		if (!StringUtils.hasLength(encoding)) {
+			return contentType;
+		}
+		try {
+			MediaType mediaType = MediaType.parseMediaType(contentType);
+			if (mediaType.getCharset() != null) {
+				return contentType;
+			}
+			return new MediaType(mediaType, Charset.forName(encoding)).toString();
+		}
+		catch (IllegalArgumentException ex) {
+			// return original if invalid media type or charset
+			return contentType;
+		}
 	}
 
 	@Override
@@ -90,7 +137,7 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 		Enumeration<String> names = this.request.getHeaderNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
-			map.put(name, this.request.getHeader(name));
+			map.put(name, getFirst(name));
 		}
 		return map;
 	}
@@ -126,6 +173,10 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 	@Override
 	public @Nullable List<String> get(Object key) {
 		if (key instanceof String headerName) {
+			if (isContentTypeHeader(headerName)) {
+				String contentType = getContentType();
+				return (contentType != null ? Collections.singletonList(contentType) : null);
+			}
 			Enumeration<String> values = this.request.getHeaders(headerName);
 			if (values.hasMoreElements()) {
 				String value = values.nextElement();

@@ -38,7 +38,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tests for {@link WebJarsResourceResolver}.
+ * Tests for {@link LiteWebJarsResourceResolver}.
  *
  * @author Sebastien Deleuze
  */

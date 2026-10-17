@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,17 +49,20 @@ import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMappingInfo;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.method.annotation.MapMethodProcessor;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
+import org.springframework.web.method.annotation.ProblemDetailExceptionHandler;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.ErrorResponseViewResolver;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -77,6 +81,10 @@ import org.springframework.web.util.DisconnectedClientHelper;
  * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers}.
  * Or alternatively to re-configure all argument and return value types use
  * {@link #setArgumentResolvers} and {@link #setReturnValueHandlers(List)}.
+ *
+ * <p>As of 7.1, exceptions not handled by any {@code @ExceptionHandler} method
+ * can be rendered as RFC 9457 problem details, see
+ * {@link #setRenderUnhandledExceptionsAsProblemDetails(boolean)}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -121,6 +129,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<>();
+
+	private boolean renderUnhandledExceptionsAsProblemDetails;
+
+	private @Nullable ErrorResponseViewResolver errorResponseViewResolver;
+
+	private @Nullable ProblemDetailExceptionHandler problemDetailExceptionHandler;
+
+	private @Nullable Method problemDetailHandlerMethod;
 
 
 	/**
@@ -263,6 +279,66 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		return this.errorResponseInterceptors;
 	}
 
+	/**
+	 * Whether to render exceptions that are not handled by any
+	 * {@code @ExceptionHandler} method as RFC 9457 problem details.
+	 * <p>When enabled, a {@link ProblemDetailExceptionHandler} is invoked after
+	 * local {@code @ExceptionHandler} methods and those declared in
+	 * {@link ControllerAdvice @ControllerAdvice} beans, and also when one of them
+	 * rethrows the exception or fails. The resulting problem detail is rendered
+	 * like any other {@code @ExceptionHandler} return value, with content
+	 * negotiation, {@link ErrorResponse.Interceptor}s and {@code MessageSource}
+	 * lookups through the {@code ApplicationContext}.
+	 * <p>Exceptions resulting in a 5xx server error are recorded as the error
+	 * of the current HTTP server observation, if any.
+	 * <p>The problem detail is not rendered if the response is already committed.
+	 * <p>By default this is set to {@code false}.
+	 * @param renderUnhandledExceptionsAsProblemDetails whether to render
+	 * unhandled exceptions as problem details
+	 * @since 7.1
+	 * @see ProblemDetailExceptionHandler
+	 */
+	public void setRenderUnhandledExceptionsAsProblemDetails(boolean renderUnhandledExceptionsAsProblemDetails) {
+		this.renderUnhandledExceptionsAsProblemDetails = renderUnhandledExceptionsAsProblemDetails;
+	}
+
+	/**
+	 * Whether exceptions not handled by any {@code @ExceptionHandler} method
+	 * are rendered as RFC 9457 problem details.
+	 * @since 7.1
+	 * @see #setRenderUnhandledExceptionsAsProblemDetails(boolean)
+	 */
+	public boolean isRenderUnhandledExceptionsAsProblemDetails() {
+		return this.renderUnhandledExceptionsAsProblemDetails;
+	}
+
+	/**
+	 * Configure an {@link ErrorResponseViewResolver} to render problem details
+	 * returned by {@code @ExceptionHandler} methods as views, typically HTML
+	 * error pages, when the client prefers HTML.
+	 * <p>This applies to {@code ProblemDetail}, {@code ErrorResponse} and
+	 * {@code ResponseEntity<ProblemDetail>} return values, including problem details
+	 * rendered for {@link #setRenderUnhandledExceptionsAsProblemDetails(boolean)
+	 * unhandled exceptions}. It is not applied to custom
+	 * {@link #setReturnValueHandlers(List) return value handlers}.
+	 * <p>By default, this is not set and problem details are always written
+	 * with message converters.
+	 * @param errorResponseViewResolver the resolver to use
+	 * @since 7.1
+	 */
+	public void setErrorResponseViewResolver(@Nullable ErrorResponseViewResolver errorResponseViewResolver) {
+		this.errorResponseViewResolver = errorResponseViewResolver;
+	}
+
+	/**
+	 * Return the {@link #setErrorResponseViewResolver configured}
+	 * {@link ErrorResponseViewResolver}, if any.
+	 * @since 7.1
+	 */
+	public @Nullable ErrorResponseViewResolver getErrorResponseViewResolver() {
+		return this.errorResponseViewResolver;
+	}
+
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -278,6 +354,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		// Do this first, it may add ResponseBodyAdvice beans
 		initExceptionHandlerAdviceCache();
 		initMessageConverters();
+		initProblemDetailExceptionHandler();
 
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
@@ -298,6 +375,18 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters.add(new FormHttpMessageConverter());
 		this.messageConverters.add(new MultipartHttpMessageConverter(HttpMessageConverters.forServer()
 				.registerDefaults().build()));
+	}
+
+	private void initProblemDetailExceptionHandler() {
+		if (this.renderUnhandledExceptionsAsProblemDetails) {
+			this.problemDetailExceptionHandler = new ProblemDetailExceptionHandler(getApplicationContext());
+			this.problemDetailHandlerMethod = new ExceptionHandlerMethodResolver(ProblemDetailExceptionHandler.class)
+					.resolveMethodByExceptionType(Exception.class);
+		}
+		else {
+			this.problemDetailExceptionHandler = null;
+			this.problemDetailHandlerMethod = null;
+		}
 	}
 
 	private void initExceptionHandlerAdviceCache() {
@@ -382,15 +471,19 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(
+		HttpEntityMethodProcessor httpEntityProcessor = new HttpEntityMethodProcessor(
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice,
-				this.errorResponseInterceptors));
+				this.errorResponseInterceptors);
+		httpEntityProcessor.setErrorResponseViewResolver(this.errorResponseViewResolver);
+		handlers.add(httpEntityProcessor);
 
 		// Annotation-based return value types
 		handlers.add(new ServletModelAttributeMethodProcessor(false));
-		handlers.add(new RequestResponseBodyMethodProcessor(
+		RequestResponseBodyMethodProcessor responseBodyProcessor = new RequestResponseBodyMethodProcessor(
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice,
-				this.errorResponseInterceptors));
+				this.errorResponseInterceptors);
+		responseBodyProcessor.setErrorResponseViewResolver(this.errorResponseViewResolver);
+		handlers.add(responseBodyProcessor);
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());
@@ -409,12 +502,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	@Override
 	protected boolean hasGlobalExceptionHandlers() {
-		return !this.exceptionHandlerAdviceCache.isEmpty();
+		return (!this.exceptionHandlerAdviceCache.isEmpty() || this.problemDetailExceptionHandler != null);
 	}
 
 	@Override
 	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
-		if ((handler instanceof ResourceHttpRequestHandler || handler instanceof HandlerFunction) &&
+		if (this.problemDetailExceptionHandler != null && !hasHandlerMappings()) {
+			return true;  // render problem details for any handler
+		}
+		else if ((handler instanceof ResourceHttpRequestHandler || handler instanceof HandlerFunction) &&
 				hasGlobalExceptionHandlers() && !hasHandlerMappings()) {
 			return true;  // apply to ResourceHttpRequestHandler and HandlerFunction by default
 		}
@@ -436,6 +532,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		if (exceptionHandlerMethod == null) {
 			return null;
 		}
+		return invokeExceptionHandlerMethod(exceptionHandlerMethod, webRequest, handlerMethod, exception);
+	}
+
+	private @Nullable ModelAndView invokeExceptionHandlerMethod(ServletInvocableHandlerMethod exceptionHandlerMethod,
+			ServletWebRequest webRequest, @Nullable HandlerMethod handlerMethod, Exception exception) {
+
+		HttpServletRequest request = webRequest.getRequest();
+		boolean isProblemDetailHandler = isProblemDetailHandlerMethod(exceptionHandlerMethod);
 
 		if (this.argumentResolvers != null) {
 			exceptionHandlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
@@ -465,6 +569,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 		catch (Throwable invocationEx) {
 			if (disconnectedClientHelper.checkAndLogClientDisconnectedException(invocationEx)) {
+				if (isProblemDetailHandler) {
+					recordServerError(exception, webRequest);
+				}
 				return new ModelAndView();
 			}
 			// Any other than the original exception (or a cause) is unintended here,
@@ -472,8 +579,20 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
 				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
 			}
+			if (!isProblemDetailHandler) {
+				ServletInvocableHandlerMethod problemDetailHandlerMethod = getProblemDetailHandlerMethod(webRequest);
+				if (problemDetailHandlerMethod != null) {
+					// Producible media types are those of the handler method that did not handle the exception
+					request.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+					return invokeExceptionHandlerMethod(problemDetailHandlerMethod, webRequest, handlerMethod, exception);
+				}
+			}
 			// Continue with default processing of the original exception...
 			return null;
+		}
+
+		if (isProblemDetailHandler) {
+			recordServerError(exception, webRequest);
 		}
 
 		if (mavContainer.isRequestHandled()) {
@@ -495,12 +614,27 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 	}
 
+	private boolean isProblemDetailHandlerMethod(ServletInvocableHandlerMethod handlerMethod) {
+		return (this.problemDetailExceptionHandler != null &&
+				handlerMethod.getBean() == this.problemDetailExceptionHandler);
+	}
+
+	private void recordServerError(Exception exception, ServletWebRequest webRequest) {
+		HttpServletResponse response = webRequest.getResponse();
+		if (response != null && HttpStatusCode.valueOf(response.getStatus()).is5xxServerError()) {
+			ServerHttpObservationFilter.findObservationContext(webRequest.getRequest())
+					.ifPresent(context -> context.setError(exception));
+		}
+	}
+
 	/**
 	 * Find an {@code @ExceptionHandler} method for the given exception. The default
 	 * implementation searches methods in the class hierarchy of the controller first
 	 * and if not found, it continues searching for additional {@code @ExceptionHandler}
 	 * methods assuming some {@linkplain ControllerAdvice @ControllerAdvice}
-	 * Spring-managed beans were detected.
+	 * Spring-managed beans were detected. As a last resort, if
+	 * {@link #setRenderUnhandledExceptionsAsProblemDetails(boolean) enabled},
+	 * a {@link ProblemDetailExceptionHandler} method is returned.
 	 * @param handlerMethod the method where the exception was raised (may be {@code null})
 	 * @param exception the raised exception
 	 * @param webRequest the original web request that resulted in a handler error
@@ -560,7 +694,22 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 		}
 
-		return null;
+		return getProblemDetailHandlerMethod(webRequest);
+	}
+
+	private @Nullable ServletInvocableHandlerMethod getProblemDetailHandlerMethod(ServletWebRequest webRequest) {
+		if (this.problemDetailExceptionHandler == null || this.problemDetailHandlerMethod == null) {
+			return null;
+		}
+		HttpServletResponse response = webRequest.getResponse();
+		if (response != null && response.isCommitted()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Response already committed, not rendering a problem detail");
+			}
+			return null;
+		}
+		return new ServletInvocableHandlerMethod(
+				this.problemDetailExceptionHandler, this.problemDetailHandlerMethod, this.applicationContext);
 	}
 
 }

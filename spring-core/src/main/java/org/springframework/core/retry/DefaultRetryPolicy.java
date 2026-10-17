@@ -89,6 +89,9 @@ class DefaultRetryPolicy implements RetryPolicy {
 		if (this.predicate != null) {
 			result.add("predicate=" + this.predicate.getClass().getSimpleName());
 		}
+		if (!this.timeout.isZero()) {
+			result.add("timeout=" + this.timeout);
+		}
 		result.add("backOff=" + this.backOff);
 		return result.toString();
 	}

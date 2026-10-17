@@ -357,7 +357,7 @@ public interface DataBuffer {
 	 */
 	@Deprecated(since = "6.0")
 	default DataBuffer retainedSlice(int index, int length) {
-		return DataBufferUtils.retain(slice(index, length));
+		return DataBuffers.retain(slice(index, length));
 	}
 
 	/**

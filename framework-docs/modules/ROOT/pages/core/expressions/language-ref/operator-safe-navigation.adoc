@@ -452,7 +452,7 @@ Kotlin::
 	val expression = "members?.^[nationality == 'Serbian']?.name" // <1>
 
 	// evaluates to "Nikola Tesla"
-	String name = parser.parseExpression(expression)
+	var name = parser.parseExpression(expression)
 			.getValue(context, String::class.java)
 
 	society.members = null

@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link MergedAnnotationCollectors}.
  *
  * @author Phillip Webb
+ * @author Chengang Guan
  */
 class MergedAnnotationCollectorsTests {
 
@@ -89,6 +92,27 @@ class MergedAnnotationCollectorsTests {
 		assertThat(map.get("extra")).containsExactly(void.class, String.class,
 				Integer.class);
 		assertThat(map.get("finished")).containsExactly(true);
+	}
+
+	@Test
+	void toMultiValueMapDeclaresIdentityFinish() {
+		assertThat(MergedAnnotationCollectors.toMultiValueMap().characteristics())
+				.contains(Collector.Characteristics.IDENTITY_FINISH);
+	}
+
+	/**
+	 * We cannot reliably determine at runtime whether an arbitrary finisher
+	 * is the identity function, so the public overload that accepts a custom
+	 * finisher conservatively omits IDENTITY_FINISH.
+	 */
+	@Test
+	void toMultiValueMapWithExplicitFinisherDoesNotDeclareIdentityFinish() {
+		assertThat(MergedAnnotationCollectors.toMultiValueMap(Function.identity()).characteristics())
+				.as("Function.identity() as finisher")
+				.doesNotContain(Collector.Characteristics.IDENTITY_FINISH);
+		assertThat(MergedAnnotationCollectors.toMultiValueMap(t -> t).characteristics())
+				.as("lambda t -> t as finisher")
+				.doesNotContain(Collector.Characteristics.IDENTITY_FINISH);
 	}
 
 	private Stream<MergedAnnotation<TestAnnotation>> stream() {

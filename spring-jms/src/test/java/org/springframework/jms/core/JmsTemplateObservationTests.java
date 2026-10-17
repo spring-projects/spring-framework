@@ -24,7 +24,6 @@ import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
-import jakarta.jms.Session;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.junit.EmbeddedActiveMQExtension;
 import org.junit.jupiter.api.AfterEach;
@@ -99,12 +98,9 @@ class JmsTemplateObservationTests {
 					mc.setMessageListener(message -> {
 						try {
 							Destination jmsReplyTo = message.getJMSReplyTo();
-							jmsTemplate.send(jmsReplyTo, new MessageCreator() {
-								@Override
-								public Message createMessage(Session session) throws JMSException {
-									latch.countDown();
-									return session.createTextMessage("response content");
-								}
+							jmsTemplate.send(jmsReplyTo, (MessageCreator) replySession -> {
+								latch.countDown();
+								return replySession.createTextMessage("response content");
 							});
 						}
 						catch (JMSException e) {
@@ -119,12 +115,9 @@ class JmsTemplateObservationTests {
 			}, true);
 
 		}).start();
-		Message response = jmsTemplate.sendAndReceive("spring.test.observation", new MessageCreator() {
-			@Override
-			public Message createMessage(Session session) throws JMSException {
-				return session.createTextMessage("request content");
-			}
-		});
+
+		Message response = jmsTemplate.sendAndReceive("spring.test.observation",
+				(MessageCreator) session -> session.createTextMessage("request content"));
 
 		String responseBody = response.getBody(String.class);
 		assertThat(responseBody).isEqualTo("response content");

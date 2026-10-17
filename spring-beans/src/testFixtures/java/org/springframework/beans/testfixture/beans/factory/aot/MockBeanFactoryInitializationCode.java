@@ -47,6 +47,7 @@ public class MockBeanFactoryInitializationCode implements BeanFactoryInitializat
 				.addForFeature("TestCode", this.typeBuilder);
 	}
 
+	@Override
 	public ClassName getClassName() {
 		return this.generatedClass.getName();
 	}

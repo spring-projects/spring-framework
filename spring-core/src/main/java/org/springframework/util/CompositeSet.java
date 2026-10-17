@@ -24,6 +24,12 @@ import org.jspecify.annotations.Nullable;
  * Composite set that combines two other sets. This type is only exposed through
  * {@link CompositeMap#keySet()} and {@link CompositeMap#entrySet()}.
  *
+ * <p><strong>WARNING</strong>: The two sets must be disjoint. Elements are not
+ * deduplicated, so an element present in both sets would be counted and iterated
+ * twice, which violates the {@link Set} contract. {@link CompositeMap} satisfies
+ * this requirement by wrapping its second map in a {@link FilteredMap} that hides
+ * keys present in the first map.
+ *
  * @author Arjen Poutsma
  * @author Yanming Zhou
  * @since 6.2
@@ -33,6 +39,16 @@ final class CompositeSet<E extends @Nullable Object> extends CompositeCollection
 
 	CompositeSet(Set<E> first, Set<E> second) {
 		super(first, second);
+	}
+
+
+	@Override
+	public boolean remove(Object o) {
+		// A set contains a given element at most once: remove it from both sets
+		// so that an element hidden in the second set does not become visible.
+		boolean firstResult = this.first.remove(o);
+		boolean secondResult = this.second.remove(o);
+		return (firstResult || secondResult);
 	}
 
 

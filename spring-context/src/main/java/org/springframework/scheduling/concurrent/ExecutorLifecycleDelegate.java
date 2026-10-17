@@ -104,7 +104,14 @@ final class ExecutorLifecycleDelegate implements SmartLifecycle {
 	}
 
 	void markShutdown() {
-		this.shutdown = true;
+		this.pauseLock.lock();
+		try {
+			this.shutdown = true;
+			this.unpaused.signalAll();
+		}
+		finally {
+			this.pauseLock.unlock();
+		}
 	}
 
 	void beforeExecute(Thread thread) {

@@ -25,8 +25,13 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.dao.DataAccessResourceFailureException;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -99,6 +104,115 @@ class DataFieldMaxValueIncrementerTests {
 		verify(statement).executeUpdate("delete from myseq where seq < 5");
 		verify(resultSet, times(6)).close();
 		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
+	}
+
+	@Test
+	void hsqlMaxValueIncrementerWithIncrementFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		willThrow(new SQLException("Cannot insert")).willReturn(1)
+				.given(statement).executeUpdate("insert into myseq values(null)");
+		given(statement.executeQuery("select max(identity()) from myseq")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L, 2L);
+
+		HsqlMaxValueIncrementer incrementer = new HsqlMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.setCacheSize(2);
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue);
+		assertThat(incrementer.nextLongValue()).isEqualTo(1);
+		assertThat(incrementer.nextLongValue()).isEqualTo(2);
+
+		verify(statement, times(3)).executeUpdate("insert into myseq values(null)");
+		verify(statement).executeUpdate("delete from myseq where seq < 2");
+		verify(connection, times(2)).close();
+	}
+
+	@Test
+	void hsqlMaxValueIncrementerWithDeleteFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		willThrow(new SQLException("Cannot delete")).willReturn(1)
+				.given(statement).executeUpdate("delete from myseq where seq < 2");
+		given(statement.executeQuery("select max(identity()) from myseq")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L, 2L, 3L, 4L);
+
+		HsqlMaxValueIncrementer incrementer = new HsqlMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.setCacheSize(2);
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue);
+		assertThat(incrementer.nextLongValue()).isEqualTo(3);
+		assertThat(incrementer.nextLongValue()).isEqualTo(4);
+
+		verify(statement, times(4)).executeUpdate("insert into myseq values(null)");
+		verify(statement).executeUpdate("delete from myseq where seq < 4");
+		verify(connection, times(2)).close();
+	}
+
+	@Test
+	void hsqlMaxValueIncrementerWithEmptyIdentityResult() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select max(identity()) from myseq")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(false).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L, 2L);
+
+		HsqlMaxValueIncrementer incrementer = new HsqlMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.setCacheSize(2);
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue)
+				.withMessage("Identity statement failed after inserting")
+				.withNoCause();
+		assertThat(incrementer.nextLongValue()).isEqualTo(1);
+		assertThat(incrementer.nextLongValue()).isEqualTo(2);
+
+		verify(statement, times(3)).executeUpdate("insert into myseq values(null)");
+		verify(statement).executeUpdate("delete from myseq where seq < 2");
+		verify(connection, times(2)).close();
+	}
+
+	@Test
+	void hsqlMaxValueIncrementerWithPartialIncrementFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		willReturn(1).willThrow(new SQLException("Cannot insert")).willReturn(1)
+				.given(statement).executeUpdate("insert into myseq values(null)");
+		given(statement.executeQuery("select max(identity()) from myseq")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L, 2L, 3L);
+
+		HsqlMaxValueIncrementer incrementer = new HsqlMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.setCacheSize(2);
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue);
+		// Values obtained before the partial failure must not be served
+		assertThat(incrementer.nextLongValue()).isEqualTo(2);
+		assertThat(incrementer.nextLongValue()).isEqualTo(3);
+
+		verify(statement, times(4)).executeUpdate("insert into myseq values(null)");
+		verify(statement).executeUpdate("delete from myseq where seq < 3");
 		verify(connection, times(2)).close();
 	}
 
@@ -185,6 +299,84 @@ class DataFieldMaxValueIncrementerTests {
 		verify(resultSet, times(2)).close();
 		verify(statement, times(2)).close();
 		verify(connection, times(2)).close();
+	}
+
+	@Test
+	void mySQLMaxValueIncrementerClosesConnectionOnCommitFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L);
+		SQLException commitFailure = new SQLException("commit failed");
+		willThrow(commitFailure).given(connection).commit();
+
+		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue)
+				.withCause(commitFailure);
+
+		verify(connection).commit();
+		verify(connection).close();
+	}
+
+	@Test
+	void mySQLMaxValueIncrementerClosesConnectionOnAutoCommitRestoreFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.getAutoCommit()).willReturn(true);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(1L);
+		SQLException autoCommitFailure = new SQLException("autoCommit restore failed");
+		willThrow(autoCommitFailure).given(connection).setAutoCommit(true);
+
+		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue)
+				.withCause(autoCommitFailure);
+
+		verify(connection).commit();
+		verify(connection).setAutoCommit(true);
+		verify(connection).close();
+	}
+
+	@Test
+	void mySQLMaxValueIncrementerWithCommitFailure() throws SQLException {
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(2L, 2L, 4L);
+		willThrow(new SQLException("Cannot commit")).willDoNothing().given(connection).commit();
+
+		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
+		incrementer.setDataSource(dataSource);
+		incrementer.setIncrementerName("myseq");
+		incrementer.setColumnName("seq");
+		incrementer.setCacheSize(2);
+		incrementer.afterPropertiesSet();
+
+		assertThatExceptionOfType(DataAccessResourceFailureException.class)
+				.isThrownBy(incrementer::nextLongValue);
+		assertThat(incrementer.nextLongValue()).isEqualTo(1);
+		assertThat(incrementer.nextLongValue()).isEqualTo(2);
+		assertThat(incrementer.nextLongValue()).isEqualTo(3);
+		assertThat(incrementer.nextLongValue()).isEqualTo(4);
+
+		verify(dataSource, times(3)).getConnection();
+		verify(statement, times(3)).executeUpdate("update myseq set seq = last_insert_id(seq + 2) limit 1");
+		verify(connection, times(3)).commit();
 	}
 
 	@Test

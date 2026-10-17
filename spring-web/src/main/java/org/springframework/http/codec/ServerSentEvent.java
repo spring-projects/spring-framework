@@ -20,8 +20,8 @@ import java.time.Duration;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.util.SseUtils;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web support.
@@ -112,7 +112,7 @@ public final class ServerSentEvent<T> {
 		}
 		if (this.comment != null) {
 			sb.append(':');
-			SseUtils.appendFieldValue("", this.comment, sb);
+			appendFieldValue("", this.comment, sb);
 			sb.append('\n');
 		}
 		if (this.data != null) {
@@ -146,6 +146,42 @@ public final class ServerSentEvent<T> {
 				this.retry + ", comment='" + this.comment + "', data=" + this.data + ']');
 	}
 
+
+	// Package-local copy of org.springframework.web.util.SeeUtils
+	// in order to avoid public utility methods in org.springframework.http
+	// as well as a package dependency cycle between the http and web packages.
+
+	static void appendFieldValue(String field, String value, StringBuilder output) {
+		if (value.indexOf('\n') == -1 && value.indexOf('\r') == -1) {
+			output.append(value);
+			return;
+		}
+		String lineSeparatorReplacement = "\n" + field + (field.isEmpty() ? ":" : ": ");
+		int length = value.length();
+		for (int i = 0; i < length; i++) {
+			char c = value.charAt(i);
+			if (c == '\r') {
+				if (i + 1 < length && value.charAt(i + 1) == '\n') {
+					i++;
+				}
+				output.append(lineSeparatorReplacement);
+			}
+			else if (c == '\n') {
+				output.append(lineSeparatorReplacement);
+			}
+			else {
+				output.append(c);
+			}
+		}
+	}
+
+	static void assertNoLineSeparator(String content) {
+		Assert.isTrue(content.indexOf('\n') == -1 && content.indexOf('\r') == -1,
+				"illegal character '\\n' or '\\r' in event content");
+	}
+
+
+	// Builder methods
 
 	/**
 	 * Return a builder for a {@code ServerSentEvent}.
@@ -241,14 +277,14 @@ public final class ServerSentEvent<T> {
 
 		@Override
 		public Builder<T> id(String id) {
-			SseUtils.assertNoLineSeparator(id);
+			assertNoLineSeparator(id);
 			this.id = id;
 			return this;
 		}
 
 		@Override
 		public Builder<T> event(String event) {
-			SseUtils.assertNoLineSeparator(event);
+			assertNoLineSeparator(event);
 			this.event = event;
 			return this;
 		}

@@ -17,9 +17,9 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -181,10 +181,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	private @Nullable BeanFactory beanFactory;
 
-	private final ConcurrentMap<Object, TransactionManager> transactionManagerCache =
+	private final Map<Object, TransactionManager> transactionManagerCache =
 			new ConcurrentReferenceHashMap<>(4);
 
-	private final ConcurrentMap<Method, ReactiveTransactionSupport> transactionSupportCache =
+	private final Map<Method, ReactiveTransactionSupport> transactionSupportCache =
 			new ConcurrentReferenceHashMap<>(1024);
 
 

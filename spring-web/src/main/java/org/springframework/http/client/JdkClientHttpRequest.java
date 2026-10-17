@@ -185,14 +185,9 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		}
 		else {
 			switch (this.method.name()) {
-				case "GET" :
-					builder.GET();
-					break;
-				case "DELETE" :
-					builder.DELETE();
-					break;
-				default :
-					builder.method(this.method.name(), HttpRequest.BodyPublishers.noBody());
+				case "GET" -> builder.GET();
+				case "DELETE" -> builder.DELETE();
+				default -> builder.method(this.method.name(), HttpRequest.BodyPublishers.noBody());
 			}
 		}
 		return builder.build();
@@ -219,16 +214,21 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	 * {@code Content-Length}, {@code Expect}, {@code Host}, or {@code Upgrade}
 	 * headers to be set, but this can be overridden with the
 	 * {@code jdk.httpclient.allowRestrictedHeaders} system property.
+	 * <p>Note that only the system property is consulted. In contrast to the
+	 * JDK, a value configured in {@code $JAVA_HOME/conf/net.properties} is
+	 * not taken into account.
 	 * @see jdk.internal.net.http.common.Utils#getDisallowedHeaders()
 	 */
-	private static Set<String> disallowedHeaders() {
+	static Set<String> disallowedHeaders() {
 		TreeSet<String> headers = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		headers.addAll(Set.of("connection", "content-length", "expect", "host", "upgrade"));
 
 		String headersToAllow = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
 		if (headersToAllow != null) {
-			Set<String> toAllow = StringUtils.commaDelimitedListToSet(headersToAllow);
-			headers.removeAll(toAllow);
+			String[] toAllow = StringUtils.commaDelimitedListToStringArray(headersToAllow.trim());
+			for (String header : toAllow) {
+				headers.remove(header);
+			}
 		}
 		return Collections.unmodifiableSet(headers);
 	}

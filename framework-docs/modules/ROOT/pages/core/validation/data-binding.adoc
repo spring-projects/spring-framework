@@ -61,7 +61,8 @@ corresponding implementation (`BeanWrapperImpl`). As quoted from the javadoc, th
 `BeanWrapper` offers functionality to set and get property values (individually or in
 bulk), get property descriptors, and query properties to determine if they are
 readable or writable. Also, the `BeanWrapper` offers support for nested properties,
-enabling the setting of properties on sub-properties to an unlimited depth. The
+enabling the setting of properties on sub-properties up to a
+<<data-binding-nested-path-depth,configurable maximum nesting depth>>. The
 `BeanWrapper` also supports the ability to add standard JavaBeans `PropertyChangeListeners`
 and `VetoableChangeListeners`, without the need for supporting code in the target class.
 Last but not least, the `BeanWrapper` provides support for setting indexed properties.
@@ -234,6 +235,48 @@ Kotlin::
 	val salary = company.getPropertyValue("managingDirector.salary") as Float?
 ----
 ======
+
+
+[[data-binding-nested-path-depth]]
+=== Maximum Nesting Depth for Nested Property Paths
+
+A nested property path such as `managingDirector.salary` is resolved recursively, one
+level per nested property. The nesting depth of a property path therefore corresponds to
+the number of intermediate properties that must be traversed in order to reach the final
+property -- for example, `address.country.name` has a nesting depth of 2, since the
+`address` and `country` properties must be traversed in order to reach the `name`
+property.
+
+The nesting depth of a property path cannot exceed 100 by default; however, the
+`maxNestedPathDepth` value is configurable. You can specify a custom value via
+`setMaxNestedPathDepth(...)` on a `ConfigurablePropertyAccessor` such as
+`BeanWrapperImpl`, or on a `DataBinder` -- and therefore also on a `WebDataBinder`, for
+example within an `@InitBinder` method. If a property path exceeds the configured limit,
+an `InvalidPropertyException` is thrown. Specify `0` to disable support for nested
+property paths altogether, while continuing to allow simple, indexed, and mapped property
+access -- for example, `name`, `accounts[2]`, or `accounts[KEY]`.
+
+Note that this limit applies to property binding as well as to
+<<data-binding-constructor-binding,constructor binding>> via `DataBinder.construct`,
+since a constructor parameter which is itself an object is constructed recursively
+through a nested property path.
+
+[NOTE]
+====
+Without such a limit, a sufficiently deeply nested property path can drive the recursive
+resolution of nested property paths to exhaust the current thread's call stack, resulting
+in a `StackOverflowError` instead of a descriptive exception.
+
+The `maxNestedPathDepth` limit improves diagnostics for that common case by converting
+it into a clear `InvalidPropertyException`; however, it is not a guaranteed defense against
+`StackOverflowError` under every possible JVM thread stack size configuration, since the
+amount of stack space consumed per level of nesting depends on the JVM, its JIT
+compilation state, and the platform.
+
+When binding untrusted input, you should additionally constrain binding to the expected
+input as described in
+xref:web/webmvc/mvc-data-binding.adoc#mvc-data-binding-design[Model Design].
+====
 
 
 [[data-binding-conversion]]

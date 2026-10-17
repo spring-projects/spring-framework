@@ -143,7 +143,7 @@ public class LimitedDataBufferList extends ArrayList<DataBuffer> {
 	public void releaseAndClear() {
 		forEach(buf -> {
 			try {
-				DataBufferUtils.release(buf);
+				DataBuffers.release(buf);
 			}
 			catch (Throwable ex) {
 				// Keep going..

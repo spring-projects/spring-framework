@@ -160,7 +160,7 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 	}
 
 	@Override
-	public boolean containsValue(Object value) {
+	public boolean containsValue(@Nullable Object value) {
 		return this.targetMap.containsValue(value);
 	}
 
@@ -222,17 +222,22 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 
 	@Override
 	public @Nullable V computeIfAbsent(String key, Function<? super String, ? extends V> mappingFunction) {
-		String oldKey = this.caseInsensitiveKeys.putIfAbsent(convertKey(key), key);
+		String convertedKey = convertKey(key);
+		String oldKey = this.caseInsensitiveKeys.get(convertedKey);
 		if (oldKey != null) {
 			V oldKeyValue = this.targetMap.get(oldKey);
 			if (oldKeyValue != null) {
 				return oldKeyValue;
 			}
-			else {
-				key = oldKey;
-			}
+			return this.targetMap.computeIfAbsent(oldKey, mappingFunction);
 		}
-		return this.targetMap.computeIfAbsent(key, mappingFunction);
+		return this.targetMap.computeIfAbsent(key, k -> {
+			V value = mappingFunction.apply(k);
+			if (value != null) {
+				this.caseInsensitiveKeys.putIfAbsent(convertedKey, k);
+			}
+			return value;
+		});
 	}
 
 	@Override
@@ -498,7 +503,7 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 	}
 
 
-	private abstract class EntryIterator<T> implements Iterator<T> {
+	private abstract class EntryIterator<T extends @Nullable Object> implements Iterator<T> {
 
 		private final Iterator<Entry<String, V>> delegate;
 

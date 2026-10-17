@@ -177,7 +177,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
 		assertThat(instance).isNotNull();
 		assertThat(instance.getSource()).isEqualTo(BeanSource.FALLBACK);
-		assertThat(instance.getApplicationContext()).isNull();
+		assertThat(instance.getApplicationContext()).isSameAs(applicationContext);
 	}
 
 	@Test
@@ -199,7 +199,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 		assertThat(instance).isNotNull();
 		assertThat(instance.getSource()).isEqualTo(BeanSource.FALLBACK);
 		assertThat(instance.getName()).isEqualTo("some name");
-		assertThat(instance.getApplicationContext()).isNull();
+		assertThat(instance.getApplicationContext()).isSameAs(applicationContext);
 	}
 
 	@Test
@@ -220,7 +220,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
 		assertThat(instance).isNotNull();
 		assertThat(instance.getSource()).isEqualTo(BeanSource.FALLBACK);
-		assertThat(instance.getApplicationContext()).isNull();
+		assertThat(instance.getApplicationContext()).isSameAs(applicationContext);
 	}
 
 	@Test
@@ -242,7 +242,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 		assertThat(instance).isNotNull();
 		assertThat(instance.getSource()).isEqualTo(BeanSource.FALLBACK);
 		assertThat(instance.getName()).isEqualTo("some name");
-		assertThat(instance.getApplicationContext()).isNull();
+		assertThat(instance.getApplicationContext()).isSameAs(applicationContext);
 	}
 
 	@Test

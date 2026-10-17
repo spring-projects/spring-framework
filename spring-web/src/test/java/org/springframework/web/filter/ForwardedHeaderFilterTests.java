@@ -33,6 +33,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -488,7 +489,7 @@ class ForwardedHeaderFilterTests {
 			HttpServletRequest actual = filterAndGetWrappedRequest(false);
 
 			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
-			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+			assertThat(actual.getRemotePort()).isEqualTo(-1);
 		}
 
 		@Test
@@ -497,7 +498,7 @@ class ForwardedHeaderFilterTests {
 			HttpServletRequest actual = filterAndGetWrappedRequest(false);
 
 			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
-			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+			assertThat(actual.getRemotePort()).isEqualTo(-1);
 		}
 
 		@Test
@@ -506,7 +507,7 @@ class ForwardedHeaderFilterTests {
 			HttpServletRequest actual = filterAndGetWrappedRequest(true);
 
 			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
-			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+			assertThat(actual.getRemotePort()).isEqualTo(-1);
 		}
 
 		@Test
@@ -515,7 +516,7 @@ class ForwardedHeaderFilterTests {
 			HttpServletRequest actual = filterAndGetWrappedRequest(true);
 
 			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("[2001:db8:cafe::17]");
-			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+			assertThat(actual.getRemotePort()).isEqualTo(-1);
 		}
 
 		@Test
@@ -542,7 +543,19 @@ class ForwardedHeaderFilterTests {
 			HttpServletRequest actual = filterAndGetWrappedRequest(true);
 
 			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
-			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+			assertThat(actual.getRemotePort()).isEqualTo(-1);
+		}
+
+		@Test  // gh-37114
+		void forwardedForWithoutPortAdaptedToServerHttpRequest() throws Exception {
+			request.addHeader(FORWARDED, "for=203.0.113.195;by=203.0.113.43");
+			HttpServletRequest actual = filterAndGetWrappedRequest(true);
+
+			ServletServerHttpRequest serverRequest = new ServletServerHttpRequest(actual);
+			assertThat(serverRequest.getRemoteAddress().getHostString()).isEqualTo("203.0.113.195");
+			assertThat(serverRequest.getRemoteAddress().getPort()).isEqualTo(0);
+			assertThat(serverRequest.getLocalAddress().getHostString()).isEqualTo("203.0.113.43");
+			assertThat(serverRequest.getLocalAddress().getPort()).isEqualTo(0);
 		}
 
 	}
@@ -556,7 +569,7 @@ class ForwardedHeaderFilterTests {
 			HttpServletRequest actual = filterAndGetWrappedRequest(true);
 
 			assertThat(actual.getLocalAddr()).isEqualTo(actual.getLocalAddr()).isEqualTo("203.0.113.195");
-			assertThat(actual.getLocalPort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+			assertThat(actual.getLocalPort()).isEqualTo(-1);
 		}
 
 		@Test
@@ -565,7 +578,7 @@ class ForwardedHeaderFilterTests {
 			HttpServletRequest actual = filterAndGetWrappedRequest(true);
 
 			assertThat(actual.getLocalAddr()).isEqualTo(actual.getLocalAddr()).isEqualTo("[2001:db8:cafe::17]");
-			assertThat(actual.getLocalPort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+			assertThat(actual.getLocalPort()).isEqualTo(-1);
 		}
 
 		@Test
@@ -592,7 +605,7 @@ class ForwardedHeaderFilterTests {
 			HttpServletRequest actual = filterAndGetWrappedRequest(true);
 
 			assertThat(actual.getLocalAddr()).isEqualTo(actual.getLocalAddr()).isEqualTo("203.0.113.195");
-			assertThat(actual.getLocalPort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+			assertThat(actual.getLocalPort()).isEqualTo(-1);
 		}
 
 	}

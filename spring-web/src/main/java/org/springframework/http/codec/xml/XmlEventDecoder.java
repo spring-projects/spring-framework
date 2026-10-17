@@ -137,7 +137,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 		if (this.useAalto) {
 			AaltoDataBufferToXmlEvent mapper = new AaltoDataBufferToXmlEvent(hints);
 			return Flux.from(input)
-					.flatMapIterable(mapper)
+					.<XMLEvent>flatMapIterable(mapper)
 					.doFinally(signalType -> mapper.endOfInput());
 		}
 		else {

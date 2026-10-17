@@ -546,12 +546,11 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Return a map that combines the provided maps. Invoking
-	 * {@link Map#put(Object, Object)} on the returned map will apply
-	 * {@code putFunction}, or will throw an
-	 * {@link UnsupportedOperationException} {@code putFunction} is
-	 * {@code null}. The same applies to {@link Map#putAll(Map)} and
-	 * {@code putAllFunction}.
+	 * Return a map that combines the provided maps.
+	 * <p>Invoking {@link Map#put(Object, Object)} on the returned map will apply
+	 * {@code putFunction}, or will throw an {@link UnsupportedOperationException}
+	 * if {@code putFunction} is {@code null}. The same applies to
+	 * {@link Map#putAll(Map)} and {@code putAllFunction}.
 	 * <p>In the case of a key collision, {@code first} takes precedence over
 	 * {@code second}. In other words, entries in {@code second} with a key
 	 * that is also mapped by {@code first} are effectively ignored.

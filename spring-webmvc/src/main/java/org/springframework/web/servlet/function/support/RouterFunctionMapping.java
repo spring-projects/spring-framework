@@ -221,6 +221,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (matchingPattern != null) {
 			servletRequest.removeAttribute(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
 			servletRequest.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, matchingPattern.getPatternString());
+			servletRequest.setAttribute(BEST_MATCHING_PATH_PATTERN_ATTRIBUTE, matchingPattern);
 			ServerHttpObservationFilter.findObservationContext(request.servletRequest())
 					.ifPresent(context -> context.setPathPattern(matchingPattern.getPatternString()));
 		}

@@ -43,7 +43,6 @@ import org.springframework.expression.MethodExecutor;
 public final class DataBindingMethodResolver extends ReflectiveMethodResolver {
 
 	private DataBindingMethodResolver() {
-		super();
 	}
 
 	@Override

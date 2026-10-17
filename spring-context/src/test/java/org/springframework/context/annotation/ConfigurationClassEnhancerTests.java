@@ -214,6 +214,7 @@ class ConfigurationClassEnhancerTests {
 			super(parent);
 		}
 
+		@Override
 		protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 			if (name.contains("MyConfig")) {
 				String path = name.replace('.', '/').concat(".class");

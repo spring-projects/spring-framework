@@ -1393,7 +1393,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer bar = stringBuffer("bar");
 
 		byte[] delims = "ooba".getBytes(StandardCharsets.UTF_8);
-		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		DataBufferMatcher matcher = DataBufferUtils.matcher(delims);
 		int result = matcher.match(foo);
 		assertThat(result).isEqualTo(-1);
 		result = matcher.match(bar);
@@ -1410,7 +1410,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer foo = stringBuffer("foooobar");
 
 		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
-		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		DataBufferMatcher matcher = DataBufferUtils.matcher(delims);
 		int endIndex = matcher.match(foo);
 		assertThat(endIndex).isEqualTo(2);
 		foo.readPosition(endIndex + 1);
@@ -1430,7 +1430,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer foo = stringBuffer("foooobar");
 
 		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
-		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		DataBufferMatcher matcher = DataBufferUtils.matcher(delims);
 		int endIndex = matcher.match(foo);
 		assertThat(endIndex).isEqualTo(2);
 		foo.readPosition(endIndex + 1);
@@ -1450,7 +1450,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer buffer = stringBuffer("a\rXY\nb");
 
 		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
-		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		DataBufferMatcher matcher = DataBufferUtils.matcher(delims);
 		int result = matcher.match(buffer);
 		assertThat(result).isEqualTo(-1);
 
@@ -1464,7 +1464,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer buffer = stringBuffer("a\r\nb");
 
 		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
-		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		DataBufferMatcher matcher = DataBufferUtils.matcher(delims);
 		int result = matcher.match(buffer);
 		assertThat(result).isEqualTo(2);
 
@@ -1478,7 +1478,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer buffer = stringBuffer("a\r\rX\nb");
 
 		byte[] delims = "\r\n".getBytes(StandardCharsets.UTF_8);
-		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		DataBufferMatcher matcher = DataBufferUtils.matcher(delims);
 		int result = matcher.match(buffer);
 		assertThat(result).isEqualTo(-1);
 

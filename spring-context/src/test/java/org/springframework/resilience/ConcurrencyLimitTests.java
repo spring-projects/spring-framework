@@ -137,7 +137,7 @@ class ConcurrencyLimitTests {
 			futures.add(CompletableFuture.runAsync(() ->
 					assertThatExceptionOfType(InvocationRejectedException.class).isThrownBy(proxy::rejectingOperation)
 							.withMessageContaining(AnnotatedMethodBean.class.getName() + ".rejectingOperation")
-							.satisfies(ex -> assertThat(ex.getTarget() == target))));
+							.extracting(InvocationRejectedException::getTarget).isSameAs(proxy)));
 		}
 		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 		assertThat(target.current).hasValue(2);
@@ -178,11 +178,11 @@ class ConcurrencyLimitTests {
 		futures.add(CompletableFuture.runAsync(() ->
 				assertThatExceptionOfType(InvocationRejectedException.class).isThrownBy(proxy::concurrentOperation)
 						.withMessageContaining(AnnotatedClassBeanWithRejection.class.getName())
-						.satisfies(ex -> assertThat(ex.getTarget() == target))));
+						.extracting(InvocationRejectedException::getTarget).isSameAs(proxy)));
 		futures.add(CompletableFuture.runAsync(() ->
 				assertThatExceptionOfType(InvocationRejectedException.class).isThrownBy(proxy::otherOperation)
 						.withMessageContaining(AnnotatedClassBeanWithRejection.class.getName())
-						.satisfies(ex -> assertThat(ex.getTarget() == target))));
+						.extracting(InvocationRejectedException::getTarget).isSameAs(proxy)));
 		for (int i = 0; i < 4; i++) {
 			futures.add(CompletableFuture.runAsync(proxy::overrideOperation));
 		}

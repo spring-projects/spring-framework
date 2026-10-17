@@ -17,9 +17,17 @@
 package org.springframework.expression.spel;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,6 +56,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.asm.MethodVisitor;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.IndexAccessor;
@@ -63,7 +77,9 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.MapAccessor;
 import org.springframework.expression.spel.support.ReflectiveIndexAccessor;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 import org.springframework.expression.spel.testresources.Person;
 import org.springframework.util.ClassUtils;
@@ -2347,10 +2363,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertCanCompile(expression);
 			assertThat(expression.getValue(new Greeter())).isEqualTo("helloworld spring");
 
-			// Three strings, optimal bytecode would only use one StringBuilder
+			// String + int + String
 			expression = parse("'hello' + 3 + ' spring'");
-			assertThat(expression.getValue(new Greeter())).isEqualTo("hello3 spring");
-			assertCannotCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello3 spring");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello3 spring");
 
 			expression = parse("object + 'a'");
 			assertThat(expression.getValue(new Greeter())).isEqualTo("objecta");
@@ -2376,6 +2393,425 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(expression.getValue(new Greeter())).isEqualTo("objectobject");
 			assertCanCompile(expression);
 			assertThat(expression.getValue(new Greeter())).isEqualTo("objectobject");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithNonStringOperand() {
+			// String + int
+			expression = parse("'hello' + 42");
+			assertThat(expression.getValue()).isEqualTo("hello42");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello42");
+
+			// String + long
+			expression = parse("'hello' + 42L");
+			assertThat(expression.getValue()).isEqualTo("hello42");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello42");
+
+			// String + float
+			expression = parse("'hello' + 3.14f");
+			assertThat(expression.getValue()).isEqualTo("hello3.14");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello3.14");
+
+			// String + double
+			expression = parse("'hello' + 3.14d");
+			assertThat(expression.getValue()).isEqualTo("hello3.14");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello3.14");
+
+			// String + boolean
+			expression = parse("'hello' + true");
+			assertThat(expression.getValue()).isEqualTo("hellotrue");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hellotrue");
+
+			// int + String
+			expression = parse("42 + ' world'");
+			assertThat(expression.getValue()).isEqualTo("42 world");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("42 world");
+
+			// String + Method returning int: String#length
+			StandardEvaluationContext ctx = new StandardEvaluationContext();
+			ctx.setVariable("first", "Jane");
+			ctx.setVariable("last", "Smith");
+			expression = parse("(#first + ' ' + #last).toUpperCase() + ' (' + (#first + ' ' + #last).length() + ')'");
+			assertThat(expression.getValue(ctx)).isEqualTo("JANE SMITH (10)");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ctx)).isEqualTo("JANE SMITH (10)");
+
+			// Custom TypeConverter producing a result different from toString() must prevent compilation,
+			// to ensure interpreted and compiled modes always produce the same result.
+			GenericConversionService conversionService = new GenericConversionService();
+			conversionService.addConverter(Integer.class, String.class, i -> "int-" + i);
+			StandardEvaluationContext contextWithConverter = new StandardEvaluationContext();
+			contextWithConverter.setTypeConverter(new StandardTypeConverter(conversionService));
+			expression = parse("'prefix-' + 42");
+			assertThat(expression.getValue(contextWithConverter)).isEqualTo("prefix-int-42");
+			assertCannotCompile(expression);
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithNestedNumericAddition() {
+			// Numeric addition on the left must not be flattened into the concatenation
+			expression = parse("1 + 2 + 'a'");
+			assertThat(expression.getValue()).isEqualTo("3a");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("3a");
+
+			// Numeric addition on the right must not be flattened into the concatenation
+			expression = parse("'a' + (1 + 2)");
+			assertThat(expression.getValue()).isEqualTo("a3");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("a3");
+
+			expression = parse("'a' + (1.5 + 2) + 'b'");
+			assertThat(expression.getValue()).isEqualTo("a3.5b");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("a3.5b");
+
+			ConcatenationOperands operands = new ConcatenationOperands();
+			expression = parse("primitiveInt + primitiveInt + ' items'");
+			assertThat(expression.getValue(operands)).isEqualTo("84 items");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("84 items");
+
+			// Unary plus
+			expression = parse("'a' + +3");
+			assertThat(expression.getValue()).isEqualTo("a3");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("a3");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithPrimitiveOperand() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+
+			expression = parse("'value: ' + primitiveChar");
+			assertThat(expression.getValue(operands)).isEqualTo("value: c");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("value: c");
+
+			expression = parse("'value: ' + primitiveByte");
+			assertThat(expression.getValue(operands)).isEqualTo("value: 8");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("value: 8");
+
+			expression = parse("primitiveShort + ' :value'");
+			assertThat(expression.getValue(operands)).isEqualTo("16 :value");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("16 :value");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithBoxedPrimitiveOperand() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+
+			expression = parse("'value: ' + boxedInteger");
+			assertThat(expression.getValue(operands)).isEqualTo("value: 42");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("value: 42");
+			operands.boxedInteger = null;
+			assertThat(expression.getValue(operands)).isEqualTo("value: null");
+
+			expression = parse("boxedDouble + ' :value'");
+			assertThat(expression.getValue(operands)).isEqualTo("3.5 :value");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("3.5 :value");
+			operands.boxedDouble = null;
+			assertThat(expression.getValue(operands)).isEqualTo("null :value");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithNullBoxedPrimitiveOperand() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+			operands.boxedInteger = null;
+
+			// The effect of the TypeConverter is unknown until a non-null value has been converted.
+			expression = parse("'value: ' + boxedInteger");
+			assertThat(expression.getValue(operands)).isEqualTo("value: null");
+			assertCannotCompile(expression);
+
+			operands.boxedInteger = 42;
+			assertThat(expression.getValue(operands)).isEqualTo("value: 42");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("value: 42");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithReferenceTypeOperand() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+
+			// final type
+			expression = parse("'value: ' + localDate");
+			assertThat(expression.getValue(operands)).isEqualTo("value: 2026-10-09");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("value: 2026-10-09");
+			operands.localDate = null;
+			assertThat(expression.getValue(operands)).isEqualTo("value: null");
+
+			// non-final type
+			expression = parse("'value: ' + bigDecimal");
+			assertThat(expression.getValue(operands)).isEqualTo("value: 1.50");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("value: 1.50");
+			operands.bigDecimal = null;
+			assertThat(expression.getValue(operands)).isEqualTo("value: null");
+
+			// type without a converter
+			expression = parse("label + ' :value'");
+			assertThat(expression.getValue(operands)).isEqualTo("label :value");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("label :value");
+
+			// enum: the default TypeConverter uses name(), which is equal to toString()
+			expression = parse("'value: ' + mood");
+			assertThat(expression.getValue(operands)).isEqualTo("value: HAPPY");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("value: HAPPY");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithReferenceTypeOperandThatCannotBeCompiled() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+
+			// The default TypeConverter converts a collection to a comma-delimited String,
+			// which differs from the collection's toString() representation.
+			expression = parse("'value: ' + list");
+			assertThat(expression.getValue(operands)).isEqualTo("value: null");
+			assertCannotCompile(expression);
+			operands.list = List.of(1, 2);
+			assertThat(expression.getValue(operands)).isEqualTo("value: 1,2");
+			assertCannotCompile(expression);
+
+			// The default TypeConverter uses name(), which differs from the overridden toString().
+			operands.mood = Mood.SAD;
+			expression = parse("'value: ' + mood");
+			assertThat(expression.getValue(operands)).isEqualTo("value: SAD");
+			assertCannotCompile(expression);
+
+			// The type of an enum constant with a class body is not public.
+			operands.mood = Mood.CALM;
+			expression = parse("'value: ' + mood");
+			assertThat(expression.getValue(operands)).isEqualTo("value: CALM");
+			assertCannotCompile(expression);
+
+			// The type is public, but its package is not exported by its module.
+			assertThat(operands.charset.getClass().getPackageName()).isEqualTo("sun.nio.cs");
+			expression = parse("'value: ' + charset");
+			assertThat(expression.getValue(operands)).isEqualTo("value: UTF-8");
+			assertCannotCompile(expression);
+
+			// The effect of the TypeConverter is unknown, since no value has been converted.
+			expression = parse("'value: ' + null");
+			assertThat(expression.getValue()).isEqualTo("value: null");
+			assertCannotCompile(expression);
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithReferenceTypeOperandWhoseTypeChanges() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+
+			expression = parse("'[' + object + ']'");
+			assertThat(expression.getValue(operands)).isEqualTo("[42]");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("[42]");
+			operands.object = null;
+			assertThat(expression.getValue(operands)).isEqualTo("[null]");
+
+			// The compiled form must not use toString() for a value whose type differs
+			// from the type of the value converted in interpreted mode.
+			operands.object = List.of(1, 2);
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expression.getValue(operands))
+					.withCauseInstanceOf(IllegalStateException.class);
+
+			// An enum constant with a class body is a subclass of the enum type.
+			operands.mood = Mood.HAPPY;
+			expression = parse("'value: ' + mood");
+			assertThat(expression.getValue(operands)).isEqualTo("value: HAPPY");
+			assertCanCompile(expression);
+			operands.mood = Mood.SAD;
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expression.getValue(operands))
+					.withCauseInstanceOf(IllegalStateException.class);
+
+			// In mixed mode, the expression reverts to interpreted mode.
+			SpelParserConfiguration configuration = SpelParserConfiguration.builder()
+					.compilerMode(SpelCompilerMode.MIXED)
+					.build();
+			operands.object = 42;
+			expression = new SpelExpressionParser(configuration).parseExpression("'[' + object + ']'");
+			assertThat(expression.getValue(operands)).isEqualTo("[42]");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("[42]");
+			operands.object = List.of(1, 2);
+			assertThat(expression.getValue(operands)).isEqualTo("[1,2]");
+
+			operands.object = 42;
+			expression = new SpelExpressionParser(configuration).parseExpression("object + ' :value'");
+			assertThat(expression.getValue(operands)).isEqualTo("42 :value");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("42 :value");
+			operands.object = List.of(1, 2);
+			assertThat(expression.getValue(operands)).isEqualTo("1,2 :value");
+
+			// String + Object-typed operand that evaluates to a String
+			operands.object = "text";
+			expression = parse("'value: ' + object");
+			assertThat(expression.getValue(operands)).isEqualTo("value: text");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("value: text");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithOperandWhoseTypeChangesBeforeCompilation() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+
+			// The type of the most recent value is used for compilation.
+			expression = parse("'[' + object + ']'");
+			assertThat(expression.getValue(operands)).isEqualTo("[42]");
+			operands.object = 42L;
+			assertThat(expression.getValue(operands)).isEqualTo("[42]");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("[42]");
+
+			// An operand that most recently evaluated to a String is appended as a String.
+			operands.object = 42;
+			expression = parse("'[' + object + ']'");
+			assertThat(expression.getValue(operands)).isEqualTo("[42]");
+			operands.object = "text";
+			assertThat(expression.getValue(operands)).isEqualTo("[text]");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(operands)).isEqualTo("[text]");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithVariableAndIndexedOperands() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+			StandardEvaluationContext context = new StandardEvaluationContext(operands);
+			context.setVariable("num", 42);
+
+			expression = parse("'value: ' + #num");
+			assertThat(expression.getValue(context)).isEqualTo("value: 42");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("value: 42");
+
+			expression = parse("'value: ' + map['key']");
+			assertThat(expression.getValue(context)).isEqualTo("value: 42");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("value: 42");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithAnnotatedOperand() {
+			GenericConversionService conversionService = new DefaultConversionService();
+			conversionService.addConverter(new GroupedNumberConverter());
+			ConcatenationOperands operands = new ConcatenationOperands();
+			StandardEvaluationContext context = new StandardEvaluationContext(operands);
+			context.setTypeConverter(new StandardTypeConverter(conversionService));
+
+			// Although the result for 42 is equal to String.valueOf(), annotation-driven
+			// formatting typically depends on the value.
+			expression = parse("'value: ' + groupedNumber");
+			assertThat(expression.getValue(context)).isEqualTo("value: 42");
+			assertCannotCompile(expression);
+			operands.groupedNumber = 1_234_567;
+			// The result would be 1234567 without the custom GroupedNumberConverter.
+			assertThat(expression.getValue(context)).isEqualTo("value: 1,234,567");
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithTypeConverterThatChangesBeforeCompilation() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+			GenericConversionService conversionService = new DefaultConversionService();
+			conversionService.addConverter(Integer.class, String.class, i -> "int-" + i);
+			StandardEvaluationContext customContext = new StandardEvaluationContext(operands);
+			customContext.setTypeConverter(new StandardTypeConverter(conversionService));
+
+			expression = mixedModeParser().parseExpression("'value: ' + primitiveInt");
+			assertThat(expression.getValue(new StandardEvaluationContext(operands))).isEqualTo("value: 42");
+			assertThat(expression.getValue(customContext)).isEqualTo("value: int-42");
+			assertCannotCompile(expression);
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithTypeConverterOfDifferentTypeBeforeExplicitCompilation() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+			GenericConversionService conversionService = new DefaultConversionService();
+			conversionService.addConverter(Integer.class, String.class, i -> "int-" + i);
+			StandardEvaluationContext customContext = new StandardEvaluationContext(operands);
+			customContext.setTypeConverter(new CustomTypeConverter(conversionService));
+
+			// Compiler mode OFF: compare when the type of the TypeConverter changes.
+			expression = parse("'value: ' + primitiveInt");
+			assertThat(expression.getValue(new StandardEvaluationContext(operands))).isEqualTo("value: 42");
+			assertThat(expression.getValue(customContext)).isEqualTo("value: int-42");
+			assertCannotCompile(expression);
+		}
+
+		@Test  // gh-37433
+		void opPlusStringWithValueDependentToString() {
+			ConcatenationOperands operands = new ConcatenationOperands();
+
+			// The default TypeConverter uses name(), which only differs from toString() for HIGH.
+			expression = mixedModeParser().parseExpression("'level: ' + level");
+			assertThat(expression.getValue(operands)).isEqualTo("level: LOW");
+			operands.level = Level.HIGH;
+			assertThat(expression.getValue(operands)).isEqualTo("level: HIGH");
+			assertCannotCompile(expression);
+		}
+
+		@Test  // gh-37433
+		void opPlusStringComparesConversionResultOnlyIfNecessary() {
+			GenericConversionService conversionService = new DefaultConversionService();
+			conversionService.addConverter(InvocationCountingToString.class, String.class, Object::toString);
+			InvocationCountingToString operand = new InvocationCountingToString();
+
+			// Compiler mode OFF: compare once for the type of the operand and the TypeConverter.
+			expression = parse("'value: ' + #operand");
+			for (int i = 0; i < 3; i++) {
+				StandardEvaluationContext context = new StandardEvaluationContext();
+				context.setTypeConverter(new StandardTypeConverter(conversionService));
+				context.setVariable("operand", operand);
+				assertThat(expression.getValue(context)).isEqualTo("value: operand");
+			}
+			// 3 conversions + 1 comparison
+			assertThat(operand.invocations).isEqualTo(4);
+
+			// Compiler mode MIXED: compare for every evaluation.
+			operand.invocations = 0;
+			expression = mixedModeParser().parseExpression("'value: ' + #operand");
+			for (int i = 0; i < 3; i++) {
+				StandardEvaluationContext context = new StandardEvaluationContext();
+				context.setTypeConverter(new StandardTypeConverter(conversionService));
+				context.setVariable("operand", operand);
+				assertThat(expression.getValue(context)).isEqualTo("value: operand");
+			}
+			// 3 conversions + 3 comparisons
+			assertThat(operand.invocations).isEqualTo(6);
+
+			// Compiler mode MIXED with an EvaluationContext that does not support compilation:
+			// compare once for the type of the operand and the TypeConverter.
+			operand.invocations = 0;
+			expression = mixedModeParser().parseExpression("'value: ' + #operand");
+			for (int i = 0; i < 3; i++) {
+				SimpleEvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding()
+						.withConversionService(conversionService)
+						.build();
+				context.setVariable("operand", operand);
+				assertThat(expression.getValue(context)).isEqualTo("value: operand");
+			}
+			// 3 conversions + 1 comparison
+			assertThat(operand.invocations).isEqualTo(4);
+		}
+
+		private static SpelExpressionParser mixedModeParser() {
+			return new SpelExpressionParser(SpelParserConfiguration.builder()
+					.compilerMode(SpelCompilerMode.MIXED)
+					.build());
 		}
 
 		@Test
@@ -6954,6 +7390,138 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public Object getObject() {
 			return "object";
+		}
+	}
+
+
+	public static class ConcatenationOperands {
+
+		public int primitiveInt = 42;
+
+		public char primitiveChar = 'c';
+
+		public byte primitiveByte = 8;
+
+		public short primitiveShort = 16;
+
+		public Integer boxedInteger = 42;
+
+		public Double boxedDouble = 3.5;
+
+		public Object object = 42;
+
+		public LocalDate localDate = LocalDate.of(2026, 10, 9);
+
+		public BigDecimal bigDecimal = new BigDecimal("1.50");
+
+		public Label label = new Label();
+
+		public Mood mood = Mood.HAPPY;
+
+		public Level level = Level.LOW;
+
+		public Charset charset = StandardCharsets.UTF_8;
+
+		@Grouped
+		public Integer groupedNumber = 42;
+
+		public Map<String, Object> map = Map.of("key", 42);
+
+		public List<Integer> list;
+	}
+
+
+	public enum Level {
+
+		LOW, HIGH;
+
+		@Override
+		public String toString() {
+			return (this == HIGH ? "high" : name());
+		}
+	}
+
+
+	private static class CustomTypeConverter extends StandardTypeConverter {
+
+		CustomTypeConverter(ConversionService conversionService) {
+			super(conversionService);
+		}
+	}
+
+
+	public static class InvocationCountingToString {
+
+		int invocations;
+
+		@Override
+		public String toString() {
+			this.invocations++;
+			return "operand";
+		}
+	}
+
+
+	@Target(ElementType.FIELD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface Grouped {
+	}
+
+
+	/**
+	 * Formats an {@link Integer} annotated with {@link Grouped @Grouped} using
+	 * grouping separators.
+	 */
+	private static class GroupedNumberConverter implements ConditionalGenericConverter {
+
+		@Override
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return Set.of(new ConvertiblePair(Integer.class, String.class));
+		}
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return sourceType.hasAnnotation(Grouped.class);
+		}
+
+		@Override
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return String.format(Locale.US, "%,d", source);
+		}
+	}
+
+
+	public static class Label {
+
+		@Override
+		public String toString() {
+			return "label";
+		}
+	}
+
+
+	public enum Mood {
+
+		HAPPY,
+
+		SAD {
+			@Override
+			public String toString() {
+				return "sad";
+			}
+		},
+
+		// The class body makes CALM a non-public subclass of Mood, while its
+		// toString() result remains equal to its name().
+		CALM {
+			@Override
+			boolean isCalm() {
+				return true;
+			}
+		};
+
+		boolean isCalm() {
+			return false;
 		}
 	}
 

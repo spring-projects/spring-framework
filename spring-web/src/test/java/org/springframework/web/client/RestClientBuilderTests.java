@@ -31,8 +31,10 @@ import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -155,7 +157,50 @@ class RestClientBuilderTests {
 
 		assertThat(fieldValue("messageConverters", restClient))
 				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.startsWith(stringConverter)
+				.hasAtLeastOneElementOfType(ByteArrayHttpMessageConverter.class)
+				.hasAtLeastOneElementOfType(JacksonJsonHttpMessageConverter.class)
+				.hasAtLeastOneElementOfType(MultipartHttpMessageConverter.class);
+	}
+
+	@Test
+	void configureMessageConvertersWithDisabledDefaults() {
+		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
+		RestClient.Builder builder = RestClient.builder();
+		builder.configureMessageConverters(clientBuilder -> clientBuilder.disableDefaults()
+				.addCustomConverter(stringConverter));
+		DefaultRestClient restClient = (DefaultRestClient) builder.build();
+
+		assertThat(fieldValue("messageConverters", restClient))
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
 				.hasExactlyElementsOfTypes(StringHttpMessageConverter.class, MultipartHttpMessageConverter.class);
+	}
+
+	@Test
+	void configureMessageConvertersOverridesDefaultConverter() {
+		JacksonJsonHttpMessageConverter jsonConverter = new JacksonJsonHttpMessageConverter();
+		RestClient.Builder builder = RestClient.builder();
+		builder.configureMessageConverters(clientBuilder -> clientBuilder.withJsonConverter(jsonConverter));
+		DefaultRestClient restClient = (DefaultRestClient) builder.build();
+
+		assertThat(fieldValue("messageConverters", restClient))
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.hasAtLeastOneElementOfType(ByteArrayHttpMessageConverter.class)
+				.filteredOn(JacksonJsonHttpMessageConverter.class::isInstance)
+				.containsExactly(jsonConverter);
+	}
+
+	@Test
+	void configureMessageConvertersAfterMutateCustomizesDefaultConverters() {
+		RestClient restClient = RestClient.builder().build();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		restClient.mutate()
+				.configureMessageConverters(clientBuilder ->
+						clientBuilder.configureMessageConvertersList(converters::addAll))
+				.build();
+
+		assertThat(converters).isNotEmpty()
+				.hasAtLeastOneElementOfType(JacksonJsonHttpMessageConverter.class);
 	}
 
 	@Test

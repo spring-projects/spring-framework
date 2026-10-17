@@ -115,6 +115,7 @@ class CustomInterceptorTests {
 
 		CacheInterceptorBeanPostProcessor(BeanFactory beanFactory) {this.beanFactory = beanFactory;}
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (beanName.equals("cacheInterceptor")) {
 				CacheInterceptor cacheInterceptor = new TestCacheInterceptor();

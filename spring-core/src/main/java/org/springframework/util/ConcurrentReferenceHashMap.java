@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link ConcurrentHashMap} variant that uses {@link ReferenceType#SOFT soft} or
- * {@linkplain ReferenceType#WEAK weak} references for both {@code keys} and {@code values}.
+ * {@linkplain ReferenceType#WEAK weak} references for its entries.
  *
  * <p>This class can be used as an alternative to
  * {@code Collections.synchronizedMap(new WeakHashMap<K, Reference<V>>())} in order to
@@ -56,6 +56,16 @@ import org.jspecify.annotations.Nullable;
  * placed into the map will be subsequently available. The garbage collector may discard
  * references at any time, so it may appear that an unknown thread is silently removing
  * entries.
+ *
+ * <p>Note that the soft or weak references are applied to the internal entries of the
+ * map, not to the keys and values themselves: each entry holds strong references to its
+ * key and value, whereas the map only holds a soft or weak reference to the entry.
+ * Consequently, an entry may be discarded even if its key and value are still strongly
+ * reachable from elsewhere. In contrast to {@link java.util.WeakHashMap}, the lifetime
+ * of an entry is therefore not tied to the reachability of its key. In particular, with
+ * {@link ReferenceType#WEAK weak} references, entries are likely to be removed on the
+ * next garbage collection. This makes the map suitable for caches whose entries can be
+ * recomputed on demand, but not for associating data with a key for the key's lifetime.
  *
  * <p>If not explicitly specified, this implementation will use
  * {@linkplain SoftReference soft entry references}.
@@ -599,10 +609,10 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 */
 	public enum ReferenceType {
 
-		/** Use {@link SoftReference SoftReferences}. */
+		/** Use {@link SoftReference SoftReferences} for map entries. */
 		SOFT,
 
-		/** Use {@link WeakReference WeakReferences}. */
+		/** Use {@link WeakReference WeakReferences} for map entries. */
 		WEAK
 	}
 

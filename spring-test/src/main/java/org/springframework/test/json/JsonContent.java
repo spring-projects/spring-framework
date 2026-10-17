@@ -19,7 +19,6 @@ package org.springframework.test.json;
 import org.assertj.core.api.AssertProvider;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.Assert;
 
 /**
@@ -47,19 +46,6 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 		Assert.notNull(json, "JSON must not be null");
 		this.json = json;
 		this.converterDelegate = converterDelegate;
-	}
-
-	/**
-	 * Create a new {@code JsonContent} instance with the message converter to
-	 * use to deserialize content.
-	 * @param json the actual JSON content
-	 * @param converter the content converter to use
-	 * @deprecated in favor of {@link #JsonContent(String, JsonConverterDelegate)}
-	 */
-	@SuppressWarnings("removal")
-	@Deprecated(since = "7.0", forRemoval = true)
-	public JsonContent(String json, @Nullable HttpMessageContentConverter converter) {
-		this(json, (JsonConverterDelegate) converter);
 	}
 
 	/**
@@ -93,16 +79,6 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	 */
 	public @Nullable JsonConverterDelegate getJsonConverterDelegate() {
 		return this.converterDelegate;
-	}
-
-	/**
-	 * Return the {@link HttpMessageContentConverter} to use to deserialize content.
-	 * @deprecated in favor of {@link #getJsonConverterDelegate()}
-	 */
-	@SuppressWarnings("removal")
-	@Deprecated(since = "7.0", forRemoval = true)
-	@Nullable HttpMessageContentConverter getContentConverter() {
-		return (this.converterDelegate instanceof HttpMessageContentConverter cc ? cc : null);
 	}
 
 	@Override

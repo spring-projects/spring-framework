@@ -1087,6 +1087,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				});
 	}
 
+	@Deprecated(since = "7.1")
 	@Override
 	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,
 			ParameterizedPreparedStatementSetter<T> pss) throws DataAccessException {

@@ -66,7 +66,9 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 	@Override
 	public ServerResponse block() {
 		try {
-			if (this.timeout != null) {
+			// Consistent with DeferredResult and the Servlet AsyncContext,
+			// a timeout of zero or less specifies an infinite timeout.
+			if (this.timeout != null && this.timeout.toMillis() > 0) {
 				return this.futureResponse.get(this.timeout.toMillis(), TimeUnit.MILLISECONDS);
 			}
 			else {
@@ -115,8 +117,13 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 			throws ServletException, IOException {
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
-		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		AsyncWebRequest asyncWebRequest = asyncManager.getAsyncWebRequest();
+		// defensive check as asyncWebRequest should not be null,
+		// should have been set already in HandlerFunctionAdapter#getWebAsyncManager
+		if (asyncWebRequest == null) {
+			asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+			asyncManager.setAsyncWebRequest(asyncWebRequest);
+		}
 		try {
 			asyncManager.startDeferredResultProcessing(deferredResult);
 		}

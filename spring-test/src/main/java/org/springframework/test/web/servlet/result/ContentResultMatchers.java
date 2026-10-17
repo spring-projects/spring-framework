@@ -28,7 +28,6 @@ import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
 import org.springframework.http.MediaType;
-import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;
@@ -200,8 +199,9 @@ public class ContentResultMatchers {
 	 * are "similar" - i.e. they contain the same attribute-value pairs
 	 * regardless of formatting with a lenient checking (extensible,
 	 * and non-strict array ordering).
-	 * <p>Use of this matcher requires the <a
-	 * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * <p>Use of this matcher requires either the
+	 * <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a> or the
+	 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param jsonContent the expected JSON content
 	 * @since 4.1
 	 * @see #json(String, JsonCompareMode)
@@ -218,8 +218,9 @@ public class ContentResultMatchers {
 	 * <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
 	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
-	 * <p>Use of this matcher requires the <a
-	 * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * <p>Use of this matcher requires either the
+	 * <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a> or the
+	 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param jsonContent the expected JSON content
 	 * @param strict enables strict checking
 	 * @since 4.2
@@ -235,22 +236,23 @@ public class ContentResultMatchers {
 	 * Parse the response content and the given string as JSON and assert the two
 	 * using the given {@linkplain JsonCompareMode mode}. If the comparison failed,
 	 * throws an {@link AssertionError} with the message of the {@link JsonComparison}.
-	 * <p>Use of this matcher requires the <a
-	 * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * <p>Use of this matcher requires either the
+	 * <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a> or the
+	 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param jsonContent the expected JSON content
 	 * @param compareMode the compare mode
 	 * @since 6.2
 	 */
 	public ResultMatcher json(String jsonContent, JsonCompareMode compareMode) {
-		return json(jsonContent, JsonAssert.comparator(compareMode));
+		return json(jsonContent, JsonComparator.of(compareMode));
 	}
 
 	/**
 	 * Parse the response content and the given string as JSON and assert the two
 	 * using the given {@link JsonComparator}. If the comparison failed, throws an
 	 * {@link AssertionError} with the message of the {@link JsonComparison}.
-	 * <p>Use this matcher if you require a custom JSONAssert configuration or
-	 * if you desire to use another assertion library.
+	 * <p>Use this matcher if you require a custom configuration or if you
+	 * desire to use another assertion library.
 	 * @param jsonContent the expected JSON content
 	 * @param comparator the comparator to use
 	 * @since 6.2

@@ -159,6 +159,8 @@ public class MockAsyncContext implements AsyncContext {
 	 * {@link org.springframework.web.context.request.async.DeferredResult DeferredResult}
 	 * or on
 	 * {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter SseEmitter}.
+	 * <p>As defined by the Servlet API, a timeout of zero or less specifies
+	 * no timeout.
 	 * @param timeout the timeout value to use.
 	 * @see AsyncContext#setTimeout(long)
 	 */

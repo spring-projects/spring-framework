@@ -137,6 +137,34 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 				.verify();
 	}
 
+	@Test
+	@SuppressWarnings("rawtypes")
+	void ignoreInvalidRetry() {
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer(
+						"retry:none\ndata:foo\n\n" +
+								"retry:\ndata:bar\n\n" +
+								"retry:-1\ndata:baz\n\n" +
+								"retry:+5000\ndata:qux\n\n" +
+								// Arabic-Indic digits: accepted by Long#parseLong, not by the spec.
+								"retry:\u0665\u0660\u0660\u0660\ndata:quux\n\n" +
+								"retry:99999999999999999999\ndata:corge\n\n")));
+
+		Flux<ServerSentEvent> events = this.reader
+				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),
+						request, Collections.emptyMap()).cast(ServerSentEvent.class);
+
+		StepVerifier.create(events)
+				.expectNext(ServerSentEvent.builder().data("foo").build())
+				.expectNext(ServerSentEvent.builder().data("bar").build())
+				.expectNext(ServerSentEvent.builder().data("baz").build())
+				.expectNext(ServerSentEvent.builder().data("qux").build())
+				.expectNext(ServerSentEvent.builder().data("quux").build())
+				.expectNext(ServerSentEvent.builder().data("corge").build())
+				.expectComplete()
+				.verify();
+	}
+
 	@Test // gh-35412
 	void emptyLines() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")

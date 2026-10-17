@@ -60,9 +60,8 @@ Java::
 			if (errors.hasErrors()) {
 				// ...
 			}
-				status.setComplete();
-				// ...
-			}
+			status.setComplete();
+			// ...
 		}
 	}
 ----

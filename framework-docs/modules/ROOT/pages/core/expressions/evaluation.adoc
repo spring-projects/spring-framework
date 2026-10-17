@@ -104,7 +104,8 @@ SpEL also supports nested properties by using the standard dot notation (such as
 `prop1.prop2.prop3`) as well as the corresponding setting of property values.
 Public fields may also be accessed.
 
-The following example shows how to use dot notation to get the length of a string literal.
+The following example shows how to use dot notation to get the number of bytes in the
+platform-encoded form of a string literal.
 
 [tabs]
 ======
@@ -118,7 +119,7 @@ Java::
 	Expression exp = parser.parseExpression("'Hello World'.bytes.length"); // <1>
 	int length = (Integer) exp.getValue();
 ----
-<1> `'Hello World'.bytes.length` gives the length of the literal.
+<1> `'Hello World'.bytes.length` gives the number of bytes in the literal's byte array.
 
 Kotlin::
 +
@@ -130,7 +131,7 @@ Kotlin::
 	val exp = parser.parseExpression("'Hello World'.bytes.length") // <1>
 	val length = exp.value as Int
 ----
-<1> `'Hello World'.bytes.length` gives the length of the literal.
+<1> `'Hello World'.bytes.length` gives the number of bytes in the literal's byte array.
 ======
 
 The String's constructor can be called instead of using a string literal, as the following
@@ -768,7 +769,8 @@ common expressions that are likely to be used in performance-critical contexts. 
 following kinds of expressions cannot be compiled.
 
 * Expressions involving assignment
-* Expressions relying on the conversion service
+* Expressions relying on the conversion service (with the exception of String
+  concatenation, as described below)
 * Expressions using custom resolvers
 * Expressions using overloaded operators
 * Expressions using array construction syntax
@@ -776,3 +778,24 @@ following kinds of expressions cannot be compiled.
 * Expressions using bean references
 
 Compilation of additional kinds of expressions may be supported in the future.
+
+[NOTE]
+====
+String concatenation with a non-String operand (for example, `'Total: ' + order.total`)
+converts that operand to a `String` by using the `TypeConverter` configured in the
+`EvaluationContext`. Such an expression can be compiled once the `TypeConverter` has
+converted a non-null value of that operand to the same `String` as `String.valueOf()`
+during interpreted evaluation. However, such an expression is never compiled if the
+operand carries any annotations (for example, a field or getter annotated with
+`@NumberFormat`, `@Column`, or `@JsonProperty`), since the `TypeConverter` may apply
+annotation-driven formatting which typically depends on the value being formatted.
+Similarly, an expression cannot be compiled as long as the operand evaluates to `null`,
+and the compiler may eventually stop attempting to compile the expression if the
+operand repeatedly evaluates to `null`.
+
+Once compiled, the expression converts the operand by using `String.valueOf()` instead
+of the `TypeConverter`, which typically produces the same result for other values of
+the same type. If the operand later evaluates to a value of a different type,
+evaluation of the compiled expression fails, which is handled according to the
+configured compiler mode (see <<expressions-compiler-configuration>>).
+====

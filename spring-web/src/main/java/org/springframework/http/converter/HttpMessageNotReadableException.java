@@ -64,7 +64,7 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 	 * @since 5.1
 	 */
 	public HttpInputMessage getHttpInputMessage() {
-		Assert.state(this.httpInputMessage != null, "No HttpInputMessage available - use non-deprecated constructors");
+		Assert.state(this.httpInputMessage != null, "No HttpInputMessage available");
 		return this.httpInputMessage;
 	}
 

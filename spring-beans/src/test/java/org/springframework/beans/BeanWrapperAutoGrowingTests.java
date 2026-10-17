@@ -257,6 +257,24 @@ class BeanWrapperAutoGrowingTests {
 		assertThat(bean.getNestedNestedMap().get("A").get("B").get("C")).isInstanceOf(Bean.class);
 	}
 
+	@Test
+	void setPropertyValueAutoGrowNestedNestedMapPreservesExistingValues() {
+		Bean existing = new Bean();
+		Bean added = new Bean();
+		wrapper.setPropertyValue("nestedNestedMap[A][B][C]", existing);
+		wrapper.setPropertyValue("nestedNestedMap[A][B][D]", added);
+		assertThat(bean.getNestedNestedMap().get("A").get("B"))
+				.containsEntry("C", existing).containsEntry("D", added);
+	}
+
+	@Test
+	void getPropertyValueDoesNotAutoGrowNestedMapValues() {
+		bean.setNestedNestedMap(Map.of("A", Map.of()));
+		assertThatExceptionOfType(NullValueInNestedPathException.class)
+				.isThrownBy(() -> wrapper.getPropertyValue("nestedNestedMap[A][B][C]"));
+		assertThat(bean.getNestedNestedMap().get("A")).isEmpty();
+	}
+
 
 	@SuppressWarnings("rawtypes")
 	public static class Bean {

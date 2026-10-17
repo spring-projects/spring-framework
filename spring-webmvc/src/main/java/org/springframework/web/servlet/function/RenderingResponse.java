@@ -49,7 +49,8 @@ public interface RenderingResponse extends ServerResponse {
 	// Builder
 
 	/**
-	 * Create a builder with the template name, status code, headers and model of the given response.
+	 * Create a builder with the template name, status code, headers, cookies,
+	 * and model of the given response.
 	 * @param other the response to copy the values from
 	 * @return the created builder
 	 */

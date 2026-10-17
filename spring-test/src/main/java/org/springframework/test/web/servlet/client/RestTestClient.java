@@ -286,7 +286,12 @@ public interface RestTestClient {
 
 		/**
 		 * Configure the message converters to use for the request and response body.
-		 * @param configurer the configurer to apply on an empty {@link HttpMessageConverters.ClientBuilder}.
+		 * <p>As of 7.1, the builder is initialized with
+		 * {@link HttpMessageConverters.ClientBuilder#registerDefaults() default
+		 * converters}. Use {@link HttpMessageConverters.ClientBuilder#disableDefaults()}
+		 * to only use the converters configured explicitly.
+		 * @param configurer the configurer to apply on the
+		 * {@link HttpMessageConverters.ClientBuilder}
 		 * @return this builder
 		 */
 		<T extends B> T configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer);
@@ -738,7 +743,8 @@ public interface RestTestClient {
 		 * comparison verifying that they contain the same attribute-value pairs
 		 * regardless of formatting with <em>lenient</em> checking (extensible
 		 * and non-strict array ordering).
-		 * <p>Use of this method requires the
+		 * <p>Use of this method requires either the
+		 * <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a> or the
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * to be on the classpath.
 		 * @param expectedJson the expected JSON content
@@ -753,7 +759,8 @@ public interface RestTestClient {
 		 * comparison using the given {@linkplain JsonCompareMode mode}. If the
 		 * comparison failed, throws an {@link AssertionError} with the message
 		 * of the {@link JsonComparison}.
-		 * <p>Use of this method requires the
+		 * <p>Use of this method requires either the
+		 * <a href="https://github.com/lukas-krecan/JsonUnit">JsonUnit</a> or the
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * to be on the classpath.
 		 * @param expectedJson the expected JSON content

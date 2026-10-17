@@ -22,6 +22,10 @@ import jakarta.servlet.jsp.JspException;
  * The {@code <password>} tag renders an HTML 'input' tag with type 'password'
  * using the bound value.
  *
+ * <p>Use this tag instead of the {@code <input>} tag ({@link InputTag}) with
+ * {@code type="password"} for password fields. By default, the bound value is
+ * not rendered.
+ *
  * <h3>Attribute Summary</h3>
  * <table>
  * <thead>

@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa;
 
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
@@ -58,6 +59,11 @@ class EntityManagerRuntimeHintsTests {
 		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(Session.class, EntityManagerProxy.class))
 				.accepts(this.hints);
 		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(StatelessSession.class)).accepts(this.hints);
+	}
+
+	@Test
+	void entityManagerFactoryHasFallbackQueryProxyHints() {
+		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(Query.class)).accepts(this.hints);
 	}
 
 	@Test

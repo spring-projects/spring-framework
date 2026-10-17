@@ -48,7 +48,7 @@ public class PropertiesPropertySource extends MapPropertySource {
 	@Override
 	public String[] getPropertyNames() {
 		synchronized (this.source) {
-			return ((Map<?, ?>) this.source).keySet().stream().filter(k -> k instanceof String).toArray(String[]::new);
+			return ((Map<?, ?>) this.source).keySet().stream().filter(String.class::isInstance).toArray(String[]::new);
 		}
 	}
 

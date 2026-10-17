@@ -204,7 +204,10 @@ class OpPlusTests {
 
 		assertThat(value.getTypeDescriptor().getObjectType()).isEqualTo(String.class);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(String.class);
+		// The custom Time -> String converter produces a result that differs from time.toString(),
+		// so the expression must remain in interpreted mode to honor the converter.
 		assertThat(value.getValue()).isEqualTo(format.format(time) + " is now");
+		assertThat(operator.isCompilable()).isFalse();
 	}
 
 }

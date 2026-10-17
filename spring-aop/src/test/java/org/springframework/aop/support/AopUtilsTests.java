@@ -125,6 +125,7 @@ class AopUtilsTests {
 
 	static class WithInterface implements ProxyInterface {
 
+		@Override
 		public void handle(List<String> list) {
 		}
 	}

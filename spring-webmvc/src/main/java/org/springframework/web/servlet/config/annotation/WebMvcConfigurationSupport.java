@@ -226,6 +226,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private @Nullable AsyncSupportConfigurer asyncSupportConfigurer;
 
+	private @Nullable ProblemDetailsConfigurer problemDetailsConfigurer;
+
 
 	/**
 	 * Set the Spring {@link ApplicationContext}, for example, for resource loading.
@@ -1039,6 +1041,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
 		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
 		exceptionHandlerResolver.setErrorResponseInterceptors(getErrorResponseInterceptors());
+		ProblemDetailsConfigurer problemDetailsConfigurer = getProblemDetailsConfigurer();
+		exceptionHandlerResolver.setRenderUnhandledExceptionsAsProblemDetails(
+				problemDetailsConfigurer.isRenderUnhandledExceptions());
+		exceptionHandlerResolver.setErrorResponseViewResolver(problemDetailsConfigurer.getViewResolver());
 		if (JACKSON_PRESENT || JACKSON_2_PRESENT || KOTLIN_SERIALIZATION_PRESENT) {
 			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>(2);
 			if (JACKSON_PRESENT || JACKSON_2_PRESENT) {
@@ -1083,6 +1089,28 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			configureErrorResponseInterceptors(this.errorResponseInterceptors);
 		}
 		return this.errorResponseInterceptors;
+	}
+
+	/**
+	 * Returns the {@link ProblemDetailsConfigurer}, as prepared by
+	 * {@link #customizeProblemDetails(ProblemDetailsConfigurer)}.
+	 * @since 7.1
+	 */
+	protected final ProblemDetailsConfigurer getProblemDetailsConfigurer() {
+		if (this.problemDetailsConfigurer == null) {
+			this.problemDetailsConfigurer = new ProblemDetailsConfigurer();
+			customizeProblemDetails(this.problemDetailsConfigurer);
+		}
+		return this.problemDetailsConfigurer;
+	}
+
+	/**
+	 * Override this method to configure how RFC 9457 problem details are
+	 * produced and rendered by the default {@code ExceptionHandlerExceptionResolver}.
+	 * @since 7.1
+	 * @see ProblemDetailsConfigurer
+	 */
+	protected void customizeProblemDetails(ProblemDetailsConfigurer configurer) {
 	}
 
 	/**

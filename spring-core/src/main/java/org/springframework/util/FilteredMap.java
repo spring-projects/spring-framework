@@ -56,7 +56,7 @@ final class FilteredMap<K, V extends @Nullable Object> extends AbstractMap<K, V>
 	@Override
 	public int size() {
 		int size = 0;
-		for (K k : keySet()) {
+		for (K k : this.delegate.keySet()) {
 			if (this.filter.test(k)) {
 				size++;
 			}

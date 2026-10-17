@@ -375,7 +375,7 @@ public class ReactiveAdapterRegistry {
 		void registerAdapters(ReactiveAdapterRegistry registry) {
 			ReactiveTypeDescriptor uniDesc = ReactiveTypeDescriptor.singleOptionalValue(
 					io.smallrye.mutiny.Uni.class,
-					() -> io.smallrye.mutiny.Uni.createFrom().nothing());
+					() -> io.smallrye.mutiny.Uni.createFrom().nullItem());
 			ReactiveTypeDescriptor multiDesc = ReactiveTypeDescriptor.multiValue(
 					io.smallrye.mutiny.Multi.class,
 					() -> io.smallrye.mutiny.Multi.createFrom().empty());

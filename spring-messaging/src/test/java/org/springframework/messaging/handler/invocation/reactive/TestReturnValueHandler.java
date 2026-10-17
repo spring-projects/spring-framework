@@ -45,9 +45,9 @@ public class TestReturnValueHandler implements HandlerMethodReturnValueHandler {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Mono<Void> handleReturnValue(@Nullable Object value, MethodParameter returnType, Message<?> message) {
-		return value instanceof Publisher ?
-				new ChannelSendOperator((Publisher) value, this::saveValue) :
-				saveValue(value);
+		return (value instanceof Publisher publisher ?
+				new ChannelSendOperator(publisher, this::saveValue) :
+				saveValue(value));
 	}
 
 	private Mono<Void> saveValue(@Nullable Object value) {

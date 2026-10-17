@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  * @author Mahmoud Ben Hassine
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Chengang Guan
  * @since 7.0
  */
 public class CompositeRetryListener implements RetryListener {
@@ -82,13 +83,13 @@ public class CompositeRetryListener implements RetryListener {
 	}
 
 	@Override
-	public void onRetrySuccess(RetryPolicy retryPolicy, Retryable<?> retryable, @Nullable Object result) {
-		this.listeners.forEach(listener -> listener.onRetrySuccess(retryPolicy, retryable, result));
+	public void onRetrySuccess(RetryPolicy retryPolicy, Retryable<?> retryable, RetryState retryState, @Nullable Object result) {
+		this.listeners.forEach(listener -> listener.onRetrySuccess(retryPolicy, retryable, retryState, result));
 	}
 
 	@Override
-	public void onRetryFailure(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
-		this.listeners.forEach(listener -> listener.onRetryFailure(retryPolicy, retryable, throwable));
+	public void onRetryFailure(RetryPolicy retryPolicy, Retryable<?> retryable, RetryState retryState, Throwable throwable) {
+		this.listeners.forEach(listener -> listener.onRetryFailure(retryPolicy, retryable, retryState, throwable));
 	}
 
 	@Override

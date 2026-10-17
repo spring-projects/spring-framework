@@ -22,6 +22,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -164,6 +166,21 @@ class ServletServerHttpRequestTests {
 		mockRequest.setContentType("*/*");
 		mockRequest.removeHeader("Content-Type");
 		assertThat(request.getHeaders().isEmpty()).as("Invalid content-type should not raise exception").isTrue();
+	}
+
+	@Test // gh-36426
+	void getHeadersWithCharacterEncoding() {
+		mockRequest.setContentType("application/x-www-form-urlencoded");
+		HttpServletRequest wrapper = new HttpServletRequestWrapper(mockRequest) {
+			@Override
+			public String getCharacterEncoding() {
+				return StandardCharsets.ISO_8859_1.name();
+			}
+		};
+
+		HttpHeaders headers = new ServletServerHttpRequest(wrapper).getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(
+				new MediaType(MediaType.APPLICATION_FORM_URLENCODED, StandardCharsets.ISO_8859_1));
 	}
 
 	@Test

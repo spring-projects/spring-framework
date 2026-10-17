@@ -47,6 +47,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * @author Rossen Stoyanchev
  * @author Keith Donald
  * @author David Syer
+ * @author Brian Clozel
  * @since 3.1
  */
 public interface WebMvcConfigurer {
@@ -243,6 +244,19 @@ public interface WebMvcConfigurer {
 	 * @see WebMvcConfigurationSupport#addDefaultHandlerExceptionResolvers(List, org.springframework.web.accept.ContentNegotiationManager)
 	 */
 	default void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+	}
+
+	/**
+	 * Configure how RFC 9457 problem details are produced and rendered, for
+	 * example to render exceptions that are not handled by any
+	 * {@code @ExceptionHandler} method as problem details.
+	 * <p>Note that this applies to the default {@code ExceptionHandlerExceptionResolver}.
+	 * It does not apply if {@link #configureHandlerExceptionResolvers} is used to
+	 * replace the default resolvers.
+	 * @since 7.1
+	 * @see #addErrorResponseInterceptors
+	 */
+	default void configureProblemDetails(ProblemDetailsConfigurer configurer) {
 	}
 
 	/**

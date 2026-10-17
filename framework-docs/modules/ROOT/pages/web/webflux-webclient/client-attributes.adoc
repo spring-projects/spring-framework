@@ -22,8 +22,6 @@ Java::
 			.attribute("myAttribute", "...")
 			.retrieve()
 			.bodyToMono(Void.class);
-
-		}
 ----
 
 Kotlin::

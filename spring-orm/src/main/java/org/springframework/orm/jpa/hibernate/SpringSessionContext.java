@@ -187,7 +187,16 @@ public class SpringSessionContext implements CurrentSessionContext {
 		if (value instanceof StatelessSession statelessSession) {
 			return statelessSession;
 		}
-		if (value instanceof SessionHolder sessionHolder) {
+		else if (value instanceof EntityManagerHolder emHolder) {
+			SessionHolder sessionHolder;
+			if (emHolder instanceof SessionHolder originalSessionHolder) {
+				sessionHolder = originalSessionHolder;
+			}
+			else {
+				sessionHolder = new SessionHolder(emHolder);
+				TransactionSynchronizationManager.unbindResource(sessionFactory);
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+			}
 			if (sessionHolder.hasStatelessSession()) {
 				return sessionHolder.getStatelessSession();
 			}
@@ -216,7 +225,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 			return session;
 		}
 
-		throw new HibernateException("Could not obtain transaction-synchronized Session for current thread");
+		throw new HibernateException("Could not obtain transaction-synchronized StatelessSession for current thread");
 	}
 
 	private static void bindSessionHolder(SessionFactory sessionFactory, SessionHolder holder) {

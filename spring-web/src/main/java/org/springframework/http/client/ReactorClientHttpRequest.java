@@ -19,7 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.time.Duration;
 import java.util.concurrent.Executor;
 
 import io.netty.buffer.ByteBuf;
@@ -56,8 +55,6 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 
 	private final Executor executor;
 
-	private final @Nullable Duration exchangeTimeout;
-
 
 	/**
 	 * Create an instance.
@@ -75,24 +72,16 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 	 * <p>If no executor is provided, the request will use an {@link Schedulers#boundedElastic() elastic scheduler}
 	 * for performing blocking I/O operations.
 	 * @param httpClient the client to perform the request with
-	 * @param executor the executor to use
 	 * @param method the HTTP method
 	 * @param uri the URI for the request
+	 * @param executor the executor to use
 	 * @since 6.2.13
 	 */
 	public ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri, @Nullable Executor executor) {
-		this(httpClient, method, uri, executor, null);
-	}
-
-	/**
-	 * Package private constructor for use until exchangeTimeout is removed.
-	 */
-	ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri, @Nullable Executor executor, @Nullable Duration exchangeTimeout) {
 		this.httpClient = httpClient;
 		this.method = method;
 		this.uri = uri;
 		this.executor = (executor != null) ? executor : Schedulers.boundedElastic()::schedule;
-		this.exchangeTimeout = exchangeTimeout;
 	}
 
 
@@ -121,8 +110,7 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 							.responseConnection((response, conn) -> Mono.just(new ReactorClientHttpResponse(response, conn)))
 							.next();
 
-			ReactorClientHttpResponse clientResponse =
-					(this.exchangeTimeout != null ? mono.block(this.exchangeTimeout) : mono.block());
+			ReactorClientHttpResponse clientResponse = mono.block();
 
 			if (clientResponse == null) {
 				throw new IOException("HTTP exchange resulted in no result");

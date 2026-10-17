@@ -52,6 +52,7 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.SmartClassLoader;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
@@ -88,6 +89,9 @@ class ConfigurationClassEnhancer {
 
 	private static final String BEAN_FACTORY_FIELD = "$$beanFactory";
 
+	private static final String KOTLIN_DEFAULT_CONSTRUCTOR_MARKER =
+			"kotlin.jvm.internal.DefaultConstructorMarker";
+
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
 
@@ -110,6 +114,14 @@ class ConfigurationClassEnhancer {
 						configClass.getName()));
 			}
 			return configClass;
+		}
+
+		if (KotlinDetector.isKotlinType(configClass) && hasKotlinConstructorDefaultValues(configClass)) {
+			throw new BeanDefinitionStoreException("Kotlin configuration class [" + configClass.getName() +
+					"] declares constructor parameters with default values, which are not supported " +
+					"with CGLIB enhancement. Remove the default values or declare " +
+					"@Configuration(proxyBeanMethods=false) without inter-bean references between " +
+					"@Bean methods on the configuration class.");
 		}
 
 		try {
@@ -136,6 +148,38 @@ class ConfigurationClassEnhancer {
 			throw new BeanDefinitionStoreException("Could not enhance configuration class [" + configClass.getName() +
 					"]. Consider declaring @Configuration(proxyBeanMethods=false) without inter-bean references " +
 					"between @Bean methods on the configuration class, avoiding the need for CGLIB enhancement.", ex);
+		}
+	}
+
+	/**
+	 * Check whether the given Kotlin config class declares constructor parameters
+	 * with default values.
+	 * <p>For each constructor with default values, the Kotlin compiler generates
+	 * a synthetic constructor with the same parameters followed by an {@code int}
+	 * bit mask and a {@code DefaultConstructorMarker}. The original constructor
+	 * is required to exist, which excludes the synthetic accessor constructors
+	 * generated for private constructors, since those only append the marker.
+	 */
+	private static boolean hasKotlinConstructorDefaultValues(Class<?> configClass) {
+		for (Constructor<?> ctor : configClass.getDeclaredConstructors()) {
+			Class<?>[] parameterTypes = ctor.getParameterTypes();
+			int count = parameterTypes.length;
+			if (count >= 3 && parameterTypes[count - 2] == int.class &&
+					parameterTypes[count - 1].getName().equals(KOTLIN_DEFAULT_CONSTRUCTOR_MARKER) &&
+					hasDeclaredConstructor(configClass, Arrays.copyOf(parameterTypes, count - 2))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean hasDeclaredConstructor(Class<?> configClass, Class<?>[] parameterTypes) {
+		try {
+			configClass.getDeclaredConstructor(parameterTypes);
+			return true;
+		}
+		catch (NoSuchMethodException ex) {
+			return false;
 		}
 	}
 

@@ -179,14 +179,18 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	/**
-	 * Immediately remove all entries from this cache.
+	 * Remove all entries from this cache.
+	 * <p>This method does not block or synchronize with in-flight
+	 * writes. An entry added concurrently while this method is running
+	 * may still survive this call, as if it had been added immediately
+	 * afterward.
 	 */
 	public void clear() {
 		this.evictionLock.lock();
 		try {
-			Node<K, V> node;
-			while ((node = this.evictionQueue.poll()) != null) {
+			for (Node<K, V> node : this.cache.values()) {
 				this.cache.remove(node.key, node);
+				this.evictionQueue.remove(node);
 				markAsRemoved(node);
 			}
 			this.readOperations.clear();
@@ -198,11 +202,15 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	/*
-	 * Transition the node to the {@code removed} state and decrement the current size of the cache.
+	 * Transition the node to the {@code removed} state and decrement the
+	 * current size of the cache, unless the node has already been removed.
 	 */
 	private void markAsRemoved(Node<K, V> node) {
-		for (; ; ) {
+		while (true) {
 			CacheEntry<V> current = node.get();
+			if (current.state == CacheEntryState.REMOVED) {
+				return;
+			}
 			CacheEntry<V> removed = new CacheEntry<>(current.value, CacheEntryState.REMOVED);
 			if (node.compareAndSet(current, removed)) {
 				this.currentSize.lazySet(this.currentSize.get() - 1);

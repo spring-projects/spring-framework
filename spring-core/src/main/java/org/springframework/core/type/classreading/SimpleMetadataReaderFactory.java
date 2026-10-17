@@ -36,7 +36,6 @@ public class SimpleMetadataReaderFactory extends AbstractMetadataReaderFactory {
 	 * Create a new SimpleMetadataReaderFactory for the default class loader.
 	 */
 	public SimpleMetadataReaderFactory() {
-		super();
 	}
 
 	/**

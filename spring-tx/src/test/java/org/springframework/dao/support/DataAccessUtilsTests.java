@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -156,6 +157,20 @@ class DataAccessUtilsTests {
 
 		assertThatExceptionOfType(TypeMismatchDataAccessException.class)
 				.isThrownBy(() -> DataAccessUtils.longResult(col));
+	}
+
+	@Test  // gh-37438
+	void optionalResultWithSupertypeTargetType() {
+		Collection<String> col = List.of("foo");
+
+		// CharSequence is a supertype of String.
+		Optional<CharSequence> fromCollection = DataAccessUtils.optionalResult(col);
+		Optional<CharSequence> fromStream = DataAccessUtils.optionalResult(col.stream());
+		Optional<CharSequence> fromIterator = DataAccessUtils.optionalResult(col.iterator());
+
+		assertThat(fromCollection).contains("foo");
+		assertThat(fromStream).contains("foo");
+		assertThat(fromIterator).contains("foo");
 	}
 
 	@Test

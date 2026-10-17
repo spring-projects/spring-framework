@@ -151,6 +151,11 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
+	protected void customizeProblemDetails(ProblemDetailsConfigurer configurer) {
+		this.configurers.configureProblemDetails(configurer);
+	}
+
+	@Override
 	protected void configureErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
 		this.configurers.addErrorResponseInterceptors(interceptors);
 	}

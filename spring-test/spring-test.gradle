@@ -30,6 +30,7 @@ dependencies {
 	optional("jakarta.websocket:jakarta.websocket-client-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional("junit:junit")
+	optional("net.javacrumbs.json-unit:json-unit-core")
 	optional("org.apache.groovy:groovy")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
 	optional("org.aspectj:aspectjweaver")

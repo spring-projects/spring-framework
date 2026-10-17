@@ -63,9 +63,13 @@ public abstract class AbstractReactorHttpExchangeAdapter implements ReactorHttpE
 	/**
 	 * Configure how long to block for the response of an HTTP service method
 	 * as described in {@link #getBlockTimeout()}.
+	 * <p>A timeout value of {@code null} or 0 specifies an infinite timeout.
+	 * <p>Negative values are not permitted.
 	 */
 	public void setBlockTimeout(@Nullable Duration blockTimeout) {
-		this.blockTimeout = blockTimeout;
+		Assert.isTrue(blockTimeout == null || !blockTimeout.isNegative(),
+				"Timeout must be a non-negative value");
+		this.blockTimeout = (blockTimeout != null && !blockTimeout.isZero() ? blockTimeout : null);
 	}
 
 	@Override

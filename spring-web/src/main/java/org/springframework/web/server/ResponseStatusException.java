@@ -17,6 +17,7 @@
 package org.springframework.web.server;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 
@@ -117,19 +118,23 @@ public class ResponseStatusException extends ErrorResponseException {
 
 	@Override
 	public ProblemDetail updateAndGetBody(@Nullable MessageSource messageSource, Locale locale) {
-		super.updateAndGetBody(messageSource, locale);
-
-		// The reason may be a code (consistent with ResponseStatusExceptionResolver)
-
-		if (messageSource != null && getReason() != null && getReason().equals(getBody().getDetail())) {
-			Object[] arguments = getDetailMessageArguments(messageSource, locale);
-			String resolved = messageSource.getMessage(getReason(), arguments, null, locale);
-			if (resolved != null) {
-				getBody().setDetail(resolved);
+		String reason = getReason();
+		if (reason != null) {
+			boolean detailNotCustomized = reason.equals(getBody().getDetail());
+			super.updateAndGetBody(messageSource, locale);
+			if (!detailNotCustomized) {
+				return getBody();
 			}
+			// The reason may itself be a code (consistent with ResponseStatusExceptionResolver)
+			String resolved = null;
+			if (messageSource != null) {
+				resolved = messageSource.getMessage(reason, getDetailMessageArguments(messageSource, locale), null, locale);
+			}
+			// set to the custom reason if no message was resolved
+			getBody().setDetail(Objects.requireNonNullElse(resolved, reason));
+			return getBody();
 		}
-
-		return getBody();
+		return super.updateAndGetBody(messageSource, locale);
 	}
 
 	@Override
