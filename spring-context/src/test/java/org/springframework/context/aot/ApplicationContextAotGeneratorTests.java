@@ -75,6 +75,7 @@ import org.springframework.context.testfixture.context.annotation.AutowiredCompo
 import org.springframework.context.testfixture.context.annotation.AutowiredGenericTemplate;
 import org.springframework.context.testfixture.context.annotation.AutowiredMixedCglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
+import org.springframework.context.testfixture.context.annotation.CglibConfigurationWithAssignableArguments;
 import org.springframework.context.testfixture.context.annotation.ConfigurableCglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.GenericTemplateConfiguration;
 import org.springframework.context.testfixture.context.annotation.InitDestroyComponent;
@@ -587,6 +588,28 @@ class ApplicationContextAotGeneratorTests {
 				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 				assertThat(freshApplicationContext.getBean("prefix", String.class)).isEqualTo("Hello0");
 				assertThat(freshApplicationContext.getBean("text", String.class)).isEqualTo("Hello0 World");
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenInterBeanCallHasAssignableArgumentsAndConcreteReturnType() {
+			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+			applicationContext.registerBean(CglibConfigurationWithAssignableArguments.class);
+
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				assertThat(freshApplicationContext.getBean("parent", String.class)).isEqualTo("test+factory");
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenInterBeanCallHasAssignableArgumentsAndInterfaceReturnType() {
+			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+			applicationContext.registerBean(CglibConfigurationWithAssignableArguments.class);
+
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				assertThat(freshApplicationContext.getBean("interfaceParent", String.class)).isEqualTo("test+factory");
 			});
 		}
 

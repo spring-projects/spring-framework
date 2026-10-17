@@ -198,6 +198,14 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 		return get(registeredBean, (args != null ? AutowiredArguments.of(args) : null));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>Constructor arguments must match the parameter types exactly, allowing
+	 * primitive wrappers, to preserve runtime constructor resolution. Factory
+	 * method arguments must be assignable to the selected method's parameter
+	 * types. Null argument values are not supported. The bean factory falls back
+	 * to regular instantiation for unsupported arguments.
+	 */
 	@Override
 	public boolean supportsExplicitArguments(@Nullable Object @Nullable ... args) {
 		return (this.generatorWithoutArguments == null && this.lookup.supportsArguments(args));
@@ -425,11 +433,16 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 			}
 			for (int i = 0; i < args.length; i++) {
 				@Nullable Object arg = args[i];
-				if (arg == null || ClassUtils.resolvePrimitiveIfNecessary(parameterTypes[i]) != arg.getClass()) {
+				if (arg == null || !supportsArgument(parameterTypes[i], arg)) {
 					return false;
 				}
 			}
 			return true;
+		}
+
+		boolean supportsArgument(Class<?> parameterType, Object arg) {
+			// Preserve runtime constructor resolution for more specific argument types.
+			return (ClassUtils.resolvePrimitiveIfNecessary(parameterType) == arg.getClass());
 		}
 	}
 
@@ -502,6 +515,11 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 				this.resolvedMethod = method;
 			}
 			return method;
+		}
+
+		@Override
+		boolean supportsArgument(Class<?> parameterType, Object arg) {
+			return ClassUtils.isAssignableValue(parameterType, arg);
 		}
 
 		@Override

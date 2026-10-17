@@ -177,6 +177,16 @@ class BeanFactorySupplierTests {
 	}
 
 	@Test
+	void getBeanWithAssignableArgumentsWhenUsingFactoryMethodSupplierUsesSelectedFactoryMethod() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
+		beanDefinition.setInstanceSupplier(BeanInstanceSupplier.forFactoryMethod(
+				OverloadedFactory.class, "create", Object.class));
+		beanFactory.registerBeanDefinition("test", beanDefinition);
+		assertThat(beanFactory.getBean("test", "test")).isEqualTo("object:test");
+	}
+
+	@Test
 	void getBeanWithInnerBeanUsingInstanceSupplier() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
@@ -254,6 +264,18 @@ class BeanFactorySupplierTests {
 		MultiConstructorBean(String name, Integer counter) {
 			this.name = name;
 			this.counter = counter;
+		}
+	}
+
+
+	static class OverloadedFactory {
+
+		static String create(Object argument) {
+			return "object:" + argument;
+		}
+
+		static String create(String argument) {
+			return "string:" + argument;
 		}
 	}
 
