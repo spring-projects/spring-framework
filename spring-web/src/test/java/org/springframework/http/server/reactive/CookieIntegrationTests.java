@@ -16,6 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +103,21 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		assertThat(requestCookies.get("lang")).extracting(HttpCookie::getValue).containsExactly("en-US", "zh-CN");
 	}
 
+	@ParameterizedHttpServerTest
+	public void maxAgeExceedingIntegerRangeTest(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		ResponseEntity<Void> response = getRestClient().get().uri("/long-max-age")
+				.retrieve().toBodilessEntity();
+
+		String header = response.getHeaders().get("Set-Cookie").stream()
+				.filter(value -> value.startsWith("remember=")).findFirst().orElseThrow();
+		assertThat(splitCookie(header).stream().map(String::toLowerCase))
+				.as(header)
+				.anySatisfy(attribute -> assertThat(attribute).startsWith("max-age="))
+				.noneMatch(attribute -> attribute.equals("max-age=0") || attribute.startsWith("max-age=-"));
+	}
+
 	// No client side HttpCookie support yet
 	private List<String> splitCookie(String value) {
 		List<String> list = new ArrayList<>();
@@ -127,6 +143,10 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 					.path("/").secure(true).httpOnly(true).partitioned(true).build());
 			response.getCookies().add("lang", ResponseCookie.from("lang", "en-US")
 					.domain("example.com").path("/").build());
+			if (request.getPath().value().endsWith("/long-max-age")) {
+				response.getCookies().add("remember", ResponseCookie.from("remember", "1")
+						.maxAge(Duration.ofDays(36_500)).build());
+			}
 
 			return response.setComplete();
 		}
