@@ -21,10 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -33,6 +37,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -42,6 +47,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -467,6 +473,117 @@ class ResourceHttpRequestHandlerTests {
 		}
 
 		@Test
+		void transformedCssEtag() throws Exception {
+			configureVersionedCss("v1");
+			this.handler.handleRequest(this.request, this.response);
+
+			byte[] body = this.response.getContentAsByteArray();
+			String etag = "W/\"" + DigestUtils.md5DigestAsHex(body) + "\"";
+			assertThat(this.response.getStatus()).isEqualTo(200);
+			assertThat(this.response.getContentAsString()).contains("/static/v1/images/image.png");
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo(etag);
+
+			this.request.setMethod("HEAD");
+			this.response = new MockHttpServletResponse();
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo(etag);
+			assertThat(this.response.getContentLength()).isEqualTo(body.length);
+			assertThat(this.response.getContentAsByteArray()).isEmpty();
+
+			this.request.setMethod("GET");
+			this.request.addHeader(HttpHeaders.RANGE, "bytes=0-9");
+			this.response = new MockHttpServletResponse();
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.response.getStatus()).isEqualTo(206);
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo(etag);
+			assertThat(this.response.getContentAsByteArray()).hasSize(10);
+		}
+
+		@Test
+		void transformedCssEtagChangesWhenReferencedVersionChanges() throws Exception {
+			configureVersionedCss("v1");
+			this.handler.handleRequest(this.request, this.response);
+			String firstEtag = this.response.getHeader(HttpHeaders.ETAG);
+			String firstBody = this.response.getContentAsString();
+			String requestUri = this.request.getRequestURI();
+
+			configureVersionedCss("v2");
+			this.response = new MockHttpServletResponse();
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.request.getRequestURI()).isEqualTo(requestUri);
+			assertThat(this.response.getContentAsString())
+					.contains("/static/v2/images/image.png").isNotEqualTo(firstBody);
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isNotNull().isNotEqualTo(firstEtag);
+		}
+
+		@ParameterizedTest
+		@NullSource
+		@ValueSource(strings = {"\"custom\"", "W/\"custom\""})
+		void transformedCssRespectsEtagGenerator(@Nullable String etag) throws Exception {
+			this.handler.setEtagGenerator(resource -> {
+				assertThat(resource).isInstanceOf(TransformedResource.class);
+				return etag;
+			});
+			configureVersionedCss("v1");
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.response.getStatus()).isEqualTo(200);
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo(etag);
+			assertThat(this.response.getContentAsString()).contains("/static/v1/images/image.png");
+		}
+
+		@Test
+		void transformedResourceHeadersAreNotMutatedWithEtagGenerator() throws Exception {
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("eTaG", "\"resource\"");
+			headers.add("X-Custom", "first");
+			headers.add("X-Custom", "second");
+			HttpHeaders readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+			this.handler.setResourceTransformers(List.of((request, resource, chain) ->
+					new TransformedResource(resource, "hello".getBytes(UTF_8)) {
+						@Override
+						public HttpHeaders getResponseHeaders() {
+							return readOnlyHeaders;
+						}
+					}));
+			this.handler.setEtagGenerator(resource -> "\"custom\"");
+			this.handler.afterPropertiesSet();
+			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo("\"custom\"");
+			assertThat(this.response.getHeaderValues("X-Custom")).containsExactly("first", "second");
+			assertThat(headers.getETag()).isEqualTo("\"resource\"");
+		}
+
+		@Test
+		void transformedCssNotModifiedWithCustomEtag() throws Exception {
+			this.handler.setEtagGenerator(resource -> "\"custom\"");
+			configureVersionedCss("v1");
+			this.request.addHeader(HttpHeaders.IF_NONE_MATCH, "\"custom\"");
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.response.getStatus()).isEqualTo(304);
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo("\"custom\"");
+			assertThat(this.response.getContentAsByteArray()).isEmpty();
+		}
+
+		@Test
+		void versionedResourceEtagWithNullGenerator() throws Exception {
+			VersionResourceResolver resolver = new VersionResourceResolver().addFixedVersionStrategy("version", "/**");
+			this.handler.setResourceResolvers(List.of(resolver, new PathResourceResolver()));
+			this.handler.setEtagGenerator(resource -> null);
+			this.handler.afterPropertiesSet();
+			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "version/foo.css");
+			this.handler.handleRequest(this.request, this.response);
+
+			assertThat(this.response.getHeader(HttpHeaders.ETAG)).isEqualTo("W/\"version\"");
+		}
+
+		@Test
 		void shouldRespondWithNotModifiedWhenModifiedSince() throws Exception {
 			this.handler.setCacheSeconds(3600);
 			this.handler.afterPropertiesSet();
@@ -546,6 +663,23 @@ class ResourceHttpRequestHandlerTests {
 			assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
 		}
 
+
+		private void configureVersionedCss(String imageVersion) throws Exception {
+			Resource original = testResource.createRelative("main.css");
+			String version = new ContentVersionStrategy().getResourceVersion(original);
+			VersionResourceResolver resolver = new VersionResourceResolver()
+					.addFixedVersionStrategy(imageVersion, "/images/**")
+					.addContentVersionStrategy("/**");
+			this.handler.setResourceResolvers(List.of(resolver, new PathResourceResolver()));
+			ResourceUrlProvider urlProvider = new ResourceUrlProvider();
+			urlProvider.setHandlerMap(Map.of("/static/**", this.handler));
+			CssLinkResourceTransformer transformer = new CssLinkResourceTransformer();
+			transformer.setResourceUrlProvider(urlProvider);
+			this.handler.setResourceTransformers(List.of(transformer));
+			this.handler.afterPropertiesSet();
+			this.request.setRequestURI("/static/main-" + version + ".css");
+			this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "main-" + version + ".css");
+		}
 
 		private long resourceLastModified(String resourceName) throws IOException {
 			return new ClassPathResource(resourceName, getClass()).getFile().lastModified();

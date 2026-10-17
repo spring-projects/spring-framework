@@ -689,7 +689,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		if (resource instanceof HttpResource httpResource) {
 			HttpHeaders resourceHeaders = httpResource.getResponseHeaders();
+			boolean skipEtag = (resource instanceof TransformedResource && getEtagGenerator() != null);
 			resourceHeaders.forEach((headerName, headerValues) -> {
+				if (skipEtag && HttpHeaders.ETAG.equalsIgnoreCase(headerName)) {
+					return;
+				}
 				boolean first = true;
 				for (String headerValue : headerValues) {
 					if (first) {
