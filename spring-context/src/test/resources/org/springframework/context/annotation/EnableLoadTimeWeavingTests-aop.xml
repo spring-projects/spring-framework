@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<aspectj>
+
+	<weaver>
+		<include within="org.springframework.context.annotation.EnableLoadTimeWeavingTests.*"/>
+	</weaver>
+
+	<aspects>
+		<aspect name="org.springframework.context.annotation.EnableLoadTimeWeavingTests.GreeterAspect"/>
+	</aspects>
+
+</aspectj>
