@@ -2272,13 +2272,15 @@ class MergedAnnotationsTests {
 
 	@Test  // gh-36417
 	void toStringForSynthesizedAnnotationsWithSingleValueAttributes() {
-		MyRepeatable myRepeatable = MergedAnnotations.from(SingleMyRepeatableClass.class)
-				.get(MyRepeatable.class).synthesize();
+		MyRepeatable myRepeatable =
+				MergedAnnotation.of(MyRepeatable.class, Map.of("value", "meta")).synthesize();
+		assertSynthesized(myRepeatable);
 		assertThat(myRepeatable).asString()
 				.isEqualTo("@%s(\"meta\")", MyRepeatable.class.getCanonicalName());
 
-		ValueAttribute valueAttribute = MergedAnnotations.from(ValueAttributeMetaMetaClass.class)
-				.get(ValueAttribute.class).synthesize();
+		ValueAttribute valueAttribute = MergedAnnotation.of(ValueAttribute.class,
+				Map.of("value", new String[] {"FromValueAttributeMeta"})).synthesize();
+		assertSynthesized(valueAttribute);
 		assertThat(valueAttribute).asString()
 				.isEqualTo("@%s({\"FromValueAttributeMeta\"})", ValueAttribute.class.getCanonicalName());
 	}
@@ -3381,16 +3383,6 @@ class MergedAnnotationsTests {
 	@MyRepeatableContainer({ @MyRepeatable("B"), @MyRepeatable("C") })
 	@MyRepeatableMeta1
 	static class MyRepeatableClass {
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Inherited
-	@MyRepeatable("meta")
-	@interface SingleMyRepeatable {
-	}
-
-	@SingleMyRepeatable
-	static class SingleMyRepeatableClass {
 	}
 
 	static class SubMyRepeatableClass extends MyRepeatableClass {
