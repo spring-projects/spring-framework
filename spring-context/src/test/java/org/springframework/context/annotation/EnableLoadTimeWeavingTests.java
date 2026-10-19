@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
- * Tests for {@code @EnableLoadTimeWeaving}.
+ * Tests for {@link EnableLoadTimeWeaving @EnableLoadTimeWeaving}.
  *
  * @author Chris Beams
  * @since 3.1
@@ -39,28 +39,23 @@ class EnableLoadTimeWeavingTests {
 
 	@Test
 	void control() {
-		GenericXmlApplicationContext ctx =
-				new GenericXmlApplicationContext(getClass(), "EnableLoadTimeWeavingTests-context.xml");
+		var ctx = new GenericXmlApplicationContext(getClass(), "EnableLoadTimeWeavingTests-context.xml");
 		ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
 		ctx.close();
 	}
 
 	@Test
 	void enableLTW_withAjWeavingDisabled() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(EnableLTWConfig_withAjWeavingDisabled.class);
-		ctx.refresh();
-		LoadTimeWeaver loadTimeWeaver = ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
+		var ctx = new AnnotationConfigApplicationContext(EnableLTWConfig_withAjWeavingDisabled.class);
+		var loadTimeWeaver = ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
 		verifyNoInteractions(loadTimeWeaver);
 		ctx.close();
 	}
 
 	@Test
 	void enableLTW_withAjWeavingAutodetect() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(EnableLTWConfig_withAjWeavingAutodetect.class);
-		ctx.refresh();
-		LoadTimeWeaver loadTimeWeaver = ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
+		var ctx = new AnnotationConfigApplicationContext(EnableLTWConfig_withAjWeavingAutodetect.class);
+		var loadTimeWeaver = ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
 		// no expectations -> a class file transformer should NOT be added
 		// because no META-INF/aop.xml is present on the classpath
 		verifyNoInteractions(loadTimeWeaver);
@@ -69,10 +64,8 @@ class EnableLoadTimeWeavingTests {
 
 	@Test
 	void enableLTW_withAjWeavingEnabled() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(EnableLTWConfig_withAjWeavingEnabled.class);
-		ctx.refresh();
-		LoadTimeWeaver loadTimeWeaver = ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
+		var ctx = new AnnotationConfigApplicationContext(EnableLTWConfig_withAjWeavingEnabled.class);
+		var loadTimeWeaver = ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
 		verify(loadTimeWeaver).addTransformer(isA(ClassFileTransformer.class));
 		ctx.close();
 	}
