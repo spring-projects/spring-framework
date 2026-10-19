@@ -162,7 +162,11 @@ class ClientHttpConnectorTests {
 		Mono<ClientHttpResponse> futureResponse =
 				connector.connect(HttpMethod.POST, this.server.url("/").uri(), request -> request.writeWith(body));
 		StepVerifier.create(futureResponse)
-				.expectErrorSatisfies(throwable -> assertThat(throwable).isSameAs(error))
+				.expectErrorSatisfies(throwable -> assertThat(throwable).satisfiesAnyOf(
+						// All other connectors and the JDK HttpClient prior to Java 26.
+						ex -> assertThat(ex).isSameAs(error),
+						// As of Java 26, the JDK HttpClient wraps the error in an IOException.
+						ex -> assertThat(ex).isInstanceOf(IOException.class).cause().isSameAs(error)))
 				.verify();
 	}
 
