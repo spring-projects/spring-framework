@@ -83,11 +83,15 @@ public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 
 	@Override
 	public void destroy() {
-		DatabasePopulator cleaner = this.databaseCleaner;
-		if (cleaner != null && getDataSource() != null) {
-			DatabasePopulatorUtils.execute(cleaner, getDataSource());
+		try {
+			DatabasePopulator cleaner = this.databaseCleaner;
+			if (cleaner != null && getDataSource() != null) {
+				DatabasePopulatorUtils.execute(cleaner, getDataSource());
+			}
 		}
-		shutdownDatabase();
+		finally {
+			shutdownDatabase();
+		}
 	}
 
 }
