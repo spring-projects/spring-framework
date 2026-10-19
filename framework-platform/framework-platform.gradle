@@ -6,6 +6,9 @@ javaPlatform {
 	allowDependencies()
 }
 
+// JRuby 10 requires Java 21 or higher, so we use JRuby 9.4 when running tests on Java 17.
+def useJRuby94 = providers.gradleProperty("toolchainVersion").map { (it as int) < 21 }.getOrElse(false)
+
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.21.6"))
 	api(platform("io.micrometer:micrometer-bom:1.18.0-SNAPSHOT"))
@@ -127,7 +130,7 @@ dependencies {
 		api("org.htmlunit:htmlunit:5.5.0")
 		api("org.javamoney:moneta:1.4.4")
 		api("org.jboss.logging:jboss-logging:3.6.3.Final")
-		api("org.jruby:jruby:10.1.2.0")
+		api(useJRuby94 ? "org.jruby:jruby:9.4.15.0" : "org.jruby:jruby:10.1.2.0")
 		api("org.jspecify:jspecify:1.0.1")
 		api("org.junit.support:testng-engine:1.1.0")
 		api("org.mozilla:rhino:1.7.15")
