@@ -51,6 +51,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Juergen Hoeller
@@ -390,6 +391,21 @@ class JdbcClientNamedParameterTests {
 		verify(connection).prepareStatement(UPDATE_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1);
 		verify(preparedStatement).setObject(2, 1);
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test  // gh-37501
+	void updateWithParameterSourceSuppliedAsObject() throws SQLException {
+		when(preparedStatement.executeUpdate()).thenReturn(1);
+
+		Object namedParamObject = new MapSqlParameterSource("perfId", 1).addValue("priceId", 2);
+		int rowsAffected = client.sql(UPDATE_NAMED_PARAMETERS).paramSource(namedParamObject).update();
+
+		assertThat(rowsAffected).isEqualTo(1);
+		verify(connection).prepareStatement(UPDATE_NAMED_PARAMETERS_PARSED);
+		verify(preparedStatement).setObject(1, 1);
+		verify(preparedStatement).setObject(2, 2);
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
