@@ -414,6 +414,10 @@ public interface JdbcClient {
 		 * with a corresponding JDBC index (i.e. list index + 1).
 		 * <p>Note that the given list represents the parameters of a <em>single</em>
 		 * entry; see {@link #entries(List)} for defining several entries at once.
+		 * <p>{@code null} elements are bound as SQL {@code NULL} values. Since
+		 * {@link List#of} rejects {@code null} elements, use a list which permits
+		 * them &mdash; for example, {@link java.util.Arrays#asList} &mdash; or bind
+		 * each parameter individually via {@link #entry(Consumer)}.
 		 * @param values the parameter values to bind
 		 * @return this batch specification (for chaining)
 		 * @throws IllegalStateException if the list is empty, or if named and

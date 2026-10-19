@@ -693,6 +693,10 @@ batch by `update()`:
 			.update();
 ----
 
+NOTE: When defining an entry with a `List` of positional parameters that contains `null`
+values, use a list which permits `null` elements – for example, `Arrays.asList(...)`
+rather than `List.of(...)` – or bind each parameter individually through the callback.
+
 Alternatively, define several entries at once through `entries(...)`, with each given
 parameter source object – for example, an `Actor` record – representing one entry.
 `entry(...)` and `entries(...)` calls may be freely combined within the same batch:
