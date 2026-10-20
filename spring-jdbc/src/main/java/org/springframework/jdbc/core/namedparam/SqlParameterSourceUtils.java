@@ -38,7 +38,8 @@ public abstract class SqlParameterSourceUtils {
 
 	/**
 	 * Create an array of {@link SqlParameterSource} objects populated with data
-	 * from the values passed in (either a {@link Map} or a bean object).
+	 * from the values passed in (a {@link Map}, a bean object, or an existing
+	 * {@link SqlParameterSource} which is used as-is).
 	 * This will define what is included in a batch operation.
 	 * @param candidates object array of objects containing the values to be used
 	 * @return an array of {@link SqlParameterSource}
@@ -52,7 +53,8 @@ public abstract class SqlParameterSourceUtils {
 
 	/**
 	 * Create an array of {@link SqlParameterSource} objects populated with data
-	 * from the values passed in (either a {@link Map} or a bean object).
+	 * from the values passed in (a {@link Map}, a bean object, or an existing
+	 * {@link SqlParameterSource} which is used as-is).
 	 * This will define what is included in a batch operation.
 	 * @param candidates collection of objects containing the values to be used
 	 * @return an array of {@link SqlParameterSource}
@@ -66,7 +68,8 @@ public abstract class SqlParameterSourceUtils {
 		SqlParameterSource[] batch = new SqlParameterSource[candidates.size()];
 		int i = 0;
 		for (Object candidate : candidates) {
-			batch[i] = (candidate instanceof Map map ? new MapSqlParameterSource(map) :
+			batch[i] = (candidate instanceof SqlParameterSource sqlParameterSource ? sqlParameterSource :
+					candidate instanceof Map map ? new MapSqlParameterSource(map) :
 					new BeanPropertySqlParameterSource(candidate));
 			i++;
 		}
