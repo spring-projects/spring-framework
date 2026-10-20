@@ -166,7 +166,10 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 		}
 
 		private static Duration toDuration(long value, TimeUnit timeUnit) {
-			return Duration.of(value, timeUnit.toChronoUnit());
+			if (timeUnit.compareTo(TimeUnit.MILLISECONDS) < 0) {
+				return Duration.of(value, timeUnit.toChronoUnit());
+			}
+			return Duration.ofMillis(timeUnit.toMillis(value));
 		}
 
 		private static Duration toDuration(String value, TimeUnit timeUnit) {

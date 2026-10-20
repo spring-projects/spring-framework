@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -117,6 +118,16 @@ class RetryInterceptorTests {
 
 		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("6");
 		assertThat(target.counter).isEqualTo(6);
+	}
+
+	@Test
+	void withPostProcessorForMethodWithTimeUnit() {
+		DefaultListableBeanFactory bf = createBeanFactoryFor(TimeUnitAnnotatedBean.class);
+		TimeUnitAnnotatedBean proxy = bf.getBean(TimeUnitAnnotatedBean.class);
+
+		assertThat(proxy.secondsOperation()).isEqualTo("seconds");
+		assertThat(proxy.minutesOperation()).isEqualTo("minutes");
+		assertThat(proxy.explicitMaxDelayOperation()).isEqualTo("explicit");
 	}
 
 	@Test
@@ -542,6 +553,25 @@ class RetryInterceptorTests {
 				Thread.sleep(100);
 			}
 			throw new IOException(Integer.toString(counter));
+		}
+	}
+
+
+	static class TimeUnitAnnotatedBean {
+
+		@Retryable(delay = 1, timeUnit = TimeUnit.SECONDS)
+		public String secondsOperation() {
+			return "seconds";
+		}
+
+		@Retryable(delay = 1, timeUnit = TimeUnit.MINUTES)
+		public String minutesOperation() {
+			return "minutes";
+		}
+
+		@Retryable(delay = 1, maxDelay = Long.MAX_VALUE / 2, timeUnit = TimeUnit.SECONDS)
+		public String explicitMaxDelayOperation() {
+			return "explicit";
 		}
 	}
 
