@@ -38,7 +38,6 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -220,23 +219,17 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
 
-		Flux<DataBuffer> body = Flux.fromIterable(map.entrySet())
-				.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue(), bufferFactory))
-				.concatWith(generateLastLine(boundary, bufferFactory))
-				.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+		Flux<Publisher<DataBuffer>> body = Flux.fromIterable(map.entrySet())
+				.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue(), bufferFactory));
 
-		if (logger.isDebugEnabled()) {
-			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
-		}
-
-		return outputMessage.writeWith(body);
+		return writeMultipart(body, boundary, outputMessage, hints);
 	}
 
-	private Flux<DataBuffer> encodePartValues(
+	private Flux<Publisher<DataBuffer>> encodePartValues(
 			byte[] boundary, String name, List<?> values, DataBufferFactory bufferFactory) {
 
 		return Flux.fromIterable(values)
-				.concatMap(value -> encodePart(boundary, name, value, bufferFactory));
+				.map(value -> Flux.defer(() -> encodePart(boundary, name, value, bufferFactory)));
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -299,9 +292,10 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 		Flux<DataBuffer> partContent = partContentReady.thenMany(Flux.defer(message::getBody));
 
 		return Flux.concat(
-				generateBoundaryLine(boundary, factory),
+				generateNewLine(factory),
 				partContent,
-				generateNewLine(factory));
+				generateNewLine(factory),
+				generateBoundary(boundary, factory));
 	}
 
 
@@ -352,7 +346,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 
 		@Override
 		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-			return Mono.error(new UnsupportedOperationException());
+			return writeWith(Flux.from(body).concatMap(Flux::from));
 		}
 
 		public Flux<DataBuffer> getBody() {

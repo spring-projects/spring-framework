@@ -28,7 +28,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -78,9 +77,9 @@ public class PartEventHttpMessageWriter extends MultipartWriterSupport implement
 			logger.debug(Hints.getLogPrefix(hints) + "Encoding Publisher<PartEvent>");
 		}
 
-		Flux<DataBuffer> body = Flux.from(partDataStream)
+		Flux<Publisher<DataBuffer>> body = Flux.from(partDataStream)
 				.windowUntil(PartEvent::isLast)
-				.concatMap(partData -> partData.switchOnFirst((signal, flux) -> {
+				.map(partData -> partData.switchOnFirst((signal, flux) -> {
 					if (signal.hasValue()) {
 						PartEvent value = signal.get();
 						Assert.state(value != null, "Null value");
@@ -91,23 +90,18 @@ public class PartEventHttpMessageWriter extends MultipartWriterSupport implement
 					else {
 						return flux.cast(DataBuffer.class);
 					}
-				}))
-				.concatWith(generateLastLine(boundary, outputMessage.bufferFactory()))
-				.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+				}));
 
-		if (logger.isDebugEnabled()) {
-			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
-		}
-
-		return outputMessage.writeWith(body);
+		return writeMultipart(body, boundary, outputMessage, hints);
 	}
 
 	private Flux<DataBuffer> encodePartData(byte[] boundary, DataBufferFactory bufferFactory, HttpHeaders headers, Flux<DataBuffer> body) {
 		return Flux.concat(
-				generateBoundaryLine(boundary, bufferFactory),
+				generateNewLine(bufferFactory),
 				generatePartHeaders(headers, bufferFactory),
 				body,
-				generateNewLine(bufferFactory));
+				generateNewLine(bufferFactory),
+				generateBoundary(boundary, bufferFactory));
 	}
 
 }

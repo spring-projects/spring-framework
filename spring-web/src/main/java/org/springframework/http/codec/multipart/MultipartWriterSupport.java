@@ -23,12 +23,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.FastByteArrayOutputStream;
@@ -77,6 +82,11 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 		this.charset = charset;
 	}
 
+	/**
+	 * Return the media types supported by this writer.
+	 * @return the supported media types
+	 * @since 5.3
+	 */
 	public List<MediaType> getWritableMediaTypes() {
 		return this.supportedMediaTypes;
 	}
@@ -111,6 +121,89 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 		return mediaType;
 	}
 
+	/**
+	 * Write encoded multipart parts, flushing after each part.
+	 * <p>Each part publisher must emit a leading CRLF, the part headers and
+	 * body, and a trailing CRLF followed by the delimiter from
+	 * {@link #generateBoundary}. This method writes the initial boundary and
+	 * completes the closing boundary when the parts finish successfully.
+	 * An empty parts stream produces only a closing boundary.
+	 * <p>The caller must set the multipart content type on the output message,
+	 * including a boundary parameter that matches the supplied boundary.
+	 * @param parts the encoded part publishers in the order to write them
+	 * @param boundary the multipart boundary
+	 * @param outputMessage the message to write to
+	 * @param hints additional information about how to write
+	 * @return a {@code Mono} that signals completion or failure of the write
+	 * @since 7.1
+	 */
+	protected Mono<Void> writeMultipart(Flux<Publisher<DataBuffer>> parts, byte[] boundary,
+			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+
+		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
+		Flux<Publisher<DataBuffer>> body = parts.switchOnFirst((signal, flux) -> {
+			if (signal.hasValue()) {
+				return flux.startWith(Mono.just(generateBoundary(boundary, bufferFactory)))
+						.concatWith(Mono.just(generateLastLineSuffix(bufferFactory)));
+			}
+			else {
+				return flux.concatWith(Mono.just(generateLastLine(boundary, bufferFactory)));
+			}
+		});
+
+		return outputMessage.writeAndFlushWith(body.map(part -> {
+			Flux<DataBuffer> buffers = Flux.from(part)
+					.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+			if (logger.isDebugEnabled()) {
+				buffers = buffers.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
+			}
+			return buffers;
+		}));
+	}
+
+	/**
+	 * Generate two hyphens followed by the boundary, without a trailing CRLF.
+	 * @param boundary the multipart boundary
+	 * @param bufferFactory the buffer factory to use
+	 * @return a publisher for the boundary buffer
+	 * @since 7.1
+	 */
+	protected Mono<DataBuffer> generateBoundary(byte[] boundary, DataBufferFactory bufferFactory) {
+		return Mono.fromCallable(() -> {
+			DataBuffer buffer = bufferFactory.allocateBuffer(boundary.length + 2);
+			buffer.write((byte)'-');
+			buffer.write((byte)'-');
+			buffer.write(boundary);
+			return buffer;
+		});
+	}
+
+	/**
+	 * Generate two hyphens followed by CRLF to complete a closing boundary.
+	 * <p>The boundary prefix from {@link #generateBoundary} must already
+	 * have been written.
+	 * @param bufferFactory the buffer factory to use
+	 * @return a publisher for the closing boundary suffix buffer
+	 * @since 7.1
+	 */
+	protected Mono<DataBuffer> generateLastLineSuffix(DataBufferFactory bufferFactory) {
+		return Mono.fromCallable(() -> {
+			DataBuffer buffer = bufferFactory.allocateBuffer(4);
+			buffer.write((byte)'-');
+			buffer.write((byte)'-');
+			buffer.write((byte)'\r');
+			buffer.write((byte)'\n');
+			return buffer;
+		});
+	}
+
+	/**
+	 * Generate two hyphens followed by the boundary and a trailing CRLF.
+	 * @param boundary the multipart boundary
+	 * @param bufferFactory the buffer factory to use
+	 * @return a publisher for the boundary line buffer
+	 * @since 5.3
+	 */
 	protected Mono<DataBuffer> generateBoundaryLine(byte[] boundary, DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
 			DataBuffer buffer = bufferFactory.allocateBuffer(boundary.length + 4);
@@ -123,6 +216,12 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 		});
 	}
 
+	/**
+	 * Generate a CRLF line ending.
+	 * @param bufferFactory the buffer factory to use
+	 * @return a publisher for the line ending buffer
+	 * @since 5.3
+	 */
 	protected Mono<DataBuffer> generateNewLine(DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
 			DataBuffer buffer = bufferFactory.allocateBuffer(2);
@@ -132,6 +231,14 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 		});
 	}
 
+	/**
+	 * Generate a closing boundary line with two leading hyphens, the boundary,
+	 * two trailing hyphens, and CRLF.
+	 * @param boundary the multipart boundary
+	 * @param bufferFactory the buffer factory to use
+	 * @return a publisher for the closing boundary line buffer
+	 * @since 5.3
+	 */
 	protected Mono<DataBuffer> generateLastLine(byte[] boundary, DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
 			DataBuffer buffer = bufferFactory.allocateBuffer(boundary.length + 6);
@@ -146,6 +253,16 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 		});
 	}
 
+	/**
+	 * Generate the part headers followed by an empty line.
+	 * <p>Encode header names and values using {@link #getCharset()}, terminate
+	 * each header line with CRLF, and append a final CRLF to separate the
+	 * headers from the body.
+	 * @param headers the part headers to write
+	 * @param bufferFactory the buffer factory to use
+	 * @return a publisher for the encoded headers buffer
+	 * @since 5.3
+	 */
 	protected Mono<DataBuffer> generatePartHeaders(HttpHeaders headers, DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
 			@SuppressWarnings("resource")
