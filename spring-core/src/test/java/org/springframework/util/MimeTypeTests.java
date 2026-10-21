@@ -121,6 +121,20 @@ class MimeTypeTests {
 		}
 
 		@Test
+		void parseMimeTypeRejectsParameterWithoutSemicolon() {
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain charset=ISO-8859-1"));
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/html q=0.1"));
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("application/json\tcharset=UTF-16"));
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;a=b charset=UTF-16"));
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;a=\"b\"charset=UTF-16"));
+		}
+
+		@Test
 		void parseMimeTypeIllegalType() {
 			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
 					MimeTypeUtils.parseMimeType("audio(/basic"));
@@ -502,6 +516,20 @@ class MimeTypeTests {
 	void parseMimeTypeWithSpacesAroundEquals() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("multipart/x-mixed-replace;boundary = --myboundary");
 		assertThat(mimeType.getParameter("boundary")).isEqualTo("--myboundary");
+	}
+
+	@Test
+	void parseMimeTypeWithWhitespaceAroundSemicolon() {
+		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain ; charset=UTF-8");
+		assertThat(mimeType.getCharset()).isEqualTo(StandardCharsets.UTF_8);
+		mimeType = MimeTypeUtils.parseMimeType("text/plain;charset=UTF-8 ");
+		assertThat(mimeType.getCharset()).isEqualTo(StandardCharsets.UTF_8);
+		mimeType = MimeTypeUtils.parseMimeType("text/plain ;a=b ; c=d");
+		assertThat(mimeType.getParameter("a")).isEqualTo("b");
+		assertThat(mimeType.getParameter("c")).isEqualTo("d");
+		mimeType = MimeTypeUtils.parseMimeType("text/plain;a=\"b\" ;c=d");
+		assertThat(mimeType.getParameter("a")).isEqualTo("\"b\"");
+		assertThat(mimeType.getParameter("c")).isEqualTo("d");
 	}
 
 	@Test

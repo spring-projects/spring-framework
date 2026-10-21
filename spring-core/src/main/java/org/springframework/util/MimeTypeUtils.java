@@ -490,7 +490,7 @@ public abstract class MimeTypeUtils {
 				}
 				if (c == ';' || c == ' ' || c == '\t') {
 					parser.resolveBareType(parser.input.substring(parser.mark, parser.index));
-					return WHITESPACE;
+					return (c == ';' ? WHITESPACE : PARAM_SEPARATOR);
 				}
 				return this;
 			}
@@ -507,7 +507,7 @@ public abstract class MimeTypeUtils {
 			ParserState process(char c, MimeTypeParser parser) {
 				if (c == ';' || c == ' ' || c == '\t') {
 					parser.subtype = parser.input.substring(parser.mark, parser.index);
-					return WHITESPACE;
+					return (c == ';' ? WHITESPACE : PARAM_SEPARATOR);
 				}
 				return this;
 			}
@@ -515,6 +515,23 @@ public abstract class MimeTypeUtils {
 			@Override
 			void onEof(MimeTypeParser parser) {
 				parser.subtype = parser.input.substring(parser.mark);
+				parser.emitMimeType();
+			}
+		},
+
+		PARAM_SEPARATOR {
+			@Override
+			ParserState process(char c, MimeTypeParser parser) {
+				if (c == ' ' || c == '\t') {
+					return this;
+				}
+				if (c == ';') {
+					return WHITESPACE;
+				}
+				throw new InvalidMimeTypeException(parser.input, "Unexpected character '" + c + "', expected ';'");
+			}
+			@Override
+			void onEof(MimeTypeParser parser) {
 				parser.emitMimeType();
 			}
 		},
@@ -584,7 +601,7 @@ public abstract class MimeTypeUtils {
 			ParserState process(char c, MimeTypeParser parser) {
 				if (c == ';' || c == ' ' || c == '\t') {
 					extractParameter(parser, parser.input.substring(parser.mark, parser.index));
-					return WHITESPACE;
+					return (c == ';' ? WHITESPACE : PARAM_SEPARATOR);
 				}
 				return this;
 			}
@@ -600,7 +617,7 @@ public abstract class MimeTypeUtils {
 			ParserState process(char c, MimeTypeParser parser) {
 				if (c == '"') {
 					extractParameter(parser, parser.input.substring(parser.mark, parser.index + 1));
-					return WHITESPACE;
+					return PARAM_SEPARATOR;
 				}
 				if (c == '\\') {
 					return PARAM_VALUE_ESCAPED;
