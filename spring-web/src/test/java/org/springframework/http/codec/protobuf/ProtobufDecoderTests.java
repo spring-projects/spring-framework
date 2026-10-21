@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.protobuf;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -157,6 +158,24 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 				.expectNext(this.testMsg1)
 				.expectNext(this.testMsg2)
 				.verifyComplete());
+	}
+
+	@Test
+	void decodeCancelWhileMessageIncomplete() throws IOException {
+		ByteArrayOutputStream secondMessage = new ByteArrayOutputStream();
+		this.testMsg2.writeDelimitedTo(secondMessage);
+		byte[] secondMessageBytes = secondMessage.toByteArray();
+
+		DataBuffer buffer = this.bufferFactory.allocateBuffer();
+		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
+		buffer.write(secondMessageBytes, 0, secondMessageBytes.length / 2);
+
+		Flux<DataBuffer> input = Flux.concat(Mono.just(buffer), Flux.never());
+
+		StepVerifier.create(this.decoder.decode(input, forClass(Msg.class), null, emptyMap()))
+				.expectNext(this.testMsg1)
+				.thenCancel()
+				.verify();
 	}
 
 	@Test  // SPR-17429
