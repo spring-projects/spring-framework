@@ -438,7 +438,7 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 				this.completionSubscriber.onError(ex);
 			}
 			finally {
-				this.writeBarrier.releaseCachedItem();
+				this.writeBarrier.cancel();
 			}
 		}
 

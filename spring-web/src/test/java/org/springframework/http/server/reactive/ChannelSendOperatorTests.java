@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -33,6 +34,7 @@ import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Signal;
+import reactor.core.publisher.SignalType;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -215,6 +217,49 @@ class ChannelSendOperatorTests {
 				}))
 				.expectErrorMessage("boo")
 				.verify(Duration.ofMillis(5000));
+	}
+
+	@Test  // gh-37527
+	void sourceCancelledWhenWriteFunctionResultErrorsWhileItemCached() {
+		AtomicReference<SignalType> sourceSignal = new AtomicReference<>();
+		Flux<String> source = Flux.just("one").concatWith(Flux.never()).doFinally(sourceSignal::set);
+
+		ChannelSendOperator<String> operator = new ChannelSendOperator<>(source,
+				publisher -> Mono.error(new IllegalStateException("boom")));
+
+		StepVerifier.create(operator).expectErrorMessage("boom").verify(Duration.ofSeconds(5));
+		assertThat(sourceSignal.get()).isEqualTo(SignalType.CANCEL);
+	}
+
+	@Test  // gh-37527
+	void sourceCancelledWhenWriteFunctionThrowsWhileItemCached() {
+		AtomicReference<SignalType> sourceSignal = new AtomicReference<>();
+		Flux<String> source = Flux.just("one").concatWith(Flux.never()).doFinally(sourceSignal::set);
+
+		ChannelSendOperator<String> operator = new ChannelSendOperator<>(source, publisher -> {
+			throw new IllegalStateException("boom");
+		});
+
+		StepVerifier.create(operator).expectErrorMessage("boom").verify(Duration.ofSeconds(5));
+		assertThat(sourceSignal.get()).isEqualTo(SignalType.CANCEL);
+	}
+
+	@Test  // gh-37527
+	void sourceCancelledAndCachedItemReleasedWhenWriteFunctionResultErrors() {
+		LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+		AtomicReference<SignalType> sourceSignal = new AtomicReference<>();
+
+		ChannelSendOperator<DataBuffer> operator = new ChannelSendOperator<>(
+				Flux.<DataBuffer>create(sink -> {
+					DataBuffer dataBuffer = bufferFactory.allocateBuffer(256);
+					dataBuffer.write("foo", StandardCharsets.UTF_8);
+					sink.next(dataBuffer);
+				}).doFinally(sourceSignal::set),
+				publisher -> Mono.error(new IllegalStateException("boom")));
+
+		StepVerifier.create(operator).expectErrorMessage("boom").verify(Duration.ofSeconds(5));
+		assertThat(sourceSignal.get()).isEqualTo(SignalType.CANCEL);
+		bufferFactory.checkForLeaks();
 	}
 
 	@Test
