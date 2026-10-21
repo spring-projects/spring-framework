@@ -266,6 +266,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 			this.mappedProperties.remove(lowerCaseName(propertyName));
 			this.mappedProperties.remove(underscoreName(propertyName));
 		}
+		if (this.mappedPropertyNames != null) {
+			this.mappedPropertyNames.remove(propertyName);
+		}
 	}
 
 	/**
