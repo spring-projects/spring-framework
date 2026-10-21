@@ -320,6 +320,12 @@ final class PartGenerator implements MultipartParser.PartListener {
 		}
 
 		private void switchToFile(DataBuffer current, boolean last) {
+			if (PartGenerator.this.maxDiskUsagePerPart != -1 &&
+					this.byteCount > PartGenerator.this.maxDiskUsagePerPart) {
+				DataBuffers.release(current);
+				throw new HttpMessageConversionException("Part exceeded " +
+						"the disk usage limit of " + PartGenerator.this.maxDiskUsagePerPart + " bytes");
+			}
 			FileState fileState = new FileState(this.headers, PartGenerator.this.fileStorageDirectory);
 			this.content.forEach(buffer -> fileState.onBody(buffer, false));
 			fileState.onBody(current, last);
@@ -400,6 +406,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 		public void onBody(DataBuffer dataBuffer, boolean last) {
 			this.byteCount += dataBuffer.readableByteCount();
 			if (isMaxDiskUsagePerPartExceeded()) {
+				DataBuffers.release(dataBuffer);
 				closeOutputStream();
 				throw new HttpMessageConversionException("Part exceeded " +
 						"the disk usage limit of " + PartGenerator.this.maxDiskUsagePerPart + " bytes");

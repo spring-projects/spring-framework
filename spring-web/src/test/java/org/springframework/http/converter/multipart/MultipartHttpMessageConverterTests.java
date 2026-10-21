@@ -21,11 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -285,6 +287,30 @@ class MultipartHttpMessageConverterTests {
 			assertThatThrownBy(() -> converter.read(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class), response, null))
 					.isInstanceOf(HttpMessageConversionException.class)
 					.hasMessage("Part exceeded the disk usage limit of 1945 bytes");
+		}
+
+		@Test
+		void readMultipartMaxDiskUsageExceededOnSwitchToFile(@TempDir Path tempDir) throws Exception {
+			PartGenerator partGenerator = new PartGenerator(100, 200, -1, tempDir);
+			assertThatThrownBy(() -> MultipartParser.parse(createStream("large-file.multipart"),
+					"B".getBytes(StandardCharsets.US_ASCII), StandardCharsets.UTF_8, 10 * 1024, 2 * 1024, partGenerator))
+					.isInstanceOf(HttpMessageConversionException.class)
+					.hasMessage("Part exceeded the disk usage limit of 200 bytes");
+			try (Stream<Path> files = Files.list(tempDir)) {
+				assertThat(files).isEmpty();
+			}
+		}
+
+		@Test
+		void readMultipartMaxDiskUsageExceededAfterSwitchToFile(@TempDir Path tempDir) throws Exception {
+			PartGenerator partGenerator = new PartGenerator(100, 2100, -1, tempDir);
+			assertThatThrownBy(() -> MultipartParser.parse(createStream("large-file.multipart"),
+					"B".getBytes(StandardCharsets.US_ASCII), StandardCharsets.UTF_8, 10 * 1024, 2 * 1024, partGenerator))
+					.isInstanceOf(HttpMessageConversionException.class)
+					.hasMessage("Part exceeded the disk usage limit of 2100 bytes");
+			try (Stream<Path> files = Files.list(tempDir)) {
+				assertThat(files).isEmpty();
+			}
 		}
 
 		@Test
