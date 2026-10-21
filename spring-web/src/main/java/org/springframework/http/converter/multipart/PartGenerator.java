@@ -32,8 +32,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBuffers;
-import org.springframework.core.io.buffer.DefaultDataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -338,8 +336,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 				DataBuffers.release(buffer);
 			}
 			this.content.clear();
-			DefaultDataBuffer content = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
-			Part part = DefaultParts.part(this.headers, content);
+			Part part = DefaultParts.part(this.headers, bytes);
 			PartGenerator.this.addPart(part);
 		}
 

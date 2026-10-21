@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -52,19 +51,18 @@ abstract class DefaultParts {
 	}
 
 	/**
-	 * Create a new {@link Part} or {@link FilePart} based on a flux of data
-	 * buffers. Returns {@link FilePart} if the {@code Content-Disposition} of
-	 * the given headers contains a filename, or a "normal" {@link Part}
-	 * otherwise.
+	 * Create a new {@link Part} or {@link FilePart} based on the given bytes.
+	 * Returns {@link FilePart} if the {@code Content-Disposition} of the given
+	 * headers contains a filename, or a "normal" {@link Part} otherwise.
 	 * @param headers the part headers
-	 * @param dataBuffer the content of the part
+	 * @param content the content of the part
 	 * @return {@link Part} or {@link FilePart}, depending on {@link HttpHeaders#getContentDisposition()}
 	 */
-	public static Part part(HttpHeaders headers, DataBuffer dataBuffer) {
+	public static Part part(HttpHeaders headers, byte[] content) {
 		Assert.notNull(headers, "Headers must not be null");
-		Assert.notNull(dataBuffer, "DataBuffer must not be null");
+		Assert.notNull(content, "Content must not be null");
 
-		return partInternal(headers, new DataBufferContent(dataBuffer));
+		return partInternal(headers, new ByteArrayContent(content));
 	}
 
 	/**
@@ -241,24 +239,24 @@ abstract class DefaultParts {
 
 
 	/**
-	 * {@code Content} implementation based on an in-memory {@code InputStream}.
+	 * {@code Content} implementation based on an in-memory byte array.
 	 */
-	private static final class DataBufferContent implements Content {
+	private static final class ByteArrayContent implements Content {
 
-		private final DataBuffer content;
+		private final byte[] content;
 
-		public DataBufferContent(DataBuffer content) {
+		public ByteArrayContent(byte[] content) {
 			this.content = content;
 		}
 
 		@Override
 		public InputStream content() {
-			return this.content.asInputStream();
+			return new ByteArrayInputStream(this.content);
 		}
 
 		@Override
 		public void transferTo(Path dest) throws IOException {
-			Files.copy(this.content.asInputStream(), dest, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(new ByteArrayInputStream(this.content), dest, StandardCopyOption.REPLACE_EXISTING);
 		}
 
 		@Override
