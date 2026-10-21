@@ -178,6 +178,29 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 				.verify();
 	}
 
+	@Test
+	void decodeTruncatedMessage() throws IOException {
+		ByteArrayOutputStream secondMessage = new ByteArrayOutputStream();
+		this.testMsg2.writeDelimitedTo(secondMessage);
+		byte[] secondMessageBytes = secondMessage.toByteArray();
+
+		DataBuffer buffer = this.bufferFactory.allocateBuffer();
+		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
+		buffer.write(secondMessageBytes, 0, secondMessageBytes.length / 2);
+
+		testDecode(Mono.just(buffer), Msg.class, step -> step
+				.expectNext(this.testMsg1)
+				.verifyError(DecodingException.class));
+	}
+
+	@Test
+	void decodeTruncatedMessageSize() {
+		DataBuffer buffer = this.bufferFactory.allocateBuffer();
+		buffer.write((byte) 0x80);
+
+		testDecode(Mono.just(buffer), Msg.class, step -> step.verifyError(DecodingException.class));
+	}
+
 	@Test  // SPR-17429
 	@SuppressWarnings("deprecation")
 	void decodeSplitMessageSize() {
