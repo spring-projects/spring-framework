@@ -127,7 +127,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 							"' because of an existing model object of the same name");
 				}
 				Object attributeValue = request.getAttribute(attribute);
-				if (logger.isDebugEnabled()) {
+				if (logger.isTraceEnabled()) {
 					exposed = (exposed != null ? exposed : new LinkedHashMap<>());
 					exposed.put(attribute, attributeValue);
 				}
@@ -149,7 +149,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 								"' because of an existing model object of the same name");
 					}
 					Object attributeValue = session.getAttribute(attribute);
-					if (logger.isDebugEnabled()) {
+					if (logger.isTraceEnabled()) {
 						exposed = (exposed != null ? exposed : new LinkedHashMap<>());
 						exposed.put(attribute, attributeValue);
 					}
