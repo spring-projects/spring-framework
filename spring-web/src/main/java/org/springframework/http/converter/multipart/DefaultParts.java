@@ -194,7 +194,7 @@ abstract class DefaultParts {
 	 */
 	private static final class DefaultFilePart extends DefaultPart implements FilePart {
 
-		public DefaultFilePart(HttpHeaders headers, Content content) {
+		DefaultFilePart(HttpHeaders headers, Content content) {
 			super(headers, content);
 		}
 
@@ -245,7 +245,7 @@ abstract class DefaultParts {
 
 		private final byte[] content;
 
-		public ByteArrayContent(byte[] content) {
+		ByteArrayContent(byte[] content) {
 			this.content = content;
 		}
 
@@ -272,7 +272,7 @@ abstract class DefaultParts {
 
 		private final Path file;
 
-		public FileContent(Path file) {
+		FileContent(Path file) {
 			this.file = file;
 		}
 
