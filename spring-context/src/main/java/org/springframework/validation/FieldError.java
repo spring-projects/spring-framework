@@ -47,7 +47,8 @@ public class FieldError extends ObjectError {
 	 * Create a new FieldError instance.
 	 * @param objectName the name of the affected object
 	 * @param field the affected field of the object
-	 * @param defaultMessage the default message to be used to resolve this message
+	 * @param defaultMessage the default message to use as a fallback, since no
+	 * message code is specified (it is not looked up as a message key)
 	 */
 	public FieldError(String objectName, String field, String defaultMessage) {
 		this(objectName, field, null, false, null, null, defaultMessage);
@@ -60,9 +61,12 @@ public class FieldError extends ObjectError {
 	 * @param rejectedValue the rejected field value
 	 * @param bindingFailure whether this error represents a binding failure
 	 * (like a type mismatch); else, it is a validation failure
-	 * @param codes the codes to be used to resolve this message
+	 * @param codes the message codes to try, in order, when resolving this
+	 * message against a {@code MessageSource}
 	 * @param arguments the array of arguments to be used to resolve this message
-	 * @param defaultMessage the default message to be used to resolve this message
+	 * @param defaultMessage the default message to use if none of the codes
+	 * can be resolved (it is not looked up as a message key itself, but may
+	 * contain argument placeholders)
 	 */
 	public FieldError(String objectName, String field, @Nullable Object rejectedValue, boolean bindingFailure,
 			String @Nullable [] codes, Object @Nullable [] arguments, @Nullable String defaultMessage) {
