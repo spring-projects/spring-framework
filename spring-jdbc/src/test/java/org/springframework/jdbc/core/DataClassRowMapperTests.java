@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.jdbc.core.test.ConstructorPerson;
 import org.springframework.jdbc.core.test.ConstructorPersonWithGenerics;
@@ -38,8 +40,8 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 
 	@Test
 	void staticQueryWithDataClass() throws Exception {
-		Mock mock = new Mock();
-		ConstructorPerson person = mock.getJdbcTemplate().queryForObject(
+		var mock = new Mock();
+		var person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(ConstructorPerson.class));
 		verifyPerson(person);
@@ -49,8 +51,8 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 
 	@Test
 	void staticQueryWithDataClassAndGenerics() throws Exception {
-		Mock mock = new Mock();
-		ConstructorPersonWithGenerics person = mock.getJdbcTemplate().queryForObject(
+		var mock = new Mock();
+		var person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(ConstructorPersonWithGenerics.class));
 		assertThat(person.name()).isEqualTo("Bubba");
@@ -61,12 +63,13 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 		mock.verifyClosed();
 	}
 
-	@Test
-	void staticQueryWithDataClassAndSetters() throws Exception {
-		Mock mock = new Mock(MockType.FOUR);
-		ConstructorPersonWithSetters person = mock.getJdbcTemplate().queryForObject(
-				"select name, age, birthdate, balance from people",
-				new DataClassRowMapper<>(ConstructorPersonWithSetters.class));
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void staticQueryWithDataClassAndSetters(boolean checkFullyPopulated) throws Exception {
+		var mapper = new DataClassRowMapper<>(ConstructorPersonWithSetters.class);
+		mapper.setCheckFullyPopulated(checkFullyPopulated);
+		var mock = new Mock(MockType.FOUR);
+		var person = mock.getJdbcTemplate().queryForObject("select name, age, birthdate, balance from people", mapper);
 		assertThat(person.name()).isEqualTo("BUBBA");
 		assertThat(person.age()).isEqualTo(22L);
 		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
@@ -77,8 +80,8 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 
 	@Test
 	void staticQueryWithDataRecord() throws Exception {
-		Mock mock = new Mock();
-		RecordPerson person = mock.getJdbcTemplate().queryForObject(
+		var mock = new Mock();
+		var person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(RecordPerson.class));
 		verifyPerson(person);
