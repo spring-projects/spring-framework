@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -216,6 +217,27 @@ class ChannelSendOperatorTests {
 				.verify(Duration.ofMillis(5000));
 	}
 
+	@Test
+	void writeFunctionNotInvokedUnderLockOnFirstItem() {
+		verifyWriteFunctionNotInvokedUnderLock(Mono.just("one"));
+	}
+
+	@Test
+	void writeFunctionNotInvokedUnderLockOnEmptyCompletion() {
+		verifyWriteFunctionNotInvokedUnderLock(Mono.empty());
+	}
+
+	private void verifyWriteFunctionNotInvokedUnderLock(Publisher<String> source) {
+		AtomicBoolean holdsLock = new AtomicBoolean(true);
+		ChannelSendOperator<String> operator = new ChannelSendOperator<>(source,
+				publisher -> {
+					holdsLock.set(Thread.holdsLock(publisher));
+					return Mono.empty();
+				});
+
+		StepVerifier.create(operator).expectComplete().verify(Duration.ofSeconds(5));
+		assertThat(holdsLock).isFalse();
+	}
 
 	private Mono<Void> sendOperator(Publisher<String> source){
 		return new ChannelSendOperator<>(source, writer::send);
