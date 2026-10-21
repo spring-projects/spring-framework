@@ -17,6 +17,7 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +25,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
@@ -231,6 +235,82 @@ class SubscriberInputStreamTests {
 
 		assertThat(sb.toString()).isEqualTo("");
 		assertThat(savedEx).hasMessage("boom");
+	}
+
+	@Test // gh-37159
+	void interruptWhileAwaitingData() throws InterruptedException {
+		CountDownLatch reading = new CountDownLatch(1);
+		AtomicReference<Throwable> savedEx = new AtomicReference<>();
+		AtomicBoolean interruptStatus = new AtomicBoolean();
+
+		// A publisher that never emits, so that read() parks in await()
+		Flow.Publisher<byte[]> publisher = subscriber -> subscriber.onSubscribe(new Flow.Subscription() {
+			@Override
+			public void request(long n) {
+			}
+			@Override
+			public void cancel() {
+			}
+		});
+
+		Thread reader = new Thread(() -> {
+			try (SubscriberInputStream<byte[]> is = new SubscriberInputStream<>(s -> s, s -> {}, 1)) {
+				publisher.subscribe(is);
+				reading.countDown();
+				is.read();
+			}
+			catch (Throwable ex) {
+				savedEx.set(ex);
+				interruptStatus.set(Thread.currentThread().isInterrupted());
+			}
+		});
+		reader.start();
+
+		reading.await();
+		for (int i = 0; i < 100 && reader.getState() != Thread.State.WAITING; i++) {
+			Thread.sleep(20);
+		}
+		assertThat(reader.getState()).isEqualTo(Thread.State.WAITING);
+
+		reader.interrupt();
+		reader.join(5000);
+
+		assertThat(reader.isAlive()).as("read() did not return after interrupt").isFalse();
+		assertThat(savedEx.get()).isInstanceOf(InterruptedIOException.class)
+				.hasMessage("Interrupted while awaiting data");
+		assertThat(interruptStatus).as("interrupt status restored").isTrue();
+	}
+
+	@Test // gh-37159
+	void interruptAfterPartialRead() throws IOException {
+		// A publisher that emits a single buffer, then no further signal
+		Flow.Publisher<byte[]> publisher = subscriber -> {
+			subscriber.onSubscribe(new Flow.Subscription() {
+				@Override
+				public void request(long n) {
+				}
+				@Override
+				public void cancel() {
+				}
+			});
+			subscriber.onNext(FOO);
+		};
+
+		try (SubscriberInputStream<byte[]> is = new SubscriberInputStream<>(s -> s, s -> {}, 1)) {
+			publisher.subscribe(is);
+			Thread.currentThread().interrupt();
+
+			byte[] chunk = new byte[6];
+			assertThat(is.read(chunk)).as("bytes read before interruption").isEqualTo(3);
+			assertThat(chunk).startsWith(FOO);
+
+			assertThatExceptionOfType(InterruptedIOException.class).isThrownBy(is::read)
+					.withMessage("Interrupted while awaiting data");
+			assertThat(Thread.currentThread().isInterrupted()).as("interrupt status restored").isTrue();
+		}
+		finally {
+			Thread.interrupted();
+		}
 	}
 
 }

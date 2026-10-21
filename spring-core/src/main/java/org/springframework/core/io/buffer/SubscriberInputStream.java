@@ -18,6 +18,7 @@ package org.springframework.core.io.buffer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.util.ConcurrentModificationException;
 import java.util.Objects;
 import java.util.Queue;
@@ -228,6 +229,9 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 			this.closed = true;
 			requiredSubscriber().cancel();
 			cleanAndFinalize();
+			if (ex instanceof IOException ioEx) {
+				throw ioEx;
+			}
 			throw Exceptions.propagate(ex);
 		}
 		finally {
@@ -251,7 +255,17 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 
 		try {
 			for (int j = 0; j < len;) {
-				DataBuffer next = getNextOrAwait();
+				DataBuffer next;
+				try {
+					next = getNextOrAwait();
+				}
+				catch (InterruptedIOException ex) {
+					if (j == 0) {
+						throw ex;
+					}
+					// return the bytes read so far, the interruption surfaces on the next call
+					return j;
+				}
 
 				if (next == DONE) {
 					cleanAndFinalize();
@@ -284,6 +298,9 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 			this.closed = true;
 			requiredSubscriber().cancel();
 			cleanAndFinalize();
+			if (ex instanceof IOException ioEx) {
+				throw ioEx;
+			}
 			throw Exceptions.propagate(ex);
 		}
 		finally {
@@ -291,7 +308,7 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 		}
 	}
 
-	private DataBuffer getNextOrAwait() {
+	private DataBuffer getNextOrAwait() throws InterruptedIOException {
 		if (this.available == null || this.available.readableByteCount() == 0) {
 			discard(this.available);
 			this.available = null;
@@ -378,7 +395,7 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 		DataBufferUtils.release(buffer);
 	}
 
-	private void await() {
+	private void await() throws InterruptedIOException {
 		Thread toUnpark = Thread.currentThread();
 
 		while (true) {
@@ -391,10 +408,20 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 				throw new IllegalStateException("Only one (Virtual)Thread can await!");
 			}
 
-			if (this.parkedThread.compareAndSet( null, toUnpark)) {
+			if (this.parkedThread.compareAndSet(null, toUnpark) || this.parkedThread.get() == toUnpark) {
 				LockSupport.park();
 				// we don't just break here because park() can wake up spuriously
 				// if we got a proper resume, get() == READY and the loop will quit above
+				// otherwise, the reference is still ours and we park again
+			}
+
+			// on interruption, release the reference and throw, unless a concurrent
+			// resume() set READY: then the data is delivered first
+			if (Thread.interrupted()) {
+				Thread.currentThread().interrupt();
+				if (this.parkedThread.compareAndSet(toUnpark, null)) {
+					throw new InterruptedIOException("Interrupted while awaiting data");
+				}
 			}
 		}
 		// clear the resume indicator so that the next await call will park without a resume()
