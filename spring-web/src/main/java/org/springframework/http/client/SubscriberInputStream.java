@@ -276,7 +276,17 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 
 		try {
 			for (int j = 0; j < len;) {
-				byte[] next = getNextOrAwait();
+				byte[] next;
+				try {
+					next = getNextOrAwait();
+				}
+				catch (InterruptedIOException ex) {
+					if (j == 0) {
+						throw ex;
+					}
+					// return the bytes read so far, the interruption surfaces on the next call
+					return j;
+				}
 
 				if (next == DONE) {
 					cleanAndFinalize();
@@ -431,17 +441,14 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 				LockSupport.park();
 				// we don't just break here because park() can wake up spuriously
 				// if we got a proper resume, get() == READY and the loop will quit above
-				// if we woke up spuriously, the reference is still ours and we park again
+				// otherwise, the reference is still ours and we park again
 			}
 
-			// park() also returns on interruption, without a resume() having set READY,
-			// in which case the loop could otherwise neither park again nor exit.
-			// Honor the cancellation, unless data arrived concurrently: then deliver it
-			// first and let the restored interrupt status surface on the next await() call.
+			// on interruption, release the reference and throw, unless a concurrent
+			// resume() set READY: then the data is delivered first
 			if (Thread.interrupted()) {
 				Thread.currentThread().interrupt();
-				if (this.parkedThread.get() != READY) {
-					this.parkedThread.lazySet(null);
+				if (this.parkedThread.compareAndSet(toUnpark, null)) {
 					throw new InterruptedIOException("Interrupted while awaiting data");
 				}
 			}

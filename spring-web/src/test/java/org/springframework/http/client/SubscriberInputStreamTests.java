@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
@@ -278,6 +279,38 @@ class SubscriberInputStreamTests {
 		assertThat(savedEx.get()).isInstanceOf(InterruptedIOException.class)
 				.hasMessage("Interrupted while awaiting data");
 		assertThat(interruptStatus).as("interrupt status restored").isTrue();
+	}
+
+	@Test // gh-37159
+	void interruptAfterPartialRead() throws IOException {
+		// A publisher that emits a single buffer, then no further signal
+		Flow.Publisher<byte[]> publisher = subscriber -> {
+			subscriber.onSubscribe(new Flow.Subscription() {
+				@Override
+				public void request(long n) {
+				}
+				@Override
+				public void cancel() {
+				}
+			});
+			subscriber.onNext(FOO);
+		};
+
+		try (SubscriberInputStream<byte[]> is = new SubscriberInputStream<>(s -> s, s -> {}, 1)) {
+			publisher.subscribe(is);
+			Thread.currentThread().interrupt();
+
+			byte[] chunk = new byte[6];
+			assertThat(is.read(chunk)).as("bytes read before interruption").isEqualTo(3);
+			assertThat(chunk).startsWith(FOO);
+
+			assertThatExceptionOfType(InterruptedIOException.class).isThrownBy(is::read)
+					.withMessage("Interrupted while awaiting data");
+			assertThat(Thread.currentThread().isInterrupted()).as("interrupt status restored").isTrue();
+		}
+		finally {
+			Thread.interrupted();
+		}
 	}
 
 }
