@@ -21,9 +21,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -218,42 +218,25 @@ class ChannelSendOperatorTests {
 	}
 
 	@Test
-	void writeFunctionIsNotInvokedUnderMonitorLock() {
-		ChannelSendOperator<String> operator = new ChannelSendOperator<>(
-				Mono.just("one"),
+	void writeFunctionNotInvokedUnderLockOnFirstItem() {
+		verifyWriteFunctionNotInvokedUnderLock(Mono.just("one"));
+	}
+
+	@Test
+	void writeFunctionNotInvokedUnderLockOnEmptyCompletion() {
+		verifyWriteFunctionNotInvokedUnderLock(Mono.empty());
+	}
+
+	private void verifyWriteFunctionNotInvokedUnderLock(Publisher<String> source) {
+		AtomicBoolean holdsLock = new AtomicBoolean(true);
+		ChannelSendOperator<String> operator = new ChannelSendOperator<>(source,
 				publisher -> {
-					CountDownLatch acquired = new CountDownLatch(1);
-					Thread t = new Thread(() -> {
-						synchronized (publisher) {
-							acquired.countDown();
-						}
-					});
-					t.start();
-
-					try {
-						if (!acquired.await(1, TimeUnit.SECONDS)) {
-							throw new IllegalStateException("writeFunction appears to be invoked under monitor lock");
-						}
-					}
-					catch (InterruptedException ex) {
-						Thread.currentThread().interrupt();
-						throw new IllegalStateException(ex);
-					}
-					finally {
-						try {
-							t.join(1_000);
-						}
-						catch (InterruptedException ex) {
-							Thread.currentThread().interrupt();
-						}
-					}
-
+					holdsLock.set(Thread.holdsLock(publisher));
 					return Mono.empty();
 				});
 
-		StepVerifier.create(operator)
-				.expectComplete()
-				.verify(Duration.ofSeconds(2));
+		StepVerifier.create(operator).expectComplete().verify(Duration.ofSeconds(5));
+		assertThat(holdsLock).isFalse();
 	}
 
 	private Mono<Void> sendOperator(Publisher<String> source){
