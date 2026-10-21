@@ -194,6 +194,18 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 	}
 
 	@Test
+	void decodeEmptyMessage() throws IOException {
+		DataBuffer buffer = this.bufferFactory.allocateBuffer();
+		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
+		Msg.getDefaultInstance().writeDelimitedTo(buffer.asOutputStream());
+
+		testDecode(Mono.just(buffer), Msg.class, step -> step
+				.expectNext(this.testMsg1)
+				.expectNext(Msg.getDefaultInstance())
+				.verifyComplete());
+	}
+
+	@Test
 	void decodeTruncatedMessageSize() {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer();
 		buffer.write((byte) 0x80);

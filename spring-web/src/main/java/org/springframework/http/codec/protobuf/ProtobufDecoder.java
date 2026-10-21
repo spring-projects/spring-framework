@@ -377,8 +377,8 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 			throw new DecodingException("Cannot parse message size: malformed varint");
 		}
 
-		private @Nullable Integer getAndReset() {
-			Integer result = (this.messageSize != 0 ? this.messageSize : null);
+		private Integer getAndReset() {
+			Integer result = this.messageSize;
 			this.offset = 0;
 			this.messageSize = 0;
 			return result;
