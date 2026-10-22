@@ -63,7 +63,8 @@ public class ProtobufJsonEncoder implements HttpMessageEncoder<Message> {
 	private static final List<MimeType> defaultMimeTypes = List.of(
 			MediaType.APPLICATION_JSON,
 			new MediaType("application", "*+json"),
-			MediaType.APPLICATION_NDJSON);
+			MediaType.APPLICATION_NDJSON,
+			MediaType.APPLICATION_JSONL);
 
 	private final JsonFormat.Printer printer;
 
