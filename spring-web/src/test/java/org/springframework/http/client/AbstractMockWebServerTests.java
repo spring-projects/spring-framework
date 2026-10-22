@@ -116,7 +116,7 @@ public abstract class AbstractMockWebServerTests {
 					String encoding = request.getTarget().replace("/compress/","");
 					String requestBody = request.getBody().utf8();
 					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-					if(encoding.equalsIgnoreCase("deflate")) {
+					if(encoding.equals("deflate")) {
 							try(DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
 							deflaterOutputStream.write(requestBody.getBytes());
 							deflaterOutputStream.flush();
@@ -124,9 +124,7 @@ public abstract class AbstractMockWebServerTests {
 					}
 					// compress anyway with gzip
 					else {
-						if (!encoding.equalsIgnoreCase("gzip")) {
-							encoding = "gzip";
-						}
+						encoding = "gzip";
 						try(GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
 							gzipOutputStream.write(requestBody.getBytes());
 							gzipOutputStream.flush();
