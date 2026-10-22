@@ -101,13 +101,19 @@ public class InjectionMetadata {
 	/**
 	 * Return the {@link InjectedElement elements} to inject based on the
 	 * specified {@link PropertyValues}. If a property is already defined
-	 * for an {@link InjectedElement}, it is excluded.
+	 * for an {@link InjectedElement}, it is excluded. If the config members
+	 * have been {@linkplain #checkConfigMembers(RootBeanDefinition) checked},
+	 * an element whose member was already externally managed is excluded
+	 * as well, consistent with {@link #inject(Object, String, PropertyValues)}.
 	 * @param pvs the property values to consider
 	 * @return the elements to inject
 	 * @since 6.0.10
 	 */
 	public Collection<InjectedElement> getInjectedElements(@Nullable PropertyValues pvs) {
-		return this.injectedElements.stream().filter(candidate -> candidate.shouldInject(pvs)).toList();
+		Collection<InjectedElement> checkedElements = this.checkedElements;
+		Collection<InjectedElement> elementsToIterate =
+				(checkedElements != null ? checkedElements : this.injectedElements);
+		return elementsToIterate.stream().filter(candidate -> candidate.shouldInject(pvs)).toList();
 	}
 
 	/**
