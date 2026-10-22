@@ -120,12 +120,13 @@ class ResourceHandlerFunctionTests {
 
 	@Test
 	void ignoreRangeWhenIfRangeETagDoesNotMatch() throws IOException, ServletException {
-		ResourceHandlerFunction handlerFunction =
-				new ResourceHandlerFunction(this.resource, (resource, headers) -> headers.setETag("\"current\""));
+		ResourceHandlerFunction handlerFunction = new ResourceHandlerFunction(
+				this.resource, (resource, headers) -> headers.setETag("\"current\""));
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addHeader(HttpHeaders.RANGE, "bytes=0-5");
 		servletRequest.addHeader(HttpHeaders.IF_RANGE, "\"stale\"");
-		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(this.messageConverter));
+		ServerRequest request = new DefaultServerRequest(
+				servletRequest, Collections.singletonList(this.messageConverter));
 
 		ServerResponse response = handlerFunction.handle(request);
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
@@ -135,17 +136,19 @@ class ResourceHandlerFunctionTests {
 		assertThat(servletResponse.getStatus()).isEqualTo(200);
 		assertThat(servletResponse.getHeader(HttpHeaders.ETAG)).isEqualTo("\"current\"");
 		assertThat(servletResponse.getHeader(HttpHeaders.CONTENT_RANGE)).isNull();
-		assertThat(servletResponse.getContentAsByteArray()).isEqualTo(Files.readAllBytes(this.resource.getFile().toPath()));
+		assertThat(servletResponse.getContentAsByteArray())
+				.isEqualTo(Files.readAllBytes(this.resource.getFile().toPath()));
 	}
 
 	@Test
 	void getRangeWhenIfRangeETagMatches() throws IOException, ServletException {
-		ResourceHandlerFunction handlerFunction =
-				new ResourceHandlerFunction(this.resource, (resource, headers) -> headers.setETag("\"current\""));
+		ResourceHandlerFunction handlerFunction = new ResourceHandlerFunction(
+				this.resource, (resource, headers) -> headers.setETag("\"current\""));
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addHeader(HttpHeaders.RANGE, "bytes=0-5");
 		servletRequest.addHeader(HttpHeaders.IF_RANGE, "\"current\"");
-		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.singletonList(this.messageConverter));
+		ServerRequest request = new DefaultServerRequest(
+				servletRequest, Collections.singletonList(this.messageConverter));
 
 		ServerResponse response = handlerFunction.handle(request);
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();

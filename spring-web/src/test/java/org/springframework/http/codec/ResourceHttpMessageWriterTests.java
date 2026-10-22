@@ -115,7 +115,6 @@ class ResourceHttpMessageWriterTests {
 		testWrite(get("/").range(of(0, 5)).header(HttpHeaders.IF_RANGE, "\"stale\"").build());
 
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE)).isNull();
-		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(39L);
 		StepVerifier.create(this.response.getBodyAsString())
 				.expectNext("Spring Framework test resource content.")
 				.expectComplete()

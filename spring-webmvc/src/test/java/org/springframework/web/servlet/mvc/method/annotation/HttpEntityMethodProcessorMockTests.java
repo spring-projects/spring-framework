@@ -79,6 +79,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
@@ -665,15 +666,18 @@ class HttpEntityMethodProcessorMockTests {
 		servletRequest.addHeader(HttpHeaders.RANGE, "bytes=0-5");
 		servletRequest.addHeader(HttpHeaders.IF_RANGE, "\"stale\"");
 
-		given(resourceMessageConverter.canWrite(ByteArrayResource.class, null)).willReturn(true);
-		given(resourceMessageConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.ALL));
-		given(resourceMessageConverter.canWrite(ByteArrayResource.class, APPLICATION_OCTET_STREAM)).willReturn(true);
+		when(resourceMessageConverter.canWrite(ByteArrayResource.class, null)).thenReturn(true);
+		when(resourceMessageConverter.getSupportedMediaTypes(any()))
+				.thenReturn(Collections.singletonList(MediaType.ALL));
+		when(resourceMessageConverter.canWrite(ByteArrayResource.class, APPLICATION_OCTET_STREAM))
+				.thenReturn(true);
 
-		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+		processor.handleReturnValue(
+				returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
 
-		then(resourceMessageConverter).should(times(1)).write(
+		verify(resourceMessageConverter).write(
 				isA(ByteArrayResource.class), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		then(resourceRegionMessageConverter).should(never()).write(anyCollection(), any(), any());
+		verify(resourceRegionMessageConverter, never()).write(anyCollection(), any(), any());
 		assertThat(servletResponse.getStatus()).isEqualTo(200);
 		assertThat(servletResponse.getHeader(HttpHeaders.CONTENT_RANGE)).isNull();
 	}
@@ -685,12 +689,14 @@ class HttpEntityMethodProcessorMockTests {
 		servletRequest.addHeader(HttpHeaders.RANGE, "bytes=0-5");
 		servletRequest.addHeader(HttpHeaders.IF_RANGE, "\"current\"");
 
-		given(resourceRegionMessageConverter.canWrite(any(), eq(null))).willReturn(true);
-		given(resourceRegionMessageConverter.canWrite(any(), eq(APPLICATION_OCTET_STREAM))).willReturn(true);
+		when(resourceRegionMessageConverter.canWrite(any(), eq(null))).thenReturn(true);
+		when(resourceRegionMessageConverter.canWrite(any(), eq(APPLICATION_OCTET_STREAM)))
+				.thenReturn(true);
 
-		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+		processor.handleReturnValue(
+				returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
 
-		then(resourceRegionMessageConverter).should(times(1)).write(
+		verify(resourceRegionMessageConverter).write(
 				anyCollection(), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
 		assertThat(servletResponse.getStatus()).isEqualTo(206);
 	}

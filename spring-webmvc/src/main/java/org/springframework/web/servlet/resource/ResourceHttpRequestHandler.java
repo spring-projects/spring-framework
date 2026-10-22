@@ -557,7 +557,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (request.getHeader(HttpHeaders.RANGE) != null) {
 			ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(request);
 			try {
-				List<HttpRange> httpRanges = HttpRange.parseRanges(inputMessage.getHeaders(), outputMessage.getHeaders());
+				List<HttpRange> httpRanges =
+						HttpRange.resolveRanges(inputMessage.getHeaders(), outputMessage.getHeaders());
 				if (!httpRanges.isEmpty()) {
 					Assert.state(this.resourceRegionHttpMessageConverter != null, "Converter not initialized");
 					response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);

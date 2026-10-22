@@ -348,7 +348,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				Resource resource = (Resource) value;
 				try {
 					List<HttpRange> httpRanges =
-							HttpRange.parseRanges(inputMessage.getHeaders(), outputMessage.getHeaders());
+							HttpRange.resolveRanges(inputMessage.getHeaders(), outputMessage.getHeaders());
 					if (!httpRanges.isEmpty()) {
 						outputMessage.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
 						body = HttpRange.toResourceRegions(httpRanges, resource);

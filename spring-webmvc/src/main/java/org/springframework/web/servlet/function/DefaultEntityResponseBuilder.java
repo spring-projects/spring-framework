@@ -285,7 +285,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 				if (rangeHeader != null) {
 					Resource resource = (Resource) entity;
 					try {
-						List<HttpRange> httpRanges = HttpRange.parseRanges(
+						List<HttpRange> httpRanges = HttpRange.resolveRanges(
 								new ServletServerHttpRequest(request).getHeaders(), serverResponse.getHeaders());
 						if (!httpRanges.isEmpty()) {
 							serverResponse.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
