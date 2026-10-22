@@ -21,8 +21,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.entry;
 
 /**
@@ -52,6 +55,33 @@ class WebSocketExtensionTests {
 
 		assertThat(extensions).extracting(WebSocketExtension::getName)
 				.containsExactly("x-foo-extension", "x-bar-extension");
+	}
+
+	@Test
+	void parseHeaderWithQuotedParameterValues() {
+		List<WebSocketExtension> extensions = WebSocketExtension
+				.parseExtensions("x-test-extension; foo=\"bar\"; escaped=\"ba\\r\"");
+
+		assertThat(extensions).singleElement().satisfies(extension -> {
+			assertThat(extension.getName()).isEqualTo("x-test-extension");
+			assertThat(extension.getParameters())
+					.containsOnly(entry("foo", "bar"), entry("escaped", "bar"));
+		});
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"bar,baz", "bar;baz", "bar baz"})
+	void parseHeaderRejectsQuotedParameterValueThatIsNotAToken(String value) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> WebSocketExtension.parseExtensions("x-test-extension; foo=\"" + value + "\""))
+				.withMessageContaining("must conform to the 'token' ABNF");
+	}
+
+	@Test
+	void parseHeaderRejectsUnterminatedQuotedParameterValue() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> WebSocketExtension.parseExtensions("x-test-extension; foo=\"bar"))
+				.withMessageContaining("Unterminated quoted string");
 	}
 
 
