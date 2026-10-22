@@ -162,7 +162,7 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {"gzip", "deflate"})
+	@ValueSource(strings = {"gzip", "deflate", "GZIP", "DEFLATE"})
 	void gzipCompressionWithHeadRequest(String compression) throws IOException {
 		URI uri = URI.create(baseUrl + "/headforcompress/" + compression);
 		JdkClientHttpRequestFactory requestFactory = (JdkClientHttpRequestFactory) this.factory;
