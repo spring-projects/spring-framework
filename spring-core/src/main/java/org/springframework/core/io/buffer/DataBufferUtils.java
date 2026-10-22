@@ -1083,6 +1083,10 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public void completed(Integer read, Attachment attachment) {
+			if (!attachment.markHandled()) {
+				return;
+			}
+
 			attachment.iterator().close();
 			DataBuffer dataBuffer = attachment.dataBuffer();
 
@@ -1118,6 +1122,10 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public void failed(Throwable ex, Attachment attachment) {
+			if (!attachment.markHandled()) {
+				return;
+			}
+
 			attachment.iterator().close();
 			release(attachment.dataBuffer());
 
@@ -1130,7 +1138,24 @@ public abstract class DataBufferUtils {
 			IDLE, READING, DISPOSED
 		}
 
-		private record Attachment(DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {}
+		private record Attachment(
+				DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator, AtomicBoolean handled) {
+
+			Attachment(DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {
+				this(dataBuffer, iterator, new AtomicBoolean());
+			}
+
+			/**
+			 * Mark this read operation as handled.
+			 * <p>Guards against the {@link CompletionHandler} being invoked more than
+			 * once for the same read, as happens on Windows when the end of the file
+			 * is reported synchronously, see
+			 * <a href="https://bugs.openjdk.org/browse/JDK-8351404">JDK-8351404</a>.
+			 */
+			boolean markHandled() {
+				return this.handled.compareAndSet(false, true);
+			}
+		}
 	}
 
 
