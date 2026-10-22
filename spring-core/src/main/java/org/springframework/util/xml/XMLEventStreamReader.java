@@ -26,6 +26,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Comment;
+import javax.xml.stream.events.EntityDeclaration;
+import javax.xml.stream.events.EntityReference;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.ProcessingInstruction;
 import javax.xml.stream.events.StartDocument;
@@ -157,6 +159,11 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 		}
 		else if (this.event.getEventType() == XMLStreamConstants.COMMENT) {
 			return ((Comment) this.event).getText();
+		}
+		else if (this.event.isEntityReference()) {
+			EntityDeclaration declaration = ((EntityReference) this.event).getDeclaration();
+			String text = (declaration != null ? declaration.getReplacementText() : null);
+			return (text != null ? text : "");
 		}
 		else {
 			throw new IllegalStateException();

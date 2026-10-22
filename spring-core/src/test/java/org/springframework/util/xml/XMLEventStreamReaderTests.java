@@ -75,6 +75,19 @@ class XMLEventStreamReaderTests {
 		assertThat(XmlContent.from(writer)).isSimilarTo(XML, nodeFilter);
 	}
 
+	@Test
+	void getElementTextWithEntityReference() throws Exception {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+		XMLEventReader eventReader = inputFactory.createXMLEventReader(
+				new StringReader("<!DOCTYPE root [<!ENTITY ent 'value'>]><root>a&ent;b</root>"));
+		XMLEventStreamReader reader = new XMLEventStreamReader(eventReader);
+		while (reader.getEventType() != XMLStreamConstants.START_ELEMENT) {
+			reader.next();
+		}
+		assertThat(reader.getElementText()).isEqualTo("avalueb");
+	}
+
 	@ParameterizedTest  // gh-36914
 	@CsvSource(textBlock = """
 			0, content
