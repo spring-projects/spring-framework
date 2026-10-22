@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link PropertySource} implementations.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1
  */
 class PropertySourceTests {
@@ -87,6 +88,39 @@ class PropertySourceTests {
 		assertThat(propertySources.indexOf(PropertySource.named("ps1"))).isEqualTo(0);
 		assertThat(propertySources.indexOf(PropertySource.named("ps2"))).isEqualTo(1);
 		propertySources.clear();
+	}
+
+	@Test  // gh-37540
+	void toStringUsesConciseFormat() {
+		Properties props = new Properties();
+		props.setProperty("a", "b");
+
+		assertThat(new MapPropertySource("mps", Map.of("a", "b")))
+				.hasToString("MapPropertySource {name='mps'}");
+		assertThat(new PropertiesPropertySource("pps", props))
+				.hasToString("PropertiesPropertySource {name='pps'}");
+		assertThat(new SystemEnvironmentPropertySource("seps", Map.of("A", "b")))
+				.hasToString("SystemEnvironmentPropertySource {name='seps'}");
+	}
+
+	/**
+	 * DEBUG logging is enabled for {@link DebugLoggingPropertySource} in
+	 * {@code log4j2-test.xml}.
+	 */
+	@Test  // gh-37540
+	void toStringDoesNotDependOnLogLevel() {
+		PropertySource<?> propertySource = new DebugLoggingPropertySource("dlps", Map.of("a", "b"));
+
+		assertThat(propertySource.logger.isDebugEnabled()).isTrue();
+		assertThat(propertySource).hasToString("DebugLoggingPropertySource {name='dlps'}");
+	}
+
+
+	static class DebugLoggingPropertySource extends MapPropertySource {
+
+		DebugLoggingPropertySource(String name, Map<String, Object> source) {
+			super(name, source);
+		}
 	}
 
 }

@@ -54,4 +54,14 @@ class CompositePropertySourceTests {
 		assertThat(composite.getPropertyNames()).containsOnly("p1.property", "p2.property1", "p2.property2");
 	}
 
+	@Test  // gh-37540
+	void toStringUsesConciseFormatForNestedPropertySources() {
+		CompositePropertySource composite = new CompositePropertySource("c");
+		composite.addPropertySource(new MapPropertySource("p1", Map.of("p1.property", "value")));
+		composite.addPropertySource(new MapPropertySource("p2", Map.of("p2.property", "value")));
+
+		assertThat(composite).hasToString("CompositePropertySource {name='c', propertySources=" +
+				"[MapPropertySource {name='p1'}, MapPropertySource {name='p2'}]}");
+	}
+
 }

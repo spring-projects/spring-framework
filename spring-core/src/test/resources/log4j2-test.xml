@@ -11,6 +11,7 @@
 	<Loggers>
 		<Logger name="org.springframework.core" level="info" />
 		<Logger name="org.springframework.util" level="warn" />
+		<Logger name="org.springframework.core.env.PropertySourceTests$DebugLoggingPropertySource" level="debug" />
 		<Root level="error">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="File" />
