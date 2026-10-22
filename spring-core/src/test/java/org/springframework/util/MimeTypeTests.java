@@ -155,13 +155,40 @@ class MimeTypeTests {
 		@Test
 		void parseMimeTypeEmptyParameterAttribute() {
 			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
-					MimeTypeUtils.parseMimeType("audio/*;=value"));
+					MimeTypeUtils.parseMimeType("audio/*;=value"))
+					.withMessageEndingWith("missing parameter name before '='");
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("audio/*; =value"))
+					.withMessageEndingWith("missing parameter name before '='");
 		}
 
 		@Test
 		void parseMimeTypeEmptyParameterValue() {
 			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
-					MimeTypeUtils.parseMimeType("audio/*;attr="));
+					MimeTypeUtils.parseMimeType("audio/*;attr="))
+					.withMessageEndingWith("missing value for parameter 'attr'");
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("audio/*;attr= "))
+					.withMessageEndingWith("missing value for parameter 'attr'");
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("audio/*;attr=;a=b"))
+					.withMessageEndingWith("missing value for parameter 'attr'");
+		}
+
+		@Test
+		void parseMimeTypeParameterWithoutValue() {
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;charset"))
+					.withMessageEndingWith("missing value for parameter 'charset'");
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;charset "))
+					.withMessageEndingWith("missing value for parameter 'charset'");
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;a;b=c"))
+					.withMessageEndingWith("missing value for parameter 'a'");
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain; a ;b=c"))
+					.withMessageEndingWith("missing value for parameter 'a'");
 		}
 
 		@Test

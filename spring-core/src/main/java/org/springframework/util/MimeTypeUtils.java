@@ -542,6 +542,9 @@ public abstract class MimeTypeUtils {
 				if (c == ' ' || c == '\t' || c == ';') {
 					return this;
 				}
+				if (c == '=') {
+					throw new InvalidMimeTypeException(parser.input, "missing parameter name before '='");
+				}
 				parser.mark = parser.index;
 				return PARAM_NAME;
 			}
@@ -564,7 +567,16 @@ public abstract class MimeTypeUtils {
 					parser.paramName = parser.input.substring(parser.mark, parser.index);
 					return PARAM_NAME_END;
 				}
+				if (c == ';') {
+					parser.paramName = parser.input.substring(parser.mark, parser.index);
+					throw missingParameterValue(parser);
+				}
 				return this;
+			}
+			@Override
+			void onEof(MimeTypeParser parser) {
+				parser.paramName = parser.input.substring(parser.mark);
+				throw missingParameterValue(parser);
 			}
 		},
 
@@ -577,7 +589,14 @@ public abstract class MimeTypeUtils {
 				if (c == '=') {
 					return PARAM_VALUE_START;
 				}
+				if (c == ';') {
+					throw missingParameterValue(parser);
+				}
 				throw new InvalidMimeTypeException(parser.input, "Unexpected character '" + c + "' after parameter name");
+			}
+			@Override
+			void onEof(MimeTypeParser parser) {
+				throw missingParameterValue(parser);
 			}
 		},
 
@@ -587,12 +606,19 @@ public abstract class MimeTypeUtils {
 				if (c == ' ' || c == '\t') {
 					return this;
 				}
+				if (c == ';') {
+					throw missingParameterValue(parser);
+				}
 				if (c == '"') {
 					parser.mark = parser.index;
 					return PARAM_VALUE_QUOTED;
 				}
 				parser.mark = parser.index;
 				return PARAM_VALUE_TOKEN;
+			}
+			@Override
+			void onEof(MimeTypeParser parser) {
+				throw missingParameterValue(parser);
 			}
 		},
 
@@ -646,6 +672,10 @@ public abstract class MimeTypeUtils {
 		private static void extractParameter(MimeTypeParser parser, String input) {
 			Assert.hasText(parser.paramName, "'paramName' must not be empty");
 			parser.putParameter(parser.paramName, input);
+		}
+
+		private static InvalidMimeTypeException missingParameterValue(MimeTypeParser parser) {
+			return new InvalidMimeTypeException(parser.input, "missing value for parameter '" + parser.paramName + "'");
 		}
 
 		abstract ParserState process(char c, MimeTypeParser parser);
