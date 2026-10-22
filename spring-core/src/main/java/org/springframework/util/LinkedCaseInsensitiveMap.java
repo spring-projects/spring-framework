@@ -134,11 +134,10 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 	/**
 	 * Copy constructor.
 	 */
-	@SuppressWarnings("unchecked")
 	private LinkedCaseInsensitiveMap(LinkedCaseInsensitiveMap<V> other) {
-		this.targetMap = (LinkedHashMap<String, V>) other.targetMap.clone();
-		this.caseInsensitiveKeys = (HashMap<String, String>) other.caseInsensitiveKeys.clone();
-		this.locale = other.locale;
+		this(other.size(), other.locale);
+		this.targetMap.putAll(other.targetMap);
+		this.caseInsensitiveKeys.putAll(other.caseInsensitiveKeys);
 	}
 
 
