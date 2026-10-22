@@ -70,6 +70,7 @@ import org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecode
 import org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
+import org.springframework.http.codec.protobuf.ProtobufJsonDecoder;
 import org.springframework.http.codec.smile.JacksonSmileDecoder;
 import org.springframework.http.codec.smile.JacksonSmileEncoder;
 import org.springframework.http.codec.xml.JacksonXmlDecoder;
@@ -200,6 +201,8 @@ class ServerCodecConfigurerTests {
 		CodecConfigurer.CustomCodecs customCodecs = this.configurer.customCodecs();
 		customCodecs.register(new ByteArrayDecoder());
 		customCodecs.registerWithDefaultConfig(new ByteArrayDecoder());
+		customCodecs.register(new ProtobufJsonDecoder());
+		customCodecs.registerWithDefaultConfig(new ProtobufJsonDecoder());
 		customCodecs.register(new JacksonJsonDecoder());
 		customCodecs.registerWithDefaultConfig(new JacksonJsonDecoder());
 
@@ -208,6 +211,8 @@ class ServerCodecConfigurerTests {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((ProtobufJsonDecoder) getNextDecoder(readers)).getMaxMessageSize()).isEqualTo(256 * 1024);
+		assertThat(((ProtobufJsonDecoder) getNextDecoder(readers)).getMaxMessageSize()).isEqualTo(size);
 		assertThat(((JacksonJsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
 		assertThat(((JacksonJsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 	}
