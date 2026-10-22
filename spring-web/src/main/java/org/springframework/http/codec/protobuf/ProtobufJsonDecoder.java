@@ -18,6 +18,8 @@ package org.springframework.http.codec.protobuf;
 
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +52,9 @@ import org.springframework.util.MimeType;
  * Applications should consider decoding to {@code Mono<Message>} or
  * {@code Mono<List<Message>>}, which will use the supported
  * {@link #decodeToMono(Publisher, ResolvableType, MimeType, Map)}.
+ *
+ * <p>The input is read with the charset of the MIME type, if any, and
+ * with UTF-8 otherwise.
  *
  * <p>To generate {@code Message} Java classes, you need to install the
  * {@code protoc} binary.
@@ -145,7 +150,7 @@ public class ProtobufJsonDecoder implements Decoder<Message> {
 
 		try {
 			Message.Builder builder = getMessageBuilder(targetType.toClass());
-			this.parser.merge(new InputStreamReader(dataBuffer.asInputStream()), builder);
+			this.parser.merge(new InputStreamReader(dataBuffer.asInputStream(), getCharset(mimeType)), builder);
 			return builder.build();
 		}
 		catch (Exception ex) {
@@ -178,6 +183,16 @@ public class ProtobufJsonDecoder implements Decoder<Message> {
 				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints))
 				.onErrorMap(DataBufferLimitException.class,
 						exc -> new DecodingException("Could not decode JSON as Protobuf message", exc));
+	}
+
+	private static Charset getCharset(@Nullable MimeType mimeType) {
+		if (mimeType != null) {
+			Charset charset = mimeType.getCharset();
+			if (charset != null) {
+				return charset;
+			}
+		}
+		return StandardCharsets.UTF_8;
 	}
 
 }
