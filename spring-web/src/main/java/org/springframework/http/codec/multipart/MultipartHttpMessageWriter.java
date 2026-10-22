@@ -219,21 +219,21 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
 
-		Flux<Publisher<DataBuffer>> body = Flux.fromIterable(map.entrySet())
-				.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue(), bufferFactory));
+		Flux<Publisher<DataBuffer>> parts = Flux.fromIterable(map.entrySet())
+				.concatMap(entry -> encodePartValues(entry.getKey(), entry.getValue(), bufferFactory));
 
-		return writeMultipart(body, boundary, outputMessage, hints);
+		return writeMultipart(parts, boundary, outputMessage, hints);
 	}
 
 	private Flux<Publisher<DataBuffer>> encodePartValues(
-			byte[] boundary, String name, List<?> values, DataBufferFactory bufferFactory) {
+			String name, List<?> values, DataBufferFactory bufferFactory) {
 
 		return Flux.fromIterable(values)
-				.map(value -> Flux.defer(() -> encodePart(boundary, name, value, bufferFactory)));
+				.map(value -> Flux.defer(() -> encodePart(name, value, bufferFactory)));
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private <T> Flux<DataBuffer> encodePart(byte[] boundary, String name, T value, DataBufferFactory factory) {
+	private <T> Flux<DataBuffer> encodePart(String name, T value, DataBufferFactory factory) {
 		MultipartHttpOutputMessage message = new MultipartHttpOutputMessage(factory);
 		HttpHeaders headers = message.getHeaders();
 
@@ -289,13 +289,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 		// After partContentReady, we can access the part content from MultipartHttpOutputMessage
 		// and use it for writing to the actual request body
 
-		Flux<DataBuffer> partContent = partContentReady.thenMany(Flux.defer(message::getBody));
-
-		return Flux.concat(
-				generateNewLine(factory),
-				partContent,
-				generateNewLine(factory),
-				generateBoundary(boundary, factory));
+		return partContentReady.thenMany(Flux.defer(message::getBody));
 	}
 
 

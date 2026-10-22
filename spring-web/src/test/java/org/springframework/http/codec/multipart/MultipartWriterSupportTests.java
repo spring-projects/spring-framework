@@ -34,6 +34,8 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -96,9 +98,8 @@ class MultipartWriterSupportTests extends AbstractLeakCheckingTests {
 		String firstPart = "\r\n" + HEADERS + "first\r\n--boundary";
 		String secondPart = "\r\n" + HEADERS + "second\r\n--boundary";
 		Flux<Publisher<DataBuffer>> parts = Flux.just(
-				Flux.just(firstPart).map(this::buffer),
-				Flux.concat(Flux.just("\r\n" + HEADERS), nextBody.asFlux(), Flux.just("\r\n--boundary"))
-						.map(this::buffer));
+				Flux.just(HEADERS + "first").map(this::buffer),
+				Flux.concat(Flux.just(HEADERS), nextBody.asFlux()).map(this::buffer));
 
 		this.writer.writeMultipart(parts, BOUNDARY, this.response, Map.of());
 
@@ -126,10 +127,10 @@ class MultipartWriterSupportTests extends AbstractLeakCheckingTests {
 				.concatMap(group -> this.decoder.decodeToMono(
 						Flux.from(group), STRING_TYPE, MediaType.TEXT_PLAIN, Map.of()));
 		StepVerifier.create(flushGroups)
-				.then(() -> assertThat(parts.tryEmitNext(Flux.just(firstPart).map(this::buffer)))
+				.then(() -> assertThat(parts.tryEmitNext(Flux.just(HEADERS + "first").map(this::buffer)))
 						.isEqualTo(Sinks.EmitResult.OK))
 				.expectNext("--boundary", firstPart)
-				.then(() -> assertThat(parts.tryEmitNext(Flux.just(secondPart).map(this::buffer)))
+				.then(() -> assertThat(parts.tryEmitNext(Flux.just(HEADERS + "second").map(this::buffer)))
 						.isEqualTo(Sinks.EmitResult.OK))
 				.expectNext(secondPart)
 				.then(() -> assertThat(parts.tryEmitComplete()).isEqualTo(Sinks.EmitResult.OK))
@@ -154,7 +155,7 @@ class MultipartWriterSupportTests extends AbstractLeakCheckingTests {
 	@Test
 	void emptyPart() {
 		String part = "\r\n" + HEADERS + "\r\n--boundary";
-		Flux<Publisher<DataBuffer>> parts = Flux.just(Flux.just(part).map(this::buffer));
+		Flux<Publisher<DataBuffer>> parts = Flux.just(Flux.just(HEADERS).map(this::buffer));
 
 		this.writer.writeMultipart(parts, BOUNDARY, this.response, Map.of());
 
@@ -168,9 +169,27 @@ class MultipartWriterSupportTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
+	void monoPart() {
+		DefaultDataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
+		when(this.response.bufferFactory()).thenReturn(bufferFactory);
+		byte[] content = (HEADERS + "value").getBytes(StandardCharsets.UTF_8);
+		Mono<Mono<DefaultDataBuffer>> parts = Mono.just(Mono.fromSupplier(() -> bufferFactory.wrap(content)));
+
+		this.writer.writeMultipart(parts, BOUNDARY, this.response, Map.of());
+
+		Flux<String> flushGroups = Flux.from(this.bodyCaptor.getValue())
+				.concatMap(group -> this.decoder.decodeToMono(
+						Flux.from(group), STRING_TYPE, MediaType.TEXT_PLAIN, Map.of()));
+		StepVerifier.create(flushGroups)
+				.expectNext("--boundary", "\r\n" + HEADERS + "value\r\n--boundary", "--\r\n")
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
 	void multipleBuffersStayInOnePart() {
-		Flux<Publisher<DataBuffer>> parts = Flux.just(
-				Flux.just("\r\n" + HEADERS, "first", "second", "\r\n--boundary").map(this::buffer));
+		Flux<Flux<DataBuffer>> parts = Flux.just(
+				Flux.just(HEADERS, "first", "second").map(this::buffer));
 
 		this.writer.writeMultipart(parts, BOUNDARY, this.response, Map.of());
 
@@ -187,7 +206,7 @@ class MultipartWriterSupportTests extends AbstractLeakCheckingTests {
 	void bodyErrorDoesNotCompletePart() {
 		IllegalStateException error = new IllegalStateException("body failed");
 		Flux<Publisher<DataBuffer>> parts = Flux.just(
-				Flux.concat(Flux.just("\r\n" + HEADERS, "partial"), Flux.<String>error(error)).map(this::buffer));
+				Flux.concat(Flux.just(HEADERS, "partial"), Flux.<String>error(error)).map(this::buffer));
 
 		this.writer.writeMultipart(parts, BOUNDARY, this.response, Map.of());
 
@@ -218,10 +237,10 @@ class MultipartWriterSupportTests extends AbstractLeakCheckingTests {
 	@Test
 	void cancellationDoesNotCloseMultipart() {
 		AtomicBoolean cancelled = new AtomicBoolean();
-		String firstPart = "\r\n" + HEADERS + "first\r\n--boundary";
+		String firstPart = HEADERS + "first";
 		Flux<Publisher<DataBuffer>> parts = Flux.just(
 				Flux.just(firstPart).map(this::buffer),
-				Flux.concat(Flux.just("\r\n" + HEADERS), Flux.<String>never())
+				Flux.concat(Flux.just(HEADERS), Flux.<String>never())
 						.map(this::buffer).doOnCancel(() -> cancelled.set(true)));
 
 		this.writer.writeMultipart(parts, BOUNDARY, this.response, Map.of());
@@ -230,7 +249,7 @@ class MultipartWriterSupportTests extends AbstractLeakCheckingTests {
 				.concatMap(Flux::from)
 				.map(buffer -> this.decoder.decode(buffer, STRING_TYPE, MediaType.TEXT_PLAIN, Map.of()));
 		StepVerifier.create(body)
-				.expectNext("--boundary", firstPart, "\r\n" + HEADERS)
+				.expectNext("--boundary", "\r\n", firstPart, "\r\n", "--boundary", "\r\n", HEADERS)
 				.thenCancel()
 				.verify(Duration.ofSeconds(5));
 		assertThat(cancelled).isTrue();

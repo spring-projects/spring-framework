@@ -78,12 +78,12 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 		}
 
 		Flux<Publisher<DataBuffer>> body = Flux.from(parts)
-				.map(part -> Flux.defer(() -> encodePart(boundary, part, outputMessage.bufferFactory())));
+				.map(part -> Flux.defer(() -> encodePart(part, outputMessage.bufferFactory())));
 
 		return writeMultipart(body, boundary, outputMessage, hints);
 	}
 
-	private <T> Flux<DataBuffer> encodePart(byte[] boundary, Part part, DataBufferFactory bufferFactory) {
+	private <T> Flux<DataBuffer> encodePart(Part part, DataBufferFactory bufferFactory) {
 		HttpHeaders headers = new HttpHeaders(part.headers());
 
 		String name = part.name();
@@ -92,12 +92,7 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 					(part instanceof FilePart filePart ? filePart.filename() : null));
 		}
 
-		return Flux.concat(
-				generateNewLine(bufferFactory),
-				generatePartHeaders(headers, bufferFactory),
-				part.content(),
-				generateNewLine(bufferFactory),
-				generateBoundary(boundary, bufferFactory));
+		return generatePartHeaders(headers, bufferFactory).concatWith(part.content());
 	}
 
 }

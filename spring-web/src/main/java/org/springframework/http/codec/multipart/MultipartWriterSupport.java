@@ -122,12 +122,13 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 	}
 
 	/**
-	 * Write encoded multipart parts, flushing after each part.
-	 * <p>Each part publisher must emit a leading CRLF, the part headers and
-	 * body, and a trailing CRLF followed by the delimiter from
-	 * {@link #generateBoundary}. This method writes the initial boundary and
-	 * completes the closing boundary when the parts finish successfully.
-	 * An empty parts stream produces only a closing boundary.
+	 * Write encoded part headers and bodies as a multipart message, flushing
+	 * after each part.
+	 * <p>Each part publisher must emit its encoded headers, an empty line, and
+	 * its body, without the surrounding multipart framing. Headers and body
+	 * may be emitted as multiple buffers. This method adds the framing CRLFs
+	 * and boundaries, and completes the closing boundary when the parts finish
+	 * successfully. An empty parts stream produces only a closing boundary.
 	 * <p>The caller must set the multipart content type on the output message,
 	 * including a boundary parameter that matches the supplied boundary.
 	 * @param parts the encoded part publishers in the order to write them
@@ -137,19 +138,26 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 	 * @return a {@code Mono} that signals completion or failure of the write
 	 * @since 7.1
 	 */
-	protected Mono<Void> writeMultipart(Flux<Publisher<DataBuffer>> parts, byte[] boundary,
+	protected Mono<Void> writeMultipart(
+			Publisher<? extends Publisher<? extends DataBuffer>> parts, byte[] boundary,
 			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
-		Flux<Publisher<DataBuffer>> body = parts.switchOnFirst((signal, flux) -> {
-			if (signal.hasValue()) {
-				return flux.startWith(Mono.just(generateBoundary(boundary, bufferFactory)))
-						.concatWith(Mono.just(generateLastLineSuffix(bufferFactory)));
-			}
-			else {
-				return flux.concatWith(Mono.just(generateLastLine(boundary, bufferFactory)));
-			}
-		});
+		Flux<Publisher<DataBuffer>> body = Flux.from(parts)
+				.<Publisher<DataBuffer>>map(part -> Flux.concat(
+						generateNewLine(bufferFactory),
+						part,
+						generateNewLine(bufferFactory),
+						generateBoundary(boundary, bufferFactory)))
+				.switchOnFirst((signal, flux) -> {
+					if (signal.hasValue()) {
+						return flux.startWith(Mono.just(generateBoundary(boundary, bufferFactory)))
+								.concatWith(Mono.just(generateLastLineSuffix(bufferFactory)));
+					}
+					else {
+						return flux.concatWith(Mono.just(generateLastLine(boundary, bufferFactory)));
+					}
+				});
 
 		return outputMessage.writeAndFlushWith(body.map(part -> {
 			Flux<DataBuffer> buffers = Flux.from(part)
