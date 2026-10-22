@@ -75,7 +75,7 @@ public class PartEventHttpMessageWriter extends MultipartWriterSupport implement
 			logger.debug(Hints.getLogPrefix(hints) + "Encoding Publisher<PartEvent>");
 		}
 
-		Flux<Publisher<DataBuffer>> body = Flux.from(partDataStream)
+		Flux<Publisher<DataBuffer>> parts = Flux.from(partDataStream)
 				.windowUntil(PartEvent::isLast)
 				.map(partData -> partData.switchOnFirst((signal, flux) -> {
 					if (signal.hasValue()) {
@@ -91,7 +91,7 @@ public class PartEventHttpMessageWriter extends MultipartWriterSupport implement
 					}
 				}));
 
-		return writeMultipart(body, boundary, outputMessage, hints);
+		return writeMultipart(parts, boundary, outputMessage, hints);
 	}
 
 }

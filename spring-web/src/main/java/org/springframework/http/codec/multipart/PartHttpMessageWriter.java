@@ -77,10 +77,10 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 			logger.debug(Hints.getLogPrefix(hints) + "Encoding Publisher<Part>");
 		}
 
-		Flux<Publisher<DataBuffer>> body = Flux.from(parts)
+		Flux<Publisher<DataBuffer>> encodedParts = Flux.from(parts)
 				.map(part -> Flux.defer(() -> encodePart(part, outputMessage.bufferFactory())));
 
-		return writeMultipart(body, boundary, outputMessage, hints);
+		return writeMultipart(encodedParts, boundary, outputMessage, hints);
 	}
 
 	private <T> Flux<DataBuffer> encodePart(Part part, DataBufferFactory bufferFactory) {
