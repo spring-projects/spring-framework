@@ -316,7 +316,8 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 
 		void method(MethodModel method) {
 			ClassFileMethodMetadata classFileMethodMetadata = ClassFileMethodMetadata.of(method, this.classLoader);
-			if (!classFileMethodMetadata.isSynthetic() && !classFileMethodMetadata.isDefaultConstructor()) {
+			if (!classFileMethodMetadata.isSynthetic() && !classFileMethodMetadata.isDefaultConstructor() &&
+					!classFileMethodMetadata.isStaticInitializer()) {
 				this.declaredMethods.add(classFileMethodMetadata);
 			}
 		}
