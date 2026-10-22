@@ -42,6 +42,7 @@ import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.util.Assert;
@@ -49,6 +50,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 
@@ -100,10 +102,16 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 				AbstractMockHttpServletRequestBuilder<?> servletRequestBuilder =
 						adaptRequest(getMethod(), getURI(), getHeaders(), getBodyAsBytes());
 
-				MockHttpServletResponse servletResponse = MockMvcClientHttpRequestFactory.this.mockMvc
+				MvcResult mvcResult = MockMvcClientHttpRequestFactory.this.mockMvc
 						.perform(servletRequestBuilder)
-						.andReturn()
-						.getResponse();
+						.andReturn();
+				if (mvcResult.getRequest().isAsyncStarted()) {
+					mvcResult.getAsyncResult();
+					mvcResult = MockMvcClientHttpRequestFactory.this.mockMvc
+							.perform(asyncDispatch(mvcResult))
+							.andReturn();
+				}
+				MockHttpServletResponse servletResponse = mvcResult.getResponse();
 
 				MockClientHttpResponse clientResponse = new MockClientHttpResponse(
 						getResponseBody(servletResponse),

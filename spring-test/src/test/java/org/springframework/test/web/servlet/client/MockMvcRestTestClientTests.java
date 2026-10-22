@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.client;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Callable;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -90,6 +91,24 @@ class MockMvcRestTestClientTests {
 				.isEqualTo("some really bad request");
 	}
 
+	@Test  // gh-37538
+	void withAsyncResult() {
+		client.get()
+				.uri("/async")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(String.class)
+				.isEqualTo("async result");
+	}
+
+	@Test  // gh-37538
+	void withAsyncError() {
+		client.get()
+				.uri("/async/error")
+				.exchange()
+				.expectStatus().is5xxServerError();
+	}
+
 	@Test
 	void retrieveMultipart() {
 		client.get()
@@ -147,6 +166,18 @@ class MockMvcRestTestClientTests {
 		void handleErrorWithBody(HttpServletResponse response) throws Exception {
 			response.sendError(400);
 			response.getWriter().write("some really bad request");
+		}
+
+		@GetMapping("/async")
+		Callable<String> handleAsync() {
+			return () -> "async result";
+		}
+
+		@GetMapping("/async/error")
+		Callable<String> handleAsyncError() {
+			return () -> {
+				throw new IllegalStateException("async failure");
+			};
 		}
 
 		@GetMapping(path = "/multipart", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
