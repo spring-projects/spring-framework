@@ -133,7 +133,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		return Flux.from(inputStream)
 				.flatMapIterable(decoderFunction)
-				.doOnTerminate(decoderFunction::discard);
+				.doFinally(signalType -> decoderFunction.discard());
 	}
 
 	/**
