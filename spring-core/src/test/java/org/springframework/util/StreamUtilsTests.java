@@ -16,8 +16,10 @@
 
 package org.springframework.util;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -118,6 +121,25 @@ class StreamUtilsTests {
 		StreamUtils.copyRange(in, out, 0, 8300);
 		assertThat(in.available()).isEqualTo(0);
 		assertThat(out.toByteArray()).isEqualTo(Arrays.copyOfRange(bytes, 0, 8202));
+	}
+
+	@Test
+	void copyRangeWithPartialSkip() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		// BufferedInputStream skips at most the bytes left in its buffer
+		BufferedInputStream in = new BufferedInputStream(new ByteArrayInputStream(bytes), 16);
+		in.read();
+		StreamUtils.copyRange(in, out, 100, 199);
+		assertThat(out.toByteArray()).isEqualTo(Arrays.copyOfRange(bytes, 101, 201));
+	}
+
+	@Test
+	void copyRangeStartBeyondAvailable() {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+		assertThatExceptionOfType(EOFException.class)
+				.isThrownBy(() -> StreamUtils.copyRange(in, out, bytes.length + 1, bytes.length + 10));
+		assertThat(out.size()).isZero();
 	}
 
 	@Test
