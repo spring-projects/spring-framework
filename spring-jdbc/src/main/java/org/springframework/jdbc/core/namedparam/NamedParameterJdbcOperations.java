@@ -309,7 +309,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 	 */
-	<T> @Nullable T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
+	<T extends @Nullable Object> @Nullable T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException;
 
 	/**
@@ -329,7 +329,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 */
-	<T> @Nullable T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
+	<T extends @Nullable Object> @Nullable T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException;
 
 	/**
@@ -382,7 +382,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String, Class)
 	 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 	 */
-	<T> List<@Nullable T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
+	<T extends @Nullable Object> List<@Nullable T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException;
 
 	/**
@@ -400,7 +400,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String, Class)
 	 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 	 */
-	<T> List<@Nullable T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
+	<T extends @Nullable Object> List<@Nullable T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
 			throws DataAccessException;
 
 	/**
