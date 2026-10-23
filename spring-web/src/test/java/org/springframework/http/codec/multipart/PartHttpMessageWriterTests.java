@@ -22,19 +22,29 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.codec.multipart.MultipartHttpMessageWriterTests.parse;
 
 /**
@@ -96,6 +106,63 @@ class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(part.name()).isEqualTo("file part");
 		assertThat(((FilePart) part).filename()).isEqualTo("file.txt");
 		assertThat(decodeToString(part)).isEqualTo("AaBbCc");
+	}
+
+	@Test
+	void flushCompletedPartBeforeNextPartAndStreamCompletion() {
+		ReactiveHttpOutputMessage outputMessage = mock();
+		HttpHeaders outputHeaders = new HttpHeaders();
+		ArgumentCaptor<Publisher<? extends Publisher<? extends DataBuffer>>> bodyCaptor = ArgumentCaptor.captor();
+		when(outputMessage.getHeaders()).thenReturn(outputHeaders);
+		when(outputMessage.bufferFactory()).thenReturn(this.bufferFactory);
+		when(outputMessage.writeAndFlushWith(bodyCaptor.capture())).thenReturn(Mono.empty());
+
+		Sinks.Many<Part> parts = Sinks.many().unicast().onBackpressureBuffer();
+		Sinks.Many<String> firstBody = Sinks.many().unicast().onBackpressureBuffer();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentDispositionFormData("part", null);
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		Part firstPart = DefaultParts.part(headers, firstBody.asFlux()
+				.map(value -> this.bufferFactory.wrap(value.getBytes(StandardCharsets.UTF_8))));
+		Part secondPart = DefaultParts.formFieldPart(headers, "second");
+
+		this.writer.write(parts.asFlux(), ResolvableType.forClass(Part.class),
+				MediaType.MULTIPART_FORM_DATA, outputMessage, Map.of()).block(Duration.ofSeconds(5));
+
+		Flux<DataBuffer> flushedBody = Flux.from(bodyCaptor.getValue()).concatMap(DataBufferUtils::join);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(outputHeaders.getContentType()).body(flushedBody);
+		Flux<String> values = new DefaultPartHttpMessageReader()
+				.read(ResolvableType.forClass(Part.class), request, Map.of())
+				.cast(FormFieldPart.class).map(FormFieldPart::value);
+		StepVerifier.create(values)
+				.then(() -> assertThat(parts.tryEmitNext(firstPart)).isEqualTo(Sinks.EmitResult.OK))
+				.then(() -> assertThat(firstBody.tryEmitNext("first")).isEqualTo(Sinks.EmitResult.OK))
+				.then(() -> assertThat(firstBody.tryEmitNext("part")).isEqualTo(Sinks.EmitResult.OK))
+				.then(() -> assertThat(firstBody.tryEmitComplete()).isEqualTo(Sinks.EmitResult.OK))
+				.expectNext("firstpart")
+				.then(() -> assertThat(parts.tryEmitNext(secondPart)).isEqualTo(Sinks.EmitResult.OK))
+				.expectNext("second")
+				.then(() -> assertThat(parts.tryEmitComplete()).isEqualTo(Sinks.EmitResult.OK))
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	void emptyPart() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentDispositionFormData("part", null);
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		Part part = DefaultParts.part(headers, Flux.empty());
+
+		this.writer.write(Mono.just(part), ResolvableType.forClass(Part.class),
+				MediaType.MULTIPART_FORM_DATA, this.response, Map.of()).block(Duration.ofSeconds(5));
+
+		MultiValueMap<String, Part> parts = parse(this.response, Map.of());
+		assertThat(parts).hasSize(1);
+		Part parsedPart = parts.getFirst("part");
+		assertThat(parsedPart).isInstanceOf(FormFieldPart.class);
+		assertThat(((FormFieldPart) parsedPart).value()).isEmpty();
 	}
 
 	@SuppressWarnings("ConstantConditions")

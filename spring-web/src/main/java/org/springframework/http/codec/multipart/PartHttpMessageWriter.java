@@ -27,7 +27,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -78,19 +77,13 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 			logger.debug(Hints.getLogPrefix(hints) + "Encoding Publisher<Part>");
 		}
 
-		Flux<DataBuffer> body = Flux.from(parts)
-				.concatMap(part -> encodePart(boundary, part, outputMessage.bufferFactory()))
-				.concatWith(generateLastLine(boundary, outputMessage.bufferFactory()))
-				.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+		Flux<Publisher<DataBuffer>> encodedParts = Flux.from(parts)
+				.map(part -> Flux.defer(() -> encodePart(part, outputMessage.bufferFactory())));
 
-		if (logger.isDebugEnabled()) {
-			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
-		}
-
-		return outputMessage.writeWith(body);
+		return writeMultipart(encodedParts, boundary, outputMessage, hints);
 	}
 
-	private <T> Flux<DataBuffer> encodePart(byte[] boundary, Part part, DataBufferFactory bufferFactory) {
+	private <T> Flux<DataBuffer> encodePart(Part part, DataBufferFactory bufferFactory) {
 		HttpHeaders headers = new HttpHeaders(part.headers());
 
 		String name = part.name();
@@ -99,11 +92,7 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 					(part instanceof FilePart filePart ? filePart.filename() : null));
 		}
 
-		return Flux.concat(
-				generateBoundaryLine(boundary, bufferFactory),
-				generatePartHeaders(headers, bufferFactory),
-				part.content(),
-				generateNewLine(bufferFactory));
+		return generatePartHeaders(headers, bufferFactory).concatWith(part.content());
 	}
 
 }
