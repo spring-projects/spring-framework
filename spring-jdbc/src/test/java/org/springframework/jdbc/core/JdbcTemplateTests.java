@@ -71,6 +71,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Mock object based tests for JdbcTemplate.
@@ -435,6 +436,19 @@ class JdbcTemplateTests {
 		catch (UncategorizedSQLException ex) {
 			assertThat(ex.getSql()).isEqualTo("B; D");
 		}
+	}
+
+	@Test
+	void batchUpdateWithBatchFailureAndPartialUpdateCounts() throws Exception {
+		final String[] sql = {"A", "B", "C", "D"};
+		when(this.statement.executeBatch()).thenThrow(new BatchUpdateException(new int[] {1}));
+		mockDatabaseMetaData(true);
+		when(this.connection.createStatement()).thenReturn(this.statement);
+
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
+		assertThatExceptionOfType(UncategorizedSQLException.class)
+				.isThrownBy(() -> template.batchUpdate(sql))
+				.satisfies(ex -> assertThat(ex.getSql()).isEqualTo("A; B; C; D"));
 	}
 
 	@Test
