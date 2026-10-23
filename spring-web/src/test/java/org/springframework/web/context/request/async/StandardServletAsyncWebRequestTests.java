@@ -29,6 +29,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -153,6 +154,29 @@ class StandardServletAsyncWebRequestTests {
 
 			verify(handler).run();
 			assertThat(asyncRequest.isAsyncComplete()).isTrue();
+		}
+
+		@Test
+		void completionStateAvailableToHandlers() throws Exception {
+			asyncRequest.addCompletionHandler(() -> assertThat(asyncRequest.isAsyncComplete()).isTrue());
+
+			asyncRequest.startAsync();
+			asyncRequest.onComplete(new AsyncEvent(request.getAsyncContext()));
+		}
+
+		@Test
+		void completionStateRetainedWhenHandlerFails() {
+			IllegalStateException ex = new IllegalStateException("Completion handler failed");
+			asyncRequest.addCompletionHandler(() -> {
+				throw ex;
+			});
+			asyncRequest.startAsync();
+
+			assertThatThrownBy(() -> asyncRequest.onComplete(new AsyncEvent(request.getAsyncContext())))
+					.isSameAs(ex);
+
+			assertThat(asyncRequest.isAsyncComplete()).isTrue();
+			assertThat(asyncRequest.isAsyncStarted()).isFalse();
 		}
 	}
 
