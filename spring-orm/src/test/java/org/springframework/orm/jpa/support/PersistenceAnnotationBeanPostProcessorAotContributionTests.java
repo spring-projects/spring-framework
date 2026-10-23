@@ -83,6 +83,15 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 	}
 
 	@Test
+	void processAheadOfTimeWhenBeanDefinitionHasBeenPostProcessed() {
+		RegisteredBean registeredBean = registerBean(DefaultPersistenceUnitField.class);
+		PersistenceAnnotationBeanPostProcessor postProcessor = new PersistenceAnnotationBeanPostProcessor();
+		postProcessor.postProcessMergedBeanDefinition(registeredBean.getMergedBeanDefinition(),
+				DefaultPersistenceUnitField.class, registeredBean.getBeanName());
+		assertThat(postProcessor.processAheadOfTime(registeredBean)).isNotNull();
+	}
+
+	@Test
 	void processAheadOfTimeWhenPersistenceUnitOnPublicField() {
 		RegisteredBean registeredBean = registerBean(DefaultPersistenceUnitField.class);
 		testCompile(registeredBean, (actual, compiled) -> {
