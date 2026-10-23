@@ -118,8 +118,8 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 	public @Nullable MethodVisitor visitMethod(
 			int access, String name, String descriptor, String signature, String[] exceptions) {
 
-		// Skip bridge methods and constructors - we're only interested in original user methods.
-		if (isBridge(access) || name.equals("<init>")) {
+		// Skip bridge methods, constructors and static initializers - only original user methods.
+		if (isBridge(access) || name.equals("<init>") || name.equals("<clinit>")) {
 			return null;
 		}
 		return new SimpleMethodMetadataReadingVisitor(this.classLoader, this.className,
