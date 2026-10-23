@@ -55,6 +55,7 @@ class BitsCronFieldTests {
 		assertThat(BitsCronField.parseDaysOfWeek("0")).has(set(7, 7)).has(clearRange(0, 6));
 		assertThat(BitsCronField.parseDaysOfWeek("7-5")).has(clear(0)).has(setRange(1, 5))
 				.has(clear(6)).has(set(7));
+		assertThat(BitsCronField.parseDaysOfWeek("7-7")).has(clearRange(0, 6)).has(set(7));
 	}
 
 	@Test
