@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -47,6 +48,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -65,6 +67,17 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 			"jakarta.validation.Validation", BeanValidationBeanRegistrationAotProcessor.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(BeanValidationBeanRegistrationAotProcessor.class);
+
+	/**
+	 * Annotation types that trigger injection on {@link ConstraintValidator} instances
+	 * created by {@link SpringConstraintValidatorFactory}.
+	 */
+	private static final String[] INJECTION_ANNOTATION_TYPES = {
+			"org.springframework.beans.factory.annotation.Autowired",
+			"org.springframework.beans.factory.annotation.Value",
+			"jakarta.inject.Inject",
+			"jakarta.annotation.Resource"
+	};
 
 
 	@Override
@@ -237,7 +250,25 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 			}
 			for (Class<? extends ConstraintValidator<?, ?>> constraintValidatorClass : this.constraintValidatorClasses) {
 				hints.registerType(constraintValidatorClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				registerInjectionHints(hints, constraintValidatorClass);
 			}
+		}
+
+		private static void registerInjectionHints(ReflectionHints hints, Class<?> validatorClass) {
+			ReflectionUtils.doWithFields(validatorClass, hints::registerField,
+					field -> isInjectionPoint(MergedAnnotations.from(field)));
+			ReflectionUtils.doWithMethods(validatorClass,
+					method -> hints.registerMethod(method, ExecutableMode.INVOKE),
+					method -> isInjectionPoint(MergedAnnotations.from(method)));
+		}
+
+		private static boolean isInjectionPoint(MergedAnnotations annotations) {
+			for (String annotationType : INJECTION_ANNOTATION_TYPES) {
+				if (annotations.isPresent(annotationType)) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
