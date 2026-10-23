@@ -131,6 +131,9 @@ class CompositeMapTests {
 		assertThat(composite.containsKey("foo")).isFalse();
 		assertThat(first).containsExactly(entry("baz", "qux"));
 
+		assertThat(composite.remove("quux")).isEqualTo("corge");
+		assertThat(second).isEmpty();
+
 		assertThat(composite.remove("grault")).isNull();
 	}
 
@@ -359,6 +362,20 @@ class CompositeMapTests {
 			assertThat(composite.containsKey("baz")).isFalse();
 			assertThat(first).containsExactly(entry("foo", "bar"));
 			assertThat(second).containsExactly(entry("corge", "grault"));
+		}
+
+		@Test
+		void removeWithNullValue() {
+			Map<String, @Nullable String> first = new HashMap<>();
+			first.put("baz", null);
+			Map<String, @Nullable String> second = new HashMap<>(Map.of("baz", "quux"));
+			CompositeMap<String, @Nullable String> composite = new CompositeMap<>(first, second);
+
+			assertThat(composite).containsExactly(entry("baz", null));
+			assertThat(composite.remove("baz")).isNull();
+			assertThat(composite).isEmpty();
+			assertThat(first).isEmpty();
+			assertThat(second).isEmpty();
 		}
 
 		@Test
