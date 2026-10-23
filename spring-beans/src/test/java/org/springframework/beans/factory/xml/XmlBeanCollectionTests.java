@@ -120,7 +120,7 @@ class XmlBeanCollectionTests {
 		// Our bean doesn't modify the collection:
 		// of course it could be a different copy in a real object.
 		Object[] friends = rod.getFriends().toArray();
-		assertThat(friends.length).isEqualTo(2);
+		assertThat(friends).hasSize(2);
 
 		assertThat(friends[0]).as("First friend must be jen, not " + friends[0]).isSameAs(jen);
 		assertThat(friends[1]).isSameAs(dave);
@@ -134,7 +134,7 @@ class XmlBeanCollectionTests {
 		TestBean rod = (TestBean) this.beanFactory.getBean("pRod");
 
 		Object[] friends = rod.getFriends().toArray();
-		assertThat(friends.length).isEqualTo(2);
+		assertThat(friends).hasSize(2);
 		assertThat(friends[0].toString()).as("First friend must be jen, not " + friends[0]).isEqualTo(jen.toString());
 		assertThat(friends[0]).as("Jen not same instance").isNotSameAs(jen);
 		assertThat(friends[1].toString()).isEqualTo(dave.toString());
@@ -143,7 +143,7 @@ class XmlBeanCollectionTests {
 
 		TestBean rod2 = (TestBean) this.beanFactory.getBean("pRod");
 		Object[] friends2 = rod2.getFriends().toArray();
-		assertThat(friends2.length).isEqualTo(2);
+		assertThat(friends2).hasSize(2);
 		assertThat(friends2[0].toString()).as("First friend must be jen, not " + friends2[0]).isEqualTo(jen.toString());
 		assertThat(friends2[0]).as("Jen not same instance").isNotSameAs(friends[0]);
 		assertThat(friends2[1].toString()).isEqualTo(dave.toString());
@@ -318,7 +318,7 @@ class XmlBeanCollectionTests {
 	@Test
 	void objectArray() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("objectArray");
-		assertThat(hasMap.getObjectArray().length).isEqualTo(2);
+		assertThat(hasMap.getObjectArray()).hasSize(2);
 		assertThat(hasMap.getObjectArray()[0]).isEqualTo("one");
 		assertThat(hasMap.getObjectArray()[1]).isEqualTo(this.beanFactory.getBean("jenny"));
 	}
@@ -326,7 +326,7 @@ class XmlBeanCollectionTests {
 	@Test
 	void integerArray() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("integerArray");
-		assertThat(hasMap.getIntegerArray().length).isEqualTo(3);
+		assertThat(hasMap.getIntegerArray()).hasSize(3);
 		assertThat(hasMap.getIntegerArray()[0]).isEqualTo(0);
 		assertThat(hasMap.getIntegerArray()[1]).isEqualTo(1);
 		assertThat(hasMap.getIntegerArray()[2]).isEqualTo(2);
@@ -335,7 +335,7 @@ class XmlBeanCollectionTests {
 	@Test
 	void classArray() {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("classArray");
-		assertThat(hasMap.getClassArray().length).isEqualTo(2);
+		assertThat(hasMap.getClassArray()).hasSize(2);
 		assertThat(hasMap.getClassArray()[0]).isEqualTo(String.class);
 		assertThat(hasMap.getClassArray()[1]).isEqualTo(Exception.class);
 	}

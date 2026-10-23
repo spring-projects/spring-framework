@@ -156,12 +156,12 @@ class ServletRequestDataBinderTests {
 		request.addParameter("stringArray", "abc");
 		request.addParameter("stringArray", "123,def");
 		binder.bind(request);
-		assertThat(target.getStringArray().length).as("Expected all three items to be bound").isEqualTo(3);
+		assertThat(target.getStringArray()).as("Expected all three items to be bound").hasSize(3);
 
 		request.removeParameter("stringArray");
 		request.addParameter("stringArray", "123,def");
 		binder.bind(request);
-		assertThat(target.getStringArray().length).as("Expected only 1 item to be bound").isEqualTo(1);
+		assertThat(target.getStringArray()).as("Expected only 1 item to be bound").hasSize(1);
 	}
 
 	@Test
@@ -215,7 +215,7 @@ class ServletRequestDataBinderTests {
 	void noParameters() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertThat(pvs.getPropertyValues().length).as("Found no parameters").isEqualTo(0);
+		assertThat(pvs.getPropertyValues()).as("Found no parameters").isEmpty();
 	}
 
 	@Test
@@ -225,7 +225,7 @@ class ServletRequestDataBinderTests {
 		request.addParameter("forname", original);
 
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertThat(pvs.getPropertyValues().length).as("Found 1 parameter").isEqualTo(1);
+		assertThat(pvs.getPropertyValues()).as("Found 1 parameter").hasSize(1);
 		assertThat(pvs.getPropertyValue("forname").getValue()).as("Found array value").isInstanceOf(String[].class);
 		String[] values = (String[]) pvs.getPropertyValue("forname").getValue();
 		assertThat(Arrays.asList(original)).as("Correct values").isEqualTo(Arrays.asList(values));
@@ -235,7 +235,7 @@ class ServletRequestDataBinderTests {
 	 * Must contain: forname=Tony surname=Blair age=50
 	 */
 	protected void doTestTony(PropertyValues pvs) {
-		assertThat(pvs.getPropertyValues().length).as("Contains 3").isEqualTo(3);
+		assertThat(pvs.getPropertyValues()).as("Contains 3").hasSize(3);
 		assertThat(pvs.contains("forname")).as("Contains forname").isTrue();
 		assertThat(pvs.contains("surname")).as("Contains surname").isTrue();
 		assertThat(pvs.contains("age")).as("Contains age").isTrue();

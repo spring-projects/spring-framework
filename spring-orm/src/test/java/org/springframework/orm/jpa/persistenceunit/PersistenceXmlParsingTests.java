@@ -287,8 +287,7 @@ class PersistenceXmlParsingTests {
 		String resource = "/org/springframework/orm/jpa/persistence-exclude-1.0.xml";
 		SpringPersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 
-		assertThat(info).isNotNull();
-		assertThat(info.length).as("The number of persistence units is incorrect.").isEqualTo(4);
+		assertThat(info).as("The number of persistence units is incorrect.").hasSize(4);
 
 		SpringPersistenceUnitInfo noExclude = info[0];
 		assertThat(noExclude).as("noExclude should not be null.").isNotNull();
@@ -318,8 +317,7 @@ class PersistenceXmlParsingTests {
 		String resource = "/org/springframework/orm/jpa/persistence-exclude-2.0.xml";
 		SpringPersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 
-		assertThat(info).isNotNull();
-		assertThat(info.length).as("The number of persistence units is incorrect.").isEqualTo(4);
+		assertThat(info).as("The number of persistence units is incorrect.").hasSize(4);
 
 		SpringPersistenceUnitInfo noExclude = info[0];
 		assertThat(noExclude).as("noExclude should not be null.").isNotNull();

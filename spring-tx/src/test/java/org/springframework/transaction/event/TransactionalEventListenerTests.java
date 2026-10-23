@@ -492,9 +492,9 @@ class TransactionalEventListenerTests {
 
 		public void assertEvents(String phase, Object... expected) {
 			List<Object> actual = getEvents(phase);
-			assertThat(actual.size()).as("wrong number of events for phase '" + phase + "'").isEqualTo(expected.length);
+			assertThat(actual).as("wrong number of events for phase '" + phase + "'").hasSize(expected.length);
 			for (int i = 0; i < expected.length; i++) {
-				assertThat(actual.get(i)).as("Wrong event for phase '" + phase + "' at index " + i).isEqualTo(expected[i]);
+				assertThat(actual).element(i).as("Wrong event for phase '" + phase + "' at index " + i).isEqualTo(expected[i]);
 			}
 		}
 
