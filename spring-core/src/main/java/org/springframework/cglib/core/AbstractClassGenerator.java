@@ -343,25 +343,35 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 						getClassName() + ". It seems that the loader has been expired from a weak reference somehow. " +
 						"Please file an issue at cglib's issue tracker.");
 			}
+			// SPRING PATCH BEGIN
 			synchronized (classLoader) {
-				String name = generateClassName(data.getUniqueNamePredicate());
+				Predicate reservedNames = data.getUniqueNamePredicate();
+				Set<String> incompatibleNames = new HashSet<>();
+				Predicate namePredicate = (candidate -> reservedNames.evaluate(candidate) || incompatibleNames.contains(candidate));
+				String name = generateClassName(namePredicate);
+				if (attemptLoad) {
+					// Pre-generated classes may have been named in a different order than
+					// the one in which they are requested at runtime: skip any candidate that
+					// does not match the configuration of this generator.
+					while (true) {
+						try {
+							gen = ReflectUtils.loadClass(name, classLoader);
+						}
+						catch (ClassNotFoundException ex) {
+							break;
+						}
+						if (isCompatible(gen)) {
+							data.reserveName(name);
+							this.setClassName(name);
+							return gen;
+						}
+						incompatibleNames.add(name);
+						name = generateClassName(namePredicate);
+					}
+				}
 				data.reserveName(name);
 				this.setClassName(name);
 			}
-			if (attemptLoad) {
-				try {
-					// SPRING PATCH BEGIN
-					synchronized (classLoader) { // just in case
-						gen = ReflectUtils.loadClass(getClassName(), classLoader);
-					}
-					// SPRING PATCH END
-					return gen;
-				}
-				catch (ClassNotFoundException e) {
-					// ignore
-				}
-			}
-			// SPRING PATCH BEGIN
 			if (inNativeImage) {
 				throw new UnsupportedOperationException("CGLIB runtime enhancement not supported on native image. " +
 						"Make sure to enable Spring AOT processing to pre-generate '" + getClassName() + "' at build time.");
@@ -387,6 +397,22 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 			CURRENT.set(save);
 		}
 	}
+
+	// SPRING PATCH BEGIN
+	/**
+	 * Determine whether the specified class, loaded rather than generated
+	 * as part of {@link #setAttemptLoad(boolean) attemptLoad}, is compatible
+	 * with the current configuration of this generator.
+	 * <p>The default implementation returns {@code true}.
+	 * @param type the loaded class
+	 * @return {@code true} if the class can be used, {@code false} to try the
+	 * next available class name instead
+	 * @since 7.1
+	 */
+	protected boolean isCompatible(Class type) {
+		return true;
+	}
+	// SPRING PATCH END
 
 	abstract protected Object firstInstance(Class type) throws Exception;
 

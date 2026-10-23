@@ -575,6 +575,30 @@ public class Enhancer extends AbstractClassGenerator {
 		return super.generate(data);
 	}
 
+	// SPRING PATCH BEGIN
+	@Override
+	protected boolean isCompatible(Class type) {
+		// Detect a pre-generated class with a different callback layout,
+		// see https://github.com/spring-projects/spring-framework/issues/30985
+		if (callbackTypes == null) {
+			return true;
+		}
+		// getDeclaredFields() only exposes the fields that are available: on a native
+		// image without reflection hints, none of them are and the class is kept as is
+		Map<String, Class> fieldTypes = new HashMap<>();
+		for (Field field : type.getDeclaredFields()) {
+			fieldTypes.put(field.getName(), field.getType());
+		}
+		for (int i = 0; i < callbackTypes.length; i++) {
+			Class fieldType = fieldTypes.get(getCallbackField(i));
+			if (fieldType != null && !Type.getType(fieldType).equals(callbackTypes[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+	// SPRING PATCH END
+
 	@Override
 	protected ClassLoader getDefaultClassLoader() {
 		if (superclass != null) {
