@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -42,6 +43,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Stas Volsky
+ * @author Seonghun Lee
  * @since 3.2
  * @see TransactionAwareCacheManagerProxy
  */
@@ -49,14 +51,34 @@ public class TransactionAwareCacheDecorator implements Cache {
 
 	private final Cache targetCache;
 
+	private final @Nullable CacheErrorHandler errorHandler;
+
 
 	/**
 	 * Create a new TransactionAwareCache for the given target Cache.
 	 * @param targetCache the target Cache to decorate
 	 */
 	public TransactionAwareCacheDecorator(Cache targetCache) {
+		this(targetCache, null);
+	}
+
+	/**
+	 * Create a new TransactionAwareCache for the given target Cache, using the
+	 * given {@link CacheErrorHandler} for {@link #put}, {@link #evict} and
+	 * {@link #clear} failures in the after-commit phase of a transaction.
+	 * <p>Without an error handler, such failures are propagated to the caller
+	 * of the transaction commit, bypassing any error handler configured at the
+	 * cache interception level, since the deferred operation runs outside the
+	 * intercepted cache invocation.
+	 * @param targetCache the target Cache to decorate
+	 * @param errorHandler the error handler to invoke for cache operation
+	 * failures in the after-commit phase (may be {@code null} to propagate them)
+	 * @since 7.1
+	 */
+	public TransactionAwareCacheDecorator(Cache targetCache, @Nullable CacheErrorHandler errorHandler) {
 		Assert.notNull(targetCache, "Target Cache must not be null");
 		this.targetCache = targetCache;
+		this.errorHandler = errorHandler;
 	}
 
 
@@ -108,7 +130,16 @@ public class TransactionAwareCacheDecorator implements Cache {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
-					TransactionAwareCacheDecorator.this.targetCache.put(key, value);
+					try {
+						TransactionAwareCacheDecorator.this.targetCache.put(key, value);
+					}
+					catch (RuntimeException ex) {
+						if (TransactionAwareCacheDecorator.this.errorHandler == null) {
+							throw ex;
+						}
+						TransactionAwareCacheDecorator.this.errorHandler.handleCachePutError(
+								ex, TransactionAwareCacheDecorator.this.targetCache, key, value);
+					}
 				}
 			});
 		}
@@ -128,7 +159,16 @@ public class TransactionAwareCacheDecorator implements Cache {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
-					TransactionAwareCacheDecorator.this.targetCache.evict(key);
+					try {
+						TransactionAwareCacheDecorator.this.targetCache.evict(key);
+					}
+					catch (RuntimeException ex) {
+						if (TransactionAwareCacheDecorator.this.errorHandler == null) {
+							throw ex;
+						}
+						TransactionAwareCacheDecorator.this.errorHandler.handleCacheEvictError(
+								ex, TransactionAwareCacheDecorator.this.targetCache, key);
+					}
 				}
 			});
 		}
@@ -148,7 +188,16 @@ public class TransactionAwareCacheDecorator implements Cache {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
-					targetCache.clear();
+					try {
+						TransactionAwareCacheDecorator.this.targetCache.clear();
+					}
+					catch (RuntimeException ex) {
+						if (TransactionAwareCacheDecorator.this.errorHandler == null) {
+							throw ex;
+						}
+						TransactionAwareCacheDecorator.this.errorHandler.handleCacheClearError(
+								ex, TransactionAwareCacheDecorator.this.targetCache);
+					}
 				}
 			});
 		}

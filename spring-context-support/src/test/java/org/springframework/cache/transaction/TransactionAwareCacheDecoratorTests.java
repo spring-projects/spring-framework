@@ -16,19 +16,26 @@
 
 package org.springframework.cache.transaction;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Seonghun Lee
  */
 class TransactionAwareCacheDecoratorTests {
 
@@ -219,6 +226,102 @@ class TransactionAwareCacheDecoratorTests {
 		});
 
 		assertThat(target.get(key)).isNull();
+	}
+
+	@Test  // gh-28554
+	void putTransactionalWithFailureAndErrorHandler() {
+		Cache target = new FailingCache("testCache");
+		CollectingCacheErrorHandler errorHandler = new CollectingCacheErrorHandler();
+		Cache cache = new TransactionAwareCacheDecorator(target, errorHandler);
+		Object key = new Object();
+
+		txTemplate.executeWithoutResult(s -> cache.put(key, "123"));
+
+		assertThat(errorHandler.handled).singleElement().isInstanceOf(SimulatedFailure.class);
+	}
+
+	@Test  // gh-28554
+	void evictTransactionalWithFailureAndErrorHandler() {
+		Cache target = new FailingCache("testCache");
+		CollectingCacheErrorHandler errorHandler = new CollectingCacheErrorHandler();
+		Cache cache = new TransactionAwareCacheDecorator(target, errorHandler);
+
+		txTemplate.executeWithoutResult(s -> cache.evict(new Object()));
+
+		assertThat(errorHandler.handled).singleElement().isInstanceOf(SimulatedFailure.class);
+	}
+
+	@Test  // gh-28554
+	void clearTransactionalWithFailureAndErrorHandler() {
+		Cache target = new FailingCache("testCache");
+		CollectingCacheErrorHandler errorHandler = new CollectingCacheErrorHandler();
+		Cache cache = new TransactionAwareCacheDecorator(target, errorHandler);
+
+		txTemplate.executeWithoutResult(s -> cache.clear());
+
+		assertThat(errorHandler.handled).singleElement().isInstanceOf(SimulatedFailure.class);
+	}
+
+	@Test  // gh-28554
+	void putTransactionalWithFailureAndNoErrorHandler() {
+		Cache target = new FailingCache("testCache");
+		Cache cache = new TransactionAwareCacheDecorator(target);
+		Object key = new Object();
+
+		assertThatExceptionOfType(SimulatedFailure.class)
+				.isThrownBy(() -> txTemplate.executeWithoutResult(s -> cache.put(key, "123")));
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class SimulatedFailure extends RuntimeException {
+	}
+
+	private static class FailingCache extends ConcurrentMapCache {
+
+		FailingCache(String name) {
+			super(name);
+		}
+
+		@Override
+		public void put(Object key, @Nullable Object value) {
+			throw new SimulatedFailure();
+		}
+
+		@Override
+		public void evict(Object key) {
+			throw new SimulatedFailure();
+		}
+
+		@Override
+		public void clear() {
+			throw new SimulatedFailure();
+		}
+	}
+
+	private static class CollectingCacheErrorHandler implements CacheErrorHandler {
+
+		final List<RuntimeException> handled = new ArrayList<>();
+
+		@Override
+		public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
+			this.handled.add(exception);
+		}
+
+		@Override
+		public void handleCachePutError(RuntimeException exception, Cache cache, Object key, @Nullable Object value) {
+			this.handled.add(exception);
+		}
+
+		@Override
+		public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
+			this.handled.add(exception);
+		}
+
+		@Override
+		public void handleCacheClearError(RuntimeException exception, Cache cache) {
+			this.handled.add(exception);
+		}
 	}
 
 }
