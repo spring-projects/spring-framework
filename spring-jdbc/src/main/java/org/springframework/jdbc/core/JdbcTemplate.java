@@ -268,6 +268,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * that might return a large number of matches).
 	 * <p>Default is -1, indicating to use the JDBC driver's default configuration
 	 * (i.e. to not pass a specific max rows setting on to the driver).
+	 * A value of 0 indicates no limit, overriding a non-zero driver default.
 	 * <p>Note: As of 4.3, negative values other than -1 will get passed on to the
 	 * driver, in sync with {@link #setFetchSize}'s support for special MySQL values.
 	 * @see java.sql.Statement#setMaxRows
@@ -1761,7 +1762,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		@Override
 		public @Nullable Object extractData(ResultSet rs) throws SQLException {
 			int processed = 0;
-			while (rs.next() && (this.maxRows == -1 || (processed++) < this.maxRows)) {
+			while (rs.next() && (this.maxRows <= 0 || (processed++) < this.maxRows)) {
 				this.rch.processRow(rs);
 			}
 			return null;
@@ -1792,7 +1793,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		@Override
 		public boolean tryAdvance(Consumer<? super T> action) {
 			try {
-				if (this.rs.next() && (this.maxRows == -1 || this.rowNum < this.maxRows)) {
+				if (this.rs.next() && (this.maxRows <= 0 || this.rowNum < this.maxRows)) {
 					action.accept(this.rowMapper.mapRow(this.rs, this.rowNum++));
 					return true;
 				}
