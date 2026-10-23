@@ -41,7 +41,7 @@ public class MockFilterRegistration implements FilterRegistration.Dynamic {
 
 	private final String name;
 
-	private final String className;
+	private final @Nullable String className;
 
 	private final Map<String, String> initParameters = new LinkedHashMap<>();
 
@@ -52,11 +52,11 @@ public class MockFilterRegistration implements FilterRegistration.Dynamic {
 	private boolean asyncSupported;
 
 
-	public MockFilterRegistration(String className) {
+	public MockFilterRegistration(@Nullable String className) {
 		this(className, "");
 	}
 
-	public MockFilterRegistration(String className, String name) {
+	public MockFilterRegistration(@Nullable String className, String name) {
 		this.name = name;
 		this.className = className;
 	}
