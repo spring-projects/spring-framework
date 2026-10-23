@@ -202,8 +202,12 @@ public final class BridgeMethodResolver {
 	private static boolean checkResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> clazz) {
 		// First, compare return type.
 		ResolvableType genericReturnType = ResolvableType.forMethodReturnType(genericMethod, clazz);
+		// Kotlin suspending functions expose Object as their JVM return type, so compare their logical return types.
+		Class<?> candidateReturnType = (KotlinDetector.isSuspendingFunction(genericMethod) &&
+				KotlinDetector.isSuspendingFunction(candidateMethod) ?
+				ResolvableType.forMethodReturnType(candidateMethod, clazz).toClass() : candidateMethod.getReturnType());
 		if (!ClassUtils.resolvePrimitiveIfNecessary(genericReturnType.toClass()).isAssignableFrom(
-				ClassUtils.resolvePrimitiveIfNecessary(candidateMethod.getReturnType()))) {
+				ClassUtils.resolvePrimitiveIfNecessary(candidateReturnType))) {
 			return false;
 		}
 		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
