@@ -24,6 +24,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -184,6 +185,25 @@ class TypeMappedAnnotationTests {
 				ClassAttributes.class, Map.of("classValue", sourceClass.getName()));
 
 		assertThat(annotation.getClass("classValue").getClassLoader()).isSameAs(classLoader);
+	}
+
+	@Test
+	void adaptFromStringToClassInMetaAnnotationUsesRootClassLoader() throws Exception {
+		OverridingClassLoader classLoader = new OverridingClassLoader(getClass().getClassLoader()) {
+			@Override
+			protected boolean isEligibleForOverriding(String className) {
+				return ClassAttributes.class.getName().equals(className);
+			}
+		};
+		Class<?> attributeClass = classLoader.loadClass(ClassAttributes.class.getName());
+
+		MergedAnnotation<?> root = TypeMappedAnnotation.of(classLoader, null,
+				ClassAliasToMetaAnnotation.class, Map.of("classValue", attributeClass.getName()));
+		MergedAnnotation<ClassAttributes> meta =
+				MergedAnnotations.of(List.of(root)).get(ClassAttributes.class);
+
+		assertThat(root.getClass("classValue").getClassLoader()).isSameAs(classLoader);
+		assertThat(meta.getClass("classValue").getClassLoader()).isSameAs(classLoader);
 	}
 
 	@Test
@@ -446,6 +466,14 @@ class TypeMappedAnnotationTests {
 		Class<?> classValue();
 
 		Class<?>[] classArrayValue();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ClassAttributes(classValue = Object.class, classArrayValue = {})
+	@interface ClassAliasToMetaAnnotation {
+
+		@AliasFor(annotation = ClassAttributes.class)
+		Class<?> classValue();
 	}
 
 }
