@@ -867,6 +867,24 @@ public class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * Convenience method that will {@link #getGeneric(int...) get} and
+	 * {@link #resolve() resolve} a specific generic parameter.
+	 * @param indexes the indexes that refer to the generic parameter
+	 * (can be omitted to return the first generic)
+	 * @return a resolved {@link Class}
+	 * @throws IllegalStateException if no generic was available
+	 * @see #resolveGeneric(int...)
+	 * @see #getGeneric(int...)
+	 * @see #resolve()
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Class<T> resolveRequiredGeneric(int... indexes) {
+		Class<?> generic = getGeneric(indexes).resolve();
+		Assert.state(generic != null, "The generic must not be null");
+		return (Class<T>) generic;
+	}
+
+	/**
 	 * Resolve this type to a {@link java.lang.Class}, returning {@code null}
 	 * if the type cannot be resolved. This method will consider bounds of
 	 * {@link TypeVariable TypeVariables} and {@link WildcardType WildcardTypes} if
