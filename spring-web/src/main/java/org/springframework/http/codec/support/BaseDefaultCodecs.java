@@ -79,6 +79,7 @@ import org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncode
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
+import org.springframework.http.codec.protobuf.ProtobufJsonDecoder;
 import org.springframework.http.codec.smile.JacksonSmileDecoder;
 import org.springframework.http.codec.smile.JacksonSmileEncoder;
 import org.springframework.http.codec.xml.JacksonXmlDecoder;
@@ -117,6 +118,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 	private static final boolean PROTOBUF_PRESENT;
 
+	private static final boolean PROTOBUF_JSON_PRESENT;
+
 	static final boolean NETTY_BYTE_BUF_PRESENT;
 
 	static final boolean KOTLIN_SERIALIZATION_CBOR_PRESENT;
@@ -138,6 +141,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		JACKSON_XML_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
 		JAXB_2_PRESENT = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		PROTOBUF_PRESENT = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
+		PROTOBUF_JSON_PRESENT = PROTOBUF_PRESENT && ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", classLoader);
 		NETTY_BYTE_BUF_PRESENT = ClassUtils.isPresent("io.netty.buffer.ByteBuf", classLoader);
 		KOTLIN_SERIALIZATION_CBOR_PRESENT = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
 		KOTLIN_SERIALIZATION_JSON_PRESENT = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
@@ -548,6 +552,11 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			if (PROTOBUF_PRESENT) {
 				if (codec instanceof ProtobufDecoder protobufDec) {
 					protobufDec.setMaxMessageSize(size);
+				}
+			}
+			if (PROTOBUF_JSON_PRESENT) {
+				if (codec instanceof ProtobufJsonDecoder protobufJsonDec) {
+					protobufJsonDec.setMaxMessageSize(size);
 				}
 			}
 			if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
