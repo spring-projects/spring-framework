@@ -494,9 +494,15 @@ public class MessageHeaderAccessor {
 
 	protected String getShortPayloadLogMessage(Object payload) {
 		if (payload instanceof String payloadText) {
-			return (payloadText.length() < 80) ?
-				" payload=" + payloadText :
-				" payload=" + payloadText.substring(0, 80) + "...(truncated)";
+			if (payloadText.length() < 80) {
+				return " payload=" + payloadText;
+			}
+			int end = 80;
+			if (payloadText.length() > end &&
+					Character.isSurrogatePair(payloadText.charAt(end - 1), payloadText.charAt(end))) {
+				end--;
+			}
+			return " payload=" + payloadText.substring(0, end) + "...(truncated)";
 		}
 		else if (payload instanceof byte[] bytes) {
 			if (isReadableContentType()) {

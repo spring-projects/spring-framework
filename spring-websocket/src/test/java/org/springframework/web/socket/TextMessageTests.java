@@ -45,4 +45,10 @@ class TextMessageTests {
 		assertThat(actual.toString()).contains(expected);
 	}
 
+	@Test
+	void toStringDoesNotSplitSurrogatePair() {
+		TextMessage actual = new TextMessage("a".repeat(9) + "\uD83D\uDE00b");
+		assertThat(actual.toString()).contains("payload=[" + "a".repeat(9) + "..]");
+	}
+
 }
