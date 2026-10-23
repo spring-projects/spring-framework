@@ -70,6 +70,16 @@ class HttpServiceRegistrarTests {
 		assertBeanDefinitionCount(3);
 	}
 
+	@Test  // gh-36993
+	void scanIgnoresConcreteClassImplementingHttpExchangeInterface() {
+		doRegister(registry -> registry.forGroup(ECHO_GROUP).detectInBasePackages(EchoA.class));
+
+		// EchoAImpl implements EchoA but is not itself an interface, and must not
+		// be registered as an HTTP Service client alongside EchoA and EchoB.
+		assertRegistryBeanDef(new TestGroup(ECHO_GROUP, EchoA.class, EchoB.class));
+		assertBeanDefinitionCount(3);
+	}
+
 	@Test
 	void merge() {
 		doRegister(
