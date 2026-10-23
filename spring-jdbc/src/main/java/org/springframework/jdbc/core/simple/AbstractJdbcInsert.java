@@ -458,7 +458,13 @@ public abstract class AbstractJdbcInsert {
 			getJdbcTemplate().update(
 					con -> {
 						PreparedStatement ps = prepareStatementForGeneratedKeys(con);
-						setParameterValues(ps, values, getInsertTypes());
+						try {
+							setParameterValues(ps, values, getInsertTypes());
+						}
+						catch (SQLException | RuntimeException ex) {
+							JdbcUtils.closeStatement(ps);
+							throw ex;
+						}
 						return ps;
 					},
 					keyHolder);
