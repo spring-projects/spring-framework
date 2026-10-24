@@ -272,6 +272,15 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	}
 
 	/**
+	 * Determine whether there are any mapped properties to check.
+	 * @since 7.1
+	 */
+	protected boolean hasMappedProperties() {
+		return (!CollectionUtils.isEmpty(this.mappedProperties) ||
+				(isCheckFullyPopulated() && !CollectionUtils.isEmpty(this.mappedPropertyNames)));
+	}
+
+	/**
 	 * Determine the mapped names for the given property.
 	 * <p>Subclasses may override this method to customize the mapped names,
 	 * adding to or removing from the set determined by this base method
@@ -328,15 +337,14 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		initBeanWrapper(bw);
-
 		T mappedObject = constructMappedInstance(rs, bw);
-		if (CollectionUtils.isEmpty(this.mappedProperties) &&
-				(!isCheckFullyPopulated() || CollectionUtils.isEmpty(this.mappedPropertyNames))) {
+
+		if (!hasMappedProperties()) {
 			// Nothing left to populate via setters (for example, a record mapped through its constructor)
 			return mappedObject;
 		}
-		bw.setBeanInstance(mappedObject);
 
+		bw.setBeanInstance(mappedObject);
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 		Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<>() : null);

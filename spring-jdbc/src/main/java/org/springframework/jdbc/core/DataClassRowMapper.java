@@ -112,8 +112,8 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 				this.underscoredParameterIndexes.putIfAbsent(underscoreName(name), i);
 				this.lowerCaseParameterIndexes.putIfAbsent(lowerCaseName(name), i);
 			}
-			this.constructorParameterTypes = new TypeDescriptor[paramCount];
-			for (int i = 0; i < paramCount; i++) {
+			this.constructorParameterTypes = new TypeDescriptor[this.constructorParameterNames.length];
+			for (int i = 0; i < this.constructorParameterTypes.length; i++) {
 				this.constructorParameterTypes[i] = new TypeDescriptor(new MethodParameter(this.mappedConstructor, i));
 			}
 		}
