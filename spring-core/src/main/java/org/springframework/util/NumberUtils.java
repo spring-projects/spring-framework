@@ -313,6 +313,10 @@ public abstract class NumberUtils {
 			radix = 8;
 		}
 
+		if (value.startsWith("-", index) || value.startsWith("+", index)) {
+			throw new NumberFormatException("Sign character in wrong position: " + value);
+		}
+
 		BigInteger result = new BigInteger(value.substring(index), radix);
 		return (negative ? result.negate() : result);
 	}
