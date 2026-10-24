@@ -334,6 +334,7 @@ class ConcurrentReferenceHashMapTests {
 		assertThat(this.map.computeIfPresent(123, (k, v) -> v + "b")).isEqualTo("123b");
 		assertThat(this.map.get(123)).isEqualTo("123b");
 		assertThat(this.map.computeIfPresent(123, (k, v) -> null)).isNull();
+		assertThat(this.map).isEmpty();
 		assertThat(this.map.containsKey(123)).isFalse();
 	}
 
@@ -341,6 +342,7 @@ class ConcurrentReferenceHashMapTests {
 	void compute() {
 		assertThat(this.map.compute(123, (k, v) -> "123" + v)).isEqualTo("123null");
 		assertThat(this.map.compute(123, (k, v) -> null)).isNull();
+		assertThat(this.map).isEmpty();
 		assertThat(this.map.compute(123, (k, v) -> null)).isNull();
 		assertThat(this.map.compute(123, (k, v) -> "123")).isEqualTo("123");
 		assertThat(this.map.compute(123, (k, v) -> v + "b")).isEqualTo("123b");
@@ -352,6 +354,7 @@ class ConcurrentReferenceHashMapTests {
 		assertThat(this.map.merge(123, "123", (v1, v2) -> v1 + v2)).isEqualTo("123");
 		assertThat(this.map.merge(123, null, (v1, v2) -> v1 + v2)).isEqualTo("123null");
 		assertThat(this.map.merge(123, null, (v1, v2) -> null)).isNull();
+		assertThat(this.map).isEmpty();
 		assertThat(this.map.merge(123, "123", (v1, v2) -> v1 + v2)).isEqualTo("123");
 		assertThat(this.map.merge(123, "b", (v1, v2) -> v1 + v2)).isEqualTo("123b");
 		assertThat(this.map.get(123)).isEqualTo("123b");
