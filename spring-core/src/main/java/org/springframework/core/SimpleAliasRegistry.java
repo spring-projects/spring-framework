@@ -191,6 +191,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 						this.aliasNames.add(resolvedAlias);
 					}
 					else if (!registeredName.equals(resolvedName)) {
+						checkForAliasCircle(resolvedName, alias);
 						this.aliasMap.put(alias, resolvedName);
 						this.aliasNames.add(alias);
 					}
