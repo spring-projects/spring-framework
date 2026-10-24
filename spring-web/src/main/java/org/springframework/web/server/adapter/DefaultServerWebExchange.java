@@ -413,7 +413,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	private void validateIfModifiedSince(Instant lastModified) {
-		if (lastModified.isBefore(Instant.EPOCH)) {
+		// If-Modified-Since only applies to GET and HEAD (RFC 9110, section 13.1.3)
+		if (lastModified.isBefore(Instant.EPOCH) || !SAFE_METHODS.contains(getRequest().getMethod())) {
 			return;
 		}
 		long ifModifiedSince = getRequestHeaders().getIfModifiedSince();
