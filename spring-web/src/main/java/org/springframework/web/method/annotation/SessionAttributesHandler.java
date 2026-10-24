@@ -69,6 +69,8 @@ public class SessionAttributesHandler {
 
 	private final SessionAttributeStore sessionAttributeStore;
 
+	private final String sessionKnownAttribute;
+
 
 	/**
 	 * Create a new session attributes handler. Session attribute names and types
@@ -80,6 +82,7 @@ public class SessionAttributesHandler {
 	public SessionAttributesHandler(Class<?> handlerType, SessionAttributeStore sessionAttributeStore) {
 		Assert.notNull(sessionAttributeStore, "SessionAttributeStore may not be null");
 		this.sessionAttributeStore = sessionAttributeStore;
+		this.sessionKnownAttribute = SessionAttributesHandler.class.getName() + ".KNOWN." + handlerType.getName();
 
 		SessionAttributes ann = AnnotatedElementUtils.findMergedAnnotation(handlerType, SessionAttributes.class);
 		if (ann != null) {
@@ -135,7 +138,7 @@ public class SessionAttributesHandler {
 		// Only necessary for type-based attributes which get added to knownAttributeNames when touched.
 		if (!this.attributeTypes.isEmpty()) {
 			this.sessionAttributeStore.storeAttribute(request,
-					SESSION_KNOWN_ATTRIBUTE, StringUtils.toStringArray(this.knownAttributeNames));
+					this.sessionKnownAttribute, StringUtils.toStringArray(this.knownAttributeNames));
 		}
 	}
 
@@ -150,7 +153,7 @@ public class SessionAttributesHandler {
 		// Restore known attribute names from session (for distributed sessions)
 		// Only necessary for type-based attributes which get added to knownAttributeNames when touched.
 		if (!this.attributeTypes.isEmpty()) {
-			Object known = this.sessionAttributeStore.retrieveAttribute(request, SESSION_KNOWN_ATTRIBUTE);
+			Object known = this.sessionAttributeStore.retrieveAttribute(request, this.sessionKnownAttribute);
 			if (known instanceof String[] retrievedAttributeNames) {
 				this.knownAttributeNames.addAll(Arrays.asList(retrievedAttributeNames));
 			}
