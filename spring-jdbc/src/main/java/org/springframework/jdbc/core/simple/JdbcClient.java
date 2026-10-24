@@ -226,7 +226,7 @@ public interface JdbcClient {
 		 * @see #param(Object)
 		 * @see #params(List)
 		 */
-		StatementSpec params(Object... values);
+		StatementSpec params(@Nullable Object... values);
 
 		/**
 		 * Bind a list of positional parameters for "?" placeholder resolution.
