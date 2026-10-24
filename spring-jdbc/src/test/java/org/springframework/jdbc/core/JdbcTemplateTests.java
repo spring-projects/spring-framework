@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -71,6 +72,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Mock object based tests for JdbcTemplate.
@@ -1140,6 +1142,26 @@ class JdbcTemplateTests {
 		assertThat(out.get("a")).as("we should have gotten the result with lower case").isNotNull();
 		verify(this.callableStatement).close();
 		verify(this.connection).close();
+	}
+
+	@Test  // "ID" vs "id" must keep matching when the default Locale folds 'I' to a dotless i
+	void caseInsensitiveResultsMapRegardlessOfDefaultLocale() throws Exception {
+		when(this.callableStatement.execute()).thenReturn(false);
+		when(this.callableStatement.getUpdateCount()).thenReturn(-1);
+		when(this.callableStatement.getObject(1)).thenReturn("X");
+		this.template.setResultsMapCaseInsensitive(true);
+
+		Locale defaultLocale = Locale.getDefault();
+		Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+		try {
+			Map<String, Object> out = this.template.call(
+					conn -> conn.prepareCall("my query"), Collections.singletonList(new SqlOutParameter("ID", 12)));
+
+			assertThat(out.get("id")).as("lower-case lookup under Turkish default Locale").isEqualTo("X");
+		}
+		finally {
+			Locale.setDefault(defaultLocale);
+		}
 	}
 
 	@Test  // SPR-16578
