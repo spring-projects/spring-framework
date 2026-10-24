@@ -114,7 +114,15 @@ public abstract class NumberUtils {
 				// do not lose precision - use BigDecimal's own conversion
 				return (T) bigDecimal.toBigInteger();
 			}
-			// original value is not a Big* number - use standard long conversion
+			if (number instanceof Double || number instanceof Float) {
+				double value = number.doubleValue();
+				if (!Double.isFinite(value)) {
+					raiseOverflowException(number, targetClass);
+				}
+				// do not lose precision - use the exact BigDecimal representation
+				return (T) new BigDecimal(value).toBigInteger();
+			}
+			// original value is not a Big* or floating-point number - use standard long conversion
 			return (T) BigInteger.valueOf(number.longValue());
 		}
 		else if (Float.class == targetClass) {
