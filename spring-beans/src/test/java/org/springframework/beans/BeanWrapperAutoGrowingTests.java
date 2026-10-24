@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -252,10 +251,28 @@ class BeanWrapperAutoGrowingTests {
 		assertThat(bean.getNestedMap().get("A").get("B")).isInstanceOf(Bean.class);
 	}
 
-	@Test @Disabled  // gh-32154
+	@Test
 	void setPropertyValueAutoGrowNestedNestedMapWithinMap() {
 		wrapper.setPropertyValue("nestedNestedMap[A][B][C]", new Bean());
 		assertThat(bean.getNestedNestedMap().get("A").get("B").get("C")).isInstanceOf(Bean.class);
+	}
+
+	@Test
+	void setPropertyValueAutoGrowNestedNestedMapPreservesExistingValues() {
+		Bean existing = new Bean();
+		Bean added = new Bean();
+		wrapper.setPropertyValue("nestedNestedMap[A][B][C]", existing);
+		wrapper.setPropertyValue("nestedNestedMap[A][B][D]", added);
+		assertThat(bean.getNestedNestedMap().get("A").get("B"))
+				.containsEntry("C", existing).containsEntry("D", added);
+	}
+
+	@Test
+	void getPropertyValueDoesNotAutoGrowNestedMapValues() {
+		bean.setNestedNestedMap(Map.of("A", Map.of()));
+		assertThatExceptionOfType(NullValueInNestedPathException.class)
+				.isThrownBy(() -> wrapper.getPropertyValue("nestedNestedMap[A][B][C]"));
+		assertThat(bean.getNestedNestedMap().get("A")).isEmpty();
 	}
 
 
