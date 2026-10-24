@@ -253,6 +253,9 @@ final class QuartzCronField extends CronField {
 	 * day-of-month. If {@code dayOfMonth} falls on a Saturday, the date is
 	 * moved back to Friday; if it falls on a Sunday (or if {@code dayOfMonth}
 	 * is 1 and it falls on a Saturday), it is moved forward to Monday.
+	 * The date never jumps over the boundary of a month: if {@code dayOfMonth}
+	 * is the last day of the month and falls on a Sunday, it is moved back
+	 * to Friday.
 	 * @param dayOfMonth the goal day-of-month
 	 * @return the weekday-nearest-to adjuster
 	 */
@@ -264,8 +267,14 @@ final class QuartzCronField extends CronField {
 			if ((current == dayOfMonth && isWeekday(dayOfWeek)) ||  // dayOfMonth is a weekday
 					(dayOfWeek == DayOfWeek.FRIDAY && current == dayOfMonth - 1) ||  // dayOfMonth is a Saturday, so Friday before
 					(dayOfWeek == DayOfWeek.MONDAY && current == dayOfMonth + 1) ||  // dayOfMonth is a Sunday, so Monday after
-					(dayOfWeek == DayOfWeek.MONDAY && dayOfMonth == 1 && current == 3)) {  // dayOfMonth is Saturday 1st, so Monday 3rd
+					(dayOfWeek == DayOfWeek.MONDAY && dayOfMonth == 1 && current == 3) ||  // dayOfMonth is Saturday 1st, so Monday 3rd
+					(dayOfWeek == DayOfWeek.FRIDAY && current == dayOfMonth - 2 &&
+							isLastDayOfMonth(temporal, dayOfMonth))) {  // dayOfMonth is Sunday and last day of month, so Friday before
 				return temporal;
+			}
+			if (dayOfWeek == DayOfWeek.SUNDAY && dayOfMonth == 1 && current == 2) {
+				// dayOfMonth is Saturday 1st, so Monday 3rd
+				return atMidnight().adjustInto(temporal.plus(1, ChronoUnit.DAYS));
 			}
 			int count = 0;
 			while (count++ < CronExpression.MAX_ATTEMPTS) {
@@ -282,7 +291,13 @@ final class QuartzCronField extends CronField {
 						}
 					}
 					else if (dayOfWeek == DayOfWeek.SUNDAY) {
-						temporal = temporal.plus(1, ChronoUnit.DAYS);
+						if (!isLastDayOfMonth(temporal, dayOfMonth)) {
+							temporal = temporal.plus(1, ChronoUnit.DAYS);
+						}
+						else {
+							// exception for last day of month: execute on previous Friday
+							temporal = temporal.minus(2, ChronoUnit.DAYS);
+						}
 					}
 					return atMidnight().adjustInto(temporal);
 				}
@@ -297,6 +312,10 @@ final class QuartzCronField extends CronField {
 
 	private static boolean isWeekday(DayOfWeek dayOfWeek) {
 		return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+	}
+
+	private static boolean isLastDayOfMonth(Temporal temporal, int dayOfMonth) {
+		return (temporal.range(ChronoField.DAY_OF_MONTH).getMaximum() == dayOfMonth);
 	}
 
 	/**

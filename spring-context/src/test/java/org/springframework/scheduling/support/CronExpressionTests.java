@@ -978,6 +978,77 @@ class CronExpressionTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 		assertThat(actual).is(weekday);
+
+		// 2018-09-01 is a Saturday, so Monday 3rd, also when starting on Sunday 2nd
+		last = LocalDateTime.of(2018, 9, 2, 5, 0);
+		assertThat(last.getDayOfWeek()).isEqualTo(SUNDAY);
+		expected = LocalDateTime.of(2018, 9, 3, 0, 0);
+		assertThat(expected.getDayOfWeek()).isEqualTo(MONDAY);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = LocalDateTime.of(2018, 9, 3, 0, 0);
+		expected = LocalDateTime.of(2018, 10, 1, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	void quartzWeekdayNearestToLastDayOfMonthOnSunday() {
+		// 2025-11-30 is a Sunday and the last day of the month
+		CronExpression expression = CronExpression.parse("0 0 0 30W * ?");
+
+		LocalDateTime last = LocalDateTime.of(2025, 11, 1, 0, 0);
+		LocalDateTime expected = LocalDateTime.of(2025, 11, 28, 0, 0);
+		assertThat(expected.getDayOfWeek()).isEqualTo(FRIDAY);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = LocalDateTime.of(2025, 11, 28, 0, 0);
+		expected = LocalDateTime.of(2025, 12, 30, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		// 2027-02-28 is a Sunday and the last day of February
+		expression = CronExpression.parse("0 0 12 28W 2 ?");
+
+		last = LocalDateTime.of(2027, 1, 1, 0, 0);
+		expected = LocalDateTime.of(2027, 2, 26, 12, 0);
+		assertThat(expected.getDayOfWeek()).isEqualTo(FRIDAY);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = LocalDateTime.of(2027, 2, 26, 11, 59);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = LocalDateTime.of(2027, 2, 27, 0, 0);
+		expected = LocalDateTime.of(2028, 2, 28, 12, 0);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		// 2025-08-31 is a Sunday and the last day of the month
+		expression = CronExpression.parse("0 0 0 31W * ?");
+
+		last = LocalDateTime.of(2025, 8, 1, 0, 0);
+		expected = LocalDateTime.of(2025, 8, 29, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		// Friday already passed: continue with next month that has a 31st
+		last = LocalDateTime.of(2025, 8, 31, 0, 0);
+		expected = LocalDateTime.of(2025, 10, 31, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		// 2032-02-29 is a Sunday and the last day of a leap-year February
+		expression = CronExpression.parse("0 0 0 29W * ?");
+
+		last = LocalDateTime.of(2032, 2, 1, 0, 0);
+		expected = LocalDateTime.of(2032, 2, 27, 0, 0);
+		assertThat(expected.getDayOfWeek()).isEqualTo(FRIDAY);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -993,6 +1064,14 @@ class CronExpressionTests {
 
 		last = actual;
 		expected = LocalDateTime.of(2020, 3, 31, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).is(weekday);
+
+		// 2020-05-31 is a Sunday, so Friday before
+		last = actual;
+		expected = LocalDateTime.of(2020, 5, 29, 0, 0);
 		actual = expression.next(last);
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
