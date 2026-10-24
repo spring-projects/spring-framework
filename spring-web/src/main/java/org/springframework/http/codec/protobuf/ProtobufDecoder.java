@@ -133,6 +133,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		return Flux.from(inputStream)
 				.flatMapIterable(decoderFunction)
+				.concatWith(decoderFunction.endOfInput())
 				.doFinally(signalType -> decoderFunction.discard());
 	}
 
@@ -212,6 +213,8 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 		private int messageBytesToRead;
 
+		private boolean messageSizeIncomplete;
+
 		private final MessageSizeReader messageSizeReader;
 
 		public MessageDecoderFunction(ResolvableType elementType, int maxMessageSize, MessageSizeReader messageSizeReader) {
@@ -229,10 +232,15 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 				do {
 					if (this.output == null) {
+						int readableByteCount = input.readableByteCount();
 						Integer messageSize = this.messageSizeReader.readMessageSize(input);
 						if (messageSize == null) {
+							if (input.readableByteCount() < readableByteCount) {
+								this.messageSizeIncomplete = true;
+							}
 							return messages;
 						}
+						this.messageSizeIncomplete = false;
 						this.messageBytesToRead = messageSize;
 						if (this.maxMessageSize > 0 && this.messageBytesToRead > this.maxMessageSize) {
 							throw new DataBufferLimitException(
@@ -277,6 +285,18 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 			finally {
 				DataBufferUtils.release(input);
 			}
+		}
+
+		/**
+		 * Signal an error if the input ended in the middle of a message.
+		 */
+		public Flux<Message> endOfInput() {
+			return Flux.defer(() -> {
+				if (this.output != null || this.messageSizeIncomplete) {
+					return Flux.error(new DecodingException("Unexpected end of input, incomplete Protobuf message"));
+				}
+				return Flux.empty();
+			});
 		}
 
 		public void discard() {
@@ -357,8 +377,8 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 			throw new DecodingException("Cannot parse message size: malformed varint");
 		}
 
-		private @Nullable Integer getAndReset() {
-			Integer result = (this.messageSize != 0 ? this.messageSize : null);
+		private Integer getAndReset() {
+			Integer result = this.messageSize;
 			this.offset = 0;
 			this.messageSize = 0;
 			return result;
