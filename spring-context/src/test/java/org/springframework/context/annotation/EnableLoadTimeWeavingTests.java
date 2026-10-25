@@ -23,7 +23,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledForJreRange;
 
 import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -33,7 +32,6 @@ import org.springframework.instrument.classloading.ShadowingClassLoader;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.condition.JRE.JAVA_26;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -82,8 +80,6 @@ class EnableLoadTimeWeavingTests {
 	}
 
 	@Test  // gh-37520
-	@EnabledForJreRange(max = JAVA_26,
-			disabledReason = "AspectJ 1.9.25.1 cannot define generated closure classes on Java 27")
 	@SuppressWarnings("unchecked")
 	void enableLTW_withAjWeavingEnabled_weavesClassesLoadedByInstrumentableClassLoader() throws Exception {
 		var ctx = new AnnotationConfigApplicationContext(EnableLTWConfig_withAjWeavingEnabledAndShadowingLoadTimeWeaver.class);
