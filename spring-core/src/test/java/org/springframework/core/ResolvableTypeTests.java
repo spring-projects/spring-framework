@@ -468,8 +468,8 @@ class ResolvableTypeTests {
 
 	@Test
 	void asFromInheritedSuperType() {
-		ResolvableType type = ResolvableType.forClass(ExtendsList.class).as(List.class);
-		assertThat(type.getType().toString()).isEqualTo("java.util.List<E>");
+		ResolvableType type = ResolvableType.forClass(ExtendsList.class).as(AbstractList.class);
+		assertThat(type.getType().toString()).isEqualTo("java.util.AbstractList<E>");
 	}
 
 	@Test
