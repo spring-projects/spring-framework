@@ -46,7 +46,9 @@ import org.springframework.util.StringUtils;
  *
  * <p>This converter can read and write the
  * {@code "application/x-www-form-urlencoded"} media type as
- * {@link MultiValueMap MultiValueMap&lt;String, String&gt;}.
+ * {@link MultiValueMap MultiValueMap&lt;String, String&gt;}. When writing,
+ * form values that are not a {@code String} are converted with
+ * {@link String#valueOf(Object)}.
  *
  * <h3>Examples</h3>
  *
@@ -56,7 +58,7 @@ import org.springframework.util.StringUtils;
  * <pre class="code">
  * RestClient restClient = RestClient.create();
  *
- * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;&gt;();
+ * MultiValueMap&lt;String, Object&gt; form = new LinkedMultiValueMap&lt;&gt;();
  * form.add("field 1", "value 1");
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
@@ -174,10 +176,10 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 
 		String serializedForm = "";
 		if (data instanceof MultiValueMap<?,?> formData) {
-			serializedForm = serializeForm((MultiValueMap<String, String>) formData, charset);
+			serializedForm = serializeForm((MultiValueMap<String, Object>) formData, charset);
 		}
 		else if (data instanceof Map<?,?> formData) {
-			serializedForm = serializeForm((Map<String, String>) formData, charset);
+			serializedForm = serializeForm((Map<String, Object>) formData, charset);
 		}
 		byte[] bytes = serializedForm.getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
@@ -209,7 +211,7 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 		return contentType;
 	}
 
-	protected String serializeForm(Map<String, String> formData, Charset charset) {
+	protected String serializeForm(Map<String, Object> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, value) -> {
 			if (name == null) {
@@ -221,7 +223,7 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 		return builder.toString();
 	}
 
-	protected String serializeForm(MultiValueMap<String, String> formData, Charset charset) {
+	protected String serializeForm(MultiValueMap<String, Object> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, values) -> {
 				if (name == null) {
@@ -233,14 +235,16 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 		return builder.toString();
 	}
 
-	private void serializeValue(StringBuilder builder, String name, String value, Charset charset) {
+	private void serializeValue(StringBuilder builder, String name,
+			@Nullable Object value, Charset charset) {
+
 		if (builder.length() != 0) {
 			builder.append('&');
 		}
 		builder.append(URLEncoder.encode(name, charset));
 		if (value != null) {
 			builder.append('=');
-			builder.append(URLEncoder.encode(value, charset));
+			builder.append(URLEncoder.encode(String.valueOf(value), charset));
 		}
 	}
 
