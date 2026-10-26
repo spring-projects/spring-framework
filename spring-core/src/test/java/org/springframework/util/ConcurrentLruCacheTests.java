@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -142,6 +143,40 @@ class ConcurrentLruCacheTests {
 
 		assertThat(this.cache.size()).as("cache size").isZero();
 		assertThat(this.cache.contains(key)).as("contains %s", key).isFalse();
+	}
+
+	@Test
+	@Timeout(10)
+	void writerWaitsForEvictionLockWhenTooManyWriteOperationsArePending() throws Exception {
+		int writes = 5_000;
+
+		// Hold the eviction lock so that pending write operations cannot be drained
+		// opportunistically: once too many of them pile up, the writer must wait.
+		Field evictionLockField = ConcurrentLruCache.class.getDeclaredField("evictionLock");
+		evictionLockField.setAccessible(true);
+		Lock evictionLock = (Lock) evictionLockField.get(this.cache);
+
+		Thread writer = new Thread(() -> {
+			for (int i = 0; i < writes; i++) {
+				this.cache.get("k" + i);
+			}
+		});
+
+		evictionLock.lock();
+		try {
+			writer.start();
+			while (writer.isAlive() && writer.getState() != Thread.State.WAITING) {
+				Thread.sleep(10);
+			}
+			assertThat(writer.getState()).as("writer state").isEqualTo(Thread.State.WAITING);
+			assertThat(this.cache.size()).as("cache size").isLessThan(writes);
+		}
+		finally {
+			evictionLock.unlock();
+		}
+		writer.join();
+
+		assertThat(this.cache.size()).as("cache size").isEqualTo(this.cache.capacity());
 	}
 
 	@Test
