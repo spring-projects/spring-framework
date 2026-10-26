@@ -494,7 +494,8 @@ public interface RetryPolicy {
 				exponentialBackOff.setMaxInterval(this.maxDelay != null ? this.maxDelay.toMillis() : DEFAULT_MAX_DELAY);
 				backOff = exponentialBackOff;
 			}
-			return new DefaultRetryPolicy(this.includes, this.excludes, this.predicate, this.timeout, backOff);
+			return new DefaultRetryPolicy(new LinkedHashSet<>(this.includes), new LinkedHashSet<>(this.excludes),
+					this.predicate, this.timeout, backOff);
 		}
 	}
 
