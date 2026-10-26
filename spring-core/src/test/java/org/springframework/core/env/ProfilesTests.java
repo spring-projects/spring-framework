@@ -260,6 +260,24 @@ class ProfilesTests {
 		assertThat(profiles.matches(activeProfiles("java"))).isTrue();
 	}
 
+	@Test  // gh-37594
+	void ofAndExpressionWithDoubleInvertedSingleElement() {
+		Profiles profiles = Profiles.of("!!spring & framework");
+		assertAndExpression(profiles);
+	}
+
+	@Test  // gh-37594
+	void ofOrExpressionWithDoubleInvertedSingleElement() {
+		Profiles profiles = Profiles.of("!!spring | framework");
+		assertOrExpression(profiles);
+	}
+
+	@Test  // gh-37594
+	void ofAndExpressionWithTripleInvertedSingleElement() {
+		Profiles profiles = Profiles.of("!!!spring & framework");
+		assertOfAndExpressionWithInvertedSingleElement(profiles);
+	}
+
 	@Test
 	void ofComplexExpression() {
 		Profiles profiles = Profiles.of("(spring & framework) | (spring & java)");
