@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Internal parser used by {@link Profiles#of}.
@@ -100,6 +101,7 @@ final class ProfilesParser {
 					assertWellFormed(expression, false);
 				}
 				default -> {
+					assertWellFormed(expression, !StringUtils.containsWhitespace(token));
 					Profiles value = equals(token);
 					if (context == Context.NEGATE) {
 						return value;

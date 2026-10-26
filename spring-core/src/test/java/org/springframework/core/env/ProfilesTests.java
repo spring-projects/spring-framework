@@ -319,6 +319,16 @@ class ProfilesTests {
 		assertMalformed(() -> Profiles.of("(dev))"));
 	}
 
+	@Test  // gh-37595
+	void malformedExpressionsWithWhitespaceSeparatedProfiles() {
+		assertMalformed(() -> Profiles.of("dev prod"));
+		assertMalformed(() -> Profiles.of("dev\tprod"));
+		assertMalformed(() -> Profiles.of("!dev prod"));
+		assertMalformed(() -> Profiles.of("(dev prod)"));
+		assertMalformed(() -> Profiles.of("dev prod & test"));
+		assertMalformed(() -> Profiles.of("test | dev prod"));
+	}
+
 	@Test
 	void sensibleToString() {
 		assertThat(Profiles.of("spring")).hasToString("spring");
