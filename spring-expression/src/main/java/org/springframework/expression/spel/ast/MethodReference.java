@@ -402,6 +402,10 @@ public class MethodReference extends SpelNodeImpl {
 		if (isNullSafe() && (descriptor != null || !isStatic)) {
 			if (this.unwrapOptional) {
 				CodeFlow.insertOptionalUnwrapIfNecessary(mv, descriptor);
+				if ("Ljava/util/Optional".equals(descriptor)) {
+					// Optional.orElse(null) leaves an Object on the stack
+					descriptor = "Ljava/lang/Object";
+				}
 			}
 			skipIfNull = new Label();
 			Label continueLabel = new Label();

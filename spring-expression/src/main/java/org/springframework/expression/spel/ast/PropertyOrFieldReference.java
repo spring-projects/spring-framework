@@ -381,7 +381,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		Label skipIfNull = null;
 		if (isNullSafe()) {
 			if (this.unwrapOptional) {
-				CodeFlow.insertOptionalUnwrapIfNecessary(mv, cf.lastDescriptor());
+				String descriptor = cf.lastDescriptor();
+				CodeFlow.insertOptionalUnwrapIfNecessary(mv, descriptor);
+				if ("Ljava/util/Optional".equals(descriptor)) {
+					// Optional.orElse(null) leaves an Object on the stack
+					cf.pushDescriptor("Ljava/lang/Object");
+				}
 			}
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
