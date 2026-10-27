@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Chengang Guan
  */
 class ExceptionTypeFilterTests {
 
@@ -131,6 +132,20 @@ class ExceptionTypeFilterTests {
 
 		assertDoesNotMatch(new FileNotFoundException());
 		assertDoesNotMatch(new Throwable());
+	}
+
+	@Test
+	void constructorAcceptsSubtypeClassCollections() {
+		List<Class<? extends RuntimeException>> includes = List.of(IllegalArgumentException.class);
+		List<Class<? extends RuntimeException>> excludes = List.of(IllegalStateException.class);
+
+		filter = new ExceptionTypeFilter(includes, excludes);
+		assertMatches(new IllegalArgumentException());
+		assertDoesNotMatch(new IllegalStateException());
+
+		filter = new ExceptionTypeFilter(includes, excludes, true);
+		assertMatches(new IllegalArgumentException());
+		assertDoesNotMatch(new IllegalStateException());
 	}
 
 
