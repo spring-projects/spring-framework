@@ -1220,8 +1220,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {
-					Flux<?> deferred = Flux.defer(() -> {
+					Flux<?> deferred = Flux.deferContextual(contextView -> {
 						Flux<?> source = Flux.from(adapter.toPublisher(result))
+								.contextWrite(contextView)
 								.publish().refCount(2);
 						source.subscribe(new CacheEvictListSubscriber(contexts));
 						return source;
@@ -1290,8 +1291,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {
-					Flux<?> deferred = Flux.defer(() -> {
+					Flux<?> deferred = Flux.deferContextual(contextView -> {
 						Flux<?> source = Flux.from(adapter.toPublisher(result))
+								.contextWrite(contextView)
 								.publish().refCount(2);
 						source.subscribe(new CachePutListSubscriber(request));
 						return source;
