@@ -40,9 +40,11 @@ public abstract class NumberUtils {
 
 	private static final BigInteger LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
+	// -2^63: exactly Long.MIN_VALUE, an inclusive lower bound
 	private static final double LONG_MIN_AS_DOUBLE = -0x1p63;
 
-	private static final double LONG_MAX_AS_DOUBLE_EXCLUSIVE = 0x1p63;
+	// 2^63: Long.MAX_VALUE + 1, an exclusive upper bound
+	private static final double LONG_MAX_PLUS_ONE_AS_DOUBLE = 0x1p63;
 
 	/**
 	 * Standard number types (all immutable):
@@ -64,7 +66,9 @@ public abstract class NumberUtils {
 	 * @param targetClass the target class to convert to
 	 * @return the converted number
 	 * @throws IllegalArgumentException if the target class is not supported
-	 * (i.e. not a standard Number subclass as included in the JDK)
+	 * (i.e. not a standard Number subclass as included in the JDK), or if the
+	 * number cannot be converted to an integral target class without overflow
+	 * (including {@code NaN} and infinite floating-point values)
 	 * @see java.lang.Byte
 	 * @see java.lang.Short
 	 * @see java.lang.Integer
@@ -119,7 +123,9 @@ public abstract class NumberUtils {
 				if (!Double.isFinite(value)) {
 					raiseOverflowException(number, targetClass);
 				}
-				// do not lose precision - use the exact BigDecimal representation
+				// do not lose precision - use the exact BigDecimal representation; in contrast
+				// to the BigDecimal target below, BigDecimal(double) is safe here since the
+				// fractional part gets truncated anyway
 				return (T) new BigDecimal(value).toBigInteger();
 			}
 			// original value is not a Big* or floating-point number - use standard long conversion
@@ -159,16 +165,16 @@ public abstract class NumberUtils {
 		else if (number instanceof BigDecimal bigDecimal) {
 			bigInt = bigDecimal.toBigInteger();
 		}
+		else if (number instanceof Double || number instanceof Float) {
+			double value = number.doubleValue();
+			// Also rejecting NaN and infinite values
+			if (!(value >= LONG_MIN_AS_DOUBLE && value < LONG_MAX_PLUS_ONE_AS_DOUBLE)) {
+				raiseOverflowException(number, targetClass);
+			}
+		}
 		// Effectively analogous to Java's BigInteger.longValueExact()
 		if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {
 			raiseOverflowException(number, targetClass);
-		}
-		if (number instanceof Double || number instanceof Float) {
-			double value = number.doubleValue();
-			// Also rejecting NaN and infinite values
-			if (!(value >= LONG_MIN_AS_DOUBLE && value < LONG_MAX_AS_DOUBLE_EXCLUSIVE)) {
-				raiseOverflowException(number, targetClass);
-			}
 		}
 		return number.longValue();
 	}

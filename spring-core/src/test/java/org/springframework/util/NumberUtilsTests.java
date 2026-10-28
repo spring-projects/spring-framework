@@ -376,7 +376,7 @@ class NumberUtilsTests {
 		assertToNumberOverflow(new BigDecimal("18446744073709551611"), Long.class);
 	}
 
-	@Test
+	@Test  // gh-37586
 	void convertFloatingPointToLong() {
 		assertThat(NumberUtils.convertNumberToTargetClass(-1.5d, Long.class)).isEqualTo(Long.valueOf(-1));
 		assertThat(NumberUtils.convertNumberToTargetClass(1.5f, Long.class)).isEqualTo(Long.valueOf(1));
@@ -390,6 +390,7 @@ class NumberUtilsTests {
 		assertToNumberOverflow(Double.POSITIVE_INFINITY, Long.class);
 		assertToNumberOverflow(Double.NEGATIVE_INFINITY, Long.class);
 		assertToNumberOverflow(Float.POSITIVE_INFINITY, Long.class);
+		assertToNumberOverflow(Float.NEGATIVE_INFINITY, Long.class);
 		assertToNumberOverflow(Double.NaN, Long.class);
 		assertToNumberOverflow(Float.NaN, Long.class);
 		assertToNumberOverflow(Double.NaN, Integer.class);
@@ -397,7 +398,7 @@ class NumberUtilsTests {
 		assertToNumberOverflow(Double.NaN, Byte.class);
 	}
 
-	@Test
+	@Test  // gh-37586
 	void convertFloatingPointToBigInteger() {
 		assertThat(NumberUtils.convertNumberToTargetClass(-1.5d, BigInteger.class)).isEqualTo(BigInteger.valueOf(-1));
 		assertThat(NumberUtils.convertNumberToTargetClass(1.5f, BigInteger.class)).isEqualTo(BigInteger.valueOf(1));
@@ -405,6 +406,8 @@ class NumberUtilsTests {
 		assertThat(NumberUtils.convertNumberToTargetClass(-1e20d, BigInteger.class)).isEqualTo(new BigInteger("-100000000000000000000"));
 		assertThat(NumberUtils.convertNumberToTargetClass(1e20f, BigInteger.class)).isEqualTo(new BigInteger("100000002004087734272"));
 
+		assertThat(NumberUtils.convertNumberToTargetClass(0x1p40f, BigInteger.class)).isEqualTo(new BigInteger("1099511627776"));
+		assertThat(NumberUtils.convertNumberToTargetClass(0x1p60, BigInteger.class)).isEqualTo(new BigInteger("1152921504606846976"));
 		assertThat(NumberUtils.convertNumberToTargetClass(0x1p40f, BigInteger.class))
 				.isEqualTo(BigInteger.valueOf(NumberUtils.convertNumberToTargetClass(0x1p40f, Long.class)));
 		assertThat(NumberUtils.convertNumberToTargetClass(0x1p60, BigInteger.class))
@@ -415,6 +418,7 @@ class NumberUtilsTests {
 		assertToNumberOverflow(Double.POSITIVE_INFINITY, BigInteger.class);
 		assertToNumberOverflow(Double.NEGATIVE_INFINITY, BigInteger.class);
 		assertToNumberOverflow(Float.POSITIVE_INFINITY, BigInteger.class);
+		assertToNumberOverflow(Float.NEGATIVE_INFINITY, BigInteger.class);
 	}
 
 
