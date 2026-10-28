@@ -318,6 +318,23 @@ class RetryPolicyTests {
 		}
 
 		@Test
+		void includesAndExcludesNotChangedByBuilderAfterBuild() {
+			var builder = RetryPolicy.builder().includes(IOException.class);
+			var policy = builder.build();
+
+			builder.includes(IllegalArgumentException.class).excludes(FileNotFoundException.class);
+
+			assertThat(policy.shouldRetry(new IOException())).isTrue();
+			assertThat(policy.shouldRetry(new FileNotFoundException())).isTrue();
+			assertThat(policy.shouldRetry(new IllegalArgumentException())).isFalse();
+			assertToString(policy, "includes=[java.io.IOException], ", 1000, 0, 1.0, Long.MAX_VALUE, 3);
+
+			var newPolicy = builder.build();
+			assertThat(newPolicy.shouldRetry(new IllegalArgumentException())).isTrue();
+			assertThat(newPolicy.shouldRetry(new FileNotFoundException())).isFalse();
+		}
+
+		@Test
 		void predicate() {
 			var policy = RetryPolicy.builder()
 					.predicate(new NumberFormatExceptionMatcher())
