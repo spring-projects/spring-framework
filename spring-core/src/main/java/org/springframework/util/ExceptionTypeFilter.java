@@ -41,8 +41,8 @@ public class ExceptionTypeFilter extends InstanceFilter<Class<? extends Throwabl
 	 * @param excludes the collection of excludes
 	 * @since 7.0
 	 */
-	public ExceptionTypeFilter(@Nullable Collection<Class<? extends Throwable>> includes,
-			@Nullable Collection<Class<? extends Throwable>> excludes) {
+	public ExceptionTypeFilter(@Nullable Collection<? extends Class<? extends Throwable>> includes,
+			@Nullable Collection<? extends Class<? extends Throwable>> excludes) {
 
 		super(includes, excludes);
 	}
