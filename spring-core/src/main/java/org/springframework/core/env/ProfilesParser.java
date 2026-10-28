@@ -66,7 +66,7 @@ final class ProfilesParser {
 	private static Profiles parseTokens(String expression, StringTokenizer tokens, Context context) {
 		List<Profiles> elements = new ArrayList<>();
 		Operator operator = null;
-		// An operand is expected at the start and after each operator
+		// Tracks whether an operand (rather than an operator) is expected next
 		boolean operandExpected = true;
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();

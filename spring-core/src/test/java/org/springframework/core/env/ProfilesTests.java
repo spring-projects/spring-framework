@@ -140,7 +140,7 @@ class ProfilesTests {
 		assertOrExpression(profiles);
 	}
 
-	@Test
+	@Test  // gh-37593
 	void ofOrExpressionWithDoubledOperator() {
 		Profiles profiles = Profiles.of("(spring || framework)");
 		assertOrExpression(profiles);
@@ -171,7 +171,7 @@ class ProfilesTests {
 		assertAndExpression(profiles);
 	}
 
-	@Test
+	@Test  // gh-37593
 	void ofAndExpressionWithDoubledOperator() {
 		Profiles profiles = Profiles.of("(spring && framework)");
 		assertAndExpression(profiles);
@@ -322,22 +322,28 @@ class ProfilesTests {
 		assertMalformed(() -> Profiles.of("a & b | c"));
 	}
 
-	@Test
+	@Test  // gh-37593
 	void malformedExpressionsWithMissingOperator() {
 		assertMalformed(() -> Profiles.of("dev !prod"));
 		assertMalformed(() -> Profiles.of("dev (prod)"));
 		assertMalformed(() -> Profiles.of("(dev) prod"));
 		assertMalformed(() -> Profiles.of("(dev) (prod)"));
+		assertMalformed(() -> Profiles.of("(dev) !prod"));
+		assertMalformed(() -> Profiles.of("!dev (prod)"));
 	}
 
-	@Test
+	@Test  // gh-37593
 	void malformedExpressionsWithMissingOperand() {
 		assertMalformed(() -> Profiles.of("dev &"));
 		assertMalformed(() -> Profiles.of("dev |"));
 		assertMalformed(() -> Profiles.of("& dev"));
 		assertMalformed(() -> Profiles.of("| dev"));
 		assertMalformed(() -> Profiles.of("&& dev"));
+		assertMalformed(() -> Profiles.of("|| dev"));
 		assertMalformed(() -> Profiles.of("(dev &)"));
+		assertMalformed(() -> Profiles.of("(| dev)"));
+		assertMalformed(() -> Profiles.of("(dev) &"));
+		assertMalformed(() -> Profiles.of("dev & ()"));
 		assertMalformed(() -> Profiles.of("dev & !"));
 	}
 
