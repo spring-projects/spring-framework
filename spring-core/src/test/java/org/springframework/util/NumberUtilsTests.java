@@ -376,6 +376,47 @@ class NumberUtilsTests {
 		assertToNumberOverflow(new BigDecimal("18446744073709551611"), Long.class);
 	}
 
+	@Test
+	void convertFloatingPointToLong() {
+		assertThat(NumberUtils.convertNumberToTargetClass(-1.5d, Long.class)).isEqualTo(Long.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass(1.5f, Long.class)).isEqualTo(Long.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass((double) Long.MIN_VALUE, Long.class)).isEqualTo(Long.valueOf(Long.MIN_VALUE));
+		assertThat(NumberUtils.convertNumberToTargetClass(Math.nextDown(0x1p63), Long.class)).isEqualTo(Long.valueOf(0x7FFFFFFFFFFFFC00L));
+
+		assertToNumberOverflow(0x1p63, Long.class);
+		assertToNumberOverflow(1e20d, Long.class);
+		assertToNumberOverflow(-1e20d, Long.class);
+		assertToNumberOverflow(1e20f, Long.class);
+		assertToNumberOverflow(Double.POSITIVE_INFINITY, Long.class);
+		assertToNumberOverflow(Double.NEGATIVE_INFINITY, Long.class);
+		assertToNumberOverflow(Float.POSITIVE_INFINITY, Long.class);
+		assertToNumberOverflow(Double.NaN, Long.class);
+		assertToNumberOverflow(Float.NaN, Long.class);
+		assertToNumberOverflow(Double.NaN, Integer.class);
+		assertToNumberOverflow(Double.NaN, Short.class);
+		assertToNumberOverflow(Double.NaN, Byte.class);
+	}
+
+	@Test
+	void convertFloatingPointToBigInteger() {
+		assertThat(NumberUtils.convertNumberToTargetClass(-1.5d, BigInteger.class)).isEqualTo(BigInteger.valueOf(-1));
+		assertThat(NumberUtils.convertNumberToTargetClass(1.5f, BigInteger.class)).isEqualTo(BigInteger.valueOf(1));
+		assertThat(NumberUtils.convertNumberToTargetClass(1e20d, BigInteger.class)).isEqualTo(new BigInteger("100000000000000000000"));
+		assertThat(NumberUtils.convertNumberToTargetClass(-1e20d, BigInteger.class)).isEqualTo(new BigInteger("-100000000000000000000"));
+		assertThat(NumberUtils.convertNumberToTargetClass(1e20f, BigInteger.class)).isEqualTo(new BigInteger("100000002004087734272"));
+
+		assertThat(NumberUtils.convertNumberToTargetClass(0x1p40f, BigInteger.class))
+				.isEqualTo(BigInteger.valueOf(NumberUtils.convertNumberToTargetClass(0x1p40f, Long.class)));
+		assertThat(NumberUtils.convertNumberToTargetClass(0x1p60, BigInteger.class))
+				.isEqualTo(BigInteger.valueOf(NumberUtils.convertNumberToTargetClass(0x1p60, Long.class)));
+
+		assertToNumberOverflow(Double.NaN, BigInteger.class);
+		assertToNumberOverflow(Float.NaN, BigInteger.class);
+		assertToNumberOverflow(Double.POSITIVE_INFINITY, BigInteger.class);
+		assertToNumberOverflow(Double.NEGATIVE_INFINITY, BigInteger.class);
+		assertToNumberOverflow(Float.POSITIVE_INFINITY, BigInteger.class);
+	}
+
 
 	private void assertLongEquals(String aLong) {
 		assertThat(NumberUtils.parseNumber(aLong, Long.class)).as("Long did not parse").isEqualTo(Long.MAX_VALUE);
