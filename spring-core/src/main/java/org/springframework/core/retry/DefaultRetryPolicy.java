@@ -17,6 +17,7 @@
 package org.springframework.core.retry;
 
 import java.time.Duration;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
@@ -52,8 +53,9 @@ class DefaultRetryPolicy implements RetryPolicy {
 	DefaultRetryPolicy(Set<Class<? extends Throwable>> includes, Set<Class<? extends Throwable>> excludes,
 			@Nullable Predicate<Throwable> predicate, Duration timeout, BackOff backOff) {
 
-		this.includes = includes;
-		this.excludes = excludes;
+		// Defensive copies, since the Builder's sets may be modified after build().
+		this.includes = new LinkedHashSet<>(includes);
+		this.excludes = new LinkedHashSet<>(excludes);
 		this.exceptionFilter = new ExceptionTypeFilter(this.includes, this.excludes);
 		this.predicate = predicate;
 		this.timeout = timeout;
