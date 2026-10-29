@@ -229,7 +229,7 @@ public final class HttpServiceProxyFactory {
 		 * create the proxy for each HTTP service interface.
 		 * @param customizer the customizer to add
 		 * @return this same builder instance
-		 * @since 7.1
+		 * @since 7.0.4
 		 */
 		public Builder proxyFactoryCustomizer(ProxyFactoryCustomizer customizer) {
 			this.proxyFactoryCustomizers.add(customizer);
@@ -335,15 +335,15 @@ public final class HttpServiceProxyFactory {
 
 	/**
 	 * Callback mechanism to customize the {@link ProxyFactory} used to create the
-	 * proxy for each HTTP service interface, e.g. to add AOP interceptors.
+	 * proxy for each HTTP service interface &mdash; for example, to add AOP interceptors.
 	 * @author Dung Dang Minh
-	 * @since 7.1
+	 * @since 7.0.4
 	 */
 	public interface ProxyFactoryCustomizer {
 
 		/**
 		 * Customize the {@link ProxyFactory} for the given HTTP service type.
-		 * @param proxyFactory will never be {@literal null}.
+		 * @param proxyFactory the proxy factory to customize
 		 * @param serviceType the HTTP service interface type
 		 */
 		void customize(ProxyFactory proxyFactory, Class<?> serviceType);
