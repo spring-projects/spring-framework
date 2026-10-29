@@ -18,6 +18,8 @@ package org.springframework.beans.factory.aot;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -191,6 +193,63 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean1)).isNotNull();
 	}
 
+	@ParameterizedTest
+	@ValueSource(classes = {RetainedInitializationAotProcessor.class,
+			RetainedRegistrationAotProcessor.class, RetainedCombinedAotProcessor.class,
+			RetainedCombinedAotProcessorWithRegistrationHook.class})
+	void getBeanDefinitionMethodGeneratorWhenProcessorOptsInRetainsBean(Class<?> processorClass) {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("processor", BeanDefinitionBuilder
+				.rootBeanDefinition(processorClass).getBeanDefinition());
+		BeanDefinitionMethodGeneratorFactory factory = new BeanDefinitionMethodGeneratorFactory(beanFactory);
+		assertThat(factory.getBeanDefinitionMethodGenerator(RegisteredBean.of(beanFactory, "processor")))
+				.isNotNull();
+	}
+
+	@ParameterizedTest
+	@ValueSource(classes = {RetainedInitializationAotProcessor.class,
+			RetainedRegistrationAotProcessor.class, RetainedCombinedAotProcessor.class,
+			RetainedCombinedAotProcessorWithRegistrationHook.class})
+	void getBeanDefinitionMethodGeneratorWhenRetainedProcessorIsExplicitlyExcludedReturnsNull(
+			Class<?> processorClass) {
+
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("processor", BeanDefinitionBuilder
+				.rootBeanDefinition(processorClass).getBeanDefinition());
+		RegisteredBean registeredBean = RegisteredBean.of(beanFactory, "processor");
+		beanFactory.getBeanDefinition("processor").setAttribute(
+				BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE, true);
+		BeanDefinitionMethodGeneratorFactory factory = new BeanDefinitionMethodGeneratorFactory(beanFactory);
+		assertThat(factory.getBeanDefinitionMethodGenerator(registeredBean)).isNull();
+	}
+
+	@ParameterizedTest
+	@ValueSource(classes = {RetainedInitializationAotProcessor.class,
+			RetainedRegistrationAotProcessor.class, RetainedCombinedAotProcessor.class,
+			RetainedCombinedAotProcessorWithRegistrationHook.class})
+	void getBeanDefinitionMethodGeneratorWhenFilterExcludesRetainedProcessorReturnsNull(Class<?> processorClass) {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("processor", BeanDefinitionBuilder
+				.rootBeanDefinition(processorClass).getBeanDefinition());
+		MockSpringFactoriesLoader loader = new MockSpringFactoriesLoader();
+		loader.addInstance(BeanRegistrationExcludeFilter.class,
+				new MockBeanRegistrationExcludeFilter(true, 0));
+		BeanDefinitionMethodGeneratorFactory factory = new BeanDefinitionMethodGeneratorFactory(
+				AotServices.factoriesAndBeans(loader, beanFactory));
+		assertThat(factory.getBeanDefinitionMethodGenerator(RegisteredBean.of(beanFactory, "processor")))
+				.isNull();
+	}
+
+	@Test
+	void getBeanDefinitionMethodGeneratorWhenCombinedProcessorUsesDefaultExcludesBean() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("processor", BeanDefinitionBuilder
+				.rootBeanDefinition(CombinedAotProcessor.class).getBeanDefinition());
+		BeanDefinitionMethodGeneratorFactory factory = new BeanDefinitionMethodGeneratorFactory(beanFactory);
+		assertThat(factory.getBeanDefinitionMethodGenerator(RegisteredBean.of(beanFactory, "processor")))
+				.isNull();
+	}
+
 	private RegisteredBean registerTestBean(DefaultListableBeanFactory beanFactory) {
 		beanFactory.registerBeanDefinition("test", BeanDefinitionBuilder
 				.rootBeanDefinition(TestBean.class).getBeanDefinition());
@@ -265,6 +324,55 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		}
 
 	}
+
+	static class RetainedInitializationAotProcessor extends TestBeanFactoryInitializationAotProcessorBean {
+
+		@Override
+		public boolean isBeanExcludedFromAotRegistration() {
+			return false;
+		}
+	}
+
+
+	static class RetainedRegistrationAotProcessor extends TestBeanRegistrationAotProcessorBean {
+
+		@Override
+		public boolean isBeanExcludedFromAotRegistration() {
+			return false;
+		}
+	}
+
+
+	static class CombinedAotProcessor extends TestBeanFactoryInitializationAotProcessorBean
+			implements BeanRegistrationAotProcessor {
+
+		@Override
+		public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+			return null;
+		}
+	}
+
+
+	static class RetainedCombinedAotProcessor extends TestBeanRegistrationAotProcessorAndNotExcluded
+			implements BeanFactoryInitializationAotProcessor {
+
+		@Override
+		public BeanFactoryInitializationAotContribution processAheadOfTime(
+				ConfigurableListableBeanFactory beanFactory) {
+
+			return null;
+		}
+	}
+
+
+	static class RetainedCombinedAotProcessorWithRegistrationHook extends CombinedAotProcessor {
+
+		@Override
+		public boolean isBeanExcludedFromAotRegistration() {
+			return false;
+		}
+	}
+
 
 	@SuppressWarnings("unused")
 	static class InnerTestBean {

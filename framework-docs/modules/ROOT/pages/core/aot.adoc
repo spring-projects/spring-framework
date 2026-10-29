@@ -105,7 +105,9 @@ A `BeanFactoryInitializationAotProcessor` implementation can be registered in `M
 
 The `BeanFactoryInitializationAotProcessor` interface can also be implemented directly by a bean.
 In this mode, the bean provides an AOT contribution equivalent to the feature it provides with a regular runtime.
-Consequently, such a bean is automatically excluded from the AOT-optimized context.
+Consequently, such a bean is excluded from registration in the AOT-optimized context by default.
+If the bean also provides behavior required at runtime, override
+`isBeanExcludedFromAotRegistration()` to return `false`.
 
 [NOTE]
 ====
@@ -126,6 +128,20 @@ This interface is used as follows:
 For instance xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp-examples-aabpp[`AutowiredAnnotationBeanPostProcessor`] implements this interface to generate code that injects members annotated with `@Autowired`.
 * Implemented by a type registered in `META-INF/spring/aot.factories` with a key equal to the fully-qualified name of the interface.
 Typically used when the bean definition needs to be tuned for specific features of the core framework.
+
+A bean that implements `BeanRegistrationAotProcessor` is also excluded from registration
+in the AOT-optimized context by default. Override `isBeanExcludedFromAotRegistration()`
+to return `false` if the bean is also required at runtime. Existing overrides of
+`isBeanExcludedFromAotProcessing()` continue to be honored, including for beans that
+also implement `BeanFactoryInitializationAotProcessor`.
+
+Excluding a processor bean from registration does not prevent it from making AOT
+contributions for the bean factory or other beans. To exclude an individual bean
+definition explicitly, set its `BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE`
+attribute to `true`. For exclusions based on other criteria, implement
+`BeanRegistrationExcludeFilter` and register it in `META-INF/spring/aot.factories`,
+or as a bean that also implements an AOT processor interface. These explicit exclusions
+take precedence over a processor's request to retain its registration.
 
 [NOTE]
 ====

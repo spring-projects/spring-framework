@@ -47,6 +47,8 @@ class BeanDefinitionMethodGeneratorFactory {
 
 	private final AotServices<BeanRegistrationAotProcessor> aotProcessors;
 
+	private final AotServices<AotProcessor> aotProcessorBeans;
+
 	private final AotServices<BeanRegistrationExcludeFilter> excludeFilters;
 
 
@@ -66,6 +68,7 @@ class BeanDefinitionMethodGeneratorFactory {
 	 */
 	BeanDefinitionMethodGeneratorFactory(AotServices.Loader loader) {
 		this.aotProcessors = loader.load(BeanRegistrationAotProcessor.class);
+		this.aotProcessorBeans = loader.load(AotProcessor.class);
 		this.excludeFilters = loader.load(BeanRegistrationExcludeFilter.class);
 		for (BeanRegistrationExcludeFilter excludeFilter : this.excludeFilters) {
 			if (this.excludeFilters.getSource(excludeFilter) == Source.BEAN_FACTORY) {
@@ -136,12 +139,10 @@ class BeanDefinitionMethodGeneratorFactory {
 			return true;
 		}
 		Class<?> beanClass = registeredBean.getBeanClass();
-		if (BeanFactoryInitializationAotProcessor.class.isAssignableFrom(beanClass)) {
-			return true;
-		}
-		if (BeanRegistrationAotProcessor.class.isAssignableFrom(beanClass)) {
-			BeanRegistrationAotProcessor processor = this.aotProcessors.findByBeanName(registeredBean.getBeanName());
-			return (processor == null || processor.isBeanExcludedFromAotProcessing());
+		if (BeanFactoryInitializationAotProcessor.class.isAssignableFrom(beanClass) ||
+				BeanRegistrationAotProcessor.class.isAssignableFrom(beanClass)) {
+			AotProcessor processor = this.aotProcessorBeans.findByBeanName(registeredBean.getBeanName());
+			return (processor == null || processor.isBeanExcludedFromAotRegistration());
 		}
 		return false;
 	}

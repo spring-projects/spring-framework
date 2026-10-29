@@ -50,6 +50,8 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RegisteredBean;
@@ -157,6 +159,33 @@ class ApplicationContextAotGeneratorTests {
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).isEmpty();
+		});
+	}
+
+	@Test
+	@CompileWithForkedClassLoader
+	void processAheadOfTimeWhenInitializationProcessorOptsInRetainsProcessor() {
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+		applicationContext.registerBeanDefinition("test",
+				new RootBeanDefinition(RetainedBeanFactoryInitializationAotProcessor.class));
+
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("test");
+			assertThat(freshApplicationContext.getBean("test")).isNotNull();
+		});
+	}
+
+	@Test
+	void processAheadOfTimeWhenRegistryProcessorIsExcludedRetainsRegisteredBeans() {
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+		applicationContext.registerBeanDefinition("registrar",
+				new RootBeanDefinition(BuildTimeBeanRegistrar.class));
+
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("registered");
+			assertThat(freshApplicationContext.getBean("registered")).isInstanceOf(SimpleComponent.class);
 		});
 	}
 
@@ -842,6 +871,27 @@ class ApplicationContextAotGeneratorTests {
 		@Override
 		public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 			return null;
+		}
+	}
+
+
+	static class RetainedBeanFactoryInitializationAotProcessor
+			extends NoOpBeanFactoryInitializationAotProcessor {
+
+		@Override
+		public boolean isBeanExcludedFromAotRegistration() {
+			return false;
+		}
+	}
+
+
+	static class BuildTimeBeanRegistrar extends NoOpBeanFactoryInitializationAotProcessor
+			implements BeanDefinitionRegistryPostProcessor {
+
+		@Override
+		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+			assertThat(registry.containsBeanDefinition("registered")).isFalse();
+			registry.registerBeanDefinition("registered", new RootBeanDefinition(SimpleComponent.class));
 		}
 	}
 

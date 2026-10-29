@@ -40,7 +40,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
  * arrangement, usually in generated code. For that reason, a component that
  * implements this interface is not contributed by default. If a component that
  * implements this interface still needs to be invoked at runtime,
- * {@link #isBeanExcludedFromAotProcessing} can be overridden.
+ * {@link #isBeanExcludedFromAotRegistration()} can be overridden.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -48,7 +48,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
  * @see BeanRegistrationAotContribution
  */
 @FunctionalInterface
-public interface BeanRegistrationAotProcessor {
+public interface BeanRegistrationAotProcessor extends AotProcessor {
 
 	/**
 	 * The name of an attribute that can be
@@ -76,15 +76,27 @@ public interface BeanRegistrationAotProcessor {
 	@Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean);
 
 	/**
-	 * Return if the bean instance associated with this processor should be
-	 * excluded from AOT processing itself. By default, this method returns
-	 * {@code true} to automatically exclude the bean, if the definition should
-	 * be written then this method may be overridden to return {@code true}.
-	 * @return if the bean should be excluded from AOT processing
+	 * Return whether the bean associated with this processor should be excluded
+	 * from registration in the AOT-optimized application context.
+	 * <p>By default, this method returns {@code true}. Override this method to
+	 * return {@code false} if the bean is also required at runtime.
+	 * @return whether the processor bean should be excluded from registration
+	 * @see #isBeanExcludedFromAotRegistration()
 	 * @see BeanRegistrationExcludeFilter
 	 */
 	default boolean isBeanExcludedFromAotProcessing() {
 		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Delegate to {@link #isBeanExcludedFromAotProcessing()} to honor
+	 * existing implementations of that method.
+	 * @since 7.1
+	 */
+	@Override
+	default boolean isBeanExcludedFromAotRegistration() {
+		return isBeanExcludedFromAotProcessing();
 	}
 
 }

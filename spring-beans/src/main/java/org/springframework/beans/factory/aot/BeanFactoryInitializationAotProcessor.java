@@ -37,7 +37,10 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * registered using a factory method, make sure to make it {@code static} so
  * that its enclosing class does not have to be initialized.
  *
- * <p>A component that implements this interface is not contributed.
+ * <p>A component that implements this interface is not registered in the
+ * AOT-optimized application context by default. Override
+ * {@link #isBeanExcludedFromAotRegistration()} to return {@code false} if
+ * the component is also required at runtime.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -45,7 +48,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * @see BeanFactoryInitializationAotContribution
  */
 @FunctionalInterface
-public interface BeanFactoryInitializationAotProcessor {
+public interface BeanFactoryInitializationAotProcessor extends AotProcessor {
 
 	/**
 	 * Process the given {@link ConfigurableListableBeanFactory} instance
