@@ -68,13 +68,13 @@ public final class HttpServiceProxyFactory {
 
 	private HttpServiceProxyFactory(
 			HttpExchangeAdapter exchangeAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
-			List<HttpRequestValues.Processor> requestValuesProcessor,
+			List<HttpRequestValues.Processor> requestValuesProcessors,
 			@Nullable StringValueResolver embeddedValueResolver,
 			List<ProxyFactoryCustomizer> proxyFactoryCustomizers) {
 
 		this.exchangeAdapter = exchangeAdapter;
 		this.argumentResolvers = argumentResolvers;
-		this.requestValuesProcessor = new CompositeHttpRequestValuesProcessor(requestValuesProcessor);
+		this.requestValuesProcessor = new CompositeHttpRequestValuesProcessor(requestValuesProcessors);
 		this.embeddedValueResolver = embeddedValueResolver;
 		this.proxyFactoryCustomizers = proxyFactoryCustomizers;
 	}
