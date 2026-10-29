@@ -61,6 +61,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
+import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -69,7 +70,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Creates instances of {@link org.springframework.web.util.UriComponentsBuilder}
- * by pointing to {@code @RequestMapping} methods on Spring MVC controllers.
+ * by pointing to {@code @RequestMapping} or {@code @HttpExchange} methods on Spring MVC controllers.
  *
  * <p>There are several groups of methods:
  * <ul>
@@ -94,6 +95,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Daeho Kwon
  * @since 4.0
  */
 public class MvcUriComponentsBuilder {
@@ -326,10 +328,10 @@ public class MvcUriComponentsBuilder {
 	}
 
 	/**
-	 * Return a "mock" controller instance. When an {@code @RequestMapping} method
-	 * on the controller is invoked, the supplied argument values are remembered
-	 * and the result can then be used to create a {@code UriComponentsBuilder}
-	 * via {@link #fromMethodCall(Object)}.
+	 * Return a "mock" controller instance. When an {@code @RequestMapping} or
+	 * {@code @HttpExchange} method on the controller is invoked, the supplied
+	 * argument values are remembered and the result can then be used to create a
+	 * {@code UriComponentsBuilder} via {@link #fromMethodCall(Object)}.
 	 * <p>Note that this is a shorthand version of {@link #controller(Class)} intended
 	 * for inline use (with a static import), for example:
 	 * <pre class="code">
@@ -342,10 +344,10 @@ public class MvcUriComponentsBuilder {
 	}
 
 	/**
-	 * Return a "mock" controller instance. When an {@code @RequestMapping} method
-	 * on the controller is invoked, the supplied argument values are remembered
-	 * and the result can then be used to create {@code UriComponentsBuilder} via
-	 * {@link #fromMethodCall(Object)}.
+	 * Return a "mock" controller instance. When an {@code @RequestMapping} or
+	 * {@code @HttpExchange} method on the controller is invoked, the supplied
+	 * argument values are remembered and the result can then be used to create
+	 * {@code UriComponentsBuilder} via {@link #fromMethodCall(Object)}.
 	 * <p>This is a longer version of {@link #on(Class)}. It is needed with controller
 	 * methods returning void as well for repeated invocations.
 	 * <pre class="code">
@@ -543,18 +545,27 @@ public class MvcUriComponentsBuilder {
 	private static String getClassMapping(Class<?> controllerType) {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
 		RequestMapping mapping = AnnotatedElementUtils.findMergedAnnotation(controllerType, RequestMapping.class);
-		if (mapping == null) {
-			return "";
+		if (mapping != null) {
+			return getPathMapping(mapping, controllerType.getName());
 		}
-		return getPathMapping(mapping, controllerType.getName());
+		HttpExchange httpExchange = AnnotatedElementUtils.findMergedAnnotation(controllerType, HttpExchange.class);
+		if (httpExchange != null) {
+			String url = httpExchange.url();
+			return StringUtils.hasText(url) ? url : "";
+		}
+		return "";
 	}
 
 	private static String getMethodMapping(AnnotatedMethod annotatedMethod) {
 		RequestMapping requestMapping = annotatedMethod.getMethodAnnotation(RequestMapping.class);
-		if (requestMapping == null) {
-			throw new IllegalArgumentException("No @RequestMapping on: " + annotatedMethod.getMethod().toGenericString());
+		if (requestMapping != null) {
+			return getPathMapping(requestMapping, annotatedMethod.getMethod().toGenericString());
 		}
-		return getPathMapping(requestMapping, annotatedMethod.getMethod().toGenericString());
+		HttpExchange httpExchange = annotatedMethod.getMethodAnnotation(HttpExchange.class);
+		if (httpExchange != null) {
+			return httpExchange.url();
+		}
+		throw new IllegalArgumentException("No @RequestMapping or @HttpExchange on: " + annotatedMethod.getMethod().toGenericString());
 	}
 
 	private static String getPathMapping(RequestMapping requestMapping, String source) {
