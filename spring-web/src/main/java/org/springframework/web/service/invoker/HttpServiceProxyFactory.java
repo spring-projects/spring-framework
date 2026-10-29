@@ -74,9 +74,11 @@ public final class HttpServiceProxyFactory {
 
 		this.exchangeAdapter = exchangeAdapter;
 		this.argumentResolvers = argumentResolvers;
-		this.requestValuesProcessor = new CompositeHttpRequestValuesProcessor(requestValuesProcessors);
+		// Defensive copies, since the Builder's lists may be modified after build().
+		this.requestValuesProcessor =
+				new CompositeHttpRequestValuesProcessor(List.copyOf(requestValuesProcessors));
 		this.embeddedValueResolver = embeddedValueResolver;
-		this.proxyFactoryCustomizers = proxyFactoryCustomizers;
+		this.proxyFactoryCustomizers = List.copyOf(proxyFactoryCustomizers);
 	}
 
 
@@ -244,8 +246,8 @@ public final class HttpServiceProxyFactory {
 			HttpExchangeAdapter adapterToUse = this.exchangeAdapterDecorator.apply(this.exchangeAdapter);
 
 			return new HttpServiceProxyFactory(
-					adapterToUse, initArgumentResolvers(), List.copyOf(this.requestValuesProcessors),
-					this.embeddedValueResolver, List.copyOf(this.proxyFactoryCustomizers));
+					adapterToUse, initArgumentResolvers(), this.requestValuesProcessors,
+					this.embeddedValueResolver, this.proxyFactoryCustomizers);
 		}
 
 		@SuppressWarnings({"DataFlowIssue", "NullAway"})
