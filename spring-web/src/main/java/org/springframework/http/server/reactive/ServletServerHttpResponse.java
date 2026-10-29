@@ -160,7 +160,8 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new Cookie(name, httpCookie.getValue());
 				if (!httpCookie.getMaxAge().isNegative()) {
-					cookie.setMaxAge((int) httpCookie.getMaxAge().getSeconds());
+					long maxAge = httpCookie.getMaxAge().getSeconds();
+					cookie.setMaxAge((int) Math.min(maxAge, Integer.MAX_VALUE));
 				}
 				if (httpCookie.getDomain() != null) {
 					cookie.setDomain(httpCookie.getDomain());
