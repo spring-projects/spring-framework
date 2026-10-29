@@ -78,7 +78,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static java.util.Map.entry;
@@ -780,7 +779,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.getBeanFactory()).isSameAs(bf);
 
 		assertThat(bf.getDependenciesForBean("annotatedBean")).isEqualTo(
-				new String[] {"testBean", "nestedTestBean", ObjectUtils.identityToString(bf)});
+				new String[] {"testBean", "nestedTestBean"});
 	}
 
 	@Test
