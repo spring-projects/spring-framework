@@ -308,6 +308,16 @@ class DefaultServerWebExchangeCheckNotModifiedTests {
 	}
 
 	@Test
+	void checkNotModifiedTimestampIgnoresIfModifiedSinceWithUnsafeMethod() {
+		MockServerHttpRequest request = MockServerHttpRequest.put("/")
+				.ifModifiedSince(currentDate.toEpochMilli()).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		assertThat(exchange.checkNotModified(currentDate)).isFalse();
+		assertThat(exchange.getResponse().getStatusCode()).isNull();
+	}
+
+	@Test
 	void checkNotModifiedTimestampConditionalWithSafeMethod() throws Exception {
 		String eTag = "\"Foo\"";
 		Instant oneMinuteAgo = currentDate.minusSeconds(60);

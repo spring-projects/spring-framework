@@ -226,6 +226,15 @@ class ServletWebRequestHttpMethodsTests {
 		assertOkWithLastModified(oneMinuteLater);
 	}
 
+	@ParameterizedTest(name = "[{index}] {0}")
+	@ValueSource(strings = {"POST", "PUT", "DELETE"})
+	void ifModifiedSinceShouldBeIgnoredForUnsafeMethods(String method) {
+		setUpRequest(method);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, NOW.toEpochMilli());
+		assertThat(request.checkNotModified(NOW.toEpochMilli())).isFalse();
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
+	}
+
 	@SafeHttpMethodsTest
 	void ifModifiedSinceShouldNotOverrideResponseStatus(String method) {
 		setUpRequest(method);

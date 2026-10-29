@@ -285,7 +285,8 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	private void validateIfModifiedSince(long lastModifiedTimestamp) {
-		if (lastModifiedTimestamp < 0) {
+		// If-Modified-Since only applies to GET and HEAD (RFC 9110, section 13.1.3)
+		if (lastModifiedTimestamp < 0 || !SAFE_METHODS.contains(getRequest().getMethod())) {
 			return;
 		}
 		long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
