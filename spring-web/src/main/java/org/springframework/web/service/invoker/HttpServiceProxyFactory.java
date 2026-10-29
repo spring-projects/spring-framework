@@ -244,8 +244,8 @@ public final class HttpServiceProxyFactory {
 			HttpExchangeAdapter adapterToUse = this.exchangeAdapterDecorator.apply(this.exchangeAdapter);
 
 			return new HttpServiceProxyFactory(
-					adapterToUse, initArgumentResolvers(), this.requestValuesProcessors,
-					this.embeddedValueResolver, this.proxyFactoryCustomizers);
+					adapterToUse, initArgumentResolvers(), List.copyOf(this.requestValuesProcessors),
+					this.embeddedValueResolver, List.copyOf(this.proxyFactoryCustomizers));
 		}
 
 		@SuppressWarnings({"DataFlowIssue", "NullAway"})

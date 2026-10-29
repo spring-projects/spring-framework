@@ -56,6 +56,22 @@ class HttpServiceProxyFactoryTests {
 		assertThat(result).isEqualTo("intercepted");
 	}
 
+	@Test
+	void builderChangesAfterBuildDoNotAffectFactory() {
+		var builder = HttpServiceProxyFactory.builderFor(mock(HttpExchangeAdapter.class))
+				.exchangeAdapterDecorator(TestDecorator::new);
+		HttpServiceProxyFactory factory = builder.build();
+
+		var interceptor = (MethodInterceptor) invocation -> "intercepted";
+		builder.proxyFactoryCustomizer((proxyFactory, serviceType) -> proxyFactory.addAdvice(0, interceptor));
+		builder.httpRequestValuesProcessor((method, parameters, arguments, requestValues) -> {
+			throw new IllegalStateException("Processor added after build");
+		});
+
+		assertThat(factory.createClient(Service.class).execute()).isEqualTo("decorated");
+		assertThat(builder.build().createClient(Service.class).execute()).isEqualTo("intercepted");
+	}
+
 
 	private interface Service {
 
