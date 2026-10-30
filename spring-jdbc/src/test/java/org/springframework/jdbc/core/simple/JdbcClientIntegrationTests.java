@@ -147,6 +147,18 @@ class JdbcClientIntegrationTests {
 	}
 
 
+	@Test
+	void queryWithDuplicateColumnLabels() {
+		this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).params("Jane", "Smith").update();
+
+		// Self-join: each column label appears twice
+		User user = this.jdbcClient.sql("select * from users u1, users u2 where u1.id = 0 and u2.id = 1")
+				.query(User.class)
+				.single();
+
+		assertThat(user).isEqualTo(new User(0, "Sam", "Brannen"));
+	}
+
 	@Nested  // gh-34768
 	class ReusedNamedParameterTests {
 
