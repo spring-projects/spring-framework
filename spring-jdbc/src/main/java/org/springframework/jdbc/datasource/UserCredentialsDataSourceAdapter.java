@@ -19,6 +19,8 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.NamedThreadLocal;
@@ -62,6 +64,8 @@ import org.springframework.util.StringUtils;
  * @see #getConnection
  */
 public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
+
+	private static final Log logger = LogFactory.getLog(UserCredentialsDataSourceAdapter.class);
 
 	private @Nullable String username;
 
@@ -157,11 +161,24 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 				doGetConnection(threadCredentials.username, threadCredentials.password) :
 				doGetConnection(this.username, this.password));
 
-		if (this.catalog != null) {
-			con.setCatalog(this.catalog);
+		try {
+			if (this.catalog != null) {
+				con.setCatalog(this.catalog);
+			}
+			if (this.schema != null) {
+				con.setSchema(this.schema);
+			}
 		}
-		if (this.schema != null) {
-			con.setSchema(this.schema);
+		catch (Throwable ex) {
+			logger.debug("Failed to apply settings to JDBC Connection", ex);
+			// Close Connection since it is not returned to the caller.
+			try {
+				con.close();
+			}
+			catch (Throwable closeEx) {
+				logger.debug("Could not close JDBC Connection after failed settings", closeEx);
+			}
+			throw ex;
 		}
 		return con;
 	}
