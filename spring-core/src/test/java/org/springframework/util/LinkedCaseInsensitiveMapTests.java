@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Yanming Zhou
+ * @author Chengang Guan
  */
 class LinkedCaseInsensitiveMapTests {
 
@@ -282,6 +284,17 @@ class LinkedCaseInsensitiveMapTests {
 	}
 
 	@Test
+	void entrySetRemoveAllIsCaseInsensitive() {
+		map.put("key1", "v1");
+		map.put("key2", "v2");
+
+		Set<Map.Entry<String, String>> toRemove = Set.of(Map.entry("KEY1", "v1"), Map.entry("KEY2", "v2"));
+
+		assertThat(map.entrySet().removeAll(toRemove)).isTrue();
+		assertThat(map).isEmpty();
+	}
+
+	@Test
 	void containsValue() {
 		assertThat(map.containsValue("value")).isFalse();
 
@@ -296,6 +309,32 @@ class LinkedCaseInsensitiveMapTests {
 
 		map.put("key", null);
 		assertThat(map.containsValue(null)).isTrue();
+	}
+
+	@Test
+	void keySetRemoveWithNullValue() {
+		map.put("key", null);
+
+		assertThat(map.keySet().remove("key")).isTrue();
+		assertThat(map).doesNotContainKey("key");
+	}
+
+	@Test
+	void keySetRemoveIsCaseInsensitive() {
+		map.put("Key", "value");
+		assertThat(map.keySet().remove("KEY")).isTrue();
+		assertThat(map).isEmpty();
+	}
+
+	@Test
+	void keySetRemoveAllIsCaseInsensitive() {
+		map.put("key1", "v1");
+		map.put("key2", "v2");
+
+		Set<String> toRemove = Set.of("KEY1", "KEY2");
+
+		assertThat(map.keySet().removeAll(toRemove)).isTrue();
+		assertThat(map).isEmpty();
 	}
 
 	private void nextAndRemove(Iterator<?> iterator) {

@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
@@ -45,6 +46,7 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Chengang Guan
  * @since 3.0
  * @param <V> the value type
  */
@@ -378,7 +380,23 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 
 		@Override
 		public boolean remove(Object o) {
-			return LinkedCaseInsensitiveMap.this.remove(o) != null;
+			if (!LinkedCaseInsensitiveMap.this.containsKey(o)) {
+				return false;
+			}
+			LinkedCaseInsensitiveMap.this.remove(o);
+			return true;
+		}
+
+		@Override
+		public boolean removeAll(Collection<?> c) {
+			Objects.requireNonNull(c);
+			boolean modified = false;
+
+			for (Object e : c) {
+				modified |= remove(e);
+			}
+
+			return modified;
 		}
 
 		@Override
@@ -484,6 +502,18 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 			}
 			LinkedCaseInsensitiveMap.this.remove(key);
 			return true;
+		}
+
+		@Override
+		public boolean removeAll(Collection<?> c) {
+			Objects.requireNonNull(c);
+			boolean modified = false;
+
+			for (Object e : c) {
+				modified |= remove(e);
+			}
+
+			return modified;
 		}
 
 		@Override
