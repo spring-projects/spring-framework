@@ -18,6 +18,7 @@ package org.springframework.http.codec.protobuf;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,9 @@ import org.springframework.util.MimeType;
 
 /**
  * A {@code Encoder} that writes {@link com.google.protobuf.Message}s as JSON.
+ *
+ * <p>The output is written with the charset of the MIME type, if any, and
+ * with UTF-8 otherwise.
  *
  * <p>To generate {@code Message} Java classes, you need to install the
  * {@code protoc} binary.
@@ -154,7 +158,7 @@ public class ProtobufJsonEncoder implements HttpMessageEncoder<Message> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
-		OutputStreamWriter writer = new OutputStreamWriter(bos, StandardCharsets.UTF_8);
+		OutputStreamWriter writer = new OutputStreamWriter(bos, getCharset(mimeType));
 		try {
 			this.printer.appendTo(message, writer);
 			writer.flush();
@@ -180,6 +184,16 @@ public class ProtobufJsonEncoder implements HttpMessageEncoder<Message> {
 			}
 		}
 		return null;
+	}
+
+	private static Charset getCharset(@Nullable MimeType mimeType) {
+		if (mimeType != null) {
+			Charset charset = mimeType.getCharset();
+			if (charset != null) {
+				return charset;
+			}
+		}
+		return StandardCharsets.UTF_8;
 	}
 
 
