@@ -189,6 +189,37 @@ class SimplePropertyRowMapperTests extends AbstractRowMapperTests {
 		assertThat(person.getFirstName()).isEqualTo("John");
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {"firstName", "first_name", "firstname", "FIRSTNAME"})
+	void mapRowWithReadOnlyPropertyAndField(String label) throws Exception {
+		ResultSet rs = mock();
+		ResultSetMetaData rsmd = mock();
+		when(rs.getMetaData()).thenReturn(rsmd);
+		when(rsmd.getColumnCount()).thenReturn(1);
+		when(rsmd.getColumnLabel(1)).thenReturn(label);
+		when(rs.getString(1)).thenReturn("John");
+
+		ReadOnlyFieldPerson person =
+				new SimplePropertyRowMapper<>(ReadOnlyFieldPerson.class).mapRow(rs, 0);
+		assertThat(person.getFirstName()).isEqualTo("John");
+	}
+
+	@Test
+	void mapRowWithReadOnlyPropertyWithoutField() throws Exception {
+		ResultSet rs = mock();
+		ResultSetMetaData rsmd = mock();
+		when(rs.getMetaData()).thenReturn(rsmd);
+		when(rsmd.getColumnCount()).thenReturn(2);
+		// Matches getClass() via the case-insensitive fallback in getDescriptor().
+		when(rsmd.getColumnLabel(1)).thenReturn("class");
+		when(rsmd.getColumnLabel(2)).thenReturn("first_name");
+		when(rs.getString(2)).thenReturn("John");
+
+		ReadOnlyFieldPerson person =
+				new SimplePropertyRowMapper<>(ReadOnlyFieldPerson.class).mapRow(rs, 0);
+		assertThat(person.getFirstName()).isEqualTo("John");
+	}
+
 
 	private static ResultSet resultSetWithDuplicateIdColumn() throws Exception {
 		// For example, "select * from orders o join customer c on o.customer_id = c.id"
@@ -274,6 +305,16 @@ class SimplePropertyRowMapperTests extends AbstractRowMapperTests {
 		ReadOnlyPerson(String firstName) {
 			this.firstName = firstName;
 		}
+
+		public String getFirstName() {
+			return this.firstName;
+		}
+	}
+
+
+	static class ReadOnlyFieldPerson {
+
+		private String firstName;
 
 		public String getFirstName() {
 			return this.firstName;
