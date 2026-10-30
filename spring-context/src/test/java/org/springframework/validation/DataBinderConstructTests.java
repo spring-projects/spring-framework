@@ -17,6 +17,10 @@
 package org.springframework.validation;
 
 import java.beans.ConstructorProperties;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +58,24 @@ class DataBinderConstructTests {
 		assertThat(dataClass.param1()).isEqualTo("value1");
 		assertThat(dataClass.param2()).isEqualTo(true);
 		assertThat(dataClass.param3()).isEqualTo(0);
+	}
+
+	@Test
+	void dataClassBindingWithNameResolverRepeatedly() {
+		DataBinder.NameResolver nameResolver = parameter -> {
+			ParamName paramName = parameter.getParameterAnnotation(ParamName.class);
+			return (paramName != null ? paramName.value() : null);
+		};
+		for (int i = 0; i < 3; i++) {
+			MapValueResolver valueResolver = new MapValueResolver(Map.of("first-name", "value1", "second", "value2"));
+			DataBinder binder = initDataBinder(NamedRecord.class);
+			binder.setNameResolver(nameResolver);
+			binder.construct(valueResolver);
+
+			NamedRecord target = getTarget(binder);
+			assertThat(target.first()).isEqualTo("value1");
+			assertThat(target.second()).isEqualTo("value2");
+		}
 	}
 
 	@Test
@@ -379,6 +401,18 @@ class DataBinderConstructTests {
 	 * bounded by the supplied input rather than by the structure of the type.
 	 */
 	private record NodeRecord(@Nullable NodeRecord next, @Nullable String value) {
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.PARAMETER)
+	private @interface ParamName {
+
+		String value();
+	}
+
+
+	private record NamedRecord(@ParamName("first-name") String first, String second) {
 	}
 
 

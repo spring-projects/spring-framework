@@ -104,8 +104,12 @@ public enum Nullness {
 			MethodParameter methodParameter = MethodParameter.forParameter(parameter);
 			return KotlinDelegate.forParameter(methodParameter.getExecutable(), methodParameter.getParameterIndex());
 		}
+		return forParameter(parameter, parameter.getDeclaredAnnotations());
+	}
+
+	private static Nullness forParameter(Parameter parameter, Annotation[] declaredAnnotations) {
 		Executable executable = parameter.getDeclaringExecutable();
-		return (hasNullableAnnotation(parameter) ? Nullness.NULLABLE :
+		return (hasNullableAnnotation(declaredAnnotations) ? Nullness.NULLABLE :
 				jSpecifyNullness(executable, executable.getDeclaringClass(), parameter.getAnnotatedType()));
 	}
 
@@ -115,9 +119,17 @@ public enum Nullness {
 	 * @return the corresponding nullness
 	 */
 	public static Nullness forMethodParameter(MethodParameter methodParameter) {
-		return (methodParameter.getParameterIndex() < 0 ?
-				forMethodReturnType(Objects.requireNonNull(methodParameter.getMethod())) :
-				forParameter(methodParameter.getParameter()));
+		int index = methodParameter.getParameterIndex();
+		if (index < 0) {
+			return forMethodReturnType(Objects.requireNonNull(methodParameter.getMethod()));
+		}
+		Parameter parameter = methodParameter.getParameter();
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(methodParameter.getDeclaringClass())) {
+			return forParameter(parameter);
+		}
+		// Same as Parameter.getDeclaredAnnotations(), but without parsing the class file again
+		Annotation[][] annotations = MethodParameter.getExecutableParameterAnnotations(methodParameter.getExecutable());
+		return (index < annotations.length ? forParameter(parameter, annotations[index]) : forParameter(parameter));
 	}
 
 	/**
@@ -137,7 +149,11 @@ public enum Nullness {
 	// Check method and parameter level @Nullable annotations regardless of the package
 	// (including Spring and JSR 305 annotations)
 	private static boolean hasNullableAnnotation(AnnotatedElement element) {
-		for (Annotation annotation : element.getDeclaredAnnotations()) {
+		return hasNullableAnnotation(element.getDeclaredAnnotations());
+	}
+
+	private static boolean hasNullableAnnotation(Annotation[] annotations) {
+		for (Annotation annotation : annotations) {
 			if ("Nullable".equals(annotation.annotationType().getSimpleName())) {
 				return true;
 			}
