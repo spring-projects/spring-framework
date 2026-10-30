@@ -17,9 +17,14 @@
 package org.springframework.jdbc.core;
 
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ConstructorPerson;
@@ -27,6 +32,8 @@ import org.springframework.jdbc.core.test.ConstructorPersonWithGenerics;
 import org.springframework.jdbc.core.test.ConstructorPersonWithSetters;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link SimplePropertyRowMapper}.
@@ -119,6 +126,87 @@ class SimplePropertyRowMapperTests extends AbstractRowMapperTests {
 		mock.verifyClosed();
 	}
 
+	@Test
+	void mapRowWithDuplicateColumnLabelForDataRecord() throws Exception {
+		ResultSet rs = resultSetWithDuplicateIdColumn();
+		RecordOrder order = new SimplePropertyRowMapper<>(RecordOrder.class).mapRow(rs, 0);
+		assertThat(order).isEqualTo(new RecordOrder(1L, "book"));
+	}
+
+	@Test
+	void mapRowWithDuplicateColumnLabelForFinalFields() throws Exception {
+		ResultSet rs = resultSetWithDuplicateIdColumn();
+		FinalFieldOrder order = new SimplePropertyRowMapper<>(FinalFieldOrder.class).mapRow(rs, 0);
+		assertThat(order.id).isEqualTo(1L);
+		assertThat(order.item).isEqualTo("book");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"name", "NAME"})
+	void mapRowWithDuplicateColumnLabelForSetter(String duplicateLabel) throws Exception {
+		// The setters for constructor properties throw UnsupportedOperationException.
+		// "name" resolves to setName() via a direct match; "NAME", via a de-underscored match.
+		ResultSet rs = mock();
+		ResultSetMetaData rsmd = mock();
+		when(rs.getMetaData()).thenReturn(rsmd);
+		when(rsmd.getColumnCount()).thenReturn(4);
+		when(rsmd.getColumnLabel(1)).thenReturn("name");
+		when(rsmd.getColumnLabel(2)).thenReturn("age");
+		when(rsmd.getColumnLabel(3)).thenReturn("balance");
+		when(rsmd.getColumnLabel(4)).thenReturn(duplicateLabel);
+		when(rs.findColumn("name")).thenReturn(1);
+		when(rs.findColumn("age")).thenReturn(2);
+		when(rs.findColumn("balance")).thenReturn(3);
+		when(rs.getString(1)).thenReturn("Bubba");
+		when(rs.getLong(2)).thenReturn(22L);
+		when(rs.getBigDecimal(3)).thenReturn(new BigDecimal("1234.56"));
+		// Duplicate column: must not be mapped
+		when(rs.getString(4)).thenReturn("Jane");
+
+		ConstructorPersonWithSetters person =
+				new SimplePropertyRowMapper<>(ConstructorPersonWithSetters.class).mapRow(rs, 0);
+		assertThat(person.name()).isEqualTo("BUBBA");
+		assertThat(person.age()).isEqualTo(22L);
+		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
+	}
+
+	@Test
+	void mapRowWithDuplicateColumnLabelForReadOnlyPropertyViaCaseInsensitiveMatch() throws Exception {
+		ResultSet rs = mock();
+		ResultSetMetaData rsmd = mock();
+		when(rs.getMetaData()).thenReturn(rsmd);
+		when(rsmd.getColumnCount()).thenReturn(2);
+		// The label only matches the property via the case-insensitive fallback in getDescriptor().
+		when(rsmd.getColumnLabel(1)).thenReturn("firstname");
+		when(rsmd.getColumnLabel(2)).thenReturn("firstname");
+		when(rs.findColumn("first_name")).thenThrow(new SQLException());
+		when(rs.findColumn("firstName")).thenReturn(1);
+		when(rs.getString(1)).thenReturn("John");
+		// Duplicate column: must not be mapped
+		when(rs.getString(2)).thenReturn("Jane");
+
+		ReadOnlyPerson person = new SimplePropertyRowMapper<>(ReadOnlyPerson.class).mapRow(rs, 0);
+		assertThat(person.getFirstName()).isEqualTo("John");
+	}
+
+
+	private static ResultSet resultSetWithDuplicateIdColumn() throws Exception {
+		// For example, "select * from orders o join customer c on o.customer_id = c.id"
+		ResultSet rs = mock();
+		ResultSetMetaData rsmd = mock();
+		when(rs.getMetaData()).thenReturn(rsmd);
+		when(rsmd.getColumnCount()).thenReturn(3);
+		when(rsmd.getColumnLabel(1)).thenReturn("id");
+		when(rsmd.getColumnLabel(2)).thenReturn("item");
+		when(rsmd.getColumnLabel(3)).thenReturn("id");
+		// findColumn returns the first matching column
+		when(rs.findColumn("id")).thenReturn(1);
+		when(rs.findColumn("item")).thenReturn(2);
+		when(rs.getLong(1)).thenReturn(1L);
+		when(rs.getString(2)).thenReturn("book");
+		when(rs.getLong(3)).thenReturn(100L);
+		return rs;
+	}
 
 	protected void verifyPerson(RecordPerson person) {
 		assertThat(person.name()).isEqualTo("Bubba");
@@ -160,6 +248,36 @@ class SimplePropertyRowMapperTests extends AbstractRowMapperTests {
 		String name;
 		long age;
 		BigDecimal balance;
+	}
+
+
+	record RecordOrder(long id, String item) {
+	}
+
+
+	static class FinalFieldOrder {
+
+		final long id;
+		final String item;
+
+		FinalFieldOrder(long id, String item) {
+			this.id = id;
+			this.item = item;
+		}
+	}
+
+
+	static class ReadOnlyPerson {
+
+		private final String firstName;
+
+		ReadOnlyPerson(String firstName) {
+			this.firstName = firstName;
+		}
+
+		public String getFirstName() {
+			return this.firstName;
+		}
 	}
 
 }
