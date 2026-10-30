@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ConstructorPerson;
@@ -139,18 +141,48 @@ class SimplePropertyRowMapperTests extends AbstractRowMapperTests {
 		assertThat(order.item).isEqualTo("book");
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {"name", "NAME"})
+	void mapRowWithDuplicateColumnLabelForSetter(String duplicateLabel) throws Exception {
+		// The setters for constructor properties throw UnsupportedOperationException.
+		// "name" resolves to setName() via a direct match; "NAME", via a de-underscored match.
+		ResultSet rs = mock();
+		ResultSetMetaData rsmd = mock();
+		when(rs.getMetaData()).thenReturn(rsmd);
+		when(rsmd.getColumnCount()).thenReturn(4);
+		when(rsmd.getColumnLabel(1)).thenReturn("name");
+		when(rsmd.getColumnLabel(2)).thenReturn("age");
+		when(rsmd.getColumnLabel(3)).thenReturn("balance");
+		when(rsmd.getColumnLabel(4)).thenReturn(duplicateLabel);
+		when(rs.findColumn("name")).thenReturn(1);
+		when(rs.findColumn("age")).thenReturn(2);
+		when(rs.findColumn("balance")).thenReturn(3);
+		when(rs.getString(1)).thenReturn("Bubba");
+		when(rs.getLong(2)).thenReturn(22L);
+		when(rs.getBigDecimal(3)).thenReturn(new BigDecimal("1234.56"));
+		// Duplicate column: must not be mapped
+		when(rs.getString(4)).thenReturn("Jane");
+
+		ConstructorPersonWithSetters person =
+				new SimplePropertyRowMapper<>(ConstructorPersonWithSetters.class).mapRow(rs, 0);
+		assertThat(person.name()).isEqualTo("BUBBA");
+		assertThat(person.age()).isEqualTo(22L);
+		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
+	}
+
 	@Test
-	void mapRowWithDuplicateColumnLabelForReadOnlyProperty() throws Exception {
+	void mapRowWithDuplicateColumnLabelForReadOnlyPropertyViaCaseInsensitiveMatch() throws Exception {
 		ResultSet rs = mock();
 		ResultSetMetaData rsmd = mock();
 		when(rs.getMetaData()).thenReturn(rsmd);
 		when(rsmd.getColumnCount()).thenReturn(2);
-		// Only resolvable through the case-insensitive fallback
+		// The label only matches the property via the case-insensitive fallback in getDescriptor().
 		when(rsmd.getColumnLabel(1)).thenReturn("firstname");
 		when(rsmd.getColumnLabel(2)).thenReturn("firstname");
 		when(rs.findColumn("first_name")).thenThrow(new SQLException());
 		when(rs.findColumn("firstName")).thenReturn(1);
 		when(rs.getString(1)).thenReturn("John");
+		// Duplicate column: must not be mapped
 		when(rs.getString(2)).thenReturn("Jane");
 
 		ReadOnlyPerson person = new SimplePropertyRowMapper<>(ReadOnlyPerson.class).mapRow(rs, 0);

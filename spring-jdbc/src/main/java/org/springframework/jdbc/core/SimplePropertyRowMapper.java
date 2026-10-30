@@ -37,6 +37,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -221,12 +222,7 @@ public class SimplePropertyRowMapper<T> implements RowMapper<T> {
 	 * in the result set.
 	 */
 	private boolean isMappedViaConstructor(String propertyName) {
-		for (String parameterName : this.constructorParameterNames) {
-			if (propertyName.equals(parameterName)) {
-				return true;
-			}
-		}
-		return false;
+		return ObjectUtils.containsElement(this.constructorParameterNames, propertyName);
 	}
 
 }
