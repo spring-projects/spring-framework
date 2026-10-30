@@ -202,7 +202,7 @@ public class SimplePropertyRowMapper<T> implements RowMapper<T> {
 			// Fallback: case-insensitive match
 			PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(this.mappedClass);
 			for (PropertyDescriptor candidate : pds) {
-				if (name.equalsIgnoreCase(candidate.getName())) {
+				if (name.equalsIgnoreCase(candidate.getName()) && candidate.getWriteMethod() != null) {
 					return (isMappedViaConstructor(candidate.getName()) ? NO_DESCRIPTOR :
 							BeanUtils.getWriteMethodParameter(candidate));
 				}
