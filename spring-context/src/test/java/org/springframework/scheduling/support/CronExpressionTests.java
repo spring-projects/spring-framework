@@ -1329,6 +1329,25 @@ class CronExpressionTests {
 	}
 
 	@Test
+	void sundayToSunday() {
+		CronExpression expression = CronExpression.parse("0 0 0 ? * SUN-SUN");
+
+		LocalDateTime last = LocalDateTime.of(2021, 2, 25, 15, 0);
+		LocalDateTime expected = LocalDateTime.of(2021, 2, 28, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(SUNDAY);
+
+		last = actual;
+		expected = LocalDateTime.of(2021, 3, 7, 0, 0);
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(SUNDAY);
+	}
+
+	@Test
 	void daylightSaving() {
 		CronExpression cronExpression = CronExpression.parse("0 0 9 * * *");
 
