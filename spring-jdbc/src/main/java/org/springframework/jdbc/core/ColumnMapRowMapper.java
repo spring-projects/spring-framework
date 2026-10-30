@@ -19,6 +19,7 @@ package org.springframework.jdbc.core;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
@@ -60,14 +61,18 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, @Nullable Objec
 
 	/**
 	 * Create a Map instance to be used as column map.
-	 * <p>By default, a linked case-insensitive Map will be created.
+	 * <p>By default, a linked case-insensitive Map will be created, folding
+	 * keys with {@link Locale#US} rather than the JVM's default Locale so that
+	 * column names containing {@code 'i'}/{@code 'I'} keep matching regardless
+	 * of the default Locale (for example {@code "ID"} vs {@code "id"} under a
+	 * Turkish default Locale), consistent with {@link BeanPropertyRowMapper}.
 	 * @param columnCount the column count, to be used as initial
 	 * capacity for the Map
 	 * @return the new Map instance
 	 * @see org.springframework.util.LinkedCaseInsensitiveMap
 	 */
 	protected Map<String, @Nullable Object> createColumnMap(int columnCount) {
-		return new LinkedCaseInsensitiveMap<>(columnCount);
+		return new LinkedCaseInsensitiveMap<>(columnCount, Locale.US);
 	}
 
 	/**

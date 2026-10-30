@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.function.Consumer;
@@ -1411,15 +1412,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Create a Map instance to be used as the results map.
 	 * <p>If {@link #resultsMapCaseInsensitive} has been set to true,
-	 * a {@link LinkedCaseInsensitiveMap} will be created; otherwise, a
-	 * {@link LinkedHashMap} will be created.
+	 * a {@link LinkedCaseInsensitiveMap} will be created, folding keys with
+	 * {@link Locale#US} rather than the JVM's default Locale so that names
+	 * containing {@code 'i'}/{@code 'I'} keep matching regardless of the
+	 * default Locale; otherwise, a {@link LinkedHashMap} will be created.
 	 * @return the results Map instance
 	 * @see #setResultsMapCaseInsensitive
 	 * @see #isResultsMapCaseInsensitive
 	 */
 	protected Map<String, @Nullable Object> createResultsMap() {
 		if (isResultsMapCaseInsensitive()) {
-			return new LinkedCaseInsensitiveMap<>();
+			return new LinkedCaseInsensitiveMap<>(Locale.US);
 		}
 		else {
 			return new LinkedHashMap<>();

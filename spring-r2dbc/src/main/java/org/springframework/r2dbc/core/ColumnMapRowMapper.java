@@ -17,6 +17,7 @@
 package org.springframework.r2dbc.core;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -69,13 +70,17 @@ public class ColumnMapRowMapper implements BiFunction<Row, RowMetadata, Map<Stri
 
 	/**
 	 * Create a {@link Map} instance to be used as column map.
-	 * <p>By default, a linked case-insensitive Map will be created.
+	 * <p>By default, a linked case-insensitive Map will be created, folding
+	 * keys with {@link Locale#US} rather than the JVM's default Locale so that
+	 * column names containing {@code 'i'}/{@code 'I'} keep matching regardless
+	 * of the default Locale (for example {@code "ID"} vs {@code "id"} under a
+	 * Turkish default Locale), consistent with {@link BeanPropertyRowMapper}.
 	 * @param columnCount the column count, to be used as initial capacity for the Map
 	 * @return the new {@link Map} instance
 	 * @see LinkedCaseInsensitiveMap
 	 */
 	protected Map<String, Object> createColumnMap(int columnCount) {
-		return new LinkedCaseInsensitiveMap<>(columnCount);
+		return new LinkedCaseInsensitiveMap<>(columnCount, Locale.US);
 	}
 
 	/**
