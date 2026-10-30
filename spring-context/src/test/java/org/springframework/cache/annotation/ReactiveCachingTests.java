@@ -315,7 +315,7 @@ class ReactiveCachingTests {
 		assertThat(cache.get("key")).isNull();
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest  // gh-37600
 	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
 			EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
 			LateCacheHitDeterminationConfig.class,
@@ -326,16 +326,16 @@ class ReactiveCachingTests {
 		ReactiveContextService service = ctx.getBean(ReactiveContextService.class);
 
 		StepVerifier.create(service.cacheableMono("key").contextWrite(Context.of("tenant", "t1")))
-				.expectNext("t1")
+				.expectNext("t1") // cache miss
 				.verifyComplete();
 		StepVerifier.create(service.cacheableMono("key").contextWrite(Context.of("tenant", "t2")))
-				.expectNext("t1")
+				.expectNext("t1") // cache hit
 				.verifyComplete();
 
 		ctx.close();
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest  // gh-37600
 	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
 			EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
 			LateCacheHitDeterminationConfig.class,
@@ -346,31 +346,31 @@ class ReactiveCachingTests {
 		ReactiveContextService service = ctx.getBean(ReactiveContextService.class);
 
 		StepVerifier.create(service.cacheableFlux("key").contextWrite(Context.of("tenant", "t1")))
-				.expectNext("t1")
+				.expectNext("t1") // cache miss
 				.verifyComplete();
 		StepVerifier.create(service.cacheableFlux("key").contextWrite(Context.of("tenant", "t2")))
-				.expectNext("t1")
+				.expectNext("t1") // cache hit
 				.verifyComplete();
 
 		ctx.close();
 	}
 
-	@Test
+	@Test  // gh-37600
 	void cachePutFluxPropagatesContext() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EarlyCacheHitDeterminationConfig.class, ReactiveContextService.class);
 		ReactiveContextService service = ctx.getBean(ReactiveContextService.class);
 
 		StepVerifier.create(service.cachePutFlux("key").contextWrite(Context.of("tenant", "t1")))
-				.expectNext("t1")
+				.expectNext("t1") // method invoked
 				.verifyComplete();
 
 		assertThat(ctx.getBean(CacheManager.class).getCache("first").get("key").get())
-				.isEqualTo(List.of("t1"));
+				.isEqualTo(List.of("t1")); // cached by @CachePut
 		ctx.close();
 	}
 
-	@Test
+	@Test  // gh-37600
 	void cacheEvictFluxPropagatesContext() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EarlyCacheHitDeterminationConfig.class, ReactiveContextService.class);
@@ -379,10 +379,10 @@ class ReactiveCachingTests {
 		cache.put("key", List.of("t0"));
 
 		StepVerifier.create(service.cacheEvictFlux("key").contextWrite(Context.of("tenant", "t1")))
-				.expectNext("t1")
+				.expectNext("t1") // method invoked
 				.verifyComplete();
 
-		assertThat(cache.get("key")).isNull();
+		assertThat(cache.get("key")).isNull(); // evicted
 		ctx.close();
 	}
 
