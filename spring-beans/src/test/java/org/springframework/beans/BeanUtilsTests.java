@@ -53,6 +53,7 @@ import org.springframework.core.io.ResourceEditor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 /**
@@ -226,6 +227,41 @@ class BeanUtilsTests {
 				assertThat(propertyDescriptor.getPropertyType()).as(propertyDescriptor.getName() + " has unexpected type").isEqualTo(keyDescr.getPropertyType());
 			}
 		}
+	}
+
+	@Test
+	void getWriteMethodParameterForReadOnlyProperty() {
+		PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(ReadOnlyAndWriteOnlyBean.class, "readOnly");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> BeanUtils.getWriteMethodParameter(pd))
+				.withMessage("No write method available for property 'readOnly' of bean class [%s]",
+						ReadOnlyAndWriteOnlyBean.class.getName());
+	}
+
+	@Test
+	void getWriteMethodParameterForReadOnlyPropertyWithStandardPropertyDescriptor() throws Exception {
+		PropertyDescriptor pd = new PropertyDescriptor("readOnly",
+				ReadOnlyAndWriteOnlyBean.class.getMethod("getReadOnly"), null);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> BeanUtils.getWriteMethodParameter(pd))
+				.withMessage("No write method available for property 'readOnly'");
+	}
+
+	@Test
+	void genericTypeAwarePropertyDescriptorForReadOnlyAndWriteOnlyProperties() {
+		GenericTypeAwarePropertyDescriptor readOnly = (GenericTypeAwarePropertyDescriptor)
+				BeanUtils.getPropertyDescriptor(ReadOnlyAndWriteOnlyBean.class, "readOnly");
+		assertThatIllegalStateException()
+				.isThrownBy(readOnly::getWriteMethodForActualAccess)
+				.withMessage("No write method available for property 'readOnly' of bean class [%s]",
+						ReadOnlyAndWriteOnlyBean.class.getName());
+
+		GenericTypeAwarePropertyDescriptor writeOnly = (GenericTypeAwarePropertyDescriptor)
+				BeanUtils.getPropertyDescriptor(ReadOnlyAndWriteOnlyBean.class, "writeOnly");
+		assertThatIllegalStateException()
+				.isThrownBy(writeOnly::getReadMethodType)
+				.withMessage("No read method available for property 'writeOnly' of bean class [%s]",
+						ReadOnlyAndWriteOnlyBean.class.getName());
 	}
 
 	@ParameterizedTest
@@ -867,6 +903,17 @@ class BeanUtilsTests {
 		@Override
 		public void setValue(String aValue) {
 			value = aValue;
+		}
+	}
+
+
+	private static class ReadOnlyAndWriteOnlyBean {
+
+		public String getReadOnly() {
+			return "readOnly";
+		}
+
+		public void setWriteOnly(String writeOnly) {
 		}
 	}
 
