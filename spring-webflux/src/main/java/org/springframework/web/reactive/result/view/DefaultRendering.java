@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.view;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
@@ -47,9 +48,10 @@ class DefaultRendering implements Rendering {
 
 	DefaultRendering(Object view, @Nullable Model model, @Nullable HttpStatusCode status, @Nullable HttpHeaders headers) {
 		this.view = view;
-		this.model = (model != null ? model.asMap() : Collections.emptyMap());
+		// Defensive copies, since the Builder's model and headers may be modified after build().
+		this.model = (model != null ? new LinkedHashMap<>(model.asMap()) : Collections.emptyMap());
 		this.status = status;
-		this.headers = (headers != null ? headers : EMPTY_HEADERS);
+		this.headers = (headers != null ? HttpHeaders.copyOf(headers) : EMPTY_HEADERS);
 	}
 
 
