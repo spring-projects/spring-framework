@@ -1263,6 +1263,31 @@ class JdbcTemplateTests {
 		});
 	}
 
+	@Test
+	void queryForStreamReleasesResourcesOnWarningFailure() throws Exception {
+		given(this.connection.createStatement()).willReturn(this.statement);
+		given(this.statement.getWarnings()).willReturn(new SQLWarning("My warning"));
+		this.template.setIgnoreWarnings(false);
+
+		assertThatExceptionOfType(SQLWarningException.class).isThrownBy(() ->
+				this.template.queryForStream("SELECT 1", (rs, rowNum) -> rs.getString(1)));
+		verify(this.resultSet).close();
+		verify(this.statement).close();
+		verify(this.connection).close();
+	}
+
+	@Test
+	void preparedQueryForStreamReleasesResourcesOnWarningFailure() throws Exception {
+		given(this.preparedStatement.getWarnings()).willReturn(new SQLWarning("My warning"));
+		this.template.setIgnoreWarnings(false);
+
+		assertThatExceptionOfType(SQLWarningException.class).isThrownBy(() ->
+				this.template.queryForStream("SELECT ?", (rs, rowNum) -> rs.getString(1), 1));
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
+	}
+
 	private void testDiscardFurtherRowsOnceMaxRowsHasBeenReached(BiFunction<JdbcTemplate,String,List<String>> function) throws Exception {
 		String sql = "SELECT FORENAME FROM CUSTMR";
 		String[] results = {"rod", "gary", " portia"};
