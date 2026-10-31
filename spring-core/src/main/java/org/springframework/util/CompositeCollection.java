@@ -49,7 +49,8 @@ class CompositeCollection<E extends @Nullable Object> implements Collection<E> {
 
 	@Override
 	public int size() {
-		return this.first.size() + this.second.size();
+		long size = (long) this.first.size() + (long) this.second.size();
+		return size > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) size;
 	}
 
 	@Override
