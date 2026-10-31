@@ -106,6 +106,32 @@ class ConcurrencyLimitTests {
 		assertThat(target.current).hasValue(0);
 	}
 
+	@Test  // gh-37611
+	void withPostProcessorForMethodWithPlainInterface() {
+		PlainInterface proxy = createProxy(AnnotatedMethodBeanWithPlainInterface.class, PlainInterface.class, false);
+		AnnotatedMethodBeanWithPlainInterface target = (AnnotatedMethodBeanWithPlainInterface) AopProxyUtils.getSingletonTarget(proxy);
+
+		List<CompletableFuture<?>> futures = new ArrayList<>(10);
+		for (int i = 0; i < 10; i++) {
+			futures.add(CompletableFuture.runAsync(proxy::concurrentOperation));
+		}
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+		assertThat(target.current).hasValue(0);
+	}
+
+	@Test  // gh-37611
+	void withPostProcessorForMethodWithPlainInterfaceAndDefaultTargetClass() {
+		PlainInterface proxy = createProxy(AnnotatedMethodBeanWithPlainInterface.class, PlainInterface.class, true);
+		AnnotatedMethodBeanWithPlainInterface target = (AnnotatedMethodBeanWithPlainInterface) AopProxyUtils.getSingletonTarget(proxy);
+
+		List<CompletableFuture<?>> futures = new ArrayList<>(10);
+		for (int i = 0; i < 10; i++) {
+			futures.add(CompletableFuture.runAsync(proxy::concurrentOperation));
+		}
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+		assertThat(target.current).hasValue(0);
+	}
+
 	@Test
 	void withPostProcessorForMethodWithUnboundedConcurrency() {
 		AnnotatedMethodBean proxy = createProxy(AnnotatedMethodBean.class);
@@ -343,6 +369,33 @@ class ConcurrencyLimitTests {
 	interface AnnotatedInterface {
 
 		@ConcurrencyLimit(2)
+		void concurrentOperation();
+	}
+
+
+	static class AnnotatedMethodBeanWithPlainInterface implements PlainInterface {
+
+		final AtomicInteger current = new AtomicInteger();
+
+		@Override
+		@ConcurrencyLimit(2)
+		public void concurrentOperation() {
+			if (current.incrementAndGet() > 2) {
+				throw new IllegalStateException();
+			}
+			try {
+				Thread.sleep(100);
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
+			current.decrementAndGet();
+		}
+	}
+
+
+	interface PlainInterface {
+
 		void concurrentOperation();
 	}
 

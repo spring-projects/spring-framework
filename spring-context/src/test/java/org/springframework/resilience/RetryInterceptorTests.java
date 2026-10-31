@@ -192,6 +192,33 @@ class RetryInterceptorTests {
 		assertThat(target.counter).isEqualTo(6);
 	}
 
+	@Test  // gh-37611
+	void withPostProcessorForMethodWithPlainInterface() {
+		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedMethodBeanWithPlainInterface.class);
+		PlainInterface proxy = bf.getBean(PlainInterface.class);
+		AnnotatedMethodBeanWithPlainInterface target = (AnnotatedMethodBeanWithPlainInterface) AopProxyUtils.getSingletonTarget(proxy);
+
+		assertThat(AopUtils.isJdkDynamicProxy(proxy)).isTrue();
+		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("6");
+		assertThat(target.counter).isEqualTo(6);
+	}
+
+	@Test  // gh-37611
+	void withPostProcessorForMethodWithPlainInterfaceAndDefaultTargetClass() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(bf);
+		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedMethodBeanWithPlainInterface.class));
+		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		PlainInterface proxy = bf.getBean(PlainInterface.class);
+		AnnotatedMethodBeanWithPlainInterface target = (AnnotatedMethodBeanWithPlainInterface) AopProxyUtils.getSingletonTarget(proxy);
+
+		assertThat(AopUtils.isCglibProxy(proxy)).isTrue();
+		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("6");
+		assertThat(target.counter).isEqualTo(6);
+	}
+
 	@Test
 	void withPostProcessorForClass() {
 		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedClassBean.class);
@@ -592,6 +619,19 @@ class RetryInterceptorTests {
 
 		@Retryable(maxRetries = 5, delay = 10)
 		void retryOperation() throws IOException;
+	}
+
+
+	static class AnnotatedMethodBeanWithPlainInterface implements PlainInterface {
+
+		int counter = 0;
+
+		@Override
+		@Retryable(maxRetries = 5, delay = 10)
+		public void retryOperation() throws IOException {
+			counter++;
+			throw new IOException(Integer.toString(counter));
+		}
 	}
 
 
