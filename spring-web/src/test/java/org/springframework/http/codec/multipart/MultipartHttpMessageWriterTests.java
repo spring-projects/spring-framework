@@ -25,9 +25,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
@@ -40,6 +43,7 @@ import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
@@ -49,6 +53,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link MultipartHttpMessageWriter}.
@@ -179,6 +184,84 @@ class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(((FilePart) part).filename()).isEqualTo("file.txt");
 		value = decodeToString(part);
 		assertThat(value).isEqualTo("AaBbCc");
+	}
+
+	@Test
+	void flushCompletedPartBeforeNextBody() {
+		ReactiveHttpOutputMessage outputMessage = mock();
+		HttpHeaders outputHeaders = new HttpHeaders();
+		ArgumentCaptor<Publisher<? extends Publisher<? extends DataBuffer>>> bodyCaptor = ArgumentCaptor.captor();
+		when(outputMessage.getHeaders()).thenReturn(outputHeaders);
+		when(outputMessage.bufferFactory()).thenReturn(this.bufferFactory);
+		when(outputMessage.writeAndFlushWith(bodyCaptor.capture())).thenReturn(Mono.empty());
+
+		Sinks.Many<String> nextBody = Sinks.many().unicast().onBackpressureBuffer();
+		MultipartBodyBuilder builder = new MultipartBodyBuilder();
+		builder.asyncPart("part", Flux.just("first", "part"), String.class).contentType(MediaType.TEXT_PLAIN);
+		builder.asyncPart("part", nextBody.asFlux(), String.class).contentType(MediaType.TEXT_PLAIN);
+
+		this.writer.write(Mono.just(builder.build()), ResolvableType.forClass(MultiValueMap.class),
+				MediaType.MULTIPART_FORM_DATA, outputMessage, Map.of()).block(Duration.ofSeconds(5));
+
+		Flux<DataBuffer> flushedBody = Flux.from(bodyCaptor.getValue()).concatMap(DataBufferUtils::join);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(outputHeaders.getContentType()).body(flushedBody);
+		Flux<String> values = new DefaultPartHttpMessageReader()
+				.read(ResolvableType.forClass(Part.class), request, Map.of())
+				.cast(FormFieldPart.class).map(FormFieldPart::value);
+		StepVerifier.create(values)
+				.expectNext("firstpart")
+				.then(() -> assertThat(nextBody.tryEmitNext("second")).isEqualTo(Sinks.EmitResult.OK))
+				.then(() -> assertThat(nextBody.tryEmitComplete()).isEqualTo(Sinks.EmitResult.OK))
+				.expectNext("second")
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	void emptyPart() {
+		MultipartBodyBuilder builder = new MultipartBodyBuilder();
+		builder.asyncPart("part", Flux.empty(), DataBuffer.class).contentType(MediaType.TEXT_PLAIN);
+
+		this.writer.write(Mono.just(builder.build()), ResolvableType.forClass(MultiValueMap.class),
+				MediaType.MULTIPART_FORM_DATA, this.response, Map.of()).block(Duration.ofSeconds(5));
+
+		MultiValueMap<String, Part> parts = parse(this.response, Map.of());
+		assertThat(parts).hasSize(1);
+		Part part = parts.getFirst("part");
+		assertThat(part).isInstanceOf(FormFieldPart.class);
+		assertThat(((FormFieldPart) part).value()).isEmpty();
+	}
+
+	@Test
+	void writeNestedMultipart() {
+		MultipartHttpMessageWriter writer = new MultipartHttpMessageWriter(List.of(new MultipartHttpMessageWriter()));
+		MultipartBodyBuilder nested = new MultipartBodyBuilder();
+		nested.part("name", "value");
+		MultipartBodyBuilder body = new MultipartBodyBuilder();
+		body.part("nested", nested.build(), MediaType.MULTIPART_MIXED);
+
+		writer.write(Mono.just(body.build()), ResolvableType.forClass(MultiValueMap.class),
+				MediaType.MULTIPART_FORM_DATA, this.response, Map.of()).block(Duration.ofSeconds(5));
+
+		MultiValueMap<String, Part> parts = parse(this.response, Map.of());
+		assertThat(parts).hasSize(1);
+		Part part = parts.getFirst("nested");
+		assertThat(part).isNotNull();
+		MediaType contentType = part.headers().getContentType();
+		assertThat(contentType).isNotNull();
+		assertThat(contentType.isCompatibleWith(MediaType.MULTIPART_MIXED)).isTrue();
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(contentType).body(part.content());
+		Flux<Part> nestedParts = new DefaultPartHttpMessageReader()
+				.read(ResolvableType.forClass(Part.class), request, Map.of());
+		StepVerifier.create(nestedParts)
+				.assertNext(nestedPart -> {
+					assertThat(nestedPart.name()).isEqualTo("name");
+					assertThat(((FormFieldPart) nestedPart).value()).isEqualTo("value");
+				})
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test  // gh-24582
