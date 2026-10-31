@@ -153,6 +153,41 @@ class CorsConfigurationTests {
 	}
 
 	@Test
+	void combineWithDefaultPermitValuesOfCombinedConfig() {
+		CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
+		CorsConfiguration other = new CorsConfiguration();
+		other.addAllowedOrigin("https://domain.com");
+		other.addAllowedHeader("header1");
+		other.addAllowedMethod(HttpMethod.PUT.name());
+
+		CorsConfiguration combinedConfig = config.combine(new CorsConfiguration()).combine(other);
+		assertThat(combinedConfig.getAllowedOrigins()).containsExactly("https://domain.com");
+		assertThat(combinedConfig.getAllowedHeaders()).containsExactly("header1");
+		assertThat(combinedConfig.getAllowedMethods()).containsExactly(HttpMethod.PUT.name());
+		assertThat(combinedConfig.checkHttpMethod(HttpMethod.POST)).isNull();
+
+		combinedConfig = other.combine(config.combine(new CorsConfiguration()));
+		assertThat(combinedConfig.getAllowedOrigins()).containsExactly("https://domain.com");
+		assertThat(combinedConfig.getAllowedHeaders()).containsExactly("header1");
+		assertThat(combinedConfig.getAllowedMethods()).containsExactly(HttpMethod.PUT.name());
+		assertThat(combinedConfig.checkHttpMethod(HttpMethod.POST)).isNull();
+
+		combinedConfig = new CorsConfiguration().combine(config).combine(other);
+		assertThat(combinedConfig.getAllowedOrigins()).containsExactly("https://domain.com");
+		assertThat(combinedConfig.getAllowedHeaders()).containsExactly("header1");
+		assertThat(combinedConfig.getAllowedMethods()).containsExactly(HttpMethod.PUT.name());
+		assertThat(combinedConfig.checkHttpMethod(HttpMethod.POST)).isNull();
+
+		combinedConfig = new CorsConfiguration().combine(config);
+		assertThat(combinedConfig.checkHttpMethod(HttpMethod.POST))
+				.containsExactly(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST);
+		combinedConfig.addAllowedHeader("header1");
+		combinedConfig.addAllowedMethod("PATCH");
+		assertThat(combinedConfig.getAllowedHeaders()).containsExactly("*", "header1");
+		assertThat(combinedConfig.getAllowedMethods()).containsExactly("GET", "HEAD", "POST", "PATCH");
+	}
+
+	@Test
 	void combinePatternWithDefaultPermitValues() {
 		CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
 		CorsConfiguration other = new CorsConfiguration();
