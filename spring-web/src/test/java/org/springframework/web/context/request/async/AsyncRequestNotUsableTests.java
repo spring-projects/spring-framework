@@ -173,6 +173,19 @@ class AsyncRequestNotUsableTests {
 		}
 
 		@Test
+		void notUsableFromCompletionHandler() throws IOException {
+			asyncRequest.startAsync();
+			ServletOutputStream wrapped = getWrappedOutputStream();
+			asyncRequest.addCompletionHandler(() -> assertThatThrownBy(wrapped::flush)
+					.isInstanceOf(AsyncRequestNotUsableException.class)
+					.hasMessage("Response not usable after async request completion."));
+
+			asyncRequest.onComplete(new AsyncEvent(request.getAsyncContext()));
+
+			verifyNoInteractions(outputStream);
+		}
+
+		@Test
 		void lockingNotUsed() throws IOException {
 			AtomicInteger count = new AtomicInteger(-1);
 			doAnswer((Answer<Void>) invocation -> {
