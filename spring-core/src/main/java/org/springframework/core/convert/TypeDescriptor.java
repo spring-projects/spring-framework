@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -312,7 +313,7 @@ public class TypeDescriptor implements Serializable {
 	 * returns {@code true} because a String value can be assigned to a CharSequence variable.
 	 * On the other hand, {@code valueOf(Number.class).isAssignableTo(valueOf(Integer.class))}
 	 * returns {@code false} because, while all Integers are Numbers, not all Numbers are Integers.
-	 * <p>For arrays, collections, and maps, element and key/value types are checked if declared.
+	 * <p>For arrays, collections, maps, and {@link Optional}, element and key/value types are checked if declared.
 	 * For example, a {@code List<String>} field value is assignable to a {@code Collection<CharSequence>}
 	 * field, but {@code List<Number>} is not assignable to {@code List<Integer>}.
 	 * @return {@code true} if this type is assignable to the type represented by the provided
@@ -333,6 +334,10 @@ public class TypeDescriptor implements Serializable {
 		else if (isMap() && typeDescriptor.isMap()) {
 			return isNestedAssignable(getMapKeyTypeDescriptor(), typeDescriptor.getMapKeyTypeDescriptor()) &&
 				isNestedAssignable(getMapValueTypeDescriptor(), typeDescriptor.getMapValueTypeDescriptor());
+		}
+		else if (getType() == Optional.class && typeDescriptor.getType() == Optional.class) {
+			return isNestedAssignable(getRelatedIfResolvable(getResolvableType().getGeneric()),
+					typeDescriptor.getRelatedIfResolvable(typeDescriptor.getResolvableType().getGeneric()));
 		}
 		else {
 			return true;
