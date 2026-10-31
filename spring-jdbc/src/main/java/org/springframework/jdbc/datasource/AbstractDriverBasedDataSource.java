@@ -191,11 +191,24 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 		}
 
 		Connection con = getConnectionFromDriver(mergedProps);
-		if (this.catalog != null) {
-			con.setCatalog(this.catalog);
+		try {
+			if (this.catalog != null) {
+				con.setCatalog(this.catalog);
+			}
+			if (this.schema != null) {
+				con.setSchema(this.schema);
+			}
 		}
-		if (this.schema != null) {
-			con.setSchema(this.schema);
+		catch (Throwable ex) {
+			logger.debug("Failed to apply settings to JDBC Connection", ex);
+			// Close Connection since it is not returned to the caller.
+			try {
+				con.close();
+			}
+			catch (Throwable closeEx) {
+				logger.debug("Could not close JDBC Connection after failed settings", closeEx);
+			}
+			throw ex;
 		}
 		return con;
 	}

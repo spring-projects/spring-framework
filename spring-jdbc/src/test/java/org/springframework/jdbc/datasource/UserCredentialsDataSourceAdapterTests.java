@@ -24,8 +24,12 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Juergen Hoeller
@@ -72,6 +76,22 @@ class UserCredentialsDataSourceAdapterTests {
 		finally {
 			adapter.removeCredentialsFromCurrentThread();
 		}
+	}
+
+	@Test
+	void connectionClosedWhenSettingSchemaFails() throws SQLException {
+		DataSource dataSource = mock();
+		Connection connection = mock();
+		when(dataSource.getConnection()).thenReturn(connection);
+		SQLException ex = new SQLException("Schema not found");
+		doThrow(ex).when(connection).setSchema("myschema");
+
+		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
+		adapter.setTargetDataSource(dataSource);
+		adapter.setSchema("myschema");
+
+		assertThatExceptionOfType(SQLException.class).isThrownBy(adapter::getConnection).isSameAs(ex);
+		verify(connection).close();
 	}
 
 }
