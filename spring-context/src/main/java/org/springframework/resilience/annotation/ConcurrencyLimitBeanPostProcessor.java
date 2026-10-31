@@ -30,6 +30,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
@@ -81,9 +82,10 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 
 		@Override
 		public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
-			Method method = invocation.getMethod();
 			Object instance = invocation.getThis();
-			Class<?> targetClass = (instance != null ? instance.getClass() : method.getDeclaringClass());
+			Class<?> targetClass = (instance != null ? instance.getClass() :
+					invocation.getMethod().getDeclaringClass());
+			Method method = AopUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
 			if (invocation instanceof ProxyMethodInvocation methodInvocation) {
 				// Apply concurrency throttling at the AOP proxy level (independent of target instance)
 				instance = methodInvocation.getProxy();

@@ -27,6 +27,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
@@ -93,7 +94,8 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 				return retrySpec;
 			}
 
-			Retryable retryable = AnnotatedElementUtils.findMergedAnnotation(method, Retryable.class);
+			Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+			Retryable retryable = AnnotatedElementUtils.findMergedAnnotation(specificMethod, Retryable.class);
 			if (retryable == null) {
 				retryable = AnnotatedElementUtils.findMergedAnnotation(targetClass, Retryable.class);
 				if (retryable == null) {
