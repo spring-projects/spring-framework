@@ -53,6 +53,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stax.StAXSource;
@@ -705,7 +706,26 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	@Override
 	public void marshal(Object graph, Result result, @Nullable MimeContainer mimeContainer) throws XmlMappingException {
 		try {
-			Marshaller marshaller = createMarshaller();
+			// XOP packaging replaces base64Binary simple content with xop:Include children.
+			// Schema validation must therefore run against the logical (non-XOP) infoset first,
+			// then MTOM marshalling proceeds without a Schema so validation does not see XOP.
+			// See spring-projects/spring-ws#1030 / SWS-958.
+			if (this.mtomEnabled && mimeContainer != null && this.schema != null) {
+				Marshaller validatingMarshaller = createMarshaller(true);
+				// Non-XOP marshaller keeps base64 as simple content and supports @XmlAttachmentRef.
+				validatingMarshaller.setAttachmentMarshaller(LogicalAttachmentMarshaller.INSTANCE);
+				validatingMarshaller.marshal(graph, new DOMResult());
+				Marshaller mtomMarshaller = createMarshaller(false);
+				mtomMarshaller.setAttachmentMarshaller(new Jaxb2AttachmentMarshaller(mimeContainer));
+				if (StaxUtils.isStaxResult(result)) {
+					marshalStaxResult(mtomMarshaller, graph, result);
+				}
+				else {
+					mtomMarshaller.marshal(graph, result);
+				}
+				return;
+			}
+			Marshaller marshaller = createMarshaller(true);
 			if (this.mtomEnabled && mimeContainer != null) {
 				marshaller.setAttachmentMarshaller(new Jaxb2AttachmentMarshaller(mimeContainer));
 			}
@@ -729,9 +749,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * @see #createUnmarshaller()
 	 */
 	public Marshaller createMarshaller() {
+		return createMarshaller(true);
+	}
+
+	private Marshaller createMarshaller(boolean applySchema) {
 		try {
 			Marshaller marshaller = getJaxbContext().createMarshaller();
-			initJaxbMarshaller(marshaller);
+			initJaxbMarshaller(marshaller, applySchema);
 			return marshaller;
 		}
 		catch (JAXBException ex) {
@@ -766,6 +790,10 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * and {@link #setAdapters adapters}.
 	 */
 	protected void initJaxbMarshaller(Marshaller marshaller) throws JAXBException {
+		initJaxbMarshaller(marshaller, true);
+	}
+
+	private void initJaxbMarshaller(Marshaller marshaller, boolean applySchema) throws JAXBException {
 		if (this.marshallerProperties != null) {
 			for (Map.Entry<String, ?> entry : this.marshallerProperties.entrySet()) {
 				marshaller.setProperty(entry.getKey(), entry.getValue());
@@ -782,7 +810,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				marshaller.setAdapter(adapter);
 			}
 		}
-		if (this.schema != null) {
+		if (applySchema && this.schema != null) {
 			marshaller.setSchema(this.schema);
 		}
 	}
@@ -979,6 +1007,38 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		else {
 			// fallback
 			return new UncategorizedMappingException("Unknown JAXB exception", ex);
+		}
+	}
+
+
+	/**
+	 * Attachment marshaller used only while validating the logical infoset (no XOP).
+	 * {@link #isXOPPackage()} is {@code false} so {@code xs:base64Binary} stays simple
+	 * content; SWA/{@code @XmlAttachmentRef} fields still get a placeholder content id.
+	 */
+	private static final class LogicalAttachmentMarshaller extends AttachmentMarshaller {
+
+		static final LogicalAttachmentMarshaller INSTANCE = new LogicalAttachmentMarshaller();
+
+		@Override
+		public boolean isXOPPackage() {
+			return false;
+		}
+
+		@Override
+		public String addMtomAttachment(byte[] data, int offset, int length, String mimeType,
+				String elementNamespace, String elementLocalName) {
+			return "cid:validation";
+		}
+
+		@Override
+		public String addMtomAttachment(DataHandler dataHandler, String elementNamespace, String elementLocalName) {
+			return "cid:validation";
+		}
+
+		@Override
+		public String addSwaRefAttachment(DataHandler dataHandler) {
+			return "cid:validation";
 		}
 	}
 
