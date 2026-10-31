@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,9 +35,12 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.TransactionExecutionListener;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class ReactiveTransactionExecutionListenerTests {
 
@@ -44,6 +48,7 @@ class ReactiveTransactionExecutionListenerTests {
 	@MethodSource("listenerFailures")
 	void listenerFailureDoesNotAffectTransaction(Callback callback, Throwable listenerFailure) {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
+		tm.logger = mock();
 		List<Invocation> invocations = addListeners(tm, callback, listenerFailure);
 		boolean rollback = (callback == Callback.BEFORE_ROLLBACK || callback == Callback.AFTER_ROLLBACK);
 
@@ -57,11 +62,12 @@ class ReactiveTransactionExecutionListenerTests {
 		assertThat(tm.commit).isEqualTo(!rollback);
 		assertThat(tm.rollback).isEqualTo(rollback);
 		assertThat(tm.cleanup).isTrue();
-		assertThat(invocations.getFirst().transaction().isCompleted()).isTrue();
+		assertThat(invocations.get(0).transaction().isCompleted()).isTrue();
 		assertCallbackOrder(invocations, Callback.BEFORE_BEGIN, Callback.AFTER_BEGIN,
 				rollback ? Callback.BEFORE_ROLLBACK : Callback.BEFORE_COMMIT,
 				rollback ? Callback.AFTER_ROLLBACK : Callback.AFTER_COMMIT);
 		assertThat(invocations).extracting(Invocation::failure).containsOnlyNulls();
+		verify(tm.logger).error("TransactionExecutionListener." + callback.methodName + " threw exception", listenerFailure);
 	}
 
 	@ParameterizedTest
@@ -106,7 +112,7 @@ class ReactiveTransactionExecutionListenerTests {
 		assertThat(tm.commit).isTrue();
 		assertThat(tm.rollback).isFalse();
 		assertThat(tm.cleanup).isTrue();
-		assertThat(invocations.getFirst().transaction().isCompleted()).isTrue();
+		assertThat(invocations.get(0).transaction().isCompleted()).isTrue();
 		assertCallbackOrder(invocations, Callback.BEFORE_BEGIN, Callback.AFTER_BEGIN,
 				Callback.BEFORE_COMMIT, Callback.AFTER_COMMIT);
 		assertCallbackFailure(invocations, Callback.AFTER_COMMIT, commitFailure);
@@ -127,10 +133,30 @@ class ReactiveTransactionExecutionListenerTests {
 		assertThat(tm.commit).isFalse();
 		assertThat(tm.rollback).isTrue();
 		assertThat(tm.cleanup).isTrue();
-		assertThat(invocations.getFirst().transaction().isCompleted()).isTrue();
+		assertThat(invocations.get(0).transaction().isCompleted()).isTrue();
 		assertCallbackOrder(invocations, Callback.BEFORE_BEGIN, Callback.AFTER_BEGIN,
 				Callback.BEFORE_ROLLBACK, Callback.AFTER_ROLLBACK);
 		assertCallbackFailure(invocations, Callback.AFTER_ROLLBACK, rollbackFailure);
+	}
+
+	@ParameterizedTest
+	@MethodSource("callbackExceptions")
+	void unexpectedRollbackIsNotReplacedByListenerFailure(Throwable listenerFailure) {
+		UnexpectedRollbackException failure = new UnexpectedRollbackException("commit rolled back");
+		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, message -> failure, null);
+		List<Invocation> invocations = addListeners(tm, Callback.AFTER_ROLLBACK, listenerFailure);
+
+		tm.getReactiveTransaction(new DefaultTransactionDefinition()).flatMap(tm::commit)
+				.contextWrite(TransactionContextManager.createTransactionContext())
+				.as(StepVerifier::create)
+				.verifyErrorSatisfies(ex -> assertThat(ex).isSameAs(failure));
+
+		assertThat(tm.commit).isTrue();
+		assertThat(tm.rollback).isFalse();
+		assertThat(tm.cleanup).isTrue();
+		assertCallbackOrder(invocations, Callback.BEFORE_BEGIN, Callback.AFTER_BEGIN,
+				Callback.BEFORE_COMMIT, Callback.AFTER_ROLLBACK);
+		assertCallbackFailure(invocations, Callback.AFTER_ROLLBACK, null);
 	}
 
 	@ParameterizedTest
@@ -243,7 +269,7 @@ class ReactiveTransactionExecutionListenerTests {
 		assertThat(tm.commit).isFalse();
 		assertThat(tm.rollback).isTrue();
 		assertThat(tm.cleanup).isTrue();
-		assertThat(invocations.getFirst().transaction().isCompleted()).isTrue();
+		assertThat(invocations.get(0).transaction().isCompleted()).isTrue();
 		assertCallbackOrder(invocations, Callback.BEFORE_BEGIN, Callback.AFTER_BEGIN,
 				Callback.BEFORE_ROLLBACK, Callback.AFTER_ROLLBACK);
 		assertThat(invocations).extracting(Invocation::failure).containsOnlyNulls();
@@ -267,6 +293,30 @@ class ReactiveTransactionExecutionListenerTests {
 		assertCallbackOrder(invocations, Callback.BEFORE_BEGIN, Callback.AFTER_BEGIN,
 				Callback.BEFORE_ROLLBACK, Callback.AFTER_ROLLBACK);
 		assertThat(invocations).extracting(Invocation::failure).containsOnlyNulls();
+	}
+
+	@Test
+	void synchronizationCanStillPreventCommit() {
+		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
+		IllegalStateException failure = new IllegalStateException("synchronization failed");
+
+		tm.getReactiveTransaction(new DefaultTransactionDefinition())
+				.flatMap(transaction -> TransactionSynchronizationManager.forCurrentTransaction()
+						.doOnNext(synchronizationManager -> synchronizationManager.registerSynchronization(
+								new TransactionSynchronization() {
+									@Override
+									public Mono<Void> beforeCommit(boolean readOnly) {
+										return Mono.error(failure);
+									}
+								}))
+						.then(tm.commit(transaction)))
+				.contextWrite(TransactionContextManager.createTransactionContext())
+				.as(StepVerifier::create)
+				.verifyErrorSatisfies(ex -> assertThat(ex).isSameAs(failure));
+
+		assertThat(tm.commit).isFalse();
+		assertThat(tm.rollback).isTrue();
+		assertThat(tm.cleanup).isTrue();
 	}
 
 
@@ -304,7 +354,7 @@ class ReactiveTransactionExecutionListenerTests {
 				.toList();
 		assertThat(invocations).extracting(invocation -> invocation.listener() + ":" + invocation.callback())
 				.containsExactlyElementsOf(expected);
-		TransactionExecution transaction = invocations.getFirst().transaction();
+		TransactionExecution transaction = invocations.get(0).transaction();
 		assertThat(invocations).allSatisfy(invocation ->
 				assertThat(invocation.transaction()).isSameAs(transaction));
 	}
@@ -343,7 +393,15 @@ class ReactiveTransactionExecutionListenerTests {
 
 	private enum Callback {
 
-		BEFORE_BEGIN, AFTER_BEGIN, BEFORE_COMMIT, AFTER_COMMIT, BEFORE_ROLLBACK, AFTER_ROLLBACK
+		BEFORE_BEGIN("beforeBegin"), AFTER_BEGIN("afterBegin"),
+		BEFORE_COMMIT("beforeCommit"), AFTER_COMMIT("afterCommit"),
+		BEFORE_ROLLBACK("beforeRollback"), AFTER_ROLLBACK("afterRollback");
+
+		private final String methodName;
+
+		Callback(String methodName) {
+			this.methodName = methodName;
+		}
 	}
 
 

@@ -27,10 +27,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 
+import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionExecutionListener;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
@@ -40,6 +42,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class TransactionExecutionListenerTests {
 
@@ -53,6 +56,7 @@ class TransactionExecutionListenerTests {
 	@MethodSource("failingCallbacks")
 	void listenerFailureDoesNotInterruptTransactionOrOtherListeners(String callback, Throwable failure) {
 		TrackingTransactionManager manager = new TrackingTransactionManager();
+		manager.logger = mock();
 		TransactionExecutionListener first = mock();
 		TransactionExecutionListener failing = failingListener(callback, failure);
 		TransactionExecutionListener last = mock();
@@ -75,11 +79,13 @@ class TransactionExecutionListenerTests {
 		assertThat(manager.cleanup).isTrue();
 		assertThat(status.isCompleted()).isTrue();
 		assertCallbacksInOrder(status, rollback, first, failing, last);
+		verify(manager.logger).error("TransactionExecutionListener." + callback + " threw exception", failure);
 	}
 
 	static Stream<Arguments> failingCallbacks() {
 		return Stream.of("beforeBegin", "afterBegin", "beforeCommit", "afterCommit", "beforeRollback", "afterRollback")
-				.flatMap(callback -> Stream.of(new IllegalStateException("Listener failure"), new AssertionError("Listener failure"))
+				.flatMap(callback -> Stream.of(
+						new IllegalStateException("Listener failure"), new AssertionError("Listener failure"))
 						.map(failure -> arguments(callback, failure)));
 	}
 
@@ -143,7 +149,67 @@ class TransactionExecutionListenerTests {
 	}
 
 	@Test
-	void synchronizationCanStillPreventCommit() {
+	void savepointFailureIsNotReplacedByListenerFailure() {
+		SavepointManager savepointManager = mock();
+		RuntimeException failure = new TransactionSystemException("Savepoint failure");
+		when(savepointManager.createSavepoint()).thenThrow(failure);
+		TestTransactionManager manager = new TestTransactionManager(true, true) {
+			@Override
+			protected Object doGetTransaction() {
+				return savepointManager;
+			}
+		};
+		manager.setNestedTransactionAllowed(true);
+		manager.addListener(failingListener("afterBegin", new IllegalStateException("Listener failure")));
+		TransactionExecutionListener observer = mock();
+		manager.addListener(observer);
+		DefaultTransactionDefinition definition =
+				new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_NESTED);
+
+		assertThatRuntimeException().isThrownBy(() -> manager.getTransaction(definition)).isSameAs(failure);
+
+		verify(observer).afterBegin(any(), same(failure));
+	}
+
+	@Test
+	void unexpectedRollbackIsNotReplacedByListenerFailure() {
+		TrackingTransactionManager manager = new TrackingTransactionManager();
+		RuntimeException failure = new UnexpectedRollbackException("Commit rolled back");
+		manager.commitFailure = failure;
+		manager.addListener(failingListener("afterRollback", new IllegalStateException("Listener failure")));
+		TransactionExecutionListener observer = mock();
+		manager.addListener(observer);
+		TransactionStatus status = manager.getTransaction(null);
+
+		assertThatRuntimeException().isThrownBy(() -> manager.commit(status)).isSameAs(failure);
+
+		verify(observer).afterRollback(status, null);
+		assertThat(manager.cleanup).isTrue();
+		assertThat(status.isCompleted()).isTrue();
+	}
+
+	@Test
+	void rollbackAfterCommitFailureIsNotReplacedByListenerFailure() {
+		TrackingTransactionManager manager = new TrackingTransactionManager();
+		manager.commitFailure = new IllegalStateException("Commit failure");
+		RuntimeException failure = new TransactionSystemException("Rollback failure");
+		manager.rollbackFailure = failure;
+		manager.addListener(failingListener("afterRollback", new IllegalStateException("Listener failure")));
+		TransactionExecutionListener observer = mock();
+		manager.addListener(observer);
+		TransactionStatus status = manager.getTransaction(null);
+
+		assertThatRuntimeException().isThrownBy(() -> manager.commit(status)).isSameAs(failure);
+
+		verify(observer).afterRollback(status, failure);
+		assertThat(manager.rollback).isTrue();
+		assertThat(manager.cleanup).isTrue();
+		assertThat(status.isCompleted()).isTrue();
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void synchronizationFailuresStillPropagate(boolean beforeCommit) {
 		TrackingTransactionManager manager = new TrackingTransactionManager();
 		manager.setTransactionSynchronization(AbstractPlatformTransactionManager.SYNCHRONIZATION_ALWAYS);
 		RuntimeException failure = new IllegalStateException("Synchronization failure");
@@ -152,12 +218,20 @@ class TransactionExecutionListenerTests {
 				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 					@Override
 					public void beforeCommit(boolean readOnly) {
-						throw failure;
+						if (beforeCommit) {
+							throw failure;
+						}
+					}
+					@Override
+					public void afterCommit() {
+						if (!beforeCommit) {
+							throw failure;
+						}
 					}
 				}))).isSameAs(failure);
 
-		assertThat(manager.commit).isFalse();
-		assertThat(manager.rollback).isTrue();
+		assertThat(manager.commit).isEqualTo(!beforeCommit);
+		assertThat(manager.rollback).isEqualTo(beforeCommit);
 		assertThat(manager.cleanup).isTrue();
 	}
 

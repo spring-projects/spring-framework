@@ -29,6 +29,11 @@ import org.jspecify.annotations.Nullable;
  * {@link TransactionStatus} (for a {@link PlatformTransactionManager} transaction) or
  * a {@link ReactiveTransaction} (for a {@link ReactiveTransactionManager} transaction).
  *
+ * <p>Any exception or error thrown by a listener is logged and not propagated by
+ * {@link org.springframework.transaction.support.AbstractPlatformTransactionManager}
+ * or {@link org.springframework.transaction.reactive.AbstractReactiveTransactionManager}.
+ * Transaction processing and notifications to subsequent listeners continue.
+ *
  * @author Juergen Hoeller
  * @since 6.1
  * @see ConfigurableTransactionManager#addListener
