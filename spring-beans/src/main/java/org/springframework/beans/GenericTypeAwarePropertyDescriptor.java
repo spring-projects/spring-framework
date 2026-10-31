@@ -137,7 +137,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	public Method getWriteMethodForActualAccess() {
-		Assert.state(this.writeMethod != null, "No write method available");
+		Assert.state(this.writeMethod != null, () -> noMethodAvailableMessage("write"));
 		if (this.ambiguousWriteMethods != null && !this.ambiguousWriteMethodsLogged) {
 			this.ambiguousWriteMethodsLogged = true;
 			LogFactory.getLog(GenericTypeAwarePropertyDescriptor.class).debug("Non-unique JavaBean property '" +
@@ -171,7 +171,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	public MethodParameter getWriteMethodParameter() {
-		Assert.state(this.writeMethodParameter != null, "No write method available");
+		Assert.state(this.writeMethodParameter != null, () -> noMethodAvailableMessage("write"));
 		return this.writeMethodParameter;
 	}
 
@@ -185,7 +185,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	public ResolvableType getReadMethodType() {
-		Assert.state(this.readMethodType != null, "No read method available");
+		Assert.state(this.readMethodType != null, () -> noMethodAvailableMessage("read"));
 		return this.readMethodType;
 	}
 
@@ -207,6 +207,11 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	@Override
 	public @Nullable Class<?> getPropertyEditorClass() {
 		return this.propertyEditorClass;
+	}
+
+	private String noMethodAvailableMessage(String methodType) {
+		return "No " + methodType + " method available for property '" + getName() +
+				"' of bean class [" + this.beanClass.getName() + "]";
 	}
 
 

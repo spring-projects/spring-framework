@@ -274,7 +274,8 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		@Override
 		public @Nullable Object getValue() throws Exception {
 			Method readMethod = this.pd.getReadMethod();
-			Assert.state(readMethod != null, "No read method available");
+			Assert.state(readMethod != null, () -> "No read method available for property '" +
+					this.pd.getName() + "' of bean class [" + this.pd.getBeanClass().getName() + "]");
 			ReflectionUtils.makeAccessible(readMethod);
 			return readMethod.invoke(getWrappedInstance(), (Object[]) null);
 		}

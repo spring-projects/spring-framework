@@ -281,6 +281,15 @@ enabled: set `setAsyncCacheMode(true)` on your `CaffeineCacheManager` instance.
 	}
 ----
 
+NOTE: On a cache miss, the publisher returned by a reactive method is subscribed to with
+the caller's Reactor `Context`, so that context-dependent operations such as reactive
+transactions or security work as they would without caching. With `sync=true`, however,
+the cache itself subscribes to the publisher in order to compute the value only once for
+concurrent callers, and the caller's `Context` is therefore not propagated. In either
+case, a cached value is returned to subsequent callers regardless of their `Context`, so
+any context-dependent value that affects the result should be passed as a method
+argument in order to become part of the cache key.
+
 Last but not least, be aware that annotation-driven caching is not appropriate
 for sophisticated reactive interactions involving composition and back pressure.
 If you choose to declare `@Cacheable` on specific reactive methods, consider the

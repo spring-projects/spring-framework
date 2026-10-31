@@ -16,6 +16,8 @@
 
 package org.springframework.web.service.invoker;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -54,6 +56,39 @@ class HttpServiceProxyFactoryTests {
 		String result = proxyFactory.createClient(Service.class).execute();
 
 		assertThat(result).isEqualTo("intercepted");
+	}
+
+	@Test  // gh-37601
+	void requestValuesProcessorAddedAfterBuildDoesNotAffectFactory() {
+		var builder = HttpServiceProxyFactory.builderFor(mock(HttpExchangeAdapter.class));
+		var factory = builder.build();
+
+		var processorInvoked = new AtomicBoolean();
+		builder.httpRequestValuesProcessor((method, parameters, arguments, requestValues) ->
+				processorInvoked.set(true));
+
+		factory.createClient(Service.class).execute();
+		assertThat(processorInvoked).isFalse();
+
+		var newFactory = builder.build();
+		newFactory.createClient(Service.class).execute();
+		assertThat(processorInvoked).isTrue();
+	}
+
+	@Test  // gh-37601
+	void proxyFactoryCustomizerAddedAfterBuildDoesNotAffectFactory() {
+		var builder = HttpServiceProxyFactory.builderFor(mock(HttpExchangeAdapter.class))
+				.exchangeAdapterDecorator(TestDecorator::new);
+		var factory = builder.build();
+
+		var interceptor = (MethodInterceptor) invocation -> "intercepted";
+		builder.proxyFactoryCustomizer((proxyFactory, serviceType) ->
+				proxyFactory.addAdvice(0, interceptor));
+
+		assertThat(factory.createClient(Service.class).execute()).isEqualTo("decorated");
+
+		var newFactory = builder.build();
+		assertThat(newFactory.createClient(Service.class).execute()).isEqualTo("intercepted");
 	}
 
 

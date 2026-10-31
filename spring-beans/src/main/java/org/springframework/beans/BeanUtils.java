@@ -636,7 +636,8 @@ public abstract class BeanUtils {
 		}
 		else {
 			Method writeMethod = pd.getWriteMethod();
-			Assert.state(writeMethod != null, "No write method available");
+			Assert.state(writeMethod != null,
+					() -> "No write method available for property '" + pd.getName() + "'");
 			return new MethodParameter(writeMethod, 0);
 		}
 	}

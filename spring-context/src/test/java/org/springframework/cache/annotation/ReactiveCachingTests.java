@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.util.context.Context;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.cache.Cache;
@@ -314,6 +315,77 @@ class ReactiveCachingTests {
 		assertThat(cache.get("key")).isNull();
 	}
 
+	@ParameterizedTest  // gh-37600
+	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
+			EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
+			LateCacheHitDeterminationConfig.class,
+			LateCacheHitDeterminationWithValueWrapperConfig.class})
+	void cacheableMonoPropagatesContextOnCacheMiss(Class<?> configClass) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				configClass, ReactiveContextService.class);
+		ReactiveContextService service = ctx.getBean(ReactiveContextService.class);
+
+		StepVerifier.create(service.cacheableMono("key").contextWrite(Context.of("tenant", "t1")))
+				.expectNext("t1") // cache miss
+				.verifyComplete();
+		StepVerifier.create(service.cacheableMono("key").contextWrite(Context.of("tenant", "t2")))
+				.expectNext("t1") // cache hit
+				.verifyComplete();
+
+		ctx.close();
+	}
+
+	@ParameterizedTest  // gh-37600
+	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
+			EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
+			LateCacheHitDeterminationConfig.class,
+			LateCacheHitDeterminationWithValueWrapperConfig.class})
+	void cacheableFluxPropagatesContextOnCacheMiss(Class<?> configClass) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				configClass, ReactiveContextService.class);
+		ReactiveContextService service = ctx.getBean(ReactiveContextService.class);
+
+		StepVerifier.create(service.cacheableFlux("key").contextWrite(Context.of("tenant", "t1")))
+				.expectNext("t1") // cache miss
+				.verifyComplete();
+		StepVerifier.create(service.cacheableFlux("key").contextWrite(Context.of("tenant", "t2")))
+				.expectNext("t1") // cache hit
+				.verifyComplete();
+
+		ctx.close();
+	}
+
+	@Test  // gh-37600
+	void cachePutFluxPropagatesContext() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				EarlyCacheHitDeterminationConfig.class, ReactiveContextService.class);
+		ReactiveContextService service = ctx.getBean(ReactiveContextService.class);
+
+		StepVerifier.create(service.cachePutFlux("key").contextWrite(Context.of("tenant", "t1")))
+				.expectNext("t1") // method invoked
+				.verifyComplete();
+
+		assertThat(ctx.getBean(CacheManager.class).getCache("first").get("key").get())
+				.isEqualTo(List.of("t1")); // cached by @CachePut
+		ctx.close();
+	}
+
+	@Test  // gh-37600
+	void cacheEvictFluxPropagatesContext() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				EarlyCacheHitDeterminationConfig.class, ReactiveContextService.class);
+		ReactiveContextService service = ctx.getBean(ReactiveContextService.class);
+		Cache cache = ctx.getBean(CacheManager.class).getCache("first");
+		cache.put("key", List.of("t0"));
+
+		StepVerifier.create(service.cacheEvictFlux("key").contextWrite(Context.of("tenant", "t1")))
+				.expectNext("t1") // method invoked
+				.verifyComplete();
+
+		assertThat(cache.get("key")).isNull(); // evicted
+		ctx.close();
+	}
+
 
 	@CacheConfig("first")
 	static class ReactiveCacheableService {
@@ -461,6 +533,35 @@ class ReactiveCachingTests {
 			return Flux.defer(() -> (subscriptions.incrementAndGet() == 1 ?
 					Flux.error(new IllegalStateException("1st subscription fails")) :
 					Flux.just("a", "b")));
+		}
+	}
+
+
+	@CacheConfig("first")
+	static class ReactiveContextService {
+
+		@Cacheable
+		Mono<String> cacheableMono(String key) {
+			return tenant();
+		}
+
+		@Cacheable
+		Flux<String> cacheableFlux(String key) {
+			return tenant().flux();
+		}
+
+		@CachePut
+		Flux<String> cachePutFlux(String key) {
+			return tenant().flux();
+		}
+
+		@CacheEvict
+		Flux<String> cacheEvictFlux(String key) {
+			return tenant().flux();
+		}
+
+		private static Mono<String> tenant() {
+			return Mono.deferContextual(contextView -> Mono.just(contextView.getOrDefault("tenant", "none")));
 		}
 	}
 
