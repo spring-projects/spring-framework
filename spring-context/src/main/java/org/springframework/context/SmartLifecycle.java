@@ -83,6 +83,21 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 
 
 	/**
+	 * Return the phase that this lifecycle object is supposed to run in.
+	 * <p>The default implementation returns {@link #DEFAULT_PHASE} in order to
+	 * let {@code stop()} callbacks execute before regular {@code Lifecycle}
+	 * implementations.
+	 * @see #isAutoStartup()
+	 * @see #start()
+	 * @see #stop(Runnable)
+	 * @see org.springframework.context.support.DefaultLifecycleProcessor#getPhase(Lifecycle)
+	 */
+	@Override
+	default int getPhase() {
+		return DEFAULT_PHASE;
+	}
+
+	/**
 	 * Returns {@code true} if this {@code Lifecycle} component should get
 	 * started automatically by the container at the time that the containing
 	 * {@link ApplicationContext} gets refreshed or restarted.
@@ -145,18 +160,31 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	}
 
 	/**
-	 * Return the phase that this lifecycle object is supposed to run in.
-	 * <p>The default implementation returns {@link #DEFAULT_PHASE} in order to
-	 * let {@code stop()} callbacks execute before regular {@code Lifecycle}
-	 * implementations.
-	 * @see #isAutoStartup()
-	 * @see #start()
+	 * Indicates that a Lifecycle component must pause if it is currently running.
+	 * <p>This is a variant of {@link #stop(Runnable)} with an explicit indication for
+	 * a pause step. The default implementation delegates to {@link #stop(Runnable)};
+	 * implementations may override this to specifically react to the pause indication.
+	 * @since 7.0.11
 	 * @see #stop(Runnable)
-	 * @see org.springframework.context.support.DefaultLifecycleProcessor#getPhase(Lifecycle)
+	 * @see #isPauseable()
+	 * @see ConfigurableApplicationContext#pause()
 	 */
-	@Override
-	default int getPhase() {
-		return DEFAULT_PHASE;
+	default void pause(Runnable callback) {
+		stop(callback);
+	}
+
+	/**
+	 * Indicates that a Lifecycle component must restart if it is currently paused.
+	 * <p>This is a variant of {@link #start()} with an explicit indication for a
+	 * restart after pause. The default implementation delegates to {@link #start()};
+	 * implementations may override this to specifically react to the paused state.
+	 * @since 7.0.11
+	 * @see #start()
+	 * @see #isPauseable()
+	 * @see ConfigurableApplicationContext#restart()
+	 */
+	default void restart() {
+		start();
 	}
 
 }

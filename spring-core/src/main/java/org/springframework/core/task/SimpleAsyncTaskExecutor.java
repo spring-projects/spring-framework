@@ -313,7 +313,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			throw new TaskRejectedException(getClass().getSimpleName() + " is not active");
 		}
 
-		Runnable taskToUse = (this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
+		Runnable taskToUse = decorateTaskIfNecessary(task);
 		Future<?> future = (task instanceof Future<?> f ? f : null);
 		if (isThrottleActive() && startTimeout > TIMEOUT_IMMEDIATE) {
 			this.concurrencyThrottle.beforeAccess();
@@ -359,6 +359,19 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 */
 	protected void doExecute(Runnable task) {
 		newThread(task).start();
+	}
+
+	/**
+	 * Decorate the given task if necessary.
+	 * <p>The default implementation applies the configured
+	 * {@link #setTaskDecorator TaskDecorator}, if any.
+	 * @param task the original task
+	 * @return the decorated task if applicable, or the original task as-is
+	 * @since 7.0.11
+	 * @see #setTaskDecorator
+	 */
+	protected Runnable decorateTaskIfNecessary(Runnable task) {
+		return (this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
 	}
 
 	/**
