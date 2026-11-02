@@ -136,7 +136,22 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 	 */
 	@SuppressWarnings("unchecked")
 	private LinkedCaseInsensitiveMap(LinkedCaseInsensitiveMap<V> other) {
-		this.targetMap = (LinkedHashMap<String, V>) other.targetMap.clone();
+		this.targetMap = new LinkedHashMap<>(
+				(int) (other.size() / CollectionUtils.DEFAULT_LOAD_FACTOR), CollectionUtils.DEFAULT_LOAD_FACTOR) {
+			@Override
+			public boolean containsKey(Object key) {
+				return LinkedCaseInsensitiveMap.this.containsKey(key);
+			}
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<String, V> eldest) {
+				boolean doRemove = LinkedCaseInsensitiveMap.this.removeEldestEntry(eldest);
+				if (doRemove) {
+					removeCaseInsensitiveKey(eldest.getKey());
+				}
+				return doRemove;
+			}
+		};
+		this.targetMap.putAll(other.targetMap);
 		this.caseInsensitiveKeys = (HashMap<String, String>) other.caseInsensitiveKeys.clone();
 		this.locale = other.locale;
 	}
