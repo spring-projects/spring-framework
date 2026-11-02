@@ -364,10 +364,18 @@ class DefaultLifecycleProcessorTests {
 		context.refresh();
 		assertThat(smartBean1.isRunning()).isTrue();
 		assertThat(smartBean2.isRunning()).isFalse();
+		assertThat(smartBean1.paused).isFalse();
+		assertThat(smartBean2.paused).isFalse();
+		assertThat(smartBean1.restarted).isFalse();
+		assertThat(smartBean2.restarted).isFalse();
 		context.restart();
 		assertThat(stoppedBeans).containsExactly(smartBean1);
 		assertThat(smartBean1.isRunning()).isTrue();
 		assertThat(smartBean2.isRunning()).isFalse();
+		assertThat(smartBean1.paused).isTrue();
+		assertThat(smartBean2.paused).isFalse();
+		assertThat(smartBean1.restarted).isTrue();
+		assertThat(smartBean2.restarted).isFalse();
 		smartBean1.stop();
 		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1);
 		assertThat(smartBean1.isRunning()).isFalse();
@@ -755,6 +763,10 @@ class DefaultLifecycleProcessorTests {
 
 		private volatile boolean pauseable = true;
 
+		volatile boolean paused = false;
+
+		volatile boolean restarted = false;
+
 		static TestSmartLifecycleBean forStartupTests(int phase, CopyOnWriteArrayList<Lifecycle> startedBeans) {
 			return new TestSmartLifecycleBean(phase, 0, startedBeans, null);
 		}
@@ -815,6 +827,20 @@ class DefaultLifecycleProcessorTests {
 			else {
 				callback.run();
 			}
+		}
+
+		@Override
+		public void pause(Runnable callback) {
+			assertThat(this.pauseable).isTrue();
+			stop(callback);
+			this.paused = true;
+		}
+
+		@Override
+		public void restart() {
+			assertThat(this.pauseable).isTrue();
+			start();
+			this.restarted = true;
 		}
 	}
 
