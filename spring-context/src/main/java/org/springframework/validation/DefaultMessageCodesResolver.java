@@ -75,6 +75,8 @@ import org.springframework.util.StringUtils;
  * <li>6. try "typeMismatch.java.lang.String"
  * <li>7. try "typeMismatch"
  * </ul>
+ * <p>Codes for the whole collection are only generated for field names with
+ * at most 8 {@code [key]} segments.
  *
  * <p>By default the {@code errorCode}s will be placed at the beginning of constructed
  * message strings. The {@link #setMessageCodeFormatter(MessageCodeFormatter)
@@ -99,6 +101,12 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	public static final String CODE_SEPARATOR = ".";
 
 	private static final MessageCodeFormatter DEFAULT_FORMATTER = Format.PREFIX_ERROR_CODE;
+
+	/**
+	 * The maximum number of {@code [key]} segments in a field name for which
+	 * {@link #buildFieldList} adds stripped variants.
+	 */
+	private static final int MAX_STRIPPED_KEYS = 8;
 
 
 	private String prefix = "";
@@ -179,9 +187,14 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	/**
 	 * Add both keyed and non-keyed entries for the supplied {@code field}
 	 * to the supplied field list.
+	 * <p>For field names with more than 8 {@code [key]} segments, only the
+	 * supplied {@code field} itself is added, without any stripped variants.
 	 */
 	protected void buildFieldList(String field, List<String> fieldList) {
 		fieldList.add(field);
+		if (exceedsMaxStrippedKeys(field)) {
+			return;
+		}
 		String plainField = field;
 		int keyIndex = plainField.lastIndexOf('[');
 		while (keyIndex != -1) {
@@ -195,6 +208,24 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 				keyIndex = -1;
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the supplied {@code field} contains more than
+	 * {@link #MAX_STRIPPED_KEYS} opening key brackets.
+	 * <p>Each iteration in {@link #buildFieldList} removes exactly one opening
+	 * bracket, so this is an upper bound on the number of stripped variants.
+	 */
+	private static boolean exceedsMaxStrippedKeys(String field) {
+		int keyCount = 0;
+		int keyIndex = field.indexOf('[');
+		while (keyIndex != -1) {
+			if (++keyCount > MAX_STRIPPED_KEYS) {
+				return true;
+			}
+			keyIndex = field.indexOf('[', keyIndex + 1);
+		}
+		return false;
 	}
 
 	/**

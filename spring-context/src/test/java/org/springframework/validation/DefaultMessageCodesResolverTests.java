@@ -64,6 +64,52 @@ class DefaultMessageCodesResolverTests {
 				"errorCode");
 	}
 
+	@Test  // gh-37642
+	void shouldResolveIndexedFieldMessageCodeWithMaxNumberOfKeys() {
+		String[] codes = resolver.resolveMessageCodes("errorCode", "objectName", "a[0][1][2][3][4][5][6][7]", null);
+		assertThat(codes).containsExactly(
+				"errorCode.objectName.a[0][1][2][3][4][5][6][7]",
+				"errorCode.objectName.a[0][1][2][3][4][5][6]",
+				"errorCode.objectName.a[0][1][2][3][4][5]",
+				"errorCode.objectName.a[0][1][2][3][4]",
+				"errorCode.objectName.a[0][1][2][3]",
+				"errorCode.objectName.a[0][1][2]",
+				"errorCode.objectName.a[0][1]",
+				"errorCode.objectName.a[0]",
+				"errorCode.objectName.a",
+				"errorCode.a[0][1][2][3][4][5][6][7]",
+				"errorCode.a[0][1][2][3][4][5][6]",
+				"errorCode.a[0][1][2][3][4][5]",
+				"errorCode.a[0][1][2][3][4]",
+				"errorCode.a[0][1][2][3]",
+				"errorCode.a[0][1][2]",
+				"errorCode.a[0][1]",
+				"errorCode.a[0]",
+				"errorCode.a",
+				"errorCode");
+	}
+
+	@Test  // gh-37642
+	void resolveMessageCodesLimitsIndexedVariants() {
+		String field = "a" + "[0]".repeat(1000);
+		String[] codes = resolver.resolveMessageCodes("errorCode", "objectName", field, null);
+		assertThat(codes).containsExactly(
+				"errorCode.objectName." + field,
+				"errorCode." + field,
+				"errorCode");
+	}
+
+	@Test  // gh-37642
+	void resolveMessageCodesLimitsIndexedVariantsForNestedField() {
+		String field = "a.b" + "[0]".repeat(9);
+		String[] codes = resolver.resolveMessageCodes("errorCode", "objectName", field, null);
+		assertThat(codes).containsExactly(
+				"errorCode.objectName." + field,
+				"errorCode." + field,
+				"errorCode.b" + "[0]".repeat(9),
+				"errorCode");
+	}
+
 	@Test
 	void shouldResolveMessageCodeWithPrefix() {
 		resolver.setPrefix("prefix.");
