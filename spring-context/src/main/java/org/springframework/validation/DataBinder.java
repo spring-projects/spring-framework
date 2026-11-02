@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -44,6 +45,7 @@ import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.InvalidPropertyPathException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.PropertyEditorRegistrar;
@@ -495,6 +497,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * parameters that do not have corresponding fields in the target object.
 	 * <p>Default is "true". Turn this off to enforce that all bind parameters
 	 * must have a matching field in the target object.
+	 * <p>This setting also applies to bind parameters whose names are not
+	 * well-formed {@linkplain PropertyPath property paths} or exceed the
+	 * {@linkplain #setMaxNestedPathDepth maximum nesting depth}: such
+	 * parameters are ignored by default, and rejected with a
+	 * {@link NotWritablePropertyException} otherwise.
 	 * <p>Note that this setting only applies to <i>binding</i> operations
 	 * on this DataBinder, not to <i>retrieving</i> values via its
 	 * {@link #getBindingResult() BindingResult}.
@@ -1306,9 +1313,17 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/**
 	 * Check the given property values against the allowed fields,
 	 * removing values for fields that are not allowed.
+	 * <p>Values whose names are not well-formed {@linkplain PropertyPath property
+	 * paths}, or exceed the {@linkplain #setMaxNestedPathDepth maximum nesting
+	 * depth}, are treated as unknown fields: they are removed if
+	 * {@link #isIgnoreUnknownFields() ignoreUnknownFields} is enabled (the
+	 * default), and rejected with a {@link NotWritablePropertyException} otherwise.
 	 * @param mpvs the property values to be bound (can be modified)
+	 * @throws NotWritablePropertyException if a property value name is not a
+	 * valid property path and unknown fields are not ignored
 	 * @see #getAllowedFields
 	 * @see #isAllowed(String)
+	 * @see #setIgnoreUnknownFields
 	 */
 	protected void checkAllowedFields(MutablePropertyValues mpvs) {
 		PropertyValue[] pvs = mpvs.getPropertyValues();
@@ -1319,11 +1334,17 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				field = PropertyPath.parse(pv.getName(), options);
 			}
 			catch (InvalidPropertyPathException ex) {
+				if (!isIgnoreUnknownFields()) {
+					Object target = getTarget();
+					Class<?> beanClass = (target != null ? target.getClass() : Object.class);
+					throw new NotWritablePropertyException(beanClass, pv.getName(),
+							Objects.requireNonNull(ex.getMessage()), ex);
+				}
 				mpvs.removePropertyValue(pv);
-				Object target = getTarget();
-				getBindingErrorProcessor().processPropertyAccessException(
-						new InvalidPropertyPathException(target != null ? target : this, pv.getName(), pv.getValue(), ex),
-						getInternalBindingResult());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Field [" + pv.getName() + "] has been removed from PropertyValues " +
+							"and will not be bound: " + ex.getMessage());
+				}
 				continue;
 			}
 			if (!isAllowed(field.canonicalName())) {

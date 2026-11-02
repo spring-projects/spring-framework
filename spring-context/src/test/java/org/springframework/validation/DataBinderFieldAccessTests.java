@@ -177,10 +177,16 @@ class DataBinderFieldAccessTests {
 		MutablePropertyValues tooDeep = new MutablePropertyValues();
 		tooDeep.add("spouse.spouse.spouse.name", "Joe");
 		binder.bind(tooDeep);
-		assertThat(binder.getBindingResult().getFieldErrors("spouse.spouse.spouse.name")).singleElement().satisfies(error -> {
-			assertThat(error.getCode()).isEqualTo(InvalidPropertyPathException.ERROR_CODE);
-			assertThat(error.getRejectedValue()).isEqualTo("Joe");
-		});
+		assertThat(kerry.getName()).isEqualTo("kerry");
+		assertThat(binder.getBindingResult().hasErrors()).isFalse();
+
+		binder.setIgnoreUnknownFields(false);
+		MutablePropertyValues tooDeepAgain = new MutablePropertyValues();
+		tooDeepAgain.add("spouse.spouse.spouse.name", "Joe");
+		assertThatExceptionOfType(NotWritablePropertyException.class)
+				.isThrownBy(() -> binder.bind(tooDeepAgain))
+				.withCauseInstanceOf(InvalidPropertyPathException.class);
+		assertThat(kerry.getName()).isEqualTo("kerry");
 	}
 
 	@Test

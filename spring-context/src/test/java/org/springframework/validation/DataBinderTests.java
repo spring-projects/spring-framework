@@ -739,8 +739,8 @@ class DataBinderTests {
 		assertThat(binder.getBindingResult().getSuppressedFields()).containsExactlyInAnyOrder("age", "favoriteColor");
 	}
 
-	@Test  // gh-37275
-	void bindingWithMalformedFieldNameSurfacesAsFieldErrorRatherThanBeingSilentlyDropped() throws BindException {
+	@Test  // gh-37641
+	void bindingWithMalformedFieldNameIgnoresFieldByDefault() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "rod");
 		MutablePropertyValues pvs = new MutablePropertyValues();
@@ -750,15 +750,15 @@ class DataBinderTests {
 		binder.bind(pvs);
 
 		assertThat(rod.getName()).as("well-formed fields still bind").isEqualTo("Rod");
-		assertThat(binder.getBindingResult().getFieldErrors("map[key1]other")).singleElement().satisfies(error -> {
-			assertThat(error.getCode()).isEqualTo(InvalidPropertyPathException.ERROR_CODE);
-			assertThat(error.getRejectedValue()).isEqualTo("value");
-		});
-		assertThatExceptionOfType(BindException.class).isThrownBy(binder::close);
+		assertThat(binder.getBindingResult().hasErrors()).isFalse();
+		assertThat(binder.getBindingResult().getSuppressedFields()).isEmpty();
+		binder.close();
 	}
 
-	@Test  // gh-37275
-	void bindingWithMalformedFieldNameIsNotSuppressedEvenWhenAllowedFieldsAreConfigured() throws BindException {
+	@Test  // gh-37641
+	void bindingWithMalformedFieldNameIgnoresFieldWithoutSuppressingItWhenAllowedFieldsAreConfigured()
+			throws BindException {
+
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "rod");
 		binder.setAllowedFields("name");
@@ -768,8 +768,57 @@ class DataBinderTests {
 
 		binder.bind(pvs);
 
+		assertThat(rod.getName()).isEqualTo("Rod");
+		assertThat(binder.getBindingResult().hasErrors()).isFalse();
 		assertThat(binder.getBindingResult().getSuppressedFields()).isEmpty();
-		assertThat(binder.getBindingResult().getFieldErrors("map[key1]other")).hasSize(1);
+		binder.close();
+	}
+
+	@Test  // gh-37641
+	void bindingWithMalformedFieldNameRejectsFieldWhenUnknownFieldsAreNotIgnored() {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "rod");
+		binder.setIgnoreUnknownFields(false);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "Rod");
+		pvs.add("map[key1]other", "value");
+
+		assertThatExceptionOfType(NotWritablePropertyException.class)
+				.isThrownBy(() -> binder.bind(pvs))
+				.withCauseInstanceOf(InvalidPropertyPathException.class)
+				.satisfies(ex -> assertThat(ex.getPropertyName()).isEqualTo("map[key1]other"));
+		assertThat(binder.getBindingResult().hasErrors()).isFalse();
+	}
+
+	@Test  // gh-37641
+	void bindingWithMalformedFieldNameRejectsFieldWhenUnknownFieldsAreNotIgnoredAndAllowedFieldsAreConfigured() {
+		DataBinder binder = new DataBinder(new TestBean(), "rod");
+		binder.setIgnoreUnknownFields(false);
+		binder.setAllowedFields("name");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "Rod");
+		pvs.add("map[key1]other", "value");
+
+		assertThatExceptionOfType(NotWritablePropertyException.class)
+				.isThrownBy(() -> binder.bind(pvs))
+				.withCauseInstanceOf(InvalidPropertyPathException.class);
+		assertThat(binder.getBindingResult().getSuppressedFields()).isEmpty();
+	}
+
+	@Test  // gh-37641
+	void bindingWithMalformedFieldNameWithManyKeysRecordsNoFieldError() {
+		String field = "name" + "[0]".repeat(1000) + "]";
+
+		DataBinder binder = new DataBinder(new TestBean(), "rod");
+		binder.bind(new MutablePropertyValues(Map.of(field, "value")));
+		assertThat(binder.getBindingResult().getErrorCount()).isZero();
+		assertThat(binder.getBindingResult().getSuppressedFields()).isEmpty();
+
+		DataBinder strictBinder = new DataBinder(new TestBean(), "rod");
+		strictBinder.setIgnoreUnknownFields(false);
+		assertThatExceptionOfType(NotWritablePropertyException.class)
+				.isThrownBy(() -> strictBinder.bind(new MutablePropertyValues(Map.of(field, "value"))));
+		assertThat(strictBinder.getBindingResult().getErrorCount()).isZero();
 	}
 
 	@Test  // gh-37275
@@ -2180,10 +2229,16 @@ class DataBinderTests {
 		MutablePropertyValues tooDeep = new MutablePropertyValues();
 		tooDeep.add("spouse.spouse.spouse.name", "Joe");
 		binder.bind(tooDeep);
-		assertThat(binder.getBindingResult().getFieldErrors("spouse.spouse.spouse.name")).singleElement().satisfies(error -> {
-			assertThat(error.getCode()).isEqualTo(InvalidPropertyPathException.ERROR_CODE);
-			assertThat(error.getRejectedValue()).isEqualTo("Joe");
-		});
+		assertThat(kerry.getName()).isEqualTo("kerry");
+		assertThat(binder.getBindingResult().hasErrors()).isFalse();
+
+		binder.setIgnoreUnknownFields(false);
+		MutablePropertyValues tooDeepAgain = new MutablePropertyValues();
+		tooDeepAgain.add("spouse.spouse.spouse.name", "Joe");
+		assertThatExceptionOfType(NotWritablePropertyException.class)
+				.isThrownBy(() -> binder.bind(tooDeepAgain))
+				.withCauseInstanceOf(InvalidPropertyPathException.class);
+		assertThat(kerry.getName()).isEqualTo("kerry");
 	}
 
 	@Test  // gh-37252
