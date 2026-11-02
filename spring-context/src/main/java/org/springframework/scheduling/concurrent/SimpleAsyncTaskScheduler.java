@@ -230,8 +230,8 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	}
 
 	private Runnable taskOnSchedulerThread(Runnable task) {
-		return new DelegatingErrorHandlingRunnable(task,
-				(this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true)));
+		return decorateTaskIfNecessary(new DelegatingErrorHandlingRunnable(task,
+				(this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true))));
 	}
 
 	private Runnable scheduledTask(Runnable task) {
