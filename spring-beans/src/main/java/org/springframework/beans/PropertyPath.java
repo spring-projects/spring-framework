@@ -45,9 +45,13 @@ import org.springframework.util.Assert;
  * RawKey       := char* excluding quote characters, with balanced '[' / ']' nesting
  * </pre>
  *
- * <p>Invalid property paths are rejected with {@link InvalidPropertyPathException}.
+ * <p>The {@code parse} methods reject a path that does not match this grammar,
+ * or whose nesting depth exceeds the
+ * {@linkplain Options#withMaxNestedPathDepth configured maximum}, with an
+ * {@link InvalidPropertyPathException}.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 7.1
  */
 public final class PropertyPath {
@@ -64,25 +68,35 @@ public final class PropertyPath {
 
 
 	/**
-	 * Parse the given property path.
+	 * Parse the given property path, without any limit on its nesting depth.
+	 * <p>Intended for paths supplied by the application itself, such as
+	 * configured field names. Use {@link #parse(String, Options)} with a
+	 * {@linkplain Options#withMaxNestedPathDepth maximum nesting depth} for
+	 * paths from external input, such as request parameter names.
 	 * @param path the property path to parse; an empty string is a valid path
 	 * with no segments
 	 * @return the parsed property path
 	 * @throws InvalidPropertyPathException if the given path is not a
 	 * well-formed property path
+	 * @see Options#UNLIMITED
 	 */
 	public static PropertyPath parse(String path) throws InvalidPropertyPathException {
 		return parse(path, Options.UNLIMITED);
 	}
 
 	/**
-	 * Parse the given property path, rejecting it if it exceeds the given {@code options}.
+	 * Parse the given property path, rejecting it if its nesting depth exceeds
+	 * the maximum configured in the given {@code options}.
+	 * <p>The maximum nesting depth is enforced while parsing: a path that
+	 * exceeds it is rejected once the first segment beyond that depth has
+	 * been read, without parsing the remainder of the path.
 	 * @param path the property path to parse; an empty string is a valid path
 	 * with no segments
 	 * @param options the parsing options to apply
 	 * @return the parsed property path
 	 * @throws InvalidPropertyPathException if the given path is not a
-	 * well-formed property path, or if it exceeds the given options
+	 * well-formed property path, or if its nesting depth exceeds the maximum
+	 * configured in the given {@code options}
 	 */
 	public static PropertyPath parse(String path, Options options) throws InvalidPropertyPathException {
 		Assert.notNull(path, "Property path must not be null");
@@ -90,13 +104,7 @@ public final class PropertyPath {
 		if (path.isEmpty()) {
 			return new PropertyPath("", Collections.emptyList());
 		}
-		PropertyPath parsed = new Parser(path).parse();
-		int nestingDepth = parsed.segments.size() - 1;
-		if (nestingDepth > options.maxNestedPathDepth) {
-			throw new InvalidPropertyPathException(path,
-					"nesting depth exceeds the maximum of " + options.maxNestedPathDepth);
-		}
-		return parsed;
+		return new Parser(path, options).parse();
 	}
 
 	/**
@@ -313,6 +321,8 @@ public final class PropertyPath {
 
 		private final String path;
 
+		private final int maxNestedPathDepth;
+
 		private final List<Segment> segments = new ArrayList<>(2);
 
 		private final StringBuilder canonicalName;
@@ -338,8 +348,9 @@ public final class PropertyPath {
 		// The quote character that opened the current quoted key.
 		private char quoteChar;
 
-		Parser(String path) {
+		Parser(String path, Options options) {
 			this.path = path;
+			this.maxNestedPathDepth = options.maxNestedPathDepth;
 			this.canonicalName = new StringBuilder(path.length());
 		}
 
@@ -362,6 +373,11 @@ public final class PropertyPath {
 		}
 
 		private void endSegment() {
+			// The nesting depth of the segment being ended is the number of segments preceding it.
+			if (this.segments.size() > this.maxNestedPathDepth) {
+				throw new InvalidPropertyPathException(this.path,
+						"nesting depth exceeds the maximum of " + this.maxNestedPathDepth);
+			}
 			String name = this.path.substring(this.segmentStart, this.segmentNameEnd);
 			List<String> keys = (this.keys != null ? this.keys : Collections.emptyList());
 			if (name.isEmpty() && keys.isEmpty()) {

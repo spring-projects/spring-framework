@@ -266,6 +266,39 @@ class PropertyPathTests {
 				.withMessageContaining("nesting depth exceeds the maximum of 2");
 	}
 
+	@Test  // gh-37642
+	void failsWhenExceedsNestingDepthWithoutParsingRemainder() {
+		// The malformed suffix is never reached: parsing stops at the first
+		// segment beyond the maximum nesting depth.
+		assertThatExceptionOfType(InvalidPropertyPathException.class)
+				.isThrownBy(() ->
+						PropertyPath.parse("a.".repeat(10) + "b]", PropertyPath.Options.withMaxNestedPathDepth(2)))
+				.withMessageContaining("nesting depth exceeds the maximum of 2");
+	}
+
+	@Test  // gh-37642
+	void failsWhenMalformedWithinNestingDepth() {
+		assertThatExceptionOfType(InvalidPropertyPathException.class)
+				.isThrownBy(() -> PropertyPath.parse("one.two]", PropertyPath.Options.withMaxNestedPathDepth(2)))
+				.withMessageContaining("unexpected ']'");
+	}
+
+	@ParameterizedTest  // gh-37642
+	@ValueSource(strings = {"one", "one[1]", "one.two", "one.two.three", "one.two.three[1][2]", "[one].two.three"})
+	void parseWithinNestingDepth(String path) {
+		assertThat(PropertyPath.parse(path, PropertyPath.Options.withMaxNestedPathDepth(2)).canonicalName())
+				.isEqualTo(path);
+	}
+
+	@ParameterizedTest  // gh-37642
+	@ValueSource(ints = {0, 1, 2})
+	void failsWhenExceedsNestingDepthByOne(int maxNestedPathDepth) {
+		String path = "one" + ".one".repeat(maxNestedPathDepth + 1);
+		assertThatExceptionOfType(InvalidPropertyPathException.class)
+				.isThrownBy(() -> PropertyPath.parse(path, PropertyPath.Options.withMaxNestedPathDepth(maxNestedPathDepth)))
+				.withMessageContaining("nesting depth exceeds the maximum of " + maxNestedPathDepth);
+	}
+
 	@Test
 	void subPathFromZeroReturnsSamePath() {
 		PropertyPath path = PropertyPath.parse("address.country.name");
