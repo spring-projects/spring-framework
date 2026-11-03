@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.protobuf;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import com.google.protobuf.Message;
@@ -126,9 +127,24 @@ class ProtobufJsonEncoderTests extends AbstractEncoderTests<ProtobufJsonEncoder>
 				.verifyComplete());
 	}
 
+	@Test
+	void encodeWithCharset() {
+		Mono<Message> input = Mono.just(Msg.newBuilder().setFoo("Caf\u00e9").build());
+		ResolvableType inputType = forClass(Msg.class);
+		MediaType mediaType = new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.ISO_8859_1);
+
+		testEncode(input, inputType, mediaType, null, step -> step
+				.assertNext(buffer -> assertBufferEqualsJson(buffer, "{\"foo\":\"Caf\u00e9\"}", StandardCharsets.ISO_8859_1))
+				.verifyComplete());
+	}
+
 	private void assertBufferEqualsJson(DataBuffer actual, String expected) {
+		assertBufferEqualsJson(actual, expected, StandardCharsets.UTF_8);
+	}
+
+	private void assertBufferEqualsJson(DataBuffer actual, String expected, Charset charset) {
 		byte[] bytes = DataBufferTestUtils.dumpBytes(actual);
-		String json = new String(bytes, StandardCharsets.UTF_8);
+		String json = new String(bytes, charset);
 		assertThat(json).isEqualTo(expected);
 		DataBufferUtils.release(actual);
 	}
