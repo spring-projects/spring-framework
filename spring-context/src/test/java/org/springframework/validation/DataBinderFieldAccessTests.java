@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.InvalidPropertyPathException;
 import org.springframework.beans.MutablePropertyValues;
@@ -33,6 +34,7 @@ import org.springframework.tests.sample.beans.FieldAccessBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Juergen Hoeller
@@ -179,6 +181,19 @@ class DataBinderFieldAccessTests {
 			assertThat(error.getCode()).isEqualTo(InvalidPropertyPathException.ERROR_CODE);
 			assertThat(error.getRejectedValue()).isEqualTo("Joe");
 		});
+	}
+
+	@Test
+	@SuppressWarnings("serial")
+	void customDirectFieldAccessor() {
+		ConfigurablePropertyAccessor accessor = mock(ConfigurablePropertyAccessor.class);
+		DirectFieldBindingResult result = new DirectFieldBindingResult(new FieldAccessForm(), "form", true, 10) {
+			@Override
+			protected ConfigurablePropertyAccessor createDirectFieldAccessor() {
+				return accessor;
+			}
+		};
+		assertThat(result.getPropertyAccessor()).isSameAs(accessor);
 	}
 
 	@Test

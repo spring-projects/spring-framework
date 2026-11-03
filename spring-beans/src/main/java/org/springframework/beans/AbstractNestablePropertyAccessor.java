@@ -635,7 +635,10 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					else if (value instanceof List list) {
 						int index = Integer.parseInt(key);
 						growCollectionIfNecessary(list, index, indexedPropertyName.toString(), ph, i + 1);
-						if (index < 0 || index >= list.size()) {
+						// Reject an out-of-bounds index unless auto-growing is enabled and the index
+						// is within the limit, in which case the List may create the element on demand.
+						if (index < 0 || (index >= list.size() &&
+								(!isAutoGrowNestedPaths() || index >= getAutoGrowCollectionLimit()))) {
 							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 									"Cannot get element with index " + index + " from List of size " +
 									list.size() + ", accessed using property path '" + propertyName + "'");

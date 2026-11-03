@@ -66,7 +66,21 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 	 * @param autoGrowNestedPaths whether to "auto-grow" a nested path that contains a null value
 	 */
 	public DirectFieldBindingResult(@Nullable Object target, String objectName, boolean autoGrowNestedPaths) {
-		this(target, objectName, autoGrowNestedPaths, Integer.MAX_VALUE,
+		this(target, objectName, autoGrowNestedPaths, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Create a new {@code DirectFieldBindingResult} for the given target.
+	 * @param target the target object to bind onto
+	 * @param objectName the name of the target object
+	 * @param autoGrowNestedPaths whether to "auto-grow" a nested path that contains a null value
+	 * @param autoGrowCollectionLimit the limit for array and collection auto-growing
+	 * @since 7.0.11
+	 */
+	public DirectFieldBindingResult(@Nullable Object target, String objectName,
+			boolean autoGrowNestedPaths, int autoGrowCollectionLimit) {
+
+		this(target, objectName, autoGrowNestedPaths, autoGrowCollectionLimit,
 				ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH);
 	}
 
