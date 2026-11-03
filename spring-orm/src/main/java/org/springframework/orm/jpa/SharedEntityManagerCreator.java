@@ -81,17 +81,18 @@ public abstract class SharedEntityManagerCreator {
 			"refresh");
 
 	private static final Set<String> queryTerminatingMethods = Set.of(
-			"execute",  // jakarta.persistence.StoredProcedureQuery.execute()
-			"executeUpdate", // jakarta.persistence.Query.executeUpdate()
-			"getSingleResult",  // jakarta.persistence.Query.getSingleResult()
-			"getSingleResultOrNull",  // jakarta.persistence.Query.getSingleResultOrNull()
-			"getResultStream",  // jakarta.persistence.Query.getResultStream()
-			"getResultList",  // jakarta.persistence.Query.getResultList()
-			"list",  // org.hibernate.query.Query.list()
-			"scroll",  // org.hibernate.query.Query.scroll()
-			"stream",  // org.hibernate.query.Query.stream()
-			"uniqueResult",  // org.hibernate.query.Query.uniqueResult()
-			"uniqueResultOptional"  // org.hibernate.query.Query.uniqueResultOptional()
+			"execute",  // jakarta.persistence.StoredProcedureQuery#execute()
+			"executeUpdate", // jakarta.persistence.Query#executeUpdate()
+			"getSingleResult",  // jakarta.persistence.Query#getSingleResult()
+			"getSingleResultOrNull",  // jakarta.persistence.Query#getSingleResultOrNull()
+			"getResultList",  // jakarta.persistence.Query#getResultList()
+			"getResultStream",  // jakarta.persistence.Query#getResultStream()
+			"getResultCount",  // jakarta.persistence.TypedQuery#getResultCount() in JPA 4.0
+			"list",  // org.hibernate.query.Query#list()
+			"scroll",  // org.hibernate.query.Query#scroll()
+			"stream",  // org.hibernate.query.Query#stream()
+			"uniqueResult",  // org.hibernate.query.Query#uniqueResult()
+			"uniqueResultOptional"  // org.hibernate.query.Query#uniqueResultOptional()
 		);
 
 
