@@ -4,6 +4,7 @@ on:
     branches:
       - 7.0.x
       - 7.0.x-internal
+      - 7.0.*.x
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
@@ -32,7 +33,7 @@ jobs:
             /**/framework-api-*.zip::zip.name=spring-framework,zip.deployed=false
             /**/framework-api-*-docs.zip::zip.type=docs
             /**/framework-api-*-schema.zip::zip.type=schema
-          build-name: ${{ vars.COMMERCIAL && format('spring-framework-commercial-{0}', '7.0.x') || format('spring-framework-{0}', '7.0.x') }}
+          build-name: ${{ vars.COMMERCIAL && format('spring-framework-commercial-{0}', github.ref_name) || format('spring-framework-{0}', github.ref_name) }}
           folder: 'deployment-repository'
           project: ${{ vars.COMMERCIAL && 'spring' }}
           repository: ${{ vars.COMMERCIAL && 'spring-enterprise-maven-dev-local' || 'libs-snapshot-local' }}
