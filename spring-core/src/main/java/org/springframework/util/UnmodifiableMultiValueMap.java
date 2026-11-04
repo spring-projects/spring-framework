@@ -118,7 +118,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 	@Override
 	public Map<K, V> asSingleValueMap() {
-		return this.delegate.asSingleValueMap();
+		return Collections.unmodifiableMap(this.delegate.asSingleValueMap());
 	}
 
 	@Override
