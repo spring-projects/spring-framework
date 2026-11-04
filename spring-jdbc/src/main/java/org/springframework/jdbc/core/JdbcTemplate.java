@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -604,11 +605,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						rowsAffected = stmt.executeBatch();
 					}
 					catch (BatchUpdateException ex) {
-						this.currSql.setLength(0);
 						int[] updateCounts = ex.getUpdateCounts();
-						for (int i = 0; i < ex.getUpdateCounts().length; i++) {
-							if (updateCounts[i] == Statement.EXECUTE_FAILED) {
-								appendSql(sql[i]);
+						if (Arrays.stream(updateCounts).anyMatch(count -> count == Statement.EXECUTE_FAILED)) {
+							this.currSql.setLength(0);
+							for (int i = 0; i < updateCounts.length; i++) {
+								if (updateCounts[i] == Statement.EXECUTE_FAILED) {
+									appendSql(sql[i]);
+								}
 							}
 						}
 						throw ex;
