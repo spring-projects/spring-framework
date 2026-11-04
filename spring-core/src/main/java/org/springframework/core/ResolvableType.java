@@ -963,10 +963,15 @@ public class ResolvableType implements Serializable {
 			if (ownerType != null) {
 				return forType(ownerType, this.variableResolver).resolveVariable(variableToCompare);
 			}
-			// Fallback: comparison by variable name, independent of generic declaration context.
-			for (int i = 0; i < variables.length; i++) {
-				if (ObjectUtils.nullSafeEquals(variables[i].getName(), variableToCompare.getName())) {
-					return forType(typeArguments[i], this.variableResolver);
+			// Fallback: comparison by variable name, limited to a subtype narrowing the
+			// resolved supertype (for example, ArrayList narrowing List<String>). A name
+			// match against an unrelated declaration must not be accepted (gh-36890).
+			if (variableToCompare.getGenericDeclaration() instanceof Class<?> declaringClass &&
+					resolved.isAssignableFrom(declaringClass)) {
+				for (int i = 0; i < variables.length; i++) {
+					if (ObjectUtils.nullSafeEquals(variables[i].getName(), variableToCompare.getName())) {
+						return forType(typeArguments[i], this.variableResolver);
+					}
 				}
 			}
 		}
