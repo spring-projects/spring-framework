@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -54,6 +55,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.StandardMethodMetadata;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
@@ -95,6 +97,8 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final ConditionEvaluator conditionEvaluator;
 
+	private final MetadataReaderFactory metadataReaderFactory;
+
 
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance
@@ -102,7 +106,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ResourceLoader resourceLoader, Environment environment, BeanNameGenerator importBeanNameGenerator,
-			ImportRegistry importRegistry) {
+			ImportRegistry importRegistry, MetadataReaderFactory metadataReaderFactory) {
 
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
@@ -111,6 +115,7 @@ class ConfigurationClassBeanDefinitionReader {
 		this.importBeanNameGenerator = importBeanNameGenerator;
 		this.importRegistry = importRegistry;
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, resourceLoader);
+		this.metadataReaderFactory = metadataReaderFactory;
 	}
 
 
@@ -529,10 +534,33 @@ class ConfigurationClassBeanDefinitionReader {
 				}
 				if (skip == null) {
 					skip = conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN);
+					if (!skip && !configClass.isImported()) {
+						// Non-imported nested @Configuration: also honor REGISTER_BEAN-phase
+						// conditions declared on any lexically enclosing class.
+						skip = shouldSkipFromEnclosingClasses(configClass.getMetadata());
+					}
 				}
 				this.skipped.put(configClass, skip);
 			}
 			return skip;
+		}
+
+		private boolean shouldSkipFromEnclosingClasses(AnnotationMetadata metadata) {
+			String enclosingClassName = metadata.getEnclosingClassName();
+			while (enclosingClassName != null) {
+				AnnotationMetadata enclosing;
+				try {
+					enclosing = metadataReaderFactory.getMetadataReader(enclosingClassName).getAnnotationMetadata();
+				}
+				catch (IOException ex) {
+					return false;
+				}
+				if (conditionEvaluator.shouldSkip(enclosing, ConfigurationPhase.REGISTER_BEAN)) {
+					return true;
+				}
+				enclosingClassName = enclosing.getEnclosingClassName();
+			}
+			return false;
 		}
 	}
 
