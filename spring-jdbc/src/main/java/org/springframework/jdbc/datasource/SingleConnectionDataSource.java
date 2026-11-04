@@ -93,7 +93,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
-	public SingleConnectionDataSource(String url, String username, String password, boolean suppressClose) {
+	public SingleConnectionDataSource(@Nullable String url, @Nullable String username, @Nullable String password, boolean suppressClose) {
 		super(url, username, password);
 		this.suppressClose = suppressClose;
 	}
