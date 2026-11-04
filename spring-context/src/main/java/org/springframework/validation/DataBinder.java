@@ -134,7 +134,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/** Default object name used for binding: "target". */
 	public static final String DEFAULT_OBJECT_NAME = "target";
 
-	/** Default limit for array and collection growing: 256. */
+	/**
+	 * Default limit for array and collection growing: 256.
+	 * @since 3.1
+	 */
 	public static final int DEFAULT_AUTO_GROW_COLLECTION_LIMIT = 256;
 
 
@@ -257,6 +260,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * for bean property access (DataBinder's default mode) and field access.
 	 * <p>Used for setter/field injection via {@link #bind(PropertyValues)}, and not
 	 * applicable to constructor binding via {@link #construct}.
+	 * @since 3.0
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowNestedPaths
 	 */
@@ -268,6 +272,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Return whether "auto-growing" of nested paths has been activated.
+	 * @since 3.0
 	 */
 	public boolean isAutoGrowNestedPaths() {
 		return this.autoGrowNestedPaths;
@@ -280,6 +285,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Used for setter and field injection via {@link #bind(PropertyValues)};
 	 * not applicable to map properties and not to constructor binding via
 	 * {@link #construct} either.
+	 * @since 3.1
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowCollectionLimit
 	 */
@@ -291,6 +297,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Return the current limit for array and collection auto-growing.
+	 * @since 3.1
 	 */
 	public int getAutoGrowCollectionLimit() {
 		return this.autoGrowCollectionLimit;
