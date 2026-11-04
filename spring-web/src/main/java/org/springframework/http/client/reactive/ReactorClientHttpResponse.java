@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
@@ -26,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.MonoSink;
 import reactor.netty.ChannelOperationsId;
 import reactor.netty.Connection;
 import reactor.netty.NettyInbound;
@@ -65,6 +67,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	// 0 - not subscribed, 1 - subscribed, 2 - cancelled via connector (before subscribe)
 	private final AtomicInteger state = new AtomicInteger();
+	private final AtomicBoolean responseDeliveryInProgress = new AtomicBoolean();
 
 
 	/**
@@ -95,15 +98,17 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.inbound.receive()
-				.doOnSubscribe(s -> {
+		return Flux.defer(() -> {
 					if (this.state.compareAndSet(0, 1)) {
-						return;
+						return this.inbound.receive();
 					}
 					if (this.state.get() == 2) {
-						throw new IllegalStateException(
-								"The client response body has been released already due to cancellation.");
+						return this.responseDeliveryInProgress.get()
+								? Flux.empty()
+								: Flux.error(new IllegalStateException("The client response body has " +
+										"been released already due to cancellation."));
 					}
+					return this.inbound.receive();
 				})
 				.map(byteBuf -> {
 					byteBuf.retain();
@@ -166,6 +171,16 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 				logger.debug("[" + getId() + "]" + "Releasing body, not yet subscribed.");
 			}
 			this.inbound.receive().doOnNext(byteBuf -> {}).subscribe(byteBuf -> {}, ex -> {});
+		}
+	}
+
+	void deliver(MonoSink<ClientHttpResponse> sink) {
+		this.responseDeliveryInProgress.set(true);
+		try {
+			sink.success(this);
+		}
+		finally {
+			this.responseDeliveryInProgress.set(false);
 		}
 	}
 
