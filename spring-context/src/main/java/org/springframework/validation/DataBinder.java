@@ -282,9 +282,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Specify the limit for array and collection/set/list auto-growing.
 	 * <p>Default is 256, preventing OutOfMemoryErrors in case of large indexes.
 	 * Raise this limit if your auto-growing needs are unusually high.
-	 * <p>Used for setter and field injection via {@link #bind(PropertyValues)};
-	 * not applicable to map properties and not to constructor binding via
-	 * {@link #construct} either.
+	 * <p>Used for setter and field injection via {@link #bind(PropertyValues)}
+	 * as well as for list and array arguments in constructor binding via
+	 * {@link #construct}; not applicable to map properties.
 	 * @since 3.1
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowCollectionLimit

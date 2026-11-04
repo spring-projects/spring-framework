@@ -304,6 +304,10 @@ value via `setAutoGrowCollectionLimit(...)` on a `DataBinder` or on a
 default. If a property path refers to an index beyond both the current size of an array
 or `List` and the configured limit, an `InvalidPropertyException` is thrown.
 
+Note that the `autoGrowCollectionLimit` of a `DataBinder` also applies to `List` and array
+arguments for <<data-binding-constructor-binding,constructor binding>> via
+`DataBinder.construct`, regardless of the `autoGrowNestedPaths` setting.
+
 TIP: Rather than binding to a self-populating `List` implementation -- such as Spring's
 `AutoPopulatingList` (deprecated as of Spring Framework 7.1) or `LazyList` from Apache
 Commons Collections -- rely on the built-in auto-grow support, which can be disabled or
