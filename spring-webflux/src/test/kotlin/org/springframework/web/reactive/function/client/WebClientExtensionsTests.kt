@@ -383,6 +383,38 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	fun `ResponseSpec#awaitExchangeWithRetry with coroutine context propagation`() {
+		val exchangeFunction = mockk<ExchangeFunction>()
+		val mockResponse = mockk<ClientResponse>()
+		val foo = mockk<Foo>()
+		val slot = slot<ClientRequest>()
+		val atomicInteger = AtomicInteger(0)
+		every { exchangeFunction.exchange(capture(slot)) } answers {
+			if (atomicInteger.getAndIncrement() < 2) {
+				Mono.error(Exception())
+			} else {
+				Mono.just(mockResponse)
+			}
+		}
+		every { mockResponse.releaseBody() } returns Mono.empty()
+		runBlocking(FooContextElement(foo)) {
+			val responseBody = WebClient.builder()
+				.exchangeFunction(exchangeFunction)
+				.filter(object : CoExchangeFilterFunction() {
+					override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+						assertThat(currentCoroutineContext()[FooContextElement.Key]!!.foo).isEqualTo(foo)
+						return next.exchange(request)
+					}
+				})
+				.build().get().uri("/path").awaitExchangeWithRetry(Retry.max(2)) { foo }
+			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(atomicInteger.get()).isEqualTo(3)
+			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
+			assertThat(responseBody).isEqualTo(foo)
+		}
+	}
+
+	@Test
 	fun `ResponseSpec#awaitExchangeOrNull with coroutine context propagation`() {
 		val exchangeFunction = mockk<ExchangeFunction>()
 		val mockResponse = mockk<ClientResponse>()
@@ -401,6 +433,38 @@ class WebClientExtensionsTests {
 				})
 				.build().get().uri("/path").awaitExchangeOrNull { foo }
 			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
+			assertThat(responseBody).isEqualTo(foo)
+		}
+	}
+
+	@Test
+	fun `ResponseSpec#awaitExchangeOrNullWithRetry with coroutine context propagation`() {
+		val exchangeFunction = mockk<ExchangeFunction>()
+		val mockResponse = mockk<ClientResponse>()
+		val foo = mockk<Foo>()
+		val slot = slot<ClientRequest>()
+		val atomicInteger = AtomicInteger(0)
+		every { exchangeFunction.exchange(capture(slot)) } answers {
+			if (atomicInteger.getAndIncrement() < 2) {
+				Mono.error(Exception())
+			} else {
+				Mono.just(mockResponse)
+			}
+		}
+		every { mockResponse.releaseBody() } returns Mono.empty()
+		runBlocking(FooContextElement(foo)) {
+			val responseBody = WebClient.builder()
+				.exchangeFunction(exchangeFunction)
+				.filter(object : CoExchangeFilterFunction() {
+					override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+						assertThat(currentCoroutineContext()[FooContextElement.Key]!!.foo).isEqualTo(foo)
+						return next.exchange(request)
+					}
+				})
+				.build().get().uri("/path").awaitExchangeOrNullWithRetry(Retry.max(2)) { foo }
+			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(atomicInteger.get()).isEqualTo(3)
 			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
 			assertThat(responseBody).isEqualTo(foo)
 		}
@@ -432,6 +496,39 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	fun `ResponseSpec#awaitBodyWithRetry with coroutine context propagation`() {
+		val exchangeFunction = mockk<ExchangeFunction>()
+		val mockResponse = mockk<ClientResponse>()
+		val foo = mockk<Foo>()
+		val slot = slot<ClientRequest>()
+		val atomicInteger = AtomicInteger(0)
+		every { exchangeFunction.exchange(capture(slot)) } answers {
+			if (atomicInteger.getAndIncrement() < 2) {
+				Mono.error(Exception())
+			} else {
+				Mono.just(mockResponse)
+			}
+		}
+		every { mockResponse.statusCode() } returns HttpStatus.OK
+		every { mockResponse.bodyToMono(object : ParameterizedTypeReference<Foo>() {}) } returns Mono.just(foo)
+		runBlocking(FooContextElement(foo)) {
+			val responseBody = WebClient.builder()
+				.exchangeFunction(exchangeFunction)
+				.filter(object : CoExchangeFilterFunction() {
+					override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+						assertThat(currentCoroutineContext()[FooContextElement.Key]!!.foo).isEqualTo(foo)
+						return next.exchange(request)
+					}
+				})
+				.build().get().uri("/path").retrieve().awaitBodyWithRetry<Foo>(Retry.max(2))
+			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(atomicInteger.get()).isEqualTo(3)
+			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
+			assertThat(responseBody).isEqualTo(foo)
+		}
+	}
+
+	@Test
 	fun `ResponseSpec#awaitBodyOrNull with coroutine context propagation`() {
 		val exchangeFunction = mockk<ExchangeFunction>()
 		val mockResponse = mockk<ClientResponse>()
@@ -451,6 +548,39 @@ class WebClientExtensionsTests {
 				})
 				.build().get().uri("/path").retrieve().awaitBodyOrNull<Foo>()
 			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
+			assertThat(responseBody).isEqualTo(foo)
+		}
+	}
+
+	@Test
+	fun `ResponseSpec#awaitBodyOrNullWithRetry with coroutine context propagation`() {
+		val exchangeFunction = mockk<ExchangeFunction>()
+		val mockResponse = mockk<ClientResponse>()
+		val foo = mockk<Foo>()
+		val slot = slot<ClientRequest>()
+		val atomicInteger = AtomicInteger(0)
+		every { exchangeFunction.exchange(capture(slot)) } answers {
+			if (atomicInteger.getAndIncrement() < 2) {
+				Mono.error(Exception())
+			} else {
+				Mono.just(mockResponse)
+			}
+		}
+		every { mockResponse.statusCode() } returns HttpStatus.OK
+		every { mockResponse.bodyToMono(object : ParameterizedTypeReference<Foo>() {}) } returns Mono.just(foo)
+		runBlocking(FooContextElement(foo)) {
+			val responseBody = WebClient.builder()
+				.exchangeFunction(exchangeFunction)
+				.filter(object : CoExchangeFilterFunction() {
+					override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+						assertThat(currentCoroutineContext()[FooContextElement.Key]!!.foo).isEqualTo(foo)
+						return next.exchange(request)
+					}
+				})
+				.build().get().uri("/path").retrieve().awaitBodyOrNullWithRetry<Foo>(Retry.max(2))
+			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(atomicInteger.get()).isEqualTo(3)
 			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
 			assertThat(responseBody).isEqualTo(foo)
 		}
@@ -479,6 +609,42 @@ class WebClientExtensionsTests {
 				})
 				.build().get().uri("/path").retrieve().awaitBodilessEntity()
 			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
+			assertThat(responseEntity.hasBody()).isEqualTo(false)
+		}
+	}
+
+	@Test
+	fun `ResponseSpec#awaitBodilessEntityWithRetry with coroutine context propagation`() {
+		val exchangeFunction = mockk<ExchangeFunction>()
+		val mockResponse = mockk<ClientResponse>()
+		val mockClientHeaders = mockk<ClientResponse.Headers>()
+		val foo = mockk<Foo>()
+		val slot = slot<ClientRequest>()
+		val atomicInteger = AtomicInteger(0)
+		every { exchangeFunction.exchange(capture(slot)) } answers {
+			if (atomicInteger.getAndIncrement() < 2) {
+				Mono.error(Exception())
+			} else {
+				Mono.just(mockResponse)
+			}
+		}
+		every { mockResponse.statusCode() } returns HttpStatus.OK
+		every { mockResponse.releaseBody() } returns Mono.empty()
+		every { mockResponse.headers() } returns mockClientHeaders
+		every { mockClientHeaders.asHttpHeaders() } returns HttpHeaders()
+		runBlocking(FooContextElement(foo)) {
+			val responseEntity = WebClient.builder()
+				.exchangeFunction(exchangeFunction)
+				.filter(object : CoExchangeFilterFunction() {
+					override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+						assertThat(currentCoroutineContext()[FooContextElement.Key]!!.foo).isEqualTo(foo)
+						return next.exchange(request)
+					}
+				})
+				.build().get().uri("/path").retrieve().awaitBodilessEntityWithRetry(Retry.max(2))
+			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(atomicInteger.get()).isEqualTo(3)
 			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
 			assertThat(responseEntity.hasBody()).isEqualTo(false)
 		}
