@@ -20,11 +20,16 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.core.Ordered;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
+import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelCompilerMode;
 import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -55,6 +60,37 @@ class SpelCompilerTests {
 		// Evaluate the expression multiple times to ensure that it gets compiled.
 		IntStream.rangeClosed(1, 5).forEach(i -> assertThat(expression.getValue(component)).isEqualTo(42));
 		assertIsCompiled(expression);
+	}
+
+	@Test  // gh-29548
+	void compilationFailureFallsBackToInterpretedMode() {
+		for (SpelCompilerMode compilerMode : new SpelCompilerMode[] {SpelCompilerMode.MIXED, SpelCompilerMode.IMMEDIATE}) {
+			SpelParserConfiguration configuration =
+					SpelParserConfiguration.builder().compilerMode(compilerMode).build();
+			SpelNodeImpl ast = new SpelNodeImpl(0, 0) {
+				@Override
+				public TypedValue getValueInternal(ExpressionState expressionState) {
+					return TypedValue.NULL;
+				}
+				@Override
+				public boolean isCompilable() {
+					return true;
+				}
+				@Override
+				public void generateCode(MethodVisitor methodVisitor, CodeFlow codeFlow) {
+					// Simulate a class definition failure as encountered in a
+					// GraalVM native image without runtime class loading support.
+					throw new UnsupportedOperationException("simulated code generation failure");
+				}
+				@Override
+				public String toStringAST() {
+					return "simulated";
+				}
+			};
+			SpelExpression expression = new SpelExpression("simulated", ast, configuration);
+			assertThat(SpelCompiler.compile(expression)).isFalse();
+			assertIsNotCompiled(expression);
+		}
 	}
 
 	@Test  // gh-25706

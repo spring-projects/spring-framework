@@ -103,15 +103,26 @@ public final class SpelCompiler implements Opcodes {
 			if (logger.isDebugEnabled()) {
 				logger.debug("SpEL: compiling " + expression.toStringAST());
 			}
-			Class<? extends CompiledExpression> clazz = createExpressionClass(expression);
-			if (clazz != null) {
-				try {
-					return ReflectionUtils.accessibleConstructor(clazz).newInstance();
+			try {
+				Class<? extends CompiledExpression> clazz = createExpressionClass(expression);
+				if (clazz != null) {
+					try {
+						return ReflectionUtils.accessibleConstructor(clazz).newInstance();
+					}
+					catch (Throwable ex) {
+						throw new IllegalStateException("Failed to instantiate CompiledExpression for expression: " +
+								expression.toStringAST(), ex);
+					}
 				}
-				catch (Throwable ex) {
-					throw new IllegalStateException("Failed to instantiate CompiledExpression for expression: " +
-							expression.toStringAST(), ex);
+			}
+			catch (RuntimeException | Error ex) {
+				// Class definition can fail in a GraalVM native image without
+				// runtime class loading support (see gh-29548): fall back to
+				// interpreted mode instead of propagating the error.
+				if (logger.isDebugEnabled()) {
+					logger.debug("SpEL: compilation failed for [" + expression.toStringAST() + "]", ex);
 				}
+				return null;
 			}
 		}
 
