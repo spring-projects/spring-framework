@@ -31,11 +31,13 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link DataBinder} with constructor binding.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 class DataBinderConstructTests {
 
@@ -247,6 +249,94 @@ class DataBinderConstructTests {
 		IntegerMapListRecord target = getTarget(binder);
 		assertThat(target.integerMapList().get(0)).containsOnly(Map.entry("a", 1), Map.entry("b", 2));
 		assertThat(target.integerMapList().get(1)).containsOnly(Map.entry("a", 3), Map.entry("b", 4));
+	}
+
+	@Test  // gh-37640
+	void listBindingWithinDefaultAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[255]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerListRecord target = getTarget(binder);
+		assertThat(target.integerList()).hasSize(256).element(255).isEqualTo(1);
+	}
+
+	@Test  // gh-37640
+	void listBindingBeyondDefaultAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[256]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+
+		assertThatExceptionOfType(IndexOutOfBoundsException.class)
+				.isThrownBy(() -> binder.construct(valueResolver));
+	}
+
+	@Test  // gh-37640
+	void listBindingWithinCustomAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[299]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.setAutoGrowCollectionLimit(300);
+		binder.construct(valueResolver);
+
+		IntegerListRecord target = getTarget(binder);
+		assertThat(target.integerList()).hasSize(300).element(299).isEqualTo(1);
+	}
+
+	@Test  // gh-37640
+	void listBindingBeyondCustomAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[10]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.setAutoGrowCollectionLimit(10);
+
+		assertThatExceptionOfType(IndexOutOfBoundsException.class)
+				.isThrownBy(() -> binder.construct(valueResolver));
+	}
+
+	@Test  // gh-37640
+	void arrayBindingWithinDefaultAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerArray[255]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerArrayRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerArrayRecord target = getTarget(binder);
+		assertThat(target.integerArray()).hasSize(256);
+		assertThat(target.integerArray()[255]).isEqualTo(1);
+	}
+
+	@Test  // gh-37640
+	void arrayBindingBeyondDefaultAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerArray[256]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerArrayRecord.class);
+
+		assertThatExceptionOfType(ArrayIndexOutOfBoundsException.class)
+				.isThrownBy(() -> binder.construct(valueResolver));
+	}
+
+	@Test  // gh-37640
+	void nestedListBindingBeyondDefaultAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerListMap[a][256]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerListMapRecord.class);
+
+		assertThatExceptionOfType(IndexOutOfBoundsException.class)
+				.isThrownBy(() -> binder.construct(valueResolver));
+	}
+
+	@Test  // gh-37640
+	void autoGrowCollectionLimitAppliesRegardlessOfAutoGrowNestedPaths() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[10]", "1"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.setAutoGrowNestedPaths(false);
+		binder.setAutoGrowCollectionLimit(10);
+
+		assertThatExceptionOfType(IndexOutOfBoundsException.class)
+				.isThrownBy(() -> binder.construct(valueResolver));
 	}
 
 
