@@ -152,7 +152,6 @@ class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", ""));
 		jof.setJndiName("myFoo");
-		jof.setExpectedType(String.class);
 		jof.setDefaultObject("myString");
 		jof.afterPropertiesSet();
 		assertThat(jof.getObject()).isEqualTo("myString");

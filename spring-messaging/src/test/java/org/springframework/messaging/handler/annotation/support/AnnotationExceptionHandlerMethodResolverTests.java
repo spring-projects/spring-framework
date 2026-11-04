@@ -83,8 +83,11 @@ class AnnotationExceptionHandlerMethodResolverTests {
 
 	@Test
 	void resolveMethodInherited() {
+		AnnotationExceptionHandlerMethodResolver resolver =
+				new AnnotationExceptionHandlerMethodResolver(InheritedController.class);
+
 		IOException exception = new IOException();
-		assertThat(this.resolver.resolveMethod(exception).getName()).isEqualTo("handleIOException");
+		assertThat(resolver.resolveMethod(exception).getName()).isEqualTo("handleIOException");
 	}
 
 	@Test
