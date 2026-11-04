@@ -19,6 +19,8 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -31,6 +33,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,9 +41,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -119,6 +127,80 @@ class DefaultRestClientTests {
 				this.client.get().uri(URL).retrieve()
 						.requiredBody(new ParameterizedTypeReference<String>() {})
 		);
+	}
+
+	@Test // gh-37078
+	void bodyWhenConverterThrowsIOExceptionThenResourceAccessException() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
+
+		HttpMessageConverter<String> converter = mock();
+		given(converter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		given(converter.read(eq(String.class), any(HttpInputMessage.class)))
+				.willThrow(new SocketTimeoutException("Read timed out"));
+
+		RestClient client = RestClient.builder()
+				.requestFactory(this.requestFactory)
+				.configureMessageConverters(converters -> converters
+						.disableDefaults()
+						.addCustomConverter(converter))
+				.build();
+
+		assertThatExceptionOfType(ResourceAccessException.class)
+				.isThrownBy(() -> client.get().uri(URL).retrieve().body(String.class))
+				.withMessageContaining("I/O error while extracting response for type")
+				.withMessageNotContaining("content type")
+				.withCauseInstanceOf(SocketTimeoutException.class);
+	}
+
+	@Test // gh-37078
+	void bodyWhenConverterThrowsUncheckedIOExceptionThenResourceAccessException() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
+
+		HttpMessageConverter<String> converter = mock();
+		given(converter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		given(converter.read(eq(String.class), any(HttpInputMessage.class)))
+				.willThrow(new UncheckedIOException(new SocketTimeoutException("Read timed out")));
+
+		RestClient client = RestClient.builder()
+				.requestFactory(this.requestFactory)
+				.configureMessageConverters(converters -> converters
+						.disableDefaults()
+						.addCustomConverter(converter))
+				.build();
+
+		assertThatExceptionOfType(ResourceAccessException.class)
+				.isThrownBy(() -> client.get().uri(URL).retrieve().body(String.class))
+				.withMessageContaining("I/O error while extracting response for type")
+				.withCauseInstanceOf(SocketTimeoutException.class);
+	}
+
+	@Test // gh-37078
+	void bodyWhenConverterThrowsHttpMessageNotReadableExceptionThenRestClientException() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
+
+		HttpMessageConverter<String> converter = mock();
+		given(converter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		given(converter.read(eq(String.class), any(HttpInputMessage.class)))
+				.willThrow(new HttpMessageNotReadableException("Could not read", this.response));
+
+		RestClient client = RestClient.builder()
+				.requestFactory(this.requestFactory)
+				.configureMessageConverters(converters -> converters
+						.disableDefaults()
+						.addCustomConverter(converter))
+				.build();
+
+		assertThatExceptionOfType(RestClientException.class)
+				.isThrownBy(() -> client.get().uri(URL).retrieve().body(String.class))
+				.isNotInstanceOf(ResourceAccessException.class)
+				.withMessageContaining("content type")
+				.withCauseInstanceOf(HttpMessageNotReadableException.class);
 	}
 
 	@ParameterizedTest(name = "{0}")

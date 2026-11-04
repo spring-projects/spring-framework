@@ -239,6 +239,10 @@ final class DefaultRestClient implements RestClient {
 			else {
 				cause = exc;
 			}
+			if (cause instanceof IOException ioException) {
+				throw new ResourceAccessException("I/O error while extracting response for type [" +
+						ResolvableType.forType(bodyType) + "]", ioException);
+			}
 			throw new RestClientException("Error while extracting response for type [" +
 					ResolvableType.forType(bodyType) + "] and content type [" + RestClientUtils.getContentType(clientResponse) + "]", cause);
 		}
