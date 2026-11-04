@@ -458,7 +458,7 @@ class GenericConversionServiceTests {
 		conversionService.addConverter(converter);
 		assertThat(conversionService.convert(3, Integer.class)).isEqualTo(3);
 		assertThat(converter.getSourceTypes()).hasSizeGreaterThan(2);
-		assertThat(converter.getSourceTypes().stream().allMatch(td -> Integer.class.equals(td.getType()))).isTrue();
+		assertThat(converter.getSourceTypes().stream()).allMatch(td -> Integer.class.equals(td.getType()));
 	}
 
 	@Test  // gh-14200, SPR-9566
@@ -605,7 +605,7 @@ class GenericConversionServiceTests {
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Map.class))
 		);
 
-		assertThat("foo").isEqualTo(result.get(0).get("bar"));
+		assertThat(result.get(0).get("bar")).isEqualTo("foo");
 	}
 
 

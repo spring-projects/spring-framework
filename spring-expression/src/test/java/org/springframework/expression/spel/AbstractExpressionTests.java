@@ -135,8 +135,8 @@ public abstract class AbstractExpressionTests {
 		else {
 			assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
-		assertThat(expectedResultType.equals(resultType)).as("Type of the result was not as expected.  Expected '" + expectedResultType +
-				"' but result was of type '" + resultType + "'").isTrue();
+		assertThat(resultType).as("Type of the result was not as expected.  Expected '" + expectedResultType +
+				"' but result was of type '" + resultType + "'").isEqualTo(expectedResultType);
 
 		assertThat(expr.isWritable(context)).as("isWritable").isEqualTo(shouldBeWritable);
 	}

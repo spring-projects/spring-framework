@@ -329,7 +329,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bf.containsSingleton("testBean")).isFalse();
 		assertThat(bf.containsSingleton("annotatedBean")).isFalse();
 		assertThat(bean.destroyed).isTrue();
-		assertThat(bf.getDependenciesForBean("annotatedBean").length).isSameAs(0);
+		assertThat(bf.getDependenciesForBean("annotatedBean")).isEmpty();
 	}
 
 	@Test

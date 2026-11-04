@@ -167,8 +167,8 @@ class MutablePropertySourcesTests {
 
 		assertThat(sources.stream()).isNotNull();
 		assertThat(sources.stream().count()).isEqualTo(1L);
-		assertThat(sources.stream().anyMatch(source -> "test".equals(source.getName()))).isTrue();
-		assertThat(sources.stream().anyMatch(source -> "bogus".equals(source.getName()))).isFalse();
+		assertThat(sources.stream()).anyMatch(source -> "test".equals(source.getName()));
+		assertThat(sources.stream()).noneMatch(source -> "bogus".equals(source.getName()));
 	}
 
 	@Test
