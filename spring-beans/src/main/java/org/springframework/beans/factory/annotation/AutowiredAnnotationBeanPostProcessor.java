@@ -303,7 +303,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
-		InjectionMetadata metadata = findInjectionMetadata(beanName, beanClass, beanDefinition);
+		// Keep the members checked when the bean definition was post-processed, if it was, under
+		// the same bean type: checking them again would find all of them externally managed by then.
+		InjectionMetadata metadata = findAutowiringMetadata(beanName, registeredBean.getBeanType().toClass(), null);
 		Collection<AutowiredElement> autowiredElements = getAutowiredElements(metadata,
 				beanDefinition.getPropertyValues());
 		if (!ObjectUtils.isEmpty(autowiredElements)) {
