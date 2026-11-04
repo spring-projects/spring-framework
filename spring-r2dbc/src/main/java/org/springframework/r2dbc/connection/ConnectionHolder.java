@@ -110,9 +110,8 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	/**
 	 * Return the current {@link Connection} held by this {@link ConnectionHolder}.
-	 * <p>This will be the same {@link Connection} until {@code released} gets called
-	 * on the {@link ConnectionHolder}, which will reset the held {@link Connection},
-	 * fetching a new {@link Connection} on demand.
+	 * <p>This will be the same {@link Connection} until it is reset for a holder
+	 * that is not synchronized with a transaction, fetching a new Connection on demand.
 	 * @see #released()
 	 */
 	public Connection getConnection() {
@@ -137,7 +136,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	@Override
 	public void released() {
 		super.released();
-		if (!isOpen() && this.currentConnection != null) {
+		if (!isOpen() && !isSynchronizedWithTransaction() && this.currentConnection != null) {
 			this.currentConnection = null;
 		}
 	}
