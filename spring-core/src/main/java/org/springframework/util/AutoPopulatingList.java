@@ -43,7 +43,13 @@ import org.jspecify.annotations.Nullable;
  * @author Juergen Hoeller
  * @since 2.0
  * @param <E> the element type
+ * @deprecated as of 7.1, to be removed in 8.0; rely on the built-in
+ * "auto-grow" support for data binding instead; see
+ * {@link org.springframework.validation.DataBinder#setAutoGrowNestedPaths(boolean)}
+ * and
+ * {@link org.springframework.validation.DataBinder#setAutoGrowCollectionLimit(int)}
  */
+@Deprecated(since = "7.1", forRemoval = true)
 @SuppressWarnings("serial")
 public class AutoPopulatingList<E> implements List<E>, Serializable {
 
@@ -249,7 +255,9 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	 * data structure such as a {@link java.util.List}.
 	 *
 	 * @param <E> the element type
+	 * @deprecated as of 7.1, along with {@link AutoPopulatingList}; to be removed in 8.0
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	@FunctionalInterface
 	public interface ElementFactory<E> {
 
@@ -265,7 +273,9 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 
 	/**
 	 * Exception to be thrown from ElementFactory.
+	 * @deprecated as of 7.1, along with {@link AutoPopulatingList}; to be removed in 8.0
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public static class ElementInstantiationException extends RuntimeException {
 
 		public ElementInstantiationException(String msg) {

@@ -279,6 +279,37 @@ xref:web/webmvc/mvc-data-binding.adoc#mvc-data-binding-design[Model Design].
 ====
 
 
+[[data-binding-auto-grow]]
+=== Auto-growing Nested Paths and Collections
+
+When auto-growing is enabled, a `null` value within a nested property path is populated
+with a new instance of the corresponding property type -- for example, a new `Employee`
+for the `managingDirector` property in `managingDirector.salary` -- instead of resulting
+in a `NullValueInNestedPathException`. Auto-growing also applies to arrays and lists: if a
+property path refers to an index beyond the current size of an array or `List` -- for
+example, `accounts[2].name` -- the array or `List` is grown accordingly, and new elements
+are created as needed.
+
+Auto-growing is enabled by default on a `DataBinder` -- and therefore also on a
+`WebDataBinder` -- but disabled by default on a plain `BeanWrapperImpl`. You can enable or
+disable auto-growing via `setAutoGrowNestedPaths(...)` on a `ConfigurablePropertyAccessor`
+such as `BeanWrapperImpl`, or on a `DataBinder` -- for example within an `@InitBinder`
+method.
+
+When auto-growing is enabled, a `DataBinder` does not automatically grow an array or
+`List` beyond 256 elements by default (see `DataBinder.DEFAULT_AUTO_GROW_COLLECTION_LIMIT`);
+however, the `autoGrowCollectionLimit` value is configurable. You can specify a custom
+value via `setAutoGrowCollectionLimit(...)` on a `DataBinder` or on a
+`ConfigurablePropertyAccessor` such as `BeanWrapperImpl`, which does not impose a limit by
+default. If a property path refers to an index beyond both the current size of an array
+or `List` and the configured limit, an `InvalidPropertyException` is thrown.
+
+TIP: Rather than binding to a self-populating `List` implementation -- such as Spring's
+`AutoPopulatingList` (deprecated as of Spring Framework 7.1) or `LazyList` from Apache
+Commons Collections -- rely on the built-in auto-grow support, which can be disabled or
+limited as described above.
+
+
 [[data-binding-conversion]]
 == ``PropertyEditor``s
 

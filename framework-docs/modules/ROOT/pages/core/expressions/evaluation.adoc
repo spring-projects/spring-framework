@@ -564,7 +564,8 @@ Kotlin::
 When collection auto-growing is enabled, a collection cannot automatically grow beyond
 256 elements by default; however, the `maximumAutoGrowSize` value is configurable. This
 default is aligned with `DataBinder.DEFAULT_AUTO_GROW_COLLECTION_LIMIT`, for consistency
-with the auto-grow limit used for data binding in Spring MVC and Spring WebFlux. If you
+with the xref:core/validation/data-binding.adoc#data-binding-auto-grow[auto-grow limit]
+used for data binding in Spring MVC and Spring WebFlux. If you
 create a `SpelExpressionParser` programmatically, you can specify a custom
 `maximumAutoGrowSize` when creating the `SpelParserConfiguration` that you provide to the
 `SpelExpressionParser`.

@@ -248,6 +248,7 @@ class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test  // gh-37634
+	@SuppressWarnings({"deprecation", "removal"})
 	void setPropertyValueAutoPopulatingRawListForNestedPath() {
 		bean.setRawList(new AutoPopulatingList<>(Bean.class));
 		wrapper.setPropertyValue("rawList[1].prop", "test");

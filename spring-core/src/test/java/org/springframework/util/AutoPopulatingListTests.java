@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
+@SuppressWarnings({"deprecation", "removal"})
 class AutoPopulatingListTests {
 
 	@Test

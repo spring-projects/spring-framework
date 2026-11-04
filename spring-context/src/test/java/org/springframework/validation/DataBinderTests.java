@@ -2491,7 +2491,7 @@ class DataBinderTests {
 	}
 
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({"deprecation", "removal", "rawtypes", "unused"})
 	private static class RawListForm {
 
 		private List items = new AutoPopulatingList<>(TestBean.class);
