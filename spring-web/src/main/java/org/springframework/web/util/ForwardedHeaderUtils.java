@@ -137,11 +137,17 @@ public abstract class ForwardedHeaderUtils {
 	 * <p>Parameter values are parsed more leniently than the strict "token"
 	 * production, allowing any character up to the next delimiter to
 	 * accept an unquoted host:port or IPv6 "node" value.
+	 * <p>Empty list elements before the first "forwarded-element" are
+	 * skipped, and parameters with an empty value are ignored.
 	 */
 	private static Map<String, String> parseFirstElement(String header) {
 		Map<String, String> pairs = new LinkedHashMap<>(4);
-		int index = 0;
 		int length = header.length();
+		int index = skipWhiteSpaces(header, 0);
+		while (index < length && header.charAt(index) == ',') {
+			// Empty list element before the first "forwarded-element"
+			index = skipWhiteSpaces(header, index + 1);
+		}
 		while (index < length) {
 			index = skipWhiteSpaces(header, index);
 			if (index == length || header.charAt(index) == ',') {
@@ -185,7 +191,9 @@ public abstract class ForwardedHeaderUtils {
 					index = skipToDelimiter(header, index);
 					value = header.substring(valueStart, index);
 				}
-				pairs.putIfAbsent(name.toLowerCase(Locale.ROOT), value.trim());
+				if (StringUtils.hasText(value)) {
+					pairs.putIfAbsent(name.toLowerCase(Locale.ROOT), value.trim());
+				}
 			}
 			index = skipToDelimiter(header, index);
 			if (index < length && header.charAt(index) == ',') {
