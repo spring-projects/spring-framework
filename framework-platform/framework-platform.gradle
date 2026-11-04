@@ -10,7 +10,7 @@ javaPlatform {
 def useJRuby94 = providers.gradleProperty("toolchainVersion").map { (it as int) < 21 }.getOrElse(false)
 
 dependencies {
-	api(platform("com.fasterxml.jackson:jackson-bom:2.21.6"))
+	api(platform("com.fasterxml.jackson:jackson-bom:2.21.8"))
 	api(platform("io.micrometer:micrometer-bom:1.18.0-SNAPSHOT"))
 	api(platform("io.netty:netty-bom:4.2.20.Final"))
 	api(platform("io.projectreactor:reactor-bom:2026.0.0-RC1"))
@@ -24,7 +24,7 @@ dependencies {
 	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.11.0"))
 	api(platform("org.junit:junit-bom:6.1.2"))
 	api(platform("org.mockito:mockito-bom:5.24.0"))
-	api(platform("tools.jackson:jackson-bom:3.1.6"))
+	api(platform("tools.jackson:jackson-bom:3.1.8"))
 
 	constraints {
 		api("com.fasterxml:aalto-xml:1.4.0")
@@ -124,7 +124,7 @@ dependencies {
 		api("org.glassfish:jakarta.el:4.0.2")
 		api("org.graalvm.sdk:graal-sdk:22.3.1")
 		api("org.hamcrest:hamcrest:3.0")
-		api("org.hibernate.orm:hibernate-core:7.4.13.Final")
+		api("org.hibernate.orm:hibernate-core:7.4.14.Final")
 		api("org.hibernate.validator:hibernate-validator:9.1.6.Final")
 		api("org.hsqldb:hsqldb:2.7.4")
 		api("org.htmlunit:htmlunit:5.5.0")
@@ -138,8 +138,8 @@ dependencies {
 		api("org.python:jython-standalone:2.7.4")
 		api("org.quartz-scheduler:quartz:2.3.2")
 		api("org.reactivestreams:reactive-streams:1.0.4")
-		api("org.seleniumhq.selenium:htmlunit3-driver:4.48.0")
-		api("org.seleniumhq.selenium:selenium-java:4.50.0")
+		api("org.seleniumhq.selenium:htmlunit3-driver:4.52.0")
+		api("org.seleniumhq.selenium:selenium-java:4.52.0")
 		api("org.skyscreamer:jsonassert:1.5.3")
 		api("org.testng:testng:7.12.0")
 		api("org.webjars:webjars-locator-lite:1.1.5")
