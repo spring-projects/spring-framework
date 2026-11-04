@@ -178,6 +178,65 @@ class NamedParameterUtilsTests {
 		assertThat(NamedParameterUtils.substituteNamedParameters(parsedSql4, new MapSqlParameterSource(parameters))).isEqualTo("/*+ HINT */ xxx /* comment :a ? */ ? yyyy ? ? ? zzzzz /* :xx XX*");
 	}
 
+	@Test  // gh-22255
+	void parseSqlContainingParametersInBlockCommentWhenAllowed() {
+		String sql = "/*@ queryKey(:cafeId) */ select * from cafe where cafe_id = :cafeId";
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql, true);
+		assertThat(parsedSql.getParameterNames()).containsExactly("cafeId", "cafeId");
+		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(2);
+		assertThat(parsedSql.getNamedParameterCount()).isEqualTo(1);
+
+		MapSqlParameterSource paramSource = new MapSqlParameterSource("cafeId", 42);
+		assertThat(NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource)).isEqualTo(
+				"/*@ queryKey(?) */ select * from cafe where cafe_id = ?");
+		assertThat(NamedParameterUtils.buildValueArray(parsedSql, paramSource, null)).containsExactly(42, 42);
+	}
+
+	@Test  // gh-22255
+	void parseSqlContainingParametersInLineCommentWhenAllowed() {
+		String sql = "select * from cafe where cafe_id = :cafeId -- filtered by :status\n";
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql, true);
+		assertThat(parsedSql.getParameterNames()).containsExactly("cafeId", "status");
+		assertThat(NamedParameterUtils.substituteNamedParameters(parsedSql, null)).isEqualTo(
+				"select * from cafe where cafe_id = ? -- filtered by ?\n");
+	}
+
+	@Test  // gh-22255
+	void parseSqlContainingCommentsWhenParametersInCommentsAllowed() {
+		String sql1 = "/*+ HINT */ xxx /* comment */ :a yyyy :b :c :a zzzzz -- :xx XX\n";
+		ParsedSql parsedSql1 = NamedParameterUtils.parseSqlStatement(sql1, true);
+		assertThat(NamedParameterUtils.substituteNamedParameters(parsedSql1, null)).isEqualTo(
+				"/*+ HINT */ xxx /* comment */ ? yyyy ? ? ? zzzzz -- ? XX\n");
+		assertThat(parsedSql1.getParameterNames()).containsExactly("a", "b", "c", "a", "xx");
+
+		// Non-terminated comment must not trip up the parser
+		String sql2 = "/*+ HINT */ xxx /* comment */ :a yyyy :b :c :a zzzzz /* :xx XX*";
+		ParsedSql parsedSql2 = NamedParameterUtils.parseSqlStatement(sql2, true);
+		assertThat(NamedParameterUtils.substituteNamedParameters(parsedSql2, null)).isEqualTo(
+				"/*+ HINT */ xxx /* comment */ ? yyyy ? ? ? zzzzz /* ? XX*");
+	}
+
+	@Test  // gh-22255
+	void parseSqlContainingCommentsIgnoresParametersInCommentsByDefault() {
+		String sql = "/*@ queryKey(:cafeId) */ select * from cafe where cafe_id = :cafeId";
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(parsedSql.getParameterNames()).containsExactly("cafeId");
+		assertThat(substituteNamedParameters(parsedSql)).isEqualTo(
+				"/*@ queryKey(:cafeId) */ select * from cafe where cafe_id = ?");
+	}
+
+	@ParameterizedTest  // gh-22255
+	@ValueSource(strings = {
+			"SELECT ':foo'':doo', :xxx FROM DUAL",
+			"SELECT \":foo\"\":doo\", :xxx FROM DUAL",
+			"SELECT `:foo``:doo`, :xxx FROM DUAL"
+		})
+	void parseSqlStatementWithParametersInsideQuotesWhenParametersInCommentsAllowed(String sql) {
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql, true);
+		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
+		assertThat(parsedSql.getParameterNames()).containsExactly("xxx");
+	}
+
 	@Test  // SPR-4612
 	void parseSqlStatementWithPostgresCasting() {
 		String expectedSql = "select 'first name' from artists where id = ? and birth_date=?::timestamp";
