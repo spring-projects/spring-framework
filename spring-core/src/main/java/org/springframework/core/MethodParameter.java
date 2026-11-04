@@ -686,10 +686,14 @@ public class MethodParameter {
 	 * <p>Note: As of 7.0.3, a default parameter name discoverer is available.
 	 * This init method can be used to override the default discoverer or to
 	 * suppress discovery (passing {@code null}).
+	 * <p>Note: As of 7.0.11, this init call is a no-op once a parameter name
+	 * has been discovered, avoiding unnecessary rediscovery attempts.
 	 * @see DefaultParameterNameDiscoverer#getSharedInstance()
 	 */
 	public void initParameterNameDiscovery(@Nullable ParameterNameDiscoverer parameterNameDiscoverer) {
-		this.parameterNameDiscoverer = parameterNameDiscoverer;
+		if (this.parameterName == null) {
+			this.parameterNameDiscoverer = parameterNameDiscoverer;
+		}
 	}
 
 	/**
@@ -703,6 +707,10 @@ public class MethodParameter {
 		if (this.parameterIndex < 0) {
 			return null;
 		}
+		String parameterName = this.parameterName;
+		if (parameterName != null) {
+			return parameterName;
+		}
 		ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 		if (discoverer != null) {
 			@Nullable String[] parameterNames = null;
@@ -713,11 +721,12 @@ public class MethodParameter {
 				parameterNames = discoverer.getParameterNames(constructor);
 			}
 			if (parameterNames != null && this.parameterIndex < parameterNames.length) {
-				this.parameterName = parameterNames[this.parameterIndex];
+				parameterName = parameterNames[this.parameterIndex];
+				this.parameterName = parameterName;
 			}
 			this.parameterNameDiscoverer = null;
 		}
-		return this.parameterName;
+		return parameterName;
 	}
 
 
