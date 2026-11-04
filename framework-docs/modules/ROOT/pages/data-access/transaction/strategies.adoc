@@ -191,6 +191,44 @@ how transactions are managed merely by changing configuration, even if that chan
 moving from local to global transactions or vice versa.
 
 
+[[transaction-strategies-multiple-managers]]
+=== Multiple Transaction Managers with the Same Resource
+
+When multiple `PlatformTransactionManager` instances are configured with the same underlying
+resource (such as the same `DataSource` for `DataSourceTransactionManager`), transactions
+created by one manager can participate in existing transactions created by another manager.
+This behavior occurs because Spring's transaction synchronization is based on the resource
+itself, not on the transaction manager instance.
+
+For example, consider two `DataSourceTransactionManager` instances (`tm1` and `tm2`) that
+are both configured with the same `DataSource`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+DataSourceTransactionManager tm1 = new DataSourceTransactionManager(dataSource);
+DataSourceTransactionManager tm2 = new DataSourceTransactionManager(dataSource);
+TransactionTemplate tt1 = new TransactionTemplate(tm1);
+TransactionTemplate tt2 = new TransactionTemplate(tm2);
+
+tt1.executeWithoutResult(s1 -> {
+    // s1.isNewTransaction() is true
+    tt2.executeWithoutResult(s2 -> {
+        // s2.isNewTransaction() is false - participates in tm1's transaction
+    });
+});
+----
+
+In this example, the transaction started by `tt2` joins the existing transaction created by
+`tt1` because both transaction managers operate on the same `DataSource`. This coordination
+happens automatically through Spring's `TransactionSynchronizationManager`, which binds
+resources to the current thread based on the resource key (the `DataSource` in this case).
+
+This behavior is particularly useful in scenarios where different components need to use
+different transaction managers for configuration reasons (such as different timeout settings)
+but should still participate in the same transaction when they share the same underlying
+resource.
+
+
 [[transaction-strategies-hibernate]]
 == Hibernate Transaction Setup
 
