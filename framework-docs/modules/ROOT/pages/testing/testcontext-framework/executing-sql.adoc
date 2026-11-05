@@ -412,6 +412,12 @@ of the `transactionMode` attribute in `@SqlConfig` and the presence of a
 `PlatformTransactionManager` in the test's `ApplicationContext`. As a bare minimum,
 however, a `javax.sql.DataSource` must be present in the test's `ApplicationContext`.
 
+The `INFERRED` mode (the effective default) is generally appropriate when SQL setup
+or cleanup should participate in the test-managed transaction and, for example, be rolled back with a
+test annotated with `@Transactional`. Choose `ISOLATED` when the scripts must run in a
+separate transaction that is committed immediately. `ISOLATED` requires both a
+`DataSource` and a `PlatformTransactionManager` to be available.
+
 If the algorithms used by `SqlScriptsTestExecutionListener` to detect a `DataSource` and
 `PlatformTransactionManager` and infer the transaction semantics do not suit your needs,
 you can specify explicit names by setting the `dataSource` and `transactionManager`
