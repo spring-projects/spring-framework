@@ -18,11 +18,14 @@ package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
@@ -92,6 +95,28 @@ class WebSocketHttpRequestHandlerTests {
 		verifyNoMoreInteractions(this.handshakeHandler);
 		assertThat(this.response.getHeader("headerName")).isEqualTo("headerValue");
 	}
+
+	@Test
+	void corsRequestRejected() throws ServletException, IOException {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain.example");
+		this.requestHandler.handleRequest(request, this.response);
+
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
+	}
+
+	@Test
+	void corsRequestAllowed() throws ServletException, IOException {
+		String origin = "https://domain.example";
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(HttpHeaders.ORIGIN, origin);
+		this.requestHandler.setHandshakeInterceptors(List.of(new OriginHandshakeInterceptor(List.of(origin))));
+		this.requestHandler.handleRequest(request, this.response);
+
+		verify(this.handshakeHandler).doHandshake(any(), any(), any(), any());
+		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.OK.value());
+	}
+
 
 
 	private static class TestInterceptor implements HandshakeInterceptor {
