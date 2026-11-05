@@ -31,6 +31,8 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -186,6 +188,37 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		this.decoder.setMaxInMemorySize(5);
 		testDecode(input, String.class, step ->
 				step.expectNext("abc", "defg").verifyError(DataBufferLimitException.class));
+	}
+
+	@Test
+	void maxInMemoryLimitAfterSplittingFrames() {
+		Flux<DataBuffer> input = Flux.just(stringBuffer("ab\ncd\nefghijkl"));
+
+		this.decoder.setMaxInMemorySize(5);
+		testDecode(input, String.class, step -> step.verifyError(DataBufferLimitException.class));
+	}
+
+	@Test
+	void maxInMemoryLimitWhenJoiningSplitFrame() {
+		Flux<DataBuffer> input = Flux.just(stringBuffer("ab\ncd"), stringBuffer("efghijkl\n"));
+
+		this.decoder.setMaxInMemorySize(5);
+		testDecode(input, String.class, step ->
+				step.expectNext("ab").verifyError(DataBufferLimitException.class));
+	}
+
+	@Test
+	void maxInMemoryLimitReleasesSourceBufferOnce() {
+		DataBuffer buffer = stringBuffer("ab\ncd\nefghijkl");
+		// Simulate a reference held by the server, as with Reactor Netty
+		((PooledDataBuffer) buffer).retain();
+
+		this.decoder.setMaxInMemorySize(5);
+		StepVerifier.create(this.decoder.decode(Flux.just(buffer), TYPE, null, Collections.emptyMap()))
+				.verifyError(DataBufferLimitException.class);
+
+		assertThat(((PooledDataBuffer) buffer).isAllocated()).isTrue();
+		DataBufferUtils.release(buffer);
 	}
 
 	@Test
