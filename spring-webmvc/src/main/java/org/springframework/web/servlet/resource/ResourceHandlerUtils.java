@@ -176,8 +176,9 @@ public abstract class ResourceHandlerUtils {
 	 * <li>Paths that contain "WEB-INF" or "META-INF"
 	 * <li>Paths that contain "../" after a call to
 	 * {@link org.springframework.util.StringUtils#cleanPath}.
-	 * <li>Paths that represent a {@link org.springframework.util.ResourceUtils#isUrl
-	 * valid URL} or would represent one after the leading slash is removed.
+	 * <li>Paths that represent a {@link ResourceUtils#isUrl valid URL},
+	 * including "classpath:", "file:" and "url:" prefix, as is or after the
+	 * leading slash is removed.
 	 * </ul>
 	 * <p><strong>Note:</strong> this method assumes that leading, duplicate '/'
 	 * or control characters (e.g. white space) have been trimmed so that the
@@ -194,7 +195,7 @@ public abstract class ResourceHandlerUtils {
 			}
 			return true;
 		}
-		if (path.contains(":/")) {
+		if (path.contains(":")) {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
 				if (logger.isWarnEnabled()) {
