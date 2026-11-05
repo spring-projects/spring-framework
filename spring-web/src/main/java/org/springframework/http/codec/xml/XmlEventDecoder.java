@@ -197,6 +197,13 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 				while (true) {
 					if (this.streamReader.next() == AsyncXMLStreamReader.EVENT_INCOMPLETE) {
 						// no more events with what currently has been fed to the reader
+						if (events.isEmpty()) {
+							ReceivedByteTracker tracker = this.byteTracker;
+							if (tracker != null && tracker.isMaxInMemorySizeExceeded()) {
+								throw new DataBufferLimitException(
+										"Exceeded limit on max bytes per XML node: " + tracker.getMaxInMemorySize());
+							}
+						}
 						break;
 					}
 					else {
