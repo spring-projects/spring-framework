@@ -83,4 +83,13 @@ class StompEncoderTests {
 		assertThat(new String(encoder.encode(frame))).isEqualTo("SEND\ncontent-length:12\n\nMessage body\0");
 	}
 
+	@Test
+	void encodeFrameWithContentLengthPresentWhereNotRequired() {
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+		headers.setContentLength(12);
+		Message<byte[]> frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
+
+		assertThat(new String(encoder.encode(frame))).isEqualTo("SUBSCRIBE\n\n\0");
+	}
+
 }
