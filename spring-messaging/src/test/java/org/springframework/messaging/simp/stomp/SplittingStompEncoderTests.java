@@ -261,6 +261,22 @@ class SplittingStompEncoderTests {
 	}
 
 	@Test
+	void splitDoesNotCutUtf8Character() {
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
+		headers.setDestination("/topic/foo");
+		String body = "é가😀".repeat(6);
+
+		List<byte[]> actual = splittingEncoder(4).encode(headers.getMessageHeaders(), body.getBytes(StandardCharsets.UTF_8));
+		String output = toAggregatedString(actual);
+
+		assertThat(output).isEqualTo("SEND\ndestination:/topic/foo\ncontent-length:54\n\n" + body + "\0");
+		assertThat(actual).allSatisfy(part -> {
+			assertThat(part.length).isLessThanOrEqualTo(4);
+			assertThat(new String(part, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8)).isEqualTo(part);
+		});
+	}
+
+	@Test
 	void bufferSizeLimitShouldBePositive() {
 		assertThatThrownBy(() -> splittingEncoder(0)).isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> splittingEncoder(-1)).isInstanceOf(IllegalArgumentException.class);
