@@ -584,6 +584,11 @@ you can set a JVM system property or Spring property named
 application (see xref:appendix.adoc#appendix-spring-properties[Supported Spring
 Properties]).
 
+Note that the `maxOperations` limit applies to the number of operations performed during
+the evaluation of an expression -- for example, operator evaluations, property accesses,
+method invocations, and each element processed by the selection and projection
+operators. It does not take into account the cost of an individual operation.
+
 In addition, the result of a `BigDecimal` or `BigInteger` power operation within a SpEL
 expression cannot exceed 1,000,000 bits by default – approximately equivalent to a
 decimal number with 300,000 digits. Power operations involving large base values or large
@@ -630,6 +635,15 @@ Because the preceding expression involves array access, some property de-referen
 numeric operations, the performance gain can be very noticeable. In an example micro
 benchmark run of 50,000 iterations, it took 75ms to evaluate by using the interpreter and
 only 3ms using the compiled version of the expression.
+
+[WARNING]
+====
+The safety guards supported in interpreted mode are not enforced when a compiled
+expression is evaluated. Compilation should therefore not be enabled for expressions
+obtained from an untrusted source (see <<expressions-evaluation-context-security>>).
+Note that `SimpleEvaluationContext` does not support compilation unless it is explicitly
+enabled via `SimpleEvaluationContext.Builder.withCompilationSupported()`.
+====
 
 [[expressions-compiler-configuration]]
 === Compiler Configuration

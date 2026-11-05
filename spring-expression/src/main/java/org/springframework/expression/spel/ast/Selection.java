@@ -135,6 +135,7 @@ public class Selection extends SpelNodeImpl {
 			Object lastKey = null;
 
 			for (Map.Entry<?, ?> entry : mapdata.entrySet()) {
+				state.trackOperation();
 				try {
 					TypedValue kvPair = new TypedValue(entry);
 					state.pushActiveContextObject(kvPair);
@@ -142,7 +143,6 @@ public class Selection extends SpelNodeImpl {
 					Object val = selectionCriteria.getValueInternal(state).getValue();
 					if (val instanceof Boolean b) {
 						if (b) {
-							state.trackOperation();
 							result.put(entry.getKey(), entry.getValue());
 							if (this.variant == FIRST) {
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);
@@ -182,6 +182,7 @@ public class Selection extends SpelNodeImpl {
 			state.trackOperation();
 			List<Object> result = new ArrayList<>();
 			for (Object element : data) {
+				state.trackOperation();
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
 					state.enterScope();
@@ -191,7 +192,6 @@ public class Selection extends SpelNodeImpl {
 							if (this.variant == FIRST) {
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(element), this);
 							}
-							state.trackOperation();
 							result.add(element);
 						}
 					}
