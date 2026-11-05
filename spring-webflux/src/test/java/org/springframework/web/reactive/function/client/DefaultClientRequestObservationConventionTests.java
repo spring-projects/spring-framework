@@ -126,6 +126,14 @@ class DefaultClientRequestObservationConventionTests {
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("uri", "/resource/{id}?queryKey={queryValue}"));
 	}
 
+	@Test
+	void shouldAddKeyValueForNonStandardHttpMethod() {
+		ClientRequestObservationContext context = createContext(
+				ClientRequest.create(HttpMethod.valueOf("CUSTOM"), URI.create("/test")));
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("method", "none"));
+	}
+
 	private ClientRequestObservationContext createContext(ClientRequest.Builder request) {
 		ClientRequestObservationContext context = new ClientRequestObservationContext(request);
 		context.setResponse(ClientResponse.create(HttpStatus.OK).build());
