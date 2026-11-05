@@ -674,6 +674,20 @@ class EvaluationTests extends AbstractExpressionTests {
 			evaluateAndCheckError("1 between listOfNumbersUpToTen", BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST, 10);
 		}
 
+		/**
+		 * The inline list tracks 3 operations (1 for the list and 1 for each element),
+		 * and the between operator tracks 1 operation for each comparison.
+		 */
+		@ParameterizedTest
+		@CsvSource({
+			"0,  4",
+			"5,  5",
+			"11, 5"
+		})
+		void betweenOperatorTracksEachComparison(int value, int expectedOperations) {
+			assertMaxOperations("#root between {1, 10}", value, expectedOperations);
+		}
+
 	}
 
 	@Nested

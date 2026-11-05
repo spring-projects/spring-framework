@@ -491,6 +491,7 @@ public class SpelParserConfiguration {
 	 * Return the maximum number of operations permitted during SpEL expression
 	 * evaluation.
 	 * @since 6.2.19
+	 * @see Builder#maximumOperations(int)
 	 */
 	public int getMaximumOperations() {
 		return this.maximumOperations;
@@ -593,7 +594,10 @@ public class SpelParserConfiguration {
 		 * for a system property or Spring property named
 		 * {@value #SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME}, or
 		 * {@link SpelCompilerMode#OFF} if that property is not set.
+		 * <p><strong>WARNING</strong>: Enabling compilation for expressions from
+		 * untrusted sources removes the safety guards supported in interpreted mode.
 		 * @param compilerMode the compiler mode to use; must not be {@code null}
+		 * @see org.springframework.expression.EvaluationContext#isCompilationSupported()
 		 */
 		public Builder compilerMode(SpelCompilerMode compilerMode) {
 			Assert.notNull(compilerMode, "'compilerMode' must not be null");
@@ -665,6 +669,10 @@ public class SpelParserConfiguration {
 		 * for a system property or Spring property named
 		 * {@value #SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME}, or
 		 * {@link #DEFAULT_MAX_OPERATIONS} if that property is not set.
+		 * <p>This limit applies to the number of operations performed &mdash; for
+		 * example, operator evaluations, property accesses, method invocations,
+		 * and each element processed by the selection and projection operators.
+		 * It does not take into account the cost of an individual operation.
 		 * @param maximumOperations the maximum number of operations; must be a
 		 * positive number
 		 */

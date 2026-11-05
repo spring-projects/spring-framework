@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -275,6 +276,31 @@ class SelectionAndProjectionTests {
 			assertThat(colorsMap).containsOnlyKeys("brown");
 		}
 
+		/**
+		 * The selection operators should track 1 operation for the selection itself
+		 * and 1 operation for each element processed, regardless of whether the
+		 * element matches the selection criteria.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"#root.?[false]",
+			"#root.?[true]",
+			"#root.^[false]",
+			"#root.$[false]",
+			"#root.$[true]"
+		})
+		void selectionTracksEachElement(String expression) {
+			assertMaxOperations(expression, tenNumbers(), 11);
+			assertMaxOperations(expression, tenNumbers().toArray(new Integer[0]), 11);
+			assertMaxOperations(expression, tenNumbersMap(), 11);
+		}
+
+		@Test
+		void selectFirstTracksElementsUntilFirstMatch() {
+			assertMaxOperations("#root.^[true]", tenNumbers(), 2);
+			assertMaxOperations("#root.^[true]", tenNumbersMap(), 2);
+		}
+
 	}
 
 	@Nested
@@ -334,6 +360,28 @@ class SelectionAndProjectionTests {
 			assertThat(value).asInstanceOf(array(Number[].class)).containsExactly(5, 5.9f, 7);
 		}
 
+		/**
+		 * The projection operator should track 1 operation for the projection itself
+		 * and 1 operation for each element processed.
+		 */
+		@Test
+		void projectionTracksEachElement() {
+			assertMaxOperations("#root.![#this]", tenNumbers(), 11);
+			assertMaxOperations("#root.![#this]", tenNumbers().toArray(new Integer[0]), 11);
+			assertMaxOperations("#root.![#this]", tenNumbersMap(), 11);
+		}
+
+	}
+
+
+	private static List<Integer> tenNumbers() {
+		return IntStream.rangeClosed(1, 10).boxed().toList();
+	}
+
+	private static Map<Integer, Integer> tenNumbersMap() {
+		Map<Integer, Integer> map = new LinkedHashMap<>();
+		tenNumbers().forEach(number -> map.put(number, number));
+		return map;
 	}
 
 
