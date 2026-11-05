@@ -4,6 +4,7 @@ on:
     branches:
       - 'main'
       - 'main-internal'
+      - '7.1.*.x'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
