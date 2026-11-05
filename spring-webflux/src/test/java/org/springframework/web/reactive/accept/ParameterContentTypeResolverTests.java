@@ -55,6 +55,22 @@ class ParameterContentTypeResolverTests {
 	}
 
 	@Test
+	void noMatchForInvalidKey() {
+		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
+		assertThatExceptionOfType(NotAcceptableStatusException.class).isThrownBy(() ->
+				resolver.resolveMediaTypes(createExchange("not.json")));
+	}
+
+	@Test
+	void resolveRegisteredKeyWithDot() {
+		Map<String, MediaType> mapping = Collections.singletonMap("custom.json", MediaType.APPLICATION_JSON);
+		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(mapping);
+		List<MediaType> mediaTypes = resolver.resolveMediaTypes(createExchange("custom.json"));
+
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
 	void resolveKeyFromRegistrations() {
 		ServerWebExchange exchange = createExchange("html");
 
@@ -76,6 +92,18 @@ class ParameterContentTypeResolverTests {
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
 		assertThat(mediaTypes).containsExactly(new MediaType("application", "vnd.ms-excel"));
+	}
+
+	@Test
+	void resolveKeyThroughMediaTypeFactoryDoesNotAddMapping() {
+		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
+		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(mapping);
+
+		assertThat(resolver.resolveMediaTypes(createExchange("xls")))
+				.containsExactly(new MediaType("application", "vnd.ms-excel"));
+		assertThatExceptionOfType(NotAcceptableStatusException.class)
+				.isThrownBy(() -> resolver.resolveMediaTypes(createExchange("blah")))
+				.satisfies(ex -> assertThat(ex.getSupportedMediaTypes()).containsExactly(MediaType.APPLICATION_JSON));
 	}
 
 	@Test // SPR-13747
