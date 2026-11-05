@@ -76,7 +76,8 @@ class UrlHandlerFilterTests {
 	void redirect() throws Exception {
 		testRedirect("/**", "/path/123/", "/path/123");
 		testRedirect("/**", "//path/123/", "/path/123");
-		testRedirect("/**", "///path/123/", "///path/123");
+		testRedirect("/**", "///path/123/", "/path/123");
+		testRedirect("/**", "////path/123/", "/path/123");
 	}
 
 	private void testRedirect(String pattern, String path, String location) throws Exception {
