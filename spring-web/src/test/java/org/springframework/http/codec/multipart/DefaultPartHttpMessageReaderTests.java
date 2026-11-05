@@ -152,6 +152,28 @@ class DefaultPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 	}
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
+	void partialBoundaryIsTreatedAsBodyContent(DefaultPartHttpMessageReader reader) {
+		MockServerHttpRequest request = createRequest(
+				new ClassPathResource("partial-boundary.multipart", getClass()), "boundary");
+
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		StepVerifier.create(result)
+				.consumeNextWith(part -> {
+					Mono<String> content = DataBufferUtils.join(part.content())
+							.map(buf -> {
+								String s = buf.toString(UTF_8);
+								release(buf);
+								return s;
+							});
+					StepVerifier.create(content)
+							.expectNext("line one\r\n--boundaryXline two\r\nline three")
+							.verifyComplete();
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedDefaultPartHttpMessageReaderTest
 	void noEndBoundary(DefaultPartHttpMessageReader reader) {
 		MockServerHttpRequest request = createRequest(
 				new ClassPathResource("no-end-boundary.multipart", getClass()), "boundary");

@@ -196,6 +196,17 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		}
 	}
 
+	/**
+	 * Return the two ways {@code boundary} may legally be followed, per RFC-2046:
+	 * {@code CR LF}, for an encapsulation boundary, or {@code --}, for the close delimiter.
+	 */
+	private static byte[][] boundaryVariants(byte[] boundary) {
+		return new byte[][] {
+				MultipartUtils.concat(boundary, CR_LF),
+				MultipartUtils.concat(boundary, TWO_HYPHENS)
+		};
+	}
+
 
 	/**
 	 * Represents the output of {@link #parse(Flux, byte[], int, Charset)}.
@@ -308,8 +319,8 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 
 		public PreambleState() {
-			this.firstBoundary = DataBufferUtils.matcher(
-					MultipartUtils.concat(TWO_HYPHENS, MultipartParser.this.boundary));
+			this.firstBoundary = DataBufferUtils.matcher(boundaryVariants(
+					MultipartUtils.concat(TWO_HYPHENS, MultipartParser.this.boundary)));
 		}
 
 		/**
@@ -324,7 +335,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				if (logger.isTraceEnabled()) {
 					logger.trace("First boundary found @" + endIdx + " in " + buf);
 				}
-				DataBuffer preambleBuffer = buf.split(endIdx + 1);
+				DataBuffer preambleBuffer = buf.split(endIdx - 1);
 				DataBufferUtils.release(preambleBuffer);
 
 				changeState(this, new HeadersState(), buf);
@@ -553,7 +564,7 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 
 		public BodyState() {
 			byte[] delimiter = MultipartUtils.concat(CR_LF, TWO_HYPHENS, MultipartParser.this.boundary);
-			this.boundary = DataBufferUtils.matcher(delimiter);
+			this.boundary = DataBufferUtils.matcher(boundaryVariants(delimiter));
 			this.boundaryLength = delimiter.length;
 		}
 
@@ -569,11 +580,11 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		public void onNext(DataBuffer buffer) {
 			int endIdx = this.boundary.match(buffer);
 			if (endIdx != -1) {
-				DataBuffer boundaryBuffer = buffer.split(endIdx + 1);
+				DataBuffer boundaryBuffer = buffer.split(endIdx - 1);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Boundary found @" + endIdx + " in " + buffer);
 				}
-				int len = endIdx - this.boundaryLength + 1 - boundaryBuffer.readPosition();
+				int len = endIdx - this.boundaryLength - 1 - boundaryBuffer.readPosition();
 				if (len > 0) {
 					// whole boundary in buffer.
 					// slice off the body part, and flush
