@@ -36,6 +36,8 @@ import java.util.TreeSet;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
@@ -67,6 +69,7 @@ import static org.assertj.core.api.Assertions.within;
  * @author Chris Beams
  * @author Dave Syer
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 abstract class AbstractPropertyAccessorTests {
 
@@ -289,6 +292,18 @@ abstract class AbstractPropertyAccessorTests {
 
 		assertThatExceptionOfType(NotReadablePropertyException.class).isThrownBy(() ->
 				accessor.getPropertyValue("address.bar"));
+	}
+
+	@ParameterizedTest  // gh-36999
+	@ValueSource(strings = {"address.[.city", "address.].city", "address.[[.city",
+			"address.]].city", "address.][.city", "address.[X.city", "address.X[.city"})
+	void getNestedPropertyWithUnbalancedBracket(String propertyPath) {
+		Person target = createPerson("John", "London", "UK");
+		AbstractPropertyAccessor accessor = createAccessor(target);
+
+		assertThatExceptionOfType(NotReadablePropertyException.class)
+				.isThrownBy(() -> accessor.getPropertyValue(propertyPath))
+				.withMessageEndingWith("contains unbalanced brackets");
 	}
 
 	@Test
@@ -1360,6 +1375,19 @@ abstract class AbstractPropertyAccessorTests {
 
 		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
 				accessor.setPropertyValue("address.bar", "value"));
+	}
+
+	@ParameterizedTest  // gh-36999
+	@ValueSource(strings = {"address.[.city", "address.].city", "address.[[.city",
+			"address.]].city", "address.][.city", "address.[X.city", "address.X[.city"})
+	void setNestedPropertyWithUnbalancedBracket(String propertyPath) {
+		Person target = createPerson("John", "Paris", "FR");
+		AbstractPropertyAccessor accessor = createAccessor(target);
+
+		assertThatExceptionOfType(NotWritablePropertyException.class)
+				.isThrownBy(() -> accessor.setPropertyValue(propertyPath, "Zürich"))
+				.withMessageEndingWith("does not exist");
+		assertThat(target.getAddress().getCity()).isEqualTo("Paris");
 	}
 
 	@Test
