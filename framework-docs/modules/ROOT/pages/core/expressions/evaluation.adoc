@@ -238,6 +238,8 @@ implementations.
 
 `SimpleEvaluationContext` is designed to support only a subset of the SpEL language
 syntax. For example, it excludes Java type references, constructors, and bean references.
+By default, it also excludes type conversions that reflectively invoke a constructor or
+method (see <<expressions-evaluation-context-security,Security Considerations>>).
 It also requires you to explicitly choose the level of support for properties and methods
 in expressions. When creating a `SimpleEvaluationContext` you need to choose the level of
 support that you need for data binding in SpEL expressions:
@@ -328,6 +330,33 @@ Side-effecting (unsafe to expose as properties, despite the identical shape):
 If an untrusted expression can reference `someFile.delete`, `someQueue.poll`, or
 `someCounter.incrementAndGet` as a property, SpEL invokes the corresponding method just
 as readily as it would invoke a genuine getter.
+====
+
+By default, `SimpleEvaluationContext` uses a restricted conversion service for type
+conversion: a `DefaultConversionService` without the converters that convert a value by
+reflectively invoking a constructor or method of an arbitrary type. Conversions for
+common types – such as numbers, booleans, characters, enums, `Locale`, `Charset`,
+`Currency`, `UUID`, collections, and arrays – remain supported. To support an additional
+conversion, register a dedicated converter via the `withConverter(...)` method of the
+`SimpleEvaluationContext` builder – for example,
+`withConverter(String.class, ZoneId.class, ZoneId::of)`.
+
+To restore reflective type conversion for every `SimpleEvaluationContext` which is not
+configured with a custom `TypeConverter` or `ConversionService` – for example, a
+`SimpleEvaluationContext` created by a library – you can set the
+`spring.expression.reflectiveConversion` property to `true` via a JVM system property or
+the xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism. Doing so
+has the same implications as registering a `DefaultConversionService` (see the following
+warning), and registering dedicated converters is therefore preferable.
+
+[WARNING]
+====
+A `TypeConverter` or `ConversionService` registered via the `SimpleEvaluationContext`
+builder is used as-is. If it converts values by reflectively invoking constructors or
+methods – as a `DefaultConversionService` and a `StandardTypeConverter` created via its
+no-arg constructor do – every type to which a value may be converted during evaluation
+must meet the same <<expressions-evaluation-context-object-design,object design>>
+requirements as any other object reachable from the expression.
 ====
 
 [[expressions-evaluation-context-object-design]]
@@ -432,6 +461,11 @@ with many built-in converters for common conversions, but is also fully extensib
 that you can add custom conversions between types. Additionally, it is generics-aware.
 This means that, when you work with generic types in expressions, SpEL attempts
 conversions to maintain type correctness for any objects it encounters.
+
+NOTE: By default, `SimpleEvaluationContext` uses a restricted conversion service that
+does not convert a value by reflectively invoking a constructor or method. Additional
+converters can be registered via the `withConverter(...)` method of its builder. See
+<<expressions-evaluation-context-security,Security Considerations>> for details.
 
 What does this mean in practice? Suppose assignment, using `setValue()`, is being used
 to set a `List` property. The type of the property is actually `List<Boolean>`. SpEL

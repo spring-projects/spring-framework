@@ -97,8 +97,16 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
 		converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
 
+		// ObjectToObjectConverter and IdToEntityConverter reflectively invoke
+		// constructors and methods on arbitrary types. Both are registered for
+		// Object-to-Object conversion, and the default ConversionService in
+		// SimpleEvaluationContext (spring-expression) excludes them by removing all
+		// Object-to-Object converters. Any new converter which reflectively invokes
+		// constructors or methods must also be registered for Object-to-Object
+		// conversion, or SimpleEvaluationContext must be revised to exclude it.
 		converterRegistry.addConverter(new ObjectToObjectConverter());
 		converterRegistry.addConverter(new IdToEntityConverter((ConversionService) converterRegistry));
+
 		converterRegistry.addConverter(new FallbackObjectToStringConverter());
 		converterRegistry.addConverter(new ObjectToOptionalConverter((ConversionService) converterRegistry));
 		converterRegistry.addConverter(new OptionalToObjectConverter((ConversionService) converterRegistry));

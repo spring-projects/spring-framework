@@ -85,6 +85,14 @@ expression.
 xref:core/expressions/evaluation.adoc#expressions-parser-configuration[Spring Expression Language]
 expression evaluation.
 
+| `spring.expression.reflectiveConversion`
+| Instructs Spring to use a standard `DefaultConversionService` as the default conversion
+service for a `SimpleEvaluationContext`, which restores reflective type conversion within
+xref:core/expressions/evaluation.adoc#expressions-evaluation-context-security[Spring Expression Language]
+expressions. See
+{spring-framework-api}++/expression/spel/support/SimpleEvaluationContext.html#REFLECTIVE_CONVERSION_PROPERTY_NAME++[`SimpleEvaluationContext`]
+for details.
+
 | `spring.getenv.ignore`
 | Instructs Spring to ignore operating system environment variables if a Spring
 `Environment` property -- for example, a placeholder in a configuration String -- isn't
