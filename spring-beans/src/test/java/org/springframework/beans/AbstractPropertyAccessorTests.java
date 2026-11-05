@@ -1461,6 +1461,16 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	void indexedPropertyWithMissingSeparatorIsRejected() {
+		IndexedTestBean target = new IndexedTestBean();
+		AbstractPropertyAccessor accessor = createAccessor(target);
+		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
+				accessor.getPropertyValue("array[0]name"));
+		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
+				accessor.setPropertyValue("map[key1]name", "value"));
+	}
+
+	@Test
 	void getAndSetIndexedPropertiesWithDirectAccess() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);

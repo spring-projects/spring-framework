@@ -954,10 +954,11 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		String actualName = null;
 		List<String> keys = new ArrayList<>(2);
 		int searchIndex = 0;
+		int consumedIndex = 0;
 		while (searchIndex != -1) {
 			int keyStart = propertyName.indexOf(PROPERTY_KEY_PREFIX, searchIndex);
 			searchIndex = -1;
-			if (keyStart != -1) {
+			if (keyStart != -1 && (actualName == null || keyStart == consumedIndex)) {
 				int keyEnd = getPropertyNameKeyEnd(propertyName, keyStart + PROPERTY_KEY_PREFIX.length());
 				if (keyEnd != -1) {
 					if (actualName == null) {
@@ -969,9 +970,14 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						key = key.substring(1, key.length() - 1);
 					}
 					keys.add(key);
-					searchIndex = keyEnd + PROPERTY_KEY_SUFFIX.length();
+					consumedIndex = keyEnd + PROPERTY_KEY_SUFFIX.length();
+					searchIndex = consumedIndex;
 				}
 			}
+		}
+		if (actualName != null && consumedIndex != propertyName.length()) {
+			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+					"Invalid property key in path '" + propertyName + "'");
 		}
 		PropertyTokenHolder tokens = new PropertyTokenHolder(actualName != null ? actualName : propertyName);
 		if (!keys.isEmpty()) {
