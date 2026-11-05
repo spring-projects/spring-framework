@@ -18,12 +18,14 @@ package org.springframework.http.client.observation;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpRequest;
@@ -62,6 +64,8 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
 
 	private static final KeyValue HTTP_URL_NONE = KeyValue.of(HighCardinalityKeyNames.HTTP_URL, KeyValue.NONE_VALUE);
+
+	private static final Set<HttpMethod> HTTP_METHODS = Set.of(HttpMethod.values());
 
 
 	private final String name;
@@ -112,11 +116,12 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	protected KeyValue method(ClientRequestObservationContext context) {
 		if (context.getCarrier() != null) {
-			return KeyValue.of(LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod().name());
+			HttpMethod httpMethod = context.getCarrier().getMethod();
+			if (HTTP_METHODS.contains(httpMethod)) {
+				return KeyValue.of(LowCardinalityKeyNames.METHOD, httpMethod.name());
+			}
 		}
-		else {
-			return METHOD_NONE;
-		}
+		return METHOD_NONE;
 	}
 
 	protected KeyValue status(ClientRequestObservationContext context) {
