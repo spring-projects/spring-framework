@@ -188,6 +188,57 @@ class LinkedCaseInsensitiveMapTests {
 
 
 	@Test
+	void mapCloneKeySetIsNotAffectedByChangesToOriginal() {
+		map.put("Key", "value1");
+		LinkedCaseInsensitiveMap<String> copy = map.clone();
+
+		map.remove("key");
+		map.put("Other", "value2");
+
+		assertThat(copy.keySet().contains("Key")).isTrue();
+		assertThat(copy.keySet().contains("KEY")).isTrue();
+		assertThat(copy.keySet().contains("Other")).isFalse();
+		assertThat(copy.keySet().contains("OTHER")).isFalse();
+		assertThat(map.keySet().contains("Key")).isFalse();
+		assertThat(map.keySet().contains("Other")).isTrue();
+	}
+
+	@Test
+	void mapCloneKeySetReflectsChangesToClone() {
+		map.put("Key", "value1");
+		LinkedCaseInsensitiveMap<String> copy = map.clone();
+
+		copy.remove("KEY");
+		copy.put("Other", "value2");
+
+		assertThat(copy.keySet().contains("Key")).isFalse();
+		assertThat(copy.keySet().contains("key")).isFalse();
+		assertThat(copy.keySet().contains("Other")).isTrue();
+		assertThat(copy.keySet().contains("other")).isTrue();
+		assertThat(map).hasSize(1);
+		assertThat(map.get("key")).isEqualTo("value1");
+		assertThat(map.keySet().contains("Key")).isTrue();
+		assertThat(map.keySet().contains("Other")).isFalse();
+	}
+
+	@Test
+	void mapCloneOfCloneKeySetIsIndependent() {
+		map.put("Key", "value1");
+		LinkedCaseInsensitiveMap<String> copy = map.clone();
+		LinkedCaseInsensitiveMap<String> copyOfCopy = copy.clone();
+
+		map.remove("key");
+		copyOfCopy.put("Other", "value2");
+
+		assertThat(copyOfCopy.keySet().contains("Key")).isTrue();
+		assertThat(copyOfCopy.keySet().contains("OTHER")).isTrue();
+		assertThat(copy.keySet().contains("Key")).isTrue();
+		assertThat(copy.keySet().contains("Other")).isFalse();
+		assertThat(copy).hasSize(1);
+	}
+
+
+	@Test
 	void clearFromKeySet() {
 		map.put("key", "value");
 		map.keySet().clear();
