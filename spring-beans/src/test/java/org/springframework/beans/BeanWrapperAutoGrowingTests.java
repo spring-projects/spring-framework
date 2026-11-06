@@ -93,6 +93,17 @@ class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
+	void getPropertyValueAutoGrowArrayFailsAgainstLimit() {
+		wrapper.setAutoGrowCollectionLimit(2);
+		assertThatExceptionOfType(InvalidPropertyException.class)
+				.isThrownBy(() -> wrapper.getPropertyValue("array[4]"))
+				.withMessageContainingAll(
+						"Invalid property 'array[4]'",
+						"Index out of bounds in property path 'array[4]'")
+				.withCauseExactlyInstanceOf(ArrayIndexOutOfBoundsException.class);
+	}
+
+	@Test
 	void getPropertyValueAutoGrow2dArray() {
 		assertThat(wrapper.getPropertyValue("multiArray[0][0]")).isNotNull();
 		assertThat(bean.getMultiArray()[0]).hasSize(1);
