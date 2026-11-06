@@ -259,7 +259,8 @@ access -- for example, `name`, `accounts[2]`, or `accounts[KEY]`.
 Note that this limit applies to property binding as well as to
 <<data-binding-constructor-binding,constructor binding>> via `DataBinder.construct`,
 since a constructor parameter which is itself an object is constructed recursively
-through a nested property path.
+through a nested property path. For constructor binding, a `BeanInstantiationException`
+is thrown if a property path exceeds the configured limit.
 
 [NOTE]
 ====
@@ -268,7 +269,7 @@ resolution of nested property paths to exhaust the current thread's call stack, 
 in a `StackOverflowError` instead of a descriptive exception.
 
 The `maxNestedPathDepth` limit improves diagnostics for that common case by converting
-it into a clear `InvalidPropertyException`; however, it is not a guaranteed defense against
+it into a descriptive exception; however, it is not a guaranteed defense against
 `StackOverflowError` under every possible JVM thread stack size configuration, since the
 amount of stack space consumed per level of nesting depends on the JVM, its JIT
 compilation state, and the platform.
@@ -306,7 +307,9 @@ or `List` and the configured limit, an `InvalidPropertyException` is thrown.
 
 Note that the `autoGrowCollectionLimit` of a `DataBinder` also applies to `List` and array
 arguments for <<data-binding-constructor-binding,constructor binding>> via
-`DataBinder.construct`, regardless of the `autoGrowNestedPaths` setting.
+`DataBinder.construct`, regardless of the `autoGrowNestedPaths` setting. For constructor
+binding, a `BeanInstantiationException` is thrown if a property path refers to an index
+beyond the configured limit.
 
 TIP: Rather than binding to a self-populating `List` implementation -- such as Spring's
 `AutoPopulatingList` (deprecated as of Spring Framework 7.1) or `LazyList` from Apache

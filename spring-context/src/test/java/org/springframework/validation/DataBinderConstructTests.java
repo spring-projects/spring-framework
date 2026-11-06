@@ -27,8 +27,8 @@ import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.ConfigurablePropertyAccessor;
-import org.springframework.beans.InvalidPropertyException;
 import org.springframework.core.ResolvableType;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.util.Assert;
@@ -288,9 +288,10 @@ class DataBinderConstructTests {
 		// depth > max
 		DataBinder tooDeep = initDataBinder(NodeRecord.class);
 		tooDeep.setMaxNestedPathDepth(2);
-		assertThatExceptionOfType(InvalidPropertyException.class)
+		assertThatExceptionOfType(BeanInstantiationException.class)
 				.isThrownBy(() -> tooDeep.construct(new MapValueResolver(Map.of("next.next.next.value", "enigma"))))
-				.withMessageEndingWith("Nesting depth of property path exceeds the maximum of 2");
+				.withMessage("Failed to instantiate [%s]: Nesting depth of property path '%s' " +
+						"exceeds the maximum of %d", NodeRecord.class.getName(), "next.next.next", 2);
 	}
 
 	@Test  // gh-37252
@@ -298,10 +299,12 @@ class DataBinderConstructTests {
 		DataBinder binder = initDataBinder(NodeRecord.class);
 
 		String propertyPath = "next.".repeat(100_000) + "value";
-		assertThatExceptionOfType(InvalidPropertyException.class)
+		int maxDepth = ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH;
+		String tooDeepPath = "next.".repeat(maxDepth) + "next";
+		assertThatExceptionOfType(BeanInstantiationException.class)
 				.isThrownBy(() -> binder.construct(new MapValueResolver(Map.of(propertyPath, "enigma"))))
-				.withMessageEndingWith("Nesting depth of property path exceeds the maximum of " +
-						ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH);
+				.withMessage("Failed to instantiate [%s]: Nesting depth of property path '%s' " +
+						"exceeds the maximum of %d", NodeRecord.class.getName(), tooDeepPath, maxDepth);
 	}
 
 	@Test  // gh-37640
@@ -321,8 +324,29 @@ class DataBinderConstructTests {
 
 		DataBinder binder = initDataBinder(IntegerListRecord.class);
 
-		assertThatExceptionOfType(IndexOutOfBoundsException.class)
-				.isThrownBy(() -> binder.construct(valueResolver));
+		assertThatExceptionOfType(BeanInstantiationException.class)
+				.isThrownBy(() -> binder.construct(valueResolver))
+				.withMessage("Failed to instantiate [%s]: Invalid list index in property path '%s'",
+						IntegerListRecord.class.getName(), "integerList[256]")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 256 out of bounds for auto-grow collection limit of 256");
+	}
+
+	@Test  // gh-37654
+	void listBindingWithMultipleIndexesBeyondDefaultAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver =
+				new MapValueResolver(Map.of("integerList[0]", "1", "integerList[256]", "2"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+
+		assertThatExceptionOfType(BeanInstantiationException.class)
+				.isThrownBy(() -> binder.construct(valueResolver))
+				.withMessage("Failed to instantiate [%s]: Invalid list index in property path '%s'",
+						IntegerListRecord.class.getName(), "integerList[256]")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 256 out of bounds for auto-grow collection limit of 256");
 	}
 
 	@Test  // gh-37640
@@ -344,8 +368,13 @@ class DataBinderConstructTests {
 		DataBinder binder = initDataBinder(IntegerListRecord.class);
 		binder.setAutoGrowCollectionLimit(10);
 
-		assertThatExceptionOfType(IndexOutOfBoundsException.class)
-				.isThrownBy(() -> binder.construct(valueResolver));
+		assertThatExceptionOfType(BeanInstantiationException.class)
+				.isThrownBy(() -> binder.construct(valueResolver))
+				.withMessage("Failed to instantiate [%s]: Invalid list index in property path '%s'",
+						IntegerListRecord.class.getName(), "integerList[10]")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 10 out of bounds for auto-grow collection limit of 10");
 	}
 
 	@Test  // gh-37640
@@ -366,8 +395,13 @@ class DataBinderConstructTests {
 
 		DataBinder binder = initDataBinder(IntegerArrayRecord.class);
 
-		assertThatExceptionOfType(ArrayIndexOutOfBoundsException.class)
-				.isThrownBy(() -> binder.construct(valueResolver));
+		assertThatExceptionOfType(BeanInstantiationException.class)
+				.isThrownBy(() -> binder.construct(valueResolver))
+				.withMessage("Failed to instantiate [%s]: Invalid array index in property path '%s'",
+						IntegerArrayRecord.class.getName(), "integerArray[256]")
+				.havingCause()
+				.isExactlyInstanceOf(ArrayIndexOutOfBoundsException.class)
+				.withMessage("Index 256 out of bounds for auto-grow collection limit of 256");
 	}
 
 	@Test  // gh-37640
@@ -376,8 +410,28 @@ class DataBinderConstructTests {
 
 		DataBinder binder = initDataBinder(IntegerListMapRecord.class);
 
-		assertThatExceptionOfType(IndexOutOfBoundsException.class)
-				.isThrownBy(() -> binder.construct(valueResolver));
+		assertThatExceptionOfType(BeanInstantiationException.class)
+				.isThrownBy(() -> binder.construct(valueResolver))
+				.withMessage("Failed to instantiate [%s]: Invalid list index in property path '%s'",
+						IntegerListMapRecord.class.getName(), "integerListMap[a][256]")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 256 out of bounds for auto-grow collection limit of 256");
+	}
+
+	@Test  // gh-37654
+	void nestedObjectListBindingBeyondDefaultAutoGrowCollectionLimit() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("nested.integerList[256]", "1"));
+
+		DataBinder binder = initDataBinder(NestedIntegerListRecord.class);
+
+		assertThatExceptionOfType(BeanInstantiationException.class)
+				.isThrownBy(() -> binder.construct(valueResolver))
+				.withMessage("Failed to instantiate [%s]: Invalid list index in property path '%s'",
+						IntegerListRecord.class.getName(), "nested.integerList[256]")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 256 out of bounds for auto-grow collection limit of 256");
 	}
 
 	@Test  // gh-37640
@@ -388,8 +442,13 @@ class DataBinderConstructTests {
 		binder.setAutoGrowNestedPaths(false);
 		binder.setAutoGrowCollectionLimit(10);
 
-		assertThatExceptionOfType(IndexOutOfBoundsException.class)
-				.isThrownBy(() -> binder.construct(valueResolver));
+		assertThatExceptionOfType(BeanInstantiationException.class)
+				.isThrownBy(() -> binder.construct(valueResolver))
+				.withMessage("Failed to instantiate [%s]: Invalid list index in property path '%s'",
+						IntegerListRecord.class.getName(), "integerList[10]")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 10 out of bounds for auto-grow collection limit of 10");
 	}
 
 
@@ -497,6 +556,10 @@ class DataBinderConstructTests {
 
 
 	private record IntegerListRecord(List<Integer> integerList) {
+	}
+
+
+	private record NestedIntegerListRecord(IntegerListRecord nested) {
 	}
 
 

@@ -42,7 +42,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
-import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.InvalidPropertyPathException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -919,7 +918,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * the target is set, and {@link #doBind(MutablePropertyValues)} can be used
 	 * for further initialization via setters.
 	 * @param valueResolver to resolve constructor argument values with
-	 * @throws BeanInstantiationException in case of constructor failure
+	 * @throws BeanInstantiationException in case of constructor failure, or if
+	 * a property path exceeds the configured {@linkplain #setMaxNestedPathDepth
+	 * maximum nesting depth} or {@linkplain #setAutoGrowCollectionLimit
+	 * auto-grow collection limit}
 	 * @since 6.1
 	 */
 	public void construct(ValueResolver valueResolver) {
@@ -951,8 +953,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		if (depth > maxNestedPathDepth) {
 			// The nested path always ends with a separator at this point, since the
 			// depth can only exceed the limit for a nested constructor argument.
-			throw new InvalidPropertyException(clazz, nestedPath.substring(0, nestedPath.length() - 1),
-					"Nesting depth of property path exceeds the maximum of " + maxNestedPathDepth);
+			String propertyPath = nestedPath.substring(0, nestedPath.length() - 1);
+			throw new BeanInstantiationException(clazz, "Nesting depth of property path '" +
+					propertyPath + "' exceeds the maximum of " + maxNestedPathDepth);
 		}
 
 		Object result = null;
@@ -987,13 +990,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 				if (value == null) {
 					if (List.class.isAssignableFrom(paramType)) {
-						value = createList(paramPath, paramType, resolvableType, valueResolver, depth);
+						value = createList(ctor, paramPath, paramType, resolvableType, valueResolver, depth);
 					}
 					else if (Map.class.isAssignableFrom(paramType)) {
-						value = createMap(paramPath, paramType, resolvableType, valueResolver, depth);
+						value = createMap(ctor, paramPath, paramType, resolvableType, valueResolver, depth);
 					}
 					else if (paramType.isArray()) {
-						value = createArray(paramPath, paramType, resolvableType, valueResolver, depth);
+						value = createArray(ctor, paramPath, paramType, resolvableType, valueResolver, depth);
 					}
 				}
 
@@ -1075,8 +1078,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return false;
 	}
 
-	private @Nullable List<?> createList(String paramPath, Class<?> paramType, ResolvableType type,
-			ValueResolver valueResolver, int depth) {
+	private @Nullable List<?> createList(Constructor<?> ctor, String paramPath, Class<?> paramType,
+			ResolvableType type, ValueResolver valueResolver, int depth) {
 
 		ResolvableType elementType = type.getNested(2);
 		SortedSet<Integer> indexes = getIndexes(paramPath, valueResolver);
@@ -1085,7 +1088,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 
 		int lastIndex = Math.max(indexes.last(), 0);
-		int size = (lastIndex < this.autoGrowCollectionLimit ? lastIndex + 1 : 0);
+		if (lastIndex >= this.autoGrowCollectionLimit) {
+			throw new BeanInstantiationException(ctor,
+					"Invalid list index in property path '" + paramPath + "[" + lastIndex + "]'",
+					new IndexOutOfBoundsException("Index " + lastIndex + " out of bounds for " +
+							"auto-grow collection limit of " + this.autoGrowCollectionLimit));
+		}
+
+		int size = lastIndex + 1;
 		List<?> list = (List<?>) CollectionFactory.createCollection(paramType, size);
 		for (int i = 0; i < size; i++) {
 			list.add(null);
@@ -1093,15 +1103,15 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 		for (int index : indexes) {
 			String indexedPath = paramPath + "[" + (index != NO_INDEX ? index : "") + "]";
-			list.set(Math.max(index, 0),
-					createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver, depth));
+			list.set(Math.max(index, 0), createIndexedValue(
+					ctor, paramPath, paramType, elementType, indexedPath, valueResolver, depth));
 		}
 
 		return list;
 	}
 
-	private <V> @Nullable Map<String, V> createMap(String paramPath, Class<?> paramType, ResolvableType type,
-			ValueResolver valueResolver, int depth) {
+	private <V> @Nullable Map<String, V> createMap(Constructor<?> ctor, String paramPath,
+			Class<?> paramType, ResolvableType type, ValueResolver valueResolver, int depth) {
 
 		ResolvableType elementType = type.getNested(2);
 		Map<String, V> map = null;
@@ -1123,15 +1133,16 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			}
 
 			String indexedPath = name.substring(0, endIdx + 1);
-			map.put(key, createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver, depth));
+			map.put(key, createIndexedValue(
+					ctor, paramPath, paramType, elementType, indexedPath, valueResolver, depth));
 		}
 
 		return map;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <V> @Nullable V @Nullable [] createArray(String paramPath, Class<?> paramType, ResolvableType type,
-			ValueResolver valueResolver, int depth) {
+	private <V> @Nullable V @Nullable [] createArray(Constructor<?> ctor, String paramPath,
+			Class<?> paramType, ResolvableType type, ValueResolver valueResolver, int depth) {
 
 		ResolvableType elementType = type.getNested(2);
 		SortedSet<Integer> indexes = getIndexes(paramPath, valueResolver);
@@ -1140,13 +1151,20 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 
 		int lastIndex = Math.max(indexes.last(), 0);
-		int size = (lastIndex < this.autoGrowCollectionLimit ? lastIndex + 1: 0);
+		if (lastIndex >= this.autoGrowCollectionLimit) {
+			throw new BeanInstantiationException(ctor,
+					"Invalid array index in property path '" + paramPath + "[" + lastIndex + "]'",
+					new ArrayIndexOutOfBoundsException("Index " + lastIndex + " out of bounds for " +
+							"auto-grow collection limit of " + this.autoGrowCollectionLimit));
+		}
+
+		int size = lastIndex + 1;
 		@Nullable V[] array = (V[]) Array.newInstance(elementType.resolve(), size);
 
 		for (int index : indexes) {
 			String indexedPath = paramPath + "[" + (index != NO_INDEX ? index : "") + "]";
-			array[Math.max(index, 0)] =
-					createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver, depth);
+			array[Math.max(index, 0)] = createIndexedValue(
+					ctor, paramPath, paramType, elementType, indexedPath, valueResolver, depth);
 		}
 
 		return array;
@@ -1177,20 +1195,20 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	@SuppressWarnings("unchecked")
 	private <V> @Nullable V createIndexedValue(
-			String paramPath, Class<?> containerType, ResolvableType elementType,
+			Constructor<?> ctor, String paramPath, Class<?> containerType, ResolvableType elementType,
 			String indexedPath, ValueResolver valueResolver, int depth) {
 
 		Object value = null;
 		Class<?> elementClass = elementType.resolve(Object.class);
 
 		if (List.class.isAssignableFrom(elementClass)) {
-			value = createList(indexedPath, elementClass, elementType, valueResolver, depth);
+			value = createList(ctor, indexedPath, elementClass, elementType, valueResolver, depth);
 		}
 		else if (Map.class.isAssignableFrom(elementClass)) {
-			value = createMap(indexedPath, elementClass, elementType, valueResolver, depth);
+			value = createMap(ctor, indexedPath, elementClass, elementType, valueResolver, depth);
 		}
 		else if (elementClass.isArray()) {
-			value = createArray(indexedPath, elementClass, elementType, valueResolver, depth);
+			value = createArray(ctor, indexedPath, elementClass, elementType, valueResolver, depth);
 		}
 		else {
 			Object rawValue = valueResolver.resolveValue(indexedPath, elementClass);
