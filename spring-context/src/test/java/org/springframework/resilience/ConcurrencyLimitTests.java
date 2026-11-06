@@ -25,10 +25,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.config.AopConfigUtils;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -127,6 +129,32 @@ class ConcurrencyLimitTests {
 		List<CompletableFuture<?>> futures = new ArrayList<>(10);
 		for (int i = 0; i < 10; i++) {
 			futures.add(CompletableFuture.runAsync(proxy::concurrentOperation));
+		}
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+		assertThat(target.current).hasValue(0);
+	}
+
+	@Test
+	void withPostProcessorForPrototypeBeans() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(AnnotatedMethodBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("bean", bd);
+		ConcurrencyLimitBeanPostProcessor bpp = new ConcurrencyLimitBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+
+		AnnotatedMethodBean proxy1 = bf.getBean(AnnotatedMethodBean.class);
+		AnnotatedMethodBean proxy2 = bf.getBean(AnnotatedMethodBean.class);
+		// Concurrency state must be held per proxy, not in a shared registry
+		// which would retain every prototype instance
+		assertThat(((Advised) proxy1).getAdvisors()[0].getAdvice())
+				.isNotSameAs(((Advised) proxy2).getAdvisors()[0].getAdvice());
+
+		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy1);
+		List<CompletableFuture<?>> futures = new ArrayList<>(10);
+		for (int i = 0; i < 10; i++) {
+			futures.add(CompletableFuture.runAsync(proxy1::concurrentOperation));
 		}
 		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 		assertThat(target.current).hasValue(0);
