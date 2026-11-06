@@ -610,7 +610,7 @@ xref:appendix.adoc#appendix-spring-properties[Supported Spring Properties]).
 
 Likewise, the structural nesting depth of a SpEL expression -- for example, the depth of
 nested inline lists or maps, parenthesized expressions, ternary or Elvis expressions, or
-chained unary operators -- cannot exceed 1,000 by default; however, the
+chained unary operators -- cannot exceed 200 by default; however, the
 `maximumNestingDepth` value is configurable. If you create a `SpelExpressionParser`
 programmatically, you can specify a custom `maximumNestingDepth` value via
 `SpelParserConfiguration.builder().maximumNestingDepth(...)` when creating the

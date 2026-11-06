@@ -84,6 +84,9 @@ public class SpelParserConfiguration {
 	 * inline lists or maps, parenthesized expressions, ternary or Elvis expressions,
 	 * or chained unary operators) that could otherwise drive SpEL's recursive-descent
 	 * parser to exhaust the current thread's call stack.
+	 * <p>The default is intentionally conservative so that the limit is reached
+	 * before the call stack is exhausted on a thread with a typical 1 MB stack,
+	 * even before the parser has been JIT-compiled.
 	 * <p><strong>NOTE</strong>: This limit improves diagnostics for the common case
 	 * by converting what would otherwise be an opaque {@link StackOverflowError}
 	 * into a descriptive {@link SpelParseException}, but it is <em>not</em> a
@@ -100,7 +103,7 @@ public class SpelParserConfiguration {
 	 * documentation for further guidance on evaluating untrusted SpEL expressions.
 	 * @since 7.1
 	 */
-	public static final int DEFAULT_MAX_EXPRESSION_NESTING_DEPTH = 1_000;
+	public static final int DEFAULT_MAX_EXPRESSION_NESTING_DEPTH = 200;
 
 	/**
 	 * System property to configure the default compiler mode for SpEL expression parsers: {@value}.
