@@ -33,8 +33,11 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.xml.sax.SAXException;
 
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -44,6 +47,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
@@ -153,6 +157,34 @@ class XsltViewTests {
 		assertHtmlOutput(this.response.getContentAsString());
 		assertThat(this.response.getContentAsString()).contains("Product List");
 
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"//org/springframework/web/servlet/view/xslt//products.xsl",
+			"\\org\\springframework\\web\\servlet\\view\\xslt\\products.xsl"})
+	void stylesheetLocationIsNormalized(String url) throws Exception {
+		XsltView view = getXsltView(url);
+		view.render(singletonMap("someKey", getProductDataResource()), this.request, this.response);
+		assertHtmlOutput(this.response.getContentAsString());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"file:/etc/passwd",
+			"http://example.org/evil.xsl",
+			"/http://example.org/evil.xsl",
+			"  //http://example.org/evil.xsl",
+			"../../WEB-INF/web.xml",
+			"/WEB-INF/views/products.xsl",
+			"\\..\\..\\META-INF\\MANIFEST.MF",
+			"/org/springframework/%2e%2e/%2e%2e/secret.xsl"})
+	void invalidStylesheetLocationIsRejected(String url) {
+		XsltView view = new XsltView();
+		view.setUrl(url);
+		assertThatExceptionOfType(ApplicationContextException.class)
+				.isThrownBy(() -> view.setApplicationContext(new StaticApplicationContext()))
+				.withMessageStartingWith("Invalid XSLT stylesheet location");
 	}
 
 	private org.w3c.dom.Document getDomDocument() throws ParserConfigurationException, SAXException, IOException {
