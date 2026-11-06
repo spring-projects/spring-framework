@@ -39,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -175,6 +176,125 @@ class CompositeFilterTests {
 
 		assertThatThrownBy(compositeFilter::destroy).isSameAs(secondFilterError);
 		assertThat(secondFilterError.getSuppressed()).containsExactly(firstFilterException);
+	}
+
+
+	@Test
+	void initInvokesFiltersInOrder() throws ServletException {
+		Filter firstFilter = mock();
+		Filter secondFilter = mock();
+		Filter thirdFilter = mock();
+		FilterConfig filterConfig = mock();
+
+		CompositeFilter compositeFilter = new CompositeFilter();
+		compositeFilter.setFilters(List.of(firstFilter, secondFilter, thirdFilter));
+
+		compositeFilter.init(filterConfig);
+
+		InOrder inOrder = inOrder(firstFilter, secondFilter, thirdFilter);
+		inOrder.verify(firstFilter).init(filterConfig);
+		inOrder.verify(secondFilter).init(filterConfig);
+		inOrder.verify(thirdFilter).init(filterConfig);
+	}
+
+	@Test
+	void initDestroysEarlierFiltersAfterServletException() throws ServletException {
+		Filter firstFilter = mock();
+		Filter failingFilter = mock();
+		Filter laterFilter = mock();
+		FilterConfig filterConfig = mock();
+
+		ServletException failingFilterException = new ServletException();
+		doThrow(failingFilterException).when(failingFilter).init(filterConfig);
+
+		CompositeFilter compositeFilter = new CompositeFilter();
+		compositeFilter.setFilters(List.of(firstFilter, failingFilter, laterFilter));
+
+		assertThatThrownBy(() -> compositeFilter.init(filterConfig)).isSameAs(failingFilterException);
+		verify(firstFilter).init(filterConfig);
+		verify(firstFilter).destroy();
+		verify(failingFilter, never()).destroy();
+		verify(laterFilter, never()).init(filterConfig);
+		verify(laterFilter, never()).destroy();
+	}
+
+	@Test
+	void initDestroysEarlierFiltersInReverseOrder() throws ServletException {
+		Filter firstFilter = mock();
+		Filter secondFilter = mock();
+		Filter failingFilter = mock();
+		FilterConfig filterConfig = mock();
+
+		ServletException failingFilterException = new ServletException();
+		doThrow(failingFilterException).when(failingFilter).init(filterConfig);
+
+		CompositeFilter compositeFilter = new CompositeFilter();
+		compositeFilter.setFilters(List.of(firstFilter, secondFilter, failingFilter));
+
+		assertThatThrownBy(() -> compositeFilter.init(filterConfig)).isSameAs(failingFilterException);
+
+		InOrder inOrder = inOrder(firstFilter, secondFilter, failingFilter);
+		inOrder.verify(firstFilter).init(filterConfig);
+		inOrder.verify(secondFilter).init(filterConfig);
+		inOrder.verify(failingFilter).init(filterConfig);
+		inOrder.verify(secondFilter).destroy();
+		inOrder.verify(firstFilter).destroy();
+	}
+
+	@Test
+	void initAddsDestroyFailuresAsSuppressed() throws ServletException {
+		Filter firstFilter = mock();
+		Filter secondFilter = mock();
+		Filter failingFilter = mock();
+		FilterConfig filterConfig = mock();
+
+		ServletException failingFilterException = new ServletException();
+		RuntimeException secondDestroyException = new RuntimeException();
+		Error firstDestroyError = new Error();
+		doThrow(failingFilterException).when(failingFilter).init(filterConfig);
+		doThrow(secondDestroyException).when(secondFilter).destroy();
+		doThrow(firstDestroyError).when(firstFilter).destroy();
+
+		CompositeFilter compositeFilter = new CompositeFilter();
+		compositeFilter.setFilters(List.of(firstFilter, secondFilter, failingFilter));
+
+		assertThatThrownBy(() -> compositeFilter.init(filterConfig)).isSameAs(failingFilterException);
+		assertThat(failingFilterException.getSuppressed())
+				.containsExactly(secondDestroyException, firstDestroyError);
+	}
+
+	@Test
+	void initDestroysEarlierFiltersAfterRuntimeException() throws ServletException {
+		Filter firstFilter = mock();
+		Filter failingFilter = mock();
+		FilterConfig filterConfig = mock();
+
+		RuntimeException failingFilterException = new RuntimeException();
+		doThrow(failingFilterException).when(failingFilter).init(filterConfig);
+
+		CompositeFilter compositeFilter = new CompositeFilter();
+		compositeFilter.setFilters(List.of(firstFilter, failingFilter));
+
+		assertThatThrownBy(() -> compositeFilter.init(filterConfig)).isSameAs(failingFilterException);
+		verify(firstFilter).destroy();
+		verify(failingFilter, never()).destroy();
+	}
+
+	@Test
+	void initDestroysEarlierFiltersAfterError() throws ServletException {
+		Filter firstFilter = mock();
+		Filter failingFilter = mock();
+		FilterConfig filterConfig = mock();
+
+		Error failingFilterError = new Error();
+		doThrow(failingFilterError).when(failingFilter).init(filterConfig);
+
+		CompositeFilter compositeFilter = new CompositeFilter();
+		compositeFilter.setFilters(List.of(firstFilter, failingFilter));
+
+		assertThatThrownBy(() -> compositeFilter.init(filterConfig)).isSameAs(failingFilterError);
+		verify(firstFilter).destroy();
+		verify(failingFilter, never()).destroy();
 	}
 
 
