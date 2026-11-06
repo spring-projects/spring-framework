@@ -47,15 +47,6 @@ import org.springframework.util.StringUtils;
 public class SpelParserConfiguration {
 
 	/**
-	 * Default maximum size to which a collection or array can automatically grow: {@value}.
-	 * <p>Aligned with the default auto-grow limit used for Spring's data binding
-	 * support (see {@code DataBinder.DEFAULT_AUTO_GROW_COLLECTION_LIMIT}), for
-	 * consistency between SpEL and data binding.
-	 * @since 7.1
-	 */
-	public static final int DEFAULT_MAX_AUTO_GROW_SIZE = 256;
-
-	/**
 	 * Default maximum length permitted for a SpEL expression: {@value}.
 	 * @since 5.2.24
 	 */
@@ -77,6 +68,15 @@ public class SpelParserConfiguration {
 	 * @see #SPRING_EXPRESSION_MAX_BIG_POWER_BITS_PROPERTY_NAME
 	 */
 	public static final int DEFAULT_MAX_BIG_POWER_BITS = 1_000_000;
+
+	/**
+	 * Default maximum size to which a collection or array can automatically grow: {@value}.
+	 * <p>Aligned with the default auto-grow limit used for Spring's data binding
+	 * support (see {@code DataBinder.DEFAULT_AUTO_GROW_COLLECTION_LIMIT}), for
+	 * consistency between SpEL and data binding.
+	 * @since 7.1
+	 */
+	public static final int DEFAULT_MAX_AUTO_GROW_SIZE = 256;
 
 	/**
 	 * Default maximum nesting depth permitted within a SpEL expression: {@value}.
