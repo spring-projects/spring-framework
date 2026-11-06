@@ -2077,8 +2077,10 @@ class DataBinderTests {
 
 		assertThatExceptionOfType(InvalidPropertyException.class)
 				.isThrownBy(() -> binder.bind(mpvs))
-				.havingRootCause()
-				.isInstanceOf(IndexOutOfBoundsException.class);
+				.withMessageContaining("Invalid list index in property path 'friends[256]'")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 256 out of bounds for auto-grow collection limit of 256");
 	}
 
 	@Test
@@ -2104,8 +2106,10 @@ class DataBinderTests {
 
 		assertThatExceptionOfType(InvalidPropertyException.class)
 				.isThrownBy(() -> binder.bind(mpvs))
-				.havingRootCause()
-				.isInstanceOf(IndexOutOfBoundsException.class);
+				.withMessageContaining("Invalid list index in property path 'friends[16]'")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 16 out of bounds for auto-grow collection limit of 10");
 	}
 
 	@ParameterizedTest(name = "directFieldAccess = {0}")  // gh-37634
@@ -2138,7 +2142,10 @@ class DataBinderTests {
 
 		assertThatExceptionOfType(InvalidPropertyException.class)
 				.isThrownBy(() -> binder.bind(mpvs))
-				.withMessageContaining("Cannot get element with index 256 from List of size 0");
+				.withMessageContaining("Invalid list index in property path 'items[256]'")
+				.havingCause()
+				.isExactlyInstanceOf(IndexOutOfBoundsException.class)
+				.withMessage("Index 256 out of bounds for auto-grow collection limit of 256");
 		List<?> items = form.getItems();
 		assertThat(items).isEmpty();
 	}
