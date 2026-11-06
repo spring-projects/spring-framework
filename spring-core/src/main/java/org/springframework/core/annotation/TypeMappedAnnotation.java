@@ -263,7 +263,9 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
-	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations) {
+	public <T extends Map<String, ? super Object>> T asMap(Function<MergedAnnotation<?>, T> factory,
+			Adapt... adaptations) {
+
 		T map = factory.apply(this);
 		Assert.state(map != null, "Factory used to create MergedAnnotation Map must not return null");
 		AttributeMethods attributes = this.mapping.getAttributes();
@@ -302,7 +304,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return Object.class;
 	}
 
-	private <T extends Map<String, Object>> Object adaptValueForMapOptions(Method attribute, Object value,
+	private <T extends Map<String, ? super Object>> Object adaptValueForMapOptions(Method attribute, Object value,
 			Class<?> mapType, Function<MergedAnnotation<?>, T> factory, Adapt[] adaptations) {
 
 		if (value instanceof MergedAnnotation<?> annotation) {

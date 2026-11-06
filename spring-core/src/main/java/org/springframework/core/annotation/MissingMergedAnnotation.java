@@ -128,7 +128,9 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
-	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations) {
+	public <T extends Map<String, ? super Object>> T asMap(Function<MergedAnnotation<?>, T> factory,
+			Adapt... adaptations) {
+
 		return factory.apply(this);
 	}
 
