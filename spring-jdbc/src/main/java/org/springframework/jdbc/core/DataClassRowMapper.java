@@ -44,6 +44,7 @@ import org.springframework.util.CollectionUtils;
  * <p>The term "data class" applies to Java <em>records</em>, Kotlin <em>data
  * classes</em>, and any class which has a constructor with named parameters
  * that are intended to be mapped to corresponding column names.
+ * Synthetic Kotlin constructor marker parameters are not mapped to columns.
  *
  * <p>When combining a data class constructor with setter methods, any property
  * mapped successfully via a constructor argument will not be mapped additionally
@@ -106,7 +107,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 			this.constructorParameterNames = BeanUtils.getParameterNames(this.mappedConstructor);
 			this.underscoredParameterIndexes = CollectionUtils.newHashMap(paramCount);
 			this.lowerCaseParameterIndexes = CollectionUtils.newHashMap(paramCount);
-			for (int i = 0; i < paramCount; i++) {
+			for (int i = 0; i < this.constructorParameterNames.length; i++) {
 				String name = this.constructorParameterNames[i];
 				suppressProperty(name);
 				this.underscoredParameterIndexes.putIfAbsent(underscoreName(name), i);
