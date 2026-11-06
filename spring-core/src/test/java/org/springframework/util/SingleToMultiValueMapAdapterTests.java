@@ -17,9 +17,12 @@
 package org.springframework.util;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -181,4 +184,27 @@ class SingleToMultiValueMapAdapterTests {
 		this.adapter.forEach(seen::put);
 		assertThat(seen).containsExactly(entry("foo", List.of("bar")), entry("qux", List.of("quux")));
 	}
+
+	@Test  // gh-37469
+	void equalsAndHashCode() {
+		Map<String, List<String>> reference = Map.of("foo", List.of("bar"), "qux", List.of("quux"));
+		assertThat(this.adapter).isEqualTo(reference);
+		assertThat(reference).isEqualTo(this.adapter);
+		assertThat(this.adapter).hasSameHashCodeAs(reference);
+		Set<Map<String, List<String>>> set = new HashSet<>();
+		set.add(this.adapter);
+		assertThat(set).contains(reference);
+	}
+
+	@Test  // gh-37469
+	void hashCodeWithNullValue() {
+		this.delegate.put("corge", null);
+		Map<String, List<String>> reference = new HashMap<>();
+		reference.put("foo", List.of("bar"));
+		reference.put("qux", List.of("quux"));
+		reference.put("corge", Collections.singletonList(null));
+		assertThat(this.adapter).isEqualTo(reference);
+		assertThat(this.adapter).hasSameHashCodeAs(reference);
+	}
+
 }
