@@ -648,6 +648,16 @@ class TypeDescriptorTests {
 	}
 
 	@Test
+	void isAssignableOptionalElementTypes() throws Exception {
+		assertThat(new TypeDescriptor(getClass().getField("optionalField")).isAssignableTo(new TypeDescriptor(getClass().getField("optionalField")))).isTrue();
+		assertThat(new TypeDescriptor(getClass().getField("notGenericOptional")).isAssignableTo(new TypeDescriptor(getClass().getField("optionalField")))).isTrue();
+		assertThat(new TypeDescriptor(getClass().getField("optionalField")).isAssignableTo(new TypeDescriptor(getClass().getField("notGenericOptional")))).isTrue();
+		assertThat(new TypeDescriptor(getClass().getField("optionalField")).isAssignableTo(new TypeDescriptor(getClass().getField("isAssignableOptionalElementTypes")))).isTrue();
+		assertThat(new TypeDescriptor(getClass().getField("isAssignableOptionalElementTypes")).isAssignableTo(new TypeDescriptor(getClass().getField("optionalField")))).isFalse();
+		assertThat(TypeDescriptor.valueOf(Optional.class).isAssignableTo(new TypeDescriptor(getClass().getField("optionalField")))).isTrue();
+	}
+
+	@Test
 	void multiValueMap() throws Exception {
 		TypeDescriptor td = new TypeDescriptor(getClass().getField("multiValueMap"));
 		assertThat(td.isMap()).isTrue();
@@ -919,6 +929,12 @@ class TypeDescriptorTests {
 	public Map notGenericMap;
 
 	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
+
+	public Optional<Integer> optionalField;
+
+	public Optional notGenericOptional;
+
+	public Optional<Number> isAssignableOptionalElementTypes;
 
 	public MultiValueMap<String, Integer> multiValueMap = new LinkedMultiValueMap<>();
 
