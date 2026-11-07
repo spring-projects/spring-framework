@@ -7044,6 +7044,25 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertIsCompiled(expression);
 			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
 		}
+
+		@ParameterizedTest
+		@MethodSource
+		void elvisOperatorOnOptional(Optional<String> optional, String expected) {
+			context.setVariable("optional", optional);
+			expression = parser.parseExpression("#optional ?: 'unknown'");
+
+			assertThat(expression.getValue(context)).isEqualTo(expected);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo(expected);
+		}
+
+		static Stream<Arguments> elvisOperatorOnOptional() {
+			return Stream.of(
+					argumentSet("empty Optional", Optional.empty(), "unknown"),
+					argumentSet("Optional with value", Optional.of("Yoda"), "Yoda"),
+					argumentSet("Optional with empty String", Optional.of(""), ""));
+		}
 	}
 
 	@Nested
