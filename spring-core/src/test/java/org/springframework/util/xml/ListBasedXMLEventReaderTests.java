@@ -93,6 +93,65 @@ class ListBasedXMLEventReaderTests {
 			.withMessageStartingWith("Not at START_ELEMENT");
 	}
 
+	@Test
+	void getElementTextSkipsComment() throws Exception {
+		String xml = "<foo><bar>ba<!-- comment -->z</bar></foo>";
+		List<XMLEvent> events = readEvents(xml);
+
+		ListBasedXMLEventReader reader = new ListBasedXMLEventReader(events);
+
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_DOCUMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.getElementText()).isEqualTo("baz");
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(END_ELEMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(END_DOCUMENT);
+	}
+
+	@Test
+	void getElementTextSkipsProcessingInstruction() throws Exception {
+		String xml = "<foo><bar>ba<?pi data?>z</bar></foo>";
+		List<XMLEvent> events = readEvents(xml);
+
+		ListBasedXMLEventReader reader = new ListBasedXMLEventReader(events);
+
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_DOCUMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.getElementText()).isEqualTo("baz");
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(END_ELEMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(END_DOCUMENT);
+	}
+
+	@Test
+	void getElementTextWithCommentOnly() throws Exception {
+		String xml = "<foo><bar><!-- comment --></bar></foo>";
+		List<XMLEvent> events = readEvents(xml);
+
+		ListBasedXMLEventReader reader = new ListBasedXMLEventReader(events);
+
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_DOCUMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.getElementText()).isEmpty();
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(END_ELEMENT);
+	}
+
+	@Test
+	void getElementTextThrowsExceptionForNestedElement() throws Exception {
+		String xml = "<foo><bar>ba<baz/>z</bar></foo>";
+		List<XMLEvent> events = readEvents(xml);
+
+		ListBasedXMLEventReader reader = new ListBasedXMLEventReader(events);
+
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_DOCUMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThatExceptionOfType(XMLStreamException.class).isThrownBy(
+				reader::getElementText)
+			.withMessageStartingWith("Unexpected non-text event");
+	}
+
 	private List<XMLEvent> readEvents(String xml) throws XMLStreamException {
 		XMLEventReader reader = this.inputFactory.createXMLEventReader(new StringReader(xml));
 		List<XMLEvent> events = new ArrayList<>();
