@@ -17,13 +17,17 @@
 package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Rod Johnson
@@ -142,6 +146,26 @@ class DriverManagerDataSourceTests {
 		assertThatIllegalStateException().isThrownBy(
 				() -> ds.setDriverClassName(bogusClassName))
 				.withCauseInstanceOf(ClassNotFoundException.class);
+	}
+
+	@Test
+	void connectionClosedWhenSettingSchemaFails() throws Exception {
+		SQLException ex = new SQLException("Schema not found");
+		doThrow(ex).when(connection).setSchema("myschema");
+
+		class TestDriverManagerDataSource extends DriverManagerDataSource {
+			@Override
+			protected Connection getConnectionFromDriverManager(String url, Properties props) {
+				return connection;
+			}
+		}
+
+		DriverManagerDataSource ds = new TestDriverManagerDataSource();
+		ds.setUrl("url");
+		ds.setSchema("myschema");
+
+		assertThatExceptionOfType(SQLException.class).isThrownBy(ds::getConnection).isSameAs(ex);
+		verify(connection).close();
 	}
 
 }

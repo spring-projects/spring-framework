@@ -17,10 +17,14 @@
 package org.springframework.jdbc.datasource;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +32,15 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.transaction.TransactionDefinition.ISOLATION_DEFAULT;
 import static org.springframework.transaction.TransactionDefinition.ISOLATION_READ_COMMITTED;
+import static org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ;
 
 /**
  * Tests for {@link IsolationLevelDataSourceAdapter}.
@@ -83,6 +93,21 @@ class IsolationLevelDataSourceAdapterTests {
 
 		adapter.setIsolationLevel(ISOLATION_READ_COMMITTED);
 		assertThat(adapter.getIsolationLevel()).isEqualTo(ISOLATION_READ_COMMITTED);
+	}
+
+	@Test
+	void connectionClosedWhenSettingIsolationLevelFails() throws SQLException {
+		DataSource dataSource = mock();
+		Connection connection = mock();
+		when(dataSource.getConnection()).thenReturn(connection);
+		SQLException ex = new SQLException("Isolation level not supported");
+		doThrow(ex).when(connection).setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+
+		adapter.setTargetDataSource(dataSource);
+		adapter.setIsolationLevel(ISOLATION_REPEATABLE_READ);
+
+		assertThatExceptionOfType(SQLException.class).isThrownBy(adapter::getConnection).isSameAs(ex);
+		verify(connection).close();
 	}
 
 
