@@ -201,9 +201,9 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	public void onComplete(AsyncEvent event) throws IOException {
 		this.stateLock.lock();
 		try {
-			this.completionHandlers.forEach(Runnable::run);
 			this.asyncContext = null;
 			this.state = State.COMPLETED;
+			this.completionHandlers.forEach(Runnable::run);
 		}
 		finally {
 			this.stateLock.unlock();
