@@ -18,6 +18,7 @@ package org.springframework.core.io.buffer;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -279,7 +280,7 @@ final class OutputStreamPublisher<T> implements Publisher<T> {
 			resume();
 		}
 
-		private void await() {
+		private void await() throws InterruptedIOException {
 			Thread toUnpark = Thread.currentThread();
 
 			while (true) {
@@ -292,10 +293,20 @@ final class OutputStreamPublisher<T> implements Publisher<T> {
 					throw new IllegalStateException("Only one (Virtual)Thread can await!");
 				}
 
-				if (this.parkedThread.compareAndSet(null, toUnpark)) {
+				if (this.parkedThread.compareAndSet(null, toUnpark) || this.parkedThread.get() == toUnpark) {
 					LockSupport.park();
 					// we don't just break here because park() can wake up spuriously
 					// if we got a proper resume, get() == READY and the loop will quit above
+					// otherwise, the reference is still ours and we park again
+				}
+
+				// on interruption, release the reference and throw, unless a concurrent
+				// resume() set READY: then the demand is observed first
+				if (Thread.interrupted()) {
+					Thread.currentThread().interrupt();
+					if (this.parkedThread.compareAndSet(toUnpark, null)) {
+						throw new InterruptedIOException("Interrupted while awaiting demand");
+					}
 				}
 			}
 			// clear the resume indicator so that the next await call will park without a resume()
