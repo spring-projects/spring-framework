@@ -214,6 +214,13 @@ class YamlProcessorTests {
 				entry("parent.anempty", ""));
 	}
 
+	@Test
+	void processAndFlattenEmptyRootMappingWithIncludedEmpty() {
+		setYaml("{}");
+		assertThat(this.processor.processAndFlatten(true, null)).isEmpty();
+		assertThat(this.processor.processAndFlatten(true, "")).isEmpty();
+	}
+
 	private void setYaml(String yaml) {
 		this.processor.setResources(new ByteArrayResource(yaml.getBytes()));
 	}
