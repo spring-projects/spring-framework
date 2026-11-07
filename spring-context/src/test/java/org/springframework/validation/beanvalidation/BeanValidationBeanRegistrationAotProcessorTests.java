@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.annotation.Resource;
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -41,6 +42,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
@@ -126,6 +128,21 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
 	}
 
+	@Test  // gh-34079
+	void shouldRegisterHintsForInjectionPointsOfConstraintValidator() {
+		process(InjectedConstraint.class);
+		assertThat(RuntimeHintsPredicates.reflection().onType(InjectedValidator.class)
+				.withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.generationContext.getRuntimeHints());
+		assertThat(RuntimeHintsPredicates.reflection().onFieldAccess(InjectedValidator.class, "autowiredField"))
+				.accepts(this.generationContext.getRuntimeHints());
+		assertThat(RuntimeHintsPredicates.reflection().onFieldAccess(InjectedValidator.class, "resourceField"))
+				.accepts(this.generationContext.getRuntimeHints());
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(InjectedValidator.class, "setResource"))
+				.accepts(this.generationContext.getRuntimeHints());
+		assertThat(RuntimeHintsPredicates.reflection().onFieldAccess(InjectedValidator.class, "plainField"))
+				.rejects(this.generationContext.getRuntimeHints());
+	}
+
 	@ParameterizedTest  // gh-33936
 	@ValueSource(classes = {BeanWithRecursiveIterable.class, BeanWithRecursiveMap.class, BeanWithRecursiveOptional.class})
 	void shouldProcessRecursiveGenericsWithoutInfiniteRecursion(Class<?> beanClass) {
@@ -184,6 +201,46 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
 			return true;
 		}
+	}
+
+	@Constraint(validatedBy = InjectedValidator.class)
+	@Target({ METHOD, FIELD, TYPE_USE })
+	@Retention(RUNTIME)
+	@interface Injected {
+
+		String message() default "Invalid";
+
+		Class<?>[] groups() default { };
+
+		Class<? extends Payload>[] payload() default { };
+	}
+
+	@SuppressWarnings("unused")
+	static class InjectedValidator implements ConstraintValidator<Injected, String> {
+
+		@Autowired
+		private Object autowiredField;
+
+		@Resource
+		private Object resourceField;
+
+		private Object plainField;
+
+		@Resource
+		public void setResource(Object resource) {
+		}
+
+		@Override
+		public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
+			return true;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	static class InjectedConstraint {
+
+		@Injected
+		private String name;
 	}
 
 	static class MethodParameterLevelConstraint {
