@@ -94,17 +94,18 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		if (bean instanceof Advised advised) {
 			if (!advised.isFrozen() && isEligible(AopUtils.getTargetClass(bean))) {
 				// Add our local Advisor to the existing proxy's Advisor chain.
+				Advisor advisor = getAdvisor(this.advisor, bean, beanName);
 				if (this.beforeExistingAdvisors) {
-					advised.addAdvisor(0, this.advisor);
+					advised.addAdvisor(0, advisor);
 				}
 				else if (advised.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE &&
 						advised.getAdvisorCount() > 0) {
 					// No target, leave last Advisor in place and add new Advisor right before.
-					advised.addAdvisor(advised.getAdvisorCount() - 1, this.advisor);
+					advised.addAdvisor(advised.getAdvisorCount() - 1, advisor);
 					return bean;
 				}
 				else {
-					advised.addAdvisor(this.advisor);
+					advised.addAdvisor(advisor);
 				}
 				return bean;
 			}
@@ -115,7 +116,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			if (!proxyFactory.isProxyTargetClass() && !proxyFactory.hasUserSuppliedInterfaces()) {
 				evaluateProxyInterfaces(bean.getClass(), proxyFactory);
 			}
-			proxyFactory.addAdvisor(this.advisor);
+			proxyFactory.addAdvisor(getAdvisor(this.advisor, bean, beanName));
 			customizeProxyFactory(proxyFactory);
 			proxyFactory.setFrozen(isFrozen());
 			proxyFactory.setPreFiltered(true);
@@ -131,6 +132,21 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 		// No proxy needed.
 		return bean;
+	}
+
+	/**
+	 * Return the {@link Advisor} to apply to the given eligible bean.
+	 * <p>The default implementation returns this post-processor's shared
+	 * {@link Advisor}. Can be overridden to return a dedicated {@link Advisor}
+	 * per bean, for example, if its advice keeps state for each proxy instance.
+	 * @param advisor this post-processor's shared {@link Advisor}
+	 * @param bean the bean instance (possibly an existing proxy)
+	 * @param beanName the name of the bean
+	 * @return the {@link Advisor} to add to the bean's proxy
+	 * @since 7.1
+	 */
+	protected Advisor getAdvisor(Advisor advisor, Object bean, String beanName) {
+		return advisor;
 	}
 
 	/**
