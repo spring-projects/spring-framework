@@ -16,6 +16,7 @@
 
 package org.springframework.core;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,6 +24,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -253,6 +255,66 @@ class MethodParameterTests {
 	}
 
 	@Test
+	void parameterAnnotationsOfSeparateInstancesMatchUncachedAnnotations() throws Exception {
+		Constructor<?> constructor = NestedClass.class.getDeclaredConstructor(String.class);
+		for (int i = 0; i < 2; i++) {
+			MethodParameter methodParameter = MethodParameter.forExecutable(constructor, 0);
+			assertThat(methodParameter.getParameterAnnotations()).isEqualTo(constructor.getParameterAnnotations()[0]);
+		}
+		Method nullableMethod = getClass().getMethod("springNullableMethod", String.class, String.class);
+		for (int i = 0; i < 2; i++) {
+			assertThat(MethodParameter.forExecutable(nullableMethod, 0).getParameterAnnotations())
+					.isEqualTo(nullableMethod.getParameterAnnotations()[0]);
+			assertThat(MethodParameter.forExecutable(nullableMethod, 1).getParameterAnnotations()).isEmpty();
+		}
+	}
+
+	@Test
+	void parameterAnnotationsOfSeparateInstancesForInnerClassConstructor() throws Exception {
+		Constructor<?> constructor = InnerClass.class.getConstructor(getClass(), String.class, Callable.class);
+		for (int i = 0; i < 2; i++) {
+			assertThat(MethodParameter.forExecutable(constructor, 0).getParameterAnnotations()).isEmpty();
+			assertThat(MethodParameter.forExecutable(constructor, 1).getParameterAnnotations())
+					.isEqualTo(constructor.getParameterAnnotations()[1]);
+			assertThat(MethodParameter.forExecutable(constructor, 2).getParameterAnnotations()).isEmpty();
+		}
+	}
+
+	@Test
+	void parameterAnnotationsOfFieldAwareConstructorParameter() throws Exception {
+		Constructor<?> constructor = FieldAwareClass.class.getDeclaredConstructor(String.class, String.class);
+		for (int i = 0; i < 2; i++) {
+			Annotation[] first = MethodParameter.forFieldAwareConstructor(constructor, 0, "first").getParameterAnnotations();
+			assertThat(first).extracting(Annotation::annotationType).containsExactlyInAnyOrder(Param.class, FieldParam.class);
+			Annotation[] second = MethodParameter.forFieldAwareConstructor(constructor, 1, "second").getParameterAnnotations();
+			assertThat(second).extracting(Annotation::annotationType).containsExactly(FieldParam.class);
+		}
+		// The field annotations are not added to the plain parameter annotations
+		assertThat(MethodParameter.forExecutable(constructor, 0).getParameterAnnotations())
+				.extracting(Annotation::annotationType).containsExactly(Param.class);
+	}
+
+	@Test
+	void modifyingParameterAnnotationsDoesNotAffectOtherInstances() throws Exception {
+		Constructor<?> constructor = NestedClass.class.getDeclaredConstructor(String.class);
+		Annotation[] annotations = MethodParameter.forExecutable(constructor, 0).getParameterAnnotations();
+		Annotation expected = annotations[0];
+		Arrays.fill(annotations, null);
+
+		assertThat(MethodParameter.forExecutable(constructor, 0).getParameterAnnotations()).containsExactly(expected);
+		assertThat(constructor.getParameterAnnotations()[0]).containsExactly(expected);
+	}
+
+	@Test
+	void isOptionalOfSeparateInstances() throws Exception {
+		Method method = getClass().getMethod("jspecifyNullableMethod", String.class, String.class);
+		for (int i = 0; i < 2; i++) {
+			assertThat(MethodParameter.forExecutable(method, 0).isOptional()).isTrue();
+			assertThat(MethodParameter.forExecutable(method, 1).isOptional()).isFalse();
+		}
+	}
+
+	@Test
 	void parameterNames() {
 		assertThat(stringParameter.getParameterName()).isEqualTo("str");
 		assertThat(longParameter.getParameterName()).isEqualTo("lng");
@@ -307,9 +369,29 @@ class MethodParameterTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	private static class FieldAwareClass {
+
+		@FieldParam
+		private final String first;
+
+		@FieldParam
+		private final String second;
+
+		FieldAwareClass(@Param String first, String second) {
+			this.first = first;
+			this.second = second;
+		}
+	}
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.PARAMETER)
 	private @interface Param {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	private @interface FieldParam {
 	}
 
 	@SuppressWarnings("serial")
