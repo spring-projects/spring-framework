@@ -962,6 +962,20 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat((Boolean) expression.getValue()).isTrue();
 		}
 
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"T(Double).NaN > 1.0d", "1.0d > T(Double).NaN", "T(Double).NaN >= 1.0d", "1.0d >= T(Double).NaN",
+			"T(Double).NaN < 1.0d", "1.0d < T(Double).NaN", "T(Double).NaN <= 1.0d", "1.0d <= T(Double).NaN",
+			"T(Float).NaN > 1.0f", "1.0f > T(Float).NaN", "T(Float).NaN >= 1.0f", "1.0f >= T(Float).NaN",
+			"T(Float).NaN < 1.0f", "1.0f < T(Float).NaN", "T(Float).NaN <= 1.0f", "1.0f <= T(Float).NaN"
+		})
+		void relationalOperatorsWithNaN(String expressionString) {
+			expression = parse(expressionString);
+			assertThat((Boolean) expression.getValue()).isFalse();
+			assertCanCompile(expression);
+			assertThat((Boolean) expression.getValue()).isFalse();
+		}
+
 		@Test
 		void opEq() {
 			String tvar = "35";
