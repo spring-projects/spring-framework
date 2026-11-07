@@ -705,7 +705,7 @@ Java::
 			configurer.defaultCodecs().enableLoggingRequestDetails(true);
 
 	WebClient webClient = WebClient.builder()
-			.exchangeStrategies(strategies -> strategies.codecs(consumer))
+			.exchangeStrategies(ExchangeStrategies.builder().codecs(consumer).build())
 			.build();
 ----
 
@@ -716,7 +716,7 @@ Kotlin::
 	val consumer: (ClientCodecConfigurer) -> Unit  = { configurer -> configurer.defaultCodecs().enableLoggingRequestDetails(true) }
 
 	val webClient = WebClient.builder()
-			.exchangeStrategies({ strategies -> strategies.codecs(consumer) })
+			.exchangeStrategies(ExchangeStrategies.builder().codecs(consumer).build())
 			.build()
 ----
 ======
