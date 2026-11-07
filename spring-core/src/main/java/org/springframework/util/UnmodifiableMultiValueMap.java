@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * @param <K> the key type
  * @param <V> the value element type
  */
-final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serializable {
+final class UnmodifiableMultiValueMap<K, V extends @Nullable Object> implements MultiValueMap<K, V>, Serializable {
 
 	private static final long serialVersionUID = -8697084563854098920L;
 
@@ -267,7 +267,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	}
 
 
-	private static class UnmodifiableEntrySet<K,V> implements Set<Map.Entry<K, List<V>>>, Serializable {
+	private static class UnmodifiableEntrySet<K, V extends @Nullable Object> implements Set<Map.Entry<K, List<V>>>, Serializable {
 
 		private static final long serialVersionUID = 2407578793783925203L;
 
@@ -413,7 +413,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		}
 
 
-		private static class UnmodifiableEntrySpliterator<K,V> implements Spliterator<Entry<K,List<V>>> {
+		private static class UnmodifiableEntrySpliterator<K, V extends @Nullable Object> implements Spliterator<Entry<K, List<V>>> {
 
 			private final Spliterator<Entry<K, List<V>>> delegate;
 
@@ -472,7 +472,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		}
 
 
-		private static class UnmodifiableEntry<K,V> implements Map.Entry<K,List<V>> {
+		private static class UnmodifiableEntry<K, V extends @Nullable Object> implements Map.Entry<K,List<V>> {
 
 			private final Entry<K, List<V>> delegate;
 
@@ -516,7 +516,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	}
 
 
-	private static class UnmodifiableValueCollection<V> implements Collection<List<V>>, Serializable {
+	private static class UnmodifiableValueCollection<V extends @Nullable Object> implements Collection<List<V>>, Serializable {
 
 		private static final long serialVersionUID = 5518377583904339588L;
 
@@ -660,7 +660,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 		}
 
 
-		private static class UnmodifiableValueSpliterator<T> implements Spliterator<List<T>> {
+		private static class UnmodifiableValueSpliterator<T extends @Nullable Object> implements Spliterator<List<T>> {
 
 			private final Spliterator<List<T>> delegate;
 
