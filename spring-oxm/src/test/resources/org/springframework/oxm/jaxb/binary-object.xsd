@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://springframework.org/spring-ws"
+           xmlns:tns="http://springframework.org/spring-ws"
+           elementFormDefault="qualified">
+
+	<xs:element name="binaryObject" type="tns:binaryObjectType"/>
+
+	<xs:complexType name="binaryObjectType">
+		<xs:sequence>
+			<xs:element name="bytes" type="xs:base64Binary" minOccurs="0"/>
+			<xs:element name="dataHandler" type="xs:base64Binary" minOccurs="0"/>
+			<!-- swaRef is a simple URI type; treat as string for validation -->
+			<xs:element name="swaDataHandler" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
