@@ -427,13 +427,26 @@ abstract class AnnotationsScanner {
 			return false;
 		}
 		for (int i = 0; i < rootParameterTypes.length; i++) {
-			Class<?> resolvedParameterType = ResolvableType.forMethodParameter(
-					candidateMethod, i, rootDeclaringClass).toClass();
+			Class<?> resolvedParameterType = toClass(ResolvableType.forMethodParameter(
+					candidateMethod, i, rootDeclaringClass));
 			if (rootParameterTypes[i] != resolvedParameterType) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Variant of {@link ResolvableType#toClass()} which also resolves an array of
+	 * an unresolved generic to the corresponding array type (for example,
+	 * {@code Object[]} instead of {@code Object}).
+	 */
+	private static Class<?> toClass(ResolvableType type) {
+		Class<?> resolved = type.resolve();
+		if (resolved != null) {
+			return resolved;
+		}
+		return (type.isArray() ? toClass(type.getComponentType()).arrayType() : Object.class);
 	}
 
 	private static <C, R> @Nullable R processMethodAnnotations(C context, int aggregateIndex, Method source,
