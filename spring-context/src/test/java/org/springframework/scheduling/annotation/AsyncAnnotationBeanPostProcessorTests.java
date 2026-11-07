@@ -17,6 +17,7 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -29,8 +30,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -91,6 +99,24 @@ class AsyncAnnotationBeanPostProcessorTests {
 		Thread asyncThread = testBean.getThread();
 		assertThat(asyncThread).isNotSameAs(mainThread);
 		context.close();
+	}
+
+	@Test
+	void cacheEvictionWithEarlySelfReference() throws Exception {
+		try (AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(ConfigWithEarlySelfReference.class)) {
+
+			SelfReferencingBean bean = context.getBean(SelfReferencingBean.class);
+			Cache cache = context.getBean(CacheManager.class).getCache("test");
+			cache.put("key", "value");
+			assertThat(bean.evictAsync("key").get(5, TimeUnit.SECONDS)).isNotSameAs(Thread.currentThread());
+			assertThat(cache.get("key")).isNull();
+
+			cache.put("key", "value");
+			bean.evict("key");
+			assertThat(cache.get("key")).isNull();
+			assertThat(bean.getSelf()).isSameAs(bean);
+		}
 	}
 
 	@Test
@@ -314,6 +340,54 @@ class AsyncAnnotationBeanPostProcessorTests {
 		@Override
 		public void execute(Runnable r) {
 			r.run();
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	@EnableAsync
+	@EnableCaching
+	static class ConfigWithEarlySelfReference {
+
+		@Bean
+		SelfReferencingBean selfReferencingBean(ApplicationContext context) {
+			return new SelfReferencingBean(context);
+		}
+
+		@Bean
+		CacheManager cacheManager() {
+			return new ConcurrentMapCacheManager("test");
+		}
+	}
+
+
+	static class SelfReferencingBean implements InitializingBean {
+
+		private final ApplicationContext context;
+
+		private SelfReferencingBean self;
+
+		SelfReferencingBean(ApplicationContext context) {
+			this.context = context;
+		}
+
+		@Override
+		public void afterPropertiesSet() {
+			this.self = this.context.getBean(SelfReferencingBean.class);
+		}
+
+		public SelfReferencingBean getSelf() {
+			return this.self;
+		}
+
+		@Async
+		public CompletableFuture<Thread> evictAsync(String key) {
+			this.self.evict(key);
+			return CompletableFuture.completedFuture(Thread.currentThread());
+		}
+
+		@CacheEvict(cacheNames = "test", key = "#key")
+		public void evict(String key) {
 		}
 	}
 
