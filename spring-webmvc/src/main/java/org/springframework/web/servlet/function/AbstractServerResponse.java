@@ -56,8 +56,10 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 			HttpStatusCode statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies) {
 
 		this.statusCode = statusCode;
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-		this.cookies = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(cookies));
+		this.headers = HttpHeaders.readOnlyHttpHeaders(HttpHeaders.copyOf(headers));
+		LinkedMultiValueMap<String, Cookie> cookiesCopy = new LinkedMultiValueMap<>(cookies.size());
+		cookiesCopy.addAll(cookies);
+		this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookiesCopy);
 	}
 
 
