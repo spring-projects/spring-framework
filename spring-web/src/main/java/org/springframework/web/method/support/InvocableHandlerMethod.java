@@ -354,7 +354,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (KotlinDetector.isInlineClass(result.getClass())) {
 				try {
 					Object unboxed = unbox(result);
-					if (unboxed != Unit.INSTANCE) {
+					if (unboxed != null && unboxed != Unit.INSTANCE) {
 						sink.next(unboxed);
 					}
 					sink.complete();
@@ -369,9 +369,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 
-		private static Object unbox(Object result) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		private static @Nullable Object unbox(Object result) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 			Object unboxed = result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
-			if (KotlinDetector.isInlineClass(unboxed.getClass())) {
+			if (unboxed != null && KotlinDetector.isInlineClass(unboxed.getClass())) {
 				return unbox(unboxed);
 			}
 			return unboxed;
