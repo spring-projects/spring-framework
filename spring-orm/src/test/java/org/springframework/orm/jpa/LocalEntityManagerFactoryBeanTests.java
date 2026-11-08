@@ -206,6 +206,11 @@ class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBea
 		public ClassTransformer getClassTransformer(PersistenceUnitInfo persistenceUnitInfo, Map<?,?> map) {
 			return null;
 		}
+
+		@SuppressWarnings("unused")  // JPA 4.0 method
+		public ClassTransformer getClientClassTransformer(PersistenceUnitInfo info, Map<?, ?> properties) {
+			return null;
+		}
 	}
 
 }
