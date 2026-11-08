@@ -42,19 +42,4 @@ public class EmptySqlParameterSource implements SqlParameterSource {
 		throw new IllegalArgumentException("This SqlParameterSource is empty");
 	}
 
-	@Override
-	public int getSqlType(String paramName) {
-		return TYPE_UNKNOWN;
-	}
-
-	@Override
-	public @Nullable String getTypeName(String paramName) {
-		return null;
-	}
-
-	@Override
-	public String @Nullable [] getParameterNames() {
-		return null;
-	}
-
 }
