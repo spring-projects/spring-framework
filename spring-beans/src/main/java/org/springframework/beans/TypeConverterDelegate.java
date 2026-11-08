@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -239,6 +240,12 @@ class TypeConverterDelegate {
 			}
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
+				if (convertedValue != null && KotlinDetector.isInlineClass(requiredType)) {
+					convertedValue = convertToInlineClass(propertyName, oldValue, convertedValue, requiredType);
+				}
+			}
+
+			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
 				if (conversionAttemptEx != null) {
 					// Original exception from former ConversionService call above...
 					throw conversionAttemptEx;
@@ -281,6 +288,18 @@ class TypeConverterDelegate {
 		}
 
 		return (T) convertedValue;
+	}
+
+	private <T> Object convertToInlineClass(@Nullable String propertyName, @Nullable Object oldValue,
+			Object newValue, Class<T> requiredType) {
+
+		Constructor<T> constructor = BeanUtils.findPrimaryConstructor(requiredType);
+		if (constructor == null || constructor.getParameterCount() != 1) {
+			return newValue;
+		}
+		Object constructorArgument = convertIfNecessary(
+				propertyName, oldValue, newValue, constructor.getParameterTypes()[0]);
+		return BeanUtils.instantiateClass(constructor, constructorArgument);
 	}
 
 	private Object attemptToConvertStringToEnum(Class<?> requiredType, String trimmedValue, Object currentConvertedValue) {
