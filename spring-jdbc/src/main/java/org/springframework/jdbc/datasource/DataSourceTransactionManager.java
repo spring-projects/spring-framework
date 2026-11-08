@@ -106,6 +106,17 @@ import org.springframework.util.Assert;
  * is available as an extended subclass which includes commit/rollback exception
  * translation, aligned with {@link org.springframework.jdbc.core.JdbcTemplate}.</b>
  *
+ * <p><b>Multiple Transaction Managers with the Same Resource:</b>
+ * When multiple {@code DataSourceTransactionManager} instances are configured with
+ * the same underlying {@code DataSource}, transactions created by one manager can
+ * participate in existing transactions created by another manager. This is because
+ * the transaction synchronization is based on the {@code DataSource} resource itself,
+ * not on the transaction manager instance. For example, if {@code tm1} starts a
+ * transaction and {@code tm2} (configured with the same {@code DataSource}) begins
+ * a transaction with {@code PROPAGATION_REQUIRED}, it will join the existing transaction
+ * rather than creating a new one. This behavior is consistent with Spring's resource-based
+ * transaction synchronization mechanism.
+ *
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see #setNestedTransactionAllowed
