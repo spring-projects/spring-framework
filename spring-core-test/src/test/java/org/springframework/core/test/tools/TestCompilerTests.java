@@ -109,6 +109,21 @@ class TestCompilerTests {
 			}
 			""";
 
+	private static final String HELLO_DEPRECATED_FOR_REMOVAL = """
+			package com.example;
+
+			import java.util.function.Supplier;
+
+			public class Hello implements Supplier<String> {
+
+				@Deprecated(forRemoval = true)
+				public String get() {
+					return "Hello Deprecated";
+				}
+
+			}
+			""";
+
 	@Test
 	@SuppressWarnings("unchecked")
 	void compileWhenHasDifferentClassesWithSameClassNameCompilesBoth() {
@@ -206,6 +221,101 @@ class TestCompilerTests {
 				""");
 		TestCompiler.forSystem().failOnWarning().withSources(
 				SourceFile.of(HELLO_DEPRECATED), main).compile(compiled -> {
+			Supplier<String> supplier = compiled.getInstance(Supplier.class,
+					"com.example.Hello");
+			assertThat(supplier.get()).isEqualTo("Hello Deprecated");
+		});
+	}
+
+	@Test
+	void compileWhenSourceUseDeprecateCodeAndFailOnDeprecationWarningIsSet() {
+		SourceFile main = sourceFileUsingDeprecatedHello("""
+				public static void main(String[] args) {
+					new Hello().get();
+				}
+				""");
+		assertThatExceptionOfType(CompilationException.class).isThrownBy(
+				() -> TestCompiler.forSystem().failOnDeprecationWarning().withSources(
+						SourceFile.of(HELLO_DEPRECATED), main).compile(compiled -> {
+				})).satisfies(compilationException -> {
+			assertThat(compilationException.getProblems(Diagnostic.Kind.ERROR)).singleElement()
+					.satisfies(error -> assertThat(error.message())
+							.contains("-Werror"));
+			assertThat(compilationException.getProblems(Diagnostic.Kind.MANDATORY_WARNING)).singleElement()
+					.satisfies(warning -> assertThat(warning.message())
+							.contains("get()", "com.example.Hello"));
+		});
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void compileWhenSourceUseDeprecateCodeAndFailOnDeprecationWarningWithSuppressWarnings() {
+		SourceFile main = sourceFileUsingDeprecatedHello("""
+				@SuppressWarnings("deprecation")
+				public static void main(String[] args) {
+					new Hello().get();
+				}
+				""");
+		TestCompiler.forSystem().failOnDeprecationWarning().withSources(
+				SourceFile.of(HELLO_DEPRECATED), main).compile(compiled -> {
+			Supplier<String> supplier = compiled.getInstance(Supplier.class,
+					"com.example.Hello");
+			assertThat(supplier.get()).isEqualTo("Hello Deprecated");
+		});
+	}
+
+	@Test
+	void compileWhenSourceExposesDeprecateTypeAndFailOnDeprecationWarningIsSet() {
+		SourceFile main = sourceFileUsingDeprecatedHello("""
+				public Hello getHello() {
+					return new Hello();
+				}
+				""");
+		assertThatExceptionOfType(CompilationException.class).isThrownBy(
+				() -> TestCompiler.forSystem().failOnDeprecationWarning().withSources(
+						SourceFile.of(HELLO_WORLD), main).compile(compiled -> {
+				})).satisfies(compilationException -> {
+			assertThat(compilationException.getProblems(Diagnostic.Kind.ERROR)).singleElement()
+					.satisfies(error -> assertThat(error.message())
+							.contains("-Werror"));
+			assertThat(compilationException.getProblems(Diagnostic.Kind.MANDATORY_WARNING))
+					.hasSize(2)
+					.allSatisfy(warning -> assertThat(warning.message())
+							.contains("Hello", "com.example"));
+		});
+	}
+
+	@Test
+	void compileWhenSourceUseDeprecateForRemovalCodeAndFailOnDeprecationWarningIsSet() {
+		SourceFile main = sourceFileUsingDeprecatedHello("""
+				public static void main(String[] args) {
+					new Hello().get();
+				}
+				""");
+		assertThatExceptionOfType(CompilationException.class).isThrownBy(
+				() -> TestCompiler.forSystem().failOnDeprecationWarning().withSources(
+						SourceFile.of(HELLO_DEPRECATED_FOR_REMOVAL), main).compile(compiled -> {
+				})).satisfies(compilationException -> {
+			assertThat(compilationException.getProblems(Diagnostic.Kind.ERROR)).singleElement()
+					.satisfies(error -> assertThat(error.message())
+							.contains("-Werror"));
+			assertThat(compilationException.getProblems(Diagnostic.Kind.MANDATORY_WARNING)).singleElement()
+					.satisfies(warning -> assertThat(warning.message())
+							.contains("get()", "com.example.Hello"));
+		});
+	}
+
+	@Test
+	@SuppressWarnings({ "removal", "unchecked" })
+	void compileWhenSourceUseDeprecateForRemovalCodeAndFailOnDeprecationWarningWithSuppressWarnings() {
+		SourceFile main = sourceFileUsingDeprecatedHello("""
+				@SuppressWarnings("removal")
+				public static void main(String[] args) {
+					new Hello().get();
+				}
+				""");
+		TestCompiler.forSystem().failOnDeprecationWarning().withSources(
+				SourceFile.of(HELLO_DEPRECATED_FOR_REMOVAL), main).compile(compiled -> {
 			Supplier<String> supplier = compiled.getInstance(Supplier.class,
 					"com.example.Hello");
 			assertThat(supplier.get()).isEqualTo("Hello Deprecated");
@@ -396,6 +506,18 @@ class TestCompilerTests {
 	private void assertHasResource(Compiled compiled) {
 		assertThat(compiled.getClassLoader().getResourceAsStream(
 				"META-INF/myfile")).hasContent("test");
+	}
+
+	private SourceFile sourceFileUsingDeprecatedHello(String method) {
+		return SourceFile.of("""
+				package com.example;
+
+				public class Main {
+
+				%s
+
+				}
+				""".formatted(method.indent(1)));
 	}
 
 	@SupportedAnnotationTypes("java.lang.Deprecated")

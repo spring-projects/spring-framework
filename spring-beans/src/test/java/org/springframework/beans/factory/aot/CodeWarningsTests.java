@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CodeWarningsTests {
 
 	private static final TestCompiler TEST_COMPILER = TestCompiler.forSystem()
-			.withCompilerOptions("-Xlint:all", "-Werror");
+			.failOnDeprecationWarning();
 
 	private final CodeWarnings codeWarnings = new CodeWarnings();
 
