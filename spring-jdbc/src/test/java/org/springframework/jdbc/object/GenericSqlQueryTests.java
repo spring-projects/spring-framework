@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
@@ -72,19 +73,19 @@ class GenericSqlQueryTests {
 
 	@Test
 	void customerQueryWithPlaceholders() throws SQLException {
-		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithPlaceholders");
+		SqlQuery<?> query = beanFactory.getBean("queryWithPlaceholders", new ParameterizedTypeReference<>() {});
 		doTestCustomerQuery(query, false);
 	}
 
 	@Test
 	void customerQueryWithNamedParameters() throws SQLException {
-		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithNamedParameters");
+		SqlQuery<?> query = beanFactory.getBean("queryWithNamedParameters", new ParameterizedTypeReference<>() {});
 		doTestCustomerQuery(query, true);
 	}
 
 	@Test
 	void customerQueryWithRowMapperInstance() throws SQLException {
-		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithRowMapperBean");
+		SqlQuery<?> query = beanFactory.getBean("queryWithRowMapperBean", new ParameterizedTypeReference<>() {});
 		doTestCustomerQuery(query, true);
 	}
 
