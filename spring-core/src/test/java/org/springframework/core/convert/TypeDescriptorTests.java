@@ -738,6 +738,49 @@ class TypeDescriptorTests {
 	}
 
 	@Test
+	void serializableCollection() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class));
+		TypeDescriptor readObject = serializeAndDeserialize(typeDescriptor);
+
+		assertThat(readObject).isEqualTo(typeDescriptor).hasSameHashCodeAs(typeDescriptor);
+		assertThat(readObject.getType()).isEqualTo(List.class);
+		assertThat(readObject.getElementTypeDescriptor().getType()).isEqualTo(String.class);
+		assertThat(readObject.toString()).isEqualTo("java.util.List<java.lang.String>");
+	}
+
+	@Test
+	void serializableMap() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.map(Map.class,
+				TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
+		TypeDescriptor readObject = serializeAndDeserialize(typeDescriptor);
+
+		assertThat(readObject).isEqualTo(typeDescriptor).hasSameHashCodeAs(typeDescriptor);
+		assertThat(readObject.getMapKeyTypeDescriptor().getType()).isEqualTo(String.class);
+		assertThat(readObject.getMapValueTypeDescriptor().getType()).isEqualTo(Integer.class);
+		assertThat(readObject.toString()).isEqualTo("java.util.Map<java.lang.String, java.lang.Integer>");
+	}
+
+	@Test
+	void serializableCollectionWithNullElementType() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.collection(List.class, null);
+		TypeDescriptor readObject = serializeAndDeserialize(typeDescriptor);
+
+		assertThat(readObject).isEqualTo(typeDescriptor).hasSameHashCodeAs(typeDescriptor);
+		assertThat(readObject.getElementTypeDescriptor()).isNull();
+		assertThat(readObject.toString()).isEqualTo("java.util.List<?>");
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T serializeAndDeserialize(T object) throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try (ObjectOutputStream outputStream = new ObjectOutputStream(out)) {
+			outputStream.writeObject(object);
+		}
+		ObjectInputStream inputStream = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
+		return (T) inputStream.readObject();
+	}
+
+	@Test
 	void createCollectionWithNullElement() {
 		TypeDescriptor typeDescriptor = TypeDescriptor.collection(List.class, null);
 		assertThat(typeDescriptor.getElementTypeDescriptor()).isNull();
