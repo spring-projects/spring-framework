@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.assertj.core.api.ThrowableTypeAssert;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.mock;
  * Tests for {@link UnmodifiableMultiValueMap}.
  *
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  * @since 6.0
  */
 class UnmodifiableMultiValueMapTests {
@@ -177,6 +179,15 @@ class UnmodifiableMultiValueMapTests {
 		assertThatUnsupportedOperationException().isThrownBy(() -> values.retainAll(List.of(List.of("foo"))));
 		assertThatUnsupportedOperationException().isThrownBy(() -> values.removeIf(s -> true));
 		assertThatUnsupportedOperationException().isThrownBy(values::clear);
+	}
+
+	@Test
+	void nullable() {
+		MultiValueMap<String, @Nullable String> linkedMultiValueMap = new LinkedMultiValueMap<>();
+		linkedMultiValueMap.add("test", "test");
+		linkedMultiValueMap.add("test", null);
+		UnmodifiableMultiValueMap<String, String> map = new UnmodifiableMultiValueMap<>(linkedMultiValueMap);
+		assertThat(map.get("test")).containsExactly("test", null);
 	}
 
 	private static ThrowableTypeAssert<UnsupportedOperationException> assertThatUnsupportedOperationException() {
