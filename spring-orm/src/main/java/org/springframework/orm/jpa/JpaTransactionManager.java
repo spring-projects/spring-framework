@@ -489,7 +489,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @param txObject the current transaction
 	 */
 	protected void closeEntityManagerAfterFailedBegin(JpaTransactionObject txObject) {
-		if (txObject.isNewEntityManagerHolder()) {
+		if (txObject.isNewEntityManagerHolder() && txObject.getEntityManagerHolder().hasEntityManager()) {
 			EntityManager em = txObject.getEntityManagerHolder().getEntityManager();
 			try {
 				if (em.getTransaction().isActive()) {
