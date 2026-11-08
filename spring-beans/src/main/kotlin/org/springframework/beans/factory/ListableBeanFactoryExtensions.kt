@@ -16,16 +16,21 @@
 
 package org.springframework.beans.factory
 
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.ResolvableType
+
 /**
  * Extension for [ListableBeanFactory.getBeanNamesForType] providing a
- * `getBeanNamesForType<Foo>()` variant.
+ * `getBeanNamesForType<Foo>()` or `getBeanNamesForType<List<Foo>>()` variant.
  *
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 5.0
  */
 inline fun <reified T : Any> ListableBeanFactory.getBeanNamesForType(includeNonSingletons: Boolean = true,
 		allowEagerInit: Boolean = true): Array<out String> =
-		getBeanNamesForType(T::class.java, includeNonSingletons, allowEagerInit)
+		getBeanNamesForType(ResolvableType.forType(object : ParameterizedTypeReference<T>() {}),
+		includeNonSingletons, allowEagerInit)
 
 /**
  * Extension for [ListableBeanFactory.getBeansOfType] providing a `getBeansOfType<Foo>()` variant.
