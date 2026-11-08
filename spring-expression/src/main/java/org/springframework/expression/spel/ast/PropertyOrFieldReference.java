@@ -39,6 +39,7 @@ import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -81,6 +82,10 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	private volatile boolean unwrapOptional;
 
 	private volatile @Nullable PropertyAccessor cachedReadAccessor;
+
+	private volatile @Nullable CachedReadAccessor cachedOptimizedReadAccessor;
+
+	private volatile @Nullable CachedReadAccessor previousOptimizedReadAccessor;
 
 	private volatile @Nullable PropertyAccessor cachedWriteAccessor;
 
@@ -225,6 +230,30 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			}
 		}
 
+		CachedReadAccessor cachedOptimizedAccessor = this.cachedOptimizedReadAccessor;
+		if (cachedOptimizedAccessor == null ||
+				!cachedOptimizedAccessor.isValid(evalContext.getPropertyAccessors(), target)) {
+			cachedOptimizedAccessor = this.previousOptimizedReadAccessor;
+		}
+		if (cachedOptimizedAccessor != null &&
+				cachedOptimizedAccessor.isValid(evalContext.getPropertyAccessors(), target)) {
+			try {
+				PropertyAccessor accessor = cachedOptimizedAccessor.accessor();
+				if (this.cachedReadAccessor != accessor) {
+					this.cachedReadAccessor = accessor;
+				}
+				state.trackOperation();
+				return accessor.read(evalContext, target, name);
+			}
+			catch (Exception ex) {
+				if (ex instanceof SpelEvaluationException see) {
+					throw see;
+				}
+				throw new SpelEvaluationException(ex, SpelMessage.EXCEPTION_DURING_PROPERTY_READ,
+						name, ex.getMessage());
+			}
+		}
+
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
 		if (accessorToUse != null) {
 			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
@@ -249,11 +278,18 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			for (PropertyAccessor accessor : accessorsToTry) {
 				// First, attempt to find the property on the target object.
 				if (accessor.canRead(evalContext, target, name)) {
+					PropertyAccessor originalAccessor = accessor;
 					if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
 						accessor = reflectivePropertyAccessor.createOptimalAccessor(
 								evalContext, target, name);
 					}
 					this.cachedReadAccessor = accessor;
+					CachedReadAccessor optimizedAccessor = CachedReadAccessor.create(
+							accessor, originalAccessor, target, evalContext.getPropertyAccessors());
+					if (optimizedAccessor != null) {
+						this.previousOptimizedReadAccessor = this.cachedOptimizedReadAccessor;
+						this.cachedOptimizedReadAccessor = optimizedAccessor;
+					}
 					state.trackOperation();
 					return accessor.read(evalContext, target, name);
 				}
@@ -416,6 +452,33 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 		else {
 			this.exitTypeDescriptor = descriptor;
+		}
+	}
+
+
+	private record CachedReadAccessor(PropertyAccessor accessor, PropertyAccessor originalAccessor,
+			Class<?> targetType, boolean targetIsClass) {
+
+		static @Nullable CachedReadAccessor create(PropertyAccessor accessor, PropertyAccessor original,
+				@Nullable Object target, List<PropertyAccessor> accessors) {
+
+			Class<?> accessorType = original.getClass();
+			if (accessor != original && target != null && accessors.size() == 1 && accessors.get(0) == original &&
+					(accessorType == ReflectivePropertyAccessor.class || accessorType == DataBindingPropertyAccessor.class)) {
+				Class<?> targetType = (target instanceof Class<?> clazz ? clazz : target.getClass());
+				return new CachedReadAccessor(accessor, original, targetType, target instanceof Class<?>);
+			}
+			return null;
+		}
+
+		boolean isValid(List<PropertyAccessor> accessors, @Nullable Object target) {
+			// Reuse the optimized accessor only when no other accessor can take precedence.
+			if (accessors.size() != 1 || accessors.get(0) != this.originalAccessor || target == null ||
+					(target instanceof Class<?>) != this.targetIsClass) {
+				return false;
+			}
+			Class<?> type = (target instanceof Class<?> clazz ? clazz : target.getClass());
+			return (type == this.targetType);
 		}
 	}
 

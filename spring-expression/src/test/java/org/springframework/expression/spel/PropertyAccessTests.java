@@ -27,6 +27,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.assertj.core.api.ThrowableTypeAssert;
 import org.jspecify.annotations.Nullable;
@@ -43,6 +47,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -54,6 +59,9 @@ import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for property access.
@@ -191,6 +199,116 @@ class PropertyAccessTests extends AbstractExpressionTests {
 		context = new StandardEvaluationContext();
 		context.addPropertyAccessor(new ConfigurablePropertyAccessor(Collections.singletonMap("name", "Jens")));
 		assertThat(expression.getValue(context)).isEqualTo("Jens");
+	}
+
+	@Test
+	void reuseReflectiveAccessorAndRespectContextChanges() throws Exception {
+		ReflectivePropertyAccessor accessor = spy(new ReflectivePropertyAccessor());
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setPropertyAccessors(new ArrayList<>(List.of(accessor)));
+		Person target = new Person("first");
+		Expression expression = parser.parseExpression("name");
+
+		assertThat(expression.getValue(context, target)).isEqualTo("first");
+		assertThat(expression.getValue(context, target)).isEqualTo("first");
+		verify(accessor, times(1)).createOptimalAccessor(context, target, "name");
+
+		PropertyAccessor custom = new ConfigurablePropertyAccessor(Map.of("name", "custom"));
+		context.addPropertyAccessor(custom);
+		assertThat(expression.getValue(context, target)).isEqualTo("custom");
+		context.removePropertyAccessor(custom);
+		assertThat(expression.getValue(context, target)).isEqualTo("first");
+	}
+
+	@Test
+	void reuseReflectiveAccessorWithDifferentTargetTypesAndContexts() {
+		Expression expression = parser.parseExpression("name");
+		StandardEvaluationContext first = new StandardEvaluationContext();
+		StandardEvaluationContext second = new StandardEvaluationContext();
+
+		assertThat(expression.getValue(first, new Person("person"))).isEqualTo("person");
+		assertThat(expression.getValue(first, new RecordPerson("record"))).isEqualTo("record");
+		assertThat(expression.getValue(second, new Person("other"))).isEqualTo("other");
+		assertThat(expression.getValue(first, new Person("again"))).isEqualTo("again");
+	}
+
+	@Test
+	void reuseDataBindingAccessor() throws Exception {
+		DataBindingPropertyAccessor accessor = spy(DataBindingPropertyAccessor.forReadOnlyAccess());
+		EvaluationContext context = SimpleEvaluationContext.forPropertyAccessors(accessor).build();
+		Person target = new Person("person");
+		Expression expression = parser.parseExpression("name");
+
+		assertThat(expression.getValue(context, target)).isEqualTo("person");
+		assertThat(expression.getValue(context, target)).isEqualTo("person");
+		verify(accessor, times(1)).createOptimalAccessor(context, target, "name");
+	}
+
+	@Test
+	void reuseReflectiveAccessorsForAlternatingTargetTypes() throws Exception {
+		ReflectivePropertyAccessor accessor = spy(new ReflectivePropertyAccessor());
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setPropertyAccessors(new ArrayList<>(List.of(accessor)));
+		Person person = new Person("person");
+		RecordPerson record = new RecordPerson("record");
+		Expression expression = parser.parseExpression("name");
+
+		assertThat(expression.getValue(context, person)).isEqualTo("person");
+		assertThat(expression.getValue(context, record)).isEqualTo("record");
+		assertThat(expression.getValue(context, person)).isEqualTo("person");
+		assertThat(expression.getValue(context, record)).isEqualTo("record");
+		verify(accessor, times(1)).createOptimalAccessor(context, person, "name");
+		verify(accessor, times(1)).createOptimalAccessor(context, record, "name");
+	}
+
+	@Test
+	void reuseReflectiveAccessorWithDifferentClassTargets() {
+		Expression expression = parser.parseExpression("value");
+		StandardEvaluationContext context = new StandardEvaluationContext();
+
+		assertThat(expression.getValue(context, (Object) FirstStaticValue.class)).isEqualTo("first");
+		assertThat(expression.getValue(context, (Object) SecondStaticValue.class)).isEqualTo("second");
+	}
+
+	@Test
+	void cachedReflectiveAccessorDoesNotRetryFailedGetter() {
+		FailingPerson target = new FailingPerson();
+		Expression expression = parser.parseExpression("name");
+		StandardEvaluationContext context = new StandardEvaluationContext(target);
+
+		assertThat(expression.getValue(context)).isEqualTo("name");
+		target.fail = true;
+		assertThatSpelEvaluationException().isThrownBy(() -> expression.getValue(context));
+		assertThat(target.invocations).isEqualTo(2);
+	}
+
+	@Test
+	void reuseReflectiveAccessorConcurrentlyAcrossContexts() throws Exception {
+		Expression expression = parser.parseExpression("name");
+		StandardEvaluationContext first = new StandardEvaluationContext(new Person("person"));
+		StandardEvaluationContext second = new StandardEvaluationContext(new RecordPerson("record"));
+		ExecutorService executor = Executors.newFixedThreadPool(8);
+		try {
+			List<Callable<Boolean>> tasks = new ArrayList<>();
+			for (int index = 0; index < 8; index++) {
+				boolean useFirst = (index % 2 == 0);
+				tasks.add(() -> {
+					for (int iteration = 0; iteration < 2_000; iteration++) {
+						Object value = expression.getValue(useFirst ? first : second);
+						if (!(useFirst ? "person" : "record").equals(value)) {
+							return false;
+						}
+					}
+					return true;
+				});
+			}
+			for (Future<Boolean> result : executor.invokeAll(tasks)) {
+				assertThat(result.get()).isTrue();
+			}
+		}
+		finally {
+			executor.shutdownNow();
+		}
 	}
 
 	@Test
@@ -566,6 +684,34 @@ class PropertyAccessTests extends AbstractExpressionTests {
 
 		public void setActive(boolean active) {
 			this.active = active;
+		}
+	}
+
+
+	private static class FirstStaticValue {
+
+		public static String value = "first";
+	}
+
+
+	private static class SecondStaticValue {
+
+		public static String value = "second";
+	}
+
+
+	private static class FailingPerson {
+
+		private int invocations;
+
+		private boolean fail;
+
+		public String getName() {
+			this.invocations++;
+			if (this.fail) {
+				throw new IllegalStateException("Getter failed");
+			}
+			return "name";
 		}
 	}
 
