@@ -40,6 +40,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -477,8 +478,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			HttpServletRequest request) {
 
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatchingPattern);
-		ServerHttpObservationFilter.findObservationContext(request)
-				.ifPresent(context -> context.setPathPattern(bestMatchingPattern));
+		// An error page must not replace the pattern of the request that failed.
+		if (request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) == null) {
+			ServerHttpObservationFilter.findObservationContext(request)
+					.ifPresent(context -> context.setPathPattern(bestMatchingPattern));
+		}
 		request.setAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 	}
 

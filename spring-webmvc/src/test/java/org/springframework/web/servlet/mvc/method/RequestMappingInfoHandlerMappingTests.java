@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
@@ -62,6 +63,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 import org.springframework.web.util.pattern.PathPattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -348,6 +350,55 @@ class RequestMappingInfoHandlerMappingTests {
 
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
 		assertThat(observationContext.getPathPattern()).isEqualTo("/{path1}/2");
+	}
+
+	@SuppressWarnings("removal")
+	@PathPatternsParameterizedTest
+	void handleMatchOnErrorDispatchKeepsPatternInObservationContext(TestRequestMappingInfoHandlerMapping mapping) {
+		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
+		config.setPathMatcher(new AntPathMatcher());
+
+		RequestMappingInfo info = RequestMappingInfo.paths("/{path1}/2", "/**").options(config).build();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
+		request.setDispatcherType(DispatcherType.ERROR);
+		request.setAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE, "/1/2");
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(request, new MockHttpServletResponse());
+		observationContext.setPathPattern("/failed");
+		request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		mapping.handleMatch(info, "/1/2", request);
+
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
+		assertThat(observationContext.getPathPattern()).isEqualTo("/failed");
+	}
+
+	@Test
+	void handleMatchBestMatchingPathPatternInObservationContext() {
+		TestRequestMappingInfoHandlerMapping mapping = new TestRequestMappingInfoHandlerMapping();
+		RequestMappingInfo info = mapping.createInfo("/{path1}/2", "/**");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
+		ServletRequestPathUtils.parseAndCache(request);
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(request, new MockHttpServletResponse());
+		request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		mapping.handleMatch(info, "/1/2", request);
+
+		assertThat(observationContext.getPathPattern()).isEqualTo("/{path1}/2");
+	}
+
+	@Test
+	void handleMatchBestMatchingPathPatternOnErrorDispatchKeepsPatternInObservationContext() {
+		TestRequestMappingInfoHandlerMapping mapping = new TestRequestMappingInfoHandlerMapping();
+		RequestMappingInfo info = mapping.createInfo("/{path1}/2", "/**");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
+		request.setDispatcherType(DispatcherType.ERROR);
+		request.setAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE, "/1/2");
+		ServletRequestPathUtils.parseAndCache(request);
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(request, new MockHttpServletResponse());
+		observationContext.setPathPattern("/failed");
+		request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		mapping.handleMatch(info, "/1/2", request);
+
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
+		assertThat(observationContext.getPathPattern()).isEqualTo("/failed");
 	}
 
 	@PathPatternsParameterizedTest // gh-22543

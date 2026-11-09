@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import jakarta.servlet.DispatcherType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,13 +34,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.util.Assert;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 import org.springframework.web.util.pattern.PathPattern;
@@ -124,6 +128,53 @@ class SimpleUrlHandlerMappingTests {
 		else {
 			assertThat(request.getAttribute(BEST_MATCHING_PATH_PATTERN_ATTRIBUTE)).isNull();
 		}
+	}
+
+	@HandlerMappingsTest
+	void resolveBestMatchingPatternInObservationContext(SimpleUrlHandlerMapping handlerMapping) throws Exception {
+		ServerRequestObservationContext observationContext =
+				resolveWelcomeInObservationContext(handlerMapping, DispatcherType.REQUEST, false);
+
+		assertThat(observationContext.getPathPattern()).isEqualTo("/welcome*");
+	}
+
+	@HandlerMappingsTest
+	void resolveOnErrorDispatchKeepsPatternInObservationContext(SimpleUrlHandlerMapping handlerMapping) throws Exception {
+		ServerRequestObservationContext observationContext =
+				resolveWelcomeInObservationContext(handlerMapping, DispatcherType.ERROR, true);
+
+		assertThat(observationContext.getPathPattern()).isEqualTo("/failed");
+	}
+
+	@HandlerMappingsTest
+	void resolveOnForwardToErrorPageKeepsPatternInObservationContext(SimpleUrlHandlerMapping handlerMapping) throws Exception {
+		ServerRequestObservationContext observationContext =
+				resolveWelcomeInObservationContext(handlerMapping, DispatcherType.FORWARD, true);
+
+		assertThat(observationContext.getPathPattern()).isEqualTo("/failed");
+	}
+
+	private ServerRequestObservationContext resolveWelcomeInObservationContext(SimpleUrlHandlerMapping handlerMapping,
+			DispatcherType dispatcherType, boolean errorPage) throws Exception {
+
+		StaticApplicationContext applicationContext = new StaticApplicationContext();
+		applicationContext.registerSingleton("mainController", Object.class);
+		handlerMapping.setUrlMap(Map.of("/welcome*", "mainController"));
+		handlerMapping.setApplicationContext(applicationContext);
+
+		boolean usePathPatterns = handlerMapping.getPatternParser() != null;
+		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/welcome.x", usePathPatterns);
+		request.setDispatcherType(dispatcherType);
+		if (errorPage) {
+			request.setAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE, "/welcome.x");
+		}
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(request, new MockHttpServletResponse());
+		observationContext.setPathPattern("/failed");
+		request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		getHandler(handlerMapping, request);
+
+		assertThat(request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/welcome*");
+		return observationContext;
 	}
 
 	@HandlerMappingsTest

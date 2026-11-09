@@ -173,8 +173,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 		request.setAttribute(BEST_MATCHING_PATH_PATTERN_ATTRIBUTE, bestPattern);
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern.getPatternString());
-		ServerHttpObservationFilter.findObservationContext(request)
-				.ifPresent(context -> context.setPathPattern(bestPattern.getPatternString()));
+		// An error page must not replace the pattern of the request that failed.
+		if (request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) == null) {
+			ServerHttpObservationFilter.findObservationContext(request)
+					.ifPresent(context -> context.setPathPattern(bestPattern.getPatternString()));
+		}
 		request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 	}
 
@@ -197,8 +200,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			uriVariables = getUrlPathHelper().decodePathVariables(request, uriVariables);
 		}
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
-		ServerHttpObservationFilter.findObservationContext(request)
-				.ifPresent(context -> context.setPathPattern(bestPattern));
+		// An error page must not replace the pattern of the request that failed.
+		if (request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) == null) {
+			ServerHttpObservationFilter.findObservationContext(request)
+					.ifPresent(context -> context.setPathPattern(bestPattern));
+		}
 		request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 	}
 

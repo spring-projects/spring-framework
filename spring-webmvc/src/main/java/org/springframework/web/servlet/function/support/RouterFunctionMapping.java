@@ -38,6 +38,7 @@ import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
+import org.springframework.web.util.WebUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -222,8 +223,11 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 			servletRequest.removeAttribute(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
 			servletRequest.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, matchingPattern.getPatternString());
 			servletRequest.setAttribute(BEST_MATCHING_PATH_PATTERN_ATTRIBUTE, matchingPattern);
-			ServerHttpObservationFilter.findObservationContext(request.servletRequest())
-					.ifPresent(context -> context.setPathPattern(matchingPattern.getPatternString()));
+			// An error page must not replace the pattern of the request that failed.
+			if (servletRequest.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) == null) {
+				ServerHttpObservationFilter.findObservationContext(servletRequest)
+						.ifPresent(context -> context.setPathPattern(matchingPattern.getPatternString()));
+			}
 		}
 		servletRequest.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerFunction);
 		servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);

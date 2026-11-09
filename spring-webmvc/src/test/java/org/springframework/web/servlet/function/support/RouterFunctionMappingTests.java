@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.servlet.DispatcherType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -37,6 +38,7 @@ import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
+import org.springframework.web.util.WebUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -181,6 +183,29 @@ class RouterFunctionMappingTests {
 		assertThat(ServerHttpObservationFilter.findObservationContext(request))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo("/match"));
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(handlerFunction);
+	}
+
+	@Test
+	void mappedRequestOnErrorDispatchShouldKeepObservationPathPattern() throws Exception {
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
+		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
+				.GET("/match", handlerFunction)
+				.build();
+
+		RouterFunctionMapping mapping = new RouterFunctionMapping(routerFunction);
+		mapping.setMessageConverters(this.messageConverters);
+
+		MockHttpServletRequest request = createTestRequest("/match");
+		request.setDispatcherType(DispatcherType.ERROR);
+		request.setAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE, "/match");
+		ServerHttpObservationFilter.findObservationContext(request)
+				.ifPresent(context -> context.setPathPattern("/failed"));
+		HandlerExecutionChain result = mapping.getHandler(request);
+
+		assertThat(result).isNotNull();
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/match");
+		assertThat(ServerHttpObservationFilter.findObservationContext(request))
+				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo("/failed"));
 	}
 
 	private MockHttpServletRequest createTestRequest(String path) {
