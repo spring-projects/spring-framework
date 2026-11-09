@@ -65,6 +65,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.support.GenericWebApplicationContext;
@@ -74,6 +75,8 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -276,6 +279,42 @@ class MethodValidationTests {
 	}
 
 	@Test
+	void requestPartsWithoutBindingResult() {
+		HandlerMethod hm = handlerMethod(new ValidController(),
+				c -> c.handleParts(mockPerson, mockErrors, mockPerson, ""));
+
+		MockMultipartHttpServletRequest multipartRequest =
+				multipartRequest("{\"name\":\"Faustino\"}", "{\"name\":\"Cayetana6789\"}");
+
+		HandlerMethodValidationException ex = catchThrowableOfType(HandlerMethodValidationException.class,
+				() -> this.handlerAdapter.handle(multipartRequest, this.response, hm));
+
+		assertThat(ex).isNotNull();
+		assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
+		assertThat(ex.getParameterValidationResults()).hasSize(1);
+
+		assertBeanResult(ex.getBeanResults().get(0), "other", List.of("""
+			Field error in object 'other' on field 'name': rejected value [Cayetana6789]; \
+			codes [Size.other.name,Size.name,Size.java.lang.String,Size]; \
+			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+			codes [other.name,name]; arguments []; default message [name],10,1]; \
+			default message [size must be between 1 and 10]"""
+		));
+	}
+
+	private static MockMultipartHttpServletRequest multipartRequest(String person, String other) {
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
+		request.addHeader("Accept", "text/plain");
+		request.addHeader("myHeader", "12345");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, new HashMap<>(0));
+		request.addFile(new MockMultipartFile("person", "", MediaType.APPLICATION_JSON_VALUE, person.getBytes(UTF_8)));
+		request.addFile(new MockMultipartFile("other", "", MediaType.APPLICATION_JSON_VALUE, other.getBytes(UTF_8)));
+		return request;
+	}
+
+	@Test
 	void jakartaAndSpringValidator() throws Exception {
 		HandlerMethod hm = handlerMethod(new InitBinderController(), ibc -> ibc.handle(mockPerson, mockErrors, ""));
 		this.request.addParameter("name", "name=Faustino1234");
@@ -401,6 +440,12 @@ class MethodValidationTests {
 		}
 
 		void handle(@Valid @RequestBody Person person, @RequestHeader @Size(min=4) String header) {
+		}
+
+		String handleParts(@Valid @RequestPart("person") Person person, Errors errors,
+				@Valid @RequestPart("other") Person other, @RequestHeader @Size(min = 5) String myHeader) {
+
+			return errors.toString();
 		}
 	}
 

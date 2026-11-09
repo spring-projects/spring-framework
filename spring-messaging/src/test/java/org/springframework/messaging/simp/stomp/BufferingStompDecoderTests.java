@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
@@ -206,6 +207,18 @@ class BufferingStompDecoderTests {
 		String payload = "SEND\na:alpha\\\n\nMessage body\0";
 		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
 				stompDecoder.decode(toByteBuffer(payload)));
+	}
+
+	@Test
+	void emptyChunksAreIgnored() {
+		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
+
+		assertThat(stompDecoder.decode(toByteBuffer("SEND\ncontent-length:40\n\naaaaa"))).isEmpty();
+		for (int i = 0; i < 100; i++) {
+			assertThat(stompDecoder.decode(toByteBuffer(""))).isEmpty();
+		}
+
+		assertThat(stompDecoder).extracting("chunks", InstanceOfAssertFactories.COLLECTION).hasSize(1);
 	}
 
 	private ByteBuffer toByteBuffer(String chunk) {
