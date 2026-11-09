@@ -50,6 +50,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -268,6 +269,45 @@ class MethodValidationTests {
 	}
 
 	@Test
+	void requestPartsObjectName() {
+		HandlerMethod hm = handlerMethod(new ValidController(),
+				c -> c.handleParts(mockPerson, mockPerson, ""));
+
+		String boundary = "boundary";
+		String body = "--" + boundary + "\r\n" +
+				"Content-Disposition: form-data; name=\"person\"\r\n" +
+				"Content-Type: application/json\r\n\r\n" +
+				"{\"name\":\"Faustino\"}\r\n" +
+				"--" + boundary + "\r\n" +
+				"Content-Disposition: form-data; name=\"other\"\r\n" +
+				"Content-Type: application/json\r\n\r\n" +
+				"{\"name\":\"Cayetana6789\"}\r\n" +
+				"--" + boundary + "--\r\n";
+
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("")
+				.contentType(MediaType.parseMediaType("multipart/form-data;boundary=" + boundary))
+				.header("myHeader", "12345")
+				.body(body));
+
+		StepVerifier.create(this.handlerAdapter.handle(exchange, hm))
+				.consumeErrorWith(throwable -> {
+					HandlerMethodValidationException ex = (HandlerMethodValidationException) throwable;
+
+					assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
+					assertThat(ex.getParameterValidationResults()).hasSize(1);
+
+					assertBeanResult(ex.getBeanResults().get(0), "other", Collections.singletonList(
+							"""
+							Field error in object 'other' on field 'name': rejected value [Cayetana6789]; \
+							codes [Size.other.name,Size.name,Size.java.lang.String,Size]; \
+							arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+							codes [other.name,name]; arguments []; default message [name],10,1]; \
+							default message [size must be between 1 and 10]"""));
+				})
+				.verify();
+	}
+
+	@Test
 	void validatedWithMethodValidation() {
 
 		// 1 for @Validated argument validation + 1 for method validation of @RequestHeader
@@ -404,6 +444,10 @@ class MethodValidationTests {
 		}
 
 		void handle(@Valid @RequestBody List<Person> persons) {
+		}
+
+		void handleParts(@Valid @RequestPart("person") Person person,
+				@Valid @RequestPart("other") Person other, @RequestHeader @Size(min = 5) String myHeader) {
 		}
 
 		Mono<String> handleAsync(@Valid @ModelAttribute("student") Mono<Person> person,

@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.SmartValidator;
@@ -43,9 +44,10 @@ import org.springframework.web.bind.support.WebBindingInitializer;
  * uses Bean Validation to validate {@code @RequestMapping} method arguments.
  *
  * <p>Handles validation results by populating {@link BindingResult} method
- * arguments with errors from {@link MethodValidationResult#getBeanResults()
- * beanResults}. Also, helps to determine parameter names for
- * {@code @ModelAttribute} and {@code @RequestBody} parameters.
+ * arguments, if actually present in the method signature, with error information
+ * from {@link MethodValidationResult#getBeanResults() beanResults}.
+ * Also, helps to determine parameter names for {@code @ModelAttribute},
+ * {@code @RequestBody}, and {@code @RequestPart} parameters.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
@@ -91,14 +93,14 @@ public final class HandlerMethodValidator implements MethodValidator {
 		if (!result.getBeanResults().isEmpty()) {
 			int bindingResultCount = 0;
 			for (ParameterErrors errors : result.getBeanResults()) {
-				for (Object arg : arguments) {
-					if (arg instanceof BindingResult bindingResult) {
-						if (bindingResult.getObjectName().equals(errors.getObjectName())) {
-							bindingResult.addAllErrors(errors);
-							bindingResultCount++;
-							break;
-						}
-					}
+				// A BindingResult applies to the argument that it immediately follows
+				int index = errors.getMethodParameter().getParameterIndex() + 1;
+				if (index > 0 && index < arguments.length &&
+						arguments[index] instanceof BindingResult bindingResult &&
+						bindingResult.getObjectName().equals(errors.getObjectName())) {
+
+					bindingResult.addAllErrors(errors);
+					bindingResultCount++;
 				}
 			}
 			if (result.getParameterValidationResults().size() == bindingResultCount) {
@@ -182,14 +184,24 @@ public final class HandlerMethodValidator implements MethodValidator {
 
 		@Override
 		public String resolveName(MethodParameter param, @Nullable Object value) {
-			if (param.hasParameterAnnotation(RequestBody.class) || param.hasParameterAnnotation(RequestPart.class)) {
+			// Names must match those used by the argument resolvers when creating a BindingResult
+
+			if (param.hasParameterAnnotation(RequestBody.class)) {
 				return Conventions.getVariableNameForParameter(param);
 			}
-			else {
-				return (param.getParameterIndex() != -1 ?
-						ModelFactory.getNameForParameter(param) :
-						ModelFactory.getNameForReturnValue(value, param));
+
+			RequestPart requestPart = param.getParameterAnnotation(RequestPart.class);
+			if (requestPart != null) {
+				String name = requestPart.name();
+				if (!StringUtils.hasText(name)) {
+					name = param.getParameterName();
+				}
+				return (StringUtils.hasText(name) ? name : Conventions.getVariableNameForParameter(param));
 			}
+
+			return (param.getParameterIndex() != -1 ?
+					ModelFactory.getNameForParameter(param) :
+					ModelFactory.getNameForReturnValue(value, param));
 		}
 	}
 
