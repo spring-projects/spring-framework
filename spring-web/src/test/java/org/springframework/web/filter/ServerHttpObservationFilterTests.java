@@ -183,6 +183,52 @@ class ServerHttpObservationFilterTests {
 	}
 
 	@Test
+	void shouldCloseObservationOnceWithFinalStatusAfterAsyncTimeout() throws Exception {
+		this.request.setAsyncSupported(true);
+		this.request.startAsync();
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onTimeout(new AsyncEvent(asyncContext));
+		}
+		this.response.setStatus(503);
+		asyncContext.complete();
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("status", "503")
+				.hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
+	}
+
+	@Test
+	void shouldCloseObservationOnceWhenAsyncCompletionIsNotifiedTwice() throws Exception {
+		this.request.setAsyncSupported(true);
+		this.request.startAsync();
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onComplete(new AsyncEvent(asyncContext));
+			listener.onComplete(new AsyncEvent(asyncContext));
+		}
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
+	}
+
+	@Test
+	void shouldKeepObservationErrorWhenAsyncErrorHasNoThrowable() throws Exception {
+		this.request.setAsyncSupported(true);
+		this.request.startAsync();
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+		ServerHttpObservationFilter.findObservationContext(this.request)
+				.ifPresent(context -> context.setError(new IllegalStateException("test error")));
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onError(new AsyncEvent(asyncContext, null));
+		}
+		asyncContext.complete();
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "IllegalStateException");
+	}
+
+	@Test
 	void shouldNotCloseObservationDuringAsyncDispatch() throws Exception {
 		this.mockFilterChain = new MockFilterChain(new ScopeCheckingServlet(this.observationRegistry));
 		this.request.setDispatcherType(DispatcherType.ASYNC);

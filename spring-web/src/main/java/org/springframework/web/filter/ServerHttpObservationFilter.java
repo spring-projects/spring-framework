@@ -18,6 +18,7 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -187,6 +188,8 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 		private final Observation currentObservation;
 
+		private final AtomicBoolean stopped = new AtomicBoolean();
+
 		public ObservationAsyncListener(Observation currentObservation) {
 			this.currentObservation = currentObservation;
 		}
@@ -198,17 +201,24 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
-			this.currentObservation.stop();
+			// The timeout is handled and its response written after this, and onComplete always follows.
 		}
 
 		@Override
 		public void onComplete(AsyncEvent event) {
-			this.currentObservation.stop();
+			// Some containers notify completion more than once.
+			if (this.stopped.compareAndSet(false, true)) {
+				this.currentObservation.stop();
+			}
 		}
 
 		@Override
 		public void onError(AsyncEvent event) {
-			this.currentObservation.error(unwrapServletException(event.getThrowable()));
+			// A container may notify an error without a throwable, which would clear one already recorded.
+			Throwable ex = event.getThrowable();
+			if (ex != null && !this.stopped.get()) {
+				this.currentObservation.error(unwrapServletException(ex));
+			}
 		}
 	}
 
