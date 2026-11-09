@@ -266,6 +266,29 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType).isEqualTo(Long.class);
 	}
 
+	@Test  // gh-36890
+	void resolveTypeAgainstSameNamedVariablesInTopLevelDeclarations() {
+		Type resolvedType = resolveType(
+				method(TopCreate.class, "create", Object.class).getGenericParameterTypes()[0], TopController.class);
+		assertThat(resolvedType).isEqualTo(Long.class);
+	}
+
+	@Test  // gh-36890
+	void resolveMethodLevelTypeVariableIsNotShadowedByClassVariable() {
+		Type resolvedType = resolveType(
+				method(TopRepo.class, "convert", Object.class).getGenericReturnType(), TopStringRepo.class);
+		assertThat(resolvedType).isInstanceOf(TypeVariable.class);
+	}
+
+	@Test  // gh-36890
+	void resolveTypeVariableByNameWhenNarrowingParameterizedSupertype() {
+		// A raw subtype narrowing a parameterized supertype must still carry the argument
+		// across by variable name, even though Box<E> and Container<E> are distinct declarations.
+		ResolvableType containerOfString = ResolvableType.forClassWithGenerics(Container.class, String.class);
+		ResolvableType box = ResolvableType.forType(Box.class, containerOfString);
+		assertThat(box.getGeneric().resolve()).isEqualTo(String.class);
+	}
+
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
@@ -522,4 +545,34 @@ class GenericTypeResolverTests {
 	static class Controller implements Search<String, Long>, Create<Long, Long> {
 	}
 
+}
+
+
+interface TopSearch<I, O> {
+}
+
+interface TopCreate<I, O> {
+
+	default O create(I body) {
+		return null;
+	}
+}
+
+class TopController implements TopSearch<String, Long>, TopCreate<Long, Long> {
+}
+
+class TopRepo<T> {
+
+	<T> T convert(Object o) {
+		return null;
+	}
+}
+
+class TopStringRepo extends TopRepo<String> {
+}
+
+interface Container<E> {
+}
+
+class Box<E> implements Container<E> {
 }
