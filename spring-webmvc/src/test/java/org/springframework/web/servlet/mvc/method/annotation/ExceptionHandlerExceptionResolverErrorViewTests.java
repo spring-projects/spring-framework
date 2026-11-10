@@ -32,17 +32,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ErrorResponseViewResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.ObservedExchange;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -124,13 +123,13 @@ class ExceptionHandlerExceptionResolverErrorViewTests {
 	@Test
 	void serverErrorRenderedAsViewIsRecorded() throws Exception {
 		this.request.addHeader(HttpHeaders.ACCEPT, BROWSER_ACCEPT);
-		ServerRequestObservationContext context = new ServerRequestObservationContext(this.request, this.response);
-		this.request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, context);
 		IllegalStateException ex = new IllegalStateException();
+		ExceptionHandlerExceptionResolver resolver = createResolver();
 
-		ModelAndView mav = resolve(createResolver(), ex);
-		assertThat(mav.getViewName()).isEqualTo("error/500");
-		assertThat(context.getError()).isSameAs(ex);
+		ObservedExchange<ModelAndView> exchange = ObservedExchange.observe(this.request, this.response,
+				() -> resolve(resolver, ex));
+		assertThat(exchange.result().getViewName()).isEqualTo("error/500");
+		assertThat(exchange.error()).isSameAs(ex);
 	}
 
 	@Test

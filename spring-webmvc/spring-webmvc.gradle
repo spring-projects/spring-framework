@@ -53,6 +53,7 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(testFixtures(project(":spring-web")))
 	testImplementation("commons-io:commons-io")
+	testImplementation("io.micrometer:micrometer-observation-test")
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("io.reactivex.rxjava3:rxjava")
 	testImplementation("jakarta.servlet:jakarta.servlet-api")

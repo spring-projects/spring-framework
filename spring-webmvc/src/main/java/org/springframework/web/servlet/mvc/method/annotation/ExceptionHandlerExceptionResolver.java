@@ -622,8 +622,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	private void recordServerError(Exception exception, ServletWebRequest webRequest) {
 		HttpServletResponse response = webRequest.getResponse();
 		if (response != null && HttpStatusCode.valueOf(response.getStatus()).is5xxServerError()) {
-			ServerHttpObservationFilter.findObservationContext(webRequest.getRequest())
-					.ifPresent(context -> context.setError(exception));
+			ServerHttpObservationFilter.recordHandledException(webRequest.getRequest(), exception);
 		}
 	}
 

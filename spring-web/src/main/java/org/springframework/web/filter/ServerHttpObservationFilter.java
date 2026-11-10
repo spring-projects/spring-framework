@@ -63,6 +63,9 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 	private static final String CURRENT_OBSERVATION_ATTRIBUTE =
 			ServerHttpObservationFilter.class.getName() + ".observation";
 
+	private static final String HANDLED_EXCEPTION_ATTRIBUTE =
+			ServerHttpObservationFilter.class.getName() + ".handledException";
+
 	private static final ServerRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION =
 			new DefaultServerRequestObservationConvention();
 
@@ -117,15 +120,12 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		finally {
 			// If async is started during the first dispatch, register a listener for completion notification.
 			if (request.isAsyncStarted() && request.getDispatcherType() == DispatcherType.REQUEST) {
-				request.getAsyncContext().addListener(new ObservationAsyncListener(observation));
+				request.getAsyncContext().addListener(new ObservationAsyncListener(observation, request));
 			}
 			// scope is opened for ASYNC dispatches, but the observation will be closed
 			// by the async listener.
 			else if (!isAsyncDispatch(request)) {
-				Throwable error = fetchException(request);
-				if (error != null) {
-					observation.error(error);
-				}
+				recordError(observation, request);
 				observation.stop();
 			}
 		}
@@ -168,6 +168,32 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 				(ServerRequestObservationContext) request.getAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
 	}
 
+	/**
+	 * Record an exception that was handled by the web framework or the
+	 * application on the observation for the current request. The exception
+	 * is reported to the {@link Observation} by this filter when the exchange
+	 * completes, so that all handlers, including tracing, are notified.
+	 * <p>This has no effect if there is no observation for the request.
+	 * @param request the current request
+	 * @param error the handled exception
+	 * @since 7.1
+	 */
+	public static void recordHandledException(HttpServletRequest request, Throwable error) {
+		if (findObservationContext(request).isPresent()) {
+			request.setAttribute(HANDLED_EXCEPTION_ATTRIBUTE, error);
+		}
+	}
+
+	private static void recordError(Observation observation, ServletRequest request) {
+		Throwable error = (Throwable) request.getAttribute(HANDLED_EXCEPTION_ATTRIBUTE);
+		if (error == null) {
+			error = fetchException(request);
+		}
+		if (error != null) {
+			observation.error(error);
+		}
+	}
+
 	static @Nullable Throwable fetchException(ServletRequest request) {
 		return (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
 	}
@@ -187,8 +213,11 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 		private final Observation currentObservation;
 
-		public ObservationAsyncListener(Observation currentObservation) {
+		private final ServletRequest request;
+
+		public ObservationAsyncListener(Observation currentObservation, ServletRequest request) {
 			this.currentObservation = currentObservation;
+			this.request = request;
 		}
 
 		@Override
@@ -198,11 +227,13 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
+			recordError(this.currentObservation, this.request);
 			this.currentObservation.stop();
 		}
 
 		@Override
 		public void onComplete(AsyncEvent event) {
+			recordError(this.currentObservation, this.request);
 			this.currentObservation.stop();
 		}
 

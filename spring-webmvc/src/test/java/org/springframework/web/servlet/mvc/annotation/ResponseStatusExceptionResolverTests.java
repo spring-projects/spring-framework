@@ -32,12 +32,11 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.ObservedExchange;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -146,50 +145,43 @@ class ResponseStatusExceptionResolverTests {
 	}
 
 	@Test
-	void serverErrorResponseStatusExceptionIsRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void serverErrorResponseStatusExceptionIsRecordedOnObservation() throws Exception {
 		ResponseStatusException ex = new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
 
-		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertResolved(mav, 503, null);
-		assertThat(context.getError()).isSameAs(ex);
+		ObservedExchange<ModelAndView> exchange = observe(ex);
+		assertResolved(exchange.result(), 503, null);
+		assertThat(exchange.error()).isSameAs(ex);
 	}
 
 	@Test
-	void serverErrorResponseStatusIsRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void serverErrorResponseStatusIsRecordedOnObservation() throws Exception {
 		ServerErrorException ex = new ServerErrorException();
 
-		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertResolved(mav, 500, null);
-		assertThat(context.getError()).isSameAs(ex);
+		ObservedExchange<ModelAndView> exchange = observe(ex);
+		assertResolved(exchange.result(), 500, null);
+		assertThat(exchange.error()).isSameAs(ex);
 	}
 
 	@Test
-	void nestedServerErrorResponseStatusIsRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void nestedServerErrorResponseStatusIsRecordedOnObservation() throws Exception {
 		Exception cause = new ServerErrorException();
 		TypeMismatchException ex = new TypeMismatchException("value", ITestBean.class, cause);
 
-		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertResolved(mav, 500, null);
-		assertThat(context.getError()).isSameAs(cause);
+		ObservedExchange<ModelAndView> exchange = observe(ex);
+		assertResolved(exchange.result(), 500, null);
+		assertThat(exchange.error()).isSameAs(cause);
 	}
 
 	@Test
-	void clientErrorIsNotRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void clientErrorIsNotRecordedOnObservation() throws Exception {
 
-		exceptionResolver.resolveException(request, response, null, new StatusCodeException());
-		assertThat(context.getError()).isNull();
+		assertThat(observe(new StatusCodeException()).error()).isNull();
 	}
 
 	@Test
-	void clientErrorResponseStatusExceptionIsNotRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void clientErrorResponseStatusExceptionIsNotRecordedOnObservation() throws Exception {
 
-		exceptionResolver.resolveException(request, response, null, new ResponseStatusException(HttpStatus.NOT_FOUND));
-		assertThat(context.getError()).isNull();
+		assertThat(observe(new ResponseStatusException(HttpStatus.NOT_FOUND)).error()).isNull();
 	}
 
 	@Test
@@ -198,10 +190,9 @@ class ResponseStatusExceptionResolverTests {
 		assertResolved(mav, 500, null);
 	}
 
-	private ServerRequestObservationContext observationContext() {
-		ServerRequestObservationContext context = new ServerRequestObservationContext(this.request, this.response);
-		this.request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, context);
-		return context;
+	private ObservedExchange<ModelAndView> observe(Exception ex) throws Exception {
+		return ObservedExchange.observe(this.request, this.response,
+				() -> this.exceptionResolver.resolveException(this.request, this.response, null, ex));
 	}
 
 	private void assertResolved(ModelAndView mav, int status, String reason) {

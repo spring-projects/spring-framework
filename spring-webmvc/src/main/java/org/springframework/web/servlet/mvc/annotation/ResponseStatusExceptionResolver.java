@@ -102,7 +102,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 	private void recordServerError(HttpStatusCode statusCode, Exception ex, HttpServletRequest request) {
 		if (statusCode.is5xxServerError()) {
-			ServerHttpObservationFilter.findObservationContext(request).ifPresent(context -> context.setError(ex));
+			ServerHttpObservationFilter.recordHandledException(request, ex);
 		}
 	}
 

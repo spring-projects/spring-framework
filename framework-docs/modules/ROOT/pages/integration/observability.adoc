@@ -202,9 +202,9 @@ or `"http.server.request.duration"` if using the OpenTelemetry convention.
 
 Applications need to configure the `org.springframework.web.filter.ServerHttpObservationFilter` Servlet filter in their application.
 
-This will only record an observation as an error if the `Exception` has not been handled by the web framework and has bubbled up to the Servlet filter.
-Typically, all exceptions handled by Spring MVC's `@ExceptionHandler` and xref:web/webmvc/mvc-ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
-You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
+This records an observation as an error if the `Exception` has bubbled up to the Servlet filter, and for server errors (5xx) that Spring MVC handles itself, including those rendered by xref:web/webmvc/mvc-ann-rest-exceptions.adoc[`ProblemDetail` support].
+Client errors (4xx) and exceptions handled by your own `@ExceptionHandler` methods are not recorded.
+You can, at any point during request processing, record the exception with the observation yourself:
 
 include-code::./UserController[]
 
@@ -258,9 +258,9 @@ include-code::./HttpHandlerConfiguration[]
 
 It uses the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
-This will only record an observation as an error if the `Exception` has not been handled by an application Controller.
-Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
-You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
+This records an observation as an error if the `Exception` has not been handled by an application Controller, and for server errors (5xx) rendered by xref:web/webflux/ann-rest-exceptions.adoc[`ProblemDetail` support].
+Exceptions handled by your own `@ExceptionHandler` methods are not recorded.
+You can, at any point during request processing, record the exception with the observation yourself:
 
 include-code::./UserController[]
 

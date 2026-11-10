@@ -191,6 +191,35 @@ class ServerHttpObservationFilterTests {
 				.isNotStopped();
 	}
 
+	@Test
+	void recordHandledExceptionShouldMarkObservationAsFailed() throws Exception {
+		IllegalStateException handled = new IllegalStateException("handled");
+		this.mockFilterChain = new MockFilterChain(new HandledExceptionServlet(handled));
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+
+		assertThatHttpObservation().hasError(handled)
+				.hasLowCardinalityKeyValue("exception", "IllegalStateException");
+	}
+
+	@Test
+	void recordHandledExceptionShouldMarkObservationAsFailedAfterAsyncCompletion() throws Exception {
+		IllegalStateException handled = new IllegalStateException("handled");
+		this.request.setAsyncSupported(true);
+		this.request.startAsync();
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+		ServerHttpObservationFilter.recordHandledException(this.request, handled);
+		this.request.getAsyncContext().complete();
+
+		assertThatHttpObservation().hasError(handled).hasBeenStopped();
+	}
+
+	@Test
+	void recordHandledExceptionShouldBeNoOpWithoutObservation() {
+		ServerHttpObservationFilter.recordHandledException(this.request, new IllegalStateException());
+
+		assertThat(this.request.getAttributeNames().hasMoreElements()).isFalse();
+	}
+
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
 		assertThat(this.observationRegistry).hasNumberOfObservationsWithNameEqualTo("http.server.requests", 1);
 
@@ -225,6 +254,22 @@ class ServerHttpObservationFilterTests {
 			Assert.notNull(request, "request must not be null");
 			Assert.notNull(response, "response must not be null");
 			response.setHeader("X-Trace-Id", "badc0ff33");
+		}
+
+	}
+
+	@SuppressWarnings("serial")
+	static class HandledExceptionServlet extends HttpServlet {
+
+		private final Throwable error;
+
+		HandledExceptionServlet(Throwable error) {
+			this.error = error;
+		}
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+			ServerHttpObservationFilter.recordHandledException(req, this.error);
 		}
 
 	}

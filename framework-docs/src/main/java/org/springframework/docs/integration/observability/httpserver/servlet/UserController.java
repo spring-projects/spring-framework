@@ -29,8 +29,7 @@ public class UserController {
 	@ExceptionHandler(MissingUserException.class)
 	ResponseEntity<Void> handleMissingUser(HttpServletRequest request, MissingUserException exception) {
 		// We want to record this exception with the observation
-		ServerHttpObservationFilter.findObservationContext(request)
-				.ifPresent(context -> context.setError(exception));
+		ServerHttpObservationFilter.recordHandledException(request, exception);
 		return ResponseEntity.notFound().build();
 	}
 

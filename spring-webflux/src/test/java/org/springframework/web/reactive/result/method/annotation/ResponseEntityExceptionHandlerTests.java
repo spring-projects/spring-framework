@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import io.micrometer.observation.tck.TestObservationRegistry;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
@@ -53,7 +54,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,29 +120,26 @@ class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void serverErrorIsRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
 		ServerErrorException ex = new ServerErrorException("simulated failure", (Throwable) null);
 
-		testException(ex);
-		assertThat(context.getError()).isSameAs(ex);
+		assertThat(observe(ex)).hasObservationWithNameEqualTo("http.server.requests").that()
+				.hasError(ex).hasBeenStopped();
 	}
 
 	@Test
 	void serverErrorResponseIsRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
 		ErrorResponseException ex = new ErrorResponseException(HttpStatus.SERVICE_UNAVAILABLE);
 
-		testException(ex);
-		assertThat(context.getError()).isSameAs(ex);
+		assertThat(observe(ex)).hasObservationWithNameEqualTo("http.server.requests").that()
+				.hasError(ex).hasBeenStopped();
 	}
 
 	@Test
 	void clientErrorIsNotRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
-
-		testException(new ServerWebInputException(""));
-		testException(new ErrorResponseException(HttpStatus.CONFLICT));
-		assertThat(context.getError()).isNull();
+		assertThat(observe(new ServerWebInputException(""))).hasObservationWithNameEqualTo("http.server.requests")
+				.that().doesNotHaveError().hasBeenStopped();
+		assertThat(observe(new ErrorResponseException(HttpStatus.CONFLICT)))
+				.hasObservationWithNameEqualTo("http.server.requests").that().doesNotHaveError().hasBeenStopped();
 	}
 
 	@Test
@@ -236,11 +236,13 @@ class ResponseEntityExceptionHandlerTests {
 	}
 
 
-	private ServerRequestObservationContext observationContext() {
-		ServerRequestObservationContext context = new ServerRequestObservationContext(
-				this.exchange.getRequest(), this.exchange.getResponse(), this.exchange.getAttributes());
-		this.exchange.getAttributes().put(ServerRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, context);
-		return context;
+	private TestObservationRegistry observe(Exception ex) {
+		TestObservationRegistry registry = TestObservationRegistry.create();
+		HttpWebHandlerAdapter adapter = new HttpWebHandlerAdapter(
+				webExchange -> this.exceptionHandler.handleException(ex, webExchange).then());
+		adapter.setObservationRegistry(registry);
+		adapter.handle(MockServerHttpRequest.get("/").build(), new MockServerHttpResponse()).block();
+		return registry;
 	}
 
 	@SuppressWarnings("unchecked")

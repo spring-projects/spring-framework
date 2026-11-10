@@ -41,7 +41,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.method.MethodValidationException;
@@ -71,6 +70,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.mvc.ObservedExchange;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
@@ -341,58 +341,50 @@ class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	void serverErrorIsRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void serverErrorIsRecordedOnObservation() throws Exception {
 		HttpMessageNotWritableException ex = new HttpMessageNotWritableException("simulated failure");
 
-		ResponseEntity<Object> entity = testException(ex);
-		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-		assertThat(context.getError()).isSameAs(ex);
+		ObservedExchange<ResponseEntity<Object>> exchange = observe(ex);
+		assertThat(exchange.result().getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+		assertThat(exchange.error()).isSameAs(ex);
 	}
 
 	@Test
-	void serverErrorResponseIsRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void serverErrorResponseIsRecordedOnObservation() throws Exception {
 		ErrorResponseException ex = new ErrorResponseException(HttpStatus.SERVICE_UNAVAILABLE);
 
-		testException(ex);
-		assertThat(context.getError()).isSameAs(ex);
+		assertThat(observe(ex).error()).isSameAs(ex);
 	}
 
 	@Test
-	void clientErrorIsNotRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void clientErrorIsNotRecordedOnObservation() throws Exception {
 
-		testException(new TypeMismatchException("foo", String.class));
-		assertThat(context.getError()).isNull();
+		assertThat(observe(new TypeMismatchException("foo", String.class)).error()).isNull();
 	}
 
 	@Test
-	void clientErrorResponseIsNotRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void clientErrorResponseIsNotRecordedOnObservation() throws Exception {
 
-		testException(new ErrorResponseException(HttpStatus.CONFLICT));
-		assertThat(context.getError()).isNull();
+		assertThat(observe(new ErrorResponseException(HttpStatus.CONFLICT)).error()).isNull();
 	}
 
 	@Test
 	void asyncRequestNotUsableIsNotRecordedOnObservation() throws Exception {
-		ServerRequestObservationContext context = observationContext();
 		AsyncRequestNotUsableException ex = new AsyncRequestNotUsableException("simulated failure");
 
-		assertThat(this.exceptionHandler.handleException(ex, this.request)).isNull();
-		assertThat(context.getError()).isNull();
+		ObservedExchange<ResponseEntity<Object>> exchange = ObservedExchange.observe(this.servletRequest,
+				this.servletResponse, () -> this.exceptionHandler.handleException(ex, this.request));
+		assertThat(exchange.result()).isNull();
+		assertThat(exchange.error()).isNull();
 	}
 
 	@Test
-	void writeFailureFromLostConnectionIsRecordedOnObservation() {
-		ServerRequestObservationContext context = observationContext();
+	void writeFailureFromLostConnectionIsRecordedOnObservation() throws Exception {
 		HttpMessageNotWritableException ex =
 				new HttpMessageNotWritableException("simulated failure", new IOException("Broken pipe"));
 
 		// same as DefaultHandlerExceptionResolver, which cannot tell a lost client from a lost remote connection
-		testException(ex);
-		assertThat(context.getError()).isSameAs(ex);
+		assertThat(observe(ex).error()).isSameAs(ex);
 	}
 
 	@Test
@@ -485,11 +477,8 @@ class ResponseEntityExceptionHandlerTests {
 	}
 
 
-	private ServerRequestObservationContext observationContext() {
-		ServerRequestObservationContext context =
-				new ServerRequestObservationContext(this.servletRequest, this.servletResponse);
-		this.servletRequest.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, context);
-		return context;
+	private ObservedExchange<ResponseEntity<Object>> observe(Exception ex) throws Exception {
+		return ObservedExchange.observe(this.servletRequest, this.servletResponse, () -> testException(ex));
 	}
 
 	private ResponseEntity<Object> testException(Exception ex) {

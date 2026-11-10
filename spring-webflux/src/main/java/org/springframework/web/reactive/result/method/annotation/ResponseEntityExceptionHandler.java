@@ -410,8 +410,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		}
 
 		if (status.is5xxServerError()) {
-			ServerRequestObservationContext.findCurrent(exchange.getAttributes())
-					.ifPresent(context -> context.setError(ex));
+			ServerRequestObservationContext.recordHandledException(exchange.getAttributes(), ex);
 		}
 
 		return createResponseEntity(body, headers, status, exchange);

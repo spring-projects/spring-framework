@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -31,7 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpRequestHandler;
@@ -40,9 +40,9 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
-import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.ObservedExchange;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -60,13 +60,11 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private final ServerRequestObservationContext observationContext =
-			new ServerRequestObservationContext(this.request, this.response);
+	private @Nullable Throwable observedError;
 
 
 	ExceptionHandlerExceptionResolverProblemDetailTests() {
 		this.request.addHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-		this.request.setAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, this.observationContext);
 	}
 
 
@@ -93,7 +91,7 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		assertThat(this.response.getContentAsString())
 				.contains("\"status\":500")
 				.doesNotContain("Secret");
-		assertThat(this.observationContext.getError()).isSameAs(ex);
+		assertThat(this.observedError).isSameAs(ex);
 	}
 
 	@Test
@@ -104,7 +102,7 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		assertThat(this.response.getStatus()).isEqualTo(405);
 		assertThat(this.response.getHeader(HttpHeaders.ALLOW)).isEqualTo("GET");
 		assertThat(this.response.getContentAsString()).contains("\"status\":405");
-		assertThat(this.observationContext.getError()).isNull();
+		assertThat(this.observedError).isNull();
 	}
 
 	@Test
@@ -144,7 +142,7 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 
 		resolve(createResolver(context), handlerMethod(), new IllegalStateException());
 		assertThat(this.response.getStatus()).isEqualTo(409);
-		assertThat(this.observationContext.getError()).isNull();
+		assertThat(this.observedError).isNull();
 	}
 
 	@Test
@@ -154,7 +152,7 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		resolve(createResolver(), new HandlerMethod(new RethrowingController(), "handle"), ex);
 		assertThat(this.response.getStatus()).isEqualTo(500);
 		assertThat(this.response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-		assertThat(this.observationContext.getError()).isSameAs(ex);
+		assertThat(this.observedError).isSameAs(ex);
 	}
 
 	@Test
@@ -213,7 +211,7 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		ModelAndView mav = resolve(createResolver(), handlerMethod(), new AsyncRequestNotUsableException("Not usable"));
 		assertThat(mav).isNotNull();
 		assertThat(this.response.getContentAsString()).isEmpty();
-		assertThat(this.observationContext.getError()).isNull();
+		assertThat(this.observedError).isNull();
 	}
 
 	@Test
@@ -223,7 +221,7 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		ModelAndView mav = resolve(createResolver(), handlerMethod(), ex);
 		assertThat(mav).isNotNull();
 		assertThat(this.response.getStatus()).isEqualTo(500);
-		assertThat(this.observationContext.getError()).isSameAs(ex);
+		assertThat(this.observedError).isSameAs(ex);
 	}
 
 	@Test
@@ -231,7 +229,7 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		this.response.setCommitted(true);
 
 		assertThat(resolve(createResolver(), handlerMethod(), new IllegalStateException())).isNull();
-		assertThat(this.observationContext.getError()).isNull();
+		assertThat(this.observedError).isNull();
 	}
 
 
@@ -251,8 +249,13 @@ class ExceptionHandlerExceptionResolverProblemDetailTests {
 		return resolver;
 	}
 
-	private ModelAndView resolve(ExceptionHandlerExceptionResolver resolver, Object handler, Exception ex) {
-		return resolver.resolveException(this.request, this.response, handler, ex);
+	private @Nullable ModelAndView resolve(ExceptionHandlerExceptionResolver resolver, @Nullable Object handler,
+			Exception ex) throws Exception {
+
+		ObservedExchange<ModelAndView> exchange = ObservedExchange.observe(this.request, this.response,
+				() -> resolver.resolveException(this.request, this.response, handler, ex));
+		this.observedError = exchange.error();
+		return exchange.result();
 	}
 
 	private static HandlerMethod handlerMethod() throws NoSuchMethodException {

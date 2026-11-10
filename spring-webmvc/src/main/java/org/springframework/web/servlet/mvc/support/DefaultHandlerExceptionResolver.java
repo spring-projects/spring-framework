@@ -560,7 +560,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		if (errorResponse.getStatusCode().is5xxServerError() && errorResponse instanceof Exception ex) {
-			ServerHttpObservationFilter.findObservationContext(request).ifPresent(context -> context.setError(ex));
+			ServerHttpObservationFilter.recordHandledException(request, ex);
 		}
 
 		if (!response.isCommitted()) {

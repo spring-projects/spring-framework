@@ -47,6 +47,10 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	 */
 	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ServerRequestObservationContext.class.getName();
 
+	// Same name as ExceptionHandlingWebHandler.HANDLED_WEB_EXCEPTION, which
+	// cannot be referenced from here without creating a package cycle.
+	private static final String HANDLED_EXCEPTION_ATTRIBUTE = "ExceptionHandlingWebHandler.handledException";
+
 	private static final HeaderGetter GETTER = new HeaderGetter();
 
 	private final Map<String, Object> attributes;
@@ -129,6 +133,22 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	public static Optional<ServerRequestObservationContext> findCurrent(Map<String, Object> attributes) {
 		return Optional.ofNullable(
 				(ServerRequestObservationContext) attributes.get(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
+	}
+
+	/**
+	 * Record an exception that was handled by the web framework or the
+	 * application on the observation for the current exchange. The exception
+	 * is reported to the {@link io.micrometer.observation.Observation} when the
+	 * exchange completes, so that all handlers, including tracing, are notified.
+	 * <p>This has no effect if there is no observation for the exchange.
+	 * @param attributes the current exchange attributes
+	 * @param error the handled exception
+	 * @since 7.1
+	 */
+	public static void recordHandledException(Map<String, Object> attributes, Throwable error) {
+		if (findCurrent(attributes).isPresent()) {
+			attributes.put(HANDLED_EXCEPTION_ATTRIBUTE, error);
+		}
 	}
 
 	static final class HeaderGetter implements Propagator.Getter<ServerHttpRequest> {

@@ -649,8 +649,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 
 	private void recordObservationError(Exception ex, WebRequest request) {
 		if (request instanceof ServletWebRequest servletWebRequest) {
-			ServerHttpObservationFilter.findObservationContext(servletWebRequest.getRequest())
-					.ifPresent(context -> context.setError(ex));
+			ServerHttpObservationFilter.recordHandledException(servletWebRequest.getRequest(), ex);
 		}
 	}
 
