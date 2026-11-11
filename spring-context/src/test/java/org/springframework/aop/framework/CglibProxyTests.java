@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rob Harrop
  * @author Ramnivas Laddad
  * @author Chris Beams
+ * @author Yongjun Hong
  */
 class CglibProxyTests extends AbstractAopProxyTests {
 
@@ -429,6 +430,48 @@ class CglibProxyTests extends AbstractAopProxyTests {
 		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 	}
 
+	@Test
+	void testProxyCreationAndPrivateAccess() {
+		ProxyFactory proxyFactory = new ProxyFactory(new TestServiceImpl());
+		proxyFactory.setProxyTargetClass(true);
+
+		TestService proxy = (TestService) proxyFactory.getProxy();
+
+		String result = proxy.publicMethod();
+		assertThat(result).isEqualTo("Private Access Success");
+	}
+
+	@Test
+	void testProxyCreationWithoutInterfaceShouldThrowException() {
+		ProxyFactory proxyFactory = new ProxyFactory(new TestServiceImplWithOutInterface());
+		proxyFactory.setProxyTargetClass(true);
+
+		assertThatExceptionOfType(AopConfigException.class)
+				.isThrownBy(proxyFactory::getProxy)
+				.withMessageContaining("Could not generate CGLIB subclass of");
+	}
+
+	interface TestService {
+		String publicMethod();
+	}
+
+	static class TestServiceImpl implements TestService {
+		private TestServiceImpl() { }
+
+		@Override
+		public String publicMethod() {
+			return "Private Access Success";
+		}
+	}
+
+	static class TestServiceImplWithOutInterface {
+
+		private TestServiceImplWithOutInterface() { }
+
+		public String publicMethod() {
+			return "Private Access Success";
+		}
+	}
 
 	public static class MyBean {
 
