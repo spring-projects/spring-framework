@@ -17,9 +17,11 @@
 package org.springframework.web.accept;
 
 import java.net.URI;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -46,6 +48,14 @@ import org.springframework.util.Assert;
  * @since 7.0
  */
 public class StandardApiVersionDeprecationHandler implements ApiVersionDeprecationHandler {
+
+	/**
+	 * HTTP-date in the preferred IMF-fixdate format: GMT with a two-digit day.
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110#section-5.6.7">RFC 9110, Section 5.6.7</a>
+	 */
+	private static final DateTimeFormatter HTTP_DATE_FORMATTER =
+			DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US).withZone(ZoneId.of("GMT"));
+
 
 	private final ApiVersionParser<?> versionParser;
 
@@ -239,7 +249,7 @@ public class StandardApiVersionDeprecationHandler implements ApiVersionDeprecati
 		public VersionInfo withSunsetDate(ZonedDateTime sunsetDate) {
 			return new VersionInfo(version(), requestPredicate(),
 					deprecationDate(), deprecationLink(),
-					sunsetDate.format(DateTimeFormatter.RFC_1123_DATE_TIME), sunsetLink());
+					HTTP_DATE_FORMATTER.format(sunsetDate), sunsetLink());
 		}
 
 		public VersionInfo withSunsetLink(URI uri, MediaType mediaType) {

@@ -54,6 +54,14 @@ class MediaTypeParamApiVersionResolverTests {
 	}
 
 	@Test
+	void fallbackToContentType() {
+		String version = "3";
+		this.request.addHeader("Accept", "*/*");
+		this.request.setContentType(getMediaType(version).toString());
+		testResolve(this.resolver, this.request, version);
+	}
+
+	@Test
 	void wildcard() {
 		MediaType compatibleMediaType = MediaType.parseMediaType("application/*+json");
 		ApiVersionResolver resolver = new MediaTypeParamApiVersionResolver(compatibleMediaType, "version");
