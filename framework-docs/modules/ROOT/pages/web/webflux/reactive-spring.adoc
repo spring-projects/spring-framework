@@ -487,8 +487,8 @@ The `JacksonJsonEncoder` works as follows:
 
 * For a single value publisher (for example, `Mono`), simply serialize it through the
 `JsonMapper`.
-* For a multi-value publisher with `application/json`, by default collect the values with
-`Flux#collectToList()` and then serialize the resulting collection.
+* For a multi-value publisher with `application/json`, by default write each value
+individually as an element of a JSON array, without collecting the values first.
 * For a multi-value publisher with a streaming media type such as
 `application/jsonl`, `application/x-ndjson` or `application/stream+x-jackson-smile`,
 encode, write, and flush each value individually using a
@@ -502,7 +502,7 @@ delivery without delay.
 By default both `JacksonJsonEncoder` and `JacksonJsonDecoder` do not support elements of type
 `String`. Instead the default assumption is that a string or a sequence of strings
 represent serialized JSON content, to be rendered by the `CharSequenceEncoder`. If what
-you need is to render a JSON array from `Flux<String>`, use `Flux#collectToList()` and
+you need is to render a JSON array from `Flux<String>`, use `Flux#collectList()` and
 encode a `Mono<List<String>>`.
 ====
 
