@@ -594,8 +594,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (!isConfigurationFrozen() || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		}
-		Map<Object, String[]> cache = (includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
-		return cache.computeIfAbsent(type, key -> doGetBeanNamesForType(type, includeNonSingletons, true));
+		return getCachedBeanNamesForType(type, type, includeNonSingletons);
 	}
 
 	@Override
@@ -608,9 +607,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, allowEagerInit);
 		}
+		return getCachedBeanNamesForType(type, ResolvableType.forRawClass(type), includeNonSingletons);
+	}
+
+	private String[] getCachedBeanNamesForType(Object cacheKey, ResolvableType type, boolean includeNonSingletons) {
 		Map<Object, String[]> cache = (includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
-		return cache.computeIfAbsent(type, key ->
-				doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, true));
+		// Deliberately not using computeIfAbsent: type matching may trigger bean creation
+		// (for example, FactoryBean instantiation for type checks), which must not happen
+		// while holding a lock on the cache since that may deadlock with the singleton lock.
+		String[] resolvedBeanNames = cache.get(cacheKey);
+		if (resolvedBeanNames == null) {
+			resolvedBeanNames = doGetBeanNamesForType(type, includeNonSingletons, true);
+			cache.put(cacheKey, resolvedBeanNames);
+		}
+		return resolvedBeanNames;
 	}
 
 	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {

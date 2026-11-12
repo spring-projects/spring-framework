@@ -16,8 +16,14 @@
 
 package org.springframework.beans.factory;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -38,6 +44,66 @@ class BeanFactoryLockingTests {
 		beanFactory.registerBeanDefinition("bean2",
 				new RootBeanDefinition(TestBean.class, () -> new TestBean("tb")));
 		beanFactory.preInstantiateSingletons();
+	}
+
+	@Test  // gh-37382 follow-up: no map lock held while matching bean types
+	void noDeadlockBetweenTypeLookupAndSingletonCreation() throws Exception {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		CountDownLatch holderInCreation = new CountDownLatch(1);
+		CountDownLatch lookupInProgress = new CountDownLatch(1);
+
+		// Lazy singleton whose creation (under the singleton lock) performs a type lookup
+		RootBeanDefinition holder = new RootBeanDefinition(Object.class, () -> {
+			holderInCreation.countDown();
+			await(lookupInProgress);
+			beanFactory.getBeanNamesForType(TestBean.class);
+			return new Object();
+		});
+		holder.setLazyInit(true);
+		beanFactory.registerBeanDefinition("holder", holder);
+		// FactoryBean whose object type can only be determined through instantiation
+		beanFactory.registerBeanDefinition("factoryBean", new RootBeanDefinition(UntypedFactoryBean.class));
+		beanFactory.addBeanPostProcessor(new SmartInstantiationAwareBeanPostProcessor() {
+			@Override
+			public @Nullable Class<?> predictBeanType(Class<?> beanClass, String beanName) {
+				if (beanName.equals("factoryBean")) {
+					lookupInProgress.countDown();
+				}
+				return null;
+			}
+		});
+		beanFactory.freezeConfiguration();
+
+		AtomicReference<Throwable> failure = new AtomicReference<>();
+		Thread creator = new Thread(() -> beanFactory.getBean("holder"));
+		Thread lookup = new Thread(() -> {
+			await(holderInCreation);
+			beanFactory.getBeanNamesForType(TestBean.class);
+		});
+		for (Thread thread : new Thread[] {creator, lookup}) {
+			thread.setDaemon(true);
+			thread.setUncaughtExceptionHandler((t, ex) -> failure.set(ex));
+			thread.start();
+		}
+		creator.join(TimeUnit.SECONDS.toMillis(10));
+		lookup.join(TimeUnit.SECONDS.toMillis(10));
+
+		assertThat(creator.isAlive()).as("creator thread deadlocked").isFalse();
+		assertThat(lookup.isAlive()).as("lookup thread deadlocked").isFalse();
+		assertThat(failure.get()).isNull();
+		assertThat(beanFactory.getBeanNamesForType(TestBean.class)).containsExactly("factoryBean");
+	}
+
+	private static void await(CountDownLatch latch) {
+		try {
+			if (!latch.await(10, TimeUnit.SECONDS)) {
+				throw new IllegalStateException("Latch timed out");
+			}
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException(ex);
+		}
 	}
 
 
@@ -65,6 +131,21 @@ class BeanFactoryLockingTests {
 			if (!initialized) {
 				throw new IllegalStateException("Thread not executed");
 			}
+		}
+	}
+
+
+	@SuppressWarnings("rawtypes")
+	static class UntypedFactoryBean implements FactoryBean {
+
+		@Override
+		public Object getObject() {
+			return new TestBean();
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return TestBean.class;
 		}
 	}
 
