@@ -263,7 +263,8 @@ public class RestTestClientResponseAssert
 			for (ResponseCookie responseCookie : responseCookies.get(name)) {
 				Cookie cookie = new Cookie(name, responseCookie.getValue());
 				if (!responseCookie.getMaxAge().isNegative()) {
-					cookie.setMaxAge((int) responseCookie.getMaxAge().getSeconds());
+					long maxAge = responseCookie.getMaxAge().getSeconds();
+					cookie.setMaxAge((int) Math.min(maxAge, Integer.MAX_VALUE));
 				}
 				if (responseCookie.getDomain() != null) {
 					cookie.setDomain(responseCookie.getDomain());
