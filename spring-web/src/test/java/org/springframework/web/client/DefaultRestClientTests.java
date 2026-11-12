@@ -50,6 +50,7 @@ import static org.mockito.Mockito.verify;
  * Tests for {@link DefaultRestClient}.
  *
  * @author Sebastien Deleuze
+ * @author Chengang Guan
  */
 class DefaultRestClientTests {
 
@@ -119,6 +120,17 @@ class DefaultRestClientTests {
 				this.client.get().uri(URL).retrieve()
 						.requiredBody(new ParameterizedTypeReference<String>() {})
 		);
+	}
+
+	@Test
+	void toBodilessEntityClosesResponseOnce() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		mockEmptyResponseBody();
+
+		this.client.get().uri(URL).retrieve().toBodilessEntity();
+
+		verify(this.response, times(1)).close();
 	}
 
 	@ParameterizedTest(name = "{0}")

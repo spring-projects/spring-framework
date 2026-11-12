@@ -848,7 +848,7 @@ final class DefaultRestClient implements RestClient {
 		@Override
 		public ResponseEntity<Void> toBodilessEntity() {
 			ResponseEntity<Void> entity = executeAndExtract((request, response) -> {
-				try (response) {
+				try {
 					applyStatusHandlers(request, response);
 					return ResponseEntity.status(response.getStatusCode())
 							.headers(response.getHeaders())
