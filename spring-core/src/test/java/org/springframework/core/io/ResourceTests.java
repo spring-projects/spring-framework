@@ -512,6 +512,17 @@ class ResourceTests {
 					StandardCharsets.ISO_8859_1)).isEqualTo("alice:secret");
 		}
 
+		@Test
+		void useStandardBase64AlphabetForBasicAuth() throws Exception {
+			startServer(true);
+			// "alice:se~ret" encodes to "+" with the standard alphabet but to "-" with the URL-safe one
+			UrlResource resource = new UrlResource(
+					"http://alice:se~ret@localhost:" + this.server.getPort() + "/resource");
+			assertThat(resource.getInputStream()).hasContent("Spring");
+			RecordedRequest request = this.server.takeRequest();
+			assertThat(request.getHeaders().get("Authorization")).isEqualTo("Basic YWxpY2U6c2V+cmV0");
+		}
+
 		@AfterEach
 		void shutdown() {
 			this.server.close();
