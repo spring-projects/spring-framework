@@ -492,6 +492,66 @@ Kotlin::
 ----
 ======
 
+If a `@Nested` test class should not inherit the configuration of its enclosing class,
+annotate it with `@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)`. In
+`OVERRIDE` mode, none of the Spring test annotations on the enclosing class are inherited,
+including `@SpringJUnitConfig` and `@ContextConfiguration`, so the nested class has to
+declare all of the configuration it needs. In the following example, `FrenchGreetings`
+declares its own configuration class and active profile, and nothing from
+`GreetingServiceTests` is applied to it.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	@ActiveProfiles("lang_en")
+	class GreetingServiceTests {
+
+		@Nested
+		@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
+		@SpringJUnitConfig(FrenchConfig.class)
+		@ActiveProfiles("lang_fr")
+		class FrenchGreetings {
+
+			@Test
+			void hello(@Autowired GreetingService service) {
+				assertThat(service.greetWorld()).isEqualTo("Bonjour le monde");
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	@ActiveProfiles("lang_en")
+	class GreetingServiceTests {
+
+		@Nested
+		@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
+		@SpringJUnitConfig(FrenchConfig::class)
+		@ActiveProfiles("lang_fr")
+		inner class FrenchGreetings {
+
+			@Test
+			fun hello(@Autowired service:GreetingService) {
+				assertThat(service.greetWorld()).isEqualTo("Bonjour le monde")
+			}
+		}
+	}
+----
+======
+
+TIP: If you only need to replace some configuration, `OVERRIDE` mode is often more than
+you want. For example, to keep the inherited configuration classes but use different
+test properties, declare `@TestPropertySource(properties = ..., inheritProperties = false)`
+on the `@Nested` class instead.
+
 
 [[testcontext-junit4-support]]
 == JUnit 4 Support
