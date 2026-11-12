@@ -40,7 +40,7 @@ public class SqlArrayValue implements SqlValue {
 
 	private final String typeName;
 
-	private final Object[] elements;
+	private final @Nullable Object[] elements;
 
 	private @Nullable Array array;
 
@@ -51,7 +51,7 @@ public class SqlArrayValue implements SqlValue {
 	 * @param elements the elements to populate the {@code Array} object with
 	 * @see java.sql.Connection#createArrayOf
 	 */
-	public SqlArrayValue(String typeName, Object... elements) {
+	public SqlArrayValue(String typeName, @Nullable Object... elements) {
 		Assert.notNull(typeName, "Type name must not be null");
 		Assert.notNull(elements, "Elements array must not be null");
 		this.typeName = typeName;
