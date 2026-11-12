@@ -123,6 +123,12 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun nullableValueClassReturnValue() {
+		val value = getInvocable(ValueClassHandler::nullableValueClassReturnValue.javaMethod!!).invokeForRequest(request, null)
+		Assertions.assertThat(value).isNull()
+	}
+
+	@Test
 	fun nestedValueClassReturnValue() {
 		val value = getInvocable(ValueClassHandler::nestedValueClassReturnValue.javaMethod!!).invokeForRequest(request, null)
 		Assertions.assertThat(value).isEqualTo("foo")
@@ -189,6 +195,13 @@ class InvocableHandlerMethodKotlinTests {
 		composite.addResolver(ContinuationHandlerMethodArgumentResolver())
 		val value = getInvocable(SuspendingValueClassHandler::valueClassReturnValue.javaMethod!!).invokeForRequest(request, null)
 		StepVerifier.create(value as Mono<String>).expectNext("foo").verifyComplete()
+	}
+
+	@Test
+	fun suspendingNullableValueClassReturnValue() {
+		composite.addResolver(ContinuationHandlerMethodArgumentResolver())
+		val value = getInvocable(SuspendingValueClassHandler::nullableValueClassReturnValue.javaMethod!!).invokeForRequest(request, null)
+		StepVerifier.create(value as Mono<String>).verifyComplete()
 	}
 
 	@Test
@@ -308,6 +321,8 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun valueClassReturnValue() = StringValueClass("foo")
 
+		fun nullableValueClassReturnValue() = NullableStringValueClass(null)
+
 		fun nestedValueClassReturnValue() = NestedStringValueClass(StringValueClass("foo"))
 
 		fun resultOfUnitReturnValue() = Result.success(Unit)
@@ -330,6 +345,11 @@ class InvocableHandlerMethodKotlinTests {
 		suspend fun valueClassReturnValue(): StringValueClass {
 			delay(1)
 			return StringValueClass("foo")
+		}
+
+		suspend fun nullableValueClassReturnValue(): NullableStringValueClass {
+			delay(1)
+			return NullableStringValueClass(null)
 		}
 
 		suspend fun resultOfUnitReturnValue(): Result<Unit> {
@@ -396,6 +416,9 @@ class InvocableHandlerMethodKotlinTests {
 
 	@JvmInline
 	value class StringValueClass(val value: String)
+
+	@JvmInline
+	value class NullableStringValueClass(val value: String?)
 
 	@JvmInline
 	value class NestedStringValueClass(val value: StringValueClass)
