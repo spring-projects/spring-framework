@@ -183,6 +183,24 @@ class ServerHttpObservationFilterTests {
 	}
 
 	@Test
+	void shouldNotCloseObservationOnAsyncTimeout() throws Exception {
+		this.request.setAsyncSupported(true);
+		this.request.startAsync();
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		for (AsyncListener listener : asyncContext.getListeners()) {
+			listener.onTimeout(new AsyncEvent(asyncContext));
+		}
+		assertThat(this.observationRegistry).hasObservationWithNameEqualTo("http.server.requests").that()
+				.isNotStopped();
+
+		// error dispatch sets the final status before the container completes the request
+		this.response.setStatus(503);
+		asyncContext.complete();
+		assertThatHttpObservation().hasLowCardinalityKeyValue("status", "503").hasBeenStopped();
+	}
+
+	@Test
 	void shouldNotCloseObservationDuringAsyncDispatch() throws Exception {
 		this.mockFilterChain = new MockFilterChain(new ScopeCheckingServlet(this.observationRegistry));
 		this.request.setDispatcherType(DispatcherType.ASYNC);
