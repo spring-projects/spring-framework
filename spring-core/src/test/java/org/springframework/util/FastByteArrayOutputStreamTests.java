@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 import org.junit.jupiter.api.Test;
 
@@ -229,6 +230,28 @@ class FastByteArrayOutputStreamTests {
 		builder.append('"');
 		String actual = builder.toString();
 		assertThat(actual).isEqualTo("\"06225ca1e4533354c516e74512065331d\"");
+	}
+
+	@Test
+	void updateMessageDigestConsumesStream() throws Exception {
+		this.os.write(this.helloBytes);
+		InputStream inputStream = this.os.getInputStream();
+		DigestUtils.md5Digest(inputStream);
+		assertThat(inputStream.available()).isEqualTo(0);
+		assertThat(inputStream.read()).isEqualTo(-1);
+	}
+
+	@Test
+	void updateMessageDigestWithLengthConsumesStream() throws Exception {
+		this.os.write(this.helloBytes);
+		UpdateMessageDigestInputStream inputStream =
+				(UpdateMessageDigestInputStream) this.os.getInputStream();
+		MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+		inputStream.updateMessageDigest(messageDigest, 4);
+		assertThat(messageDigest.digest()).isEqualTo(
+				MessageDigest.getInstance("MD5").digest("Hell".getBytes(StandardCharsets.UTF_8)));
+		assertThat(inputStream.available()).isEqualTo(this.helloBytes.length - 4);
+		assertThat(inputStream.read()).isEqualTo(this.helloBytes[4]);
 	}
 
 
