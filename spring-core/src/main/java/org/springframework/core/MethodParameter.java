@@ -42,6 +42,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -67,6 +68,14 @@ public class MethodParameter {
 	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
 	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
+	/**
+	 * Cache for {@link Executable#getParameterAnnotations()}, which the JDK
+	 * parses from the class file on every call. The cached arrays are shared
+	 * and must not be handed out or modified.
+	 */
+	private static final Map<Executable, Annotation[][]> parameterAnnotationsCache =
+			new ConcurrentReferenceHashMap<>(256);
 
 
 	private final Executable executable;
@@ -628,7 +637,7 @@ public class MethodParameter {
 	public Annotation[] getParameterAnnotations() {
 		Annotation[] paramAnns = this.parameterAnnotations;
 		if (paramAnns == null) {
-			Annotation[][] annotationArray = this.executable.getParameterAnnotations();
+			Annotation[][] annotationArray = getExecutableParameterAnnotations(this.executable);
 			int index = this.parameterIndex;
 			if (this.executable instanceof Constructor &&
 					ClassUtils.isInnerClass(this.executable.getDeclaringClass()) &&
@@ -638,10 +647,18 @@ public class MethodParameter {
 				index = this.parameterIndex - 1;
 			}
 			paramAnns = (index >= 0 && index < annotationArray.length && annotationArray[index].length > 0 ?
-					adaptAnnotationArray(annotationArray[index]) : EMPTY_ANNOTATION_ARRAY);
+					adaptAnnotationArray(annotationArray[index].clone()) : EMPTY_ANNOTATION_ARRAY);
 			this.parameterAnnotations = paramAnns;
 		}
 		return paramAnns;
+	}
+
+	/**
+	 * Return the cached parameter annotations of the given executable.
+	 * <p>The result is shared: callers must not modify it or hand it out.
+	 */
+	static Annotation[][] getExecutableParameterAnnotations(Executable executable) {
+		return parameterAnnotationsCache.computeIfAbsent(executable, Executable::getParameterAnnotations);
 	}
 
 	/**
