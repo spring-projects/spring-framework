@@ -331,7 +331,7 @@ public abstract class YamlProcessor {
 	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path,
 			boolean includeEmpty, @Nullable Object emptyValue) {
 
-		if (includeEmpty && source.isEmpty()) {
+		if (includeEmpty && source.isEmpty() && path != null) {
 			result.put(path, emptyValue);
 			return;
 		}
