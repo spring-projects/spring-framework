@@ -279,6 +279,23 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
+	void builderChangesAfterBuildDoNotAffectResponse() {
+		ResponseCookie cookie = ResponseCookie.from("name", "value").build();
+		ServerResponse.BodyBuilder builder = ServerResponse.ok()
+				.header("foo", "bar")
+				.cookie(cookie);
+		ServerResponse response = builder.build().block();
+
+		builder.header("foo", "baz")
+				.header("qux", "quux")
+				.cookie(ResponseCookie.from("name", "other").build());
+
+		assertThat(response.headers().get("foo")).containsExactly("bar");
+		assertThat(response.headers().containsHeader("qux")).isFalse();
+		assertThat(response.cookies().get("name")).containsExactly(cookie);
+	}
+
+	@Test
 	void cookies() {
 		MultiValueMap<String, ResponseCookie> newCookies = new LinkedMultiValueMap<>();
 		newCookies.add("name", ResponseCookie.from("name", "value").build());
