@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -251,7 +252,11 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 
 	@Override
 	public int hashCode() {
-		return this.targetMap.hashCode();
+		int hash = 0;
+		for (Entry<K, List<V>> entry : this.targetMap.entrySet()) {
+			hash += (Objects.hashCode(entry.getKey()) ^ Objects.hashCode(adaptValue(entry.getValue())));
+		}
+		return hash;
 	}
 
 	@Override
