@@ -173,7 +173,8 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	@Override
 	public Set<Entry<String, List<String>>> headerSet() {
-		return super.headerSet().stream().map(SimpleImmutableEntry::new)
+		return super.headerSet().stream()
+				.map(entry -> new SimpleImmutableEntry<>(entry.getKey(), Collections.unmodifiableList(entry.getValue())))
 				.collect(Collectors.collectingAndThen(
 						Collectors.toCollection(LinkedHashSet::new), // Retain original ordering of entries
 						Collections::unmodifiableSet));
