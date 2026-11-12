@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied
+ * AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be applied
  * to a {@link MediaType}.
  *
  * @author Brian Clozel
