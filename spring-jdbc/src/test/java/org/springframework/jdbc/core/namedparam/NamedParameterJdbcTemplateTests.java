@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,11 +48,13 @@ import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -458,6 +461,21 @@ class NamedParameterJdbcTemplateTests {
 		verify(preparedStatement).setObject(2, 1, Types.INTEGER);
 		verify(preparedStatement).close();
 		verify(connection).close();
+	}
+
+	@Test
+	void updateClosesStatementWhenSettingParameterValueFails() throws SQLException {
+		SQLException sqlException = new SQLException("Invalid parameter value");
+		doThrow(sqlException).when(preparedStatement).setString(1, "one");
+
+		params.put("perfId", "one");
+		params.put("priceId", 1);
+		assertThatExceptionOfType(DataAccessException.class)
+				.isThrownBy(() -> namedParameterTemplate.update(UPDATE_NAMED_PARAMETERS, params))
+				.withCause(sqlException);
+
+		verify(preparedStatement).close();
+		verify(connection, atLeastOnce()).close();
 	}
 
 	@Test
