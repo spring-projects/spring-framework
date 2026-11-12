@@ -91,7 +91,8 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 	 * @param rowMapper the RowMapper which creates an object for each row
 	 * @param rowsExpected the number of expected rows
 	 * (just used for optimized collection handling)
-	 * @param maxRows the number of max rows (or -1 for the driver's default)
+	 * @param maxRows the number of max rows (or -1 for the driver's default,
+	 * or 0 for no limit)
 	 * @since 7.0
 	 */
 	public RowMapperResultSetExtractor(RowMapper<T> rowMapper, int rowsExpected, int maxRows) {
@@ -106,7 +107,7 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 	public List<T> extractData(ResultSet rs) throws SQLException {
 		List<T> results = (this.rowsExpected > 0 ? new ArrayList<>(this.rowsExpected) : new ArrayList<>());
 		int rowNum = 0;
-		while (rs.next() && (this.maxRows == -1 || rowNum < this.maxRows)) {
+		while (rs.next() && (this.maxRows <= 0 || rowNum < this.maxRows)) {
 			results.add(this.rowMapper.mapRow(rs, rowNum++));
 		}
 		return results;
