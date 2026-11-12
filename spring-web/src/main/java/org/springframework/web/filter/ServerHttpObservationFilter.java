@@ -198,7 +198,7 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
-			this.currentObservation.stop();
+			// The container must perform an error dispatch after.
 		}
 
 		@Override
