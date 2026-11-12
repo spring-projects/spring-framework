@@ -597,6 +597,10 @@ public abstract class AbstractAnnotationMetadataTests {
 		}
 
 		static class TestMethods {
+
+			// Non-constant static field: forces a static initializer in the class file
+			private static final Object LOCK = new Object();
+
 			public String test1(String argument) {
 				return "test";
 			}
