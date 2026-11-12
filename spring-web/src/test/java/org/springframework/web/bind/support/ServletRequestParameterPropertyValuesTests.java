@@ -48,7 +48,7 @@ class ServletRequestParameterPropertyValuesTests {
 		request.addParameter("forname", original);
 
 		var pvs = new ServletRequestParameterPropertyValues(request);
-		assertThat(pvs.getPropertyValues().length).as("Found 1 parameter").isEqualTo(1);
+		assertThat(pvs.getPropertyValues()).as("Found 1 parameter").hasSize(1);
 		assertThat(pvs.getPropertyValue("forname").getValue()).as("Found array value").isInstanceOf(String[].class);
 		String[] values = (String[]) pvs.getPropertyValue("forname").getValue();
 		assertThat(original).containsExactly(values);
@@ -80,7 +80,7 @@ class ServletRequestParameterPropertyValuesTests {
 	 * Must contain: forname=Tony surname=Blair age=50
 	 */
 	private static void testTony(PropertyValues pvs) {
-		assertThat(pvs.getPropertyValues().length).as("Contains 3").isEqualTo(3);
+		assertThat(pvs.getPropertyValues()).as("Contains 3").hasSize(3);
 		assertThat(pvs.contains("forname")).as("Contains forname").isTrue();
 		assertThat(pvs.contains("surname")).as("Contains surname").isTrue();
 		assertThat(pvs.contains("age")).as("Contains age").isTrue();

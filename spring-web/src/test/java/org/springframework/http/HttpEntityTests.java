@@ -78,7 +78,7 @@ class HttpEntityTests {
 		assertThat(new HttpEntity<>(headers1)).isEqualTo(new HttpEntity<>(headers1));
 		assertThat(new HttpEntity<>(headers1)).isNotEqualTo(new HttpEntity<>(headers2));
 
-		assertThat(new HttpEntity<String>(null, (HttpHeaders) null).equals(new HttpEntity<>(null, (HttpHeaders) null))).isTrue();
+		assertThat(new HttpEntity<String>(null, (HttpHeaders) null)).isEqualTo(new HttpEntity<>(null, (HttpHeaders) null));
 		assertThat(new HttpEntity<>("foo", (HttpHeaders) null)).isNotEqualTo(new HttpEntity<>(null, (HttpHeaders) null));
 		assertThat(new HttpEntity<String>(null, (HttpHeaders) null)).isNotEqualTo(new HttpEntity<>("bar", (HttpHeaders) null));
 

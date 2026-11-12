@@ -80,7 +80,8 @@ class CustomEditorTests {
 		pvs.addPropertyValue(new PropertyValue("spouse", tbString));
 		bw.setPropertyValues(pvs);
 		assertThat(tb.getSpouse()).as("spouse is non-null").isNotNull();
-		assertThat(tb.getSpouse().getName().equals("Kerry") && tb.getSpouse().getAge() == 34).as("spouse name is Kerry and age is 34").isTrue();
+		assertThat(tb.getSpouse().getName()).as("spouse name is Kerry").isEqualTo("Kerry");
+		assertThat(tb.getSpouse().getAge()).as("spouse age is 34").isEqualTo(34);
 	}
 
 	@Test
@@ -100,7 +101,8 @@ class CustomEditorTests {
 
 		bw.setPropertyValues(pvs);
 		assertThat(tb.getSpouse()).as("spouse is non-null").isNotNull();
-		assertThat(tb.getSpouse().getName().equals("Kerry") && tb.getSpouse().getAge() == 34).as("spouse name is Kerry and age is 34").isTrue();
+		assertThat(tb.getSpouse().getName()).as("spouse name is Kerry").isEqualTo("Kerry");
+		assertThat(tb.getSpouse().getAge()).as("spouse age is 34").isEqualTo(34);
 		ITestBean spouse = tb.getSpouse();
 
 		bw.setPropertyValues(pvs);
