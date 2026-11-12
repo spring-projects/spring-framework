@@ -16,12 +16,17 @@
 
 package org.springframework.http.client;
 
+import java.io.InterruptedIOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.FlowAdapters;
@@ -156,6 +161,65 @@ class OutputStreamPublisherTests {
 				.verifyComplete();
 
 		latch.await();
+	}
+
+	@Test // gh-37621
+	void interruptWhileAwaitingDemand() throws InterruptedException {
+		CountDownLatch done = new CountDownLatch(1);
+		AtomicReference<Thread> writer = new AtomicReference<>();
+		AtomicReference<Throwable> savedEx = new AtomicReference<>();
+		AtomicBoolean interruptStatus = new AtomicBoolean();
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Flow.Publisher<byte[]> flowPublisher = new OutputStreamPublisher<>(outputStream -> {
+			writer.set(Thread.currentThread());
+			try {
+				outputStream.write(FOO);
+				outputStream.flush();
+				outputStream.write(BAR);
+				outputStream.flush();
+			}
+			catch (Throwable ex) {
+				savedEx.set(ex);
+				interruptStatus.set(Thread.currentThread().isInterrupted());
+				throw ex;
+			}
+			finally {
+				done.countDown();
+			}
+		}, this.byteMapper, executor, null);
+
+		flowPublisher.subscribe(new Flow.Subscriber<>() {
+			@Override
+			public void onSubscribe(Flow.Subscription subscription) {
+				subscription.request(1);
+			}
+
+			@Override
+			public void onNext(byte[] item) {
+			}
+
+			@Override
+			public void onError(Throwable throwable) {
+			}
+
+			@Override
+			public void onComplete() {
+			}
+		});
+
+		for (int i = 0; i < 100 && (writer.get() == null || writer.get().getState() != Thread.State.WAITING); i++) {
+			Thread.sleep(20);
+		}
+		assertThat(writer.get()).isNotNull();
+		assertThat(writer.get().getState()).isEqualTo(Thread.State.WAITING);
+
+		executor.shutdownNow();
+		assertThat(done.await(5, TimeUnit.SECONDS)).isTrue();
+
+		assertThat(savedEx.get()).isInstanceOf(InterruptedIOException.class)
+				.hasMessage("Interrupted while awaiting demand");
+		assertThat(interruptStatus).as("interrupt status restored").isTrue();
 	}
 
 	@Test
