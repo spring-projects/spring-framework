@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.testfixture.beans.IOther;
 import org.springframework.beans.testfixture.beans.ITestBean;
@@ -128,6 +130,66 @@ class AspectJExpressionPointcutTests {
 		assertThat(testBeanPc.matches(getAge, TestBean.class)).isTrue();
 		assertThat(iOtherPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class)).isTrue();
 		assertThat(testBeanPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class)).isFalse();
+	}
+
+	@Test  // gh-27302
+	void negatedTargetWithResidue() throws NoSuchMethodException {
+		AspectJExpressionPointcut pc = getPointcut("execution(* foo()) && !target(java.io.Serializable)");
+		Method foo = Base.class.getMethod("foo");
+		assertThat(pc.matches(foo, SerializableSubclass.class)).isFalse();
+		assertThat(pc.matches(foo, PlainSubclass.class)).isTrue();
+		// Auto-proxying must not create a proxy for an excluded target
+		assertThat(AopUtils.canApply(pc, SerializableSubclass.class)).isFalse();
+		assertThat(AopUtils.canApply(pc, PlainSubclass.class)).isTrue();
+	}
+
+	@Test  // gh-27302
+	void disjunctionOfTargetsWithResidue() throws NoSuchMethodException {
+		AspectJExpressionPointcut pc = getPointcut(
+				"execution(* foo()) && (target(java.io.Serializable) || target(java.lang.Cloneable))");
+		Method foo = Base.class.getMethod("foo");
+		assertThat(pc.matches(foo, SerializableSubclass.class)).isTrue();
+		assertThat(pc.matches(foo, CloneableSubclass.class)).isTrue();
+		assertThat(pc.matches(foo, PlainSubclass.class)).isFalse();
+	}
+
+	@Test  // gh-27302
+	void conjunctionOfTargetsWithResidue() throws NoSuchMethodException {
+		AspectJExpressionPointcut pc = getPointcut(
+				"execution(* foo()) && target(java.io.Serializable) && target(java.lang.Cloneable)");
+		Method foo = Base.class.getMethod("foo");
+		assertThat(pc.matches(foo, SerializableCloneableSubclass.class)).isTrue();
+		assertThat(pc.matches(foo, SerializableSubclass.class)).isFalse();
+		assertThat(pc.matches(foo, CloneableSubclass.class)).isFalse();
+	}
+
+	@Test  // gh-27302
+	void negatedConjunctionWithUndeterminedResidue() throws NoSuchMethodException {
+		AspectJExpressionPointcut pc = getPointcut(
+				"execution(* bar(..)) && !(target(java.io.Serializable) && args(String))");
+		Method bar = Base.class.getMethod("bar", Object.class);
+		// Depends on the runtime argument: must remain a candidate for the target class
+		assertThat(pc.matches(bar, SerializableSubclass.class)).isTrue();
+		assertThat(pc.matches(bar, PlainSubclass.class)).isTrue();
+	}
+
+	@Test  // gh-27302
+	void disjunctionWithUndeterminedResidue() throws NoSuchMethodException {
+		AspectJExpressionPointcut pc = getPointcut(
+				"execution(* bar(..)) && (target(java.io.Serializable) || args(String))");
+		Method bar = Base.class.getMethod("bar", Object.class);
+		assertThat(pc.matches(bar, SerializableSubclass.class)).isTrue();
+		// Depends on the runtime argument: must remain a candidate for the target class
+		assertThat(pc.matches(bar, PlainSubclass.class)).isTrue();
+	}
+
+	@Test  // gh-27302
+	void conjunctionWithUndeterminedResidue() throws NoSuchMethodException {
+		AspectJExpressionPointcut pc = getPointcut(
+				"execution(* bar(..)) && target(java.io.Serializable) && args(String)");
+		Method bar = Base.class.getMethod("bar", Object.class);
+		assertThat(pc.matches(bar, SerializableSubclass.class)).isTrue();
+		assertThat(pc.matches(bar, PlainSubclass.class)).isFalse();
 	}
 
 	@Test
@@ -503,6 +565,34 @@ class AspectJExpressionPointcutTests {
 		assertThat(takesSpringAnnotatedArgument2.matches(
 				ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters", TestBean.class, BeanA.class),
 				ProcessesSpringAnnotatedParameters.class)).isFalse();
+	}
+
+
+	public static class Base {
+
+		public void foo() {
+		}
+
+		public void bar(Object arg) {
+		}
+	}
+
+
+	@SuppressWarnings("serial")
+	public static class SerializableSubclass extends Base implements Serializable {
+	}
+
+
+	public static class CloneableSubclass extends Base implements Cloneable {
+	}
+
+
+	@SuppressWarnings("serial")
+	public static class SerializableCloneableSubclass extends Base implements Serializable, Cloneable {
+	}
+
+
+	public static class PlainSubclass extends Base {
 	}
 
 
