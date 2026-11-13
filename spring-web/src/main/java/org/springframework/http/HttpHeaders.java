@@ -677,8 +677,6 @@ public class HttpHeaders implements Serializable {
 		return MediaType.parseMediaTypes(get(ACCEPT_QUERY));
 	}
 
-
-
 	/**
 	 * Set the (new) value of the {@code Access-Control-Allow-Credentials} response header.
 	 */

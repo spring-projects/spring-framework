@@ -75,15 +75,30 @@ public final class NameGenerator {
 
 	private NameGenerator(ClassName defaultTarget, String featureNamePrefix,
 			Map<String, AtomicInteger> sequenceGenerator) {
+
 		Assert.notNull(defaultTarget, "'defaultTarget' must not be null");
 		this.defaultTarget = defaultTarget;
 		this.featureNamePrefix = (!StringUtils.hasText(featureNamePrefix) ? "" : featureNamePrefix);
 		this.sequenceGenerator = sequenceGenerator;
 	}
 
+
+	/**
+	 * Create a new {@link NameGenerator} instance for the specified feature name
+	 * prefix, keeping track of all the class names and resource names generated
+	 * by this instance.
+	 * @param featureNamePrefix the feature name prefix to use
+	 * @return a new instance for the specified feature name prefix
+	 */
+	NameGenerator withFeatureNamePrefix(String featureNamePrefix) {
+		return new NameGenerator(this.defaultTarget, featureNamePrefix,
+				this.sequenceGenerator);
+	}
+
 	String getFeatureNamePrefix() {
 		return this.featureNamePrefix;
 	}
+
 
 	/**
 	 * Generate a unique {@link ClassName} based on the specified
@@ -170,19 +185,6 @@ public final class NameGenerator {
 			name = name + sequence;
 		}
 		return factory.apply(name);
-	}
-
-
-	/**
-	 * Create a new {@link NameGenerator} instance for the specified feature name
-	 * prefix, keeping track of all the class names and resource names generated
-	 * by this instance.
-	 * @param featureNamePrefix the feature name prefix to use
-	 * @return a new instance for the specified feature name prefix
-	 */
-	NameGenerator withFeatureNamePrefix(String featureNamePrefix) {
-		return new NameGenerator(this.defaultTarget, featureNamePrefix,
-				this.sequenceGenerator);
 	}
 
 	private static String toName(ClassName className) {

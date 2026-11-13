@@ -19,7 +19,6 @@ package org.springframework.web.servlet.config.annotation;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.web.servlet.ErrorResponseViewResolver;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 /**
  * Configure how RFC 9457 problem details are produced and rendered.
@@ -47,7 +46,7 @@ public class ProblemDetailsConfigurer {
 	 * <p>By default, this is set to {@code false}.
 	 * @param renderUnhandledExceptions whether to render unhandled exceptions
 	 * as problem details
-	 * @see ExceptionHandlerExceptionResolver#setRenderUnhandledExceptionsAsProblemDetails(boolean)
+	 * @see org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver#setRenderUnhandledExceptionsAsProblemDetails
 	 */
 	public ProblemDetailsConfigurer renderUnhandledExceptions(boolean renderUnhandledExceptions) {
 		this.renderUnhandledExceptions = renderUnhandledExceptions;
@@ -60,7 +59,7 @@ public class ProblemDetailsConfigurer {
 	 * error pages, when the client prefers HTML.
 	 * <p>By default, problem details are always written with message converters.
 	 * @param viewResolver the resolver to use
-	 * @see ExceptionHandlerExceptionResolver#setErrorResponseViewResolver(ErrorResponseViewResolver)
+	 * @see org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver#setErrorResponseViewResolver
 	 */
 	public ProblemDetailsConfigurer viewResolver(ErrorResponseViewResolver viewResolver) {
 		this.viewResolver = viewResolver;

@@ -335,7 +335,6 @@ public interface ErrorResponse {
 			response.updateAndGetBody(messageSource, locale);
 			return response;
 		}
-
 	}
 
 
@@ -374,7 +373,6 @@ public interface ErrorResponse {
 		default void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse, HttpRequest request) {
 			handleError(detail, errorResponse);
 		}
-
 	}
 
 }

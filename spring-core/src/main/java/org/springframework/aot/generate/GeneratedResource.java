@@ -42,6 +42,7 @@ public final class GeneratedResource {
 
 	private final Content content;
 
+
 	/**
 	 * Create a new, empty instance with the given {@code path}.
 	 * @param path the absolute path of this resource on the classpath
@@ -50,6 +51,7 @@ public final class GeneratedResource {
 		this.path = path;
 		this.content = new DefaultContent();
 	}
+
 
 	/**
 	 * Return the absolute path of this resource on the classpath.
@@ -98,6 +100,7 @@ public final class GeneratedResource {
 				.add("path='" + this.path + "'")
 				.toString();
 	}
+
 
 	/**
 	 * Abstraction of the content of a generated resource.
@@ -164,8 +167,8 @@ public final class GeneratedResource {
 		 * but its content does not match the given {@code content}
 		 */
 		void createOrValidate(InputStreamSource content);
-
 	}
+
 
 	private final class DefaultContent implements Content {
 
@@ -250,8 +253,7 @@ public final class GeneratedResource {
 				throw new RuntimeException("Failed to validate content for generated resource at '%s'"
 						.formatted(getPath()), ex);
 			}
-
 		}
-
 	}
+
 }

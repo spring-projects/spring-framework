@@ -198,6 +198,7 @@ public class GeneratedResources {
 				this.resources, this.resourcesByPath, this.resourcesByOwner);
 	}
 
+
 	private record Owner(String extension, String featureNamePrefix, String featureName, @Nullable ClassName target) {
 	}
 

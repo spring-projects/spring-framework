@@ -21,6 +21,7 @@ package org.springframework.core.io.buffer;
  * be passed one at a time to the {@link #match(DataBuffer)} method.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 7.1
  * @see #of(byte[]...)
  * @see #match(DataBuffer)

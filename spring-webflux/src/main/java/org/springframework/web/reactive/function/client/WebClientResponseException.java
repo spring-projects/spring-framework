@@ -344,7 +344,6 @@ public class WebClientResponseException extends WebClientException {
 
 			super(HttpStatus.BAD_REQUEST, statusText, headers, body, charset, request);
 		}
-
 	}
 
 	/**
@@ -497,7 +496,6 @@ public class WebClientResponseException extends WebClientException {
 		}
 	}
 
-
 	/**
 	 * {@link WebClientResponseException} for status HTTP 422 Unprocessable Entity.
 	 * @since 5.1
@@ -529,7 +527,6 @@ public class WebClientResponseException extends WebClientException {
 			super(HttpStatus.TOO_MANY_REQUESTS, statusText, headers, body, charset, request);
 		}
 	}
-
 
 
 	// Subclasses for specific, server-side, HTTP status codes
