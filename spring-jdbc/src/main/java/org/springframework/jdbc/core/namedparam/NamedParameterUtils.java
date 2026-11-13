@@ -230,7 +230,7 @@ public abstract class NamedParameterUtils {
 			if (statement[position] == START_SKIP[i].charAt(0)) {
 				boolean match = true;
 				for (int j = 1; j < START_SKIP[i].length(); j++) {
-					if (statement[position + j] != START_SKIP[i].charAt(j)) {
+					if (position + j >= statement.length || statement[position + j] != START_SKIP[i].charAt(j)) {
 						match = false;
 						break;
 					}
