@@ -20,6 +20,8 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import tools.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.core.ResolvableType;
@@ -72,6 +74,16 @@ class JacksonXmlEncoderTests extends AbstractLeakCheckingTests {
 			assertThat(actual).isEqualTo(expected);
 			release(dataBuffer);
 		};
+	}
+
+	@Test
+	void encodeMono() {
+		Pojo value = new Pojo("foo", "bar");
+		Flux<DataBuffer> result = this.encoder.encode(Mono.just(value), this.bufferFactory,
+				ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_XML, null);
+		StepVerifier.create(result)
+				.consumeNextWith(pojoConsumer(value))
+				.verifyComplete();
 	}
 
 	@Test

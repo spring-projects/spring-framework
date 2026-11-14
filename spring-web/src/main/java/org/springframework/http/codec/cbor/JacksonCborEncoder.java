@@ -21,6 +21,7 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.dataformat.cbor.CBORMapper;
 
@@ -34,7 +35,8 @@ import org.springframework.util.MimeType;
 /**
  * Encode from an {@code Object} to bytes of CBOR objects using Jackson 3.x.
  *
- * <p><a href="https://github.com/FasterXML/jackson-dataformats-binary/issues/110">Stream encoding is currently not supported</a>.
+ * <p><a href="https://github.com/FasterXML/jackson-dataformats-binary/issues/110">Stream encoding is currently not supported</a>,
+ * but a single value can be encoded, for example as a {@code Mono}.
  *
  * @author Sebastien Deleuze
  * @since 7.0
@@ -93,6 +95,9 @@ public class JacksonCborEncoder extends AbstractJacksonEncoder<CBORMapper> {
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		if (inputStream instanceof Mono) {
+			return super.encode(inputStream, bufferFactory, elementType, mimeType, hints);
+		}
 		throw new UnsupportedOperationException("Stream encoding is currently not supported");
 	}
 
