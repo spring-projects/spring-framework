@@ -121,13 +121,13 @@ Kotlin::
 ======
 
 
-Multipart requests can also be submitted from non-browser clients in a RESTful service
-scenario. The following example shows a file with JSON:
+`multipart/form-data` requests can also be submitted from non-browser clients in a RESTful
+service scenario. The following example shows a file with JSON in named parts:
 
 [literal,subs="verbatim,quotes"]
 ----
 POST /someUrl
-Content-Type: multipart/mixed
+Content-Type: multipart/form-data
 
 --edt7Tfrdusa7r3lNQc79vXuhIIMlatb7PQg7Vp
 Content-Disposition: form-data; name="meta-data"
@@ -143,6 +143,10 @@ Content-Type: text/xml
 Content-Transfer-Encoding: 8bit
 ... File Data ...
 ----
+
+This example uses `multipart/form-data` because the handler accesses each part by its
+`name`. A `multipart/mixed` body does not require form-field names, so it cannot be used
+with these name-based `@RequestPart` arguments unless names are provided.
 
 You can access the "meta-data" part with `@RequestParam` as a `String` but you'll
 probably want it deserialized from JSON (similar to `@RequestBody`). Use the
