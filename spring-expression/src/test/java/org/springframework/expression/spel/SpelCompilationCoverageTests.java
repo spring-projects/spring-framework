@@ -6966,6 +6966,26 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(expression.getValue(context)).isNull();
 			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
 		}
+
+		@ParameterizedTest
+		@MethodSource("nestedOptionalExpressions")
+		void accessMemberOfNestedOptionalViaNullSafeOperator(String expressionString, Object expected) {
+			context.setVariable("nested", Optional.of(Optional.of("x")));
+			expression = parser.parseExpression(expressionString);
+
+			assertThat(expression.getValue(context)).isEqualTo(expected);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo(expected);
+		}
+
+		static Stream<Arguments> nestedOptionalExpressions() {
+			return Stream.of(
+					Arguments.of("#nested?.isPresent()", true),
+					Arguments.of("#nested?.present", true),
+					Arguments.of("#nested?.get()", "x"),
+					Arguments.of("#nested?.orElse('z')", "x"));
+		}
 	}
 
 	/**
