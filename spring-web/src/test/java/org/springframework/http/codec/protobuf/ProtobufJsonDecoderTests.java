@@ -16,6 +16,8 @@
 
 package org.springframework.http.codec.protobuf;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -71,6 +73,16 @@ class ProtobufJsonDecoderTests extends AbstractDecoderTests<ProtobufJsonDecoder>
 		testDecodeToMonoAll(Mono.just(dataBuffer), Msg.class, step -> step
 				.expectNext(this.msg1)
 				.verifyComplete());
+	}
+
+	@Test
+	void decodeToMonoNonAsciiUtf8() {
+		Msg expected = Msg.newBuilder().setFoo("Caf\u00e9 \u20ac").build();
+		byte[] json = "{\"foo\":\"Caf\u00e9 \u20ac\"}".getBytes(StandardCharsets.UTF_8);
+
+		testDecodeToMono(Mono.just(this.bufferFactory.wrap(json)), ResolvableType.forClass(Msg.class), step -> step
+				.expectNext(expected)
+				.verifyComplete(), MediaType.APPLICATION_JSON, null);
 	}
 
 	@Test

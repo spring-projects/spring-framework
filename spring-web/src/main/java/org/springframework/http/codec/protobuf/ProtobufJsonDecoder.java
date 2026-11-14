@@ -18,6 +18,7 @@ package org.springframework.http.codec.protobuf;
 
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -145,7 +146,7 @@ public class ProtobufJsonDecoder implements Decoder<Message> {
 
 		try {
 			Message.Builder builder = getMessageBuilder(targetType.toClass());
-			this.parser.merge(new InputStreamReader(dataBuffer.asInputStream()), builder);
+			this.parser.merge(new InputStreamReader(dataBuffer.asInputStream(), StandardCharsets.UTF_8), builder);
 			return builder.build();
 		}
 		catch (Exception ex) {
