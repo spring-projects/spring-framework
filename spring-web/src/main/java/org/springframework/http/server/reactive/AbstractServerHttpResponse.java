@@ -177,7 +177,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 						return doCommit(
 								() -> {
 									try {
-										return writeWithInternal(Mono.fromCallable(() -> buffer)
+										return writeWithInternal(Mono.just(buffer)
 												.doOnSubscribe(s -> subscribed.set(true))
 												.doOnDiscard(DataBuffer.class, DataBufferUtils::release));
 									}
