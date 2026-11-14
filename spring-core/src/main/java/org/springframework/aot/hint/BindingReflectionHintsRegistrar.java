@@ -126,7 +126,7 @@ public class BindingReflectionHintsRegistrar {
 			});
 		}
 		Set<Class<?>> referencedTypes = new LinkedHashSet<>();
-		collectReferencedTypes(referencedTypes, ResolvableType.forType(type));
+		collectReferencedTypes(referencedTypes, new HashSet<>(), ResolvableType.forType(type));
 		referencedTypes.forEach(referencedType -> registerReflectionHints(hints, seen, referencedType));
 	}
 
@@ -177,12 +177,15 @@ public class BindingReflectionHintsRegistrar {
 		return (ClassUtils.isAssignable(type1, type2) || ClassUtils.isAssignable(type2, type1));
 	}
 
-	private void collectReferencedTypes(Set<Class<?>> types, ResolvableType resolvableType) {
+	private void collectReferencedTypes(Set<Class<?>> types, Set<Type> visitedTypes, ResolvableType resolvableType) {
 		Class<?> clazz = resolvableType.resolve();
-		if (clazz != null && !types.contains(clazz)) {
+		// Track visited generic types rather than classes so that nested occurrences
+		// of the same container type (for example Map<String, Map<String, T>>) are
+		// traversed, while self-referencing type variables still terminate.
+		if (clazz != null && visitedTypes.add(resolvableType.getType())) {
 			types.add(clazz);
 			for (ResolvableType genericResolvableType : resolvableType.getGenerics()) {
-				collectReferencedTypes(types, genericResolvableType);
+				collectReferencedTypes(types, visitedTypes, genericResolvableType);
 			}
 			Class<?> superClass = clazz.getSuperclass();
 			if (superClass != null && superClass != Object.class && superClass != Record.class && superClass != Enum.class) {
