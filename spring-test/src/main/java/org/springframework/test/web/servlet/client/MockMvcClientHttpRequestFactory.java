@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import jakarta.servlet.http.Cookie;
@@ -169,7 +170,7 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 			List<String> values = headers.get(HttpHeaders.COOKIE);
 			if (!ObjectUtils.isEmpty(values)) {
 				values.stream()
-						.flatMap(header -> StringUtils.commaDelimitedListToSet(header).stream())
+						.flatMap(header -> Arrays.stream(StringUtils.tokenizeToStringArray(header, ";")))
 						.map(value -> {
 							String[] cookieParts = StringUtils.split(value, "=");
 							Assert.isTrue(cookieParts != null && cookieParts.length == 2, "Invalid cookie: '" + value + "'");
