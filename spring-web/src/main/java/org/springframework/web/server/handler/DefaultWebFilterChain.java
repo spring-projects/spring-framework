@@ -16,6 +16,7 @@
 
 package org.springframework.web.server.handler;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -61,9 +62,11 @@ public class DefaultWebFilterChain implements WebFilterChain {
 	 */
 	public DefaultWebFilterChain(WebHandler handler, List<WebFilter> filters) {
 		Assert.notNull(handler, "WebHandler is required");
-		this.allFilters = Collections.unmodifiableList(filters);
+		// Defensive copy, since the supplied list (for example, from WebHttpHandlerBuilder)
+		// may be modified after construction.
+		this.allFilters = Collections.unmodifiableList(new ArrayList<>(filters));
 		this.handler = handler;
-		DefaultWebFilterChain chain = initChain(filters, handler);
+		DefaultWebFilterChain chain = initChain(this.allFilters, handler);
 		this.currentFilter = chain.currentFilter;
 		this.chain = chain.chain;
 	}
