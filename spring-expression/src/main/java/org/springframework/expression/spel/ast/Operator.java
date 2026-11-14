@@ -222,12 +222,15 @@ public abstract class Operator extends SpelNodeImpl {
 		}
 
 		// assert: SpelCompiler.boxingCompatible(leftDesc, rightDesc)
+		// For OpGT and OpGE, use DCMPL/FCMPL (NaN yields -1) like javac, so that
+		// a comparison with NaN is false; DCMPG/FCMPG (NaN yields 1) otherwise.
+		boolean greaterThan = (compInstruction1 == IFLE || compInstruction1 == IFLT);
 		if (targetType == 'D') {
-			mv.visitInsn(DCMPG);
+			mv.visitInsn(greaterThan ? DCMPL : DCMPG);
 			mv.visitJumpInsn(compInstruction1, elseTarget);
 		}
 		else if (targetType == 'F') {
-			mv.visitInsn(FCMPG);
+			mv.visitInsn(greaterThan ? FCMPL : FCMPG);
 			mv.visitJumpInsn(compInstruction1, elseTarget);
 		}
 		else if (targetType == 'J') {
