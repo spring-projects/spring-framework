@@ -30,6 +30,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import org.springframework.aop.support.AopUtils;
+import org.springframework.aot.AotDetector;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.JdkProxyHint;
@@ -83,6 +85,8 @@ import org.springframework.context.testfixture.context.annotation.LazyConstructo
 import org.springframework.context.testfixture.context.annotation.LazyFactoryMethodArgumentComponent;
 import org.springframework.context.testfixture.context.annotation.LazyResourceFieldComponent;
 import org.springframework.context.testfixture.context.annotation.LazyResourceMethodComponent;
+import org.springframework.context.testfixture.context.annotation.LazySelfReferenceAutoProxyCreator;
+import org.springframework.context.testfixture.context.annotation.LazySelfReferenceComponent;
 import org.springframework.context.testfixture.context.annotation.LookupComponent;
 import org.springframework.context.testfixture.context.annotation.PropertySourceConfiguration;
 import org.springframework.context.testfixture.context.annotation.QualifierConfiguration;
@@ -638,6 +642,41 @@ class ApplicationContextAotGeneratorTests {
 
 		private String toCglibClassSimpleName(Class<?> configClass) {
 			return configClass.getSimpleName() + CGLIB_CONFIGURATION_CLASS_SUFFIX;
+		}
+	}
+
+
+	@Nested
+	@CompileWithForkedClassLoader
+	class LazyResolutionProxy {
+
+		@Test  // gh-30985
+		void processAheadOfTimeWhenHasLazySelfReferenceAndClassBasedAopProxy() {
+			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+			applicationContext.registerBean(LazySelfReferenceAutoProxyCreator.class);
+			applicationContext.registerBean("component", LazySelfReferenceComponent.class);
+
+			TestGenerationContext generationContext = processAheadOfTime(applicationContext);
+			testCompiledResult(generationContext, (initializer, compiled) -> {
+				System.setProperty(AotDetector.AOT_ENABLED, "true");
+				try {
+					GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+					LazySelfReferenceComponent component =
+							freshApplicationContext.getBean(LazySelfReferenceComponent.class);
+					assertThat(AopUtils.isCglibProxy(component)).isTrue();
+					assertThat(AopUtils.isCglibProxy(component.getSelf())).isTrue();
+					assertThat(component.getSelf().getClass()).isNotSameAs(component.getClass());
+					assertThat(component.greet()).isEqualTo("Hello World");
+					assertThat(RuntimeHintsPredicates.reflection()
+							.onType(TypeReference.of(component.getSelf().getClass()))
+							.withMemberCategories(MemberCategory.INVOKE_DECLARED_METHODS,
+									MemberCategory.ACCESS_DECLARED_FIELDS))
+							.accepts(generationContext.getRuntimeHints());
+				}
+				finally {
+					System.clearProperty(AotDetector.AOT_ENABLED);
+				}
+			});
 		}
 	}
 
