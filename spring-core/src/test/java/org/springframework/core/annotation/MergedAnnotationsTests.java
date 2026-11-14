@@ -1153,6 +1153,34 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
+	void getFromMethodWithUnresolvedGenericArrayInGenericTypeHierarchy() {
+		// The following method is GenericArrayAbstractSuperclass.processOneAndTwo(java.lang.Long, C[]),
+		// where 'C[]' is an array of an unresolved generic, for which ResolvableType.resolve() returns null.
+		Method method = ClassUtils.getMethod(GenericArrayInterfaceImpl.class, "processOneAndTwo",
+				Long.class, Object[].class);
+		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY)
+				.get(Transactional.class).isDirectlyPresent()).isTrue();
+	}
+
+	@Test
+	void getFromOverloadedMethodWithUnresolvedGenericArrayInGenericTypeHierarchy() {
+		// processOneAndTwo(Long, Object) overloads, but does not override,
+		// processOneAndTwo(Long, C[]) and processOneAndTwo(A, B) with B = C[].
+		Method method = ClassUtils.getMethod(GenericArrayOverloadingSubclass.class, "processOneAndTwo",
+				Long.class, Object.class);
+		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY)
+				.get(Transactional.class).isPresent()).isFalse();
+	}
+
+	@Test
+	void getFromMethodWithUnresolvedGenericMultidimensionalArrayInGenericTypeHierarchy() {
+		Method method = ClassUtils.getMethod(GenericMultidimensionalArrayAbstractSuperclass.class,
+				"processOneAndTwo", Long.class, Object[][].class);
+		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY)
+				.get(Transactional.class).isDirectlyPresent()).isTrue();
+	}
+
+	@Test
 	void getFromMethodWithInterfaceOnSuper() throws Exception {
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
@@ -3341,6 +3369,30 @@ class MergedAnnotationsTests {
 		// The compiler does not require us to declare a concrete
 		// processOneAndTwo(Long, String) method, and we intentionally
 		// do not declare one here.
+	}
+
+	abstract static class GenericArrayAbstractSuperclass<C> implements GenericInterface<Long, C[]> {
+
+		@Override
+		public void processOneAndTwo(Long value1, C[] value2) {
+		}
+	}
+
+	static class GenericArrayInterfaceImpl extends GenericArrayAbstractSuperclass<String> {
+	}
+
+	abstract static class GenericArrayOverloadingSubclass<D> extends GenericArrayAbstractSuperclass<D> {
+
+		public void processOneAndTwo(Long value1, Object value2) {
+		}
+	}
+
+	abstract static class GenericMultidimensionalArrayAbstractSuperclass<C>
+			implements GenericInterface<Long, C[][]> {
+
+		@Override
+		public void processOneAndTwo(Long value1, C[][] value2) {
+		}
 	}
 
 
