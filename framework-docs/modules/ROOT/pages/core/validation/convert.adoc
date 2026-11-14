@@ -337,6 +337,28 @@ converters, and basic `Object`-to-`String` converters. You can register the same
 with any `ConverterRegistry` by using the static `addDefaultConverters`
 method on the `DefaultConversionService` class.
 
+The default set includes conversions for the following categories:
+
+* Scalars such as numbers, characters, booleans, enums, locales, charsets, currencies,
+  UUIDs, regular expressions, and data sizes
+* Arrays, collections, maps, and streams, with element conversion where necessary
+* `Date` and `Instant`, time zones, `Calendar`, byte buffers, `Properties`, and `Optional`
+
+In addition to these registered converters, `DefaultConversionService` applies common
+object conversion conventions. It looks for a non-static `to` method named after the
+target type on the source object (for example, `toBar()` for a `Bar` target), a static
+`valueOf`, `of`, or `from` factory method on the target type that accepts the source
+type, or a target type constructor that accepts the source type. For example, a `String`
+can be converted to `java.io.File` through its `File(String)` constructor. These
+conventions do not make every type convertible: `java.nio.file.Path` has neither such a
+constructor nor a matching single-argument factory method, so an application that needs
+`String`-to-`Path` conversion must register a converter, for example `Path::of`.
+
+`PropertyResolver` implementations use a `DefaultConversionService` for typed property
+lookups unless you configure a different conversion service. Since the exact set of
+supported pairs can evolve, use `ConversionService.canConvert()` to check a particular
+source and target type programmatically.
+
 Converters for value types are reused for arrays and collections, so there is
 no need to create a specific converter to convert from a `Collection` of `S` to a
 `Collection` of `T`, assuming that standard collection handling is appropriate.
