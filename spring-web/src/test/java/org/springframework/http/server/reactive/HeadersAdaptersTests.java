@@ -213,6 +213,14 @@ class HeadersAdaptersTests {
 	}
 
 	@ParameterizedHeadersTest
+	void putShouldKeepMultipleValues(MultiValueMap<String, String> headers) {
+		headers.put("TestHeader", List.of("first", "second"));
+		assertThat(headers.get("TestHeader")).containsExactly("first", "second");
+		headers.put("TestHeader", List.of("third", "fourth"));
+		assertThat(headers.get("TestHeader")).containsExactly("third", "fourth");
+	}
+
+	@ParameterizedHeadersTest
 	void nullValuesShouldNotFail(MultiValueMap<String, String> headers) {
 		headers.add("TestHeader", null);
 		assertThat(headers.getFirst("TestHeader")).isNull();
