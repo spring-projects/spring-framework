@@ -248,7 +248,8 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 
 	/**
-	 * Wrapper that holds override values.
+	 * Wrapper that holds override values, as well as the names of headers removed
+	 * from the underlying, immutable request headers.
 	 */
 	private static class RequestHeaderOverrideWrapper implements MultiValueMap<String, String> {
 
@@ -256,24 +257,28 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 		private @Nullable MultiValueMap<String, String> overrideMap;
 
+		private @Nullable Set<String> removedNames;
+
 		RequestHeaderOverrideWrapper(MultiValueMap<String, String> delegate) {
 			this.delegate = delegate;
 		}
 
 		@Override
 		public @Nullable String getFirst(String key) {
-			String value = (this.overrideMap != null ? this.overrideMap.getFirst(key) : null);
-			return (value != null ? value : this.delegate.getFirst(key));
+			if (this.overrideMap != null && this.overrideMap.containsKey(key)) {
+				return this.overrideMap.getFirst(key);
+			}
+			return (!isRemoved(key) ? this.delegate.getFirst(key) : null);
 		}
 
 		@Override
 		public void add(String key, @Nullable String value) {
-			initOverrideMap().add(key, value);
+			initOverrideMapFor(key).add(key, value);
 		}
 
 		@Override
 		public void addAll(String key, List<? extends String> values) {
-			initOverrideMap().addAll(key, values);
+			initOverrideMapFor(key).addAll(key, values);
 		}
 
 		@Override
@@ -293,41 +298,42 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 		@Override
 		public Map<String, String> toSingleValueMap() {
-			Map<String, String> map = this.delegate.toSingleValueMap();
-			if (this.overrideMap != null) {
-				this.overrideMap.forEach((key, values) -> map.put(key, values.get(0)));
+			if (this.overrideMap == null && this.removedNames == null) {
+				return this.delegate.toSingleValueMap();
+			}
+			Map<String, String> map = new LinkedHashMap<>();
+			for (String name : keySet()) {
+				List<String> values = get(name);
+				if (!CollectionUtils.isEmpty(values)) {
+					map.put(name, values.get(0));
+				}
 			}
 			return map;
 		}
 
 		@Override
 		public int size() {
-			if (this.overrideMap == null) {
+			if (this.overrideMap == null && this.removedNames == null) {
 				return this.delegate.size();
 			}
-			int size = this.overrideMap.size();
-			for (String name : this.delegate.keySet()) {
-				if (!this.overrideMap.containsKey(name)) {
-					size++;
-				}
-			}
-			return size;
+			return keySet().size();
 		}
 
 		@Override
 		public boolean isEmpty() {
-			return (this.delegate.isEmpty() && (this.overrideMap == null || this.overrideMap.isEmpty()));
+			if (this.overrideMap == null && this.removedNames == null) {
+				return this.delegate.isEmpty();
+			}
+			return keySet().isEmpty();
 		}
 
 		@Override
 		public boolean containsKey(Object key) {
 			if (key instanceof String headerName) {
-				if (this.delegate.containsKey(headerName)) {
+				if (this.overrideMap != null && this.overrideMap.containsKey(headerName)) {
 					return true;
 				}
-				if (this.overrideMap != null) {
-					return this.overrideMap.containsKey(headerName);
-				}
+				return (!isRemoved(headerName) && this.delegate.containsKey(headerName));
 			}
 			return false;
 		}
@@ -340,25 +346,34 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 		@Override
 		public @Nullable List<String> get(Object key) {
 			if (key instanceof String headerName) {
-				if (this.overrideMap != null) {
-					List<String> values = this.overrideMap.get(headerName);
-					if (values != null) {
-						return values;
-					}
+				if (this.overrideMap != null && this.overrideMap.containsKey(headerName)) {
+					return this.overrideMap.get(headerName);
 				}
-				return this.delegate.get(headerName);
+				return (!isRemoved(headerName) ? this.delegate.get(headerName) : null);
 			}
 			return null;
 		}
 
 		@Override
 		public @Nullable List<String> put(String key, List<String> value) {
-			return initOverrideMap().put(key, value);
+			List<String> previous = get(key);
+			initOverrideMap().put(key, value);
+			return previous;
 		}
 
 		@Override
 		public @Nullable List<String> remove(Object key) {
-			return initOverrideMap().remove(key);
+			if (key instanceof String headerName) {
+				List<String> previous = get(headerName);
+				if (this.overrideMap != null) {
+					this.overrideMap.remove(headerName);
+				}
+				if (this.delegate.containsKey(headerName)) {
+					initRemovedNames().add(headerName);
+				}
+				return previous;
+			}
+			return null;
 		}
 
 		@Override
@@ -371,21 +386,24 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 			if (this.overrideMap != null) {
 				this.overrideMap.clear();
 			}
+			initRemovedNames().addAll(this.delegate.keySet());
 		}
 
 		@Override
 		public Set<String> keySet() {
-			if (this.overrideMap != null) {
-				Set<String> set = new LinkedHashSet<>();
-				for (String name : this.delegate.keySet()) {
-					if (!this.overrideMap.containsKey(name)) {
-						set.add(name);
-					}
-				}
-				set.addAll(this.overrideMap.keySet());
-				return set;
+			if (this.overrideMap == null && this.removedNames == null) {
+				return this.delegate.keySet();
 			}
-			return this.delegate.keySet();
+			Set<String> set = new LinkedHashSet<>();
+			for (String name : this.delegate.keySet()) {
+				if ((this.overrideMap == null || !this.overrideMap.containsKey(name)) && !isRemoved(name)) {
+					set.add(name);
+				}
+			}
+			if (this.overrideMap != null) {
+				set.addAll(this.overrideMap.keySet());
+			}
+			return set;
 		}
 
 		@Override
@@ -403,6 +421,32 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 				this.overrideMap = CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT));
 			}
 			return this.overrideMap;
+		}
+
+		/**
+		 * Return the override map, initialized with the current values of the
+		 * given header from the request, if any, so that they can be added to.
+		 */
+		private MultiValueMap<String, String> initOverrideMapFor(String key) {
+			MultiValueMap<String, String> map = initOverrideMap();
+			if (!map.containsKey(key) && !isRemoved(key)) {
+				List<String> values = this.delegate.get(key);
+				if (values != null) {
+					map.addAll(key, values);
+				}
+			}
+			return map;
+		}
+
+		private Set<String> initRemovedNames() {
+			if (this.removedNames == null) {
+				this.removedNames = Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT));
+			}
+			return this.removedNames;
+		}
+
+		private boolean isRemoved(String headerName) {
+			return (this.removedNames != null && this.removedNames.contains(headerName));
 		}
 
 		@Override
