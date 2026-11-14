@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -79,7 +80,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	/** Proxy Connection. */
 	private @Nullable Connection connection;
 
-	private final Mono<? extends Connection> connectionEmitter;
+	private volatile Mono<? extends Connection> connectionEmitter;
 
 
 	/**
@@ -87,7 +88,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	 */
 	public SingleConnectionFactory(ConnectionFactory targetConnectionFactory) {
 		super(targetConnectionFactory);
-		this.connectionEmitter = super.create().cache();
+		this.connectionEmitter = createConnectionEmitter();
 	}
 
 	/**
@@ -100,7 +101,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	public SingleConnectionFactory(String url, boolean suppressClose) {
 		super(ConnectionFactories.get(url));
 		this.suppressClose = suppressClose;
-		this.connectionEmitter = super.create().cache();
+		this.connectionEmitter = createConnectionEmitter();
 	}
 
 	/**
@@ -131,6 +132,16 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 		this.connectionEmitter = Mono.just(target);
 		this.suppressClose = suppressClose;
 		this.connection = (suppressClose ? getCloseSuppressingConnectionProxy(target) : target);
+	}
+
+	/**
+	 * Create a {@code Mono} that obtains a {@link Connection} from the target
+	 * {@link ConnectionFactory} on first subscription and caches it, without
+	 * caching a failed attempt so that the next access tries again.
+	 */
+	private Mono<? extends Connection> createConnectionEmitter() {
+		return Mono.defer(super::create).cache(
+				connectionToUse -> Duration.ofMillis(Long.MAX_VALUE), ex -> Duration.ZERO, () -> Duration.ZERO);
 	}
 
 
@@ -170,14 +181,16 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 
 	@Override
 	public Mono<? extends Connection> create() {
-		Connection connection = this.target.get();
-		return this.connectionEmitter.map(connectionToUse -> {
-			if (connection == null) {
-				this.target.compareAndSet(null, connectionToUse);
-				this.connection =
-						(isSuppressClose() ? getCloseSuppressingConnectionProxy(connectionToUse) : connectionToUse);
-			}
-			return Objects.requireNonNull(this.connection);
+		return Mono.defer(() -> {
+			Connection connection = this.target.get();
+			return this.connectionEmitter.map(connectionToUse -> {
+				if (connection == null) {
+					this.target.compareAndSet(null, connectionToUse);
+					this.connection =
+							(isSuppressClose() ? getCloseSuppressingConnectionProxy(connectionToUse) : connectionToUse);
+				}
+				return Objects.requireNonNull(this.connection);
+			});
 		}).flatMap(this::prepareConnection);
 	}
 
@@ -203,6 +216,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 		return Mono.defer(() -> {
 			if (this.target.compareAndSet(connection, null)) {
 				this.connection = null;
+				this.connectionEmitter = createConnectionEmitter();
 				return Mono.from(connection.close());
 			}
 			return Mono.empty();
