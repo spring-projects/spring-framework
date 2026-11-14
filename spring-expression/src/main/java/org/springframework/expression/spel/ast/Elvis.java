@@ -128,11 +128,18 @@ public class Elvis extends SpelNodeImpl {
 		this.children[0].generateCode(mv, cf);
 		String lastDesc = cf.lastDescriptor();
 		Assert.state(lastDesc != null, "No last descriptor");
+		if (CodeFlow.isPrimitive(lastDesc) && !"V".equals(lastDesc)) {
+			// A primitive value is neither null nor an empty String, so the value
+			// of the expression is always the value of the left-hand operand.
+			if (!CodeFlow.isPrimitive(this.exitTypeDescriptor)) {
+				CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
+			}
+			cf.exitCompilationScope();
+			cf.pushDescriptor(this.exitTypeDescriptor);
+			return;
+		}
 		if ("Ljava/util/Optional".equals(lastDesc)) {
 			CodeFlow.insertOptionalUnwrapIfNecessary(mv, lastDesc);
-		}
-		else {
-			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
 		}
 		cf.exitCompilationScope();
 
