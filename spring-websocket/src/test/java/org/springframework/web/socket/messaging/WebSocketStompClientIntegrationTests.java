@@ -137,6 +137,18 @@ class WebSocketStompClientIntegrationTests {
 		assertThat(testHandler.getReceived()).containsExactly(payload);
 	}
 
+	@Test
+	void publishSubscribeWithSplitMultibyteMessage() throws Exception {
+		String payload = "가".repeat(700);
+
+		TestHandler testHandler = new TestHandler("/topic/foo", payload);
+		this.stompClient.setOutboundMessageSizeLimit(512);
+		this.stompClient.connectAsync(this.url, testHandler);
+
+		assertThat(testHandler.awaitForMessageCount(1, 5000)).isTrue();
+		assertThat(testHandler.getReceived()).containsExactly(payload);
+	}
+
 
 	@Configuration(proxyBeanMethods = false)
 	static class TestConfig extends WebSocketMessageBrokerConfigurationSupport {

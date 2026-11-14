@@ -55,7 +55,8 @@ public class SplittingStompEncoder {
 
 	/**
 	 * Encode the given payload and headers to a STOMP frame, and split it into a
-	 * list of parts based on the configured buffer size limit.
+	 * list of parts based on the configured buffer size limit. A part does not
+	 * end inside a UTF-8 character unless the limit is too small to hold it.
 	 * @param headers the STOMP message headers
 	 * @param payload the STOMP message payload
 	 * @return the parts of the encoded STOMP message
@@ -69,8 +70,19 @@ public class SplittingStompEncoder {
 		}
 
 		List<byte[]> frames = new ArrayList<>();
-		for (int i = 0; i < length; i += this.bufferSizeLimit) {
-			frames.add(Arrays.copyOfRange(result, i, Math.min(i + this.bufferSizeLimit, length)));
+		int start = 0;
+		while (start < length) {
+			int end = Math.min(start + this.bufferSizeLimit, length);
+			// Do not end a part inside a UTF-8 character, as a part may be sent as text
+			int cut = end;
+			while (cut > start && cut < length && end - cut < 3 && (result[cut] & 0xC0) == 0x80) {
+				cut--;
+			}
+			if (cut > start) {
+				end = cut;
+			}
+			frames.add(Arrays.copyOfRange(result, start, end));
+			start = end;
 		}
 		return frames;
 	}
