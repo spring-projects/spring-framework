@@ -45,6 +45,7 @@ import org.xml.sax.Locator;
 import org.xmlunit.diff.DifferenceEvaluator;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.oxm.AbstractMarshallerTests;
@@ -289,6 +290,50 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
 		assertThat(writer.toString()).as("No XML written").isNotEmpty();
 		verify(mimeContainer, times(3)).addAttachment(isA(String.class), isA(DataHandler.class));
+	}
+
+	@Test  // spring-ws#1030 / SWS-958: mtomEnabled + schema must validate logical infoset then XOP-encode
+	void marshalAttachmentsWithSchema() throws Exception {
+		marshaller = new Jaxb2Marshaller();
+		marshaller.setClassesToBeBound(BinaryObject.class);
+		marshaller.setMtomEnabled(true);
+		marshaller.setSchema(new ClassPathResource("binary-object.xsd", getClass()));
+		marshaller.afterPropertiesSet();
+		MimeContainer mimeContainer = mock();
+
+		Resource logo = new ClassPathResource("spring-ws.png", getClass());
+		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
+
+		given(mimeContainer.convertToXopPackage()).willReturn(true);
+		byte[] bytes = FileCopyUtils.copyToByteArray(logo.getInputStream());
+		BinaryObject object = new BinaryObject(bytes, dataHandler);
+		StringWriter writer = new StringWriter();
+		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
+		String xml = writer.toString();
+		assertThat(xml).as("No XML written").isNotEmpty();
+		assertThat(xml).contains("Include");
+		verify(mimeContainer, times(3)).addAttachment(isA(String.class), isA(DataHandler.class));
+	}
+
+	@Test  // spring-ws#1030: schema still rejects content that does not match when MTOM is enabled
+	void marshalAttachmentsWithSchemaRejectsInvalidGraph() throws Exception {
+		marshaller = new Jaxb2Marshaller();
+		marshaller.setClassesToBeBound(BinaryObject.class);
+		marshaller.setMtomEnabled(true);
+		// flight.xsd does not describe BinaryObject — logical validation must still fail before XOP
+		marshaller.setSchema(new FileSystemResource("src/test/schema/flight.xsd"));
+		marshaller.afterPropertiesSet();
+		MimeContainer mimeContainer = mock();
+
+		Resource logo = new ClassPathResource("spring-ws.png", getClass());
+		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
+		given(mimeContainer.convertToXopPackage()).willReturn(true);
+		byte[] bytes = FileCopyUtils.copyToByteArray(logo.getInputStream());
+		BinaryObject object = new BinaryObject(bytes, dataHandler);
+
+		assertThatExceptionOfType(XmlMappingException.class).isThrownBy(() ->
+				marshaller.marshal(object, new StreamResult(new StringWriter()), mimeContainer));
+		verify(mimeContainer, times(0)).addAttachment(isA(String.class), isA(DataHandler.class));
 	}
 
 	@Test  // SPR-10714
