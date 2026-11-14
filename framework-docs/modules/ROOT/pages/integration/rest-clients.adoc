@@ -110,7 +110,7 @@ Java::
 		.uri("https://example.com") <2>
 		.retrieve() <3>
 		.body(String.class); <4>
-	
+
 	System.out.println(result); <5>
 ----
 <1> Set up a GET request
@@ -127,7 +127,7 @@ Kotlin::
 		.uri("https://example.com") <2>
 		.retrieve() <3>
 		.body<String>() <4>
-	
+
 	println(result) <5>
 ----
 <1> Set up a GET request
@@ -149,7 +149,7 @@ Java::
 		.uri("https://example.com") <1>
 		.retrieve()
 		.toEntity(String.class); <2>
-	
+
 	System.out.println("Response status: " + result.getStatusCode()); <3>
 	System.out.println("Response headers: " + result.getHeaders()); <3>
 	System.out.println("Contents: " + result.getBody()); <3>
@@ -166,7 +166,7 @@ Kotlin::
 		.uri("https://example.com") <1>
 		.retrieve()
 		.toEntity<String>() <2>
-	
+
 	println("Response status: " + result.statusCode) <3>
 	println("Response headers: " + result.headers) <3>
 	println("Contents: " + result.body) <3>
@@ -495,7 +495,7 @@ By default, it uses the `SimpleClientHttpRequestFactory`, but this can be change
 See <<rest-request-factories>>.
 
 NOTE: `RestTemplate` can be instrumented for observability, in order to produce metrics and traces.
-See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplate Observability support] section.
+See the xref:integration/observability.adoc#observability.http-client.resttemplate[RestTemplate Observability support] section.
 
 [[rest-template-body]]
 === Body

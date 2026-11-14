@@ -584,7 +584,7 @@ for those annotations.
 
 NOTE: This element does not activate processing of Spring's
 xref:data-access/transaction/declarative/annotations.adoc[`@Transactional`] annotation;
-you can use the <<data-access.adoc#tx-decl-explained, `<tx:annotation-driven/>`>>
+you can use the xref:data-access/transaction/declarative/tx-decl-explained.adoc[`<tx:annotation-driven/>`]
 element for that purpose. Similarly, Spring's
 xref:integration/cache/annotations.adoc[caching annotations] need to be explicitly
 xref:integration/cache/annotations.adoc#cache-annotation-enable[enabled] as well.
