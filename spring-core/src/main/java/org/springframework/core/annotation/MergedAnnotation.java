@@ -497,7 +497,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @see #asAnnotationAttributes(Adapt...)
 	 * @see #asMap(Adapt...)
 	 */
-	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);
+	<T extends Map<String, ? super Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);
 
 	/**
 	 * Create a type-safe synthesized version of this merged annotation that can
