@@ -109,6 +109,28 @@ class DefaultRSocketStrategiesTests {
 	}
 
 	@Test
+	void encoderAddedAfterBuildDoesNotAffectStrategies() {
+		var builder = RSocketStrategies.builder();
+		var strategies = builder.build();
+
+		builder.encoder(new ByteArrayEncoder());
+
+		assertThat(strategies.encoders()).hasSize(4);
+		assertThat(builder.build().encoders()).hasSize(5);
+	}
+
+	@Test
+	void decoderAddedAfterBuildDoesNotAffectStrategies() {
+		var builder = RSocketStrategies.builder();
+		var strategies = builder.build();
+
+		builder.decoder(new ByteArrayDecoder());
+
+		assertThat(strategies.decoders()).hasSize(4);
+		assertThat(builder.build().decoders()).hasSize(5);
+	}
+
+	@Test
 	void applyMetadataExtractors() {
 		Consumer<MetadataExtractorRegistry> consumer = mock();
 		RSocketStrategies.builder().metadataExtractorRegistry(consumer).build();

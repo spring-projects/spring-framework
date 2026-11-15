@@ -18,7 +18,6 @@ package org.springframework.messaging.rsocket;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -68,8 +67,9 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			RouteMatcher routeMatcher, ReactiveAdapterRegistry adapterRegistry,
 			DataBufferFactory bufferFactory, MetadataExtractor metadataExtractor) {
 
-		this.encoders = Collections.unmodifiableList(encoders);
-		this.decoders = Collections.unmodifiableList(decoders);
+		// Defensive copies, since the Builder's lists may be modified after build().
+		this.encoders = List.copyOf(encoders);
+		this.decoders = List.copyOf(decoders);
 		this.routeMatcher = routeMatcher;
 		this.adapterRegistry = adapterRegistry;
 		this.bufferFactory = bufferFactory;

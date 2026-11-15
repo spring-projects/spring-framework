@@ -18,6 +18,7 @@ package org.springframework.web.server.adapter;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -44,6 +45,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
+import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
@@ -113,6 +116,20 @@ class WebHttpHandlerBuilderTests {
 		httpHandler.handle(request, response).block(ofMillis(5000));
 
 		assertThat(response.getBodyAsString().block(ofMillis(5000))).isEqualTo("handled");
+	}
+
+	@Test
+	void webFilterAddedAfterBuildDoesNotAffectHttpHandler() {
+		WebFilter filterA = (exchange, chain) -> chain.filter(exchange);
+		WebFilter filterB = (exchange, chain) -> chain.filter(exchange);
+
+		var builder = WebHttpHandlerBuilder.webHandler(exchange -> Mono.empty()).filter(filterA);
+		var httpHandler = builder.build();
+
+		builder.filter(filterB);
+
+		assertThat(getFilters(httpHandler)).containsExactly(filterA);
+		assertThat(getFilters(builder.build())).containsExactly(filterA, filterB);
 	}
 
 	@Test  // SPR-16972
@@ -210,6 +227,12 @@ class WebHttpHandlerBuilderTests {
 
 		assertThat(((HttpWebHandlerAdapter) builder.build()).getDefaultHtmlEscape()).isTrue();
 		assertThat(((HttpWebHandlerAdapter) builder.clone().build()).getDefaultHtmlEscape()).isTrue();
+	}
+
+	private static List<WebFilter> getFilters(HttpHandler httpHandler) {
+		WebHandler exceptionHandlingWebHandler = ((HttpWebHandlerAdapter) httpHandler).getDelegate();
+		WebHandler filteringWebHandler = ((ExceptionHandlingWebHandler) exceptionHandlingWebHandler).getDelegate();
+		return ((FilteringWebHandler) filteringWebHandler).getFilters();
 	}
 
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
