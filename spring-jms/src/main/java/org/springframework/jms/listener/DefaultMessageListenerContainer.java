@@ -1170,15 +1170,24 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				break;
 			}
 			catch (Exception ex) {
-				if (ex instanceof JMSException jmsException) {
+				JMSException jmsException = null;
+				if (ex instanceof JMSException directEx) {
+					jmsException = directEx;
+				}
+				else if (ex instanceof ConnectionValidationException && ex.getCause() instanceof JMSException causeEx) {
+					jmsException = causeEx;
+				}
+				if (jmsException != null) {
 					invokeExceptionListener(jmsException);
 				}
 				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
 				msg.append(getDestinationDescription()).append("' - retrying using ");
 				msg.append(execution).append(". Cause: ");
-				msg.append(ex instanceof JMSException jmsException ? JmsUtils.buildExceptionMessage(jmsException) :
-						ex.getMessage());
+				if (ex instanceof ConnectionValidationException) {
+					msg.append(ex.getMessage()).append(": ");
+				}
+				msg.append(jmsException != null ? JmsUtils.buildExceptionMessage(jmsException) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.error(msg, ex);
 				}
