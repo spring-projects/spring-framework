@@ -17,6 +17,8 @@
 package org.springframework.scheduling.support;
 
 import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
@@ -249,6 +251,15 @@ abstract class CronField {
 		 * for this type.
 		 */
 		public <T extends Temporal & Comparable<? super T>> T elapseUntil(T temporal, int goal) {
+			if (temporal instanceof ZonedDateTime zdt) {
+				if (this.field.isDateBased()) {
+					return cast(elapseUntil(zdt.toLocalDate(), goal).atStartOfDay(zdt.getZone()));
+				}
+				if (this == HOUR && this.field.range().isValidIntValue(goal)) {
+					LocalDate date = (get(zdt) < goal ? zdt.toLocalDate() : zdt.toLocalDate().plusDays(1));
+					return cast(date.atTime(goal, 0).atZone(zdt.getZone()));
+				}
+			}
 			int current = get(temporal);
 			ValueRange range = temporal.range(this.field);
 			if (current < goal) {
@@ -277,6 +288,14 @@ abstract class CronField {
 		 * @return the rolled forward temporal
 		 */
 		public <T extends Temporal & Comparable<? super T>> T rollForward(T temporal) {
+			if (this.higherOrder.isDateBased() && temporal instanceof ZonedDateTime zdt) {
+				LocalDate date = this.higherOrder.addTo(zdt.toLocalDate(), 1);
+				if (date.isSupported(this.field)) {
+					ValueRange range = date.range(this.field);
+					date = this.field.adjustInto(date, range.getMinimum());
+				}
+				return cast(date.atStartOfDay(zdt.getZone()));
+			}
 			T result = this.higherOrder.addTo(temporal, 1);
 			ValueRange range = result.range(this.field);
 			return this.field.adjustInto(result, range.getMinimum());
@@ -291,6 +310,12 @@ abstract class CronField {
 		 * @return the reset temporal
 		 */
 		public <T extends Temporal> T reset(T temporal) {
+			if (this.field.isDateBased() && temporal instanceof ZonedDateTime zdt) {
+				LocalDate date = (this == MONTH ? zdt.toLocalDate().withDayOfMonth(1) : zdt.toLocalDate());
+				@SuppressWarnings("unchecked")
+				T result = (T) date.atStartOfDay(zdt.getZone());
+				return result;
+			}
 			for (ChronoField lowerOrder : this.lowerOrders) {
 				if (temporal.isSupported(lowerOrder)) {
 					temporal = lowerOrder.adjustInto(temporal, temporal.range(lowerOrder).getMinimum());

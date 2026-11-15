@@ -18,6 +18,8 @@ package org.springframework.scheduling.support;
 
 import java.time.DateTimeException;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
@@ -364,6 +366,14 @@ final class QuartzCronField extends CronField {
 
 	@SuppressWarnings("unchecked")
 	private <T extends Temporal & Comparable<? super T>> @Nullable T adjust(T temporal) {
+		if (temporal instanceof ZonedDateTime zdt) {
+			LocalDate date = zdt.toLocalDate();
+			LocalDate adjusted = (LocalDate) this.adjuster.adjustInto(date);
+			if (adjusted == null) {
+				return null;
+			}
+			return (T) (adjusted.equals(date) ? zdt : adjusted.atStartOfDay(zdt.getZone()));
+		}
 		return (T) this.adjuster.adjustInto(temporal);
 	}
 

@@ -1394,6 +1394,39 @@ class CronExpressionTests {
 		actual = cronExpression.next(last);
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
+
+		// Late-evening spring-forward transition at 23:00 -> 00:00 (gh-37688)
+		cronExpression = CronExpression.parse("0 0 12 * * *");
+		last = ZonedDateTime.parse("2024-03-29T23:00:00-02:00[America/Nuuk]");
+		expected = ZonedDateTime.parse("2024-03-30T12:00:00-02:00[America/Nuuk]");
+		assertThat(cronExpression.next(last)).isEqualTo(expected);
+		assertThat(cronExpression.next(expected))
+				.isEqualTo(ZonedDateTime.parse("2024-03-31T12:00:00-01:00[America/Nuuk]"));
+
+		assertThat(CronExpression.parse("0 0 12 30 * *").next(last)).isEqualTo(expected);
+		assertThat(CronExpression.parse("0 0 12 * * SAT").next(last)).isEqualTo(expected);
+		assertThat(CronExpression.parse("0 0 12 L-1 * *").next(last)).isEqualTo(expected);
+
+		cronExpression = CronExpression.parse("0 0 12 * * *");
+		last = ZonedDateTime.parse("2018-05-03T23:30:00+08:30[Asia/Pyongyang]");
+		expected = ZonedDateTime.parse("2018-05-04T12:00:00+08:30[Asia/Pyongyang]");
+		assertThat(cronExpression.next(last)).isEqualTo(expected);
+		assertThat(cronExpression.next(expected))
+				.isEqualTo(ZonedDateTime.parse("2018-05-05T12:00:00+09:00[Asia/Pyongyang]"));
+
+		// Midnight fall-back transition at 01:00 -> 00:00
+		cronExpression = CronExpression.parse("0 30 0 * * *");
+		last = ZonedDateTime.parse("2024-11-02T23:30:00-04:00[America/Havana]");
+		expected = ZonedDateTime.parse("2024-11-03T00:30:00-04:00[America/Havana]");
+		assertThat(cronExpression.next(last)).isEqualTo(expected);
+		assertThat(cronExpression.next(expected))
+				.isEqualTo(ZonedDateTime.parse("2024-11-03T00:30:00-05:00[America/Havana]"));
+
+		// Sub-hour spring-forward gap from 02:45 -> 03:45
+		cronExpression = CronExpression.parse("0 15 2 * * *");
+		last = ZonedDateTime.parse("2024-09-29T01:50:00+12:45[Pacific/Chatham]");
+		assertThat(cronExpression.next(last))
+				.isEqualTo(ZonedDateTime.parse("2024-09-29T02:15:00+12:45[Pacific/Chatham]"));
 	}
 
 	@Test
