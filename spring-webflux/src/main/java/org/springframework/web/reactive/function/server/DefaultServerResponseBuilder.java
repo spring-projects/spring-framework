@@ -304,8 +304,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				Map<String, Object> hints) {
 
 			this.statusCode = statusCode;
-			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-			this.cookies = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(cookies));
+			this.headers = HttpHeaders.readOnlyHttpHeaders(HttpHeaders.copyOf(headers));
+			LinkedMultiValueMap<String, ResponseCookie> cookiesCopy = new LinkedMultiValueMap<>(cookies.size());
+			cookiesCopy.addAll(cookies);
+			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookiesCopy);
 			this.hints = hints;
 		}
 

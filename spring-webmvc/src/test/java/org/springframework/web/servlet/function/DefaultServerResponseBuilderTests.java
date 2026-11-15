@@ -76,6 +76,22 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
+	void builderChangesAfterBuildDoNotAffectResponse() {
+		ServerResponse.BodyBuilder builder = ServerResponse.ok()
+				.header("foo", "bar")
+				.cookie(new Cookie("name", "value"));
+		ServerResponse response = builder.build();
+
+		builder.header("foo", "baz")
+				.header("qux", "quux")
+				.cookie(new Cookie("name", "other"));
+
+		assertThat(response.headers().get("foo")).containsExactly("bar");
+		assertThat(response.headers().containsHeader("qux")).isFalse();
+		assertThat(response.cookies().get("name")).hasSize(1);
+	}
+
+	@Test
 	void ok() {
 		ServerResponse response = ServerResponse.ok().build();
 
