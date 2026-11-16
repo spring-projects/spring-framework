@@ -19,7 +19,6 @@ package org.springframework.orm.jpa.hibernate;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.engine.spi.SessionImplementor;
 
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
@@ -76,11 +75,6 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	public void suspend() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			// Eagerly disconnect the Session here, to make release mode "on_close" work on JBoss.
-			Session session = getCurrentSession();
-			if (session instanceof SessionImplementor sessionImpl) {
-				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
-			}
 		}
 	}
 
@@ -125,10 +119,6 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 			if (this.sessionHolder.getPreviousFlushMode() != null) {
 				// In case of pre-bound Session, restore previous flush mode.
 				session.setHibernateFlushMode(this.sessionHolder.getPreviousFlushMode());
-			}
-			// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
-			if (session instanceof SessionImplementor sessionImpl) {
-				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
 			}
 		}
 		finally {
