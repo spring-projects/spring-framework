@@ -23,6 +23,7 @@ import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.rsocket.metadata.CompositeMetadata;
 import io.rsocket.metadata.RoutingMetadata;
@@ -53,6 +54,32 @@ class MetadataEncoderTests {
 
 	private final RSocketStrategies strategies = RSocketStrategies.create();
 
+
+	@Test
+	void rawByteBufMetadataWithDefaultDataBufferFactory() {
+		RSocketStrategies strategies = RSocketStrategies.builder()
+				.dataBufferFactory(DefaultDataBufferFactory.sharedInstance)
+				.build();
+		MimeType mimeType = MimeTypeUtils.parseMimeType("application/x.test");
+
+		ByteBuf byteBuf = PooledByteBufAllocator.DEFAULT.directBuffer(16);
+		byteBuf.writeBytes("route-metadata!".getBytes(UTF_8));
+
+		DataBuffer buffer = new MetadataEncoder(mimeType, strategies)
+				.metadata(byteBuf, mimeType)
+				.encode()
+				.block();
+
+		// Reuse the pooled memory that held the metadata
+		ByteBuf other = PooledByteBufAllocator.DEFAULT.directBuffer(16);
+		other.writeBytes("SECRET-OF-OTHER".getBytes(UTF_8));
+		try {
+			assertThat(buffer.toString(UTF_8)).isEqualTo("route-metadata!");
+		}
+		finally {
+			other.release();
+		}
+	}
 
 	@Test
 	void compositeMetadata() {
