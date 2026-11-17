@@ -261,7 +261,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 		super.customizeConnection(con);
 		String userInfo = this.url.getUserInfo();
 		if (userInfo != null) {
-			String encodedCredentials = Base64.getUrlEncoder().encodeToString(userInfo.getBytes());
+			String encodedCredentials = Base64.getEncoder().encodeToString(userInfo.getBytes());
 			con.setRequestProperty(AUTHORIZATION, "Basic " + encodedCredentials);
 		}
 	}
