@@ -603,8 +603,23 @@ public class CorsConfiguration {
 		List<OriginPattern> patterns = combinePatterns(this.allowedOriginPatterns, other.allowedOriginPatterns);
 		config.allowedOrigins = (origins == DEFAULT_PERMIT_ALL && !CollectionUtils.isEmpty(patterns) ? null : origins);
 		config.allowedOriginPatterns = patterns;
-		config.setAllowedMethods(combine(getAllowedMethods(), other.getAllowedMethods()));
-		config.setAllowedHeaders(combine(getAllowedHeaders(), other.getAllowedHeaders()));
+		// Bypass setAllowedMethods and setAllowedHeaders to retain default permit values
+		List<String> methods = combine(getAllowedMethods(), other.getAllowedMethods());
+		if (methods == DEFAULT_PERMIT_METHODS) {
+			config.allowedMethods = methods;
+			config.resolvedMethods = (this.allowedMethods == methods ?
+					this.resolvedMethods : other.resolvedMethods);
+		}
+		else {
+			config.setAllowedMethods(methods);
+		}
+		List<String> headers = combine(getAllowedHeaders(), other.getAllowedHeaders());
+		if (headers == DEFAULT_PERMIT_ALL) {
+			config.allowedHeaders = headers;
+		}
+		else {
+			config.setAllowedHeaders(headers);
+		}
 		config.setExposedHeaders(combine(getExposedHeaders(), other.getExposedHeaders()));
 		Boolean allowCredentials = other.getAllowCredentials();
 		if (allowCredentials != null) {
