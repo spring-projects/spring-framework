@@ -495,7 +495,7 @@ By default, it uses the `SimpleClientHttpRequestFactory`, but this can be change
 See <<rest-request-factories>>.
 
 NOTE: `RestTemplate` can be instrumented for observability, in order to produce metrics and traces.
-See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplate Observability support] section.
+See the xref:integration/observability.adoc#observability.http-client.resttemplate[RestTemplate Observability support] section.
 
 [[rest-template-body]]
 === Body
