@@ -508,7 +508,7 @@ public abstract class CollectionUtils {
 	 * @return the adapted multi-value map (wrapping the original map)
 	 * @since 3.1
 	 */
-	public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> targetMap) {
+	public static <K, V extends @Nullable Object> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> targetMap) {
 		return new MultiValueMapAdapter<>(targetMap);
 	}
 
@@ -519,7 +519,7 @@ public abstract class CollectionUtils {
 	 * @since 3.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <K, V> MultiValueMap<K, V> unmodifiableMultiValueMap(
+	public static <K, V extends @Nullable Object> MultiValueMap<K, V> unmodifiableMultiValueMap(
 			MultiValueMap<? extends K, ? extends V> targetMap) {
 
 		Assert.notNull(targetMap, "'targetMap' must not be null");
@@ -541,7 +541,7 @@ public abstract class CollectionUtils {
 	 * @return a new map that composes the given two maps
 	 * @since 6.2
 	 */
-	public static <K, V> Map<K, V> compositeMap(Map<K,V> first, Map<K,V> second) {
+	public static <K, V extends @Nullable Object> Map<K, V> compositeMap(Map<K, V> first, Map<K, V> second) {
 		return new CompositeMap<>(first, second);
 	}
 
@@ -565,7 +565,7 @@ public abstract class CollectionUtils {
 	 * @return a new map that composes the give maps
 	 * @since 6.2
 	 */
-	public static <K, V> Map<K, V> compositeMap(Map<K,V> first, Map<K,V> second,
+	public static <K, V extends @Nullable Object> Map<K, V> compositeMap(Map<K, V> first, Map<K, V> second,
 			@Nullable BiFunction<K, V, V> putFunction,
 			@Nullable Consumer<Map<K, V>> putAllFunction) {
 

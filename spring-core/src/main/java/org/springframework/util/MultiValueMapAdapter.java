@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  * @see LinkedMultiValueMap
  */
 @SuppressWarnings("serial")
-public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
+public class MultiValueMapAdapter<K, V extends @Nullable Object> implements MultiValueMap<K, V>, Serializable {
 
 	private final Map<K, List<V>> targetMap;
 
