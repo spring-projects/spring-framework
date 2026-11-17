@@ -1683,12 +1683,12 @@ public class HttpHeaders implements Serializable {
 		for (int i = 0; i < str.length(); ++i) {
 			char ch = str.charAt(i);
 			if (ch == '"') {
-				if (builder.isEmpty()) {
-					quoted = true;
-				}
-				else if (quoted) {
+				if (quoted) {
 					quoted = false;
 					trim = false;
+				}
+				else if (builder.isEmpty()) {
+					quoted = true;
 				}
 				else {
 					builder.append(ch);
