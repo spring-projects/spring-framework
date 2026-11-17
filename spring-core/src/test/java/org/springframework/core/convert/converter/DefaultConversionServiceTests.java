@@ -1144,6 +1144,19 @@ class DefaultConversionServiceTests {
 					.contains("42");
 		}
 
+		@Test
+		void convertOptionalToOptionalWithNonConvertibleContainedObject() {
+			TypeDescriptor integerOptionalType =
+					new TypeDescriptor(ResolvableType.forClassWithGenerics(Optional.class, Integer.class), null, null);
+			TypeDescriptor localDateOptionalType =
+					new TypeDescriptor(ResolvableType.forClassWithGenerics(Optional.class, LocalDate.class), null, null);
+
+			// Integer -> LocalDate is not convertible, so the Optional must not be passed through as is
+			assertThat(conversionService.canConvert(integerOptionalType, localDateOptionalType)).isFalse();
+			assertThatExceptionOfType(ConverterNotFoundException.class)
+					.isThrownBy(() -> conversionService.convert(Optional.of(42), integerOptionalType, localDateOptionalType));
+		}
+
 		@Test  // gh-34544
 		@SuppressWarnings("unchecked")
 		void convertOptionalToObjectWithoutConversionOfContainedObject() {
