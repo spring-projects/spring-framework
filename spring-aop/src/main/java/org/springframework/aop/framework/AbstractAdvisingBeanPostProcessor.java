@@ -44,6 +44,8 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 	private final Map<Class<?>, Boolean> eligibleBeans = new ConcurrentHashMap<>(256);
 
+	private final Map<String, Object> earlyBeanReferences = new ConcurrentHashMap<>(16);
+
 
 	/**
 	 * Set whether this post-processor's advisor is supposed to apply before
@@ -84,8 +86,23 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 		return beanClass;
 	}
 
+	/**
+	 * Expose the advised bean early for circular references.
+	 * @since 7.1
+	 */
+	@Override
+	public Object getEarlyBeanReference(Object bean, String beanName) {
+		Object proxy = postProcessAfterInitialization(bean, beanName);
+		this.earlyBeanReferences.put(beanName, AopProxyUtils.ultimateSingletonTarget(bean));
+		return proxy;
+	}
+
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
+		Object earlyReference = this.earlyBeanReferences.remove(beanName);
+		if (earlyReference != null && earlyReference == AopProxyUtils.ultimateSingletonTarget(bean)) {
+			return bean;
+		}
 		if (this.advisor == null || bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
