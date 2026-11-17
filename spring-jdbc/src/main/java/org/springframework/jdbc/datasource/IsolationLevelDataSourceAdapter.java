@@ -20,6 +20,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.transaction.TransactionDefinition;
@@ -56,6 +58,8 @@ import org.springframework.util.Assert;
  * @see #setPassword
  */
 public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAdapter {
+
+	private static final Log logger = LogFactory.getLog(IsolationLevelDataSourceAdapter.class);
 
 	/**
 	 * Map of constant names to constant values for the isolation constants
@@ -136,13 +140,26 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	@Override
 	protected Connection doGetConnection(@Nullable String username, @Nullable String password) throws SQLException {
 		Connection con = super.doGetConnection(username, password);
-		Boolean readOnlyToUse = getCurrentReadOnlyFlag();
-		if (readOnlyToUse != null) {
-			con.setReadOnly(readOnlyToUse);
+		try {
+			Boolean readOnlyToUse = getCurrentReadOnlyFlag();
+			if (readOnlyToUse != null) {
+				con.setReadOnly(readOnlyToUse);
+			}
+			Integer isolationLevelToUse = getCurrentIsolationLevel();
+			if (isolationLevelToUse != null) {
+				con.setTransactionIsolation(isolationLevelToUse);
+			}
 		}
-		Integer isolationLevelToUse = getCurrentIsolationLevel();
-		if (isolationLevelToUse != null) {
-			con.setTransactionIsolation(isolationLevelToUse);
+		catch (Throwable ex) {
+			logger.debug("Failed to apply settings to JDBC Connection", ex);
+			// Close Connection since it is not returned to the caller.
+			try {
+				con.close();
+			}
+			catch (Throwable closeEx) {
+				logger.debug("Could not close JDBC Connection after failed settings", closeEx);
+			}
+			throw ex;
 		}
 		return con;
 	}
