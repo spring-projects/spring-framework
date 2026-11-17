@@ -441,8 +441,9 @@ public interface RestClient {
 		 * client library (for example, SSL).
 		 * <p>If no request factory is specified, {@code RestClient} uses
 		 * {@linkplain org.springframework.http.client.HttpComponentsClientHttpRequestFactory Apache Http Client},
-		 * {@linkplain org.springframework.http.client.JettyClientHttpRequestFactory Jetty Http Client}
-		 * if available on the classpath, and defaults to the
+		 * {@linkplain org.springframework.http.client.JettyClientHttpRequestFactory Jetty Http Client},
+		 * or {@linkplain org.springframework.http.client.ReactorClientHttpRequestFactory Reactor Netty HttpClient}
+		 * if available on the classpath (in that order), and defaults to the
 		 * {@linkplain org.springframework.http.client.JdkClientHttpRequestFactory JDK HttpClient}
 		 * if the {@code java.net.http} module is loaded, or to a
 		 * {@linkplain org.springframework.http.client.SimpleClientHttpRequestFactory simple default}
