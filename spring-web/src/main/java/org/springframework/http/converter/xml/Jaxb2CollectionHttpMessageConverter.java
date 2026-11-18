@@ -20,10 +20,15 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.Queue;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -204,11 +209,17 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 		else if (List.class == collectionClass) {
 			return (T) new ArrayList();
 		}
-		else if (SortedSet.class == collectionClass) {
+		else if (SortedSet.class == collectionClass || NavigableSet.class == collectionClass) {
 			return (T) new TreeSet();
 		}
-		else {
+		else if (Queue.class == collectionClass || Deque.class == collectionClass) {
+			return (T) new ArrayDeque();
+		}
+		else if (Set.class == collectionClass || Collection.class == collectionClass) {
 			return (T) new LinkedHashSet();
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported collection type: " + collectionClass.getName());
 		}
 	}
 
