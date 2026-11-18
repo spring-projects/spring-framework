@@ -20,6 +20,8 @@ import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.resource.jdbc.internal.LogicalConnectionProvidedImpl;
+import org.hibernate.resource.jdbc.spi.LogicalConnectionImplementor;
 
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
@@ -66,6 +68,17 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		return this.sessionHolder.getSession();
 	}
 
+	private void disconnectManagedConnection() {
+		Session session = getCurrentSession();
+		if (session instanceof SessionImplementor sessionImpl) {
+			LogicalConnectionImplementor logicalConnection =
+					sessionImpl.getJdbcCoordinator().getLogicalConnection();
+			if (!(logicalConnection instanceof LogicalConnectionProvidedImpl)) {
+				logicalConnection.manualDisconnect();
+			}
+		}
+	}
+
 
 	@Override
 	public int getOrder() {
@@ -76,11 +89,11 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	public void suspend() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			// Eagerly disconnect the Session here, to make release mode "on_close" work on JBoss.
-			Session session = getCurrentSession();
-			if (session instanceof SessionImplementor sessionImpl) {
-				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
-			}
+			// Release a Hibernate-managed connection so a nested transaction can
+			// reuse the pooled connection. A user-supplied connection stays with
+			// DataSourceUtils; disconnecting it would drop the JDBC Connection
+			// without releasing it, and resume does not reconnect.
+			disconnectManagedConnection();
 		}
 	}
 
@@ -126,10 +139,8 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 				// In case of pre-bound Session, restore previous flush mode.
 				session.setHibernateFlushMode(this.sessionHolder.getPreviousFlushMode());
 			}
-			// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
-			if (session instanceof SessionImplementor sessionImpl) {
-				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
-			}
+			// Eagerly disconnect a Hibernate-managed Session here, to make release mode "on_close" work nicely.
+			disconnectManagedConnection();
 		}
 		finally {
 			// Unbind at this point if it's a new Session...

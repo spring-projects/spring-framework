@@ -144,10 +144,14 @@ public class SpringSessionContext implements CurrentSessionContext {
 		}
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			// Lazily create Session
+			// Lazily create Session. Share Spring's connection only when a real
+			// transaction is active. A synchronization-only scope (PROPAGATION_NEVER,
+			// or PROPAGATION_SUPPORTS without an existing transaction) must let
+			// Hibernate acquire the connection: DataSourceUtils would otherwise keep
+			// it borrowed across suspend, and a nested transaction would need another.
 			Session session;
 			DataSource dataSource = determineDataSource(this.sessionFactory);
-			if (dataSource != null) {
+			if (dataSource != null && TransactionSynchronizationManager.isActualTransactionActive()) {
 				session = this.sessionFactory.withOptions()
 						.connection(DataSourceUtils.getConnection(dataSource))
 						.openSession();
