@@ -147,7 +147,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 			// Lazily create Session
 			Session session;
 			DataSource dataSource = determineDataSource(this.sessionFactory);
-			if (dataSource != null) {
+			if (dataSource != null && TransactionSynchronizationManager.isActualTransactionActive()) {
 				session = this.sessionFactory.withOptions()
 						.connection(DataSourceUtils.getConnection(dataSource))
 						.openSession();
