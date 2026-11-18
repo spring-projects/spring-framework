@@ -754,10 +754,11 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			connectionLock.lock();
 			try {
 				if (!this.locallyStarted) {
-					this.locallyStarted = true;
 					if (startedCount == 0 && connection != null) {
 						connection.start();
 					}
+					// only once started: a failed start may be retried
+					this.locallyStarted = true;
 					startedCount++;
 				}
 			}

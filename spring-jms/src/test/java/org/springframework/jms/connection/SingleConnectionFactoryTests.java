@@ -37,6 +37,7 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,6 +89,20 @@ class SingleConnectionFactoryTests {
 		verify(con, times(2)).stop();
 		verify(con).close();
 		verifyNoMoreInteractions(con);
+	}
+
+	@Test
+	void startAfterFailedStart() throws JMSException {
+		Connection con = mock();
+		willThrow(new JMSException("not yet")).willDoNothing().given(con).start();
+
+		SingleConnectionFactory scf = new SingleConnectionFactory(con);
+		Connection con1 = scf.createConnection();
+		assertThatExceptionOfType(JMSException.class).isThrownBy(con1::start);
+		con1.start();
+		scf.destroy();
+
+		verify(con, times(2)).start();
 	}
 
 	@Test
