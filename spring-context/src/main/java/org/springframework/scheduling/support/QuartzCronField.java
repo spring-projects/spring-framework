@@ -163,9 +163,9 @@ final class QuartzCronField extends CronField {
 			// "[0-7]#[0-9]+"
 			DayOfWeek dayOfWeek = parseDayOfWeek(value.substring(0, idx));
 			int ordinal = Integer.parseInt(value, idx + 1, value.length(), 10);
-			if (ordinal <= 0) {
+			if (ordinal < 1 || ordinal > 5) {
 				throw new IllegalArgumentException("Ordinal '" + ordinal + "' in '" + value +
-						"' must be positive number ");
+						"' must be between 1 and 5");
 			}
 			TemporalAdjuster adjuster = dayOfWeekInMonth(ordinal, dayOfWeek);
 			return new QuartzCronField(Type.DAY_OF_WEEK, Type.DAY_OF_MONTH, adjuster, value);
