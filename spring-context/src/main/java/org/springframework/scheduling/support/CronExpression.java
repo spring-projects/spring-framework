@@ -16,8 +16,11 @@
 
 package org.springframework.scheduling.support;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
+import java.time.zone.ZoneOffsetTransition;
 import java.util.Arrays;
 
 import org.jspecify.annotations.Nullable;
@@ -238,7 +241,47 @@ public final class CronExpression {
 	 * if no such temporal can be found
 	 */
 	public <T extends Temporal & Comparable<? super T>> @Nullable T next(T temporal) {
+		if (temporal instanceof ZonedDateTime zonedDateTime) {
+			return nextZoned(zonedDateTime);
+		}
 		return nextOrSame(ChronoUnit.NANOS.addTo(temporal, 1));
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private <T extends Temporal & Comparable<? super T>> @Nullable T nextZoned(ZonedDateTime temporal) {
+		LocalDateTime local = temporal.toLocalDateTime();
+		for (int i = 0; i < MAX_ATTEMPTS; i++) {
+			LocalDateTime nextLocal = nextOrSame(ChronoUnit.NANOS.addTo(local, 1));
+			if (nextLocal == null) {
+				return null;
+			}
+			ZonedDateTime candidate = nextLocal.atZone(temporal.getZone());
+			if (!candidate.toLocalDateTime().equals(nextLocal)) {
+				local = nextLocal;
+				continue;
+			}
+			if (!candidate.toInstant().isAfter(temporal.toInstant())) {
+				candidate = candidate.withLaterOffsetAtOverlap();
+			}
+			if (candidate.toInstant().isAfter(temporal.toInstant())) {
+				ZoneOffsetTransition transition = temporal.getZone().getRules().nextTransition(temporal.toInstant());
+				if (transition != null && transition.getInstant().isBefore(candidate.toInstant())) {
+					LocalDateTime transitionLocal = nextOrSame(transition.getDateTimeAfter());
+					if (transitionLocal != null) {
+						ZonedDateTime transitionCandidate = ZonedDateTime.ofLocal(transitionLocal,
+								temporal.getZone(), transition.getOffsetAfter());
+						if (!transitionCandidate.toInstant().isBefore(transition.getInstant()) &&
+								transitionCandidate.toInstant().isBefore(candidate.toInstant())) {
+							candidate = transitionCandidate;
+						}
+					}
+				}
+				return (T) candidate;
+			}
+			local = nextLocal;
+		}
+		return null;
 	}
 
 

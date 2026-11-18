@@ -17,6 +17,7 @@
 package org.springframework.scheduling.support;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -1348,6 +1349,36 @@ class CronExpressionTests {
 	}
 
 	@Test
+	void nextIsStrictlyIncreasingAtLordHoweFallBack() {
+		CronExpression expression = CronExpression.parse("0 0 * * * *");
+		ZonedDateTime current = Instant.parse("2016-04-02T14:00:00Z")
+				.atZone(ZoneId.of("Australia/Lord_Howe"));
+
+		ZonedDateTime next = expression.next(current);
+
+		assertThat(next).isNotNull();
+		assertThat(next.toInstant()).isAfter(current.toInstant());
+		assertThat(next.toInstant()).isEqualTo(Instant.parse("2016-04-02T15:30:00Z"));
+		assertStrictlyIncreasingChain(expression, Instant.parse("2016-04-01T15:00:00Z"),
+				Instant.parse("2016-04-03T15:00:00Z"), current.getZone(), 48);
+	}
+
+	@Test
+	void nextIsStrictlyIncreasingAtChathamFallBack() {
+		CronExpression expression = CronExpression.parse("0 */15 * * * *");
+		ZonedDateTime current = Instant.parse("2016-04-02T13:00:00Z")
+				.atZone(ZoneId.of("Pacific/Chatham"));
+
+		ZonedDateTime next = expression.next(current);
+
+		assertThat(next).isNotNull();
+		assertThat(next.toInstant()).isAfter(current.toInstant());
+		assertThat(next.toInstant()).isEqualTo(Instant.parse("2016-04-02T13:15:00Z"));
+		assertStrictlyIncreasingChain(expression, Instant.parse("2016-04-01T14:00:00Z"),
+				Instant.parse("2016-04-03T14:00:00Z"), current.getZone(), 192);
+	}
+
+	@Test
 	void daylightSaving() {
 		CronExpression cronExpression = CronExpression.parse("0 0 9 * * *");
 
@@ -1411,6 +1442,21 @@ class CronExpressionTests {
 		actual = cronExpression.next(last);
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
+	}
+
+	private static void assertStrictlyIncreasingChain(CronExpression expression, Instant start, Instant end,
+			ZoneId zone, int expectedCalls) {
+		ZonedDateTime current = start.atZone(zone);
+		int calls = 0;
+		while (current.toInstant().isBefore(end)) {
+			ZonedDateTime next = expression.next(current);
+			assertThat(next).isNotNull();
+			assertThat(next.toInstant()).isAfter(current.toInstant());
+			current = next;
+			calls++;
+			assertThat(calls).isLessThanOrEqualTo(expectedCalls);
+		}
+		assertThat(calls).isEqualTo(expectedCalls);
 	}
 
 }
