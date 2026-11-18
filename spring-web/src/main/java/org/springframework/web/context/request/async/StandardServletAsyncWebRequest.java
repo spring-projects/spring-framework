@@ -155,7 +155,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 			Assert.state(this.state == State.ASYNC, "Cannot start async: [" + this.state + "]");
 		}
 
-		this.asyncContext = getRequest().startAsync(getRequest(), getResponse());
+		this.asyncContext = getRequest().startAsync();
 		this.asyncContext.addListener(this);
 		if (this.timeout != null) {
 			this.asyncContext.setTimeout(this.timeout);

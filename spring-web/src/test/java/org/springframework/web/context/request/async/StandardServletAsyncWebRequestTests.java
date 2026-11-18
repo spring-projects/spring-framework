@@ -18,7 +18,10 @@ package org.springframework.web.context.request.async;
 
 import java.util.function.Consumer;
 
+import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link StandardServletAsyncWebRequest}.
@@ -77,6 +81,20 @@ class StandardServletAsyncWebRequestTests {
 			assertThat(context).isNotNull();
 			assertThat(context.getTimeout()).as("Timeout value not set").isEqualTo((44 * 1000));
 			assertThat(context.getListeners()).containsExactly(asyncRequest);
+		}
+
+		@Test
+		void startAsyncUsesContainerRequestAndResponse() {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			HttpServletResponse response = mock(HttpServletResponse.class);
+			AsyncContext asyncContext = mock(AsyncContext.class);
+			when(request.isAsyncSupported()).thenReturn(true);
+			when(request.startAsync()).thenReturn(asyncContext);
+			StandardServletAsyncWebRequest asyncRequest = new StandardServletAsyncWebRequest(request, response);
+
+			asyncRequest.startAsync();
+
+			verify(request).startAsync();
 		}
 
 		@Test
