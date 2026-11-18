@@ -92,6 +92,14 @@ class HtmlUtilsTests {
 	}
 
 	@Test
+	void htmlUnescapeLeavesSurrogateReferencesUnchanged() {
+		assertThat(HtmlUtils.htmlUnescape("x&#55296;y")).isEqualTo("x&#55296;y");
+		assertThat(HtmlUtils.htmlUnescape("x&#xDFFF;y")).isEqualTo("x&#xDFFF;y");
+		assertThat(HtmlUtils.htmlUnescape("x&#xD7FF;y")).isEqualTo("x\uD7FFy");
+		assertThat(HtmlUtils.htmlUnescape("x&#xE000;y")).isEqualTo("x\uE000y");
+	}
+
+	@Test
 	void htmlUnescapeHandlesBasicEntities() {
 		String input = "&lt;p&gt;Tom &amp; Jerry&#39;s &quot;Show&quot;&lt;/p&gt;";
 		String expectedOutput = "<p>Tom & Jerry's \"Show\"</p>";
