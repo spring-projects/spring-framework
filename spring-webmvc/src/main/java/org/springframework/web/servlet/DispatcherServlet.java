@@ -1102,7 +1102,8 @@ public class DispatcherServlet extends FrameworkServlet {
 					return this.multipartResolver.resolveMultipart(request);
 				}
 				catch (MultipartException ex) {
-					if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) != null) {
+					if (request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) != null ||
+						DispatcherType.ERROR.equals(request.getDispatcherType())) {
 						logger.debug("Multipart resolution failed for error dispatch", ex);
 						// Keep processing error dispatch with regular request handle below
 					}

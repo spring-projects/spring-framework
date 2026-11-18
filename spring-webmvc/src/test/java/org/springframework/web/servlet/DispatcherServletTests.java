@@ -17,6 +17,7 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -77,6 +78,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link DispatcherServlet}.
@@ -273,6 +275,33 @@ class DispatcherServletTests {
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(request.getAttribute(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE))
 			.isInstanceOf(MaxUploadSizeExceededException.class);
+	}
+
+	@Test
+	void multipartResolutionFailureOnErrorDispatchDoesNotReplaceRequest() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet();
+		MultipartResolver multipartResolver = mock(MultipartResolver.class);
+		setMultipartResolver(servlet, multipartResolver);
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "POST", "/upload");
+		request.setDispatcherType(DispatcherType.ERROR);
+		when(multipartResolver.isMultipart(request)).thenReturn(true);
+		when(multipartResolver.resolveMultipart(request)).thenThrow(new MaxUploadSizeExceededException(1024));
+
+		assertThat(servlet.checkMultipart(request)).isSameAs(request);
+	}
+
+	@Test
+	void multipartResolutionFailureOnRequestDispatchIsNotSuppressed() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet();
+		MultipartResolver multipartResolver = mock(MultipartResolver.class);
+		setMultipartResolver(servlet, multipartResolver);
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "POST", "/upload");
+		request.setDispatcherType(DispatcherType.REQUEST);
+		when(multipartResolver.isMultipart(request)).thenReturn(true);
+		when(multipartResolver.resolveMultipart(request)).thenThrow(new MaxUploadSizeExceededException(1024));
+
+		assertThatThrownBy(() -> servlet.checkMultipart(request))
+				.isInstanceOf(MaxUploadSizeExceededException.class);
 	}
 
 	@Test
@@ -918,6 +947,14 @@ class DispatcherServletTests {
 		assertThat(response.getStatus()).isEqualTo(400);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_TYPE);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_DISPOSITION);
+	}
+
+
+	private static void setMultipartResolver(DispatcherServlet servlet, MultipartResolver multipartResolver)
+			throws ReflectiveOperationException {
+		Field field = DispatcherServlet.class.getDeclaredField("multipartResolver");
+		field.setAccessible(true);
+		field.set(servlet, multipartResolver);
 	}
 
 
