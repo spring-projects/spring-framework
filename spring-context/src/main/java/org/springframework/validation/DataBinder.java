@@ -1122,6 +1122,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 			int startIdx = paramPath.length() + 1;
 			int endIdx = name.indexOf(']', startIdx);
+			if (endIdx == -1) {
+				continue;
+			}
 			boolean quoted = (endIdx - startIdx > 2 && name.charAt(startIdx) == '\'' && name.charAt(endIdx - 1) == '\'');
 			String key = (quoted ? name.substring(startIdx + 1, endIdx - 1) : name.substring(startIdx, endIdx));
 
@@ -1183,6 +1186,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				}
 				else {
 					int endIndex = name.indexOf(']', paramPath.length() + 2);
+					if (endIndex == -1) {
+						continue;
+					}
 					String indexValue = name.substring(paramPath.length() + 1, endIndex);
 					index = Integer.parseInt(indexValue);
 				}

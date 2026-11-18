@@ -226,6 +226,28 @@ class DataBinderConstructTests {
 	}
 
 	@Test
+	void simpleListBindingIgnoresUnclosedIndex() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerList[0]", "1", "integerList[35", "2"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerListRecord target = getTarget(binder);
+		assertThat(target.integerList()).containsExactly(1);
+	}
+
+	@Test
+	void simpleMapBindingIgnoresUnclosedKey() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerMap[a]", "1", "integerMap[b", "2"));
+
+		DataBinder binder = initDataBinder(IntegerMapRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerMapRecord target = getTarget(binder);
+		assertThat(target.integerMap()).hasSize(1).containsEntry("a", 1);
+	}
+
+	@Test
 	void simpleMapBinding() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerMap[a]", "1", "integerMap[b]", "2"));
 
