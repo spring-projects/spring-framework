@@ -113,6 +113,22 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test
+	void queryParamAdditionDoesNotAffectBuiltUriComponents() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org?q=one");
+		UriComponents result1 = builder.build();
+		builder.queryParam("q", "two");
+		UriComponents result2 = builder.build();
+
+		assertThat(result1.getQuery()).isEqualTo("q=one");
+		URI expected = URI.create("https://example.org?q=one");
+		assertThat(result1.toUri()).as("Invalid result URI").isEqualTo(expected);
+
+		assertThat(result2.getQuery()).isEqualTo("q=one&q=two");
+		expected = URI.create("https://example.org?q=one&q=two");
+		assertThat(result2.toUri()).as("Invalid result URI").isEqualTo(expected);
+	}
+
+	@Test
 	void fromPath() {
 		UriComponents result = UriComponentsBuilder.fromPath("foo").queryParam("bar").fragment("baz").build();
 
