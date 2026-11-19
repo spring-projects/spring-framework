@@ -20,9 +20,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -137,6 +139,33 @@ class MultiValueMapTests {
 		Map<String, List<String>> map2 = Map.of("key1", List.of("value1"));
 		assertThat(map2).isEqualTo(map);
 		assertThat(map).isEqualTo(map2);
+	}
+
+	@ParameterizedMultiValueMapTest  // gh-37469
+	void asSingleValueMapEqualsAndHashCode(MultiValueMap<String, String> map) {
+		map.clear();
+		map.add("key1", "value1");
+		map.add("key1", "value2");
+		map.add("key2", "value3");
+		Map<String, String> singleValueMap = map.asSingleValueMap();
+		Map<String, String> reference = Map.of("key1", "value1", "key2", "value3");
+		assertThat(singleValueMap).isEqualTo(reference);
+		assertThat(reference).isEqualTo(singleValueMap);
+		assertThat(singleValueMap).hasSameHashCodeAs(reference);
+		Set<Map<String, String>> set = new HashSet<>();
+		set.add(singleValueMap);
+		assertThat(set).contains(reference);
+	}
+
+	@ParameterizedMultiValueMapTest  // gh-37469
+	void asSingleValueMapHashCodeWithEmptyList(MultiValueMap<String, String> map) {
+		map.clear();
+		map.add("key1", "value1");
+		map.put("key2", List.of());
+		Map<String, String> reference = new HashMap<>();
+		reference.put("key1", "value1");
+		reference.put("key2", null);
+		assertThat(map.asSingleValueMap()).hasSameHashCodeAs(reference);
 	}
 
 	@Test

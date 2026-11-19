@@ -298,7 +298,11 @@ final class SingleToMultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, S
 
 	@Override
 	public int hashCode() {
-		return this.targetMap.hashCode();
+		int hash = 0;
+		for (Entry<K, List<V>> entry : entrySet()) {
+			hash += entry.hashCode();
+		}
+		return hash;
 	}
 
 	@Override
