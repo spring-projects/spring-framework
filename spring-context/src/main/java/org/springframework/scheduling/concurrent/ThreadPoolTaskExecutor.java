@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -37,7 +36,6 @@ import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * JavaBean that allows for configuring a {@link java.util.concurrent.ThreadPoolExecutor}
@@ -102,10 +100,6 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	private @Nullable TaskDecorator taskDecorator;
 
 	private @Nullable ThreadPoolExecutor threadPoolExecutor;
-
-	// Runnable decorator to user-level FutureTask, if different
-	private final Map<Runnable, Object> decoratedTaskMap =
-			new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
 
 	/**
@@ -286,7 +280,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 				if (taskDecorator != null) {
 					decorated = taskDecorator.decorate(command);
 					if (decorated != command) {
-						decoratedTaskMap.put(decorated, command);
+						decorated = new DecoratedTask(decorated, command);
 					}
 				}
 				super.execute(decorated);
@@ -413,11 +407,13 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	@Override
 	protected void cancelRemainingTask(Runnable task) {
-		super.cancelRemainingTask(task);
-		// Cancel associated user-level Future handle as well
-		Object original = this.decoratedTaskMap.get(task);
-		if (original instanceof Future<?> future) {
-			future.cancel(true);
+		if (task instanceof DecoratedTask decoratedTask) {
+			super.cancelRemainingTask(decoratedTask.decorated);
+			// Cancel associated user-level Future handle as well.
+			super.cancelRemainingTask(decoratedTask.original);
+		}
+		else {
+			super.cancelRemainingTask(task);
 		}
 	}
 
@@ -425,6 +421,29 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	protected void initiateEarlyShutdown() {
 		if (this.strictEarlyShutdown) {
 			super.initiateEarlyShutdown();
+		}
+	}
+
+
+	/**
+	 * Retain the original task for cancellation while the decorated task is queued.
+	 *
+	 * @since 7.1
+	 */
+	private static class DecoratedTask implements Runnable {
+
+		private final Runnable decorated;
+
+		private final Runnable original;
+
+		public DecoratedTask(Runnable decorated, Runnable original) {
+			this.decorated = decorated;
+			this.original = original;
+		}
+
+		@Override
+		public void run() {
+			this.decorated.run();
 		}
 	}
 
