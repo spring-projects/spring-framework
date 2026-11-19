@@ -436,7 +436,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (supportedMediaTypes.contains(MediaType.APPLICATION_CBOR)) {
 			map.put("cbor", MediaType.APPLICATION_CBOR);
 		}
-		if (supportedMediaTypes.contains(MediaType.APPLICATION_ATOM_XML)) {
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_YAML)) {
 			map.put("yaml", MediaType.APPLICATION_YAML);
 		}
 		return map;

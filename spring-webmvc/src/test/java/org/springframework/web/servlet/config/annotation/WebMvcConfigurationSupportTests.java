@@ -48,6 +48,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
@@ -230,6 +232,32 @@ class WebMvcConfigurationSupportTests {
 				.containsEntry("smile", MediaType.valueOf("application/x-jackson-smile"))
 				.containsEntry("cbor", MediaType.APPLICATION_CBOR)
 				.containsEntry("yaml", MediaType.APPLICATION_YAML);
+	}
+
+	@Test
+	void contentNegotiationManagerWithYamlConverterOnly() {
+		assertThat(mediaTypeMappingsFor(MediaType.APPLICATION_YAML))
+				.containsOnlyKeys("yaml")
+				.containsEntry("yaml", MediaType.APPLICATION_YAML);
+	}
+
+	@Test
+	void contentNegotiationManagerWithAtomConverterOnly() {
+		assertThat(mediaTypeMappingsFor(MediaType.APPLICATION_ATOM_XML))
+				.containsOnlyKeys("atom")
+				.containsEntry("atom", MediaType.APPLICATION_ATOM_XML);
+	}
+
+	private Map<String, MediaType> mediaTypeMappingsFor(MediaType mediaType) {
+		StringHttpMessageConverter converter = new StringHttpMessageConverter();
+		converter.setSupportedMediaTypes(List.of(mediaType));
+		WebMvcConfigurationSupport configuration = new WebMvcConfigurationSupport() {
+			@Override
+			protected void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+				builder.disableDefaults().addCustomConverter(converter);
+			}
+		};
+		return configuration.mvcContentNegotiationManager().getMediaTypeMappings();
 	}
 
 	@Test
