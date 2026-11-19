@@ -171,10 +171,8 @@ public abstract class StreamUtils {
 		Assert.notNull(in, "No InputStream specified");
 		Assert.notNull(out, "No OutputStream specified");
 
-		long skipped = in.skip(start);
-		if (skipped < start) {
-			throw new IOException("Skipped only " + skipped + " bytes out of " + start + " required");
-		}
+		// InputStream.skip(long) may skip fewer bytes than requested before the end of the stream
+		in.skipNBytes(start);
 
 		long bytesToCopy = end - start + 1;
 		byte[] buffer = new byte[(int) Math.min(StreamUtils.BUFFER_SIZE, bytesToCopy)];
