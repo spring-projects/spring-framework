@@ -18,10 +18,12 @@ package org.springframework.jdbc.core.simple;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -29,13 +31,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Mock-based tests for {@link SimpleJdbcInsert}.
@@ -111,6 +118,30 @@ class SimpleJdbcInsertTests {
 
 		// Satisfy the @AfterEach mock verification.
 		connection.close();
+	}
+
+	@Test
+	void executeAndReturnKeyClosesStatementWhenSettingParameterValueFails() throws Exception {
+		Connection insertConnection = mock();
+		PreparedStatement preparedStatement = mock();
+		SQLException sqlException = new SQLException("Invalid parameter value");
+		when(dataSource.getConnection()).thenReturn(connection, insertConnection);
+		when(databaseMetaData.supportsGetGeneratedKeys()).thenReturn(true);
+		when(insertConnection.prepareStatement(anyString(), any(String[].class))).thenReturn(preparedStatement);
+		doThrow(sqlException).when(preparedStatement).setString(1, "one");
+
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource)
+				.withTableName("my_table")
+				.usingColumns("name")
+				.usingGeneratedKeyColumns("id")
+				.withoutTableColumnMetaDataAccess();
+
+		assertThatExceptionOfType(DataAccessException.class)
+				.isThrownBy(() -> insert.executeAndReturnKey(Map.of("name", "one")))
+				.withCause(sqlException);
+
+		verify(preparedStatement).close();
+		verify(insertConnection).close();
 	}
 
 	@Test
