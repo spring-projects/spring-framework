@@ -56,6 +56,7 @@ import org.springframework.beans.testfixture.beans.SideEffectBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.testfixture.beans.TestApplicationListener;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.testfixture.TimeStamped;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
@@ -512,7 +513,7 @@ class ProxyFactoryBeanTests {
 		// 2 globals + 2 explicit
 		assertThat(pfb.getAdvisors()).as("Have 2 globals and 2 explicit advisors").hasSize(3);
 
-		ApplicationListener<?> l = (ApplicationListener<?>) factory.getBean("validGlobals");
+		ApplicationListener<?> l = factory.getBean("validGlobals", new ParameterizedTypeReference<>() {});
 		agi = (AddedGlobalInterface) l;
 		assertThat(agi.globalsAdded()).isEqualTo(-1);
 
