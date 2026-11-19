@@ -298,7 +298,8 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			if (!rawResponse.isCommitted()) {
 				if (complete || this.contentLength != null) {
 					if (rawResponse.getHeader(HttpHeaders.TRANSFER_ENCODING) == null) {
-						rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
+						rawResponse.setContentLength(!complete && this.contentLength != null ?
+								this.contentLength : this.content.size());
 					}
 					this.contentLength = null;
 				}
