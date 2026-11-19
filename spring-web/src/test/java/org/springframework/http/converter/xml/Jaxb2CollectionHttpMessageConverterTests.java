@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.xml.stream.XMLInputFactory;
@@ -100,6 +101,18 @@ class Jaxb2CollectionHttpMessageConverterTests {
 		assertThat(result).as("Invalid result").hasSize(2);
 		assertThat(result.contains(new RootElement("1"))).as("Invalid result").isTrue();
 		assertThat(result.contains(new RootElement("2"))).as("Invalid result").isTrue();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void readXmlRootElementQueue() throws Exception {
+		String content = "<list><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></list>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
+		Type queueType = new ParameterizedTypeReference<Queue<RootElement>>() {}.getType();
+		Object result = converter.read(queueType, null, inputMessage);
+
+		assertThat(result).isInstanceOf(Queue.class);
+		assertThat((Queue<RootElement>) result).hasSize(2);
 	}
 
 	@Test
