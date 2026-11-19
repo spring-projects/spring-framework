@@ -198,7 +198,7 @@ public class HandlerMethod extends AnnotatedMethod {
 		this.beanType = handlerMethod.beanType;
 
 		this.validateArguments = (initValidateFlags ?
-				MethodValidationInitializer.checkArguments(this.beanType, getMethodParameters()) :
+				MethodValidationInitializer.checkArguments(this, getMethodParameters()) :
 				handlerMethod.validateArguments);
 
 		this.validateReturnValue = (initValidateFlags ?
@@ -457,8 +457,9 @@ public class HandlerMethod extends AnnotatedMethod {
 		private static final Predicate<MergedAnnotation<? extends Annotation>> VALID_PREDICATE =
 				MergedAnnotationPredicates.typeIn("jakarta.validation.Valid");
 
-		public static boolean checkArguments(Class<?> beanType, MethodParameter[] parameters) {
-			if (BEAN_VALIDATION_PRESENT && AnnotationUtils.findAnnotation(beanType, Validated.class) == null) {
+		public static boolean checkArguments(HandlerMethod handlerMethod, MethodParameter[] parameters) {
+			if (BEAN_VALIDATION_PRESENT &&
+					AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Validated.class) == null) {
 				for (MethodParameter param : parameters) {
 					MergedAnnotations merged = MergedAnnotations.from(param.getParameterAnnotations());
 					if (merged.stream().anyMatch(CONSTRAINT_PREDICATE)) {
@@ -468,7 +469,7 @@ public class HandlerMethod extends AnnotatedMethod {
 					if (merged.stream().anyMatch(VALID_PREDICATE) && isIndexOrKeyBasedContainer(type)) {
 						return true;
 					}
-					merged = MergedAnnotations.from(getContainerElementAnnotations(param));
+					merged = MergedAnnotations.from(getContainerElementAnnotations(handlerMethod, param));
 					if (merged.stream().anyMatch(CONSTRAINT_PREDICATE.or(VALID_PREDICATE))) {
 						return true;
 					}
@@ -495,13 +496,30 @@ public class HandlerMethod extends AnnotatedMethod {
 		}
 
 		/**
-		 * There may be constraints on elements of a container (list, map).
+		 * There may be constraints on elements of a container (list, map, optional).
+		 * A constraint declared only on an overridden interface or superclass method
+		 * still counts: type annotations are not part of {@code getParameterAnnotations()}.
 		 */
-		private static Annotation[] getContainerElementAnnotations(MethodParameter param) {
+		private static Annotation[] getContainerElementAnnotations(HandlerMethod handlerMethod, MethodParameter param) {
 			List<Annotation> result = null;
-			int i = param.getParameterIndex();
+			int index = param.getParameterIndex();
 			Method method = param.getMethod();
-			if (method != null && method.getAnnotatedParameterTypes()[i] instanceof AnnotatedParameterizedType apt) {
+			if (method != null) {
+				result = addContainerElementAnnotations(result, method, index);
+				for (Method candidate : handlerMethod.getOverriddenMethods()) {
+					result = addContainerElementAnnotations(result, candidate, index);
+				}
+			}
+			result = (result != null ? result : Collections.emptyList());
+			return result.toArray(new Annotation[0]);
+		}
+
+		private static @Nullable List<Annotation> addContainerElementAnnotations(
+				@Nullable List<Annotation> result, Method method, int index) {
+
+			AnnotatedType[] parameterTypes = method.getAnnotatedParameterTypes();
+			if (index >= 0 && index < parameterTypes.length &&
+					parameterTypes[index] instanceof AnnotatedParameterizedType apt) {
 				for (AnnotatedType type : apt.getAnnotatedActualTypeArguments()) {
 					for (Annotation annot : type.getAnnotations()) {
 						result = (result != null ? result : new ArrayList<>());
@@ -509,8 +527,7 @@ public class HandlerMethod extends AnnotatedMethod {
 					}
 				}
 			}
-			result = (result != null ? result : Collections.emptyList());
-			return result.toArray(new Annotation[0]);
+			return result;
 		}
 
 	}

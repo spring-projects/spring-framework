@@ -60,6 +60,8 @@ public class AnnotatedMethod {
 
 	private volatile @Nullable List<Annotation[][]> inheritedParameterAnnotations;
 
+	private volatile @Nullable List<Method> overriddenMethods;
+
 
 	/**
 	 * Create an instance that wraps the given {@link Method}.
@@ -84,6 +86,7 @@ public class AnnotatedMethod {
 		this.parameters = annotatedMethod.parameters;
 		this.annotations = annotatedMethod.annotations;
 		this.inheritedParameterAnnotations = annotatedMethod.inheritedParameterAnnotations;
+		this.overriddenMethods = annotatedMethod.overriddenMethods;
 	}
 
 
@@ -174,16 +177,22 @@ public class AnnotatedMethod {
 		return (getMethodAnnotation(annotationType) != null);
 	}
 
-	private List<Annotation[][]> getInheritedParameterAnnotations() {
-		List<Annotation[][]> parameterAnnotations = this.inheritedParameterAnnotations;
-		if (parameterAnnotations == null) {
-			parameterAnnotations = new ArrayList<>();
+	/**
+	 * Return interface and superclass methods that this method overrides.
+	 * <p>Methods inherited from superinterfaces are included, because
+	 * {@link Class#getMethods()} returns them.
+	 * @since 7.1.1
+	 */
+	protected final List<Method> getOverriddenMethods() {
+		List<Method> methods = this.overriddenMethods;
+		if (methods == null) {
+			methods = new ArrayList<>();
 			Class<?> clazz = this.method.getDeclaringClass();
 			while (clazz != null) {
 				for (Class<?> ifc : clazz.getInterfaces()) {
 					for (Method candidate : ifc.getMethods()) {
 						if (AnnotationsScanner.isOverride(this.method, candidate)) {
-							parameterAnnotations.add(candidate.getParameterAnnotations());
+							methods.add(candidate);
 						}
 					}
 				}
@@ -194,10 +203,22 @@ public class AnnotatedMethod {
 				if (clazz != null) {
 					for (Method candidate : clazz.getDeclaredMethods()) {
 						if (AnnotationsScanner.isOverride(this.method, candidate)) {
-							parameterAnnotations.add(candidate.getParameterAnnotations());
+							methods.add(candidate);
 						}
 					}
 				}
+			}
+			this.overriddenMethods = methods;
+		}
+		return methods;
+	}
+
+	private List<Annotation[][]> getInheritedParameterAnnotations() {
+		List<Annotation[][]> parameterAnnotations = this.inheritedParameterAnnotations;
+		if (parameterAnnotations == null) {
+			parameterAnnotations = new ArrayList<>();
+			for (Method candidate : getOverriddenMethods()) {
+				parameterAnnotations.add(candidate.getParameterAnnotations());
 			}
 			this.inheritedParameterAnnotations = parameterAnnotations;
 		}

@@ -18,6 +18,7 @@ package org.springframework.web.method;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -51,6 +52,16 @@ class HandlerMethodTests {
 		Object target = new MyInterfaceImpl();
 		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons", "addPeople"), true);
 		testValidateArgs(target, List.of("addPerson", "addPersonNotValidated", "getPerson", "getIntValue"), false);
+	}
+
+	@Test // gh-37723
+	void shouldValidateContainerElementConstraintDeclaredOnlyOnOverriddenMethod() {
+		Object target = new ContainerConstraintImpl();
+		shouldValidateArguments(getHandlerMethod(target, "optionalCount", Optional.class), true);
+		shouldValidateArguments(getHandlerMethod(target, "names", List.class), true);
+		shouldValidateArguments(getHandlerMethod(target, "people", List.class), true);
+		shouldValidateArguments(getHandlerMethod(target, "unchecked", Optional.class), false);
+		shouldValidateArguments(getHandlerMethod(target, "fromSuper", Optional.class), true);
 	}
 
 	@Test
@@ -232,7 +243,7 @@ class HandlerMethodTests {
 		}
 
 		@Override
-		public void addPeople(List<@Valid Person> persons) {
+		public void addPeople(List<Person> persons) {
 		}
 
 		@Override
@@ -289,6 +300,52 @@ class HandlerMethodTests {
 
 		@Override
 		public void processTwo(String value) {
+		}
+	}
+
+
+	@SuppressWarnings("unused")
+	private interface ContainerConstraintApi {
+
+		void optionalCount(Optional<@Max(100) Integer> count);
+
+		void names(List<@NotEmpty String> names);
+
+		void people(List<@Valid Person> people);
+
+		void unchecked(Optional<Integer> count);
+	}
+
+
+	@SuppressWarnings("unused")
+	private abstract static class ContainerConstraintSuper {
+
+		public void fromSuper(Optional<@Max(10) Integer> count) {
+		}
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class ContainerConstraintImpl extends ContainerConstraintSuper implements ContainerConstraintApi {
+
+		@Override
+		public void optionalCount(Optional<Integer> count) {
+		}
+
+		@Override
+		public void names(List<String> names) {
+		}
+
+		@Override
+		public void people(List<Person> people) {
+		}
+
+		@Override
+		public void unchecked(Optional<Integer> count) {
+		}
+
+		@Override
+		public void fromSuper(Optional<Integer> count) {
 		}
 	}
 
