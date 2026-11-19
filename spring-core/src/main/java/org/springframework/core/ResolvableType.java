@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import java.io.InvalidObjectException;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -1634,6 +1636,53 @@ public class ResolvableType implements Serializable {
 		public Object getSource() {
 			return this.generics;
 		}
+
+		private Object writeReplace() throws ObjectStreamException {
+			if (this.variables.length == 0) {
+				return this;
+			}
+			// Arrays.equals invokes equals on this.variables elements: JDK TypeVariable
+			// implementations only accept their own class, so the receiver side must be
+			// this.variables for wrapped variables to match their unwrapped counterparts.
+			if (!(this.variables[0].getGenericDeclaration() instanceof Class<?> declaringClass) ||
+					!Arrays.equals(this.variables, declaringClass.getTypeParameters())) {
+				// Not the type parameters of a single declaring class -> retain default serialization.
+				return this;
+			}
+			return new SerializedTypeVariablesVariableResolver(declaringClass, this.generics);
+		}
+	}
+
+
+	/**
+	 * Serialization proxy for {@link TypeVariablesVariableResolver}, restoring the
+	 * non-serializable {@link TypeVariable} array from its declaring class.
+	 */
+	@SuppressWarnings("serial")
+	private static final class SerializedTypeVariablesVariableResolver implements Serializable {
+
+		private final Class<?> declaringClass;
+
+		private final @Nullable ResolvableType[] generics;
+
+		SerializedTypeVariablesVariableResolver(Class<?> declaringClass, @Nullable ResolvableType[] generics) {
+			this.declaringClass = declaringClass;
+			this.generics = generics;
+		}
+
+		private Object readResolve() throws ObjectStreamException {
+			// The stream is not trusted to be self-consistent: incomplete or mismatched
+			// proxy state fails with InvalidObjectException rather than downstream errors.
+			if (this.declaringClass == null || this.generics == null) {
+				throw new InvalidObjectException("Incomplete serialization proxy for TypeVariablesVariableResolver");
+			}
+			TypeVariable<?>[] variables = this.declaringClass.getTypeParameters();
+			if (variables.length != this.generics.length) {
+				throw new InvalidObjectException(
+						"Mismatched type variables for " + this.declaringClass.getName());
+			}
+			return new TypeVariablesVariableResolver(variables, this.generics);
+		}
 	}
 
 
@@ -1691,6 +1740,94 @@ public class ResolvableType implements Serializable {
 		@Override
 		public String toString() {
 			return getTypeName();
+		}
+
+		private Object writeReplace() throws ObjectStreamException {
+			if (!(this.rawType instanceof Class<?> rawClass)) {
+				return this;
+			}
+			TypeVariable<?>[] variables = rawClass.getTypeParameters();
+			Object[] encodedArguments = new Object[this.typeArguments.length];
+			boolean encodedVariable = false;
+			for (int i = 0; i < this.typeArguments.length; i++) {
+				Type argument = this.typeArguments[i];
+				int variableIndex = indexOf(variables, argument);
+				if (variableIndex != -1) {
+					// Re-derivable from the raw class -> encode as a type parameter index.
+					encodedArguments[i] = variableIndex;
+					encodedVariable = true;
+				}
+				else if (argument instanceof Serializable) {
+					encodedArguments[i] = argument;
+				}
+				else {
+					// Not encodable -> retain default serialization (and its failure mode).
+					return this;
+				}
+			}
+			// Only use the proxy for instances that would otherwise fail to serialize.
+			return (encodedVariable ? new SerializedSyntheticParameterizedType(rawClass, encodedArguments) : this);
+		}
+
+		// Identity comparison, relying on the JDK returning canonical TypeVariable
+		// instances; a miss simply falls back to default serialization.
+		private static int indexOf(TypeVariable<?>[] variables, Type argument) {
+			for (int i = 0; i < variables.length; i++) {
+				if (variables[i] == argument) {
+					return i;
+				}
+			}
+			return -1;
+		}
+	}
+
+
+	/**
+	 * Serialization proxy for {@link SyntheticParameterizedType}, encoding type
+	 * arguments that are non-serializable {@link TypeVariable TypeVariables} as
+	 * indexes into the type parameters of the raw class.
+	 */
+	@SuppressWarnings("serial")
+	private static final class SerializedSyntheticParameterizedType implements Serializable {
+
+		private final Class<?> rawType;
+
+		private final Object[] encodedArguments;
+
+		SerializedSyntheticParameterizedType(Class<?> rawType, Object[] encodedArguments) {
+			this.rawType = rawType;
+			this.encodedArguments = encodedArguments;
+		}
+
+		private Object readResolve() throws ObjectStreamException {
+			// The stream is not trusted to be self-consistent: incomplete or mismatched
+			// proxy state fails with InvalidObjectException rather than downstream errors.
+			if (this.rawType == null || this.encodedArguments == null) {
+				throw new InvalidObjectException("Incomplete serialization proxy for SyntheticParameterizedType");
+			}
+			TypeVariable<?>[] variables = this.rawType.getTypeParameters();
+			if (this.encodedArguments.length != variables.length) {
+				throw new InvalidObjectException("Mismatched type arguments for " + this.rawType.getName());
+			}
+			Type[] typeArguments = new Type[this.encodedArguments.length];
+			for (int i = 0; i < this.encodedArguments.length; i++) {
+				Object encoded = this.encodedArguments[i];
+				if (encoded instanceof Integer index) {
+					if (index < 0 || index >= variables.length) {
+						throw new InvalidObjectException(
+								"Invalid type variable index " + index + " for " + this.rawType.getName());
+					}
+					typeArguments[i] = variables[index];
+				}
+				else if (encoded instanceof Type type) {
+					typeArguments[i] = type;
+				}
+				else {
+					throw new InvalidObjectException(
+							"Invalid type argument encoding for " + this.rawType.getName());
+				}
+			}
+			return new SyntheticParameterizedType(this.rawType, typeArguments);
 		}
 	}
 
