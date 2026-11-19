@@ -115,6 +115,46 @@ class XMLEventStreamReaderTests {
 				streamReader.require(XMLStreamConstants.START_ELEMENT, "wrong-namespace", "root"));
 	}
 
+	@Test
+	void isWhiteSpaceForWhitespaceCharacters() throws Exception {
+		XMLEventStreamReader reader = createReader("<root>\n\t<child>content</child>\n</root>");
+		reader.nextTag();
+
+		assertThat(reader.next()).isEqualTo(XMLStreamConstants.CHARACTERS);
+		assertThat(reader.isWhiteSpace()).isTrue();
+
+		reader.nextTag();
+		assertThat(reader.next()).isEqualTo(XMLStreamConstants.CHARACTERS);
+		assertThat(reader.isWhiteSpace()).isFalse();
+	}
+
+	@Test
+	void nextTagSkipsWhitespace() throws Exception {
+		XMLEventStreamReader reader = createReader(
+				"<root>\n\t<child>content</child>\n\t<!-- comment -->\n\t<?pi data?>\n</root>");
+
+		assertThat(reader.nextTag()).isEqualTo(XMLStreamConstants.START_ELEMENT);
+		assertThat(reader.getLocalName()).isEqualTo("root");
+		assertThat(reader.nextTag()).isEqualTo(XMLStreamConstants.START_ELEMENT);
+		assertThat(reader.getLocalName()).isEqualTo("child");
+		assertThat(reader.getElementText()).isEqualTo("content");
+		assertThat(reader.nextTag()).isEqualTo(XMLStreamConstants.END_ELEMENT);
+		assertThat(reader.getLocalName()).isEqualTo("root");
+	}
+
+	@Test
+	void nextTagRejectsNonWhitespaceCharacters() throws Exception {
+		XMLEventStreamReader reader = createReader("<root>\n\ttext<child/></root>");
+		reader.nextTag();
+
+		assertThatExceptionOfType(XMLStreamException.class).isThrownBy(reader::nextTag);
+	}
+
+	private static XMLEventStreamReader createReader(String xml) throws XMLStreamException {
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		return new XMLEventStreamReader(inputFactory.createXMLEventReader(new StringReader(xml)));
+	}
+
 	private void advanceToStartElement(String localName) throws Exception {
 		while (streamReader.getEventType() != XMLStreamConstants.START_ELEMENT ||
 				!streamReader.getLocalName().equals(localName)) {
