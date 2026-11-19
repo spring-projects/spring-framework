@@ -111,6 +111,24 @@ class DefaultRenderingBuilderTests {
 	}
 
 	@Test
+	void builderChangesAfterBuildDoNotAffectRendering() {
+		Foo foo = new Foo();
+		Rendering.Builder<?> builder = Rendering.view("foo").modelAttribute(foo).header("foo", "bar");
+		Rendering rendering = builder.build();
+
+		builder.modelAttribute("baz", new Bar()).header("foo", "baz").header("qux", "quux");
+
+		assertThat(rendering.modelAttributes()).isEqualTo(Collections.singletonMap("foo", foo));
+		assertThat(rendering.headers().size()).isOne();
+		assertThat(rendering.headers().get("foo")).isEqualTo(Collections.singletonList("bar"));
+
+		Rendering newRendering = builder.build();
+		assertThat(newRendering.modelAttributes()).containsOnlyKeys("foo", "baz");
+		assertThat(newRendering.headers().get("foo")).isEqualTo(Collections.singletonList("baz"));
+		assertThat(newRendering.headers().get("qux")).isEqualTo(Collections.singletonList("quux"));
+	}
+
+	@Test
 	void redirectWithAbsoluteUrl() {
 		Rendering rendering = Rendering.redirectTo("foo").contextRelative(false).build();
 
