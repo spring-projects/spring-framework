@@ -638,6 +638,64 @@ class ForwardedHeaderUtilsTests {
 		assertThat(info.forAddress().getPort()).isEqualTo(47011);
 	}
 
+	@Test
+	void parseForwardedHeaderIgnoresEmptyValues() {
+		MockHttpServletRequest request = createRequest("for=\"\";by=;proto=https;host=");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		ForwardedHeaderUtils.ForwardedInfo info =
+				ForwardedHeaderUtils.parseStandardHeader(httpRequest.getURI(), httpRequest.getHeaders());
+
+		assertThat(info.forAddress()).isNull();
+		assertThat(info.byAddress()).isNull();
+		UriComponents result = info.uriComponentsBuilder().build();
+		assertThat(result.getScheme()).isEqualTo("https");
+		assertThat(result.getHost()).isEqualTo("example.com");
+		assertThat(result.getPort()).isEqualTo(-1);
+		assertThat(result.getPath()).isEqualTo("/path");
+	}
+
+	@Test
+	void parseForwardedHeaderIgnoresEmptyProto() {
+		MockHttpServletRequest request = createRequest("proto=;host=a.example.org");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = adaptFromForwardedHeader(httpRequest.getURI(), httpRequest.getHeaders());
+
+		assertThat(result.getScheme()).isEqualTo("http");
+		assertThat(result.getHost()).isEqualTo("a.example.org");
+		assertThat(result.getPort()).isEqualTo(-1);
+		assertThat(result.getPath()).isEqualTo("/path");
+	}
+
+	@Test
+	void parseForwardedHeaderSkipsLeadingEmptyElements() {
+		MockHttpServletRequest request =
+				createRequest(", ,for=192.0.2.60;proto=https;host=a.example.org, for=192.0.2.61");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		ForwardedHeaderUtils.ForwardedInfo info =
+				ForwardedHeaderUtils.parseStandardHeader(httpRequest.getURI(), httpRequest.getHeaders());
+
+		assertThat(info.forAddress()).isNotNull();
+		assertThat(info.forAddress().getHostString()).isEqualTo("192.0.2.60");
+		UriComponents result = info.uriComponentsBuilder().build();
+		assertThat(result.getScheme()).isEqualTo("https");
+		assertThat(result.getHost()).isEqualTo("a.example.org");
+		assertThat(result.getPort()).isEqualTo(-1);
+		assertThat(result.getPath()).isEqualTo("/path");
+	}
+
+	private static MockHttpServletRequest createRequest(String forwardedHeader) {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Forwarded", forwardedHeader);
+		request.setScheme("http");
+		request.setServerName("example.com");
+		request.setServerPort(8080);
+		request.setRequestURI("/path");
+		return request;
+	}
+
 
 	private static UriComponents adaptFromForwardedHeader(URI uri, HttpHeaders headers) {
 		return ForwardedHeaderUtils.parseStandardHeader(uri, headers)
