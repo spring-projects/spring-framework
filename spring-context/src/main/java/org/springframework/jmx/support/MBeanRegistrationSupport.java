@@ -140,6 +140,9 @@ public class MBeanRegistrationSupport {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Ignoring existing MBean at [" + objectName + "]");
 					}
+					// Not registered by us: do not track it, so that
+					// unregisterBeans() leaves the existing MBean alone.
+					return;
 				}
 				else if (this.registrationPolicy == RegistrationPolicy.REPLACE_EXISTING) {
 					try {
