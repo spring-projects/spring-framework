@@ -68,6 +68,15 @@ class KotlinDetectorTests {
 		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.NONE)).isFalse()
 	}
 
+	@Test
+	fun hasSerializableAnnotationWithRecursiveGeneric() {
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(
+			ResolvableType.forClass(RecursiveGeneric::class.java))).isFalse()
+	}
+
+	// Real life example: Guava's `ImmutableEnumSet`.
+	class RecursiveGeneric<T : RecursiveGeneric<T>>
+
 	@JvmInline
 	value class ValueClass(val value: String)
 
