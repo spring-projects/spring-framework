@@ -22,11 +22,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscription;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.channel.AbortedException;
@@ -34,6 +39,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory;
@@ -215,6 +221,62 @@ class ServerHttpResponseTests {
 		bufferFactory.checkForLeaks();
 	}
 
+	@Test // gh-36438
+	void monoResponseShouldNotLeakIfCancelledBeforeEmit() throws Exception {
+		LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+		CountDownLatch subscribedLatch = new CountDownLatch(1);
+		CountDownLatch proceedLatch = new CountDownLatch(1);
+		AtomicReference<BaseSubscriber<DataBuffer>> innerRef = new AtomicReference<>();
+		TestServerHttpResponse response = new TestServerHttpResponse(bufferFactory) {
+			@Override
+			protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
+				return Mono.create(sink -> body.subscribe(new BaseSubscriber<DataBuffer>() {
+					@Override
+					protected void hookOnSubscribe(Subscription subscription) {
+						innerRef.set(this);
+						subscribedLatch.countDown();
+						try {
+							proceedLatch.await(5, TimeUnit.SECONDS);
+						}
+						catch (InterruptedException ex) {
+							Thread.currentThread().interrupt();
+						}
+						requestUnbounded();
+					}
+					@Override
+					protected void hookOnNext(DataBuffer value) {
+					}
+					@Override
+					protected void hookOnComplete() {
+						sink.success();
+					}
+					@Override
+					protected void hookOnCancel() {
+						sink.success();
+					}
+				}));
+			}
+		};
+
+		DataBuffer buffer = bufferFactory.allocateBuffer(64);
+		buffer.write(new byte[64]);
+		Thread worker = new Thread(() -> response.writeWith(Mono.just(buffer)).subscribe());
+		worker.start();
+		try {
+			// Cancel the inner source after it is subscribed but before it emits,
+			// as can happen when the request is aborted on another thread.
+			subscribedLatch.await(5, TimeUnit.SECONDS);
+			innerRef.get().cancel();
+			proceedLatch.countDown();
+			worker.join(5000);
+		}
+		finally {
+			proceedLatch.countDown();
+		}
+
+		bufferFactory.checkForLeaks();
+	}
+
 
 	private DefaultDataBuffer wrap(String a) {
 		return DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(a.getBytes(StandardCharsets.UTF_8)));
@@ -232,7 +294,11 @@ class ServerHttpResponseTests {
 		private final List<DataBuffer> body = new ArrayList<>();
 
 		public TestServerHttpResponse() {
-			super(DefaultDataBufferFactory.sharedInstance);
+			this(DefaultDataBufferFactory.sharedInstance);
+		}
+
+		public TestServerHttpResponse(DataBufferFactory bufferFactory) {
+			super(bufferFactory);
 		}
 
 		@Override
