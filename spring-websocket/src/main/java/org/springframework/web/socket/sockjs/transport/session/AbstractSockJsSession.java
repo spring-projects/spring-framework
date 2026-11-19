@@ -183,7 +183,9 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			try {
 				if (isActive() && !CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
 					try {
-						writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
+						synchronized (this.responseLock) {
+							writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
+						}
 					}
 					catch (Throwable ex) {
 						logger.debug("Failure while sending SockJS close frame", ex);

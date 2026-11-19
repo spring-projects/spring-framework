@@ -16,9 +16,12 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +29,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.frame.DefaultSockJsFrameFormat;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
@@ -90,6 +94,42 @@ class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstractHttp
 		assertThat(this.servletResponse.getContentAsString()).isEqualTo("hhh\n");
 
 		verifyNoMoreInteractions(this.webSocketHandler);
+	}
+
+	@Test
+	void closeWritesCloseFrameUnderResponseLock() throws Exception {
+		LockCheckingResponse lockCheckingResponse = new LockCheckingResponse(this.servletResponse, this.session.responseLock);
+		this.session.handleInitialRequest(this.request, lockCheckingResponse, this.frameFormat);
+		this.session.close(CloseStatus.PROTOCOL_ERROR);
+
+		assertThat(this.servletResponse.getContentAsString()).isEqualTo("hhh\noc[1002,\"\"]");
+		assertThat(lockCheckingResponse.writtenWithoutLock).isFalse();
+	}
+
+
+	private static class LockCheckingResponse extends ServletServerHttpResponse {
+
+		private final Object lock;
+
+		private boolean writtenWithoutLock;
+
+		LockCheckingResponse(HttpServletResponse servletResponse, Object lock) {
+			super(servletResponse);
+			this.lock = lock;
+		}
+
+		@Override
+		public OutputStream getBody() throws IOException {
+			return new FilterOutputStream(super.getBody()) {
+				@Override
+				public void write(byte[] b, int off, int len) throws IOException {
+					if (!Thread.holdsLock(LockCheckingResponse.this.lock)) {
+						LockCheckingResponse.this.writtenWithoutLock = true;
+					}
+					this.out.write(b, off, len);
+				}
+			};
+		}
 	}
 
 
