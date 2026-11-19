@@ -86,6 +86,8 @@ import org.springframework.context.testfixture.context.annotation.LazyResourceMe
 import org.springframework.context.testfixture.context.annotation.LookupComponent;
 import org.springframework.context.testfixture.context.annotation.PropertySourceConfiguration;
 import org.springframework.context.testfixture.context.annotation.QualifierConfiguration;
+import org.springframework.context.testfixture.context.annotation.ResourceAndAutowiredCglibConfiguration;
+import org.springframework.context.testfixture.context.annotation.ResourceAndAutowiredComponent;
 import org.springframework.context.testfixture.context.annotation.ResourceComponent;
 import org.springframework.context.testfixture.context.annotation.ValueCglibConfiguration;
 import org.springframework.context.testfixture.context.generator.SimpleComponent;
@@ -401,6 +403,28 @@ class ApplicationContextAotGeneratorTests {
 		}
 
 		@Test
+		void processAheadOfTimeWhenHasResourceAndAutowiringOnSameMember() {
+			GenericApplicationContext applicationContext = new GenericApplicationContext();
+			registerBeanPostProcessor(applicationContext,
+					AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME, CommonAnnotationBeanPostProcessor.class);
+			registerBeanPostProcessor(applicationContext,
+					AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, AutowiredAnnotationBeanPostProcessor.class);
+			registerStringBean(applicationContext, "text", "hello");
+			registerStringBean(applicationContext, "primaryText", "primary");
+			applicationContext.getBeanDefinition("primaryText").setPrimary(true);
+			applicationContext.registerBeanDefinition("component",
+					new RootBeanDefinition(ResourceAndAutowiredComponent.class));
+
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				ResourceAndAutowiredComponent bean = freshApplicationContext.getBean(ResourceAndAutowiredComponent.class);
+				assertThat(bean.getField()).isEqualTo("hello");
+				assertThat(bean.getMethod()).isEqualTo("hello");
+				assertThat(bean.getMethodInvocations()).isOne();
+			});
+		}
+
+		@Test
 		void processAheadOfTimeWhenHasLazyResourceAutowiringOnField() {
 			testResourceAutowiringComponent(LazyResourceFieldComponent.class, (bean, generationContext) -> {
 				Environment environment = bean.getEnvironment();
@@ -566,6 +590,25 @@ class ApplicationContextAotGeneratorTests {
 				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 				assertThat(freshApplicationContext.getBean("prefix", String.class)).isEqualTo("Hello0");
 				assertThat(freshApplicationContext.getBean("text", String.class)).isEqualTo("Hello0 World");
+			});
+		}
+
+		@Test
+		void processAheadOfTimeWhenHasCglibProxyAndResourceAndAutowiringOnSameMember() {
+			GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+			registerStringBean(applicationContext, "text", "hello");
+			registerStringBean(applicationContext, "primaryText", "primary");
+			applicationContext.getBeanDefinition("primaryText").setPrimary(true);
+			applicationContext.registerBean(ResourceAndAutowiredCglibConfiguration.class);
+
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+				ResourceAndAutowiredCglibConfiguration bean =
+						freshApplicationContext.getBean(ResourceAndAutowiredCglibConfiguration.class);
+				assertThat(bean.getClass()).isNotEqualTo(ResourceAndAutowiredCglibConfiguration.class);
+				assertThat(bean.getField()).isEqualTo("hello");
+				assertThat(bean.getMethod()).isEqualTo("hello");
+				assertThat(bean.getMethodInvocations()).isOne();
 			});
 		}
 

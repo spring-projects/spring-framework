@@ -298,7 +298,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
-		InjectionMetadata metadata = findResourceMetadata(beanName, beanClass,
+		// Use the members checked when the bean definition was post-processed, if it was,
+		// under the same bean type.
+		InjectionMetadata metadata = findResourceMetadata(beanName, registeredBean.getBeanType().toClass(),
 				beanDefinition.getPropertyValues());
 		Collection<LookupElement> injectedElements = getInjectedElements(metadata,
 				beanDefinition.getPropertyValues());

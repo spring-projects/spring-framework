@@ -380,7 +380,9 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
-		InjectionMetadata metadata = findInjectionMetadata(beanDefinition, beanClass, beanName);
+		// Keep the members checked when the bean definition was post-processed, if it was, under
+		// the same bean type: checking them again would find all of them externally managed by then.
+		InjectionMetadata metadata = findPersistenceMetadata(beanName, registeredBean.getBeanType().toClass(), null);
 		Collection<InjectedElement> injectedElements = metadata.getInjectedElements(
 				beanDefinition.getPropertyValues());
 		if (!CollectionUtils.isEmpty(injectedElements)) {

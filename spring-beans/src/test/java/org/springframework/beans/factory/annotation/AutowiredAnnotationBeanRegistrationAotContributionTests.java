@@ -209,6 +209,27 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		assertThat(contribution).isNull();
 	}
 
+	@Test
+	void contributeWhenBeanDefinitionHasBeenPostProcessed() {
+		RegisteredBean registeredBean = registerBean(InjectionBean.class);
+		this.beanPostProcessor.postProcessMergedBeanDefinition(registeredBean.getMergedBeanDefinition(),
+				InjectionBean.class, registeredBean.getBeanName());
+		BeanRegistrationAotContribution contribution = this.beanPostProcessor.processAheadOfTime(registeredBean);
+		assertThat(contribution).isNotNull();
+	}
+
+	@Test
+	void contributeWhenMethodInjectionIsExternallyManaged() throws NoSuchMethodException {
+		RegisteredBean registeredBean = registerBean(InjectionBean.class);
+		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		beanDefinition.registerExternallyManagedConfigMember(
+				InjectionBean.class.getMethod("setCounter", Integer.class));
+		this.beanPostProcessor.postProcessMergedBeanDefinition(beanDefinition,
+				InjectionBean.class, registeredBean.getBeanName());
+		BeanRegistrationAotContribution contribution = this.beanPostProcessor.processAheadOfTime(registeredBean);
+		assertThat(contribution).isNull();
+	}
+
 	@Nested
 	@SuppressWarnings("deprecation")
 	class DeprecationTests {
