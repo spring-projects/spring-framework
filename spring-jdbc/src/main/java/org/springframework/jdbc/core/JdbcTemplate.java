@@ -410,7 +410,21 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			stmt = con.createStatement();
 			applyStatementSettings(stmt);
 			T result = action.doInStatement(stmt);
-			handleWarnings(stmt);
+			if (!closeResources && result instanceof Stream<?> stream) {
+				try {
+					handleWarnings(stmt);
+				}
+				catch (SQLException | RuntimeException ex) {
+					// Stream close handler releases ResultSet, Statement and Connection
+					stream.close();
+					stmt = null;
+					con = null;
+					throw ex;
+				}
+			}
+			else {
+				handleWarnings(stmt);
+			}
 			return result;
 		}
 		catch (SQLException ex) {
@@ -668,7 +682,21 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			ps = psc.createPreparedStatement(con);
 			applyStatementSettings(ps);
 			T result = action.doInPreparedStatement(ps);
-			handleWarnings(ps);
+			if (!closeResources && result instanceof Stream<?> stream) {
+				try {
+					handleWarnings(ps);
+				}
+				catch (SQLException | RuntimeException ex) {
+					// Stream close handler releases ResultSet, Statement and Connection
+					stream.close();
+					ps = null;
+					con = null;
+					throw ex;
+				}
+			}
+			else {
+				handleWarnings(ps);
+			}
 			return result;
 		}
 		catch (SQLException ex) {
