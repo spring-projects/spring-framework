@@ -9,6 +9,7 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -41,6 +42,19 @@ class ContentBasedVersionStrategyTests {
 
 		assertThat(this.strategy.extractVersion(path)).isEqualTo(hash);
 		assertThat(this.strategy.extractVersion("foo/bar.css")).isNull();
+	}
+
+	@Test
+	void extractVersionWithMultipleDashesAndDots() {
+		assertThat(this.strategy.extractVersion("my-dir/foo-abc.min.css")).isEqualTo("abc.min");
+		assertThat(this.strategy.extractVersion("foo-bar baz-abc.css")).isEqualTo("abc");
+		assertThat(this.strategy.extractVersion("foo-bar/baz")).isNull();
+	}
+
+	@Test
+	@Timeout(5)
+	void extractVersionWithManyDashes() {
+		assertThat(this.strategy.extractVersion("css/" + "-".repeat(100_000))).isNull();
 	}
 
 	@Test

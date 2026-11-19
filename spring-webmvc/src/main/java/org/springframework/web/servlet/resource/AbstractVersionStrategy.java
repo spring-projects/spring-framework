@@ -5,9 +5,6 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
@@ -107,18 +104,31 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 	 */
 	protected static class FileNameVersionPathStrategy implements VersionPathStrategy {
 
-		private static final Pattern pattern = Pattern.compile("-(\\S*)\\.");
-
 		@Override
 		public @Nullable String extractVersion(String requestPath) {
-			Matcher matcher = pattern.matcher(requestPath);
-			if (matcher.find()) {
-				String match = matcher.group(1);
-				return (match.contains("-") ? match.substring(match.lastIndexOf('-') + 1) : match);
+			// Equivalent to the first match of "-(\S*)\." without the backtracking
+			// of a regular expression, which is super-linear on paths with many '-'
+			int length = requestPath.length();
+			int dashIndex = requestPath.indexOf('-');
+			while (dashIndex != -1) {
+				int dotIndex = -1;
+				int index = dashIndex + 1;
+				for (; index < length && !isWhitespace(requestPath.charAt(index)); index++) {
+					if (requestPath.charAt(index) == '.') {
+						dotIndex = index;
+					}
+				}
+				if (dotIndex != -1) {
+					String match = requestPath.substring(dashIndex + 1, dotIndex);
+					return (match.contains("-") ? match.substring(match.lastIndexOf('-') + 1) : match);
+				}
+				dashIndex = requestPath.indexOf('-', index);
 			}
-			else {
-				return null;
-			}
+			return null;
+		}
+
+		private static boolean isWhitespace(char ch) {
+			return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\u000B' || ch == '\f' || ch == '\r');
 		}
 
 		@Override
