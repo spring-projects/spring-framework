@@ -267,14 +267,14 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
+	public <T extends @Nullable Object> @Nullable T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException {
 
 		return queryForObject(sql, paramSource, new SingleColumnRowMapper<>(requiredType));
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
+	public <T extends @Nullable Object> @Nullable T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException {
 
 		return queryForObject(sql, paramMap, new SingleColumnRowMapper<>(requiredType));
@@ -282,27 +282,23 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public Map<String, @Nullable Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Map<String, @Nullable Object> result = queryForObject(sql, paramSource, new ColumnMapRowMapper());
-		Assert.state(result != null, "No result map");
-		return result;
+		return queryForObject(sql, paramSource, new ColumnMapRowMapper());
 	}
 
 	@Override
 	public Map<String, @Nullable Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		Map<String, @Nullable Object> result = queryForObject(sql, paramMap, new ColumnMapRowMapper());
-		Assert.state(result != null, "No result map");
-		return result;
+		return queryForObject(sql, paramMap, new ColumnMapRowMapper());
 	}
 
 	@Override
-	public <T> List<@Nullable T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
+	public <T extends @Nullable Object> List<@Nullable T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException {
 
 		return query(sql, paramSource, new SingleColumnRowMapper<>(elementType));
 	}
 
 	@Override
-	public <T> List<@Nullable T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
+	public <T extends @Nullable Object> List<@Nullable T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
 			throws DataAccessException {
 
 		return queryForList(sql, new MapSqlParameterSource(paramMap), elementType);
@@ -324,10 +320,8 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	@Override
 	public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		SqlRowSet result = getJdbcOperations().query(
+		return getJdbcOperations().query(
 				getPreparedStatementCreator(sql, paramSource), new SqlRowSetResultSetExtractor());
-		Assert.state(result != null, "No result");
-		return result;
 	}
 
 	@Override
