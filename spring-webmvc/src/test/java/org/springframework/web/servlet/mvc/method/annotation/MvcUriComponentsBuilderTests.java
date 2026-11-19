@@ -56,6 +56,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.filter.ForwardedHeaderFilter;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -84,6 +86,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
  * @author Dietrich Schulten
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Daeho Kwon
  */
 @SuppressWarnings("unused")
 class MvcUriComponentsBuilderTests {
@@ -355,6 +358,42 @@ class MvcUriComponentsBuilderTests {
 		UriComponents uriComponents = fromMethodName(HelloController.class, "get", "test").build();
 
 		assertThat(uriComponents.toString()).isEqualTo("http://localhost/hello/test");
+	}
+
+	@Test
+	void fromControllerWithHttpExchange() {
+		UriComponents uriComponents = fromController(PersonHttpExchangeController.class).build();
+		assertThat(uriComponents.toUriString()).endsWith("/exchange/people");
+	}
+
+	@Test
+	void fromMethodNameWithHttpExchange() {
+		UriComponents uriComponents = fromMethodName(PersonHttpExchangeController.class, "getPerson", 123L).build();
+		assertThat(uriComponents.toUriString()).endsWith("/exchange/people/123");
+	}
+
+	@Test
+	void fromMethodCallWithHttpExchange() {
+		UriComponents uriComponents = fromMethodCall(on(PersonHttpExchangeController.class).getPerson(123L)).build();
+		assertThat(uriComponents.toUriString()).endsWith("/exchange/people/123");
+	}
+
+	@Test
+	void fromControllerWithHttpExchangeOnInterface() {
+		UriComponents uriComponents = fromController(PersonHttpExchangeControllerImpl.class).build();
+		assertThat(uriComponents.toUriString()).endsWith("/exchange/persons");
+	}
+
+	@Test
+	void fromMethodNameWithHttpExchangeOnInterface() {
+		UriComponents uriComponents = fromMethodName(PersonHttpExchangeControllerImpl.class, "getPerson", 123L).build();
+		assertThat(uriComponents.toUriString()).endsWith("/exchange/persons/123");
+	}
+
+	@Test
+	void fromMethodCallWithHttpExchangeOnInterface() {
+		UriComponents uriComponents = fromMethodCall(on(PersonHttpExchangeControllerImpl.class).getPerson(123L)).build();
+		assertThat(uriComponents.toUriString()).endsWith("/exchange/persons/123");
 	}
 
 	@Test
@@ -897,6 +936,35 @@ class MvcUriComponentsBuilderTests {
 		@Override
 		public ResponseEntity<String> get(String name) {
 			return ResponseEntity.ok("Hello " + name);
+		}
+	}
+
+
+	@Controller
+	@HttpExchange("/exchange/people")
+	static class PersonHttpExchangeController {
+
+		@GetExchange("/{id}")
+		HttpEntity<Void> getPerson(@PathVariable Long id) {
+			return null;
+		}
+	}
+
+
+	@HttpExchange("/exchange/persons")
+	interface PersonHttpExchangeInterface {
+
+		@GetExchange("/{id}")
+		HttpEntity<Void> getPerson(@PathVariable Long id);
+	}
+
+
+	@Controller
+	static class PersonHttpExchangeControllerImpl implements PersonHttpExchangeInterface {
+
+		@Override
+		public HttpEntity<Void> getPerson(Long id) {
+			return null;
 		}
 	}
 
