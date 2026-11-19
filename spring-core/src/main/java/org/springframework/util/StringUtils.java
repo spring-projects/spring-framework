@@ -254,30 +254,36 @@ public abstract class StringUtils {
 		return str.strip();
 	}
 
-	/**
-	 * Trim <em>all</em> whitespace from the given {@code CharSequence}:
-	 * leading, trailing, and in between characters.
-	 * @param str the {@code CharSequence} to check
-	 * @return the trimmed {@code CharSequence}
-	 * @since 5.3.22
-	 * @see #trimAllWhitespace(String)
-	 * @see java.lang.Character#isWhitespace
-	 */
-	public static CharSequence trimAllWhitespace(CharSequence str) {
-		if (!hasLength(str)) {
-			return str;
-		}
-
-		int len = str.length();
-		StringBuilder sb = new StringBuilder(str.length());
-		for (int i = 0; i < len; i++) {
-			char c = str.charAt(i);
-			if (!Character.isWhitespace(c)) {
-				sb.append(c);
+		public static CharSequence trimAllWhitespace(CharSequence str) {
+			if (!hasLength(str)) {
+				return str;
 			}
+
+			int len = str.length();
+			int firstWhitespace = -1;
+			
+			for (int i = 0; i < len; i++) {
+				if (Character.isWhitespace(str.charAt(i))) {
+					firstWhitespace = i;
+					break;
+				}
+			}
+			if (firstWhitespace == -1) {
+				return str;
+			}
+
+			StringBuilder sb = new StringBuilder(len);
+			sb.append(str, 0, firstWhitespace);
+			
+			for (int i = firstWhitespace + 1; i < len; i++) {
+				char c = str.charAt(i);
+				if (!Character.isWhitespace(c)) {
+					sb.append(c);
+				}
+			}
+
+			return sb;
 		}
-		return sb;
-	}
 
 	/**
 	 * Trim <em>all</em> whitespace from the given {@code String}:
