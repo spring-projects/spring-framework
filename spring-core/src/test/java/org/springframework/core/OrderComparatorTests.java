@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Yanming Zhou
  */
 class OrderComparatorTests {
 
@@ -106,6 +107,61 @@ class OrderComparatorTests {
 	}
 
 	@Test
+	void compareTailOrderedInstancesBefore() {
+		assertThat(this.comparator.compare(new StubTailOrdered(100), new StubTailOrdered(2000))).isEqualTo(-1);
+	}
+
+	@Test
+	void compareTailOrderedInstancesSame() {
+		assertThat(this.comparator.compare(new StubTailOrdered(100), new StubTailOrdered(100))).isEqualTo(0);
+	}
+
+	@Test
+	void compareTailOrderedInstancesAfter() {
+		assertThat(this.comparator.compare(new StubTailOrdered(982300), new StubTailOrdered(100))).isEqualTo(1);
+	}
+
+	@Test
+	void compareTailOrderedInstanceToStandardOrderedInstanceWithHigherPriority() {
+		assertThatTailOrderedAlwaysLoses(new StubTailOrdered(200), new StubOrdered(100));
+	}
+
+	@Test
+	void compareTailOrderedInstanceToStandardOrderedInstanceWithSamePriority() {
+		assertThatTailOrderedAlwaysLoses(new StubTailOrdered(100), new StubOrdered(100));
+	}
+
+	@Test
+	void compareTailOrderedInstanceToStandardOrderedInstanceWithLowerPriority() {
+		assertThatTailOrderedAlwaysLoses(new StubTailOrdered(100), new StubOrdered(200));
+	}
+
+	private void assertThatTailOrderedAlwaysLoses(StubTailOrdered priority, StubOrdered standard) {
+		assertThat(this.comparator.compare(priority, standard)).isEqualTo(1);
+		assertThat(this.comparator.compare(standard, priority)).isEqualTo(-1);
+	}
+
+	@Test
+	void compareTailOrderedInstanceToPriorityOrderedInstanceWithHigherPriority() {
+		assertThatTailOrderedAlwaysLoses(new StubTailOrdered(200), new StubPriorityOrdered(100));
+	}
+
+	@Test
+	void compareTailOrderedInstanceToPriorityOrderedInstanceWithSamePriority() {
+		assertThatTailOrderedAlwaysLoses(new StubTailOrdered(100), new StubPriorityOrdered(100));
+	}
+
+	@Test
+	void compareTailOrderedInstanceToPriorityOrderedInstanceWithLowerPriority() {
+		assertThatTailOrderedAlwaysLoses(new StubTailOrdered(100), new StubPriorityOrdered(200));
+	}
+
+	private void assertThatTailOrderedAlwaysLoses(StubTailOrdered priority, StubPriorityOrdered standard) {
+		assertThat(this.comparator.compare(priority, standard)).isEqualTo(1);
+		assertThat(this.comparator.compare(standard, priority)).isEqualTo(-1);
+	}
+
+	@Test
 	void compareWithSimpleSourceProvider() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
 				new TestSourceProvider(5L, new StubOrdered(25)));
@@ -153,6 +209,20 @@ class OrderComparatorTests {
 		private final int order;
 
 		StubPriorityOrdered(int order) {
+			this.order = order;
+		}
+
+		@Override
+		public int getOrder() {
+			return this.order;
+		}
+	}
+
+	private static class StubTailOrdered implements TailOrdered {
+
+		private final int order;
+
+		StubTailOrdered(int order) {
 			this.order = order;
 		}
 

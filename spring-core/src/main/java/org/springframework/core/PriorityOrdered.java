@@ -41,6 +41,7 @@ package org.springframework.core;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 2.5
+ * @see TailOrdered
  * @see org.springframework.beans.factory.config.PropertyOverrideConfigurer
  */
 public interface PriorityOrdered extends Ordered {
