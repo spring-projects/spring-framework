@@ -92,6 +92,10 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 			if (event.isEndElement()) {
 				break;
 			}
+			else if (event.getEventType() == XMLStreamConstants.COMMENT ||
+					event.getEventType() == XMLStreamConstants.PROCESSING_INSTRUCTION) {
+				continue;
+			}
 			else if (!event.isCharacters()) {
 				throw new XMLStreamException("Unexpected non-text event: " + event);
 			}
