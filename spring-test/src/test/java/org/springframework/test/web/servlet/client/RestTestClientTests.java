@@ -35,6 +35,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -213,6 +214,38 @@ class RestTestClientTests {
 					.expectStatus().isOk()
 					.expectBody().jsonPath("$.headers.Cookie").isEqualTo("foo=bar");
 		}
+
+		@Test
+		void multipleCookie() {
+			RestTestClientTests.this.client.get().uri("/test")
+					.cookie("foo", "bar")
+					.cookie("baz", "qux")
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody()
+					.jsonPath("$.headers.Cookie").isEqualTo("foo=bar; baz=qux")
+					.jsonPath("$.cookies[0].name").isEqualTo("foo")
+					.jsonPath("$.cookies[0].value").isEqualTo("bar")
+					.jsonPath("$.cookies[1].name").isEqualTo("baz")
+					.jsonPath("$.cookies[1].value").isEqualTo("qux");
+		}
+
+		@Test
+		void multipleCookies() {
+			RestTestClientTests.this.client.get().uri("/test")
+					.cookies(cookies -> {
+						cookies.add("foo", "bar");
+						cookies.add("baz", "qux");
+					})
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody()
+					.jsonPath("$.headers.Cookie").isEqualTo("foo=bar; baz=qux")
+					.jsonPath("$.cookies[0].name").isEqualTo("foo")
+					.jsonPath("$.cookies[0].value").isEqualTo("bar")
+					.jsonPath("$.cookies[1].name").isEqualTo("baz")
+					.jsonPath("$.cookies[1].value").isEqualTo("qux");
+		}
 	}
 
 
@@ -345,7 +378,8 @@ class RestTestClientTests {
 			return Map.of(
 					"method", request.getMethod(),
 					"uri", request.getRequestURI(),
-					"headers", headers.toSingleValueMap()
+					"headers", headers.toSingleValueMap(),
+					"cookies", ObjectUtils.toObjectArray(request.getCookies())
 			);
 		}
 
