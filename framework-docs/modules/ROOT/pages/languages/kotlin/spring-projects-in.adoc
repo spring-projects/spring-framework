@@ -181,7 +181,7 @@ such bean by name, or add `@JvmName("sampleBean")` to disable name mangling.
 [[injecting-configuration-properties]]
 == Injecting Configuration Properties
 
-In Java, you can inject configuration properties by using annotations (such as pass:q[`@Value("${property}")`)].
+In Java, you can inject configuration properties by using annotations (such as pass:q[`@Value("${property}")`]).
 However, in Kotlin, `$` is a reserved character that is used for
 {kotlin-docs}/idioms.html#string-interpolation[string interpolation].
 
@@ -357,7 +357,7 @@ file with a `spring.test.constructor.autowire.mode = all` property.
 	class OrderServiceIntegrationTests(
 					val orderService: OrderService,
 					val customerService: CustomerService) {
-	
+
 		// tests that use the injected OrderService and CustomerService
 	}
 ----
@@ -414,19 +414,19 @@ class support. The following example shows how to do so:
 [source,kotlin,indent=0]
 ----
 	class SpecificationLikeTests {
-	
+
 		@Nested
 		@DisplayName("a calculator")
 		inner class Calculator {
 
 			val calculator = SampleCalculator()
-	
+
 			@Test
 			fun `should return the result of adding the first number to the second number`() {
 				val sum = calculator.sum(2, 4)
 				assertEquals(6, sum)
 			}
-	
+
 			@Test
 			fun `should return the result of subtracting the second number from the first number`() {
 				val subtract = calculator.subtract(4, 2)

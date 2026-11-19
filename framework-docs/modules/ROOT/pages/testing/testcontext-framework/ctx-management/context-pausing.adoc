@@ -32,14 +32,16 @@ For example, if you want inactive application contexts to always be paused, you 
 switch from the default `ON_CONTEXT_SWITCH` mode to `ALWAYS` by setting the
 `spring.test.context.cache.pause` system property to `always`.
 
-```shell
+[source,shell]
+----
 -Dspring.test.context.cache.pause=always
-```
+----
 Similarly, if you encounter issues with `Lifecycle` components that cannot or should not
 opt out of pausing, or if you discover that your test suite runs more slowly due to the
 pausing and restarting of application contexts, you can disable the pausing feature by
 setting the `spring.test.context.cache.pause` system property to `never`.
 
-```shell
+[source,shell]
+----
 -Dspring.test.context.cache.pause=never
-```
+----
