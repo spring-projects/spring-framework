@@ -185,7 +185,7 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 		@Override
-		public StatementSpec params(Object... values) {
+		public StatementSpec params(@Nullable Object... values) {
 			Collections.addAll(this.indexedParams, values);
 			return this;
 		}
