@@ -128,7 +128,8 @@ public class Elvis extends SpelNodeImpl {
 		this.children[0].generateCode(mv, cf);
 		String lastDesc = cf.lastDescriptor();
 		Assert.state(lastDesc != null, "No last descriptor");
-		if ("Ljava/util/Optional".equals(lastDesc)) {
+		boolean unwrapOptional = "Ljava/util/Optional".equals(lastDesc);
+		if (unwrapOptional) {
 			CodeFlow.insertOptionalUnwrapIfNecessary(mv, lastDesc);
 		}
 		else {
@@ -138,12 +139,19 @@ public class Elvis extends SpelNodeImpl {
 
 		mv.visitInsn(DUP);
 		mv.visitJumpInsn(IFNULL, elseTarget);
-		// Also check if empty string, as per the code in the interpreted version
-		mv.visitInsn(DUP);
-		mv.visitLdcInsn("");
-		mv.visitInsn(SWAP);
-		mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z",false);
-		mv.visitJumpInsn(IFEQ, endOfIf);  // if not empty, drop through to elseTarget
+		if (unwrapOptional) {
+			// The value of a non-empty Optional is used as is, even an empty String
+			mv.visitJumpInsn(GOTO, endOfIf);
+		}
+		else {
+			// Also check if empty string, as per the code in the interpreted version
+			mv.visitInsn(DUP);
+			mv.visitLdcInsn("");
+			mv.visitInsn(SWAP);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "equals",
+					"(Ljava/lang/Object;)Z", false);
+			mv.visitJumpInsn(IFEQ, endOfIf);  // if not empty, drop through to elseTarget
+		}
 
 		mv.visitLabel(elseTarget);
 		mv.visitInsn(POP);
