@@ -19,6 +19,7 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -207,6 +208,31 @@ class FormHttpMessageConverterTests {
 				.as("Invalid content-type").isEqualTo(APPLICATION_FORM_URLENCODED);
 		assertThat(outputMessage.getHeaders().getContentLength())
 				.as("Invalid content-length").isEqualTo(outputMessage.getBodyAsBytes().length);
+	}
+
+	@Test  // gh-22174
+	void writeFormFromMultiValueMapWithNonStringValues() throws IOException {
+		MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+		body.add("name", "value");
+		body.add("page", 1);
+		body.add("enabled", true);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(body, APPLICATION_FORM_URLENCODED, outputMessage);
+
+		assertThat(outputMessage.getBodyAsString(UTF_8))
+				.as("Invalid result").isEqualTo("name=value&page=1&enabled=true");
+	}
+
+	@Test  // gh-22174
+	void writeFormFromMapWithNonStringValues() throws IOException {
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("name", "value");
+		body.put("page", 1);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(body, APPLICATION_FORM_URLENCODED, outputMessage);
+
+		assertThat(outputMessage.getBodyAsString(UTF_8))
+				.as("Invalid result").isEqualTo("name=value&page=1");
 	}
 
 	private void assertCanRead(ResolvableType type, MediaType mediaType) {
