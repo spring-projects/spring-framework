@@ -134,6 +134,10 @@ public class SockJsFrame {
 	public String toString() {
 		int maxLength = 80;
 		int length = Math.min(this.content.length(), maxLength);
+		if (length < this.content.length() &&
+				Character.isSurrogatePair(this.content.charAt(length - 1), this.content.charAt(length))) {
+			length--;
+		}
 
 		StringBuilder sb = new StringBuilder(length + 36);
 		sb.append("SockJsFrame content='");

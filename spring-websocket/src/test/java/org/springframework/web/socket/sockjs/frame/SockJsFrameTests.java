@@ -94,4 +94,12 @@ class SockJsFrameTests {
 		assertThat(frame.getFrameData()).isEqualTo("[]");
 	}
 
+	@Test
+	void toStringDoesNotSplitSurrogatePair() {
+		String prefix = "a[\"" + "x".repeat(76);
+		SockJsFrame frame = new SockJsFrame(prefix + "\uD83D\uDE00\"]");
+
+		assertThat(frame.toString()).isEqualTo("SockJsFrame content='" + prefix + "...(truncated)'");
+	}
+
 }
