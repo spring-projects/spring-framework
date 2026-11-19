@@ -948,7 +948,9 @@ class ConstructorResolver {
 			Executable executable, String beanName, Set<String> autowiredBeanNames) {
 
 		for (String autowiredBeanName : autowiredBeanNames) {
-			this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
+			if (this.beanFactory.containsBean(autowiredBeanName)) {
+				this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Autowiring by type from bean name '" + beanName + "' via " +
 						(executable instanceof Constructor ? "constructor" : "factory method") +
