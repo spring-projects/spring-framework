@@ -60,7 +60,7 @@ class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		assertThat(response.hasBody()).isTrue();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(springLogoResource.contentLength());
-		assertThat(response.getBody().length).isEqualTo(springLogoResource.contentLength());
+		assertThat(response.getBody()).hasSize((int) springLogoResource.contentLength());
 		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.IMAGE_PNG);
 	}
 

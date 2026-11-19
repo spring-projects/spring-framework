@@ -404,15 +404,16 @@ class JdbcTemplateTests {
 	void batchUpdate() throws Exception {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 2"};
+		int[] rowsAffected = new int[] {1, 1};
 
-		given(this.statement.executeBatch()).willReturn(new int[] {1, 1});
+		given(this.statement.executeBatch()).willReturn(rowsAffected);
 		mockDatabaseMetaData(true);
 		given(this.connection.createStatement()).willReturn(this.statement);
 
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
 		verify(this.statement).addBatch(sql[0]);
 		verify(this.statement).addBatch(sql[1]);
@@ -452,7 +453,7 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(new int[] {1, 1});
 
 		verify(this.statement, never()).addBatch(anyString());
 		verify(this.statement).close();
@@ -501,9 +502,7 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -535,7 +534,7 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected.length == 0).as("executed 0 updates").isTrue();
+		assertThat(actualRowsAffected).as("executed 0 updates").isEmpty();
 
 		verify(this.preparedStatement, never()).executeBatch();
 	}
@@ -570,9 +569,7 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -607,9 +604,7 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -644,9 +639,7 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
 		verify(this.preparedStatement, never()).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -675,9 +668,7 @@ class JdbcTemplateTests {
 		};
 
 		int[] actualRowsAffected = this.template.batchUpdate(sql, setter);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
 		verify(this.preparedStatement, never()).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -742,9 +733,7 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, ids);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setObject(1, 100);
@@ -767,9 +756,7 @@ class JdbcTemplateTests {
 		this.template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = this.template.batchUpdate(sql, ids, sqlTypes);
-		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
-		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(rowsAffected);
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setObject(1, 100, sqlTypes[0]);
 		verify(this.preparedStatement).setObject(1, 200, sqlTypes[0]);
@@ -792,10 +779,7 @@ class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[][] actualRowsAffected = template.batchUpdate(sql, ids, 2, setter);
-		assertThat(actualRowsAffected[0]).as("executed 2 updates").hasSize(2);
-		assertThat(actualRowsAffected[0][0]).isEqualTo(rowsAffected1[0]);
-		assertThat(actualRowsAffected[0][1]).isEqualTo(rowsAffected1[1]);
-		assertThat(actualRowsAffected[1][0]).isEqualTo(rowsAffected2[0]);
+		assertThat(actualRowsAffected).as("executed 2 updates").isEqualTo(new int[][] {rowsAffected1, rowsAffected2});
 
 		verify(this.preparedStatement, times(3)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids.get(0));

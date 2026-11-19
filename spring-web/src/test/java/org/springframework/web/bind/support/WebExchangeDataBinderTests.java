@@ -166,12 +166,12 @@ class WebExchangeDataBinderTests {
 		formData.add("stringArray", "abc");
 		formData.add("stringArray", "123,def");
 		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
-		assertThat(this.testBean.getStringArray().length).as("Expected all three items to be bound").isEqualTo(3);
+		assertThat(this.testBean.getStringArray()).as("Expected all three items to be bound").hasSize(3);
 
 		formData.remove("stringArray");
 		formData.add("stringArray", "123,def");
 		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
-		assertThat(this.testBean.getStringArray().length).as("Expected only 1 item to be bound").isEqualTo(1);
+		assertThat(this.testBean.getStringArray()).as("Expected only 1 item to be bound").hasSize(1);
 	}
 
 	@Test

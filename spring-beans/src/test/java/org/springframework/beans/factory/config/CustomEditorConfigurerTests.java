@@ -105,8 +105,7 @@ class CustomEditorConfigurerTests {
 		bf.registerBeanDefinition("tb", bd);
 
 		TestBean tb = (TestBean) bf.getBean("tb");
-		assertThat(tb.getStringArray() != null && tb.getStringArray().length == 1).isTrue();
-		assertThat(tb.getStringArray()[0]).isEqualTo("test");
+		assertThat(tb.getStringArray()).containsExactly("test");
 	}
 
 

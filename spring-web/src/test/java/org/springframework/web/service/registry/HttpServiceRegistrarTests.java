@@ -139,7 +139,7 @@ class HttpServiceRegistrarTests {
 
 	private void assertRegistryBeanDef(HttpServiceGroup... expectedGroups) {
 		Map<String, HttpServiceGroup> groupMap = groupMap();
-		assertThat(groupMap.size()).isEqualTo(expectedGroups.length);
+		assertThat(groupMap).hasSize(expectedGroups.length);
 		for (HttpServiceGroup expected : expectedGroups) {
 			HttpServiceGroup actual = groupMap.get(expected.name());
 			assertThat(actual.httpServiceTypes()).isEqualTo(expected.httpServiceTypes());

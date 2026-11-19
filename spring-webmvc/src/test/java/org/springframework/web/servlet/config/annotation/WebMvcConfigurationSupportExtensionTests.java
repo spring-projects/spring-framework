@@ -181,7 +181,7 @@ class WebMvcConfigurationSupportExtensionTests {
 		assertThat(chain).isNotNull();
 		assertThat(chain.getHandler()).isNotNull();
 		interceptors = chain.getInterceptors();
-		assertThat(interceptors.length).as(Arrays.toString(interceptors)).isEqualTo(5);
+		assertThat(interceptors).as(Arrays.toString(interceptors)).hasSize(5);
 		assertThat(interceptors[0].getClass().getSimpleName()).isEqualTo("CorsInterceptor");
 		// PathExposingHandlerInterceptor at interceptors[1]
 		assertThat(interceptors[2].getClass()).isEqualTo(LocaleChangeInterceptor.class);

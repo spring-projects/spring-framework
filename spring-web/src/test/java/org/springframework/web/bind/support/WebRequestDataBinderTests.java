@@ -244,12 +244,12 @@ class WebRequestDataBinderTests {
 		request.addParameter("stringArray", "abc");
 		request.addParameter("stringArray", "123,def");
 		binder.bind(new ServletWebRequest(request));
-		assertThat(target.getStringArray().length).as("Expected all three items to be bound").isEqualTo(3);
+		assertThat(target.getStringArray()).as("Expected all three items to be bound").hasSize(3);
 
 		request.removeParameter("stringArray");
 		request.addParameter("stringArray", "123,def");
 		binder.bind(new ServletWebRequest(request));
-		assertThat(target.getStringArray().length).as("Expected only 1 item to be bound").isEqualTo(1);
+		assertThat(target.getStringArray()).as("Expected only 1 item to be bound").hasSize(1);
 	}
 
 	@Test

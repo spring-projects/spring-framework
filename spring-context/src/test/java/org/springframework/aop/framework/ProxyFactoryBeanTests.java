@@ -225,7 +225,7 @@ class ProxyFactoryBeanTests {
 		NopInterceptor di = new NopInterceptor();
 		pc1.addAdvice(1, di);
 		assertThat(pc2.getAdvisors()).isEqualTo(pc1.getAdvisors());
-		assertThat(pc2.getAdvisors().length).as("Now have one more advisor").isEqualTo((oldLength + 1));
+		assertThat(pc2.getAdvisors()).as("Now have one more advisor").hasSize((oldLength + 1));
 		assertThat(di.getCount()).isEqualTo(0);
 		test1.setAge(5);
 		assertThat(test1.getAge()).isEqualTo(test1_1.getAge());
@@ -302,7 +302,7 @@ class ProxyFactoryBeanTests {
 		assertThat(factory.getType("test1")).isAssignableTo(ITestBean.class);
 		// Trigger lazy initialization.
 		config.getObject();
-		assertThat(config.getAdvisors().length).as("Have one advisors").isEqualTo(1);
+		assertThat(config.getAdvisors()).as("Have one advisors").hasSize(1);
 		assertThat(config.getObjectType()).isAssignableTo(ITestBean.class);
 		assertThat(factory.getType("test1")).isAssignableTo(ITestBean.class);
 

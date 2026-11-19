@@ -131,7 +131,7 @@ class ImportHttpServiceRegistrarTests {
 
 	private void assertGroups(TestGroup... expectedGroups) {
 		Map<String, TestGroup> groupMap = this.groupRegistry.groupMap();
-		assertThat(groupMap.size()).isEqualTo(expectedGroups.length);
+		assertThat(groupMap).hasSize(expectedGroups.length);
 		for (TestGroup expected : expectedGroups) {
 			TestGroup actual = groupMap.get(expected.name());
 			assertThat(actual.httpServiceTypes()).isEqualTo(expected.httpServiceTypes());
