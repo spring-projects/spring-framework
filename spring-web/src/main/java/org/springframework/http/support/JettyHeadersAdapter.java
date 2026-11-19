@@ -162,18 +162,23 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	public @Nullable List<String> put(String key, List<String> value) {
 		HttpFields.Mutable mutableHttpFields = mutableFields();
 		List<String> oldValues = get(key);
+		// Add multiple values as separate fields: Jetty writes a field holding a list of
+		// values as a single comma-separated header line, which breaks Set-Cookie headers
 		if (oldValues == null) {
 			switch (value.size()) {
 				case 0 -> {}
 				case 1 -> mutableHttpFields.add(key, value.get(0));
-				default -> mutableHttpFields.add(key, value);
+				default -> addAll(key, value);
 			}
 		}
 		else {
 			switch (value.size()) {
 				case 0 -> mutableHttpFields.remove(key);
 				case 1 -> mutableHttpFields.put(key, value.get(0));
-				default -> mutableHttpFields.put(key, value);
+				default -> {
+					mutableHttpFields.remove(key);
+					addAll(key, value);
+				}
 			}
 		}
 		return oldValues;
