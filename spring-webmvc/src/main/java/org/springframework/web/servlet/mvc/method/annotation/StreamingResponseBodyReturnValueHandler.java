@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.FilterOutputStream;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import jakarta.servlet.ServletRequest;
@@ -106,9 +108,38 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 
 		@Override
 		public Void call() throws Exception {
-			this.streamingBody.writeTo(this.outputMessage.getBody());
+			this.streamingBody.writeTo(new ResponseFlushingOutputStream(this.outputMessage));
 			this.outputMessage.flush();
 			return null;
+		}
+	}
+
+
+	/**
+	 * Response body stream that delegates {@link #flush()} to
+	 * {@link ServerHttpResponse#flush()}. The body stream of the response
+	 * ignores flush calls by default, but with a {@code StreamingResponseBody}
+	 * the application writes the body directly and calls {@code flush()} to
+	 * send what it has written so far to the client.
+	 */
+	private static class ResponseFlushingOutputStream extends FilterOutputStream {
+
+		private final ServerHttpResponse outputMessage;
+
+		ResponseFlushingOutputStream(ServerHttpResponse outputMessage) throws IOException {
+			super(outputMessage.getBody());
+			this.outputMessage = outputMessage;
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			// Override for performance, FilterOutputStream writes one byte at a time
+			this.out.write(b, off, len);
+		}
+
+		@Override
+		public void flush() throws IOException {
+			this.outputMessage.flush();
 		}
 	}
 
