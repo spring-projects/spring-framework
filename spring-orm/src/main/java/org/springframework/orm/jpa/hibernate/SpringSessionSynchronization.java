@@ -19,7 +19,6 @@ package org.springframework.orm.jpa.hibernate;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.engine.spi.SessionImplementor;
 
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
@@ -62,11 +61,6 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	}
 
 
-	private Session getCurrentSession() {
-		return this.sessionHolder.getSession();
-	}
-
-
 	@Override
 	public int getOrder() {
 		return SESSION_SYNCHRONIZATION_ORDER;
@@ -76,11 +70,6 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	public void suspend() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
-			// Eagerly disconnect the Session here, to make release mode "on_close" work on JBoss.
-			Session session = getCurrentSession();
-			if (session instanceof SessionImplementor sessionImpl) {
-				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
-			}
 		}
 	}
 
@@ -93,23 +82,25 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 
 	@Override
 	public void flush() {
-		try {
-			getCurrentSession().flush();
-		}
-		catch (RuntimeException ex) {
-			throw DataAccessUtils.translateIfNecessary(ex, SpringFlushSynchronization.exceptionTranslator);
+		if (this.sessionHolder.hasSession()) {
+			try {
+				this.sessionHolder.getSession().flush();
+			}
+			catch (RuntimeException ex) {
+				throw DataAccessUtils.translateIfNecessary(ex, SpringFlushSynchronization.exceptionTranslator);
+			}
 		}
 	}
 
 	@Override
 	public void beforeCommit(boolean readOnly) throws DataAccessException {
-		if (!readOnly) {
-			Session session = getCurrentSession();
+		if (!readOnly && this.sessionHolder.hasSession()) {
+			Session session = this.sessionHolder.getSession();
 			// Read-write transaction -> flush the Hibernate Session.
 			// Further check: only flush when not FlushMode.MANUAL.
 			if (!FlushMode.MANUAL.equals(session.getHibernateFlushMode())) {
 				try {
-					getCurrentSession().flush();
+					session.flush();
 				}
 				catch (RuntimeException ex) {
 					throw DataAccessUtils.translateIfNecessary(ex, SpringFlushSynchronization.exceptionTranslator);
@@ -121,14 +112,12 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	@Override
 	public void beforeCompletion() {
 		try {
-			Session session = this.sessionHolder.getSession();
-			if (this.sessionHolder.getPreviousFlushMode() != null) {
-				// In case of pre-bound Session, restore previous flush mode.
-				session.setHibernateFlushMode(this.sessionHolder.getPreviousFlushMode());
-			}
-			// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
-			if (session instanceof SessionImplementor sessionImpl) {
-				sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
+			if (this.sessionHolder.hasSession()) {
+				Session session = this.sessionHolder.getSession();
+				if (this.sessionHolder.getPreviousFlushMode() != null) {
+					// In case of pre-bound Session, restore previous flush mode.
+					session.setHibernateFlushMode(this.sessionHolder.getPreviousFlushMode());
+				}
 			}
 		}
 		finally {
@@ -147,7 +136,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	@Override
 	public void afterCompletion(int status) {
 		try {
-			if (status != STATUS_COMMITTED) {
+			if (status != STATUS_COMMITTED && this.sessionHolder.hasSession()) {
 				// Clear all pending inserts/updates/deletes in the Session.
 				// Necessary for pre-bound Sessions, to avoid inconsistent state.
 				this.sessionHolder.getSession().clear();

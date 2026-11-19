@@ -35,6 +35,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.domain.Person;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -102,6 +103,28 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 	}
 
 	@Test
+	void statelessSession() {
+		String firstName = "Tony";
+		insertPerson(firstName);
+
+		Query<Person> q = statelessSession.createQuery("select p from Person as p", Person.class);
+		assertThat(q.getResultList()).hasSize(1);
+		assertThat(q.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+
+		endTransaction();
+
+		DataSourceTransactionManager dstm = new DataSourceTransactionManager(dataSource);
+		new TransactionTemplate(dstm).execute(status -> {
+			insertPerson(firstName);
+			Query<Person> q2 = statelessSession.createQuery("select p from Person as p", Person.class);
+			assertThat(q2.getResultList()).hasSize(1);
+			assertThat(q2.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+			status.setRollbackOnly();
+			return null;
+		});
+	}
+
+	@Test
 	void sharedSession() {
 		String firstName = "Tony";
 		insertPerson(firstName);
@@ -129,7 +152,7 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 	}
 
 	@Test
-	void statelessSession() {
+	void sharedSessionWithStatelessFirst() {
 		String firstName = "Tony";
 		insertPerson(firstName);
 
@@ -206,6 +229,33 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 
 		session.close();
 		TransactionSynchronizationManager.unbindResource(sessionFactory);
+	}
+
+	@Test  // gh-37693
+	void withSuspendedSession() {
+		Query<Person> q = sessionFactory.getCurrentSession().createQuery("select p from Person as p", Person.class);
+		assertThat(q.getResultList()).isEmpty();
+		endTransaction();
+
+		transactionDefinition.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+		startNewTransaction();
+		q = sessionFactory.getCurrentSession().createQuery("select p from Person as p", Person.class);
+		assertThat(q.getResultList()).isEmpty();
+
+		new TransactionTemplate(transactionManager).execute(status -> {
+			String firstName = "Tony";
+			insertPerson(firstName);
+			Query<Person> q2 = sessionFactory.getCurrentSession().createQuery("select p from Person as p", Person.class);
+			assertThat(q2.getResultList()).hasSize(1);
+			assertThat(q2.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+			assertThat(q2.getResultList().get(0).postLoaded).isSameAs(applicationContext);
+			status.setRollbackOnly();
+			return null;
+		});
+
+		// Access original Session from PROPAGATION_SUPPORTS transaction definition again
+		q = sessionFactory.getCurrentSession().createQuery("select p from Person as p", Person.class);
+		assertThat(q.getResultList()).isEmpty();
 	}
 
 	@Test  // SPR-16956
