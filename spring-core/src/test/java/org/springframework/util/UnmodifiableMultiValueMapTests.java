@@ -179,6 +179,21 @@ class UnmodifiableMultiValueMapTests {
 		assertThatUnsupportedOperationException().isThrownBy(values::clear);
 	}
 
+	@Test
+	void asSingleValueMapUnsupported() {
+		MultiValueMap<String, String> target = new LinkedMultiValueMap<>();
+		target.add("foo", "bar");
+		Map<String, String> map = new UnmodifiableMultiValueMap<>(target).asSingleValueMap();
+
+		assertThat(map).containsExactly(entry("foo", "bar"));
+		assertThatUnsupportedOperationException().isThrownBy(() -> map.put("baz", "qux"));
+		assertThatUnsupportedOperationException().isThrownBy(() -> map.remove("foo"));
+		assertThatUnsupportedOperationException().isThrownBy(() -> map.keySet().remove("foo"));
+		assertThatUnsupportedOperationException().isThrownBy(() -> map.values().removeIf(s -> true));
+		assertThatUnsupportedOperationException().isThrownBy(map::clear);
+		assertThat(target).containsExactly(entry("foo", List.of("bar")));
+	}
+
 	private static ThrowableTypeAssert<UnsupportedOperationException> assertThatUnsupportedOperationException() {
 		return assertThatExceptionOfType(UnsupportedOperationException.class);
 	}
