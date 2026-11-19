@@ -21,7 +21,6 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -41,6 +40,7 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.ClassHintUtils;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -439,8 +439,8 @@ public class InstanceSupplierCodeGenerator {
 
 		private void registerProxyIfNecessary(RuntimeHints runtimeHints, DependencyDescriptor dependencyDescriptor) {
 			Class<?> proxyType = this.candidateResolver.getLazyResolutionProxyClass(dependencyDescriptor, null);
-			if (proxyType != null && Proxy.isProxyClass(proxyType)) {
-				runtimeHints.proxies().registerJdkProxy(proxyType.getInterfaces());
+			if (proxyType != null) {
+				ClassHintUtils.registerProxyIfNecessary(proxyType, runtimeHints);
 			}
 		}
 	}
