@@ -6759,6 +6759,41 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		@Test
+		void elvisWithPrimitiveOperandsOfSameType() {
+			expression = parser.parseExpression("3 ?: 4");
+			assertThat(expression.getValue()).isEqualTo(3);
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo(3);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+
+			// double slot primitive
+			expression = parser.parseExpression("3L ?: 4L");
+			assertThat(expression.getValue()).isEqualTo(3L);
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo(3L);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("J");
+
+			expression = parser.parseExpression("3.5d ?: 4.5d");
+			assertThat(expression.getValue()).isEqualTo(3.5d);
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo(3.5d);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("D");
+
+			expression = parser.parseExpression("true ?: false");
+			assertThat(expression.getValue()).isEqualTo(true);
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo(true);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Z");
+
+			// method returning primitive
+			expression = parser.parseExpression("length() ?: 0");
+			assertThat(expression.getValue("abc")).isEqualTo(3);
+			assertCanCompile(expression);
+			assertThat(expression.getValue("abc")).isEqualTo(3);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test
 		void elvis_SPR17214() {
 			SpelParserConfiguration spc = SpelParserConfiguration.builder().compilerMode(SpelCompilerMode.IMMEDIATE).build();
 			SpelExpressionParser sep = new SpelExpressionParser(spc);
