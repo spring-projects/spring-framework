@@ -52,12 +52,44 @@ public class CompositeFilter implements Filter {
 
 	/**
 	 * Initialize all the filters, calling each one's init method in turn in the order supplied.
+	 * <p>If a filter's {@code init} method fails, filters that were already initialized
+	 * are destroyed in reverse order before the failure is rethrown. Failures from those
+	 * {@code destroy()} calls are added as {@linkplain Throwable#addSuppressed suppressed
+	 * exceptions}. The filter that failed {@code init} is not destroyed, matching the
+	 * Servlet specification that {@code destroy} is only invoked after a successful
+	 * {@code init}.
 	 * @see Filter#init(FilterConfig)
+	 * @see Filter#destroy()
 	 */
 	@Override
 	public void init(FilterConfig config) throws ServletException {
-		for (Filter filter : this.filters) {
-			filter.init(config);
+		for (int i = 0; i < this.filters.size(); i++) {
+			Filter filter = this.filters.get(i);
+			try {
+				filter.init(config);
+			}
+			catch (Throwable ex) {
+				for (int j = i; j-- > 0;) {
+					try {
+						this.filters.get(j).destroy();
+					}
+					catch (Throwable destroyEx) {
+						if (ex != destroyEx) {
+							ex.addSuppressed(destroyEx);
+						}
+					}
+				}
+				if (ex instanceof ServletException servletException) {
+					throw servletException;
+				}
+				if (ex instanceof RuntimeException runtimeException) {
+					throw runtimeException;
+				}
+				if (ex instanceof Error error) {
+					throw error;
+				}
+				throw new ServletException(ex);
+			}
 		}
 	}
 
