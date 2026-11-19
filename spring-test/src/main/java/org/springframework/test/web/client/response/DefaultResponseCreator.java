@@ -106,7 +106,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 	/**
 	 * Set the {@code Content-Type} header.
 	 */
-	public DefaultResponseCreator contentType(MediaType mediaType) {
+	public DefaultResponseCreator contentType(@Nullable MediaType mediaType) {
 		this.headers.setContentType(mediaType);
 		return this;
 	}
@@ -114,7 +114,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 	/**
 	 * Set the {@code Location} header.
 	 */
-	public DefaultResponseCreator location(URI location) {
+	public DefaultResponseCreator location(@Nullable URI location) {
 		this.headers.setLocation(location);
 		return this;
 	}
@@ -123,7 +123,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 	 * Add a response header with one or more values.
 	 * @since 6.0
 	 */
-	public DefaultResponseCreator header(String name, String ... headerValues) {
+	public DefaultResponseCreator header(String name, @Nullable String... headerValues) {
 		for (String headerValue : headerValues) {
 			this.headers.add(name, headerValue);
 		}
