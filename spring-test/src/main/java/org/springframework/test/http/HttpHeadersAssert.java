@@ -26,17 +26,19 @@ import java.util.function.Consumer;
 
 import org.assertj.core.api.AbstractCollectionAssert;
 import org.assertj.core.api.AbstractObjectAssert;
+import org.assertj.core.api.AbstractUriAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ObjectAssert;
 
 import org.springframework.http.HttpHeaders;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to
- * {@link HttpHeaders}.
+ * AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be applied
+ * to {@link HttpHeaders}.
  *
  * @author Stephane Nicoll
  * @author Simon Baslé
+ * @author Stefano Cordio
  * @since 6.2
  */
 public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, HttpHeaders> {
@@ -131,6 +133,17 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 				.as("check all values for HTTP header '%s'", name)
 				.satisfies(values -> valueRequirements.accept((List<String>) values));
 		return this.myself;
+	}
+
+	/**
+	 * Return {@linkplain AbstractUriAssert URI assertions} for the HTTP
+	 * {@code Location} header value.
+	 * @since 7.1
+	 */
+	public AbstractUriAssert<?> location() {
+		containsHeader(HttpHeaders.LOCATION);
+		return Assertions.assertThat(this.actual.getLocation())
+				.as("HTTP header '%s'", HttpHeaders.LOCATION);
 	}
 
 	/**

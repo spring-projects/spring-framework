@@ -16,6 +16,7 @@
 
 package org.springframework.test.http;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Stephane Nicoll
  * @author Simon Baslé
+ * @author Stefano Cordio
  */
 class HttpHeadersAssertTests {
 
@@ -156,6 +158,26 @@ class HttpHeadersAssertTests {
 				.isThrownBy(() -> assertThat(headers).hasHeaderSatisfying("header", values ->
 						Assertions.assertThat(values).hasSize(42)))
 				.withMessageContainingAll("HTTP header", "header", "first", "second", "third", "42", "3");
+	}
+
+	@Test
+	void location() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setLocation(URI.create("http://127.0.0.1:8081/path?param=value&number=1"));
+		assertThat(headers).location()
+				.hasScheme("http")
+				.hasHost("127.0.0.1")
+				.hasPort(8081)
+				.hasParameter("param", "value")
+				.hasParameter("number")
+				.hasNoParameter("error");
+	}
+
+	@Test
+	void locationWithNoLocationHeader() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(new HttpHeaders()).location())
+				.withMessageContaining("Location");
 	}
 
 	@Test
