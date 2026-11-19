@@ -209,6 +209,7 @@ final class RSocketServiceMethod {
 			spec = requester.metadata(entry.getKey(), entry.getValue());
 
 			while (iterator.hasNext()) {
+				entry = iterator.next();
 				spec.metadata(entry.getKey(), entry.getValue());
 			}
 		}

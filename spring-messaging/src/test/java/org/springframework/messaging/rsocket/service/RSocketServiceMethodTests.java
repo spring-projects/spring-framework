@@ -22,6 +22,7 @@ import java.util.List;
 import io.rsocket.util.DefaultPayload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,6 +30,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.TestRSocket;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
@@ -127,6 +130,28 @@ class RSocketServiceMethodTests {
 				.block(Duration.ofSeconds(5));
 
 		assertThat(savedPayloads).containsExactly("p1", "p2");
+	}
+
+
+	@Test
+	@Timeout(value = 5, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+	void metadataWithoutRoute() {
+		MimeType composite = MimeTypeUtils.parseMimeType("message/x.rsocket.composite-metadata.v0");
+		RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, composite, RSocketStrategies.create());
+		MetadataService service = RSocketServiceProxyFactory.builder(requester).build().createClient(MetadataService.class);
+
+		service.execute("m1", TEXT_PLAIN, "m2", TEXT_PLAIN, Mono.just("p1")).block(Duration.ofSeconds(5));
+
+		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("fireAndForget");
+		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEqualTo("p1");
+	}
+
+
+	private interface MetadataService {
+
+		@RSocketExchange
+		Mono<Void> execute(String metadata1, MimeType mimeType1, String metadata2, MimeType mimeType2,
+				@Payload Mono<String> input);
 	}
 
 
