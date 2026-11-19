@@ -1190,7 +1190,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 						continue;
 					}
 					String indexValue = name.substring(paramPath.length() + 1, endIndex);
-					index = Integer.parseInt(indexValue);
+					try {
+						index = Integer.parseInt(indexValue);
+					}
+					catch (NumberFormatException ex) {
+						continue;
+					}
 				}
 				indexes = (indexes != null ? indexes : new TreeSet<>());
 				indexes.add(index);

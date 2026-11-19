@@ -237,6 +237,18 @@ class DataBinderConstructTests {
 	}
 
 	@Test
+	void simpleListBindingIgnoresNonNumericOrOutOfRangeIndex() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of(
+				"integerList[0]", "1", "integerList[abc]", "2", "integerList[99999999999]", "3"));
+
+		DataBinder binder = initDataBinder(IntegerListRecord.class);
+		binder.construct(valueResolver);
+
+		IntegerListRecord target = getTarget(binder);
+		assertThat(target.integerList()).containsExactly(1);
+	}
+
+	@Test
 	void simpleMapBindingIgnoresUnclosedKey() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of("integerMap[a]", "1", "integerMap[b", "2"));
 
