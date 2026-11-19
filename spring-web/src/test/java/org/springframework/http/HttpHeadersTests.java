@@ -821,6 +821,19 @@ class HttpHeadersTests {
 		}
 
 		@Test
+		void readOnlyHttpHeadersHeaderSetValuesAreUnmodifiable() {
+			headers.add("foo", "bar");
+			HttpHeaders readOnlyHttpHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+			List<String> values = readOnlyHttpHeaders.headerSet().iterator().next().getValue();
+
+			assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> values.add("baz"));
+			assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> values.set(0, "baz"));
+			assertThat(headers.get("foo")).containsExactly("bar");
+		}
+
+		@Test
 		void readOnlyHttpHeadersCopyOrderTest() {
 			headers.add("aardvark", "enigma");
 			headers.add("beaver", "enigma");
