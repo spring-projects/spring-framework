@@ -178,19 +178,65 @@ class RuntimeTestWalker {
 
 		private final Class<?> matchClass;
 
-		private boolean matches;
+		private final boolean defaultMatches;
 
 		private final int matchVarType;
 
+		// Whether any test was determined by the var under test
+		private boolean determined;
+
+		// Result of the last evaluated test, or null if not determined
+		private @Nullable Boolean matches;
+
 		public InstanceOfResidueTestVisitor(Class<?> matchClass, boolean defaultMatches, int matchVarType) {
 			this.matchClass = matchClass;
-			this.matches = defaultMatches;
+			this.defaultMatches = defaultMatches;
 			this.matchVarType = matchVarType;
 		}
 
 		public boolean instanceOfMatches(Test test) {
+			Boolean matches = evaluate(test);
+			if (matches != null) {
+				return matches;
+			}
+			// Not decidable for the given class alone: leave it to runtime matching
+			return (this.determined || this.defaultMatches);
+		}
+
+		private @Nullable Boolean evaluate(Test test) {
+			this.matches = null;
 			test.accept(this);
 			return this.matches;
+		}
+
+		@Override
+		public void visit(And e) {
+			Boolean left = evaluate(e.getLeft());
+			Boolean right = evaluate(e.getRight());
+			if (Boolean.FALSE.equals(left) || Boolean.FALSE.equals(right)) {
+				this.matches = Boolean.FALSE;
+			}
+			else {
+				this.matches = (left != null && right != null ? Boolean.TRUE : null);
+			}
+		}
+
+		@Override
+		public void visit(Or e) {
+			Boolean left = evaluate(e.getLeft());
+			Boolean right = evaluate(e.getRight());
+			if (Boolean.TRUE.equals(left) || Boolean.TRUE.equals(right)) {
+				this.matches = Boolean.TRUE;
+			}
+			else {
+				this.matches = (left != null && right != null ? Boolean.FALSE : null);
+			}
+		}
+
+		@Override
+		public void visit(Not e) {
+			Boolean body = evaluate(e.getBody());
+			this.matches = (body != null ? Boolean.valueOf(!body) : null);
 		}
 
 		@Override
@@ -213,6 +259,7 @@ class RuntimeTestWalker {
 					}
 				}
 			}
+			this.determined = true;
 			try {
 				// Don't use ResolvedType.isAssignableFrom() as it won't be aware of (Spring) mixins
 				if (typeClass == null) {
