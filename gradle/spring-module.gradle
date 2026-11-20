@@ -44,15 +44,13 @@ jar {
 	manifest.attributes["Implementation-Version"] = project.version
 	manifest.attributes["Automatic-Module-Name"] = project.name.replace('-', '.')  // for Jigsaw
 	manifest.attributes["Build-Jdk-Spec"] = "${System.getProperty("java.specification.version")}"
+}
 
-	from("${rootDir}/framework-docs/src/docs/dist") {
-		include "notice.txt"
-		into "META-INF"
-		expand(copyright: new Date().format("yyyy"), version: project.version)
-	}
-	from("${rootDir}/framework-docs/src/docs/dist") {
-		include "license.txt"
-		into "META-INF"
+// Ship the root legal files in the META-INF directory of all published jars.
+tasks.withType(Jar).matching { it.name in ["jar", "sourcesJar", "javadocJar"] }.configureEach {
+	into("META-INF") {
+		from(rootProject.file("LICENSE"))
+		from(rootProject.file("NOTICE"))
 	}
 }
 

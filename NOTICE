@@ -1,0 +1,38 @@
+Spring Framework
+Copyright 2002-present the original author or authors.
+
+This product includes software developed by the Spring project
+(https://spring.io/).
+
+This product is licensed to you under the Apache License, Version 2.0,
+the text of which is available in the LICENSE file.
+
+This product includes the following third-party components, which are
+repackaged under the "org.springframework" namespace and remain subject
+to their own copyright notices and license terms:
+
+ASM (https://asm.ow2.io/)
+  Copyright (c) 2000-2011 INRIA, France Telecom
+  Copyright (c) 1999-2009, OW2 Consortium (https://www.ow2.org/)
+  Licensed under the BSD 3-Clause License:
+  https://asm.ow2.io/license.html
+  Repackaged as org.springframework.asm
+
+CGLIB (https://github.com/cglib/cglib)
+  Copyright 2003-2004 The Apache Software Foundation and the CGLIB
+  contributors
+  Licensed under the Apache License, Version 2.0:
+  https://www.apache.org/licenses/LICENSE-2.0
+  Repackaged, with Spring-specific patches, as org.springframework.cglib
+
+JavaPoet (https://github.com/palantir/javapoet)
+  Copyright (C) 2015 Square, Inc. and the JavaPoet contributors
+  Licensed under the Apache License, Version 2.0:
+  https://www.apache.org/licenses/LICENSE-2.0
+  Repackaged as org.springframework.javapoet
+
+Objenesis (https://objenesis.org/)
+  Copyright 2006-present Joe Walnes, Henri Tremblay, Leonardo Mesquita
+  Licensed under the Apache License, Version 2.0:
+  https://www.apache.org/licenses/LICENSE-2.0
+  Repackaged as org.springframework.objenesis
