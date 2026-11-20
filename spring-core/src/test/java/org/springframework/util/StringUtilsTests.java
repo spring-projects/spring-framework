@@ -372,6 +372,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.getFilenameExtension("myfile")).isNull();
 		assertThat(StringUtils.getFilenameExtension("myPath/myfile")).isNull();
 		assertThat(StringUtils.getFilenameExtension("/home/user/.m2/settings/myfile")).isNull();
+		assertThat(StringUtils.getFilenameExtension(".hidden")).isNull();
+		assertThat(StringUtils.getFilenameExtension("myPath/.hidden")).isNull();
 		assertThat(StringUtils.getFilenameExtension("myfile.")).isEmpty();
 		assertThat(StringUtils.getFilenameExtension("myPath/myfile.")).isEmpty();
 		assertThat(StringUtils.getFilenameExtension("myfile.txt")).isEqualTo("txt");
@@ -389,6 +391,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.stripFilenameExtension("mypath/myfile.")).isEqualTo("mypath/myfile");
 		assertThat(StringUtils.stripFilenameExtension("mypath/myfile.txt")).isEqualTo("mypath/myfile");
 		assertThat(StringUtils.stripFilenameExtension("/home/user/.m2/settings/myfile")).isEqualTo("/home/user/.m2/settings/myfile");
+		assertThat(StringUtils.stripFilenameExtension(".hidden")).isEqualTo(".hidden");
+		assertThat(StringUtils.stripFilenameExtension("mypath/.hidden")).isEqualTo("mypath/.hidden");
 		assertThat(StringUtils.stripFilenameExtension("/home/user/.m2/settings/myfile.")).isEqualTo("/home/user/.m2/settings/myfile");
 		assertThat(StringUtils.stripFilenameExtension("/home/user/.m2/settings/myfile.txt")).isEqualTo("/home/user/.m2/settings/myfile");
 	}
