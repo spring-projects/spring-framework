@@ -33,6 +33,7 @@ import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
 import org.gradle.api.plugins.quality.CheckstylePlugin;
+import org.gradle.api.tasks.SourceSetContainer;
 
 /**
  * {@link Plugin} that applies conventions for checkstyle.
@@ -61,7 +62,27 @@ public class CheckstyleConventions {
 			DependencySet checkstyleDependencies = project.getConfigurations().getByName("checkstyle").getDependencies();
 			checkstyleDependencies.add(
 					project.getDependencies().create("io.spring.javaformat:spring-javaformat-checkstyle:" + version));
+			includeKotlinSources(project);
 		});
+	}
+
+	/**
+	 * Checkstyle only processes Java sources by default. Add the Kotlin sources of
+	 * each source set so that file-level checks, such as the license header, apply to
+	 * them as well.
+	 */
+	private static void includeKotlinSources(Project project) {
+		SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
+		sourceSets.all(sourceSet -> {
+			String taskName = "checkstyle" + capitalize(sourceSet.getName());
+			project.getTasks().withType(Checkstyle.class).matching(task -> task.getName().equals(taskName))
+					.configureEach(task -> task.source(project.fileTree("src/" + sourceSet.getName() + "/kotlin",
+							tree -> tree.include("**/*.kt"))));
+		});
+	}
+
+	private static String capitalize(String name) {
+		return Character.toUpperCase(name.charAt(0)) + name.substring(1);
 	}
 
 	private static void configureNoHttpPlugin(Project project) {

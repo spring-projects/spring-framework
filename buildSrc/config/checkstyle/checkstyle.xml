@@ -5,8 +5,7 @@
 	<!-- Root Checks -->
 	<module name="io.spring.javaformat.checkstyle.check.SpringHeaderCheck">
 		<property name="fileExtensions" value="java"/>
-		<property name="headerType" value="apache2"/>
-		<property name="headerCopyrightPattern" value="20\d\d-present"/>
+		<property name="headerFile" value="${config_loc}/checkstyle-header.txt"/>
 		<property name="packageInfoHeaderType" value="none"/>
 	</module>
 	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck"/>

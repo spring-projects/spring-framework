@@ -21,7 +21,7 @@ Concise extract of [CONTRIBUTING.md](CONTRIBUTING.md), which remains the referen
 - Two blank lines before fields, constructors, `static {}` blocks, and inner classes; one blank line after a multiline method signature.
 - Import order, groups separated by a blank line: `java.*`, then `javax.*` + `jakarta.*`, then others, then `org.springframework.*`, then static imports.
 - No wildcard imports. No static imports in production code except constants/enum constants and third-party DSL factory methods; use them in tests (e.g. `assertThat`).
-- Every source file: Apache 2.0 license header (`Copyright 2002-present the original author or authors.`, copy from an existing file), package, imports, exactly one top-level class.
+- Every source file: the dateless license header pointing to `NOTICE` and `LICENSE` (copy from an existing file or `src/checkstyle/checkstyle-header.txt`), package, imports, exactly one top-level class.
 - Always reference fields with `this.`, never methods. Always add `@Override`.
 - No `var` in production code. No single-character variable names. Wrap ternaries in parentheses with the non-null condition first: `(foo != null ? foo : "default")`.
 - Argument checks: `Assert.notNull(event, "Event must not be null")`; state checks: `Assert.state(...)`.
