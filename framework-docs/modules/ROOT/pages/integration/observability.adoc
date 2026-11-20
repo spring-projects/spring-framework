@@ -332,7 +332,7 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 [cols="a,a"]
 |===
 |Name | Description
-|`method` _(required)_|Name of the HTTP request method or `"none"` if the request could not be created.
+|`method` _(required)_|Name of the HTTP request method or `"none"` if the request could not be created or if not a well-known method.
 |`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. The protocol, host and port part of the URI are not considered.
 |`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.

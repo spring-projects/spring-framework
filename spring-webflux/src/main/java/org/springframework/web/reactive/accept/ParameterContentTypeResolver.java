@@ -18,10 +18,10 @@ package org.springframework.web.reactive.accept;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -41,13 +41,15 @@ import org.springframework.web.server.ServerWebExchange;
 public class ParameterContentTypeResolver implements RequestedContentTypeResolver {
 
 	/** Primary lookup for media types by key (for example, "json" -> "application/json"). */
-	private final Map<String, MediaType> mediaTypes = new ConcurrentHashMap<>(64);
+	private final Map<String, MediaType> mediaTypes;
 
 	private String parameterName = "format";
 
 
 	public ParameterContentTypeResolver(Map<String, MediaType> mediaTypes) {
-		mediaTypes.forEach((key, value) -> this.mediaTypes.put(formatKey(key), value));
+		Map<String, MediaType> formatted = new LinkedHashMap<>(mediaTypes.size());
+		mediaTypes.forEach((key, value) -> formatted.put(formatKey(key), value));
+		this.mediaTypes = Collections.unmodifiableMap(formatted);
 	}
 
 	private static String formatKey(String key) {
@@ -78,13 +80,14 @@ public class ParameterContentTypeResolver implements RequestedContentTypeResolve
 		key = formatKey(key);
 		MediaType match = this.mediaTypes.get(key);
 		if (match == null) {
-			match = MediaTypeFactory.getMediaType("filename." + key)
-					.orElseThrow(() -> {
-						List<MediaType> supported = new ArrayList<>(this.mediaTypes.values());
-						return new NotAcceptableStatusException(supported);
-					});
+			if (key.indexOf('.') == -1) {
+				match = MediaTypeFactory.getMediaType("filename." + key).orElse(null);
+			}
+			if (match == null) {
+				List<MediaType> supported = new ArrayList<>(this.mediaTypes.values());
+				throw new NotAcceptableStatusException(supported);
+			}
 		}
-		this.mediaTypes.putIfAbsent(key, match);
 		return Collections.singletonList(match);
 	}
 

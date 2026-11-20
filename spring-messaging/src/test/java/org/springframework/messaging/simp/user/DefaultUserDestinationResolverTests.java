@@ -116,6 +116,20 @@ class DefaultUserDestinationResolverTests {
 	}
 
 	@Test
+	void handleSubscribeWithPatternCharsInSessionId() {
+		TestPrincipal user = new TestPrincipal("joe");
+		String sourceDestination = "/user/queue/foo";
+
+		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, user, "*?{}", sourceDestination);
+		UserDestinationResult actual = this.resolver.resolveDestination(message);
+
+		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getTargetDestinations()).containsExactly("/queue/foo-user%2A%3F%7B%7D");
+		assertThat(actual.getSubscribeDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getUser()).isEqualTo(user.getName());
+	}
+
+	@Test
 	void handleUnsubscribe() {
 		TestPrincipal user = new TestPrincipal("joe");
 		Message<?> message = createMessage(SimpMessageType.UNSUBSCRIBE, user, "123", "/user/queue/foo");

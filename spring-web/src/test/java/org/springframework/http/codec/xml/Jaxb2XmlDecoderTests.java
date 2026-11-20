@@ -22,12 +22,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.XMLEvent;
 
 import jakarta.xml.bind.annotation.XmlSeeAlso;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -170,6 +174,52 @@ class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 				})
 				.expectError(DataBufferLimitException.class)
 				.verify();
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("unterminatedTokens")
+	void unterminatedTokenInsideMatchedElementLimitExceeded(String name, String tokenStart) {
+		assertLimitExceeded("<pojo><foo>foo</foo>" + tokenStart);
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("unterminatedTokens")
+	void unterminatedTokenOutsideMatchedElementLimitExceeded(String name, String tokenStart) {
+		assertLimitExceeded("<?xml version=\"1.0\" encoding=\"UTF-8\"?><other>" + tokenStart);
+	}
+
+	static Stream<Arguments> unterminatedTokens() {
+		return Stream.of(
+				Arguments.of("attribute value", "<foo attr=\""),
+				Arguments.of("comment", "<!--"),
+				Arguments.of("CDATA section", "<![CDATA["),
+				Arguments.of("processing instruction", "<?target "));
+	}
+
+	private void assertLimitExceeded(String prefix) {
+		this.decoder.setMaxInMemorySize(1024);
+
+		Flux<DataBuffer> source = Flux.just(prefix)
+				.concatWith(Flux.range(0, 3).map(i -> "x".repeat(512)))
+				.map(this::toToDataBuffer);
+
+		Flux<?> output = this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null, HINTS);
+
+		StepVerifier.create(output)
+				.thenConsumeWhile(object -> true)
+				.expectError(DataBufferLimitException.class)
+				.verify();
+	}
+
+	@Test
+	void manySmallElementsInLargeBufferWithinLimit() {
+		this.decoder.setMaxInMemorySize(1024);
+		String xml = "<root>" + "<pojo><foo>f</foo><bar>b</bar></pojo>".repeat(100) + "</root>";
+		Flux<DataBuffer> source = Flux.just(xml).map(this::toToDataBuffer);
+
+		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null, HINTS);
+
+		StepVerifier.create(output).expectNextCount(100).expectComplete().verify();
 	}
 
 	private static void assertStartElement(XMLEvent event, String expectedLocalName) {

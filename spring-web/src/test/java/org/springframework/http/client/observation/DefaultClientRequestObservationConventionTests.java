@@ -177,6 +177,14 @@ class DefaultClientRequestObservationConventionTests {
 		assertThat(lowCardinality).contains(KeyValue.of("exception", "RuntimeException"));
 	}
 
+	@Test
+	void addsKeyValueForNonStandardHttpMethod() {
+		ClientRequestObservationContext context = createContext(
+				new MockClientHttpRequest(HttpMethod.valueOf("CUSTOM"), "/test"), response);
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("method", "none"));
+	}
+
 	private ClientRequestObservationContext createContext(ClientHttpRequest request, ClientHttpResponse response) {
 		ClientRequestObservationContext context = new ClientRequestObservationContext(request);
 		context.setResponse(response);

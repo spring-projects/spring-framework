@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.Lifecycle;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -44,6 +45,7 @@ import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A {@link HttpRequestHandler} for processing WebSocket handshake requests.
@@ -65,6 +67,8 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 	private final HandshakeHandler handshakeHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
+
+	private boolean hasOriginChecks;
 
 	private volatile boolean running;
 
@@ -110,8 +114,14 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 	 */
 	public void setHandshakeInterceptors(@Nullable List<HandshakeInterceptor> interceptors) {
 		this.interceptors.clear();
+		this.hasOriginChecks = false;
 		if (interceptors != null) {
-			this.interceptors.addAll(interceptors);
+			interceptors.forEach(interceptor -> {
+				this.interceptors.add(interceptor);
+				if (interceptor instanceof OriginHandshakeInterceptor) {
+					this.hasOriginChecks = true;
+				}
+			});
 		}
 	}
 
@@ -162,6 +172,16 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 
 		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
 		ServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
+
+		if (!this.hasOriginChecks && !WebUtils.isSameOrigin(request)) {
+			if (logger.isDebugEnabled()) {
+				String origin = request.getHeaders().getOrigin();
+				logger.debug("Rejecting cross-origin WebSocket request from: '" + origin + "'. " +
+						"Please, configure an OriginHandshakeInterceptor to allow expected origins.");
+			}
+			response.setStatusCode(HttpStatus.FORBIDDEN);
+			return;
+		}
 
 		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, this.wsHandler);
 		HandshakeFailureException failure = null;
