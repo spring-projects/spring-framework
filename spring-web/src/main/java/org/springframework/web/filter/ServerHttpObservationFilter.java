@@ -232,7 +232,11 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 		@Override
 		public void onComplete(AsyncEvent event) {
-			recordError(this.currentObservation, this.request);
+			// An exception that escaped was reported by the filter or onError already
+			Throwable error = (Throwable) this.request.getAttribute(HANDLED_EXCEPTION_ATTRIBUTE);
+			if (error != null) {
+				this.currentObservation.error(error);
+			}
 			this.currentObservation.stop();
 		}
 

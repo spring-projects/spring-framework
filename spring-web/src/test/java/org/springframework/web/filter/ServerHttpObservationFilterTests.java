@@ -201,6 +201,27 @@ class ServerHttpObservationFilterTests {
 	}
 
 	@Test
+	void shouldNotReportErrorAttributeAfterAsyncDispatchFailure() throws Exception {
+		IllegalStateException error = new IllegalStateException("test error");
+		ServletException wrapper = new ServletException(error);
+		this.request.setAsyncSupported(true);
+		this.request.startAsync();
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+
+		this.request.setDispatcherType(DispatcherType.ASYNC);
+		assertThatThrownBy(() -> this.filter.doFilter(this.request, this.response, (request, response) -> {
+			throw wrapper;
+		})).isSameAs(wrapper);
+		// the container exposes the exception that escaped before completing
+		this.request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, wrapper);
+		asyncContext.complete();
+
+		assertThatHttpObservation().hasError(error)
+				.hasLowCardinalityKeyValue("exception", "IllegalStateException");
+	}
+
+	@Test
 	void shouldNotCloseObservationDuringAsyncDispatch() throws Exception {
 		this.mockFilterChain = new MockFilterChain(new ScopeCheckingServlet(this.observationRegistry));
 		this.request.setDispatcherType(DispatcherType.ASYNC);
