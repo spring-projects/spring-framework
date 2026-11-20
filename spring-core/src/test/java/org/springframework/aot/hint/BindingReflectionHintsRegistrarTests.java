@@ -19,6 +19,7 @@ package org.springframework.aot.hint;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -226,6 +227,30 @@ class BindingReflectionHintsRegistrarTests {
 	}
 
 	@Test
+	void registerTypeForSerializationWithNestedMap() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithNestedMap.class);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleRecord.class, "name")).accepts(this.hints);
+	}
+
+	@Test
+	void registerTypeForSerializationWithThreeLevelNestedMap() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithThreeLevelNestedMap.class);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleRecord.class, "name")).accepts(this.hints);
+	}
+
+	@Test
+	void registerTypeForSerializationWithNestedList() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithNestedList.class);
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleRecord.class, "name")).accepts(this.hints);
+	}
+
+	@Test
+	void registerTypeForSerializationWithSelfReferencingTypeVariable() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithSelfReferencingTypeVariable.class);
+		assertThat(RuntimeHintsPredicates.reflection().onType(Comparable.class)).accepts(this.hints);
+	}
+
+	@Test
 	void registerTypeForSerializationWithEnum() {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleEnum.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(SampleEnum.class).withMemberCategories(
@@ -398,6 +423,14 @@ class BindingReflectionHintsRegistrarTests {
 	}
 
 	record SampleRecord(String name) {}
+
+	record SampleRecordWithNestedMap(Map<String, Map<String, SampleRecord>> records) {}
+
+	record SampleRecordWithThreeLevelNestedMap(Map<String, Map<String, Map<String, SampleRecord>>> records) {}
+
+	record SampleRecordWithNestedList(List<List<SampleRecord>> records) {}
+
+	record SampleRecordWithSelfReferencingTypeVariable<T extends Comparable<T>>(T value) {}
 
 	record SampleRecordWithProperty(String name) {
 
