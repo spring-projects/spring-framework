@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -144,6 +145,55 @@ class DefaultRestClientTests {
 					assertThat(result).isInstanceOf(ResponseEntity.class);
 				})
 		);
+	}
+
+	@Test
+	void requestInterceptorAddedAfterBuildDoesNotAffectClient() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		mockEmptyResponseBody();
+
+		// Register an interceptor before build() so that the builder's list already exists
+		RestClient.Builder builder = RestClient.builder()
+				.requestFactory(this.requestFactory)
+				.requestInterceptor((request, body, execution) -> execution.execute(request, body));
+		RestClient client = builder.build();
+
+		AtomicBoolean interceptorInvoked = new AtomicBoolean();
+		builder.requestInterceptor((request, body, execution) -> {
+			interceptorInvoked.set(true);
+			return execution.execute(request, body);
+		});
+
+		client.get().uri(URL).retrieve().toBodilessEntity();
+		assertThat(interceptorInvoked).isFalse();
+
+		RestClient newClient = builder.build();
+		newClient.get().uri(URL).retrieve().toBodilessEntity();
+		assertThat(interceptorInvoked).isTrue();
+	}
+
+	@Test
+	void requestInitializerAddedAfterBuildDoesNotAffectClient() throws IOException {
+		mockSentRequest(HttpMethod.GET, URL);
+		mockResponseStatus(HttpStatus.OK);
+		mockEmptyResponseBody();
+
+		// Register an initializer before build() so that the builder's list already exists
+		RestClient.Builder builder = RestClient.builder()
+				.requestFactory(this.requestFactory)
+				.requestInitializer(request -> {});
+		RestClient client = builder.build();
+
+		AtomicBoolean initializerInvoked = new AtomicBoolean();
+		builder.requestInitializer(request -> initializerInvoked.set(true));
+
+		client.get().uri(URL).retrieve().toBodilessEntity();
+		assertThat(initializerInvoked).isFalse();
+
+		RestClient newClient = builder.build();
+		newClient.get().uri(URL).retrieve().toBodilessEntity();
+		assertThat(initializerInvoked).isTrue();
 	}
 
 

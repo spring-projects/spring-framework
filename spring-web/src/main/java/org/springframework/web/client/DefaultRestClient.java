@@ -141,8 +141,9 @@ final class DefaultRestClient implements RestClient {
 			DefaultRestClientBuilder builder) {
 
 		this.clientRequestFactory = clientRequestFactory;
-		this.initializers = initializers;
-		this.interceptors = interceptors;
+		// Defensive copies, since the Builder's lists may be modified after build().
+		this.initializers = (initializers != null ? new ArrayList<>(initializers) : null);
+		this.interceptors = (interceptors != null ? new ArrayList<>(interceptors) : null);
 		this.bufferingPredicate = bufferingPredicate;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
