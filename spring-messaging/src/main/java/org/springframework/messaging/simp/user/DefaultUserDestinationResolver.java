@@ -135,6 +135,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		Set<String> targetSet = new HashSet<>();
 		for (String sessionId : sessionIds) {
 			String actualDest = parseResult.getActualDestination();
+			sessionId = updateSessionId(sessionId);
 			String targetDest = getTargetDestination(sourceDest, actualDest, sessionId, user);
 			if (targetDest != null) {
 				targetSet.add(targetDest);
@@ -228,6 +229,14 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 
 	protected boolean checkDestination(String destination, String requiredPrefix) {
 		return destination.startsWith(requiredPrefix);
+	}
+
+	private static String updateSessionId(String sessionId) {
+		sessionId = StringUtils.replace(sessionId, "*", "%2A");
+		sessionId = StringUtils.replace(sessionId, "?", "%3F");
+		sessionId = StringUtils.replace(sessionId, "{", "%7B");
+		sessionId = StringUtils.replace(sessionId, "}", "%7D");
+		return sessionId;
 	}
 
 	/**

@@ -130,7 +130,7 @@ public class StompEncoder {
 				command != StompCommand.CONNECTED);
 
 		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
-			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {
+			if ("content-length".equals(entry.getKey())) { // skip, added below
 				continue;
 			}
 

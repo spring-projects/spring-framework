@@ -128,7 +128,7 @@ class RegexPathElement extends PathElement {
 	@Override
 	public boolean matches(int pathIndex, MatchingContext matchingContext) {
 		String textToMatch = matchingContext.pathElementValue(pathIndex);
-		Matcher matcher = this.pattern.matcher(textToMatch);
+		Matcher matcher = this.pattern.matcher(new MaxAttemptsCharSequence(textToMatch));
 		boolean matches = matcher.matches();
 
 		if (matches) {
