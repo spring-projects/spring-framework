@@ -138,6 +138,25 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
+	void findBridgedMethodWithUnresolvedGenericArrayAndOverloadedMethod() throws Exception {
+		Method bridgeMethod = GenericArrayProcessor.class.getDeclaredMethod("process", Object.class);
+		Method bridgedMethod = GenericArrayProcessor.class.getDeclaredMethod("process", Object[].class);
+		assertThat(bridgeMethod.isBridge()).isTrue();
+		assertThat(BridgeMethodResolver.findBridgedMethod(bridgeMethod)).isEqualTo(bridgedMethod);
+		assertThat(BridgeMethodResolver.getMostSpecificMethod(bridgeMethod, StringArrayProcessor.class))
+				.isEqualTo(bridgedMethod);
+	}
+
+	@Test
+	void findBridgedMethodWithUnresolvedGenericArrayInHierarchy() throws Exception {
+		Class<?> clazz = TwoDimensionalArrayProcessor.class;
+		Method bridgeMethod = clazz.getDeclaredMethod("process", Object.class);
+		Method bridgedMethod = clazz.getDeclaredMethod("process", Object[][].class);
+		assertThat(bridgeMethod.isBridge()).isTrue();
+		assertThat(BridgeMethodResolver.findBridgedMethod(bridgeMethod)).isEqualTo(bridgedMethod);
+	}
+
+	@Test
 	void isBridgeMethodFor() throws Exception {
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
@@ -1488,6 +1507,38 @@ class BridgeMethodResolverTests {
 
 		@Override
 		<S extends FooEntity> S test(S T);
+	}
+
+	public interface Processor<T> {
+
+		void process(T value);
+	}
+
+	public abstract static class GenericArrayProcessor<E> implements Processor<E[]> {
+
+		@Override
+		public void process(E[] values) {
+		}
+
+		public void process(String value) {
+		}
+	}
+
+	public static class StringArrayProcessor extends GenericArrayProcessor<String> {
+	}
+
+	public static class ArrayProcessor<C> implements Processor<C[]> {
+
+		@Override
+		public void process(C[] values) {
+		}
+	}
+
+	public static class TwoDimensionalArrayProcessor<D> extends ArrayProcessor<D[]> {
+
+		@Override
+		public void process(D[][] values) {
+		}
 	}
 
 }

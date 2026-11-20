@@ -209,12 +209,25 @@ public final class BridgeMethodResolver {
 		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		for (int i = 0; i < candidateParameters.length; i++) {
 			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, clazz);
-			if (!ClassUtils.resolvePrimitiveIfNecessary(genericParameter.toClass()).equals(
+			if (!ClassUtils.resolvePrimitiveIfNecessary(toClass(genericParameter)).equals(
 					ClassUtils.resolvePrimitiveIfNecessary(candidateParameters[i]))) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Variant of {@link ResolvableType#toClass()} which also resolves an array of
+	 * an unresolved generic to the corresponding array type (for example,
+	 * {@code Object[]} instead of {@code Object}).
+	 */
+	private static Class<?> toClass(ResolvableType type) {
+		Class<?> resolved = type.resolve();
+		if (resolved != null) {
+			return resolved;
+		}
+		return (type.isArray() ? toClass(type.getComponentType()).arrayType() : Object.class);
 	}
 
 	/**

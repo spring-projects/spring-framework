@@ -89,6 +89,21 @@ class AnnotatedMethodTests {
 		assertThat(methodParameters[1].hasParameterAnnotation(Param.class)).isTrue();
 	}
 
+	@Test
+	void shouldFindAnnotationsOnMethodInGenericInterfaceWithUnresolvedGenericArray() {
+		Method method = ReflectionUtils.findMethod(GenericArrayInterfaceImpl.class, "processOneAndTwo",
+				Long.class, Object[].class);
+		assertThat(method).isNotNull();
+
+		AnnotatedMethod annotatedMethod = new AnnotatedMethod(method);
+		MethodParameter[] methodParameters = annotatedMethod.getMethodParameters();
+
+		assertThat(annotatedMethod.hasMethodAnnotation(Handler.class)).isTrue();
+		assertThat(methodParameters).hasSize(2);
+		assertThat(methodParameters[0].hasParameterAnnotation(Param.class)).isFalse();
+		assertThat(methodParameters[1].hasParameterAnnotation(Param.class)).isTrue();
+	}
+
 	@Test  // gh-37390
 	void shouldNotInheritParameterAnnotationsFromStaticMethods() {
 		Method method = ReflectionUtils.findMethod(StaticMethodChild.class, "process", String.class);
@@ -183,6 +198,16 @@ class AnnotatedMethodTests {
 		@Override
 		void processTwo(String value) {
 		}
+	}
+
+	abstract static class GenericArrayAbstractSuperclass<C> implements GenericInterface<Long, C[]> {
+
+		@Override
+		public void processOneAndTwo(Long value1, C[] value2) {
+		}
+	}
+
+	static class GenericArrayInterfaceImpl extends GenericArrayAbstractSuperclass<String> {
 	}
 
 	static class StaticMethodSuperclass {
