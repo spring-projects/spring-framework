@@ -124,7 +124,7 @@ public abstract class AbstractJacksonDecoder<T extends ObjectMapper> extends Jac
 
 			return tokens.handle((tokenBuffer, sink) -> {
 				try {
-					Object value = reader.readValue(tokenBuffer.asParser(getMapper()._deserializationContext()));
+					Object value = reader.readValue(tokenBuffer);
 					logValue(value, hints);
 					if (value != null) {
 						sink.next(value);
