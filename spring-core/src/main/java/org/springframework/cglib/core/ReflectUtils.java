@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -393,7 +394,12 @@ public class ReflectUtils {
 			list.addAll(OBJECT_METHODS);
 		}
 		else {
-			list.addAll(java.util.Arrays.asList(type.getDeclaredMethods()));
+			// Sort the methods, because getDeclaredMethods returns them in no particular order.
+			// Generated classes number and index the methods in this order.
+			Method[] methods = type.getDeclaredMethods();
+			Arrays.sort(methods, Comparator.comparing(Method::getName)
+					.thenComparing(method -> Type.getMethodDescriptor(method)));
+			list.addAll(Arrays.asList(methods));
 		}
 
 		Class superclass = type.getSuperclass();
