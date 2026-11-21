@@ -31,17 +31,23 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.r2dbc.connection.R2dbcTransactionManager;
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
+import org.springframework.transaction.reactive.TransactionalOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -116,6 +122,62 @@ class DefaultDatabaseClientTests {
 			}
 		});
 
+		verify(connection, times(1)).close();
+	}
+
+	@Test
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	void shouldCloseConnectionObtainedWithCompletedTransactionContext() {
+		Connection txConnection = mock();
+		when(txConnection.beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class))).thenReturn(Mono.empty());
+		when(txConnection.commitTransaction()).thenReturn(Mono.empty());
+		when(txConnection.close()).thenReturn(Mono.empty());
+		ConnectionFactory connectionFactory = mock();
+		when(connectionFactory.create()).thenReturn((Publisher) Mono.just(txConnection), (Publisher) Mono.just(connection));
+
+		DatabaseClient databaseClient = DatabaseClient.builder().connectionFactory(connectionFactory)
+				.bindMarkers(BindMarkersFactory.indexed("$", 1)).build();
+		TransactionalOperator operator = TransactionalOperator.create(new R2dbcTransactionManager(connectionFactory));
+
+		// Capture the subscriber context of a transaction and keep using it after the
+		// transaction has completed, as a Kotlin coroutine does in a finally block.
+		ContextView transactionContext = Mono.deferContextual(Mono::just)
+				.as(operator::transactional)
+				.block();
+		assertThat(transactionContext).isNotNull();
+
+		databaseClient.inConnection(conn -> Mono.just("done"))
+				.contextWrite(Context.of(transactionContext))
+				.as(StepVerifier::create)
+				.expectNext("done")
+				.verifyComplete();
+
+		verify(txConnection).close();
+		verify(connection).close();
+	}
+
+	@Test
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	void shouldNotCloseTransactionalConnection() {
+		when(connection.beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class))).thenReturn(Mono.empty());
+		when(connection.commitTransaction()).thenReturn(Mono.empty());
+		ConnectionFactory connectionFactory = mock();
+		when(connectionFactory.create()).thenReturn((Publisher) Mono.just(connection));
+
+		DatabaseClient databaseClient = DatabaseClient.builder().connectionFactory(connectionFactory)
+				.bindMarkers(BindMarkersFactory.indexed("$", 1)).build();
+		TransactionalOperator operator = TransactionalOperator.create(new R2dbcTransactionManager(connectionFactory));
+
+		databaseClient.inConnection(conn -> Mono.just("done"))
+				.doOnNext(value -> verify(connection, never()).close())
+				.as(operator::transactional)
+				.as(StepVerifier::create)
+				.expectNext("done")
+				.verifyComplete();
+
+		InOrder inOrder = inOrder(connection);
+		inOrder.verify(connection).commitTransaction();
+		inOrder.verify(connection).close();
 		verify(connection, times(1)).close();
 	}
 
