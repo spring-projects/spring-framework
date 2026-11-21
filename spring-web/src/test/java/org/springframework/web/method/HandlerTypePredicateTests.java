@@ -42,13 +42,15 @@ class HandlerTypePredicateTests {
 		assertThat(predicate.test(AnotherApiController.class)).isTrue();
 	}
 
-	@Test
+	@Test  // gh-37599
 	void selectorsAreNotChangedByBuilderAfterBuild() {
-
-		HandlerTypePredicate.Builder builder = HandlerTypePredicate.builder().annotation(RestController.class);
+		HandlerTypePredicate.Builder builder = HandlerTypePredicate.builder()
+				.annotation(RestController.class);
 		Predicate<Class<?>> predicate = builder.build();
 
-		builder.annotation(Controller.class).basePackage("java.lang").assignableType(Special.class);
+		builder.annotation(Controller.class)
+				.basePackage("java.lang")
+				.assignableType(Special.class);
 
 		assertThat(predicate.test(ApiController.class)).isTrue();
 		assertThat(predicate.test(HtmlController.class)).isFalse();
@@ -56,6 +58,7 @@ class HandlerTypePredicateTests {
 		assertThat(predicate.test(SpecialHandler.class)).isFalse();
 
 		Predicate<Class<?>> newPredicate = builder.build();
+		assertThat(newPredicate.test(ApiController.class)).isTrue();
 		assertThat(newPredicate.test(HtmlController.class)).isTrue();
 		assertThat(newPredicate.test(String.class)).isTrue();
 		assertThat(newPredicate.test(SpecialHandler.class)).isTrue();
