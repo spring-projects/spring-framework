@@ -8,6 +8,7 @@ package org.springframework.messaging.converter;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import com.google.protobuf.ExtensionRegistry;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -107,6 +108,12 @@ class ProtobufMessageConverterTests {
 
 		//convertFrom
 		assertThat(converter.fromMessage(messageJson, Msg.class)).isEqualTo(testMsg);
+	}
+
+	@Test
+	void jsonFormatConverterWithExtensionRegistry() {
+		ExtensionRegistry registry = ExtensionRegistry.newInstance();
+		assertThat(new ProtobufJsonFormatMessageConverter(registry).extensionRegistry).isSameAs(registry);
 	}
 
 }
