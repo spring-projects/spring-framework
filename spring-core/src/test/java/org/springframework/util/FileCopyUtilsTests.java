@@ -97,6 +97,18 @@ class FileCopyUtilsTests {
 	}
 
 	@Test
+	void copyFileToSameFile(@TempDir Path tempDir) throws IOException {
+		Path source = tempDir.resolve("src");
+		Files.write(source, "content".getBytes());
+		assertThat(FileCopyUtils.copy(source.toFile(), source.toFile())).isZero();
+		assertThat(source).content().isEqualTo("content");
+		Path sameFile = tempDir.resolve("sub").resolve("..").resolve("src");
+		Files.createDirectory(tempDir.resolve("sub"));
+		assertThat(FileCopyUtils.copy(source.toFile(), sameFile.toFile())).isZero();
+		assertThat(source).content().isEqualTo("content");
+	}
+
+	@Test
 	void copyByteArrayToFile(@TempDir Path tempDir) throws IOException {
 		Path target = tempDir.resolve("target");
 		FileCopyUtils.copy("content".getBytes(), target.toFile());

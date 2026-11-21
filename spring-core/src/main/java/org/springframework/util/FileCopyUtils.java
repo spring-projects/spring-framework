@@ -45,6 +45,8 @@ public abstract class FileCopyUtils {
 
 	/**
 	 * Copy the contents of the given input File to the given output File.
+	 * <p>If both refer to the same file, nothing is copied and the file is left
+	 * unchanged, like {@link Files#copy(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...)}.
 	 * @param in the file to copy from
 	 * @param out the file to copy to
 	 * @return the number of bytes copied
@@ -53,6 +55,10 @@ public abstract class FileCopyUtils {
 	public static int copy(File in, File out) throws IOException {
 		Assert.notNull(in, "No input File specified");
 		Assert.notNull(out, "No output File specified");
+		if (out.exists() && Files.isSameFile(in.toPath(), out.toPath())) {
+			// Opening the output stream would truncate the input
+			return 0;
+		}
 		return copy(Files.newInputStream(in.toPath()), Files.newOutputStream(out.toPath()));
 	}
 
