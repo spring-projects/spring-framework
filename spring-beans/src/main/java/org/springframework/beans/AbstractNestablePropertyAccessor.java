@@ -364,7 +364,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		PropertyPath.Segment getterSegment = segment.withoutLastKey();
 		Object propValue;
 		try {
-			propValue = getPropertyValue(getterSegment);
+			propValue = getPropertyValue(getterSegment, isAutoGrowNestedPaths());
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + segment.toCanonicalName(),
@@ -590,8 +590,14 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		return resolved.accessor().getPropertyValue(resolved.segment());
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	protected @Nullable Object getPropertyValue(PropertyPath.Segment segment) throws BeansException {
+		return getPropertyValue(segment, false);
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private @Nullable Object getPropertyValue(PropertyPath.Segment segment, boolean autoGrowMapValues)
+			throws BeansException {
+
 		String propertyName = segment.toCanonicalName();
 		String actualName = segment.name();
 		PropertyHandler ph = getLocalPropertyHandler(actualName);
@@ -655,6 +661,13 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
 						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
 						value = map.get(convertedMapKey);
+						if (value == null && autoGrowMapValues) {
+							String indexedMapKeyName = indexedPropertyName +
+									PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;
+							TypeDescriptor mapValueType = ph.getMapValueType(i + 1);
+							value = newValue(mapValueType.getType(), mapValueType, indexedMapKeyName);
+							map.put(convertedMapKey, value);
+						}
 					}
 					else if (value instanceof Iterable iterable) {
 						// Apply index to Iterator in case of a Set/Collection/Iterable.
