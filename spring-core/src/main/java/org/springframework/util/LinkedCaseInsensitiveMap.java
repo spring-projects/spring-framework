@@ -374,7 +374,6 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 			return false;
 		}
 
-
 		@Override
 		public void clear() {
 			LinkedCaseInsensitiveMap.this.clear();
