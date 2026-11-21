@@ -367,7 +367,7 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 
 		@Override
 		public boolean remove(Object o) {
-			if (containsKey(o)) {
+			if (LinkedCaseInsensitiveMap.this.containsKey(o)) {
 				LinkedCaseInsensitiveMap.this.remove(o);
 				return true;
 			}
