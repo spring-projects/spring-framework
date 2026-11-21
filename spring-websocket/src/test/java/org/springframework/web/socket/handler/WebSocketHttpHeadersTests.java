@@ -22,6 +22,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.web.socket.WebSocketHttpHeaders.SEC_WEBSOCKET_EXTENSIONS;
+import static org.springframework.web.socket.WebSocketHttpHeaders.SEC_WEBSOCKET_PROTOCOL;
 
 /**
  * Tests for {@link WebSocketHttpHeaders}.
@@ -129,6 +130,14 @@ class WebSocketHttpHeadersTests {
 
 		var parsedExtensions = this.headers.getSecWebSocketExtensions();
 		assertThat(parsedExtensions).hasSize(3);
+	}
+
+	@Test  // gh-37282
+	void getSecWebSocketProtocolWithMultipleHeaderValues() {
+		this.headers.add(SEC_WEBSOCKET_PROTOCOL, "foo");
+		this.headers.add(SEC_WEBSOCKET_PROTOCOL, "bar, baz");
+
+		assertThat(this.headers.getSecWebSocketProtocol()).containsExactly("foo", "bar", "baz");
 	}
 
 	@Test  // gh-35792
