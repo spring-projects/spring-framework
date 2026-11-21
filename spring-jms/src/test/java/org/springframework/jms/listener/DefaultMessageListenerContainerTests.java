@@ -16,10 +16,13 @@ import java.util.stream.Stream;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Destination;
+import jakarta.jms.ExceptionListener;
 import jakarta.jms.JMSException;
 import jakarta.jms.MessageConsumer;
 import jakarta.jms.Session;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -102,6 +105,35 @@ class DefaultMessageListenerContainerTests {
 		assertThat(container.isRunning()).isTrue();
 		verify(backOff).start();
 		verify(execution, times(1)).nextBackOff();  // only on attempt as the second one lead to a recovery
+
+		container.destroy();
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {DefaultMessageListenerContainer.CACHE_NONE, DefaultMessageListenerContainer.CACHE_CONNECTION})
+	void refreshConnectionInvokesExceptionListenerOnValidationFailure(int cacheLevel) throws JMSException {
+		BackOff backOff = mock();
+		BackOffExecution execution = mock();
+		given(execution.nextBackOff()).willReturn(50L, BackOffExecution.STOP);
+		given(backOff.start()).willReturn(execution);
+
+		JMSException validationFailure = new JMSException("Test exception");
+		Connection connection = mock();
+		given(connection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willThrow(validationFailure);
+		ConnectionFactory connectionFactory = mock();
+		given(connectionFactory.createConnection()).willReturn(connection);
+		ExceptionListener exceptionListener = mock();
+
+		DefaultMessageListenerContainer container = createContainer(connectionFactory);
+		container.setCacheLevel(cacheLevel);
+		container.setBackOff(backOff);
+		container.setExceptionListener(exceptionListener);
+		container.start();
+		container.refreshConnectionUntilSuccessful();
+
+		assertThat(container.isRunning()).isFalse();
+		verify(execution, times(2)).nextBackOff();
+		verify(exceptionListener, times(2)).onException(validationFailure);
 
 		container.destroy();
 	}
