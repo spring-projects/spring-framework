@@ -189,7 +189,8 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 		 * Match types that are annotated with one of the given annotations.
 		 * @param annotations one or more annotations to check for
 		 */
-		@SuppressWarnings("unchecked")
+		@SafeVarargs // Making the method final allows us to use @SafeVarargs.
+		@SuppressWarnings("varargs")
 		public final Builder annotation(Class<? extends Annotation>... annotations) {
 			this.annotations.addAll(Arrays.asList(annotations));
 			return this;
