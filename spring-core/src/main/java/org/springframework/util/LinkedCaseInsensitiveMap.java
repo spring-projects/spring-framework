@@ -365,7 +365,6 @@ public class LinkedCaseInsensitiveMap<V extends @Nullable Object> implements Map
 			return new KeySetIterator();
 		}
 
-		
 		@Override
 		public boolean remove(Object o) {
 			if (containsKey(o)) {
