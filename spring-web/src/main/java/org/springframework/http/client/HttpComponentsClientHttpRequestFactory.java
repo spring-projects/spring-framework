@@ -299,10 +299,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		else if (HttpMethod.TRACE.equals(httpMethod)) {
 			return new HttpTrace(uri);
 		}
-		else if (HttpMethod.QUERY.equals(httpMethod)) {
-			return new HttpUriRequestBase(HttpMethod.QUERY.name(), uri);
-		}
-		throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
+		return new HttpUriRequestBase(httpMethod.name(), uri);
 	}
 
 	/**

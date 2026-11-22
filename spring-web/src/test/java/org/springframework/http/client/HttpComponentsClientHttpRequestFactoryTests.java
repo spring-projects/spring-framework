@@ -52,6 +52,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	void httpMethods() throws Exception {
 		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
+		assertHttpMethod("propfind", HttpMethod.valueOf("PROPFIND"));
 	}
 
 	@Test
