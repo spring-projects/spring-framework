@@ -190,6 +190,12 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 	 * Return the two ways {@code boundary} may legally be followed, per RFC-2046:
 	 * {@code CR LF}, for an encapsulation boundary, or {@code --}, for the close delimiter.
 	 */
+	private static boolean isCloseDelimiter(byte[] delimiter) {
+		return (delimiter.length >= 2 &&
+				delimiter[delimiter.length - 2] == HYPHEN && delimiter[delimiter.length - 1] == HYPHEN);
+	}
+
+
 	private static byte[][] boundaryVariants(byte[] boundary) {
 		return new byte[][] {
 				MultipartUtils.concat(boundary, CR_LF),
@@ -325,8 +331,19 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 				if (logger.isTraceEnabled()) {
 					logger.trace("First boundary found @" + endIdx + " in " + buf);
 				}
-				DataBuffer preambleBuffer = buf.split(endIdx - 1);
+				if (isCloseDelimiter(this.firstBoundary.delimiter())) {
+					if (changeState(this, DisposedState.INSTANCE, buf)) {
+						emitComplete();
+					}
+					return;
+				}
+				int splitIdx = endIdx - 1;
+				boolean splitBeforeBuffer = (splitIdx < buf.readPosition());
+				DataBuffer preambleBuffer = buf.split(splitBeforeBuffer ? buf.readPosition() : splitIdx);
 				DataBufferUtils.release(preambleBuffer);
+				if (splitBeforeBuffer) {
+					buf.readPosition(endIdx + 1);
+				}
 
 				changeState(this, new HeadersState(), buf);
 			}
@@ -570,7 +587,9 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 		public void onNext(DataBuffer buffer) {
 			int endIdx = this.boundary.match(buffer);
 			if (endIdx != -1) {
-				DataBuffer boundaryBuffer = buffer.split(endIdx - 1);
+				int splitIdx = endIdx - 1;
+				boolean splitBeforeBuffer = (splitIdx < buffer.readPosition());
+				DataBuffer boundaryBuffer = buffer.split(splitBeforeBuffer ? buffer.readPosition() : splitIdx);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Boundary found @" + endIdx + " in " + buffer);
 				}
@@ -624,6 +643,15 @@ final class MultipartParser extends BaseSubscriber<DataBuffer> {
 					}
 				}
 
+				if (isCloseDelimiter(this.boundary.delimiter())) {
+					if (changeState(this, DisposedState.INSTANCE, buffer)) {
+						emitComplete();
+					}
+					return;
+				}
+				if (splitBeforeBuffer) {
+					buffer.readPosition(endIdx + 1);
+				}
 				changeState(this, new HeadersState(), buffer);
 			}
 			else {

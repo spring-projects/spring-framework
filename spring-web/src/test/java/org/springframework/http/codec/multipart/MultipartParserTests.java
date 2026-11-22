@@ -5,8 +5,10 @@
 
 package org.springframework.http.codec.multipart;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
@@ -97,6 +99,52 @@ class MultipartParserTests extends AbstractLeakCheckingTests {
 		assertThat(receivedBuffers).allSatisfy(received ->
 				assertThat(((PooledDataBuffer) received).isAllocated()).isTrue());
 		receivedBuffers.forEach(DataBufferUtils::release);
+	}
+
+
+	@Test  // gh-XXXXX
+	void boundaryDelimiterSplitAcrossBuffers() {
+		byte[] boundary = "simple-boundary".getBytes(UTF_8);
+		String content = "--simple-boundary\r\nContent-Type: text/plain\r\n\r\n" +
+				"one\r\n--simple-boundary\r\nContent-Type: text/plain\r\n\r\n" +
+				"second\r\n--simple-boundary--\r\n";
+		byte[] bytes = content.getBytes(UTF_8);
+
+		// Split after the CR of each boundary's trailing CRLF (and inside the final "--"),
+		// so that the boundary delimiter spans two buffers.
+		int firstSplit = content.indexOf("--simple-boundary\r") + "--simple-boundary\r".length();
+		int secondSplit = content.indexOf("--simple-boundary\r", firstSplit) + "--simple-boundary\r".length();
+		int thirdSplit = content.indexOf("--simple-boundary--") + "--simple-boundary-".length();
+
+		List<DataBuffer> buffers = List.of(
+				createBuffer(bytes, 0, firstSplit),
+				createBuffer(bytes, firstSplit, secondSplit),
+				createBuffer(bytes, secondSplit, thirdSplit),
+				createBuffer(bytes, thirdSplit, bytes.length));
+
+		List<MultipartParser.Token> tokens = MultipartParser
+				.parse(Flux.fromIterable(buffers), boundary, 8192, UTF_8)
+				.collectList()
+				.block(Duration.ofSeconds(5));
+
+		assertThat(tokens).isNotNull();
+		String body = tokens.stream()
+				.filter(MultipartParser.BodyToken.class::isInstance)
+				.map(MultipartParser.BodyToken.class::cast)
+				.map(MultipartParser.BodyToken::buffer)
+				.map(buffer -> {
+					String result = buffer.toString(UTF_8);
+					DataBufferUtils.release(buffer);
+					return result;
+				})
+				.collect(Collectors.joining());
+		assertThat(body).isEqualTo("onesecond");
+	}
+
+	private DataBuffer createBuffer(byte[] bytes, int from, int to) {
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(to - from);
+		buffer.write(bytes, from, to - from);
+		return buffer;
 	}
 
 }
