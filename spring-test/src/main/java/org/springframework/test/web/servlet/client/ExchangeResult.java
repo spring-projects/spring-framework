@@ -239,6 +239,9 @@ public class ExchangeResult {
 		catch (IOException ex) {
 			throw new IllegalStateException("Failed to get response content: " + ex);
 		}
+		finally {
+			this.clientResponse.close();
+		}
 	}
 
 	private String formatStatus(HttpStatusCode statusCode) {

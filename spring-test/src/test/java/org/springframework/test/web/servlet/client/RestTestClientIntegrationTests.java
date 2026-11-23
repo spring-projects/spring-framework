@@ -5,12 +5,17 @@
 
 package org.springframework.test.web.servlet.client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
+import okio.Buffer;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedClass;
@@ -34,12 +39,14 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 class RestTestClientIntegrationTests {
 
 	static Stream<Arguments> clientHttpRequestFactories() {
+		HttpComponentsClientHttpRequestFactory httpComponents = new HttpComponentsClientHttpRequestFactory();
+		httpComponents.setConnectionRequestTimeout(Duration.ofSeconds(2));
 		return Stream.of(
 				argumentSet("JDK HttpURLConnection", new SimpleClientHttpRequestFactory()),
 				argumentSet("Jetty", new JettyClientHttpRequestFactory()),
 				argumentSet("JDK HttpClient", new JdkClientHttpRequestFactory()),
 				argumentSet("Reactor Netty", new ReactorClientHttpRequestFactory()),
-				argumentSet("HttpComponents", new HttpComponentsClientHttpRequestFactory())
+				argumentSet("HttpComponents", httpComponents)
 		);
 	}
 
@@ -47,11 +54,14 @@ class RestTestClientIntegrationTests {
 	@AutoClose
 	private final MockWebServer server = new MockWebServer();
 
+	private final ClientHttpRequestFactory requestFactory;
+
 	private final RestTestClient testClient;
 
 
 	RestTestClientIntegrationTests(ClientHttpRequestFactory requestFactory) throws IOException {
 		this.server.start();
+		this.requestFactory = requestFactory;
 		this.testClient = RestTestClient.bindToServer(requestFactory)
 				.baseUrl(this.server.url("/").toString())
 				.build();
@@ -63,6 +73,36 @@ class RestTestClientIntegrationTests {
 			prepareResponse(builder ->
 					builder.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
 			this.testClient.get().uri("/").exchange().expectStatus().isOk();
+		}
+	}
+
+	@Test // gh-37732
+	void sequentialRequestsGzipCompressedResponse() throws IOException {
+		String expectedBody = "Hello Spring with gzip compression!".repeat(10);
+		byte[] data = expectedBody.getBytes(StandardCharsets.UTF_8);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
+			gzipOut.write(data);
+		}
+		byte[] gzipped = baos.toByteArray();
+
+		for (int i = 0; i < 10; i++) {
+			prepareResponse(builder -> {
+				Buffer buffer = new Buffer().write(gzipped);
+				return builder.setHeader("Content-Type", "text/plain")
+						.setHeader("Content-Encoding", "gzip")
+						.body(buffer);
+			});
+			if (this.requestFactory instanceof SimpleClientHttpRequestFactory) {
+				this.testClient.get().uri("/").exchange()
+						.expectStatus().isOk()
+						.expectBody(byte[].class).isEqualTo(gzipped);
+			}
+			else {
+				this.testClient.get().uri("/").exchange()
+						.expectStatus().isOk()
+						.expectBody(String.class).isEqualTo(expectedBody);
+			}
 		}
 	}
 
