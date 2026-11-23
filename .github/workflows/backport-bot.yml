@@ -9,6 +9,7 @@ on:
       - '*.x'
 jobs:
   backport-issue:
+    if: "${{ github.event_name == 'push' || startsWith(github.event.label.name, 'for: backport-to-') }}"
     permissions:
       contents: read
       issues: write
