@@ -175,21 +175,21 @@ public abstract class DataBuffers {
 		public int match(DataBuffer dataBuffer) {
 			this.longestDelimiter = NO_DELIMITER;
 
-			for (int pos = dataBuffer.readPosition(); pos < dataBuffer.writePosition(); pos++) {
-				byte b = dataBuffer.getByte(pos);
+			int pos = dataBuffer.forEachByte(dataBuffer.readPosition(),
+					dataBuffer.readableByteCount(), this::process);
+			if (pos != -1) {
+				reset();
+			}
+			return pos;
+		}
 
-				for (NestedMatcher matcher : this.matchers) {
-					if (matcher.match(b) && matcher.delimiter().length > this.longestDelimiter.length) {
-						this.longestDelimiter = matcher.delimiter();
-					}
-				}
-
-				if (this.longestDelimiter != NO_DELIMITER) {
-					reset();
-					return pos;
+		private boolean process(byte b) {
+			for (NestedMatcher matcher : this.matchers) {
+				if (matcher.match(b) && matcher.delimiter().length > this.longestDelimiter.length) {
+					this.longestDelimiter = matcher.delimiter();
 				}
 			}
-			return -1;
+			return (this.longestDelimiter == NO_DELIMITER);
 		}
 
 		@Override
