@@ -29,12 +29,15 @@ import jakarta.validation.ValidatorFactory;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.HibernateValidatorFactory;
+import org.hibernate.validator.bean.BeanRetrieval;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.Environment;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -327,6 +330,18 @@ class ValidatorFactoryTests {
 
 		assertThat(validator.getConstraintValidatorFactory()).isSameAs(cvf);
 		validator.destroy();
+	}
+
+	@Test
+	void accessBeanProvider() {
+		@SuppressWarnings("resource")
+		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+		StaticApplicationContext context = new StaticApplicationContext();
+		validator.setApplicationContext(context);
+		validator.afterPropertiesSet();
+
+		assertThat(validator.unwrap(HibernateValidatorFactory.class).getBeanResolver()
+				.resolve(MessageSource.class, BeanRetrieval.ANY).get()).isSameAs(context.getStaticMessageSource());
 	}
 
 

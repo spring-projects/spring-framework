@@ -125,7 +125,7 @@ dependencies {
 		api("org.graalvm.sdk:graal-sdk:22.3.1")
 		api("org.hamcrest:hamcrest:3.0")
 		api("org.hibernate.orm:hibernate-core:7.4.14.Final")
-		api("org.hibernate.validator:hibernate-validator:9.1.6.Final")
+		api("org.hibernate.validator:hibernate-validator:9.2.0.Final")
 		api("org.hsqldb:hsqldb:2.7.4")
 		api("org.htmlunit:htmlunit:5.5.0")
 		api("org.javamoney:moneta:1.4.4")
