@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +64,13 @@ public class ReflectUtils {
 
 	private static final List<Method> OBJECT_METHODS = new ArrayList<>();
 
+	// Class.getDeclaredMethods() returns methods in no particular order, and
+	// generated classes number and index the methods in the order collected.
+	// Sort them by name and descriptor for deterministic class generation.
+	private static final Comparator<Method> METHOD_COMPARATOR =
+			Comparator.comparing(Method::getName)
+					.thenComparing(method -> Type.getMethodDescriptor(method));
+
 	private static BiConsumer<String, byte[]> generatedClassHandler;
 
 	private static Consumer<Class<?>> loadedClassHandler;
@@ -93,6 +101,7 @@ public class ReflectUtils {
 			}
 			OBJECT_METHODS.add(method);
 		}
+		OBJECT_METHODS.sort(METHOD_COMPARATOR);
 	}
 	// SPRING PATCH END
 
@@ -393,7 +402,11 @@ public class ReflectUtils {
 			list.addAll(OBJECT_METHODS);
 		}
 		else {
-			list.addAll(java.util.Arrays.asList(type.getDeclaredMethods()));
+			// SPRING PATCH BEGIN
+			Method[] methods = type.getDeclaredMethods();
+			Arrays.sort(methods, METHOD_COMPARATOR);
+			list.addAll(Arrays.asList(methods));
+			// SPRING PATCH END
 		}
 
 		Class superclass = type.getSuperclass();
