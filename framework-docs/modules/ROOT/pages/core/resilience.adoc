@@ -99,7 +99,7 @@ public Mono<Void> sendNotification() {
 }
 ----
 <1> This raw `Mono` will get decorated with a retry spec.
-	
+
 For details on the various characteristics, see the available annotation attributes in
 {spring-framework-api}/resilience/annotation/Retryable.html[`@Retryable`].
 
@@ -133,10 +133,10 @@ When `@Transactional` and `@Retryable` are used together, the advice chain is:
 Retry (OUTER) → Transaction (INNER) → target method
 ----
 
-Each retry attempt starts a fresh transaction. If the target method throws, the transaction
-is rolled back and `@Retryable` decides whether to retry. On success, the transaction
-commits. This is usually the desired behavior for transient failures such as database
-deadlocks.
+Each retry attempt starts a fresh transaction. If the target method throws an access
+exception, the transaction is rolled back and `@Retryable` decides whether to retry.
+On success, the transaction commits. This is usually the desired behavior for
+transient failures such as database deadlocks.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -153,6 +153,13 @@ Because the retry interceptor is outside the transaction interceptor, the curren
 transaction has already been rolled back by the time the retry interceptor receives the
 exception. The retry interceptor sees the same, unwrapped exception that the target
 method threw.
+
+For special consideration, note that an exception from a transactional method may also
+indicate a communication error. In such a scenario, the transaction may have committed
+but the commit reply got lost, leading to a `TransactionSystemException`. It is strongly
+recommended to narrow the exception to `DataAccessException` (or one of its subclasses),
+and/or to exclude `TransactionException` (or `TransactionSystemException` specifically).
+Otherwise, a committed transaction might run again after the original reply got lost.
 ====
 
 TIP: See xref:data-access/transaction/declarative/annotations.adoc[Using `@Transactional`]
@@ -292,7 +299,7 @@ public void sendNotification() {
     this.jmsClient.destination("notifications").send(...);
 }
 ----
-	
+
 Such limiting is particularly useful with Virtual Threads where there is generally no
 thread pool limit in place. For asynchronous tasks, this can be constrained on
 {spring-framework-api}/core/task/SimpleAsyncTaskExecutor.html[`SimpleAsyncTaskExecutor`].
