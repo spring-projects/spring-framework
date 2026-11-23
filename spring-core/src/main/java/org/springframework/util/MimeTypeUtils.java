@@ -388,7 +388,31 @@ public abstract class MimeTypeUtils {
 
 
 		private MimeTypeParser(String input) {
-			this.input = input;
+			this.input = unfold(input);
+		}
+
+		/**
+		 * Unfold the given header value as described in RFC 5322 2.2.3:
+		 * unfold long MIME types split by a CRLF + a space or a tab.
+		 */
+		private static String unfold(String input) {
+			if (input.indexOf('\n') == -1) {
+				return input;
+			}
+			int length = input.length();
+			StringBuilder sb = new StringBuilder(length);
+			for (int i = 0; i < length; i++) {
+				char ch = input.charAt(i);
+				if (ch == '\r' && i + 2 < length && input.charAt(i + 1) == '\n') {
+					char next = input.charAt(i + 2);
+					if (next == ' ' || next == '\t') {
+						i++;
+						continue;
+					}
+				}
+				sb.append(ch);
+			}
+			return sb.toString();
 		}
 
 		/**

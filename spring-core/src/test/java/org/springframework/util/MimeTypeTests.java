@@ -123,6 +123,22 @@ class MimeTypeTests {
 					MimeTypeUtils.parseMimeType("text/plain;a=\"b\"charset=UTF-16"));
 		}
 
+		@Test // gh-37747
+		void parseMimeTypeRejectsInvalidFolding() {
+			// single CR or LF: not strict folding
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;\n charset=UTF-8"));
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;\r charset=UTF-8"));
+			// single CRLF not followed by whitespace: not strict folding
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;\r\ncharset=UTF-8"));
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;\r\n\r\n charset=UTF-8"));
+			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+					MimeTypeUtils.parseMimeType("text/plain;charset=UTF-8\r\n"));
+		}
+
 		@Test
 		void parseMimeTypeIllegalType() {
 			assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
@@ -546,6 +562,16 @@ class MimeTypeTests {
 		mimeType = MimeTypeUtils.parseMimeType("text/plain;a=\"b\" ;c=d");
 		assertThat(mimeType.getParameter("a")).isEqualTo("\"b\"");
 		assertThat(mimeType.getParameter("c")).isEqualTo("d");
+	}
+
+	@Test // gh-37747
+	void parseMimeTypeWithFoldedHeader() {
+		MimeType mimeType = MimeTypeUtils.parseMimeType(
+				"multipart/mixed;\r\n boundary=--boundary_496_a6341099-041e-4353-a08f-6754fe9da5b0");
+		assertThat(mimeType.getType()).isEqualTo("multipart");
+		assertThat(mimeType.getSubtype()).isEqualTo("mixed");
+		assertThat(mimeType.getParameter("boundary"))
+				.isEqualTo("--boundary_496_a6341099-041e-4353-a08f-6754fe9da5b0");
 	}
 
 	@Test
