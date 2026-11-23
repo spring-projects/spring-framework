@@ -11,6 +11,21 @@ Concise extract of [CONTRIBUTING.md](CONTRIBUTING.md), which remains the referen
 - Do not run `clean` unless needed; the build is incremental and cached.
 - Reference docs: `./gradlew antora`, output in `framework-docs/build/site/index.html`.
 
+## Security-sensitive changes: stop before coding
+
+Never open a PR, issue, or public branch for a change that fixes a potential security vulnerability. Report it privately instead, see [SECURITY.md](SECURITY.md).
+
+Stop and tell the user, rather than writing a patch, if the problem is any of these (even if it looks like a plain bug or hardening):
+
+- Denial of service: memory leaks, unbounded growth, high CPU, regex/algorithmic complexity, resource exhaustion.
+- Remote code execution, unsafe deserialization, expression or script injection.
+- Routing or path matching mismatches that could bypass a security rule.
+- Auth bypass, SSRF, path traversal, XXE, XSS, injection, information disclosure.
+
+Explain in plain words what an attacker could do, and recommend a private report if the input can come from an untrusted party or you are unsure.
+Offer to draft the report; never submit it for the user or mention "CVE" or "vulnerability" in public commits or PRs.
+Proceed only if the user explicitly confirms there is no security impact.
+
 ## Code style
 
 - Match surrounding code; do not reformat unrelated code; a file should look like it was written by a single author.
@@ -50,6 +65,7 @@ Concise extract of [CONTRIBUTING.md](CONTRIBUTING.md), which remains the referen
 ## Commits and pull requests
 
 - Pull requests target `main`.
+- Before opening a PR, re-check the security section above. When in doubt, don't open it.
 - Subject: imperative, capitalized verb, at most 55 characters, no `fix:`/`docs:` prefixes, no issue/PR number, no trailing period.
 - Body wrapped at 72 characters explaining the motivation, followed by `Closes gh-123` (or `See gh-123`), then a `Signed-off-by: Name <email>` trailer (DCO, use `git commit -s`).
 - Never write annotations verbatim in commit messages or PR titles (it mentions GitHub users): enclose them in backticks, as in `` `@Override` ``.

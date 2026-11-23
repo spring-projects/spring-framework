@@ -9,7 +9,8 @@ assignees: ''
 
 <!--
 
-Have you considered asking for help on stackoverflow.com?
+** Discuss security issues and potential security vulnerabilities **
+Please discuss security issues and potential security vulnerabilities with a [new advisory report](https://github.com/spring-projects/security-advisories/security/advisories/new).
 
 ** Bug Reports **
 Please submit issues against OSS supported versions, see https://spring.io/projects/spring-framework#support
