@@ -710,12 +710,11 @@ public class MethodParameter {
 				parameterNames = discoverer.getParameterNames(constructor);
 			}
 			if (parameterNames != null && this.parameterIndex < parameterNames.length) {
-				parameterName = parameterNames[this.parameterIndex];
-				this.parameterName = parameterName;
+				this.parameterName = parameterNames[this.parameterIndex];
 			}
 			this.parameterNameDiscoverer = null;
 		}
-		return parameterName;
+		return this.parameterName;
 	}
 
 
