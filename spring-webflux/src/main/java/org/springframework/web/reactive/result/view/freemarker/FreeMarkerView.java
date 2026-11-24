@@ -135,6 +135,17 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Set the {@link Charset} used to decode byte sequences to character sequences
+	 * when reading the FreeMarker template file for this view.
+	 * <p>See {@link #setEncoding(String)} for details.
+	 * @since 6.2
+	 * @see java.nio.charset.StandardCharsets
+	 */
+	public void setCharset(@Nullable Charset charset) {
+		this.encoding = (charset != null ? charset.name() : null);
+	}
+
+	/**
 	 * Set the encoding used to decode byte sequences to character sequences when
 	 * reading the FreeMarker template file for this view.
 	 * <p>Defaults to {@code null} to signal that the FreeMarker
@@ -159,17 +170,6 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 */
 	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
-	}
-
-	/**
-	 * Set the {@link Charset} used to decode byte sequences to character sequences
-	 * when reading the FreeMarker template file for this view.
-	 * <p>See {@link #setEncoding(String)} for details.
-	 * @since 6.2
-	 * @see java.nio.charset.StandardCharsets
-	 */
-	public void setCharset(@Nullable Charset charset) {
-		this.encoding = (charset != null ? charset.name() : null);
 	}
 
 	/**
@@ -361,10 +361,10 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * @since 6.1
 	 */
 	protected Mono<Template> lookupTemplate(Locale locale) {
-		return Mono.fromCallable(() ->
-						getEncoding() != null ?
-								obtainConfiguration().getTemplate(getUrl(), locale, getEncoding()) :
-								obtainConfiguration().getTemplate(getUrl(), locale))
+		String encoding = getEncoding();
+		return Mono.fromCallable(() -> encoding != null ?
+						obtainConfiguration().getTemplate(getUrl(), locale, encoding) :
+						obtainConfiguration().getTemplate(getUrl(), locale))
 				.subscribeOn(Schedulers.boundedElastic());
 	}
 
