@@ -25,8 +25,9 @@ class ReflectUtilsTests {
 		List<Method> methods = new ArrayList<>();
 		ReflectUtils.addAllMethods(ReverseOrder.class, methods);
 
-		// The names are not spelled out here, because string literals would
-		// create them in sorted order before the JVM loads ReverseOrder.
+		// The method names are intentionally not used as string literals here: the
+		// JVM would intern them when loading this test class, before ReverseOrder,
+		// which would make getDeclaredMethods() return them in sorted order.
 		assertThat(methods.subList(0, 6)).extracting(Method::getName).isSorted();
 	}
 

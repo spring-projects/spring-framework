@@ -64,12 +64,14 @@ public class ReflectUtils {
 
 	private static final List<Method> OBJECT_METHODS = new ArrayList<>();
 
+	// SPRING PATCH BEGIN
 	// Class.getDeclaredMethods() returns methods in no particular order, and
 	// generated classes number and index the methods in the order collected.
 	// Sort them by name and descriptor for deterministic class generation.
 	private static final Comparator<Method> METHOD_COMPARATOR =
 			Comparator.comparing(Method::getName)
 					.thenComparing(method -> Type.getMethodDescriptor(method));
+	// SPRING PATCH END
 
 	private static BiConsumer<String, byte[]> generatedClassHandler;
 
