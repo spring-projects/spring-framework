@@ -8,6 +8,7 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -196,6 +197,35 @@ class FormHttpMessageConverterTests {
 				.as("Invalid content-type").isEqualTo(APPLICATION_FORM_URLENCODED);
 		assertThat(outputMessage.getHeaders().getContentLength())
 				.as("Invalid content-length").isEqualTo(outputMessage.getBodyAsBytes().length);
+	}
+
+	@Test
+	void writeFormFromMultiValueMapWithNonStringValues() throws IOException {
+		MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+		body.add("string", "value 1");
+		body.add("int", 1);
+		body.add("long", 10L);
+		body.add("boolean", true);
+		body.add("null", null);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(body, APPLICATION_FORM_URLENCODED, outputMessage);
+
+		assertThat(outputMessage.getBodyAsString(UTF_8))
+				.isEqualTo("string=value+1&int=1&long=10&boolean=true&null");
+		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(APPLICATION_FORM_URLENCODED);
+	}
+
+	@Test
+	void writeFormFromMapWithNonStringValues() throws IOException {
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("string", "value 1");
+		body.put("int", 1);
+		body.put("boolean", true);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(body, APPLICATION_FORM_URLENCODED, outputMessage);
+
+		assertThat(outputMessage.getBodyAsString(UTF_8))
+				.isEqualTo("string=value+1&int=1&boolean=true");
 	}
 
 	private void assertCanRead(ResolvableType type, MediaType mediaType) {

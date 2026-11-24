@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * <pre class="code">
  * RestClient restClient = RestClient.create();
  *
- * MultiValueMap&lt;String, String&gt; form = new LinkedMultiValueMap&lt;&gt;();
+ * MultiValueMap&lt;String, Object&gt; form = new LinkedMultiValueMap&lt;&gt;();
  * form.add("field 1", "value 1");
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
@@ -163,10 +163,10 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 
 		String serializedForm = "";
 		if (data instanceof MultiValueMap<?,?> formData) {
-			serializedForm = serializeForm((MultiValueMap<String, String>) formData, charset);
+			serializedForm = serializeForm((MultiValueMap<String, ?>) formData, charset);
 		}
 		else if (data instanceof Map<?,?> formData) {
-			serializedForm = serializeForm((Map<String, String>) formData, charset);
+			serializedForm = serializeForm((Map<String, ?>) formData, charset);
 		}
 		byte[] bytes = serializedForm.getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
@@ -198,7 +198,14 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 		return contentType;
 	}
 
-	protected String serializeForm(Map<String, String> formData, Charset charset) {
+	/**
+	 * Serialize the given form data to a URL encoded String.
+	 * <p>Non-null values are converted with {@link String#valueOf(Object)}.
+	 * @param formData the form data to serialize
+	 * @param charset the charset used for URL encoding
+	 * @return the URL encoded form
+	 */
+	protected String serializeForm(Map<String, ?> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, value) -> {
 			if (name == null) {
@@ -210,7 +217,14 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 		return builder.toString();
 	}
 
-	protected String serializeForm(MultiValueMap<String, String> formData, Charset charset) {
+	/**
+	 * Serialize the given form data to a URL encoded String.
+	 * <p>Non-null values are converted with {@link String#valueOf(Object)}.
+	 * @param formData the form data to serialize
+	 * @param charset the charset used for URL encoding
+	 * @return the URL encoded form
+	 */
+	protected String serializeForm(MultiValueMap<String, ?> formData, Charset charset) {
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, values) -> {
 				if (name == null) {
@@ -222,14 +236,16 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 		return builder.toString();
 	}
 
-	private void serializeValue(StringBuilder builder, String name, String value, Charset charset) {
-		if (builder.length() != 0) {
+	private void serializeValue(
+			StringBuilder builder, String name, @Nullable Object value, Charset charset) {
+
+		if (!builder.isEmpty()) {
 			builder.append('&');
 		}
 		builder.append(URLEncoder.encode(name, charset));
 		if (value != null) {
 			builder.append('=');
-			builder.append(URLEncoder.encode(value, charset));
+			builder.append(URLEncoder.encode(String.valueOf(value), charset));
 		}
 	}
 

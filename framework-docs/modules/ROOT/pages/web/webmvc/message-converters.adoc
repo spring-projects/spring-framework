@@ -27,6 +27,7 @@ By default, this converter supports all text media types(`text/{asterisk}`) and 
 By default, this converter reads and writes the `application/x-www-form-urlencoded` media type.
 Form data is read from and written into a `MultiValueMap<String, String>`.
 `Map<String, String>` is also supported, but multiple values under the same key will be ignored.
+When writing, non-`String` values are converted using `String.valueOf(Object)`.
 
 | `MultipartHttpMessageConverter`
 | An `HttpMessageConverter` implementation that can read and write multipart messages.
