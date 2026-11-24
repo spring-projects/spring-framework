@@ -63,10 +63,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private static final String SHUTDOWN_METHOD_NAME = "shutdown";
 
 
-	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
-
 	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", DisposableBeanAdapter.class.getClassLoader());
+
+	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
 
 	private final Object bean;

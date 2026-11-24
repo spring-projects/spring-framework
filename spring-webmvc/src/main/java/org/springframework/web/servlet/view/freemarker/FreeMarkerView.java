@@ -106,6 +106,17 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 
 	/**
+	 * Set the {@link Charset} used to decode byte sequences to character sequences
+	 * when reading the FreeMarker template file for this view.
+	 * <p>See {@link #setEncoding(String)} for details.
+	 * @since 6.2
+	 * @see java.nio.charset.StandardCharsets
+	 */
+	public void setCharset(@Nullable Charset charset) {
+		this.encoding = (charset != null ? charset.name() : null);
+	}
+
+	/**
 	 * Set the encoding used to decode byte sequences to character sequences when
 	 * reading the FreeMarker template file for this view.
 	 * <p>Defaults to {@code null} to signal that the FreeMarker
@@ -127,17 +138,6 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
-	}
-
-	/**
-	 * Set the {@link Charset} used to decode byte sequences to character sequences
-	 * when reading the FreeMarker template file for this view.
-	 * <p>See {@link #setEncoding(String)} for details.
-	 * @since 6.2
-	 * @see java.nio.charset.StandardCharsets
-	 */
-	public void setCharset(@Nullable Charset charset) {
-		this.encoding = (charset != null ? charset.name() : null);
 	}
 
 	/**
@@ -402,8 +402,9 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @see #setEncoding(String)
 	 */
 	protected Template getTemplate(String name, Locale locale) throws IOException {
-		return (getEncoding() != null ?
-				obtainConfiguration().getTemplate(name, locale, getEncoding()) :
+		String encoding = getEncoding();
+		return (encoding != null ?
+				obtainConfiguration().getTemplate(name, locale, encoding) :
 				obtainConfiguration().getTemplate(name, locale));
 	}
 
