@@ -59,6 +59,8 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 
 	private final MonoSink<Part> sink;
 
+	private final boolean requireFormFieldName;
+
 	private final int maxInMemorySize;
 
 	private final long maxDiskUsagePerPart;
@@ -68,10 +70,11 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 	private final Scheduler blockingOperationScheduler;
 
 
-	private PartGenerator(MonoSink<Part> sink, int maxInMemorySize, long maxDiskUsagePerPart,
-			Mono<Path> fileStorageDirectory, Scheduler blockingOperationScheduler) {
+	private PartGenerator(MonoSink<Part> sink, boolean requireFormFieldName, int maxInMemorySize,
+			long maxDiskUsagePerPart, Mono<Path> fileStorageDirectory, Scheduler blockingOperationScheduler) {
 
 		this.sink = sink;
+		this.requireFormFieldName = requireFormFieldName;
 		this.maxInMemorySize = maxInMemorySize;
 		this.maxDiskUsagePerPart = maxDiskUsagePerPart;
 		this.fileStorageDirectory = fileStorageDirectory;
@@ -81,12 +84,13 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 	/**
 	 * Creates parts from a given stream of tokens.
 	 */
-	public static Mono<Part> createPart(Flux<MultipartParser.Token> tokens, int maxInMemorySize,
-			long maxDiskUsagePerPart, Mono<Path> fileStorageDirectory, Scheduler blockingOperationScheduler) {
+	public static Mono<Part> createPart(Flux<MultipartParser.Token> tokens, boolean requireFormFieldName,
+			int maxInMemorySize, long maxDiskUsagePerPart, Mono<Path> fileStorageDirectory,
+			Scheduler blockingOperationScheduler) {
 
 		return Mono.create(sink -> {
-			PartGenerator generator = new PartGenerator(sink, maxInMemorySize, maxDiskUsagePerPart,
-					fileStorageDirectory, blockingOperationScheduler);
+			PartGenerator generator = new PartGenerator(sink, requireFormFieldName, maxInMemorySize,
+					maxDiskUsagePerPart, fileStorageDirectory, blockingOperationScheduler);
 
 			sink.onCancel(generator);
 			sink.onRequest(l -> generator.requestToken());
@@ -118,7 +122,8 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 	}
 
 	private void newPart(State currentState, HttpHeaders headers) {
-		if (MultipartUtils.isFormField(headers)) {
+		if (MultipartUtils.isFormField(headers) &&
+				(!this.requireFormFieldName || headers.getContentDisposition().getName() != null)) {
 			changeState(currentState, new FormFieldState(headers));
 			requestToken();
 		}

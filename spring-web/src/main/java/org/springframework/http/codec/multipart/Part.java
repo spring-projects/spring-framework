@@ -12,7 +12,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 
 /**
- * Representation for a part in a "multipart/form-data" request.
+ * Representation of a part in a multipart HTTP message.
  *
  * <p>The origin of a multipart request may be a browser form in which case each
  * part is either a {@link FormFieldPart} or a {@link FilePart}.
@@ -30,8 +30,11 @@ import org.springframework.http.HttpHeaders;
 public interface Part {
 
 	/**
-	 * Return the name of the part in the multipart form.
+	 * Return the name of the part from its {@code Content-Disposition} header.
+	 * <p>For parts that may have no name, use
+	 * {@code headers().getContentDisposition().getName()}.
 	 * @return the name of the part, never {@code null} or empty
+	 * @throws IllegalStateException if the part has no name
 	 */
 	String name();
 

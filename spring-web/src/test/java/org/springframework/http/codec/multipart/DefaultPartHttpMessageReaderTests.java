@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.reactivestreams.Subscription;
 import reactor.core.Exceptions;
 import reactor.core.publisher.BaseSubscriber;
@@ -29,6 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -66,6 +69,33 @@ class DefaultPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void canRead(DefaultPartHttpMessageReader reader) {
 		assertThat(reader.canRead(forClass(Part.class), MediaType.MULTIPART_FORM_DATA)).isTrue();
+		assertThat(reader.canRead(forClass(Part.class), MediaType.MULTIPART_MIXED)).isTrue();
+		assertThat(reader.canRead(forClass(Part.class), MediaType.MULTIPART_RELATED)).isTrue();
+		assertThat(reader.canRead(forClass(Part.class), new MediaType("multipart", "alternative"))).isFalse();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"mixed", "related"})
+	void readUnnamedPart(String subtype) {
+		MediaType contentType = new MediaType("multipart", subtype, singletonMap("boundary", "batch"));
+		byte[] text = {(byte) 0xff, (byte) 0xfe, 'A', 0};  // UTF-16 with a little-endian BOM
+		DataBuffer body = this.bufferFactory.allocateBuffer(256)
+				.write("--batch\r\nContent-ID: <root>\r\nContent-Type: text/plain; charset=UTF-16\r\n\r\n", UTF_8)
+				.write(text)
+				.write("\r\n--batch\r\nContent-Disposition: form-data; name=\"label\"\r\n\r\n", UTF_8)
+				.write("hello\r\n--batch--\r\n", UTF_8);
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.contentType(contentType).body(Flux.just(body));
+		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
+
+		List<Part> parts = reader.read(forClass(Part.class), request, emptyMap()).collectList().block();
+		assertThat(parts).hasSize(2);
+		Part first = parts.get(0);
+		assertThat(first.headers().getFirst("Content-ID")).isEqualTo("<root>");
+		byte[] bytes = new ByteArrayDecoder().decodeToMono(first.content(), forClass(byte[].class),
+				null, emptyMap()).block();
+		assertThat(bytes).isEqualTo(text);
+		testBrowserFormField(parts.get(1), "label", "hello");
 	}
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
