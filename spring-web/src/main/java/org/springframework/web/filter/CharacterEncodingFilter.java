@@ -6,6 +6,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,12 +31,12 @@ import org.springframework.util.Assert;
  * @since 15.03.2004
  * @see #setEncoding
  * @see #setForceEncoding
- * @see jakarta.servlet.http.HttpServletRequest#setCharacterEncoding(String)
- * @see jakarta.servlet.http.HttpServletResponse#setCharacterEncoding(String)
+ * @see jakarta.servlet.http.HttpServletRequest#setCharacterEncoding(Charset)
+ * @see jakarta.servlet.http.HttpServletResponse#setCharacterEncoding(Charset)
  */
 public class CharacterEncodingFilter extends OncePerRequestFilter {
 
-	private @Nullable String encoding;
+	private @Nullable Charset charset;
 
 	private boolean forceRequestEncoding = false;
 
@@ -48,6 +49,17 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * @see #setEncoding
 	 */
 	public CharacterEncodingFilter() {
+	}
+
+	/**
+	 * Create a {@code CharacterEncodingFilter} for the given charset.
+	 * @param charset the charset to apply as an encoding
+	 * @since 7.1.1
+	 * @see #setCharset
+	 * @see #setForceEncoding
+	 */
+	public CharacterEncodingFilter(Charset charset) {
+		this.charset = charset;
 	}
 
 	/**
@@ -82,26 +94,41 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * override existing response encodings
 	 * @since 4.3
 	 * @see #setEncoding
-	 * @see #setForceRequestEncoding(boolean)
-	 * @see #setForceResponseEncoding(boolean)
+	 * @see #setForceRequestEncoding
+	 * @see #setForceResponseEncoding
 	 */
 	public CharacterEncodingFilter(String encoding, boolean forceRequestEncoding, boolean forceResponseEncoding) {
 		Assert.hasLength(encoding, "Encoding must not be empty");
-		this.encoding = encoding;
+		this.charset = Charset.forName(encoding);
 		this.forceRequestEncoding = forceRequestEncoding;
 		this.forceResponseEncoding = forceResponseEncoding;
 	}
 
 
 	/**
-	 * Set the encoding to use for requests. This encoding will be passed into a
-	 * {@link jakarta.servlet.http.HttpServletRequest#setCharacterEncoding} call.
+	 * Set the charset to apply as an encoding. This charset will be passed into
+	 * {@link jakarta.servlet.http.HttpServletRequest#setCharacterEncoding(Charset)}.
 	 * <p>Whether this encoding will override existing request encodings
 	 * (and whether it will be applied as default response encoding as well)
 	 * depends on the {@link #setForceEncoding "forceEncoding"} flag.
+	 * @since 7.1.1
+	 * @see #setEncoding
+	 */
+	public void setCharset(@Nullable Charset charset) {
+		this.charset = charset;
+	}
+
+	/**
+	 * Set the encoding to use for requests. As of 7.1.1, this encoding will be
+	 * pre-resolved into a {@link Charset} instance and then passed into
+	 * {@link jakarta.servlet.http.HttpServletRequest#setCharacterEncoding(Charset)}.
+	 * <p>Whether this encoding will override existing request encodings
+	 * (and whether it will be applied as default response encoding as well)
+	 * depends on the {@link #setForceEncoding "forceEncoding"} flag.
+	 * @see #setCharset
 	 */
 	public void setEncoding(@Nullable String encoding) {
-		this.encoding = encoding;
+		this.charset = (encoding != null ? Charset.forName(encoding) : null);
 	}
 
 	/**
@@ -109,7 +136,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * @since 4.3
 	 */
 	public @Nullable String getEncoding() {
-		return this.encoding;
+		return (this.charset != null ? this.charset.name() : null);
 	}
 
 	/**
@@ -121,8 +148,8 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * encoding in any case, applying it as default response encoding as well.
 	 * <p>This is the equivalent to setting both {@link #setForceRequestEncoding(boolean)}
 	 * and {@link #setForceResponseEncoding(boolean)}.
-	 * @see #setForceRequestEncoding(boolean)
-	 * @see #setForceResponseEncoding(boolean)
+	 * @see #setForceRequestEncoding
+	 * @see #setForceResponseEncoding
 	 */
 	public void setForceEncoding(boolean forceEncoding) {
 		this.forceRequestEncoding = forceEncoding;
@@ -176,13 +203,13 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		String encoding = getEncoding();
-		if (encoding != null) {
+		Charset charset = this.charset;
+		if (charset != null) {
 			if (isForceRequestEncoding() || request.getCharacterEncoding() == null) {
-				request.setCharacterEncoding(encoding);
+				request.setCharacterEncoding(charset);
 			}
 			if (isForceResponseEncoding()) {
-				response.setCharacterEncoding(encoding);
+				response.setCharacterEncoding(charset);
 			}
 		}
 		filterChain.doFilter(request, response);

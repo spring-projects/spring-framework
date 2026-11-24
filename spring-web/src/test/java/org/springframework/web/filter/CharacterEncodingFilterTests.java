@@ -5,6 +5,9 @@
 
 package org.springframework.web.filter;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,13 +34,13 @@ class CharacterEncodingFilterTests {
 
 	private static final String FILTER_NAME = "boot";
 
-	private static final String ENCODING = "UTF-8";
+	private static final Charset CHARSET = StandardCharsets.UTF_8;
 
 
 	@Test
 	void forceEncodingAlwaysSetsEncoding() throws Exception {
 		HttpServletRequest request = mock();
-		request.setCharacterEncoding(ENCODING);
+		request.setCharacterEncoding(CHARSET);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
 		given(request.getAttribute(filteredName(FILTER_NAME))).willReturn(null);
 		given(request.getDispatcherType()).willReturn(DispatcherType.REQUEST);
@@ -45,13 +48,14 @@ class CharacterEncodingFilterTests {
 		HttpServletResponse response = mock();
 		FilterChain filterChain = mock();
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING, true);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(CHARSET);
+		filter.setForceEncoding(true);
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
 		verify(request).setAttribute(filteredName(FILTER_NAME), Boolean.TRUE);
 		verify(request).removeAttribute(filteredName(FILTER_NAME));
-		verify(response).setCharacterEncoding(ENCODING);
+		verify(response).setCharacterEncoding(CHARSET);
 		verify(filterChain).doFilter(request, response);
 	}
 
@@ -67,11 +71,11 @@ class CharacterEncodingFilterTests {
 
 		FilterChain filterChain = mock();
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(CHARSET);
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
-		verify(request).setCharacterEncoding(ENCODING);
+		verify(request).setCharacterEncoding(CHARSET);
 		verify(request).setAttribute(filteredName(FILTER_NAME), Boolean.TRUE);
 		verify(request).removeAttribute(filteredName(FILTER_NAME));
 		verify(filterChain).doFilter(request, response);
@@ -80,7 +84,7 @@ class CharacterEncodingFilterTests {
 	@Test
 	void doesNotIfEncodingIsNotEmptyAndNotForced() throws Exception {
 		HttpServletRequest request = mock();
-		given(request.getCharacterEncoding()).willReturn(ENCODING);
+		given(request.getCharacterEncoding()).willReturn(CHARSET.name());
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
 		given(request.getAttribute(filteredName(FILTER_NAME))).willReturn(null);
 		given(request.getDispatcherType()).willReturn(DispatcherType.REQUEST);
@@ -89,7 +93,7 @@ class CharacterEncodingFilterTests {
 
 		FilterChain filterChain = mock();
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(CHARSET);
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
@@ -111,12 +115,12 @@ class CharacterEncodingFilterTests {
 		FilterChain filterChain = mock();
 
 		CharacterEncodingFilter filter = new CharacterEncodingFilter();
-		filter.setEncoding(ENCODING);
+		filter.setCharset(CHARSET);
 		filter.setBeanName(FILTER_NAME);
 		filter.setServletContext(new MockServletContext());
 		filter.doFilter(request, response, filterChain);
 
-		verify(request).setCharacterEncoding(ENCODING);
+		verify(request).setCharacterEncoding(CHARSET);
 		verify(request).setAttribute(filteredName(FILTER_NAME), Boolean.TRUE);
 		verify(request).removeAttribute(filteredName(FILTER_NAME));
 		verify(filterChain).doFilter(request, response);
@@ -134,20 +138,19 @@ class CharacterEncodingFilterTests {
 
 		FilterChain filterChain = mock();
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(CHARSET);
 		filter.doFilter(request, response, filterChain);
 
-		verify(request).setCharacterEncoding(ENCODING);
+		verify(request).setCharacterEncoding(CHARSET);
 		verify(request).setAttribute(filteredName(CharacterEncodingFilter.class.getName()), Boolean.TRUE);
 		verify(request).removeAttribute(filteredName(CharacterEncodingFilter.class.getName()));
 		verify(filterChain).doFilter(request, response);
 	}
 
-	// SPR-14240
-	@Test
+	@Test  // SPR-14240
 	void setForceEncodingOnRequestOnly() throws Exception {
 		HttpServletRequest request = mock();
-		request.setCharacterEncoding(ENCODING);
+		request.setCharacterEncoding(CHARSET);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
 		given(request.getAttribute(filteredName(FILTER_NAME))).willReturn(null);
 		given(request.getDispatcherType()).willReturn(DispatcherType.REQUEST);
@@ -155,14 +158,14 @@ class CharacterEncodingFilterTests {
 		HttpServletResponse response = mock();
 		FilterChain filterChain = mock();
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING, true, false);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(CHARSET.name(), true, false);
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
 		verify(request).setAttribute(filteredName(FILTER_NAME), Boolean.TRUE);
 		verify(request).removeAttribute(filteredName(FILTER_NAME));
-		verify(request, times(2)).setCharacterEncoding(ENCODING);
-		verify(response, never()).setCharacterEncoding(ENCODING);
+		verify(request, times(2)).setCharacterEncoding(CHARSET);
+		verify(response, never()).setCharacterEncoding(CHARSET);
 		verify(filterChain).doFilter(request, response);
 	}
 
