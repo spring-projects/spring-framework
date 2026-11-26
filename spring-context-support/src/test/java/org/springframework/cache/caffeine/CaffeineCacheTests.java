@@ -5,6 +5,8 @@
 
 package org.springframework.cache.caffeine;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +32,9 @@ class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> 
 
 	private CaffeineCache cacheNoNull;
 
+
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		nativeCache = Caffeine.newBuilder().build();
 		cache = new CaffeineCache(CACHE_NAME, nativeCache);
 		com.github.benmanes.caffeine.cache.Cache<Object, Object> nativeCacheNoNull
@@ -54,14 +57,15 @@ class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> 
 		return nativeCache;
 	}
 
+
 	@Test
 	void loadingCacheGet() {
 		Object value = new Object();
 		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
 				.build(key -> value));
-		ValueWrapper valueWrapper = loadingCache.get(new Object());
-		assertThat(valueWrapper).isNotNull();
-		assertThat(valueWrapper.get()).isEqualTo(value);
+		ValueWrapper cacheValue = loadingCache.get(new Object());
+		assertThat(cacheValue).isNotNull();
+		assertThat(cacheValue.get()).isSameAs(value);
 	}
 
 	@Test
@@ -69,9 +73,9 @@ class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> 
 		String value = "value";
 		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
 				.build(key -> value));
-		String valueWrapper = loadingCache.get(new Object(), String.class);
-		assertThat(valueWrapper).isNotNull();
-		assertThat(valueWrapper).isEqualTo(value);
+		String cacheValue = loadingCache.get(new Object(), String.class);
+		assertThat(cacheValue).isNotNull();
+		assertThat(cacheValue).isSameAs(value);
 	}
 
 	@Test
@@ -80,6 +84,16 @@ class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> 
 		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
 				.build(key -> value));
 		assertThatIllegalStateException().isThrownBy(() -> loadingCache.get(new Object(), Long.class));
+	}
+
+	@Test
+	void loadingCacheGetAsync() {
+		Object value = new Object();
+		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
+				.buildAsync(key -> value), true);
+		CompletableFuture<?> cacheValue = loadingCache.retrieve(new Object());
+		assertThat(cacheValue).isNotNull();
+		assertThat(cacheValue.join()).isSameAs(value);
 	}
 
 	@Test
