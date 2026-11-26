@@ -6,6 +6,7 @@
 package org.springframework.http.codec.json
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import org.assertj.core.api.Assertions.assertThat
@@ -125,6 +126,16 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 	}
 
 	@Test
+	fun encodeWithSerializationError() {
+		val input = Flux.just(Metric("foo", 1.0), Metric("bar", Double.NaN))
+		val output = encoder.encode(input, this.bufferFactory, ResolvableType.forClass(Metric::class.java), null, null)
+		StepVerifier.create(output)
+			.consumeNextWith(expectString("[{\"name\":\"foo\",\"value\":1.0}"))
+			.expectError(SerializationException::class.java)
+			.verify()
+	}
+
+	@Test
 	fun encodeStream() {
 		val input = Flux.just(
 			Pojo("foo", "bar"),
@@ -196,6 +207,9 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		}
 	}
 
+
+	@Serializable
+	data class Metric(val name: String, val value: Double)
 
 	@Serializable
 	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)

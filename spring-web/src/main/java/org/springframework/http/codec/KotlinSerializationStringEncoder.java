@@ -26,6 +26,7 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.EncodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.MimeType;
 
@@ -125,14 +126,24 @@ public abstract class KotlinSerializationStringEncoder<T extends StringFormat> e
 			@Nullable Map<String, Object> hints, byte[] prefix, byte[] suffix) {
 
 		List<DataBuffer> buffers = new ArrayList<>(3);
-		if (prefix.length > 0) {
-			buffers.add(bufferFactory.allocateBuffer(prefix.length).write(prefix));
+		boolean release = true;
+		try {
+			if (prefix.length > 0) {
+				buffers.add(bufferFactory.allocateBuffer(prefix.length).write(prefix));
+			}
+			buffers.add(encodeValue(value, bufferFactory, valueType, mimeType, hints));
+			if (suffix.length > 0) {
+				buffers.add(bufferFactory.allocateBuffer(suffix.length).write(suffix));
+			}
+			DataBuffer result = bufferFactory.join(buffers);
+			release = false;
+			return result;
 		}
-		buffers.add(encodeValue(value, bufferFactory, valueType, mimeType, hints));
-		if (suffix.length > 0) {
-			buffers.add(bufferFactory.allocateBuffer(suffix.length).write(suffix));
+		finally {
+			if (release) {
+				buffers.forEach(DataBufferUtils::release);
+			}
 		}
-		return bufferFactory.join(buffers);
 	}
 
 	protected Flux<DataBuffer> encodeNonStream(Publisher<?> inputStream, DataBufferFactory bufferFactory,
