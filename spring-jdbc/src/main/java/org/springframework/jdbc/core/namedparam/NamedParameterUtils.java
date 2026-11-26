@@ -274,8 +274,8 @@ public abstract class NamedParameterUtils {
 	 * @see #parseSqlStatement
 	 */
 	public static String substituteNamedParameters(ParsedSql parsedSql, @Nullable SqlParameterSource paramSource) {
-		String originalSql = parsedSql.getOriginalSql();
-		List<String> paramNames = parsedSql.getParameterNames();
+		String originalSql = parsedSql.originalSql;
+		List<String> paramNames = parsedSql.parameterNames;
 		if (paramNames.isEmpty()) {
 			return originalSql;
 		}
@@ -346,9 +346,9 @@ public abstract class NamedParameterUtils {
 					"Not allowed to mix named and traditional ? placeholders. You have " +
 					parsedSql.getNamedParameterCount() + " named parameter(s) and " +
 					parsedSql.getUnnamedParameterCount() + " traditional placeholder(s) in statement: " +
-					parsedSql.getOriginalSql());
+					parsedSql.originalSql);
 		}
-		List<String> paramNames = parsedSql.getParameterNames();
+		List<String> paramNames = parsedSql.parameterNames;
 		for (int i = 0; i < paramNames.size(); i++) {
 			String paramName = paramNames.get(i);
 			try {
@@ -417,7 +417,7 @@ public abstract class NamedParameterUtils {
 	 */
 	public static int[] buildSqlTypeArray(ParsedSql parsedSql, SqlParameterSource paramSource) {
 		int[] sqlTypes = new int[parsedSql.getTotalParameterCount()];
-		List<String> paramNames = parsedSql.getParameterNames();
+		List<String> paramNames = parsedSql.parameterNames;
 		for (int i = 0; i < paramNames.size(); i++) {
 			String paramName = paramNames.get(i);
 			sqlTypes[i] = paramSource.getSqlType(paramName);
@@ -434,7 +434,7 @@ public abstract class NamedParameterUtils {
 	 * @param paramSource the source for named parameters
 	 */
 	public static List<SqlParameter> buildSqlParameterList(ParsedSql parsedSql, SqlParameterSource paramSource) {
-		List<String> paramNames = parsedSql.getParameterNames();
+		List<String> paramNames = parsedSql.parameterNames;
 		List<SqlParameter> params = new ArrayList<>(paramNames.size());
 		for (String paramName : paramNames) {
 			params.add(new SqlParameter(

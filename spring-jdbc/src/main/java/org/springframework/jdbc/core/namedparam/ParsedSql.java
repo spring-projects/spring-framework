@@ -6,7 +6,9 @@
 package org.springframework.jdbc.core.namedparam;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Holds information about a parsed SQL statement.
@@ -17,9 +19,9 @@ import java.util.List;
  */
 public class ParsedSql {
 
-	private final String originalSql;
+	final String originalSql;
 
-	private final List<String> parameterNames = new ArrayList<>();
+	final List<String> parameterNames = new ArrayList<>();
 
 	private final List<int[]> parameterIndexes = new ArrayList<>();
 
@@ -38,13 +40,6 @@ public class ParsedSql {
 		this.originalSql = originalSql;
 	}
 
-	/**
-	 * Return the SQL statement that is being parsed.
-	 */
-	String getOriginalSql() {
-		return this.originalSql;
-	}
-
 
 	/**
 	 * Add a named parameter parsed from this SQL statement.
@@ -59,10 +54,11 @@ public class ParsedSql {
 
 	/**
 	 * Return all the parameters (bind variables) in the parsed SQL statement.
-	 * Repeated occurrences of the same parameter name are included here.
+	 * Repeated occurrences of the same parameter name are included only once.
+	 * @since 7.1.1
 	 */
-	List<String> getParameterNames() {
-		return this.parameterNames;
+	public Set<String> getParameterNames() {
+		return new LinkedHashSet<>(this.parameterNames);
 	}
 
 	/**
@@ -87,8 +83,9 @@ public class ParsedSql {
 	/**
 	 * Return the count of named parameters in the SQL statement.
 	 * Each parameter name counts once; repeated occurrences do not count here.
+	 * @since 7.1.1
 	 */
-	int getNamedParameterCount() {
+	public int getNamedParameterCount() {
 		return this.namedParameterCount;
 	}
 
@@ -101,8 +98,9 @@ public class ParsedSql {
 
 	/**
 	 * Return the count of all the unnamed parameters in the SQL statement.
+	 * @since 7.1.1
 	 */
-	int getUnnamedParameterCount() {
+	public int getUnnamedParameterCount() {
 		return this.unnamedParameterCount;
 	}
 

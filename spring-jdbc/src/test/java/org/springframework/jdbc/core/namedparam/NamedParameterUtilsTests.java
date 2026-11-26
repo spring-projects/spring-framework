@@ -36,16 +36,19 @@ class NamedParameterUtilsTests {
 		String sql = "xxx :a yyyy :b :c :a zzzzz";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(substituteNamedParameters(parsedSql)).isEqualTo("xxx ? yyyy ? ? ? zzzzz");
-		assertThat(parsedSql.getParameterNames()).containsExactly("a", "b", "c", "a");
-		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(4);
+		assertThat(parsedSql.parameterNames).containsExactly("a", "b", "c", "a");
+		assertThat(parsedSql.getParameterNames()).containsExactly("a", "b", "c");
 		assertThat(parsedSql.getNamedParameterCount()).isEqualTo(3);
+		assertThat(parsedSql.getUnnamedParameterCount()).isEqualTo(0);
+		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(4);
 
 		String sql2 = "xxx &a yyyy ? zzzzz";
 		ParsedSql parsedSql2 = NamedParameterUtils.parseSqlStatement(sql2);
 		assertThat(NamedParameterUtils.substituteNamedParameters(parsedSql2, null)).isEqualTo("xxx ? yyyy ? zzzzz");
 		assertThat(parsedSql2.getParameterNames()).containsExactly("a");
-		assertThat(parsedSql2.getTotalParameterCount()).isEqualTo(2);
 		assertThat(parsedSql2.getNamedParameterCount()).isEqualTo(1);
+		assertThat(parsedSql2.getUnnamedParameterCount()).isEqualTo(1);
+		assertThat(parsedSql2.getTotalParameterCount()).isEqualTo(2);
 
 		String sql3 = "xxx &ä+:ö" + '\t' + ":ü%10 yyyy ? zzzzz";
 		ParsedSql parsedSql3 = NamedParameterUtils.parseSqlStatement(sql3);
@@ -286,16 +289,20 @@ class NamedParameterUtilsTests {
 		})
 	void parseSqlStatementWithParametersInsideQuotesAndComments(String sql) {
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
 		assertThat(parsedSql.getParameterNames()).containsExactly("xxx");
+		assertThat(parsedSql.getNamedParameterCount()).isEqualTo(1);
+		assertThat(parsedSql.getUnnamedParameterCount()).isEqualTo(0);
+		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
 	}
 
 	@Test  // gh-27716
 	void parseSqlStatementWithSquareBracket() {
 		String sql = "SELECT ARRAY[:ext]";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getNamedParameterCount()).isEqualTo(1);
 		assertThat(parsedSql.getParameterNames()).containsExactly("ext");
+		assertThat(parsedSql.getNamedParameterCount()).isEqualTo(1);
+		assertThat(parsedSql.getUnnamedParameterCount()).isEqualTo(0);
+		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
 
 		String sqlToUse = substituteNamedParameters(parsedSql);
 		assertThat(sqlToUse).isEqualTo("SELECT ARRAY[?]");
@@ -317,8 +324,10 @@ class NamedParameterUtilsTests {
 	void namedParamMapReference() {
 		String sql = "insert into foos (id) values (:headers[id])";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getNamedParameterCount()).isEqualTo(1);
 		assertThat(parsedSql.getParameterNames()).containsExactly("headers[id]");
+		assertThat(parsedSql.getNamedParameterCount()).isEqualTo(1);
+		assertThat(parsedSql.getUnnamedParameterCount()).isEqualTo(0);
+		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
 
 		class Foo {
 			final Map<String, Object> headers = new HashMap<>();
