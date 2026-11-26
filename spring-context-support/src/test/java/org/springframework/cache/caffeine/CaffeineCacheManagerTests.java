@@ -302,12 +302,32 @@ class CaffeineCacheManagerTests {
 			}
 			throw new IllegalArgumentException("I only know ping");
 		});
+
 		Cache cache1 = cm.getCache("c1");
 		Cache.ValueWrapper value = cache1.get("ping");
 		assertThat(value).isNotNull();
 		assertThat(value.get()).isEqualTo("pong");
 
-		assertThatIllegalArgumentException().isThrownBy(() -> assertThat(cache1.get("foo")).isNull())
+		assertThatIllegalArgumentException().isThrownBy(() -> assertThat(cache1.get("foo")))
+				.withMessageContaining("I only know ping");
+	}
+
+	@Test
+	void cacheLoaderUseAsyncLoadingCache() {
+		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
+		cm.setAsyncCacheLoader((key, executor) -> {
+			if ("ping".equals(key)) {
+				return CompletableFuture.completedFuture("pong");
+			}
+			throw new IllegalArgumentException("I only know ping");
+		});
+
+		Cache cache1 = cm.getCache("c1");
+		CompletableFuture<?> value = cache1.retrieve("ping");
+		assertThat(value).isNotNull();
+		assertThat(value.join()).isEqualTo("pong");
+
+		assertThatIllegalArgumentException().isThrownBy(() -> assertThat(cache1.retrieve("foo").join()))
 				.withMessageContaining("I only know ping");
 	}
 
