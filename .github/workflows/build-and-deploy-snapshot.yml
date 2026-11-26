@@ -67,6 +67,7 @@ jobs:
   verify:
     name: Verify
     needs: build-and-deploy-snapshot
+    if: ${{ !vars.COMMERCIAL }} # remove when commercial support
     uses: ./.github/workflows/verify.yml
     secrets:
       commercial-repository-password: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
