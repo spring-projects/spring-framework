@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,8 +31,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.unit.DataSize;
 
 /**
- * Default {@code HttpMessageReader} for parsing {@code "multipart/form-data"}
- * requests to a stream of {@link Part}s.
+ * Read a {@code multipart/form-data}, {@code multipart/mixed}, or
+ * {@code multipart/related} message as a stream of {@link Part parts}.
  *
  * <p>In default, non-streaming mode, this message reader stores the
  * {@linkplain Part#content() contents} of parts smaller than
@@ -42,7 +41,7 @@ import org.springframework.util.unit.DataSize;
  * {@link #setFileStorageDirectory(Path) fileStorageDirectory}.
  *
  * <p>This reader can be provided to {@link MultipartHttpMessageReader} in order
- * to aggregate all parts into a Map.
+ * to aggregate named parts into a Map.
  *
  * @author Arjen Poutsma
  * @since 5.3
@@ -162,13 +161,12 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
-		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+		return MultipartHttpMessageReader.MIME_TYPES;
 	}
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return Part.class.equals(elementType.toClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+		return Part.class.equals(elementType.toClass()) && MultipartHttpMessageReader.supportsMediaType(mediaType);
 	}
 
 	@Override
@@ -187,6 +185,9 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 			}
 			Flux<MultipartParser.Token> allPartsTokens = MultipartParser.parse(message.getBody(), boundary,
 					this.maxHeadersSize, this.headersCharset);
+			MediaType contentType = message.getHeaders().getContentType();
+			boolean requireFormFieldName = MediaType.MULTIPART_MIXED.equalsTypeAndSubtype(contentType) ||
+					MediaType.MULTIPART_RELATED.equalsTypeAndSubtype(contentType);
 
 			AtomicInteger partCount = new AtomicInteger();
 			return allPartsTokens
@@ -203,7 +204,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 											this.maxParts + " allowed)")));
 						}
 						else {
-							return PartGenerator.createPart(partsTokens,
+							return PartGenerator.createPart(partsTokens, requireFormFieldName,
 									this.maxInMemorySize, this.maxDiskUsagePerPart,
 									this.fileStorage.directory(), getBlockingOperationScheduler());
 						}

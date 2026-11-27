@@ -75,7 +75,7 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 		return supportsMediaType(mediaType) && MULTIPART_VALUE_TYPE.isAssignableFrom(elementType);
 	}
 
-	private boolean supportsMediaType(@Nullable MediaType mediaType) {
+	static boolean supportsMediaType(@Nullable MediaType mediaType) {
 		if (mediaType == null) {
 			return true;
 		}
