@@ -8,6 +8,7 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
@@ -39,6 +40,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Stephane Nicoll
+ * @author Hyun Lee
  * @since 15 April 2001
  * @see #registerCustomEditor
  * @see #setPropertyValues
@@ -55,6 +57,11 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 * the cost of JavaBeans introspection every time.
 	 */
 	private @Nullable CachedIntrospectionResults cachedIntrospectionResults;
+
+	/**
+	 * Generic context inherited from the property containing this nested bean.
+	 */
+	private @Nullable ResolvableType beanType;
 
 
 	/**
@@ -112,6 +119,17 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 */
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl parent) {
 		super(object, nestedPath, parent);
+		String propertyName = nestedPath.substring(parent.getNestedPath().length(), nestedPath.length() - 1);
+		TypeDescriptor descriptor = parent.getPropertyTypeDescriptor(propertyName);
+		if (descriptor != null) {
+			ResolvableType type = descriptor.getResolvableType();
+			if (descriptor.getType() == Optional.class) {
+				type = type.getGeneric();
+			}
+			if (type.hasResolvableGenerics()) {
+				this.beanType = type;
+			}
+		}
 	}
 
 
@@ -124,6 +142,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	public void setBeanInstance(Object object) {
 		this.wrappedObject = object;
 		this.rootObject = object;
+		this.beanType = null;
 		this.typeConverterDelegate = new TypeConverterDelegate(this, this.wrappedObject);
 		setIntrospectionClass(object.getClass());
 	}
@@ -131,6 +150,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	@Override
 	public void setWrappedInstance(Object object, @Nullable String nestedPath, @Nullable Object rootObject) {
 		super.setWrappedInstance(object, nestedPath, rootObject);
+		this.beanType = null;
 		setIntrospectionClass(getWrappedClass());
 	}
 
@@ -174,7 +194,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 			throw new InvalidPropertyException(getRootClass(), getNestedPath() + propertyName,
 					"No property '" + propertyName + "' found");
 		}
-		TypeDescriptor td = ((GenericTypeAwarePropertyDescriptor) pd).getTypeDescriptor();
+		TypeDescriptor td = new BeanPropertyHandler((GenericTypeAwarePropertyDescriptor) pd).toTypeDescriptor();
 		return convertForProperty(propertyName, null, value, td);
 	}
 
@@ -232,32 +252,56 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		}
 
 		@Override
+		public @Nullable Class<?> getPropertyType() {
+			return (beanType != null ? toTypeDescriptor().getType() : super.getPropertyType());
+		}
+
+		@Override
 		public TypeDescriptor toTypeDescriptor() {
-			return this.pd.getTypeDescriptor();
+			TypeDescriptor descriptor = this.pd.getTypeDescriptor();
+			if (beanType == null) {
+				return descriptor;
+			}
+			ResolvableType type = resolveType(descriptor.getResolvableType());
+			return new TypeDescriptor(type, type.resolve(descriptor.getType()), descriptor.getAnnotations());
 		}
 
 		@Override
 		public ResolvableType getResolvableType() {
-			return this.pd.getReadMethodType();
+			return resolveType(this.pd.getReadMethodType());
+		}
+
+		private ResolvableType resolveType(ResolvableType type) {
+			if (beanType != null && type.getSource() instanceof MethodParameter parameter) {
+				ResolvableType owner = beanType.as(parameter.getDeclaringClass());
+				if (owner != ResolvableType.NONE) {
+					ResolvableType resolved = ResolvableType.forMethodParameter(parameter, owner);
+					// Retain a more specific type supplied by the runtime class.
+					if (type.isAssignableFrom(resolved)) {
+						return resolved;
+					}
+				}
+			}
+			return type;
 		}
 
 		@Override
 		public TypeDescriptor getMapValueType(int nestingLevel) {
 			return new TypeDescriptor(
-					this.pd.getReadMethodType().getNested(nestingLevel).asMap().getGeneric(1),
+					getResolvableType().getNested(nestingLevel).asMap().getGeneric(1),
 					null, this.pd.getTypeDescriptor().getAnnotations());
 		}
 
 		@Override
 		public TypeDescriptor getCollectionType(int nestingLevel) {
 			return new TypeDescriptor(
-					this.pd.getReadMethodType().getNested(nestingLevel).asCollection().getGeneric(),
+					getResolvableType().getNested(nestingLevel).asCollection().getGeneric(),
 					null, this.pd.getTypeDescriptor().getAnnotations());
 		}
 
 		@Override
 		public @Nullable TypeDescriptor nested(int level) {
-			return this.pd.getTypeDescriptor().nested(level);
+			return toTypeDescriptor().nested(level);
 		}
 
 		@Override
