@@ -48,7 +48,7 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	public ProtobufJsonFormatHttpMessageConverter(
 			JsonFormat.@Nullable Parser parser, JsonFormat.@Nullable Printer printer) {
 
-		this(parser, printer, (ExtensionRegistry) null);
+		this(parser, printer, null);
 	}
 
 	/**
