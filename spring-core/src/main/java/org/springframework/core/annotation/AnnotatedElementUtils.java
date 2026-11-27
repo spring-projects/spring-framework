@@ -202,7 +202,8 @@ public abstract class AnnotatedElementUtils {
 			return element.isAnnotationPresent(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return getAnnotations(element).isPresent(annotationType);
+		return TypeMappedAnnotations.isPresent(element, SearchStrategy.INHERITED_ANNOTATIONS,
+				RepeatableContainers.none(), AnnotationFilter.PLAIN, annotationType);
 	}
 
 	/**
@@ -530,7 +531,8 @@ public abstract class AnnotatedElementUtils {
 			return element.isAnnotationPresent(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return findAnnotations(element).isPresent(annotationType);
+		return TypeMappedAnnotations.isPresent(element, SearchStrategy.TYPE_HIERARCHY,
+				RepeatableContainers.none(), AnnotationFilter.PLAIN, annotationType);
 	}
 
 	/**

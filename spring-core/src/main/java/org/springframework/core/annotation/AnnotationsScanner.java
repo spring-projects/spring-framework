@@ -226,10 +226,8 @@ abstract class AnnotationsScanner {
 
 		return switch (searchStrategy) {
 			case DIRECT, INHERITED_ANNOTATIONS -> processMethodInheritedAnnotations(context, source, processor);
-			case SUPERCLASS -> processMethodHierarchy(context, new int[]{0}, source.getDeclaringClass(),
-					processor, source, false);
-			case TYPE_HIERARCHY -> processMethodHierarchy(context, new int[]{0}, source.getDeclaringClass(),
-					processor, source, true);
+			case SUPERCLASS -> processMethodHierarchy(context, source, processor, false);
+			case TYPE_HIERARCHY -> processMethodHierarchy(context, source, processor, true);
 		};
 	}
 
@@ -243,6 +241,54 @@ abstract class AnnotationsScanner {
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.handleIntrospectionFailure(source, ex);
+		}
+		return null;
+	}
+
+	private static <C, R> @Nullable R processMethodHierarchy(C context, Method rootMethod,
+			AnnotationsProcessor<C, R> processor, boolean includeInterfaces) {
+
+		try {
+			Class<?> sourceClass = rootMethod.getDeclaringClass();
+			R result = processor.doWithAggregate(context, 0);
+			if (result != null) {
+				return result;
+			}
+			if (hasPlainJavaAnnotationsOnly(sourceClass)) {
+				return null;
+			}
+			result = processMethodAnnotations(context, 0, rootMethod, processor);
+			if (result != null) {
+				return result;
+			}
+			int modifiers = rootMethod.getModifiers();
+			if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers)) {
+				return null;
+			}
+			Class<?>[] interfaces = (includeInterfaces ? sourceClass.getInterfaces() : null);
+			Class<?> superclass = sourceClass.getSuperclass();
+			boolean hasInterfaces = (interfaces != null && interfaces.length > 0);
+			boolean hasSuperclass = (superclass != Object.class && superclass != null);
+			if (!hasInterfaces && !hasSuperclass) {
+				return null;
+			}
+			int[] aggregateIndex = {1};
+			if (interfaces != null && interfaces.length > 0) {
+				for (Class<?> interfaceType : interfaces) {
+					R interfacesResult = processMethodHierarchy(context, aggregateIndex,
+						interfaceType, processor, rootMethod, true);
+					if (interfacesResult != null) {
+						return interfacesResult;
+					}
+				}
+			}
+			if (superclass != Object.class && superclass != null) {
+				return processMethodHierarchy(context, aggregateIndex,
+					superclass, processor, rootMethod, includeInterfaces);
+			}
+		}
+		catch (Throwable ex) {
+			AnnotationUtils.handleIntrospectionFailure(rootMethod, ex);
 		}
 		return null;
 	}

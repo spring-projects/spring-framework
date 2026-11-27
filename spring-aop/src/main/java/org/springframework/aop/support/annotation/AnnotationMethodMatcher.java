@@ -69,7 +69,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 		}
 		// The method may be on an interface, so let's check on the target class as well.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-		return (specificMethod != method && matchesMethod(specificMethod));
+		return (!specificMethod.equals(method) && matchesMethod(specificMethod));
 	}
 
 	private boolean matchesMethod(Method method) {

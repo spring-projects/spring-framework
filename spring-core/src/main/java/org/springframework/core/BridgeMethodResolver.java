@@ -76,9 +76,11 @@ public final class BridgeMethodResolver {
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method bridgeMethod, @Nullable Class<?> targetClass) {
-		if (targetClass != null &&
-				!ClassUtils.getUserClass(bridgeMethod.getDeclaringClass()).isAssignableFrom(targetClass) &&
-				!Proxy.isProxyClass(bridgeMethod.getDeclaringClass())) {
+		Class<?> declaringClass = bridgeMethod.getDeclaringClass();
+		if (targetClass != null && targetClass != declaringClass &&
+				!declaringClass.isAssignableFrom(targetClass) &&
+				!ClassUtils.getUserClass(declaringClass).isAssignableFrom(targetClass) &&
+				!Proxy.isProxyClass(declaringClass)) {
 			// From a different class hierarchy, and not a JDK or CGLIB proxy either -> return as-is.
 			return bridgeMethod;
 		}
