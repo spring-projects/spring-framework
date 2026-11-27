@@ -44,6 +44,7 @@ import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
@@ -1590,6 +1591,14 @@ class ResolvableTypeTests {
 		assertThat(typeWithGenerics.isAssignableFrom(PaymentCreator.class)).isTrue();
 	}
 
+	@Test
+	void resolveRequiredGeneric() {
+		assertThat(new AbstractRepository<String>() {}.entityClass).isEqualTo(String.class);
+		assertThat(new AbstractRepository<Long>() {}.entityClass).isEqualTo(Long.class);
+		assertThat(new AbstractRepository<>() {}.entityClass).isEqualTo(Object.class);
+		assertThatIllegalStateException().isThrownBy(() -> new AbstractRepository() {});
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -2002,6 +2011,14 @@ class ResolvableTypeTests {
 	abstract static class Payment {
 	}
 
+	abstract class AbstractRepository<T> {
+
+		final Class<T> entityClass;
+
+		AbstractRepository() {
+			entityClass = ResolvableType.forClass(getClass()).as(AbstractRepository.class).resolveRequiredGeneric();
+		}
+	}
 
 	private static class ResolvableTypeAssert extends AbstractAssert<ResolvableTypeAssert, ResolvableType>{
 
