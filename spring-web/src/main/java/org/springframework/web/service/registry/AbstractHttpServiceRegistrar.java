@@ -337,7 +337,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 		@Override
 		protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
 			AnnotationMetadata metadata = beanDefinition.getMetadata();
-			return (metadata.isIndependent() && !metadata.isAnnotation());
+			return (metadata.isInterface() && metadata.isIndependent() && !metadata.isAnnotation());
 		}
 
 		/**
