@@ -106,6 +106,10 @@ final class ClassFileMethodMetadata implements MethodMetadata {
 		return this.methodName.equals("<init>");
 	}
 
+	public boolean isStaticInitializer() {
+		return this.methodName.equals("<clinit>");
+	}
+
 	@Override
 	public MergedAnnotations getAnnotations() {
 		return this.mergedAnnotations;
