@@ -47,8 +47,9 @@ inline fun <reified T : Any> BeanFactory.getBean(vararg args:Any): T =
  *
  * @see BeanFactory.getBeanProvider(ResolvableType)
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 5.1
  */
 inline fun <reified T : Any> BeanFactory.getBeanProvider(): ObjectProvider<T> =
-		getBeanProvider(ResolvableType.forType((object : ParameterizedTypeReference<T>() {}).type))
+		getBeanProvider(object : ParameterizedTypeReference<T>() {})
 
