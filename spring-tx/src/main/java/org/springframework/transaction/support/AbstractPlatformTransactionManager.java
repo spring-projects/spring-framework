@@ -405,7 +405,8 @@ public abstract class AbstractPlatformTransactionManager
 						"isolation level will effectively be ignored: " + def);
 			}
 			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
-			return prepareTransactionStatus(def, null, true, newSynchronization, debugEnabled, null);
+			SuspendedResourcesHolder suspendedResources = suspend(null);
+			return prepareTransactionStatus(def, null, true, newSynchronization, debugEnabled, suspendedResources);
 		}
 	}
 
