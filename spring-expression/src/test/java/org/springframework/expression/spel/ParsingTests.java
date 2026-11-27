@@ -284,7 +284,7 @@ class ParsingTests extends AbstractExpressionTests {
 
 		@Test
 		void booleanOperatorsOr04() {
-			parseCheck("true or false", "(true or false)");
+			parseCheck("true or true", "(true or true)");
 		}
 
 		@Test
