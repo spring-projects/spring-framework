@@ -7,6 +7,7 @@ package org.springframework.jdbc.core.simple;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -162,6 +163,11 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 		@Override
+		public StatementSpec param(int jdbcIndex, @Nullable Object value, SQLType sqlType) {
+			return param(jdbcIndex, value, sqlType.getVendorTypeNumber());
+		}
+
+		@Override
 		public StatementSpec param(String name, @Nullable Object value) {
 			this.namedParams.addValue(name, value);
 			return this;
@@ -171,6 +177,11 @@ final class DefaultJdbcClient implements JdbcClient {
 		public StatementSpec param(String name, @Nullable Object value, int sqlType) {
 			this.namedParams.addValue(name, value, sqlType);
 			return this;
+		}
+
+		@Override
+		public StatementSpec param(String name, @Nullable Object value, SQLType sqlType) {
+			return param(name, value, sqlType.getVendorTypeNumber());
 		}
 
 		@Override

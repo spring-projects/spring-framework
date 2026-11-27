@@ -5,6 +5,7 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.sql.SQLType;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -185,6 +186,17 @@ public interface JdbcClient {
 		StatementSpec param(int jdbcIndex, @Nullable Object value, int sqlType);
 
 		/**
+		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
+		 * by explicit JDBC statement parameter index.
+		 * @param jdbcIndex the JDBC-style index (starting with 1)
+		 * @param value the parameter value to bind
+		 * @param sqlType the associated SQL type
+		 * @return this statement specification (for chaining)
+		 * @see java.sql.PreparedStatement#setObject(int, Object, SQLType)
+		 */
+		StatementSpec param(int jdbcIndex, @Nullable Object value, SQLType sqlType);
+
+		/**
 		 * Bind a named statement parameter for ":x" placeholder resolution,
 		 * with each "x" name matching a ":x" placeholder in the SQL statement.
 		 * @param name the parameter name
@@ -204,6 +216,17 @@ public interface JdbcClient {
 		 * @see org.springframework.jdbc.core.namedparam.MapSqlParameterSource#addValue(String, Object, int)
 		 */
 		StatementSpec param(String name, @Nullable Object value, int sqlType);
+
+		/**
+		 * Bind a named statement parameter for ":x" placeholder resolution,
+		 * with each "x" name matching a ":x" placeholder in the SQL statement.
+		 * @param name the parameter name
+		 * @param value the parameter value to bind
+		 * @param sqlType the associated SQL type
+		 * @return this statement specification (for chaining)
+		 * @see org.springframework.jdbc.core.namedparam.MapSqlParameterSource#addValue(String, Object, int)
+		 */
+		StatementSpec param(String name, @Nullable Object value, SQLType sqlType);
 
 		/**
 		 * Bind a var-args list of positional parameters for "?" placeholder resolution.
