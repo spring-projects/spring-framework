@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +17,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.InvalidServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.WebUtils;
 
@@ -164,17 +166,19 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
+			Map<String, String[]> parameterMap = InvalidServletRequestParameterException.read(request::getParameterMap);
 			for (String current : this.namesToMatch) {
-				if (request.getParameterMap().get(current) != null) {
+				if (parameterMap.get(current) != null) {
 					return true;
 				}
 			}
-			return request.getParameterMap().containsKey(this.name);
+			return parameterMap.containsKey(this.name);
 		}
 
 		@Override
 		protected boolean matchValue(HttpServletRequest request) {
-			return ObjectUtils.nullSafeEquals(this.value, request.getParameter(this.name));
+			return ObjectUtils.nullSafeEquals(this.value,
+					InvalidServletRequestParameterException.read(() -> request.getParameter(this.name)));
 		}
 	}
 

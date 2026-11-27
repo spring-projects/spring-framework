@@ -61,6 +61,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.InvalidServletRequestParameterException;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
@@ -283,7 +284,8 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public Optional<String> param(String name) {
-		return Optional.ofNullable(servletRequest().getParameter(name));
+		return Optional.ofNullable(
+				InvalidServletRequestParameterException.read(() -> servletRequest().getParameter(name)));
 	}
 
 	@Override
@@ -428,7 +430,7 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public Set<Entry<String, List<String>>> entrySet() {
-			return this.servletRequest.getParameterMap().entrySet().stream()
+			return parameterMap().entrySet().stream()
 					.map(entry -> {
 						List<String> value = Arrays.asList(entry.getValue());
 						return new SimpleImmutableEntry<>(entry.getKey(), value);
@@ -438,13 +440,14 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public int size() {
-			return this.servletRequest.getParameterMap().size();
+			return parameterMap().size();
 		}
 
 		@Override
 		public List<String> get(Object key) {
 			String name = (String) key;
-			String[] parameterValues = this.servletRequest.getParameterValues(name);
+			String[] parameterValues = InvalidServletRequestParameterException.read(
+					() -> this.servletRequest.getParameterValues(name));
 			if (!ObjectUtils.isEmpty(parameterValues)) {
 				return Arrays.asList(parameterValues);
 			}
@@ -466,6 +469,10 @@ class DefaultServerRequest implements ServerRequest {
 		@Override
 		public void clear() {
 			throw new UnsupportedOperationException();
+		}
+
+		private Map<String, String[]> parameterMap() {
+			return InvalidServletRequestParameterException.read(this.servletRequest::getParameterMap);
 		}
 	}
 

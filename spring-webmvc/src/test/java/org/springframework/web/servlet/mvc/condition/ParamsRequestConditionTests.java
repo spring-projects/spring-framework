@@ -5,11 +5,15 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.InvalidServletRequestParameterException;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link ParamsRequestCondition}.
@@ -74,6 +78,27 @@ class ParamsRequestConditionTests {
 		request.addParameter("foo", "bazz");
 
 		assertThat(new ParamsRequestCondition("foo=bar").getMatchingCondition(request)).isNull();
+	}
+
+	@Test
+	void parameterParsingFailureIsTranslated() {
+		MockHttpServletRequest request = new MockHttpServletRequest() {
+
+			@Override
+			public String getParameter(String name) {
+				throw new IllegalStateException("Invalid character found in the request target");
+			}
+
+			@Override
+			public Map<String, String[]> getParameterMap() {
+				throw new IllegalStateException("Invalid character found in the request target");
+			}
+		};
+
+		assertThatExceptionOfType(InvalidServletRequestParameterException.class)
+				.isThrownBy(() -> new ParamsRequestCondition("foo").getMatchingCondition(request));
+		assertThatExceptionOfType(InvalidServletRequestParameterException.class)
+				.isThrownBy(() -> new ParamsRequestCondition("foo=bar").getMatchingCondition(request));
 	}
 
 	@Test

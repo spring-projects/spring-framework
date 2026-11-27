@@ -42,10 +42,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.InvalidServletRequestParameterException;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpSession;
 import org.springframework.web.testfixture.servlet.MockPart;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -154,6 +156,37 @@ class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		assertThat(request.param("foo")).contains("bar");
+	}
+
+	@Test
+	void paramParsingFailureIsTranslated() {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/") {
+
+			@Override
+			public String getParameter(String name) {
+				throw new IllegalStateException("Invalid character found in the request target");
+			}
+
+			@Override
+			public String[] getParameterValues(String name) {
+				throw new IllegalStateException("Invalid character found in the request target");
+			}
+
+			@Override
+			public Map<String, String[]> getParameterMap() {
+				throw new IllegalStateException("Invalid character found in the request target");
+			}
+		};
+		ServletRequestPathUtils.parseAndCache(servletRequest);
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		assertThatExceptionOfType(InvalidServletRequestParameterException.class)
+				.isThrownBy(() -> request.param("foo"));
+		assertThatExceptionOfType(InvalidServletRequestParameterException.class)
+				.isThrownBy(() -> request.params().get("foo"));
+		assertThatExceptionOfType(InvalidServletRequestParameterException.class)
+				.isThrownBy(() -> request.params().size());
 	}
 
 	@Test  // gh-36966
