@@ -995,11 +995,10 @@ public abstract class ClassUtils {
 	 * @see #CGLIB_CLASS_SEPARATOR
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
-		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
-			Class<?> superclass = clazz.getSuperclass();
-			if (superclass != null && superclass != Object.class) {
-				return superclass;
-			}
+		Class<?> superclass = clazz.getSuperclass();
+		if (superclass != null && superclass != Object.class &&
+				clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+			return superclass;
 		}
 		return clazz;
 	}

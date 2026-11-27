@@ -5,6 +5,8 @@
 
 package org.springframework.aop.support.annotation;
 
+import java.lang.reflect.Method;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodMatcher;
@@ -89,6 +91,36 @@ class AnnotationMatchingPointcutTests {
 		// #1 and #3 have equivalent hash codes even though equals() returns false.
 		assertThat(pointcut1.hashCode()).isEqualTo(pointcut3.hashCode());
 		assertThat(pointcut1.toString()).isEqualTo(pointcut2.toString());
+	}
+
+
+	@Test
+	void methodMatcherHandlesInheritedAndOverriddenMethods() throws Exception {
+		AnnotationMethodMatcher matcher = new AnnotationMethodMatcher(Qualifier.class, true);
+		Method objectToString = Object.class.getMethod("toString");
+		Method baseUnannotated = BaseService.class.getMethod("unannotated");
+		Method baseOverridden = BaseService.class.getMethod("overridden");
+
+		assertThat(matcher.matches(objectToString, SubService.class)).isFalse();
+		assertThat(matcher.matches(baseUnannotated, SubService.class)).isFalse();
+		assertThat(matcher.matches(baseOverridden, SubService.class)).isTrue();
+	}
+
+	static class BaseService {
+
+		public void unannotated() {
+		}
+
+		public void overridden() {
+		}
+	}
+
+	static class SubService extends BaseService {
+
+		@Override
+		@Qualifier
+		public void overridden() {
+		}
 	}
 
 }

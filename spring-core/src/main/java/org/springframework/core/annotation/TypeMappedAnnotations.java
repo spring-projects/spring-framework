@@ -235,6 +235,14 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 	}
 
 
+	static boolean isPresent(AnnotatedElement element, SearchStrategy searchStrategy,
+			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter,
+			Class<? extends Annotation> annotationType) {
+
+		return Boolean.TRUE.equals(AnnotationsScanner.scan(annotationType, element, searchStrategy,
+				Search.never, IsPresent.get(repeatableContainers, annotationFilter, false)));
+	}
+
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			Predicate<Class<?>> searchEnclosingClass, RepeatableContainers repeatableContainers,
 			AnnotationFilter annotationFilter) {
