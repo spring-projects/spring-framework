@@ -263,7 +263,7 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * if the corresponding extracted message content was {@code null}
 	 */
 	protected @Nullable Object[] buildListenerArguments(@Nullable Object extractedMessage) {
-		return new Object[] {extractedMessage};
+		return new @Nullable Object[] {extractedMessage};
 	}
 
 	/**

@@ -35,9 +35,9 @@ public class UnknownContentTypeException extends RestClientException {
 
 	private final String statusText;
 
-	private final byte[] responseBody;
+	private final byte @Nullable [] responseBody;
 
-	private final HttpHeaders responseHeaders;
+	private final @Nullable HttpHeaders responseHeaders;
 
 
 	/**
@@ -50,7 +50,7 @@ public class UnknownContentTypeException extends RestClientException {
 	 * @param responseBody the response body content (may be {@code null})
 	 */
 	public UnknownContentTypeException(Type targetType, MediaType contentType,
-			int statusCode, String statusText, HttpHeaders responseHeaders, byte[] responseBody) {
+			int statusCode, String statusText, @Nullable HttpHeaders responseHeaders, byte @Nullable [] responseBody) {
 
 		this(targetType, contentType, HttpStatusCode.valueOf(statusCode), statusText, responseHeaders, responseBody);
 	}
@@ -66,7 +66,7 @@ public class UnknownContentTypeException extends RestClientException {
 	 * @since 6.0
 	 */
 	public UnknownContentTypeException(Type targetType, MediaType contentType,
-			HttpStatusCode statusCode, String statusText, HttpHeaders responseHeaders, byte[] responseBody) {
+			HttpStatusCode statusCode, String statusText, @Nullable HttpHeaders responseHeaders, byte @Nullable [] responseBody) {
 
 		super("Could not extract response: no suitable HttpMessageConverter found " +
 				"for response type [" + targetType + "] and content type [" + contentType + "]");
@@ -118,7 +118,7 @@ public class UnknownContentTypeException extends RestClientException {
 	/**
 	 * Return the response body as a byte array.
 	 */
-	public byte[] getResponseBody() {
+	public byte @Nullable [] getResponseBody() {
 		return this.responseBody;
 	}
 
@@ -127,7 +127,8 @@ public class UnknownContentTypeException extends RestClientException {
 	 * response "Content-Type" or {@code "UTF-8"} otherwise.
 	 */
 	public String getResponseBodyAsString() {
-		return new String(this.responseBody, this.contentType.getCharset() != null ?
+		byte[] responseBody = this.responseBody != null ? this.responseBody : new byte[0];
+		return new String(responseBody, this.contentType.getCharset() != null ?
 				this.contentType.getCharset() : StandardCharsets.UTF_8);
 	}
 
