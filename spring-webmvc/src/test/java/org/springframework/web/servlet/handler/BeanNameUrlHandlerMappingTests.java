@@ -71,38 +71,38 @@ class BeanNameUrlHandlerMappingTests {
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/mypath/welcome.html");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/myapp/myservlet/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/myservlet");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/myapp/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/myapp");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/mypath/show.html");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/mypath/bookseats.html");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 	}
 
 	@SuppressWarnings("removal")
@@ -120,28 +120,28 @@ class BeanNameUrlHandlerMappingTests {
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/mypath/welcome.html");
 		req.setContextPath("");
 		req.setServletPath("/mypath");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/Myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/mypath");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 	}
 
 	@Test
@@ -151,11 +151,11 @@ class BeanNameUrlHandlerMappingTests {
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/test.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/mypath/testarossa");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/mypath/tes");
 		hec = hm.getHandler(req);
@@ -171,11 +171,11 @@ class BeanNameUrlHandlerMappingTests {
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/test.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, bean);
 
 		req = new MockHttpServletRequest("GET", "/mypath/testarossa");
 		hec = hm.getHandler(req);
-		assertThat(hec != null && hec.getHandler() == anotherHandler).as("Handler is correct bean").isTrue();
+		assertHandlerIsCorrectBean(hec, anotherHandler);
 
 		req = new MockHttpServletRequest("GET", "/mypath/tes");
 		hec = hm.getHandler(req);
@@ -189,4 +189,7 @@ class BeanNameUrlHandlerMappingTests {
 				hm.registerHandler("/mypath/welcome.html", new Object()));
 	}
 
+	private static void assertHandlerIsCorrectBean(HandlerExecutionChain hec, Object bean) {
+		assertThat(hec).extracting(HandlerExecutionChain::getHandler).as("Handler is correct bean").isSameAs(bean);
+	}
 }

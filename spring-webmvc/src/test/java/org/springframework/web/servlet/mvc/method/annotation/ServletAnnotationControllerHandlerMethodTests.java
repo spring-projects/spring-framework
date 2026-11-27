@@ -1790,7 +1790,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getHeader("MyResponseHeader")).isEqualTo("MyValue");
 		assertThat(response.getContentLength()).isEqualTo(4);
-		assertThat(response.getContentAsByteArray().length).isEqualTo(0);
+		assertThat(response.getContentAsByteArray()).isEmpty();
 
 		// Now repeat with GET
 		request = new MockHttpServletRequest("GET", "/baz");
@@ -1825,7 +1825,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getHeader("Allow")).isEqualTo("GET,HEAD,OPTIONS");
-		assertThat(response.getContentAsByteArray().length).isEqualTo(0);
+		assertThat(response.getContentAsByteArray()).isEmpty();
 	}
 
 	@PathPatternsParameterizedTest

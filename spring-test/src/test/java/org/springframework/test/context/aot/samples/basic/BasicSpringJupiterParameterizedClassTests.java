@@ -44,7 +44,7 @@ public class BasicSpringJupiterParameterizedClassTests extends AbstractSpringJup
 	@Test
 	void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
 			@Value("${test.engine}") String testEngine) {
-		assertThat("foo".equals(parameterizedString) || "bar".equals(parameterizedString)).isTrue();
+		assertThat(parameterizedString).isIn("foo", "bar");
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 		assertThat(testEngine).isEqualTo("jupiter");
 		assertThat(magicNumber).isEqualTo(42);
@@ -59,7 +59,7 @@ public class BasicSpringJupiterParameterizedClassTests extends AbstractSpringJup
 		@Test
 		void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
 				@Value("${test.engine}") String testEngine, @Value("${foo}") String foo) {
-			assertThat("foo".equals(parameterizedString) || "bar".equals(parameterizedString)).isTrue();
+			assertThat(parameterizedString).isIn("foo", "bar");
 			assertThat(messageService.generateMessage()).isEqualTo("¡Hola, AOT!");
 			assertThat(foo).isEqualTo("bar");
 			assertThat(testEngine).isEqualTo("jupiter");
@@ -73,7 +73,7 @@ public class BasicSpringJupiterParameterizedClassTests extends AbstractSpringJup
 			@Test
 			void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
 					@Value("${test.engine}") String testEngine, @Value("${foo}") String foo) {
-				assertThat("foo".equals(parameterizedString) || "bar".equals(parameterizedString)).isTrue();
+				assertThat(parameterizedString).isIn("foo", "bar");
 				assertThat(messageService.generateMessage()).isEqualTo("¡Hola, AOT!");
 				assertThat(foo).isEqualTo("quux");
 				assertThat(testEngine).isEqualTo("jupiter");

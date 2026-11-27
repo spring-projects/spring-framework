@@ -45,7 +45,7 @@ class SpringManagedJupiterExtensionTests {
 
 	@TestTemplate
 	void testTemplate(String parameter) {
-		assertThat("foo".equals(parameter) || "bar".equals(parameter)).isTrue();
+		assertThat(parameter).isIn("foo", "bar");
 	}
 
 
