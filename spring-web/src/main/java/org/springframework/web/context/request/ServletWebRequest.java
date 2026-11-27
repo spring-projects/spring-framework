@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.InvalidServletRequestParameterException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -121,22 +122,23 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	@Override
 	public @Nullable String getParameter(String paramName) {
-		return getRequest().getParameter(paramName);
+		return InvalidServletRequestParameterException.read(() -> getRequest().getParameter(paramName));
 	}
 
 	@Override
 	public String @Nullable [] getParameterValues(String paramName) {
-		return getRequest().getParameterValues(paramName);
+		return InvalidServletRequestParameterException.read(() -> getRequest().getParameterValues(paramName));
 	}
 
 	@Override
 	public Iterator<String> getParameterNames() {
-		return CollectionUtils.toIterator(getRequest().getParameterNames());
+		return CollectionUtils.toIterator(
+				InvalidServletRequestParameterException.read(() -> getRequest().getParameterNames()));
 	}
 
 	@Override
 	public Map<String, String[]> getParameterMap() {
-		return getRequest().getParameterMap();
+		return InvalidServletRequestParameterException.read(() -> getRequest().getParameterMap());
 	}
 
 	@Override

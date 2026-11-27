@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
+import org.springframework.web.InvalidServletRequestParameterException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.multipart.support.StandardServletPartUtils;
@@ -229,7 +230,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 		}
 
 		protected @Nullable Object getRequestParameter(String name, Class<?> type) {
-			Object value = this.request.getParameterValues(name);
+			Object value = InvalidServletRequestParameterException.read(() -> this.request.getParameterValues(name));
 			return (ObjectUtils.isArray(value) && Array.getLength(value) == 1 ? Array.get(value, 0) : value);
 		}
 
@@ -263,7 +264,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 		protected Set<String> initParameterNames(ServletRequest request) {
 			Set<String> set = new LinkedHashSet<>();
-			Enumeration<String> enumeration = request.getParameterNames();
+			Enumeration<String> enumeration = InvalidServletRequestParameterException.read(request::getParameterNames);
 			while (enumeration.hasMoreElements()) {
 				set.add(enumeration.nextElement());
 			}

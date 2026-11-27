@@ -39,6 +39,7 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.InvalidServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -176,6 +177,13 @@ class ResponseEntityExceptionHandlerTests {
 	@Test
 	void servletRequestBindingException() {
 		testException(new ServletRequestBindingException("message"));
+	}
+
+	@Test
+	void invalidServletRequestParameter() {
+		ResponseEntity<Object> entity = testException(new InvalidServletRequestParameterException(
+				new IllegalStateException("Invalid character found in the request target")));
+		assertThat(entity.getStatusCode().value()).isEqualTo(400);
 	}
 
 	@Test

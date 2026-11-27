@@ -34,6 +34,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.InvalidServletRequestParameterException;
 
 /**
  * Miscellaneous utilities for web applications.
@@ -580,11 +581,11 @@ public abstract class WebUtils {
 	 */
 	public static boolean hasSubmitParameter(ServletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
-		if (request.getParameter(name) != null) {
+		if (parameter(request, name) != null) {
 			return true;
 		}
 		for (String suffix : SUBMIT_IMAGE_SUFFIXES) {
-			if (request.getParameter(name + suffix) != null) {
+			if (parameter(request, name + suffix) != null) {
 				return true;
 			}
 		}
@@ -601,7 +602,7 @@ public abstract class WebUtils {
 	 * if the parameter does not exist in given request
 	 */
 	public static @Nullable String findParameterValue(ServletRequest request, String name) {
-		return findParameterValue(request.getParameterMap(), name);
+		return findParameterValue(parameterMap(request), name);
 	}
 
 	/**
@@ -669,7 +670,7 @@ public abstract class WebUtils {
 	 */
 	public static Map<String, Object> getParametersStartingWith(ServletRequest request, @Nullable String prefix) {
 		Assert.notNull(request, "Request must not be null");
-		Enumeration<String> paramNames = request.getParameterNames();
+		Enumeration<String> paramNames = parameterNames(request);
 		Map<String, Object> params = new TreeMap<>();
 		if (prefix == null) {
 			prefix = "";
@@ -678,7 +679,7 @@ public abstract class WebUtils {
 			String paramName = paramNames.nextElement();
 			if (prefix.isEmpty() || paramName.startsWith(prefix)) {
 				String unprefixed = paramName.substring(prefix.length());
-				String[] values = request.getParameterValues(paramName);
+				String[] values = parameterValues(request, paramName);
 				if (values == null || values.length == 0) {
 					// Do nothing, no values found at all.
 				}
@@ -799,6 +800,22 @@ public abstract class WebUtils {
 		return (ObjectUtils.nullSafeEquals(scheme, originUrl.getScheme()) &&
 				ObjectUtils.nullSafeEquals(host, originUrl.getHost()) &&
 				getPort(scheme, port) == getPort(originUrl.getScheme(), originUrl.getPort()));
+	}
+
+	private static @Nullable String parameter(ServletRequest request, String name) {
+		return InvalidServletRequestParameterException.read(() -> request.getParameter(name));
+	}
+
+	private static Map<String, String[]> parameterMap(ServletRequest request) {
+		return InvalidServletRequestParameterException.read(request::getParameterMap);
+	}
+
+	private static @Nullable Enumeration<String> parameterNames(ServletRequest request) {
+		return InvalidServletRequestParameterException.read(request::getParameterNames);
+	}
+
+	private static String @Nullable [] parameterValues(ServletRequest request, String name) {
+		return InvalidServletRequestParameterException.read(() -> request.getParameterValues(name));
 	}
 
 	private static int getPort(@Nullable String scheme, int port) {

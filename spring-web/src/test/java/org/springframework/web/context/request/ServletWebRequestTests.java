@@ -17,11 +17,13 @@ import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.InvalidServletRequestParameterException;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -99,6 +101,20 @@ class ServletWebRequestTests {
 		assertThat(request.getNativeResponse(HttpServletResponse.class)).isSameAs(decoratedResponse);
 		assertThat(request.getNativeResponse(MockHttpServletResponse.class)).isSameAs(servletResponse);
 		assertThat(request.getNativeResponse(MultipartRequest.class)).isNull();
+	}
+
+	@Test
+	void parameterParsingFailureIsTranslated() {
+		HttpServletRequest failing = new HttpServletRequestWrapper(this.servletRequest) {
+			@Override
+			public String getParameter(String name) {
+				throw new IllegalStateException("Invalid character found in the request target");
+			}
+		};
+
+		assertThatExceptionOfType(InvalidServletRequestParameterException.class)
+				.isThrownBy(() -> new ServletWebRequest(failing).getParameter("email"))
+				.satisfies(ex -> assertThat(ex.getStatusCode().value()).isEqualTo(400));
 	}
 
 }
