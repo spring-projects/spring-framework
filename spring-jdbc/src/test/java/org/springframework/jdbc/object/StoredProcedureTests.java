@@ -47,6 +47,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Thomas Risberg
@@ -226,6 +227,15 @@ class StoredProcedureTests {
 		this.verifyClosedAfter = false;
 		MissingParameterStoredProcedure mp = new MissingParameterStoredProcedure(dataSource);
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(mp::execute);
+	}
+
+	@Test
+	void misnamedParameterClosesStatement() throws Exception {
+		when(connection.prepareCall("{call takes_string(?)}")).thenReturn(callableStatement);
+		MissingParameterStoredProcedure mp = new MissingParameterStoredProcedure(dataSource);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+				.isThrownBy(() -> mp.execute(Map.of("wrong_name", "value")))
+				.withMessage("Required input parameter 'mystring' is missing");
 	}
 
 	@Test

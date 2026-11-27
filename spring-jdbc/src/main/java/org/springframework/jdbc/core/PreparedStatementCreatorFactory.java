@@ -21,6 +21,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Helper class that efficiently creates multiple {@link PreparedStatementCreator}
@@ -230,7 +231,13 @@ public class PreparedStatementCreatorFactory {
 				ps = con.prepareStatement(this.actualSql, resultSetType,
 					updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
-			setValues(ps);
+			try {
+				setValues(ps);
+			}
+			catch (SQLException | RuntimeException ex) {
+				JdbcUtils.closeStatement(ps);
+				throw ex;
+			}
 			return ps;
 		}
 
