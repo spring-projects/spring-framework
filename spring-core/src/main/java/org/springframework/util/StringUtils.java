@@ -738,7 +738,7 @@ public abstract class StringUtils {
 		String pathToUse = normalizedPath;
 
 		// Shortcut if there is no work to do
-		if (pathToUse.indexOf(DOT_CHAR) == -1) {
+		if (!containsDotSegment(pathToUse)) {
 			return pathToUse;
 		}
 
@@ -804,6 +804,25 @@ public abstract class StringUtils {
 		String joined = collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
 		// Avoid String concatenation with empty prefix
 		return (prefix.isEmpty() ? joined : prefix + joined);
+	}
+
+	private static boolean containsDotSegment(String path) {
+		int length = path.length();
+		int index = path.indexOf(DOT_CHAR);
+		while (index != -1) {
+			if (index == 0 || path.charAt(index - 1) == FOLDER_SEPARATOR_CHAR || path.charAt(index - 1) == ':') {
+				int next = index + 1;
+				if (next == length || path.charAt(next) == FOLDER_SEPARATOR_CHAR) {
+					return true;
+				}
+				if (path.charAt(next) == DOT_CHAR &&
+						(next + 1 == length || path.charAt(next + 1) == FOLDER_SEPARATOR_CHAR)) {
+					return true;
+				}
+			}
+			index = path.indexOf(DOT_CHAR, index + 1);
+		}
+		return false;
 	}
 
 	/**

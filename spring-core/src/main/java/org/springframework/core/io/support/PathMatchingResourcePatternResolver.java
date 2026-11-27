@@ -949,12 +949,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 				entriesCache.add(entries.nextElement().getName());
 			}
-			for (String entryPath : entriesCache) {
-				if (entryPath.startsWith(rootEntryPath)) {
-					String relativePath = entryPath.substring(rootEntryPath.length());
-					if (getPathMatcher().match(subPattern, relativePath)) {
-						result.add(rootDirResource.createRelative(relativePath));
-					}
+			for (String entryPath : entriesCache.tailSet(rootEntryPath, true)) {
+				if (!entryPath.startsWith(rootEntryPath)) {
+					// We are beyond the potential matches in the current TreeSet.
+					break;
+				}
+				String relativePath = entryPath.substring(rootEntryPath.length());
+				if (getPathMatcher().match(subPattern, relativePath)) {
+					result.add(rootDirResource.createRelative(relativePath));
 				}
 			}
 			if (this.useCaches == null || this.useCaches) {
