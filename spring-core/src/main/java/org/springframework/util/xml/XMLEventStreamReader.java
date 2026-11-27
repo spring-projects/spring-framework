@@ -14,6 +14,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.Comment;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.ProcessingInstruction;
@@ -150,6 +151,11 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 		else {
 			throw new IllegalStateException();
 		}
+	}
+
+	@Override
+	public boolean isWhiteSpace() {
+		return (this.event instanceof Characters characters && characters.isWhiteSpace());
 	}
 
 	@Override
