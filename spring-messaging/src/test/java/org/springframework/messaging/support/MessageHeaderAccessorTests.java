@@ -376,6 +376,16 @@ class MessageHeaderAccessorTests {
 	}
 
 	@Test
+	void getShortLogMessagePayloadDoesNotSplitSurrogatePair() {
+		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
+		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
+
+		String prefix = "a".repeat(79);
+		String actual = accessor.getShortLogMessage(prefix + "\uD83D\uDE00 > 80");
+		assertThat(actual).isEqualTo("headers={contentType=text/plain} payload=" + prefix + "...(truncated)");
+	}
+
+	@Test
 	void getDetailedLogMessagePayload() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
