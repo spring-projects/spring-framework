@@ -36,6 +36,12 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * <p>This resolver does not delegate to the {@code ResourceResolverChain} and is
  * expected to be configured at the end in a chain of resolvers.
  *
+ * <p>Security model: the resource location check protects against
+ * path traversal through the request path but does not inspect the
+ * filesystem layout under a configured location. This is the responsibility
+ * of the application developer and operator. Following symbolic links inside
+ * a location is supported by design.
+ *
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
  * @author Sam Brannen

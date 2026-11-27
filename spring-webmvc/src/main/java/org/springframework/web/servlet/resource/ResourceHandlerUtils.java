@@ -234,6 +234,7 @@ public abstract class ResourceHandlerUtils {
 
 	/**
 	 * Check whether the resource is under the given location.
+	 * <p>See {@link PathResourceResolver} for security considerations.
 	 */
 	public static boolean isResourceUnderLocation(Resource location, Resource resource) throws IOException {
 		if (resource.getClass() != location.getClass()) {
