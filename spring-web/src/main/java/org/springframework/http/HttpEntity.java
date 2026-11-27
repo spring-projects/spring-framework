@@ -45,7 +45,7 @@ import org.springframework.util.ObjectUtils;
  * @see #getBody()
  * @see #getHeaders()
  */
-public class HttpEntity<T> {
+public class HttpEntity<T extends @Nullable Object> {
 
 	/**
 	 * An {@code HttpEntity} instance with a {@code null} body and
@@ -56,12 +56,13 @@ public class HttpEntity<T> {
 
 	private final HttpHeaders headers;
 
-	private final @Nullable T body;
+	private final T body;
 
 
 	/**
 	 * Create a new, empty {@code HttpEntity}.
 	 */
+	@SuppressWarnings("NullAway")
 	protected HttpEntity() {
 		this(null, (HttpHeaders) null);
 	}
@@ -79,6 +80,7 @@ public class HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @since 7.0
 	 */
+	@SuppressWarnings("NullAway")
 	public HttpEntity(HttpHeaders headers) {
 		this(null, headers);
 	}
@@ -89,7 +91,7 @@ public class HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @since 7.0
 	 */
-	public HttpEntity(@Nullable T body, @Nullable HttpHeaders headers) {
+	public HttpEntity(T body, @Nullable HttpHeaders headers) {
 		this.body = body;
 		this.headers = (headers != null) ? headers : new HttpHeaders();
 	}
@@ -99,7 +101,7 @@ public class HttpEntity<T> {
 	 * @param headers the entity headers
 	 * @deprecated in favor of {@link #HttpEntity(HttpHeaders)}
 	 */
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"removal", "NullAway"})
 	@Deprecated(since = "7.0", forRemoval = true)
 	public HttpEntity(MultiValueMap<String, String> headers) {
 		this(null, headers);
@@ -112,7 +114,7 @@ public class HttpEntity<T> {
 	 * @deprecated in favor of {@link #HttpEntity(Object, HttpHeaders)}
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
-	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
+	public HttpEntity(T body, @Nullable MultiValueMap<String, String> headers) {
 		this(body, (headers != null) ? new HttpHeaders(headers) : new HttpHeaders());
 	}
 
@@ -127,7 +129,7 @@ public class HttpEntity<T> {
 	/**
 	 * Returns the body of this entity.
 	 */
-	public @Nullable T getBody() {
+	public T getBody() {
 		return this.body;
 	}
 

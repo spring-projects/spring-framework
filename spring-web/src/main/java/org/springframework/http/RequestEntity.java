@@ -54,7 +54,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.web.client.RestOperations#exchange(RequestEntity, Class)
  * @see ResponseEntity
  */
-public class RequestEntity<T> extends HttpEntity<T> {
+public class RequestEntity<T extends @Nullable Object> extends HttpEntity<T> {
 
 	private final @Nullable HttpMethod method;
 
@@ -67,6 +67,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param method the method
 	 * @param url the URL
 	 */
+	@SuppressWarnings("NullAway")
 	public RequestEntity(HttpMethod method, URI url) {
 		this(null, (HttpHeaders) null, method, url, null);
 	}
@@ -77,7 +78,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param method the method
 	 * @param url the URL
 	 */
-	public RequestEntity(@Nullable T body, HttpMethod method, URI url) {
+	public RequestEntity(T body, HttpMethod method, URI url) {
 		this(body, (HttpHeaders) null, method, url, null);
 	}
 
@@ -89,7 +90,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param type the type used for generic type resolution
 	 * @since 4.3
 	 */
-	public RequestEntity(@Nullable T body, HttpMethod method, URI url, Type type) {
+	public RequestEntity(T body, HttpMethod method, URI url, Type type) {
 		this(body, (HttpHeaders) null, method, url, type);
 	}
 
@@ -100,6 +101,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 * @since 7.0
 	 */
+	@SuppressWarnings("NullAway")
 	public RequestEntity(HttpHeaders headers, HttpMethod method, URI url) {
 		this(null, headers, method, url, null);
 	}
@@ -112,7 +114,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 * @since 7.0
 	 */
-	public RequestEntity(@Nullable T body, @Nullable HttpHeaders headers,
+	public RequestEntity(T body, @Nullable HttpHeaders headers,
 			@Nullable HttpMethod method, URI url) {
 
 		this(body, headers, method, url, null);
@@ -127,7 +129,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param type the type used for generic type resolution
 	 * @since 7.0
 	 */
-	public RequestEntity(@Nullable T body, @Nullable HttpHeaders headers,
+	public RequestEntity(T body, @Nullable HttpHeaders headers,
 			@Nullable HttpMethod method, @Nullable URI url, @Nullable Type type) {
 
 		super(body, headers);
@@ -143,7 +145,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 * @deprecated in favor of {@link #RequestEntity(HttpHeaders, HttpMethod, URI)}
 	 */
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"removal", "NullAway"})
 	@Deprecated(since = "7.0", forRemoval = true)
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
 		this(null, headers, method, url, null);
@@ -160,7 +162,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
 	public RequestEntity(
-			@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+			T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, URI url) {
 
 		this(body, headers, method, url, null);
@@ -178,7 +180,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 */
 	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
-	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+	public RequestEntity(T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, @Nullable URI url, @Nullable Type type) {
 
 		super(body, headers);
@@ -537,7 +539,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		 * @return the request entity
 		 * @see BodyBuilder#body(Object)
 		 */
-		RequestEntity<Void> build();
+		RequestEntity<@Nullable Void> build();
 	}
 
 
@@ -693,7 +695,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public RequestEntity<Void> build() {
+		public RequestEntity<@Nullable Void> build() {
 			return buildInternal(null, null);
 		}
 
@@ -707,7 +709,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			return buildInternal(body, type);
 		}
 
-		private <T> RequestEntity<T> buildInternal(@Nullable T body, @Nullable Type type) {
+		private <T extends @Nullable Object> RequestEntity<T> buildInternal(T body, @Nullable Type type) {
 			if (this.uri != null) {
 				return new RequestEntity<>(body, this.headers, this.method, this.uri, type);
 			}
@@ -727,7 +729,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @since 5.3
 	 * @param <T> the body type
 	 */
-	public static class UriTemplateRequestEntity<T> extends RequestEntity<T> {
+	public static class UriTemplateRequestEntity<T extends @Nullable Object> extends RequestEntity<T> {
 
 		private final String uriTemplate;
 
@@ -736,7 +738,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		private final @Nullable Map<String, ? extends @Nullable Object> uriVarsMap;
 
 		UriTemplateRequestEntity(
-				@Nullable T body, @Nullable HttpHeaders headers,
+				T body, @Nullable HttpHeaders headers,
 				@Nullable HttpMethod method, @Nullable Type type, String uriTemplate,
 				@Nullable Object @Nullable [] uriVarsArray, @Nullable Map<String, ?> uriVarsMap) {
 

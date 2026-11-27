@@ -95,7 +95,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			ErrorResponseException.class,
 			MethodValidationException.class
 	})
-	public final Mono<ResponseEntity<Object>> handleException(Exception ex, ServerWebExchange exchange) {
+	public final Mono<ResponseEntity<@Nullable Object>> handleException(Exception ex, ServerWebExchange exchange) {
 		if (ex instanceof MethodNotAllowedException theEx) {
 			return handleMethodNotAllowedException(theEx, theEx.getHeaders(), theEx.getStatusCode(), exchange);
 		}
@@ -149,7 +149,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleMethodNotAllowedException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleMethodNotAllowedException(
 			MethodNotAllowedException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -165,7 +165,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleNotAcceptableStatusException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleNotAcceptableStatusException(
 			NotAcceptableStatusException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -181,7 +181,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleUnsupportedMediaTypeStatusException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleUnsupportedMediaTypeStatusException(
 			UnsupportedMediaTypeStatusException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -197,7 +197,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleMissingRequestValueException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleMissingRequestValueException(
 			MissingRequestValueException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -213,7 +213,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleUnsatisfiedRequestParameterException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleUnsatisfiedRequestParameterException(
 			UnsatisfiedRequestParameterException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -229,7 +229,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleWebExchangeBindException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleWebExchangeBindException(
 			WebExchangeBindException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -246,7 +246,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 * @since 6.1
 	 */
-	protected Mono<ResponseEntity<Object>> handleHandlerMethodValidationException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleHandlerMethodValidationException(
 			HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -262,7 +262,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleServerWebInputException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleServerWebInputException(
 			ServerWebInputException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -278,7 +278,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleResponseStatusException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleResponseStatusException(
 			ResponseStatusException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -294,7 +294,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleServerErrorException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleServerErrorException(
 			ServerErrorException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -310,7 +310,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleErrorResponseException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleErrorResponseException(
 			ErrorResponseException ex, HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -326,7 +326,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 * @since 6.1
 	 */
-	protected Mono<ResponseEntity<Object>> handleMethodValidationException(
+	protected Mono<ResponseEntity<@Nullable Object>> handleMethodValidationException(
 			MethodValidationException ex, HttpStatus status, ServerWebExchange exchange) {
 
 		ProblemDetail body = createProblemDetail(ex, status, "Validation failed", null, null, exchange);
@@ -386,7 +386,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @param exchange the current request and response
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
-	protected Mono<ResponseEntity<Object>> handleExceptionInternal(
+	protected Mono<ResponseEntity<@Nullable Object>> handleExceptionInternal(
 			Exception ex, @Nullable Object body, @Nullable HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
@@ -417,11 +417,11 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @return a {@code Mono} with the created {@code ResponseEntity}
 	 * @since 6.0
 	 */
-	protected Mono<ResponseEntity<Object>> createResponseEntity(
+	protected Mono<ResponseEntity<@Nullable Object>> createResponseEntity(
 			@Nullable Object body, @Nullable HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
-		return Mono.just(new ResponseEntity<>(body, headers, status));
+		return Mono.just(new ResponseEntity<@Nullable Object>(body, headers, status));
 	}
 
 }
