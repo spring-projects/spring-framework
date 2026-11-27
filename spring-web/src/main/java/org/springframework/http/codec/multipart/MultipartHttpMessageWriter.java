@@ -70,7 +70,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 
 	private final Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
 
-	private final @Nullable HttpMessageWriter<MultiValueMap<String, String>> formWriter;
+	private final @Nullable HttpMessageWriter<? super MultiValueMap<String, String>> formWriter;
 
 
 	/**
@@ -98,7 +98,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	 * @param formWriter the fallback writer for form data, {@code null} by default
 	 */
 	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters,
-			@Nullable HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
+			@Nullable HttpMessageWriter<? super MultiValueMap<String, String>> formWriter) {
 
 		this(() -> partWriters, formWriter);
 	}
@@ -113,7 +113,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	 * @since 6.0.3
 	 */
 	public MultipartHttpMessageWriter(Supplier<List<HttpMessageWriter<?>>> partWritersSupplier,
-			@Nullable HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
+			@Nullable HttpMessageWriter<? super MultiValueMap<String, String>> formWriter) {
 
 		super(initMediaTypes(formWriter));
 		this.partWritersSupplier = partWritersSupplier;
@@ -142,8 +142,9 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	 * Return the configured form writer.
 	 * @since 5.1.13
 	 */
+	@SuppressWarnings("unchecked")
 	public @Nullable HttpMessageWriter<MultiValueMap<String, String>> getFormWriter() {
-		return this.formWriter;
+		return (HttpMessageWriter<MultiValueMap<String, String>>) this.formWriter;
 	}
 
 
