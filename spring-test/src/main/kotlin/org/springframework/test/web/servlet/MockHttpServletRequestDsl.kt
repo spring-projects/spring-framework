@@ -96,7 +96,7 @@ open class MockHttpServletRequestDsl(private val builder: AbstractMockHttpServle
 	/**
 	 * @see [MockHttpServletRequestBuilder.param]
 	 */
-	fun param(name: String, vararg values: String) {
+	fun param(name: String, vararg values: String?) {
 		builder.param(name, *values)
 	}
 
