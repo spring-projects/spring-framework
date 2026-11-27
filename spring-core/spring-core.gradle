@@ -71,8 +71,8 @@ tasks.register('objenesisSourceJar', Jar) {
 }
 
 dependencies {
-	javapoet("com.palantir.javapoet:javapoet:${javapoetVersion}@jar")
-	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
+	javapoet("com.palantir.javapoet:javapoet:${javapoetVersion}") { transitive = false }
+	objenesis("org.objenesis:objenesis:${objenesisVersion}") { transitive = false }
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
 	api("commons-logging:commons-logging")
