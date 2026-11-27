@@ -247,8 +247,14 @@ public class ResolvableType implements Serializable {
 	 */
 	public boolean isAssignableFrom(Class<?> other) {
 		// As of 6.1: shortcut assignability check for top-level Class references
-		return (this.type instanceof Class<?> clazz ? ClassUtils.isAssignable(clazz, other) :
-				isAssignableFrom(forClass(other), false, null, false));
+		if (this.type instanceof Class<?> clazz) {
+			return ClassUtils.isAssignable(clazz, other);
+		}
+		if (this.type instanceof ParameterizedType && this.resolved != null &&
+				!ClassUtils.isAssignable(this.resolved, other)) {
+			return false;
+		}
+		return isAssignableFrom(forClass(other), false, null, false);
 	}
 
 	/**
@@ -297,6 +303,15 @@ public class ResolvableType implements Serializable {
 			// As of 6.1: shortcut assignability check for top-level Class references
 			if (this.type instanceof Class<?> clazz && other.type instanceof Class<?> otherClazz) {
 				return (strict ? clazz.isAssignableFrom(otherClazz) : ClassUtils.isAssignable(clazz, otherClazz));
+			}
+			if (this.type instanceof ParameterizedType && this.resolved != null) {
+				Class<?> otherResolved = (other.type instanceof Class<?> otherClazz ? otherClazz :
+						(other.type instanceof ParameterizedType ? other.resolved : null));
+				if (otherResolved != null &&
+						!(strict ? this.resolved.isAssignableFrom(otherResolved) :
+								ClassUtils.isAssignable(this.resolved, otherResolved))) {
+					return false;
+				}
 			}
 		}
 
@@ -407,7 +422,7 @@ public class ResolvableType implements Serializable {
 	 * @see #getComponentType()
 	 */
 	public boolean isArray() {
-		if (this == NONE) {
+		if (this == NONE || this.type instanceof ParameterizedType) {
 			return false;
 		}
 		return ((this.type instanceof Class<?> clazz && clazz.isArray()) ||
@@ -1803,7 +1818,8 @@ public class ResolvableType implements Serializable {
 		public static @Nullable WildcardBounds get(ResolvableType type) {
 			ResolvableType candidate = type;
 			while (!(candidate.getType() instanceof WildcardType || candidate.isUnresolvableTypeVariable())) {
-				if (candidate == NONE) {
+				if (candidate == NONE || candidate.type instanceof Class<?> ||
+						candidate.type instanceof ParameterizedType || candidate.type instanceof GenericArrayType) {
 					return null;
 				}
 				candidate = candidate.resolveType();

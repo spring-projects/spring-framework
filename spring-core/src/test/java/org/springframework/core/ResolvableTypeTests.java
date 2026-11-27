@@ -1157,6 +1157,18 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void isAssignableFromForParameterizedTypeRawClassReject() throws Exception {
+		ResolvableType charSequenceList = ResolvableType.forField(AssignmentBase.class.getField("listc"), Assignment.class);
+		ResolvableType charSequenceMap = ResolvableType.forClassWithGenerics(Map.class, String.class, CharSequence.class);
+
+		assertThat(charSequenceList.isArray()).isFalse();
+		assertThat(charSequenceList.isAssignableFrom(String.class)).isFalse();
+		assertThat(charSequenceList.isAssignableFrom(ExtendsList.class)).isTrue();
+		assertThat(charSequenceList.isAssignableFrom(ResolvableType.forClass(String.class))).isFalse();
+		assertThat(charSequenceList.isAssignableFrom(charSequenceMap)).isFalse();
+	}
+
+	@Test
 	void isAssignableFromForArrays() throws Exception {
 		ResolvableType object = ResolvableType.forField(AssignmentBase.class.getField("o"), Assignment.class);
 		ResolvableType objectArray = ResolvableType.forField(AssignmentBase.class.getField("oarray"), Assignment.class);

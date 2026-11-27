@@ -640,13 +640,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Class<?> targetType = determineTargetType(beanName, mbd, typesToMatch);
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
-		if (targetType != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-			boolean matchingOnlyFactoryBean = (typesToMatch.length == 1 && typesToMatch[0] == FactoryBean.class);
-			for (SmartInstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().smartInstantiationAware) {
-				Class<?> predicted = bp.predictBeanType(targetType, beanName);
-				if (predicted != null &&
-						(!matchingOnlyFactoryBean || FactoryBean.class.isAssignableFrom(predicted))) {
-					return predicted;
+		if (targetType != null && !mbd.isSynthetic()) {
+			List<SmartInstantiationAwareBeanPostProcessor> bpps = getBeanPostProcessorCache().predictBeanType;
+			if (!bpps.isEmpty()) {
+				boolean matchingOnlyFactoryBean = (typesToMatch.length == 1 && typesToMatch[0] == FactoryBean.class);
+				for (int i = 0, size = bpps.size(); i < size; i++) {
+					Class<?> predicted = bpps.get(i).predictBeanType(targetType, beanName);
+					if (predicted != null &&
+							(!matchingOnlyFactoryBean || FactoryBean.class.isAssignableFrom(predicted))) {
+						return predicted;
+					}
 				}
 			}
 		}
