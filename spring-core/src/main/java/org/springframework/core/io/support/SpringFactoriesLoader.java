@@ -361,10 +361,26 @@ public class SpringFactoriesLoader {
 
 		T instantiate(@Nullable ArgumentResolver argumentResolver) throws Exception {
 			Object[] args = resolveArgs(argumentResolver);
-			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(this.constructor.getDeclaringClass())) {
+			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(this.constructor.getDeclaringClass()) &&
+					needsKotlinReflection(this.constructor, args)) {
 				return KotlinDelegate.instantiate(this.constructor, args);
 			}
 			return this.constructor.newInstance(args);
+		}
+
+		private static boolean needsKotlinReflection(Constructor<?> constructor, @Nullable Object[] args) {
+			if (constructor.isSynthetic() || KotlinDetector.isInlineClass(constructor.getDeclaringClass())) {
+				return true;
+			}
+			if (args.length != constructor.getParameterCount()) {
+				return true;
+			}
+			for (@Nullable Object arg : args) {
+				if (arg == null || KotlinDetector.isInlineClass(arg.getClass())) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private Object[] resolveArgs(@Nullable ArgumentResolver argumentResolver) {
@@ -384,11 +400,13 @@ public class SpringFactoriesLoader {
 
 		private static @Nullable Constructor<?> findConstructor(Class<?> factoryImplementationClass) {
 			// Same algorithm as BeanUtils.getResolvableConstructor
+			Constructor<?>[] declaredConstructors = factoryImplementationClass.getDeclaredConstructors();
+			if (declaredConstructors.length == 1) {
+				return declaredConstructors[0];
+			}
 			Constructor<?> constructor = findPrimaryKotlinConstructor(factoryImplementationClass);
 			constructor = (constructor != null ? constructor :
 					findSingleConstructor(factoryImplementationClass.getConstructors()));
-			constructor = (constructor != null ? constructor :
-					findSingleConstructor(factoryImplementationClass.getDeclaredConstructors()));
 			constructor = (constructor != null ? constructor :
 					findDeclaredConstructor(factoryImplementationClass));
 			return constructor;

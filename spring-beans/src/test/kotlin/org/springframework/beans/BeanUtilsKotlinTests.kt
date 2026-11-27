@@ -181,6 +181,16 @@ class BeanUtilsKotlinTests {
 		assertThat(names).isEmpty()
 	}
 
+	@Test
+	fun `getResolvableConstructor with single constructor classes`() {
+		assertThat(BeanUtils.getResolvableConstructor(Foo::class.java))
+			.isEqualTo(Foo::class.java.getDeclaredConstructor(String::class.java, Int::class.javaPrimitiveType))
+		assertThat(BeanUtils.getResolvableConstructor(OneConstructorWithoutDefaultOne::class.java))
+			.isEqualTo(OneConstructorWithoutDefaultOne::class.java.getDeclaredConstructor(String::class.java))
+		assertThat(BeanUtils.getResolvableConstructor(PrivateConstructor::class.java))
+			.isEqualTo(PrivateConstructor::class.java.getDeclaredConstructor())
+	}
+
 
 	class Foo(val param1: String, val param2: Int)
 
