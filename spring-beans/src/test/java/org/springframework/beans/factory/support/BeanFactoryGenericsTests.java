@@ -61,7 +61,7 @@ class BeanFactoryGenericsTests {
 		bd.getPropertyValues().add("integerSet", Set.of("4", "5"));
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 	}
 
@@ -74,7 +74,7 @@ class BeanFactoryGenericsTests {
 		bd.getPropertyValues().add("resourceList", input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
 	}
@@ -117,7 +117,7 @@ class BeanFactoryGenericsTests {
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getResourceList()).isNull();
 	}
 
@@ -132,7 +132,7 @@ class BeanFactoryGenericsTests {
 		bd.getPropertyValues().add("shortMap", input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 	}
@@ -143,7 +143,7 @@ class BeanFactoryGenericsTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("listOfArrays");
+		GenericBean<?> gb = bf.getBean("listOfArrays", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getListOfArrays()).containsExactly(new String[] {"value1", "value2"});
 	}
 
@@ -156,7 +156,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 	}
 
@@ -170,7 +170,7 @@ class BeanFactoryGenericsTests {
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 	}
 
@@ -182,7 +182,7 @@ class BeanFactoryGenericsTests {
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).isNull();
 	}
 
@@ -197,7 +197,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
@@ -215,7 +215,7 @@ class BeanFactoryGenericsTests {
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
@@ -231,7 +231,7 @@ class BeanFactoryGenericsTests {
 		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).isNull();
 		assertThat(gb.getResourceList()).isNull();
 	}
@@ -249,7 +249,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
@@ -267,7 +267,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue("http://localhost:8080");
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 		assertThat(gb.getResourceList()).containsExactly(new UrlResource("http://localhost:8080"));
@@ -288,7 +288,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getShortMap()).isNotSameAs(gb.getPlainMap());
 		assertThat(gb.getPlainMap()).hasSize(2);
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
@@ -310,7 +310,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getShortMap()).isNotSameAs(gb.getPlainMap());
 		assertThat(gb.getPlainMap()).hasSize(2);
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
@@ -332,7 +332,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getShortMap()).isSameAs(gb.getPlainMap());
 		assertThat(gb.getShortMap()).hasSize(2);
 		assertThat(gb.getShortMap().get(Short.valueOf("1"))).isEqualTo(0);
@@ -350,7 +350,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getLongMap().get(4L)).isEqualTo("5");
 		assertThat(gb.getLongMap().get(6L)).isEqualTo("7");
 	}
@@ -369,7 +369,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getCollectionMap().get(1)).isInstanceOf(Set.class);
 		assertThat(gb.getCollectionMap().get(2)).isInstanceOf(List.class);
 	}
@@ -384,7 +384,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 	}
 
@@ -400,7 +400,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
@@ -420,7 +420,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
@@ -439,7 +439,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue("http://localhost:8080");
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 		assertThat(gb.getResourceList()).containsExactly(new UrlResource("http://localhost:8080"));
@@ -461,7 +461,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
 		assertThat(gb.getPlainMap().get("2")).isEqualTo("3");
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
@@ -480,7 +480,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getLongMap().get(Long.valueOf("4"))).isEqualTo("5");
 		assertThat(gb.getLongMap().get(Long.valueOf("6"))).isEqualTo("7");
 	}
@@ -500,7 +500,7 @@ class BeanFactoryGenericsTests {
 		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		bf.registerBeanDefinition("genericBean", bd);
 
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		GenericBean<?> gb = bf.getBean("genericBean", new ParameterizedTypeReference<>() {});
 		assertThat(gb.getCollectionMap().get(1)).isInstanceOf(Set.class);
 		assertThat(gb.getCollectionMap().get(2)).isInstanceOf(List.class);
 	}
