@@ -249,6 +249,30 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType).isEqualTo(method(MyOptionalInterfaceType.class, "get").getGenericReturnType());
 	}
 
+	@Test
+	void resolveTypeWithGenericArray() {
+		Type type = method(WithGenericArrays.class, "array").getGenericReturnType();
+		assertThat(resolveType(type, WithStringArrays.class)).isEqualTo(String[].class);
+	}
+
+	@Test
+	void resolveTypeWithGenericMultidimensionalArray() {
+		Type type = method(WithGenericArrays.class, "matrix").getGenericReturnType();
+		assertThat(resolveType(type, WithStringArrays.class)).isEqualTo(String[][].class);
+	}
+
+	@Test
+	void resolveTypeWithGenericArrayOfElementBounds() {
+		Type type = method(WithElementBounds.class, "getArray").getGenericReturnType();
+		assertThat(resolveType(type, WithElementBounds.class)).isEqualTo(A[].class);
+	}
+
+	@Test
+	void resolveTypeWithUnresolvableGenericArray() {
+		Type type = method(WithGenericArrays.class, "array").getGenericReturnType();
+		assertThat(resolveType(type, WithGenericArrays.class)).isSameAs(type);
+	}
+
 	@Test  // gh-36890
 	void resolveTypeAgainstSameNamedVariables() {
 		Type resolvedType = resolveType(method(Create.class, "create", Object.class).getGenericParameterTypes()[0], Controller.class);
@@ -443,6 +467,16 @@ class GenericTypeResolverTests {
 	abstract static class WithArray<T> extends WithArrayBase<T> {
 	}
 
+	abstract static class WithGenericArrays<T> {
+
+		abstract T[] array();
+
+		abstract T[][] matrix();
+	}
+
+	abstract static class WithStringArrays extends WithGenericArrays<String> {
+	}
+
 	interface Repository<T, ID extends Serializable> {
 
 		default void store(Supplier<T> t) {
@@ -473,6 +507,10 @@ class GenericTypeResolverTests {
 
 		<T extends A> List<T> get() {
 			return List.of();
+		}
+
+		<T extends A> T[] getArray() {
+			return null;
 		}
 	}
 

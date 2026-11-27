@@ -5,6 +5,7 @@
 
 package org.springframework.core;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -190,6 +191,13 @@ public final class GenericTypeResolver {
 					if (rawClass != null) {
 						return ResolvableType.forClassWithGenerics(rawClass, generics).getType();
 					}
+				}
+			}
+			else if (genericType instanceof GenericArrayType genericArrayType) {
+				Type resolvedComponentType =
+						resolveType(genericArrayType.getGenericComponentType(), contextClass);
+				if (resolvedComponentType instanceof Class<?> componentClass) {
+					return componentClass.arrayType();
 				}
 			}
 		}
