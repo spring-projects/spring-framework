@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 class LinkedMultiValueMapTests {
 
@@ -119,4 +121,11 @@ class LinkedMultiValueMapTests {
 		assertThat(map).isEqualTo(o2);
 	}
 
+	@Test
+	void nullable() {
+		LinkedMultiValueMap<String, @Nullable String> map = new LinkedMultiValueMap<>();
+		map.add("test", "test");
+		map.add("test", null);
+		assertThat(map.get("test")).containsExactly("test", null);
+	}
 }
