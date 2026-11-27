@@ -41,6 +41,13 @@ JavaBeans `Introspector`. See
 {spring-framework-api}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`StandardBeanInfoFactory`]
 for details.
 
+| `spring.beans.typeIndex.ignore`
+| Instructs Spring to ignore the bean type index for by-type lookups in a frozen bean
+factory configuration, checking all bean definitions for every type that is not cached
+yet instead. See
+{spring-framework-api}++/beans/factory/support/DefaultListableBeanFactory.html#IGNORE_TYPE_INDEX_PROPERTY_NAME++[`DefaultListableBeanFactory`]
+for details.
+
 | `spring.cache.reactivestreams.ignore`
 | Instructs Spring's caching infrastructure to ignore the presence of Reactive Streams,
 in particular Reactor's `Mono`/`Flux` in `@Cacheable` method return type declarations. See

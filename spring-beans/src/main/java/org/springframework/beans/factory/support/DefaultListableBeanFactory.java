@@ -136,6 +136,24 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public static final String STRICT_LOCKING_PROPERTY_NAME = "spring.locking.strict";
 
+	/**
+	 * System property that instructs Spring to ignore the bean type index for by-type
+	 * lookups in a frozen configuration, checking all bean definitions for every type
+	 * that is not cached yet instead. Setting this flag to "true" restores the lookup
+	 * behavior before 7.1.1.
+	 * <p>By default, the factory builds an index from types to the names of the bean
+	 * definitions that may match them on the first uncached by-type lookup after
+	 * {@link #freezeConfiguration()}, and only checks those bean definitions for each
+	 * further lookup. The outcome of a lookup is the same either way, since the regular
+	 * type matching still applies to every candidate. This only makes a difference for
+	 * subclasses that customize the type matching (for example, through an overridden
+	 * {@link #isTypeMatch(String, ResolvableType, boolean)}) in a way that is not
+	 * reflected in the predicted bean types.
+	 * @since 7.1.1
+	 * @see #getBeanNamesForType(Class, boolean, boolean)
+	 */
+	public static final String IGNORE_TYPE_INDEX_PROPERTY_NAME = "spring.beans.typeIndex.ignore";
+
 	private static @Nullable Class<?> jakartaInjectProviderClass;
 
 	static {
@@ -156,6 +174,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Whether strict locking is enforced or relaxed in this factory. */
 	private final @Nullable Boolean strictLocking = SpringProperties.checkFlag(STRICT_LOCKING_PROPERTY_NAME);
+
+	/** Whether by-type lookups in a frozen configuration may use the bean type index. */
+	private final boolean typeIndexEnabled = !SpringProperties.getFlag(IGNORE_TYPE_INDEX_PROPERTY_NAME);
 
 	/** Optional id for this factory, for serialization purposes. */
 	private @Nullable String serializationId;
@@ -191,6 +212,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Cache of singleton-only bean names, keyed by dependency type. */
 	private final Map<Object, String[]> singletonBeanNamesByType = new ConcurrentReferenceHashMap<>(64);
+
+	/** Index of candidate bean definition names by type, built on demand for a frozen configuration. */
+	private volatile @Nullable BeanTypeIndex typeIndex;
 
 	/** List of bean definition names, in registration order. */
 	private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
@@ -598,15 +622,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, allowEagerInit);
 		}
 		Map<Object, String[]> cache = (includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
-		return cache.computeIfAbsent(type, key ->
-				doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, true));
+		return cache.computeIfAbsent(type, key -> doGetBeanNamesForType(ResolvableType.forRawClass(type),
+				includeNonSingletons, true, getCandidateBeanDefinitionNames(type)));
 	}
 
 	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
+		return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit, this.beanDefinitionNames);
+	}
+
+	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit,
+			List<String> candidateNames) {
+
 		List<String> result = new ArrayList<>();
 
-		// Check all bean definitions.
-		for (String beanName : this.beanDefinitionNames) {
+		// Check all candidate bean definitions.
+		for (String beanName : candidateNames) {
 			// Only consider bean as eligible if the bean name is not defined as alias for some other bean.
 			if (!isAlias(beanName)) {
 				try {
@@ -696,6 +726,103 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	private boolean isSingleton(String beanName, RootBeanDefinition mbd, @Nullable BeanDefinitionHolder dbd) {
 		return (dbd != null ? mbd.isSingleton() : isSingleton(beanName));
+	}
+
+	/**
+	 * Determine the names of the bean definitions to check for the given type:
+	 * the candidates from the bean type index if available, or all bean definition
+	 * names otherwise.
+	 * <p>Only to be called for a frozen configuration and for type checks that
+	 * allow for eager initialization, as reflected by the by-type cache.
+	 * @param type the type to match
+	 * @return the candidate bean definition names, in registration order
+	 * @see BeanTypeIndex
+	 */
+	private List<String> getCandidateBeanDefinitionNames(Class<?> type) {
+		if (type != Object.class) {
+			BeanTypeIndex index = obtainTypeIndex();
+			if (index != null) {
+				return index.getCandidateNames(type);
+			}
+		}
+		return this.beanDefinitionNames;
+	}
+
+	/**
+	 * Return the bean type index, building it if necessary.
+	 * <p>The index gets published before it is populated, so that singletons and
+	 * early references registered in the meantime are reflected in it. Until it
+	 * is complete, lookups on any thread (including nested lookups triggered by
+	 * the type predictions of the index itself) check all bean definitions.
+	 * @return the complete index, or {@code null} if not available (yet)
+	 */
+	private @Nullable BeanTypeIndex obtainTypeIndex() {
+		if (!this.typeIndexEnabled || getTempClassLoader() != null) {
+			// Type predictions with a temporary ClassLoader depend on the type to match.
+			return null;
+		}
+		BeanTypeIndex index = this.typeIndex;
+		if (index == null) {
+			BeanTypeIndex newIndex = null;
+			// Lock for consistent snapshot of the names.
+			synchronized (this.beanDefinitionMap) {
+				index = this.typeIndex;
+				if (index == null) {
+					newIndex = new BeanTypeIndex(getBeanDefinitionNames());
+					this.typeIndex = newIndex;
+				}
+			}
+			if (newIndex != null) {
+				populateTypeIndex(newIndex);
+				newIndex.markComplete();
+				index = newIndex;
+			}
+		}
+		return index.isComplete() ? index : null;
+	}
+
+	/**
+	 * Register the types of all bean definitions in the given index, based on the
+	 * singleton instance if available and on the predicted bean type otherwise.
+	 * <p>Every bean that {@link #doGetBeanNamesForType} might match without its
+	 * predicted type being assignable to the requested type is registered as a
+	 * candidate for every type instead.
+	 * @param index the index to populate
+	 */
+	private void populateTypeIndex(BeanTypeIndex index) {
+		for (String beanName : index.getBeanNames()) {
+			if (isAlias(beanName)) {
+				index.registerUnknownType(beanName);
+				continue;
+			}
+			try {
+				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+				if (mbd.isAbstract() || !mbd.isSingleton() || isFactoryBean(beanName, mbd)) {
+					index.registerUnknownType(beanName);
+					continue;
+				}
+				if (isSingletonCurrentlyInCreation(beanName)) {
+					index.registerEarlyReference(beanName);
+				}
+				else {
+					Object beanInstance = getSingleton(beanName, false);
+					if (beanInstance != null) {
+						index.registerSingleton(beanName, beanInstance);
+					}
+				}
+				Class<?> predictedType = predictBeanType(beanName, mbd);
+				if (predictedType == null || FactoryBean.class.isAssignableFrom(predictedType)) {
+					index.registerUnknownType(beanName);
+				}
+				else {
+					index.registerType(beanName, predictedType);
+				}
+			}
+			catch (BeansException ex) {
+				// Let the regular type matching handle (or rethrow) any such failure.
+				index.registerUnknownType(beanName);
+			}
+		}
 	}
 
 	/**
@@ -1457,6 +1584,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	protected void addSingleton(String beanName, Object singletonObject) {
+		// Register the instance type before evicting cached lookups that it may affect.
+		BeanTypeIndex index = this.typeIndex;
+		if (index != null) {
+			index.registerSingleton(beanName, singletonObject);
+		}
 		super.addSingleton(beanName, singletonObject);
 
 		Predicate<Object> filter = (beanType -> beanType != Object.class &&
@@ -1472,6 +1604,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				this.primaryBeanNamesWithType.put(beanName, beanType);
 			}
 		}
+	}
+
+	@Override
+	protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
+		// The type of early reference is unknown until the singleton instance gets registered.
+		BeanTypeIndex index = this.typeIndex;
+		if (index != null) {
+			index.registerEarlyReference(beanName);
+		}
+		super.addSingletonFactory(beanName, singletonFactory);
 	}
 
 	@Override
@@ -1527,9 +1669,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Remove any assumptions about by-type mappings.
+	 * Remove any assumptions about by-type mappings, including the bean type index.
 	 */
 	private void clearByTypeCache() {
+		this.typeIndex = null;
 		this.allBeanNamesByType.clear();
 		this.singletonBeanNamesByType.clear();
 	}
