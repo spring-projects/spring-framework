@@ -65,7 +65,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	@Override
 	@Cacheable(cacheNames = "testCache", unless = "#result > 10")
 	public Object unless(int arg) {
-		return arg;
+		return (long) arg;
 	}
 
 	@Override

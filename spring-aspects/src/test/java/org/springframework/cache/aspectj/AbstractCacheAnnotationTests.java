@@ -617,7 +617,7 @@ abstract class AbstractCacheAnnotationTests {
 
 	@Test
 	void classCacheUnlessExpression() {
-		testUnlessExpression(this.cs);
+		testUnlessExpression(this.ccs);
 	}
 
 	@Test
