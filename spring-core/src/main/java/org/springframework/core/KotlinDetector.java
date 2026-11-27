@@ -7,6 +7,8 @@ package org.springframework.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.IdentityHashMap;
 
 import org.jspecify.annotations.Nullable;
 
@@ -130,6 +132,10 @@ public abstract class KotlinDetector {
 	 * @since 7.0
 	 */
 	public static boolean hasSerializableAnnotation(ResolvableType type) {
+		return hasSerializableAnnotation(type, new IdentityHashMap<>());
+	}
+
+	private static boolean hasSerializableAnnotation(ResolvableType type, IdentityHashMap<Type, Boolean> visitedTypes) {
 		Class<?> resolvedClass = type.resolve();
 		if (KOTLIN_SERIALIZABLE == null || resolvedClass == null) {
 			return false;
@@ -137,12 +143,31 @@ public abstract class KotlinDetector {
 		if (resolvedClass.isAnnotationPresent(KOTLIN_SERIALIZABLE)) {
 			return true;
 		}
-		for (ResolvableType genericType : type.getGenerics()) {
-			if (hasSerializableAnnotation(genericType)) {
-				return true;
-			}
+
+		Type sourceType = type.getType();
+		if (markVisited(visitedTypes, sourceType)) {
+			// Already visited - short circuit.
+			return false;
 		}
-		return false;
+
+		try {
+			for (ResolvableType genericType : type.getGenerics()) {
+				if (hasSerializableAnnotation(genericType, visitedTypes)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		finally {
+			// `visitedTypes` are for cycle detection only, not global memoization.
+			visitedTypes.remove(sourceType);
+		}
+	}
+
+	@SuppressWarnings("ConstantValue")
+	private static boolean markVisited(IdentityHashMap<Type, Boolean> visitedTypes, Type type) {
+		// JSpecify based nullability analysis thinks that `put` always returns a non-null value
+		return visitedTypes.put(type, Boolean.TRUE) != null;
 	}
 
 }
