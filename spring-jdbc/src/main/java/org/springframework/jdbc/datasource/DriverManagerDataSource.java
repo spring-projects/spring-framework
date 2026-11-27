@@ -10,6 +10,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -79,7 +81,7 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 	 * @param password the JDBC password to use for accessing the DriverManager
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
-	public DriverManagerDataSource(String url, String username, String password) {
+	public DriverManagerDataSource(@Nullable String url, @Nullable String username, @Nullable String password) {
 		setUrl(url);
 		setUsername(username);
 		setPassword(password);
