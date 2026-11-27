@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  */
 public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
-	private final Map<String, Object> values = new LinkedHashMap<>();
+	private final Map<String, @Nullable Object> values = new LinkedHashMap<>();
 
 
 	/**
@@ -143,7 +143,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	/**
 	 * Expose the current parameter values as read-only Map.
 	 */
-	public Map<String, Object> getValues() {
+	public Map<String, @Nullable Object> getValues() {
 		return Collections.unmodifiableMap(this.values);
 	}
 
