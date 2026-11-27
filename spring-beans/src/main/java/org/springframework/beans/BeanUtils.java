@@ -173,7 +173,8 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(ctor.getDeclaringClass()) &&
+					needsKotlinReflection(ctor, args)) {
 				return KotlinDelegate.instantiateClass(ctor, args);
 			}
 			else {
@@ -223,6 +224,11 @@ public abstract class BeanUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Constructor<T> getResolvableConstructor(Class<T> clazz) {
+		Constructor<?>[] declaredCtors = clazz.getDeclaredConstructors();
+		if (declaredCtors.length == 1) {
+			return (Constructor<T>) declaredCtors[0];
+		}
+
 		Constructor<T> ctor = findPrimaryConstructor(clazz);
 		if (ctor != null) {
 			return ctor;
@@ -232,14 +238,6 @@ public abstract class BeanUtils {
 		if (ctors.length == 1) {
 			// A single public constructor
 			return (Constructor<T>) ctors[0];
-		}
-		else if (ctors.length == 0) {
-			// No public constructors -> check non-public
-			ctors = clazz.getDeclaredConstructors();
-			if (ctors.length == 1) {
-				// A single non-public constructor, for example, from a non-public record type
-				return (Constructor<T>) ctors[0];
-			}
 		}
 
 		// Several constructors -> let's try to take the default constructor
@@ -252,6 +250,21 @@ public abstract class BeanUtils {
 
 		// No unique constructor at all
 		throw new IllegalStateException("No primary or single unique constructor found for " + clazz);
+	}
+
+	private static boolean needsKotlinReflection(Constructor<?> ctor, @Nullable Object[] args) {
+		if (ctor.isSynthetic() || KotlinDetector.isInlineClass(ctor.getDeclaringClass())) {
+			return true;
+		}
+		if (args.length != ctor.getParameterCount()) {
+			return true;
+		}
+		for (@Nullable Object arg : args) {
+			if (arg == null || KotlinDetector.isInlineClass(arg.getClass())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -868,8 +881,11 @@ public abstract class BeanUtils {
 				if (primaryCtor == null) {
 					return null;
 				}
+				Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+				if (constructors.length == 1) {
+					return (Constructor<T>) constructors[0];
+				}
 				if (KotlinDetector.isInlineClass(clazz)) {
-					Constructor<?>[] constructors = clazz.getDeclaredConstructors();
 					Assert.state(constructors.length == 1,
 							"Kotlin value classes annotated with @JvmInline are expected to have a single JVM constructor");
 					return (Constructor<T>) constructors[0];

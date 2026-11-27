@@ -359,7 +359,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
 					Constructor<?> requiredConstructor = null;
 					Constructor<?> defaultConstructor = null;
-					Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(beanClass);
+					Constructor<?> primaryConstructor = (rawCandidates.length > 1 ||
+							(rawCandidates.length == 1 && rawCandidates[0].isSynthetic()) ?
+							BeanUtils.findPrimaryConstructor(beanClass) : null);
 					int nonSyntheticConstructors = 0;
 					for (Constructor<?> candidate : rawCandidates) {
 						if (!candidate.isSynthetic()) {

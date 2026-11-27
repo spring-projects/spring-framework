@@ -7,8 +7,12 @@ package org.springframework.core;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -32,6 +36,12 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	@Override
 	public @Nullable String @Nullable [] getParameterNames(Method method) {
 		if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+			if (!method.isSynthetic() && !KotlinDetector.isSuspendingFunction(method)) {
+				String[] parameterNames = getStandardParameterNames(method.getParameters());
+				if (parameterNames != null) {
+					return parameterNames;
+				}
+			}
 			try {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 				return (function != null ? getParameterNames(function.getParameters()) : null);
@@ -44,9 +54,16 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 
 	@Override
 	public @Nullable String @Nullable [] getParameterNames(Constructor<?> ctor) {
-		if (!ctor.getDeclaringClass().isEnum() && KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+		Class<?> declaringClass = ctor.getDeclaringClass();
+		if (!declaringClass.isEnum() && KotlinDetector.isKotlinType(declaringClass)) {
+			if (!ctor.isSynthetic()) {
+				String[] parameterNames = getStandardParameterNames(ctor.getParameters());
+				if (parameterNames != null) {
+					return parameterNames;
+				}
+			}
 			try {
-				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(ctor);
+				KFunction<?> function = findKotlinConstructor(declaringClass, ctor);
 				if (function != null) {
 					return getParameterNames(function.getParameters());
 				}
@@ -57,20 +74,53 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 		return null;
 	}
 
-	private @Nullable String @Nullable [] getParameterNames(List<KParameter> parameters) {
-		@Nullable String[] parameterNames = parameters.stream()
-				// Extension receivers of extension methods must be included as they appear as normal method parameters in Java
-				.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()) || KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()))
-				// extension receivers are not explicitly named, but require a name for Java interoperability
-				// $receiver is not a valid Kotlin identifier, but valid in Java, so it can be used here
-				.map(p -> KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()) ? "$receiver" : p.getName())
-				.toArray(String[]::new);
-		for (String parameterName : parameterNames) {
-			if (parameterName == null) {
-				return null;
+	private static @Nullable KFunction<?> findKotlinConstructor(Class<?> declaringClass, Constructor<?> ctor) {
+		if (!ctor.isSynthetic() && !KotlinDetector.isInlineClass(declaringClass) &&
+				declaringClass.getDeclaredConstructors().length == 1) {
+			Collection<? extends KFunction<?>> constructors =
+					JvmClassMappingKt.getKotlinClass(declaringClass).getConstructors();
+			if (constructors.size() == 1) {
+				return constructors.iterator().next();
 			}
 		}
+		return ReflectJvmMapping.getKotlinFunction(ctor);
+	}
+
+	private static String @Nullable [] getStandardParameterNames(Parameter[] parameters) {
+		String[] parameterNames = new String[parameters.length];
+		for (int i = 0; i < parameters.length; i++) {
+			Parameter param = parameters[i];
+			if (!param.isNamePresent() || param.isImplicit() || param.isSynthetic()) {
+				return null;
+			}
+			String name = param.getName();
+			if (name.startsWith("$")) {
+				return null;
+			}
+			parameterNames[i] = name;
+		}
 		return parameterNames;
+	}
+
+	private @Nullable String @Nullable [] getParameterNames(List<KParameter> parameters) {
+		int size = parameters.size();
+		String[] names = new String[size];
+		int count = 0;
+		for (int i = 0; i < size; i++) {
+			KParameter param = parameters.get(i);
+			KParameter.Kind kind = param.getKind();
+			if (kind == KParameter.Kind.VALUE) {
+				String name = param.getName();
+				if (name == null) {
+					return null;
+				}
+				names[count++] = name;
+			}
+			else if (kind == KParameter.Kind.EXTENSION_RECEIVER) {
+				names[count++] = "$receiver";
+			}
+		}
+		return (count == size ? names : Arrays.copyOf(names, count));
 	}
 
 }
