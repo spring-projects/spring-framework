@@ -13,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.RelativeOrderProcessor;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
  * @author Juergen Hoeller
  * @author Oliver Gierke
  * @author Stephane Nicoll
+ * @author Yongjun Hong
  * @since 2.0.1
  * @see org.springframework.core.Ordered
  * @see org.springframework.core.annotation.Order
@@ -94,9 +96,10 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * @see java.util.List#sort(java.util.Comparator)
 	 */
 	public static void sort(List<?> list) {
-		if (list.size() > 1) {
-			list.sort(INSTANCE);
+		if (list.size() <= 1) {
+			return;
 		}
+		RelativeOrderProcessor.sort(list);
 	}
 
 	/**
@@ -107,9 +110,10 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
 	 */
 	public static void sort(Object[] array) {
-		if (array.length > 1) {
-			Arrays.sort(array, INSTANCE);
+		if (array.length <= 1) {
+			return;
 		}
+		RelativeOrderProcessor.sort(Arrays.asList(array));
 	}
 
 	/**
