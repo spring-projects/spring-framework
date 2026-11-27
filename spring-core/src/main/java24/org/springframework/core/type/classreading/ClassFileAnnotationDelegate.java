@@ -10,12 +10,10 @@ import java.lang.classfile.AnnotationElement;
 import java.lang.classfile.AnnotationValue;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
@@ -23,6 +21,7 @@ import org.springframework.core.annotation.AnnotationFilter;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Parse {@link RuntimeVisibleAnnotationsAttribute} into {@link MergedAnnotations}
@@ -38,11 +37,17 @@ abstract class ClassFileAnnotationDelegate {
 	static MergedAnnotations createMergedAnnotations(
 			String className, RuntimeVisibleAnnotationsAttribute annotationAttribute, @Nullable ClassLoader classLoader) {
 
-		List<MergedAnnotation<?>> annotations = annotationAttribute.annotations()
-				.stream()
-				.map(ann -> createMergedAnnotation(className, ann, classLoader))
-				.filter(Objects::nonNull)
-				.collect(Collectors.toList());
+		List<Annotation> rawAnnotations = annotationAttribute.annotations();
+		if (rawAnnotations.isEmpty()) {
+			return MergedAnnotations.of(Collections.emptyList());
+		}
+		List<MergedAnnotation<?>> annotations = new ArrayList<>(rawAnnotations.size());
+		for (Annotation ann : rawAnnotations) {
+			MergedAnnotation<?> merged = createMergedAnnotation(className, ann, classLoader);
+			if (merged != null) {
+				annotations.add(merged);
+			}
+		}
 		return MergedAnnotations.of(annotations);
 	}
 
@@ -50,22 +55,32 @@ abstract class ClassFileAnnotationDelegate {
 	private static <A extends java.lang.annotation.Annotation> @Nullable MergedAnnotation<A> createMergedAnnotation(
 			String className, Annotation annotation, @Nullable ClassLoader classLoader) {
 
-		String typeName = ClassFileAnnotationMetadata.resolveTypeName(annotation.classSymbol());
+		String descriptor = annotation.className().stringValue();
+		String typeName = (descriptor.length() > 2 && descriptor.charAt(0) == 'L' &&
+				descriptor.charAt(descriptor.length() - 1) == ';' ?
+				ClassUtils.convertResourcePathToClassName(descriptor.substring(1, descriptor.length() - 1)) :
+				ClassFileAnnotationMetadata.resolveTypeName(annotation.classSymbol()));
 		if (AnnotationFilter.PLAIN.matches(typeName)) {
 			return null;
 		}
 		try {
 			// Fail early when annotation type is not loadable (before resolving annotation values)
 			Class<A> annotationType = (Class<A>) ClassUtils.forName(typeName, classLoader);
-			Map<String, Object> attributes = new LinkedHashMap<>(4);
-			for (AnnotationElement element : annotation.elements()) {
-				Object annotationValue = readAnnotationValue(className, element.value(), classLoader);
-				if (annotationValue != null) {
-					attributes.put(element.name().stringValue(), annotationValue);
+			List<AnnotationElement> elements = annotation.elements();
+			Map<String, Object> attributes;
+			if (elements.isEmpty()) {
+				attributes = Collections.emptyMap();
+			}
+			else {
+				attributes = CollectionUtils.newLinkedHashMap(elements.size());
+				for (AnnotationElement element : elements) {
+					Object annotationValue = readAnnotationValue(className, element.value(), classLoader);
+					if (annotationValue != null) {
+						attributes.put(element.name().stringValue(), annotationValue);
+					}
 				}
 			}
-			Map<String, Object> compactedAttributes = (attributes.isEmpty() ? Collections.emptyMap() : attributes);
-			return MergedAnnotation.of(classLoader, new Source(className), annotationType, compactedAttributes);
+			return MergedAnnotation.of(classLoader, new Source(className), annotationType, attributes);
 		}
 		catch (ClassNotFoundException | LinkageError ex) {
 			// Non-loadable annotation type -> ignore.

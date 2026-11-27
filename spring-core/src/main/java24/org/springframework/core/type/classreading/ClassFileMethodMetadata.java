@@ -6,6 +6,7 @@
 package org.springframework.core.type.classreading;
 
 import java.lang.classfile.AccessFlags;
+import java.lang.classfile.Attributes;
 import java.lang.classfile.MethodModel;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
 import java.lang.constant.ClassDesc;
@@ -128,21 +129,27 @@ final class ClassFileMethodMetadata implements MethodMetadata {
 	}
 
 
-	static ClassFileMethodMetadata of(MethodModel methodModel, ClassLoader classLoader) {
-		String methodName = methodModel.methodName().stringValue();
-		AccessFlags flags = methodModel.flags();
+	static ClassFileMethodMetadata of(MethodModel methodModel, @Nullable ClassLoader classLoader) {
 		String declaringClassName = methodModel.parent()
 				.map(parent -> ClassUtils.convertResourcePathToClassName(parent.thisClass().name().stringValue()))
 				.orElse(null);
-		ClassDesc returnType = methodModel.methodTypeSymbol().returnType();
+		return of(methodModel, declaringClassName, classLoader);
+	}
+
+	static ClassFileMethodMetadata of(MethodModel methodModel, @Nullable String declaringClassName,
+			@Nullable ClassLoader classLoader) {
+
+		String methodName = methodModel.methodName().stringValue();
+		AccessFlags flags = methodModel.flags();
+		MethodTypeDesc methodType = methodModel.methodTypeSymbol();
+		ClassDesc returnType = methodType.returnType();
 		String returnTypeName = ClassFileAnnotationMetadata.resolveTypeName(returnType);
-		Source source = new Source(declaringClassName, flags, methodName, methodModel.methodTypeSymbol());
-		MergedAnnotations mergedAnnotations = methodModel.elementStream()
-				.filter(RuntimeVisibleAnnotationsAttribute.class::isInstance)
-				.map(RuntimeVisibleAnnotationsAttribute.class::cast)
-				.findFirst()
-				.map(annotations -> ClassFileAnnotationDelegate.createMergedAnnotations(methodName, annotations, classLoader))
-				.orElseGet(() -> MergedAnnotations.of(Collections.emptyList()));
+		Source source = new Source(declaringClassName, flags, methodName, methodType);
+		RuntimeVisibleAnnotationsAttribute annotationsAttribute =
+				methodModel.findAttribute(Attributes.runtimeVisibleAnnotations()).orElse(null);
+		MergedAnnotations mergedAnnotations = (annotationsAttribute != null ?
+				ClassFileAnnotationDelegate.createMergedAnnotations(methodName, annotationsAttribute, classLoader) :
+				MergedAnnotations.of(Collections.emptyList()));
 		return new ClassFileMethodMetadata(methodName, flags, declaringClassName, returnTypeName, source, mergedAnnotations);
 	}
 
