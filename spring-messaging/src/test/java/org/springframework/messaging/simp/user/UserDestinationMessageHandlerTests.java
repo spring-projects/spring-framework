@@ -6,6 +6,8 @@
 package org.springframework.messaging.simp.user;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
@@ -19,9 +21,13 @@ import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.broker.OrderedMessageChannelDecorator;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +35,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
 
 /**
@@ -87,6 +94,31 @@ class UserDestinationMessageHandlerTests {
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.wrap(captor.getValue());
 		assertThat(accessor.getDestination()).isEqualTo("/queue/foo-user123");
 		assertThat(accessor.getFirstNativeHeader(ORIGINAL_DESTINATION)).isEqualTo("/user/queue/foo");
+	}
+
+	@Test
+	void handleMessageWithPreserveReceiveOrderToMultipleSessions() {
+		TestSimpUser simpUser = new TestSimpUser("joe");
+		simpUser.addSessions(new TestSimpSession("123"), new TestSimpSession("456"));
+		when(this.registry.getUser("joe")).thenReturn(simpUser);
+		ExecutorSubscribableChannel inboundChannel = new ExecutorSubscribableChannel();
+		OrderedMessageChannelDecorator.configureInterceptor(inboundChannel, true);
+		ExecutorSubscribableChannel brokerChannel = new ExecutorSubscribableChannel();
+		brokerChannel.addInterceptor(new ImmutableMessageChannelInterceptor());
+		List<String> destinations = new ArrayList<>();
+		brokerChannel.subscribe(message -> {
+			String destination = SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+			if (destination != null && !destination.startsWith("/user/")) {
+				destinations.add(destination);
+			}
+		});
+		brokerChannel.subscribe(new UserDestinationMessageHandler(inboundChannel, brokerChannel,
+				new DefaultUserDestinationResolver(this.registry)));
+		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(brokerChannel);
+
+		messagingTemplate.convertAndSendToUser("joe", "/queue/foo", "data");
+
+		assertThat(destinations).containsExactlyInAnyOrder("/queue/foo-user123", "/queue/foo-user456");
 	}
 
 	@Test

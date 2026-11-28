@@ -152,6 +152,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 			else {
 				// Try and keep the original accessor type
 				simpAccessor = (SimpMessageHeaderAccessor) MessageHeaderAccessor.getMutableAccessor(message);
+				simpAccessor.setLeaveMutable(true);
 				initHeaders(simpAccessor);
 			}
 		}
