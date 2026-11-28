@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.CompositeByteBuf;
 import io.rsocket.metadata.WellKnownMimeType;
 import org.jspecify.annotations.Nullable;
@@ -233,7 +234,9 @@ final class MetadataEncoder {
 			return nettyDBF.wrap(byteBuf);
 		}
 		else {
-			DataBuffer buffer = bufferFactory().wrap(byteBuf.nioBuffer());
+			// Copy: wrapping byteBuf.nioBuffer() would keep a view of memory
+			// that is returned to the allocator by the release below.
+			DataBuffer buffer = bufferFactory().wrap(ByteBufUtil.getBytes(byteBuf));
 			byteBuf.release();
 			return buffer;
 		}
