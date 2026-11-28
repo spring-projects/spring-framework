@@ -277,6 +277,29 @@ class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	void destroyLeavesIgnoredExistingMBeanRegistered() throws Exception {
+		ObjectName objectName = ObjectNameManager.getInstance(OBJECT_NAME);
+
+		Person preRegistered = new Person();
+		preRegistered.setName("Rob Harrop");
+		server.registerMBean(preRegistered, objectName);
+
+		Person springRegistered = new Person();
+		springRegistered.setName("Sally Greenwood");
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(Map.of(objectName.toString(), springRegistered));
+		exporter.setRegistrationPolicy(RegistrationPolicy.IGNORE_EXISTING);
+		start(exporter);
+		exporter.destroy();
+
+		// the MBean was not registered by the exporter, so it must not be unregistered by it
+		assertThat(server.isRegistered(objectName)).isTrue();
+		assertThat(server.getAttribute(objectName, "Name")).isEqualTo("Rob Harrop");
+	}
+
+	@Test
 	void registerReplaceExisting() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(OBJECT_NAME);
 
