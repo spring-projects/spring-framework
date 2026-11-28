@@ -164,7 +164,7 @@ final class DefaultJdbcClient implements JdbcClient {
 
 		@Override
 		public StatementSpec param(int jdbcIndex, @Nullable Object value, SQLType sqlType) {
-			return param(jdbcIndex, value, sqlType.getVendorTypeNumber());
+			return param(jdbcIndex, new SqlParameterValue(sqlType, value));
 		}
 
 		@Override
@@ -181,7 +181,8 @@ final class DefaultJdbcClient implements JdbcClient {
 
 		@Override
 		public StatementSpec param(String name, @Nullable Object value, SQLType sqlType) {
-			return param(name, value, sqlType.getVendorTypeNumber());
+			this.namedParams.addValue(name, value, sqlType);
+			return this;
 		}
 
 		@Override
@@ -520,6 +521,11 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			@Override
+			public BatchEntry param(int jdbcIndex, @Nullable Object value, SQLType sqlType) {
+				return param(jdbcIndex, new SqlParameterValue(sqlType, value));
+			}
+
+			@Override
 			public BatchEntry param(String name, @Nullable Object value) {
 				this.namedParams.addValue(name, value);
 				return this;
@@ -527,6 +533,12 @@ final class DefaultJdbcClient implements JdbcClient {
 
 			@Override
 			public BatchEntry param(String name, @Nullable Object value, int sqlType) {
+				this.namedParams.addValue(name, value, sqlType);
+				return this;
+			}
+
+			@Override
+			public BatchEntry param(String name, @Nullable Object value, SQLType sqlType) {
 				this.namedParams.addValue(name, value, sqlType);
 				return this;
 			}

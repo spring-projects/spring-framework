@@ -5,6 +5,7 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.sql.JDBCType;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
@@ -219,7 +220,7 @@ class JdbcClientIntegrationTests {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 				.batch()
 					.entry(entry -> entry.param("firstName", "Jane", Types.VARCHAR).param("lastName", "Smith", Types.VARCHAR))
-					.entry(entry -> entry.param("firstName", "John", Types.VARCHAR).param("lastName", "Doe", Types.VARCHAR))
+					.entry(entry -> entry.param("firstName", "John", JDBCType.VARCHAR).param("lastName", "Doe", JDBCType.VARCHAR))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);

@@ -5,6 +5,7 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.sql.SQLType;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -35,7 +36,7 @@ import org.springframework.util.StringUtils;
  */
 public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
-	private final Map<String, Object> values = new LinkedHashMap<>();
+	private final Map<String, @Nullable Object> values = new LinkedHashMap<>();
 
 
 	/**
@@ -78,7 +79,24 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 		this.values.put(paramName, value);
 		if (value instanceof SqlParameterValue sqlParameterValue) {
 			registerSqlType(paramName, sqlParameterValue.getSqlType());
+			registerTypeName(paramName, sqlParameterValue.getTypeName());
 		}
+		return this;
+	}
+
+	/**
+	 * Add a parameter to this parameter source.
+	 * @param paramName the name of the parameter
+	 * @param value the value of the parameter
+	 * @param sqlType the SQL type from an enum such as {@link java.sql.JDBCType}
+	 * @return a reference to this parameter source,
+	 * so it's possible to chain several calls together
+	 * @since 7.1.1
+	 */
+	public MapSqlParameterSource addValue(String paramName, @Nullable Object value, SQLType sqlType) {
+		Assert.notNull(paramName, "Parameter name must not be null");
+		this.values.put(paramName, value);
+		registerSqlType(paramName, sqlType);
 		return this;
 	}
 
@@ -126,6 +144,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 				this.values.put(key, value);
 				if (value instanceof SqlParameterValue sqlParameterValue) {
 					registerSqlType(key, sqlParameterValue.getSqlType());
+					registerTypeName(key, sqlParameterValue.getTypeName());
 				}
 			});
 		}
@@ -143,7 +162,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	/**
 	 * Expose the current parameter values as read-only Map.
 	 */
-	public Map<String, Object> getValues() {
+	public Map<String, @Nullable Object> getValues() {
 		return Collections.unmodifiableMap(this.values);
 	}
 

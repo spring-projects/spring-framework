@@ -192,6 +192,7 @@ public interface JdbcClient {
 		 * @param value the parameter value to bind
 		 * @param sqlType the associated SQL type
 		 * @return this statement specification (for chaining)
+		 * @since 7.1.1
 		 * @see java.sql.PreparedStatement#setObject(int, Object, SQLType)
 		 */
 		StatementSpec param(int jdbcIndex, @Nullable Object value, SQLType sqlType);
@@ -224,6 +225,7 @@ public interface JdbcClient {
 		 * @param value the parameter value to bind
 		 * @param sqlType the associated SQL type
 		 * @return this statement specification (for chaining)
+		 * @since 7.1.1
 		 * @see org.springframework.jdbc.core.namedparam.MapSqlParameterSource#addValue(String, Object, int)
 		 */
 		StatementSpec param(String name, @Nullable Object value, SQLType sqlType);
@@ -570,6 +572,18 @@ public interface JdbcClient {
 		BatchEntry param(int jdbcIndex, @Nullable Object value, int sqlType);
 
 		/**
+		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
+		 * by explicit JDBC statement parameter index.
+		 * @param jdbcIndex the JDBC-style index (starting with 1)
+		 * @param value the parameter value to bind
+		 * @param sqlType the associated SQL type (see {@link java.sql.Types})
+		 * @return this batch entry (for chaining)
+		 * @since 7.1.1
+		 * @see StatementSpec#param(int, Object, SQLType)
+		 */
+		BatchEntry param(int jdbcIndex, @Nullable Object value, SQLType sqlType);
+
+		/**
 		 * Bind a named statement parameter for ":x" placeholder resolution,
 		 * with each "x" name matching a ":x" placeholder in the SQL statement.
 		 * @param name the parameter name
@@ -589,6 +603,18 @@ public interface JdbcClient {
 		 * @see StatementSpec#param(String, Object, int)
 		 */
 		BatchEntry param(String name, @Nullable Object value, int sqlType);
+
+		/**
+		 * Bind a named statement parameter for ":x" placeholder resolution,
+		 * with each "x" name matching a ":x" placeholder in the SQL statement.
+		 * @param name the parameter name
+		 * @param value the parameter value to bind
+		 * @param sqlType the associated SQL type (see {@link java.sql.Types})
+		 * @return this batch entry (for chaining)
+		 * @since 7.1.1
+		 * @see StatementSpec#param(String, Object, SQLType)
+		 */
+		BatchEntry param(String name, @Nullable Object value, SQLType sqlType);
 
 		/**
 		 * Bind named statement parameters for ":x" placeholder resolution.

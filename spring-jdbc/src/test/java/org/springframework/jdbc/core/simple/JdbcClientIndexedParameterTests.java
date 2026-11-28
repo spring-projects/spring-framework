@@ -383,7 +383,7 @@ class JdbcClientIndexedParameterTests {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		params.add(new SqlParameterValue(Types.DECIMAL, 1));
-		params.add(new SqlParameterValue(Types.INTEGER, 1));
+		params.add(new SqlParameterValue(JDBCType.INTEGER, 1));
 		int rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).params(params).update();
 
 		assertThat(rowsAffected).isEqualTo(1);
@@ -395,7 +395,24 @@ class JdbcClientIndexedParameterTests {
 	}
 
 	@Test
-	void updateWithSQLTypeParameters() throws SQLException {
+	void updateWithTypeValues() throws SQLException {
+		given(preparedStatement.executeUpdate()).willReturn(1);
+
+		int rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS)
+				.param(1, 10, Types.DECIMAL)
+				.param(2, 20, Types.INTEGER)
+				.update();
+
+		assertThat(rowsAffected).isEqualTo(1);
+		verify(connection).prepareStatement(UPDATE_INDEXED_PARAMETERS);
+		verify(preparedStatement).setObject(1, 10, Types.DECIMAL);
+		verify(preparedStatement).setObject(2, 20, Types.INTEGER);
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	void updateWithSQLTypeEnum() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
 		int rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS)
@@ -424,7 +441,7 @@ class JdbcClientIndexedParameterTests {
 
 		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
 				.entry(entry -> entry.param(1, new SqlParameterValue(Types.DECIMAL, 1)).param(2, new SqlParameterValue(Types.INTEGER, 1)))
-				.entry(entry -> entry.param(1, new SqlParameterValue(Types.DECIMAL, 2)).param(2, new SqlParameterValue(Types.INTEGER, 2)))
+				.entry(entry -> entry.param(1, new SqlParameterValue(JDBCType.DECIMAL, 2)).param(2, new SqlParameterValue(JDBCType.INTEGER, 2)))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -457,7 +474,7 @@ class JdbcClientIndexedParameterTests {
 
 		int[] rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS).batch()
 				.entry(entry -> entry.param(1, 1, Types.DECIMAL).param(2, 1, Types.INTEGER))
-				.entry(entry -> entry.param(1, 2, Types.DECIMAL).param(2, 2, Types.INTEGER))
+				.entry(entry -> entry.param(1, 2, JDBCType.DECIMAL).param(2, 2, JDBCType.INTEGER))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);

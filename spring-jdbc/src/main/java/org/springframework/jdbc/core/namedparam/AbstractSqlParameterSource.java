@@ -5,6 +5,7 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.sql.SQLType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -39,11 +40,27 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	/**
 	 * Register an SQL type for the given parameter.
 	 * @param paramName the name of the parameter
+	 * @param sqlType the SQL type from an enum such as {@link java.sql.JDBCType}
+	 * @since 7.1.1
+	 */
+	public void registerSqlType(String paramName, SQLType sqlType) {
+		Assert.notNull(paramName, "Parameter name must not be null");
+		this.sqlTypes.put(paramName, sqlType.getVendorTypeNumber());
+	}
+
+	/**
+	 * Register an SQL type for the given parameter.
+	 * @param paramName the name of the parameter
 	 * @param sqlType the SQL type of the parameter
 	 */
 	public void registerSqlType(String paramName, int sqlType) {
 		Assert.notNull(paramName, "Parameter name must not be null");
-		this.sqlTypes.put(paramName, sqlType);
+		if (sqlType != TYPE_UNKNOWN) {
+			this.sqlTypes.put(paramName, sqlType);
+		}
+		else {
+			this.sqlTypes.remove(paramName);
+		}
 	}
 
 	/**
@@ -51,9 +68,14 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * @param paramName the name of the parameter
 	 * @param typeName the type name of the parameter
 	 */
-	public void registerTypeName(String paramName, String typeName) {
+	public void registerTypeName(String paramName, @Nullable String typeName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
-		this.typeNames.put(paramName, typeName);
+		if (typeName != null) {
+			this.typeNames.put(paramName, typeName);
+		}
+		else {
+			this.typeNames.remove(paramName);
+		}
 	}
 
 	/**

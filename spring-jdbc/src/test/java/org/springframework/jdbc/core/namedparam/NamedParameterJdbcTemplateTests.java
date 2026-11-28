@@ -7,6 +7,7 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -437,8 +438,8 @@ class NamedParameterJdbcTemplateTests {
 	void updateWithTypedParameters() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
 
-		params.put("perfId", new SqlParameterValue(Types.DECIMAL, 1));
-		params.put("priceId", new SqlParameterValue(Types.INTEGER, 1));
+		params.put("perfId", new SqlParameterValue(JDBCType.DECIMAL, 1));
+		params.put("priceId", new SqlParameterValue(JDBCType.INTEGER, 1));
 		int rowsAffected = namedParameterTemplate.update(UPDATE_NAMED_PARAMETERS, params);
 
 		assertThat(rowsAffected).isEqualTo(1);

@@ -36,11 +36,14 @@ class MapSqlParameterSourceTests {
 
 	@Test
 	void sqlParameterValueRegistersSqlType() {
-		MapSqlParameterSource msps = new MapSqlParameterSource("FOO", new SqlParameterValue(Types.NUMERIC, "Foo"));
+		MapSqlParameterSource msps = new MapSqlParameterSource("FOO", new SqlParameterValue(Types.NUMERIC, "myType", "Foo"));
 		assertThat(msps.getSqlType("FOO")).as("Correct SQL Type not registered").isEqualTo(2);
+		assertThat(msps.getTypeName("FOO")).as("Correct SQL Type not registered").isEqualTo("myType");
+
 		MapSqlParameterSource msps2 = new MapSqlParameterSource();
 		msps2.addValues(msps.getValues());
 		assertThat(msps2.getSqlType("FOO")).as("Correct SQL Type not registered").isEqualTo(2);
+		assertThat(msps2.getTypeName("FOO")).as("Correct SQL Type not registered").isEqualTo("myType");
 	}
 
 	@Test

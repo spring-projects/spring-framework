@@ -207,11 +207,13 @@ public abstract class StatementCreatorUtils {
 				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramIndex +
 						", SQL type " + parameterValue.getSqlType() + ", type name " + parameterValue.getTypeName());
 			}
-			if (parameterValue.getSqlType() != SqlTypeValue.TYPE_UNKNOWN) {
-				sqlTypeToUse = parameterValue.getSqlType();
+			int paramSqlType = parameterValue.getSqlType();
+			String paramTypeName = parameterValue.getTypeName();
+			if (paramSqlType != SqlTypeValue.TYPE_UNKNOWN) {
+				sqlTypeToUse = paramSqlType;
 			}
-			if (parameterValue.getTypeName() != null) {
-				typeNameToUse = parameterValue.getTypeName();
+			if (paramTypeName != null) {
+				typeNameToUse = paramTypeName;
 			}
 			inValueToUse = parameterValue.getValue();
 		}

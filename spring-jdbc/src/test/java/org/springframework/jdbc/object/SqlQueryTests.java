@@ -6,6 +6,7 @@
 package org.springframework.jdbc.object;
 
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -562,19 +563,16 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void namedParameterCustomerQueryWithUnnamedDeclarations()
-			throws SQLException {
+	void namedParameterCustomerQueryWithUnnamedDeclarations() throws SQLException {
 		doTestNamedParameterCustomerQuery(false);
 	}
 
 	@Test
-	void namedParameterCustomerQueryWithNamedDeclarations()
-			throws SQLException {
+	void namedParameterCustomerQueryWithNamedDeclarations() throws SQLException {
 		doTestNamedParameterCustomerQuery(true);
 	}
 
-	private void doTestNamedParameterCustomerQuery(final boolean namedDeclarations)
-			throws SQLException {
+	private void doTestNamedParameterCustomerQuery(final boolean namedDeclarations) throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -588,12 +586,12 @@ class SqlQueryTests {
 				super(ds, SELECT_ID_FORENAME_NAMED_PARAMETERS);
 				setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
 				if (namedDeclarations) {
-					declareParameter(new SqlParameter("country", Types.VARCHAR));
-					declareParameter(new SqlParameter("id", Types.NUMERIC));
+					declareParameter(new SqlParameter("country", JDBCType.VARCHAR));
+					declareParameter(new SqlParameter("id", JDBCType.NUMERIC));
 				}
 				else {
-					declareParameter(new SqlParameter(Types.NUMERIC));
-					declareParameter(new SqlParameter(Types.VARCHAR));
+					declareParameter(new SqlParameter(JDBCType.NUMERIC));
+					declareParameter(new SqlParameter(JDBCType.VARCHAR));
 				}
 				compile();
 			}
@@ -730,10 +728,8 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void namedParameterUsingInvalidQuestionMarkPlaceHolders()
-			throws SQLException {
-		given(
-		connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,
+	void namedParameterUsingInvalidQuestionMarkPlaceholders() throws SQLException {
+		given(connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)).willReturn(preparedStatement);
 
 		class CustomerQuery extends MappingSqlQuery<Customer> {
@@ -782,8 +778,7 @@ class SqlQueryTests {
 			}
 
 			@Override
-			protected Customer updateRow(ResultSet rs, int rownum, @Nullable Map<? ,?> context)
-					throws SQLException {
+			protected Customer updateRow(ResultSet rs, int rownum, @Nullable Map<? ,?> context) throws SQLException {
 				rs.updateString(2, "" + context.get(rs.getInt(COLUMN_NAMES[0])));
 				return null;
 			}

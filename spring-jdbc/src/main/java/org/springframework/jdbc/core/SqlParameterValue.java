@@ -5,6 +5,8 @@
 
 package org.springframework.jdbc.core;
 
+import java.sql.SQLType;
+
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -29,6 +31,17 @@ public class SqlParameterValue extends SqlParameter {
 
 	private final @Nullable Object value;
 
+
+	/**
+	 * Create a new SqlParameterValue, supplying the SQL type.
+	 * @param sqlType the SQL type from an enum such as {@link java.sql.JDBCType}
+	 * @param value the value object
+	 * @since 7.1.1
+	 */
+	public SqlParameterValue(SQLType sqlType, @Nullable Object value) {
+		super(sqlType);
+		this.value = value;
+	}
 
 	/**
 	 * Create a new SqlParameterValue, supplying the SQL type.

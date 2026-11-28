@@ -5,6 +5,7 @@
 
 package org.springframework.jdbc.core;
 
+import java.sql.SQLType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,15 @@ public class SqlParameter {
 
 	/**
 	 * Create a new anonymous SqlParameter, supplying the SQL type.
+	 * @param sqlType the SQL type from an enum such as {@link java.sql.JDBCType}
+	 * @since 7.1.1
+	 */
+	public SqlParameter(SQLType sqlType) {
+		this.sqlType = sqlType.getVendorTypeNumber();
+	}
+
+	/**
+	 * Create a new anonymous SqlParameter, supplying the SQL type.
 	 * @param sqlType the SQL type of the parameter according to {@code java.sql.Types}
 	 */
 	public SqlParameter(int sqlType) {
@@ -65,6 +75,17 @@ public class SqlParameter {
 	public SqlParameter(int sqlType, int scale) {
 		this.sqlType = sqlType;
 		this.scale = scale;
+	}
+
+	/**
+	 * Create a new SqlParameter, supplying name and SQL type.
+	 * @param name the name of the parameter, as used in input and output maps
+	 * @param sqlType the SQL type from an enum such as {@link java.sql.JDBCType}
+	 * @since 7.1.1
+	 */
+	public SqlParameter(String name, SQLType sqlType) {
+		this.name = name;
+		this.sqlType = sqlType.getVendorTypeNumber();
 	}
 
 	/**
