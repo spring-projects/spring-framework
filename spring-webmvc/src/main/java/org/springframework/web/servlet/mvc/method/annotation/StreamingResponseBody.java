@@ -29,6 +29,10 @@ public interface StreamingResponseBody {
 
 	/**
 	 * A callback for writing to the response body.
+	 * <p>Calling {@link OutputStream#flush() flush()} on the given stream
+	 * sends the content written so far to the client. Otherwise, the Servlet
+	 * container decides when to send buffered content, typically when its
+	 * response buffer is full or when the response is complete.
 	 * @param outputStream the stream for the response body
 	 * @throws IOException an exception while writing
 	 */

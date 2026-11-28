@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -84,6 +85,25 @@ class StreamingResponseBodyReturnValueHandlerTests {
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
 		assertThat(this.response.getContentAsString()).isEqualTo("foo");
+	}
+
+
+	@Test
+	void streamingResponseBodyFlushCommitsResponse() throws Exception {
+		CountDownLatch latch = new CountDownLatch(1);
+		AtomicBoolean committedAfterFlush = new AtomicBoolean();
+
+		MethodParameter returnType = returnType(TestController.class, "handle");
+		StreamingResponseBody streamingBody = outputStream -> {
+			outputStream.write("foo".getBytes(StandardCharsets.UTF_8));
+			outputStream.flush();
+			committedAfterFlush.set(this.response.isCommitted());
+			latch.countDown();
+		};
+		this.handler.handleReturnValue(streamingBody, returnType, this.mavContainer, this.webRequest);
+
+		assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
+		assertThat(committedAfterFlush).isTrue();
 	}
 
 
