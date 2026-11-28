@@ -113,7 +113,8 @@ class HtmlCharacterEntityDecoder {
 			int value = (!isHexNumberedReference ?
 					Integer.parseInt(getReferenceSubstring(2)) :
 					Integer.parseInt(getReferenceSubstring(3), 16));
-			if (value < 0 || value > Character.MAX_CODE_POINT) {
+			if (value < 0 || value > Character.MAX_CODE_POINT ||
+					(value >= Character.MIN_SURROGATE && value <= Character.MAX_SURROGATE)) {
 				return false;
 			}
 			this.decodedMessage.appendCodePoint(value);
