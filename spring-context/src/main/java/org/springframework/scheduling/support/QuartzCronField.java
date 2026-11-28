@@ -231,9 +231,18 @@ final class QuartzCronField extends CronField {
 	private static TemporalAdjuster lastDayWithOffset(int offset) {
 		Assert.isTrue(offset < 0, "Offset should be < 0");
 		TemporalAdjuster adjuster = TemporalAdjusters.lastDayOfMonth();
+		TemporalAdjuster firstDayOfNextMonth = TemporalAdjusters.firstDayOfNextMonth();
 		return temporal -> {
-			Temporal result = adjuster.adjustInto(temporal).plus(offset, ChronoUnit.DAYS);
-			return rollbackToMidnight(temporal, result);
+			// A month can be too short for the offset ("L-30" in February), in which
+			// case the result falls into the previous month: try the next month instead
+			for (int i = 0; i < 12; i++) {
+				Temporal result = adjuster.adjustInto(temporal).plus(offset, ChronoUnit.DAYS);
+				if (result.get(ChronoField.MONTH_OF_YEAR) == temporal.get(ChronoField.MONTH_OF_YEAR)) {
+					return rollbackToMidnight(temporal, result);
+				}
+				temporal = atMidnight().adjustInto(firstDayOfNextMonth.adjustInto(temporal));
+			}
+			return null;
 		};
 	}
 

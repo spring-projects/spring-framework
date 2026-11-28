@@ -707,6 +707,37 @@ class CronExpressionTests {
 	}
 
 	@Test
+	void quartzLastDayOfMonthOffsetLongerThanMonth() {
+		// L-28: there is no such day in February of a non-leap year
+		CronExpression expression = CronExpression.parse("0 0 12 L-28 * *");
+
+		LocalDateTime last = LocalDateTime.of(2025, 1, 15, 0, 0);
+		LocalDateTime expected = LocalDateTime.of(2025, 3, 3, 12, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = LocalDateTime.of(2025, 4, 2, 12, 0);
+		assertThat(expression.next(last)).isEqualTo(expected);
+
+		// L-30: only months with 31 days have such a day
+		expression = CronExpression.parse("0 0 12 L-30 * *");
+
+		last = LocalDateTime.of(2024, 1, 15, 0, 0);
+		expected = LocalDateTime.of(2024, 3, 1, 12, 0);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = LocalDateTime.of(2024, 5, 1, 12, 0);
+		assertThat(expression.next(last)).isEqualTo(expected);
+
+		// never earlier than or equal to the given time
+		last = LocalDateTime.of(2024, 1, 31, 13, 0);
+		assertThat(expression.next(last)).isEqualTo(LocalDateTime.of(2024, 3, 1, 12, 0));
+	}
+
+	@Test
 	void quartzLastWeekdayOfMonth() {
 		CronExpression expression = CronExpression.parse("0 0 0 LW * *");
 
