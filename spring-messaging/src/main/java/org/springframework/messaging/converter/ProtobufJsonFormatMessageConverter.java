@@ -31,7 +31,7 @@ public class ProtobufJsonFormatMessageConverter extends ProtobufMessageConverter
 	 * JsonFormat.Printer}, and {@link ExtensionRegistry}.
 	 */
 	public ProtobufJsonFormatMessageConverter(@Nullable ExtensionRegistry extensionRegistry) {
-		this(null, null);
+		this(null, null, extensionRegistry);
 	}
 
 	/**
