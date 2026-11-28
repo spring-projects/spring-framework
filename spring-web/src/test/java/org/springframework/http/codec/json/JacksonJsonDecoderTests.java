@@ -263,6 +263,17 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 	}
 
 	@Test
+	void customDeserializerReadingValueFromParser() {
+		Flux<DataBuffer> input = stringBuffer("[{\"value\": \"1\"}, {\"value\": \"2\"}]").flux();
+
+		testDecode(input, ParserReadingObject.class, step -> step
+				.consumeNextWith(o -> assertThat(o.value).isEqualTo(1))
+				.consumeNextWith(o -> assertThat(o.value).isEqualTo(2))
+				.verifyComplete()
+		);
+	}
+
+	@Test
 	void bigDecimalFlux() {
 		Flux<DataBuffer> input = stringBuffer("[ 1E+2 ]").flux();
 
@@ -396,6 +407,27 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 			TestObject result = new TestObject();
 			result.setTest(node.get("test").asInt());
 			return result;
+		}
+	}
+
+
+	private static class ParserReadingObject {
+
+		@JsonDeserialize(using = ParserReadingDeserializer.class)
+		public Integer value;
+	}
+
+
+	private static class ParserReadingDeserializer extends StdDeserializer<Integer> {
+
+		ParserReadingDeserializer() {
+			super(Integer.class);
+		}
+
+		@Override
+		public Integer deserialize(JsonParser p, DeserializationContext ctxt) {
+			// Reads with the context of the parser, including coercion from String
+			return p.readValueAs(Integer.class);
 		}
 	}
 
