@@ -117,6 +117,30 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 	}
 
 	@Test
+	void decodeEmptyMessages() {
+		Msg empty = Msg.getDefaultInstance();
+		Flux<DataBuffer> input = Flux.defer(() -> {
+			DataBuffer buffer = this.bufferFactory.allocateBuffer(256);
+			try {
+				empty.writeDelimitedTo(buffer.asOutputStream());
+				this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
+				empty.writeDelimitedTo(buffer.asOutputStream());
+				return Flux.just(buffer);
+			}
+			catch (IOException ex) {
+				release(buffer);
+				return Flux.error(ex);
+			}
+		});
+
+		testDecodeAll(input, Msg.class, step -> step
+				.expectNext(empty)
+				.expectNext(this.testMsg1)
+				.expectNext(empty)
+				.verifyComplete());
+	}
+
+	@Test
 	@SuppressWarnings("deprecation")
 	void decodeSplitChunks() {
 		Flux<DataBuffer> input = Flux.just(this.testMsg1, this.testMsg2)
