@@ -106,6 +106,8 @@ import org.springframework.util.StringValueResolver;
  */
 public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory {
 
+	static final Class<?>[] FACTORY_BEAN_TYPE_ARRAY = {FactoryBean.class};
+
 	/** Parent bean factory, for bean inheritance support. */
 	private @Nullable BeanFactory parentBeanFactory;
 
@@ -143,7 +145,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final List<BeanPostProcessor> beanPostProcessors = new BeanPostProcessorCacheAwareList();
 
 	/** Cache of pre-filtered post-processors. */
-	private @Nullable BeanPostProcessorCache beanPostProcessorCache;
+	private volatile @Nullable BeanPostProcessorCache beanPostProcessorCache;
 
 	/** Map from scope identifier String to corresponding Scope. */
 	private final Map<String, Scope> scopes = new LinkedHashMap<>(8);
@@ -529,6 +531,27 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 		String beanName = transformedBeanName(name);
 		boolean isFactoryDereference = BeanFactoryUtils.isFactoryDereference(name);
+		return isTypeMatch(name, beanName, null, isFactoryDereference, typeToMatch, allowFactoryBeanInit, null);
+	}
+
+	boolean isTypeMatch(String beanName, RootBeanDefinition mbd, boolean isFactoryDereference,
+			ResolvableType typeToMatch, boolean allowFactoryBeanInit, Class<?>[] typesToMatch)
+			throws NoSuchBeanDefinitionException {
+
+		return isTypeMatch(beanName, beanName, mbd, isFactoryDereference, typeToMatch, allowFactoryBeanInit, typesToMatch);
+	}
+
+	static Class<?>[] resolveTypesToMatch(ResolvableType typeToMatch) {
+		Class<?> classToMatch = typeToMatch.resolve();
+		if (classToMatch == null || classToMatch == FactoryBean.class) {
+			return FACTORY_BEAN_TYPE_ARRAY;
+		}
+		return new Class<?>[] {FactoryBean.class, classToMatch};
+	}
+
+	private boolean isTypeMatch(String name, String beanName, @Nullable RootBeanDefinition mergedBeanDefinition,
+			boolean isFactoryDereference, ResolvableType typeToMatch, boolean allowFactoryBeanInit,
+			Class<?> @Nullable [] typesToMatch) throws NoSuchBeanDefinitionException {
 
 		// Check manually registered singletons.
 		Object beanInstance = getSingleton(beanName, false);
@@ -549,8 +572,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					if (typeToMatch.isAssignableFrom(type)) {
 						return true;
 					}
-					else if (typeToMatch.hasGenerics() && containsBeanDefinition(beanName)) {
-						RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+					else if (typeToMatch.hasGenerics() && (mergedBeanDefinition != null || containsBeanDefinition(beanName))) {
+						RootBeanDefinition mbd = (mergedBeanDefinition != null ? mergedBeanDefinition :
+								getMergedLocalBeanDefinition(beanName));
 						ResolvableType targetType = mbd.targetType;
 						if (targetType == null) {
 							targetType = mbd.factoryMethodReturnType;
@@ -581,9 +605,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				// Direct match for exposed instance?
 				return true;
 			}
-			else if (typeToMatch.hasGenerics() && containsBeanDefinition(beanName)) {
+			else if (typeToMatch.hasGenerics() && (mergedBeanDefinition != null || containsBeanDefinition(beanName))) {
 				// Generics potentially only match on the target class, not on the proxy...
-				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+				RootBeanDefinition mbd = (mergedBeanDefinition != null ? mergedBeanDefinition :
+						getMergedLocalBeanDefinition(beanName));
 				Class<?> targetType = mbd.getTargetType();
 				if (targetType != null && targetType != ClassUtils.getUserClass(beanInstance)) {
 					// Check raw class match as well, making sure it's exposed on the proxy.
@@ -605,29 +630,26 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return false;
 			}
 		}
-		else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
+		else if (mergedBeanDefinition == null && containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
 			// null instance registered
 			return false;
 		}
 
 		// No singleton instance found -> check bean definition.
-		BeanFactory parentBeanFactory = getParentBeanFactory();
-		if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
-			// No bean definition found in this factory -> delegate to parent.
-			return parentBeanFactory.isTypeMatch(originalBeanName(name), typeToMatch);
+		RootBeanDefinition mbd = mergedBeanDefinition;
+		if (mbd == null) {
+			BeanFactory parentBeanFactory = getParentBeanFactory();
+			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+				// No bean definition found in this factory -> delegate to parent.
+				return parentBeanFactory.isTypeMatch(originalBeanName(name), typeToMatch);
+			}
+			// Retrieve corresponding bean definition.
+			mbd = getMergedLocalBeanDefinition(beanName);
 		}
-
-		// Retrieve corresponding bean definition.
-		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 		BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
 
 		// Set up the types that we want to match against
-		Class<?> classToMatch = typeToMatch.resolve();
-		if (classToMatch == null) {
-			classToMatch = FactoryBean.class;
-		}
-		Class<?>[] typesToMatch = (FactoryBean.class == classToMatch ?
-				new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
+		Class<?>[] resolvedTypesToMatch = (typesToMatch != null ? typesToMatch : resolveTypesToMatch(typeToMatch));
 
 		// Attempt to predict the bean type
 		Class<?> predictedType = null;
@@ -640,7 +662,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// and we know the merged bean definition is for a factory bean.
 			if (!mbd.isLazyInit() || allowFactoryBeanInit) {
 				RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
-				Class<?> targetType = predictBeanType(dbd.getBeanName(), tbd, typesToMatch);
+				Class<?> targetType = predictBeanType(dbd.getBeanName(), tbd, resolvedTypesToMatch);
 				if (targetType != null && !FactoryBean.class.isAssignableFrom(targetType)) {
 					predictedType = targetType;
 				}
@@ -649,7 +671,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 		// If we couldn't use the target type, try regular prediction.
 		if (predictedType == null) {
-			predictedType = predictBeanType(beanName, mbd, typesToMatch);
+			predictedType = predictBeanType(beanName, mbd, resolvedTypesToMatch);
 			if (predictedType == null) {
 				return false;
 			}
@@ -672,7 +694,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Special case: A SmartInstantiationAwareBeanPostProcessor returned a non-FactoryBean
 			// type, but we nevertheless are being asked to dereference a FactoryBean...
 			// Let's check the original bean class and proceed with it if it is a FactoryBean.
-			predictedType = predictBeanType(beanName, mbd, FactoryBean.class);
+			predictedType = predictBeanType(beanName, mbd, FACTORY_BEAN_TYPE_ARRAY);
 			if (predictedType == null || !FactoryBean.class.isAssignableFrom(predictedType)) {
 				return false;
 			}
@@ -1011,27 +1033,43 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @since 5.3
 	 */
 	BeanPostProcessorCache getBeanPostProcessorCache() {
-		synchronized (this.beanPostProcessors) {
-			BeanPostProcessorCache bppCache = this.beanPostProcessorCache;
-			if (bppCache == null) {
-				bppCache = new BeanPostProcessorCache();
-				for (BeanPostProcessor bpp : this.beanPostProcessors) {
-					if (bpp instanceof InstantiationAwareBeanPostProcessor instantiationAwareBpp) {
-						bppCache.instantiationAware.add(instantiationAwareBpp);
-						if (bpp instanceof SmartInstantiationAwareBeanPostProcessor smartInstantiationAwareBpp) {
-							bppCache.smartInstantiationAware.add(smartInstantiationAwareBpp);
+		BeanPostProcessorCache bppCache = this.beanPostProcessorCache;
+		if (bppCache == null) {
+			synchronized (this.beanPostProcessors) {
+				bppCache = this.beanPostProcessorCache;
+				if (bppCache == null) {
+					bppCache = new BeanPostProcessorCache();
+					for (BeanPostProcessor bpp : this.beanPostProcessors) {
+						if (bpp instanceof InstantiationAwareBeanPostProcessor instantiationAwareBpp) {
+							bppCache.instantiationAware.add(instantiationAwareBpp);
+							if (bpp instanceof SmartInstantiationAwareBeanPostProcessor smartInstantiationAwareBpp) {
+								bppCache.smartInstantiationAware.add(smartInstantiationAwareBpp);
+								if (overridesPredictBeanType(smartInstantiationAwareBpp)) {
+									bppCache.predictBeanType.add(smartInstantiationAwareBpp);
+								}
+							}
+						}
+						if (bpp instanceof DestructionAwareBeanPostProcessor destructionAwareBpp) {
+							bppCache.destructionAware.add(destructionAwareBpp);
+						}
+						if (bpp instanceof MergedBeanDefinitionPostProcessor mergedBeanDefBpp) {
+							bppCache.mergedDefinition.add(mergedBeanDefBpp);
 						}
 					}
-					if (bpp instanceof DestructionAwareBeanPostProcessor destructionAwareBpp) {
-						bppCache.destructionAware.add(destructionAwareBpp);
-					}
-					if (bpp instanceof MergedBeanDefinitionPostProcessor mergedBeanDefBpp) {
-						bppCache.mergedDefinition.add(mergedBeanDefBpp);
-					}
+					this.beanPostProcessorCache = bppCache;
 				}
-				this.beanPostProcessorCache = bppCache;
 			}
-			return bppCache;
+		}
+		return bppCache;
+	}
+
+	private static boolean overridesPredictBeanType(SmartInstantiationAwareBeanPostProcessor bpp) {
+		try {
+			return bpp.getClass().getMethod("predictBeanType", Class.class, String.class)
+					.getDeclaringClass() != SmartInstantiationAwareBeanPostProcessor.class;
+		}
+		catch (NoSuchMethodException | LinkageError ex) {
+			return true;
 		}
 	}
 
@@ -1698,7 +1736,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
 		Boolean result = mbd.isFactoryBean;
 		if (result == null) {
-			Class<?> beanType = predictBeanType(beanName, mbd, FactoryBean.class);
+			Class<?> beanType = predictBeanType(beanName, mbd, FACTORY_BEAN_TYPE_ARRAY);
 			result = (beanType != null && FactoryBean.class.isAssignableFrom(beanType));
 			mbd.isFactoryBean = result;
 		}
@@ -2107,6 +2145,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		final List<InstantiationAwareBeanPostProcessor> instantiationAware = new ArrayList<>();
 
 		final List<SmartInstantiationAwareBeanPostProcessor> smartInstantiationAware = new ArrayList<>();
+
+		final List<SmartInstantiationAwareBeanPostProcessor> predictBeanType = new ArrayList<>();
 
 		final List<DestructionAwareBeanPostProcessor> destructionAware = new ArrayList<>();
 

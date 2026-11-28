@@ -604,6 +604,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List<String> result = new ArrayList<>();
+		Class<?>[] typesToMatch = resolveTypesToMatch(type);
 
 		// Check all bean definitions.
 		for (String beanName : this.beanDefinitionNames) {
@@ -622,24 +623,25 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						boolean isNonLazyDecorated = (dbd != null && !mbd.isLazyInit());
 						if (!isFactoryBean) {
 							if (includeNonSingletons || isSingleton(beanName, mbd, dbd)) {
-								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+								matchFound = isTypeMatch(beanName, mbd, false, type, allowFactoryBeanInit, typesToMatch);
 							}
 						}
 						else {
 							if (includeNonSingletons || isNonLazyDecorated) {
-								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+								matchFound = isTypeMatch(beanName, mbd, false, type, allowFactoryBeanInit, typesToMatch);
 							}
 							else if (allowFactoryBeanInit) {
 								// Type check before singleton check, avoiding FactoryBean instantiation
 								// for early FactoryBean.isSingleton() calls on non-matching beans.
-								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit) &&
+								matchFound = isTypeMatch(beanName, mbd, false, type, allowFactoryBeanInit, typesToMatch) &&
 										isSingleton(beanName, mbd, dbd);
 							}
 							if (!matchFound) {
 								// In case of FactoryBean, try to match FactoryBean instance itself next.
+								String canonicalBeanName = beanName;
 								beanName = FACTORY_BEAN_PREFIX + beanName;
 								if (includeNonSingletons || isSingleton(beanName, mbd, dbd)) {
-									matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+									matchFound = isTypeMatch(canonicalBeanName, mbd, true, type, allowFactoryBeanInit, typesToMatch);
 								}
 							}
 						}

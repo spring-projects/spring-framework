@@ -79,6 +79,18 @@ class Spr8954Tests {
 	}
 
 
+	@Test
+	void findsFactoryBeanWithDefaultAndOverridingSmartPostProcessors() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("foo", new RootBeanDefinition(FooFactoryBean.class));
+		factory.addBeanPostProcessor(new SmartInstantiationAwareBeanPostProcessor() {});
+		factory.addBeanPostProcessor(new PredictingBPP());
+
+		assertThat(factory.getBeanNamesForType(AnInterface.class, false, false)).containsExactly("&foo");
+		assertThat(factory.getBeanNamesForType(PredictedType.class, true, false)).containsExactly("foo");
+	}
+
+
 	static class FooFactoryBean implements FactoryBean<Foo>, AnInterface {
 
 		@Override
