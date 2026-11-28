@@ -949,7 +949,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 				entriesCache.add(entries.nextElement().getName());
 			}
-			for (String entryPath : entriesCache.tailSet(rootEntryPath, true)) {
+			for (String entryPath : entriesCache.tailSet(rootEntryPath, false)) {
 				if (!entryPath.startsWith(rootEntryPath)) {
 					// We are beyond the potential matches in the current TreeSet.
 					break;
