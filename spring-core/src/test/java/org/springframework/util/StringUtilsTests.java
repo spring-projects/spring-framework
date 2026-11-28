@@ -418,6 +418,14 @@ class StringUtilsTests {
 		assertThat(StringUtils.cleanPath("jar:file:///c:\\some\\..\\path\\.\\the%20file.txt")).isEqualTo("jar:file:///c:/path/the%20file.txt");
 		assertThat(StringUtils.cleanPath("jar:file:///c:/some/../path/./the%20file.txt")).isEqualTo("jar:file:///c:/path/the%20file.txt");
 		assertThat(StringUtils.cleanPath("jar:file:///c:\\\\some\\\\..\\\\path\\\\.\\\\the%20file.txt")).isEqualTo("jar:file:///c:/path/the%20file.txt");
+		assertThat(StringUtils.cleanPath("file:.")).isEqualTo("file:");
+		assertThat(StringUtils.cleanPath("file:..")).isEqualTo("file:..");
+		assertThat(StringUtils.cleanPath("mypath/.")).isEqualTo("mypath");
+		assertThat(StringUtils.cleanPath("mypath/.hidden")).isEqualTo("mypath/.hidden");
+		assertThat(StringUtils.cleanPath("mypath/..hidden")).isEqualTo("mypath/..hidden");
+		assertThat(StringUtils.cleanPath("mypath/.../myfile.class")).isEqualTo("mypath/.../myfile.class");
+		String jarClassPath = "jar:file:/app/app-1.0.jar!/com/example/MyService.class";
+		assertThat(StringUtils.cleanPath(jarClassPath)).isSameAs(jarClassPath);
 	}
 
 	@Test
