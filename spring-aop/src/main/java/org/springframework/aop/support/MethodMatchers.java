@@ -102,6 +102,79 @@ public abstract class MethodMatchers {
 				mm.matches(method, targetClass));
 	}
 
+	/**
+	 * Specialize the given {@link MethodMatcher} for a fixed {@code targetClass}
+	 * by evaluating any embedded {@link ClassFilter} instances once up front.
+	 * @param mm the MethodMatcher to specialize
+	 * @param targetClass the target class
+	 * @return a specialized MethodMatcher, {@link MethodMatcher#TRUE} if every
+	 * method on the target class matches, or {@code null} if no method can match
+	 */
+	static @Nullable MethodMatcher forTargetClass(MethodMatcher mm, Class<?> targetClass) {
+		if (mm instanceof ClassFilterAwareUnionMethodMatcher union) {
+			MethodMatcher n1 = (union.matchesClass1(targetClass) ? forTargetClass(union.mm1, targetClass) : null);
+			if (n1 == MethodMatcher.TRUE) {
+				return MethodMatcher.TRUE;
+			}
+			MethodMatcher n2 = (union.matchesClass2(targetClass) ? forTargetClass(union.mm2, targetClass) : null);
+			if (n2 == MethodMatcher.TRUE) {
+				return MethodMatcher.TRUE;
+			}
+			if (n1 == null) {
+				return n2;
+			}
+			if (n2 == null) {
+				return n1;
+			}
+			return union(n1, n2);
+		}
+		if (mm instanceof UnionMethodMatcher union) {
+			MethodMatcher n1 = forTargetClass(union.mm1, targetClass);
+			if (n1 == MethodMatcher.TRUE) {
+				return MethodMatcher.TRUE;
+			}
+			MethodMatcher n2 = forTargetClass(union.mm2, targetClass);
+			if (n2 == MethodMatcher.TRUE) {
+				return MethodMatcher.TRUE;
+			}
+			if (n1 == null) {
+				return n2;
+			}
+			if (n2 == null) {
+				return n1;
+			}
+			return (n1 == union.mm1 && n2 == union.mm2 ? union : union(n1, n2));
+		}
+		if (mm instanceof IntersectionMethodMatcher intersection) {
+			MethodMatcher n1 = forTargetClass(intersection.mm1, targetClass);
+			if (n1 == null) {
+				return null;
+			}
+			MethodMatcher n2 = forTargetClass(intersection.mm2, targetClass);
+			if (n2 == null) {
+				return null;
+			}
+			if (n1 == MethodMatcher.TRUE) {
+				return n2;
+			}
+			if (n2 == MethodMatcher.TRUE) {
+				return n1;
+			}
+			return (n1 == intersection.mm1 && n2 == intersection.mm2 ? intersection : intersection(n1, n2));
+		}
+		if (mm instanceof NegateMethodMatcher negate) {
+			MethodMatcher n = forTargetClass(negate.original, targetClass);
+			if (n == null) {
+				return MethodMatcher.TRUE;
+			}
+			if (n == MethodMatcher.TRUE) {
+				return null;
+			}
+			return (n == negate.original ? negate : negate(n));
+		}
+		return mm;
+	}
+
 
 	/**
 	 * MethodMatcher implementation for a union of two given MethodMatchers.

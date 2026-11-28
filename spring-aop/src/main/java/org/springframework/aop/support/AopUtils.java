@@ -236,6 +236,13 @@ public abstract class AopUtils {
 			// No need to iterate the methods if we're matching any method anyway...
 			return true;
 		}
+		methodMatcher = MethodMatchers.forTargetClass(methodMatcher, targetClass);
+		if (methodMatcher == null) {
+			return false;
+		}
+		if (methodMatcher == MethodMatcher.TRUE) {
+			return true;
+		}
 
 		IntroductionAwareMethodMatcher introductionAwareMethodMatcher = null;
 		if (methodMatcher instanceof IntroductionAwareMethodMatcher iamm) {

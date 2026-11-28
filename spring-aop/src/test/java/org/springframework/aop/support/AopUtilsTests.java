@@ -7,6 +7,7 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -104,6 +105,65 @@ class AopUtilsTests {
 		Class<?> proxyClass = new ProxyFactory(new WithoutInterface()).getProxyClass(getClass().getClassLoader());
 		Method specificMethod = AopUtils.getMostSpecificMethod(proxyClass.getMethod("handle", List.class), WithoutInterface.class);
 		assertThat(ResolvableType.forMethodParameter(specificMethod, 0).getGeneric().toClass()).isEqualTo(String.class);
+	}
+
+	@Test
+	void canApplyEvaluatesClassFilterOnceForUnionPointcut() {
+		AtomicInteger classFilterCalls = new AtomicInteger();
+		ClassFilter countingClassFilter = clazz -> {
+			classFilterCalls.incrementAndGet();
+			return false;
+		};
+		Pointcut classLevel = new ComposablePointcut(countingClassFilter, MethodMatcher.TRUE);
+		Pointcut methodLevel = new StaticMethodMatcherPointcut() {
+			@Override
+			public boolean matches(Method method, Class<?> targetClass) {
+				return false;
+			}
+		};
+		Pointcut union = Pointcuts.union(classLevel, methodLevel);
+
+		assertThat(AopUtils.canApply(union, TestBean.class)).isFalse();
+		// Once for pc.getClassFilter() and once during MethodMatchers.forTargetClass(), not once per method.
+		assertThat(classFilterCalls).hasValueLessThanOrEqualTo(2);
+	}
+
+	@Test
+	void canApplyShortCircuitsWhenUnionBranchMatchesAllMethods() {
+		AtomicInteger methodMatcherCalls = new AtomicInteger();
+		Pointcut classLevel = new ComposablePointcut(clazz -> clazz == TestBean.class, MethodMatcher.TRUE);
+		Pointcut methodLevel = new StaticMethodMatcherPointcut() {
+			@Override
+			public boolean matches(Method method, Class<?> targetClass) {
+				methodMatcherCalls.incrementAndGet();
+				return false;
+			}
+		};
+		Pointcut union = Pointcuts.union(classLevel, methodLevel);
+
+		assertThat(AopUtils.canApply(union, TestBean.class)).isTrue();
+		assertThat(methodMatcherCalls).hasValue(0);
+	}
+
+	@Test
+	void canApplyEvaluatesClassFilterOnceForIntersectionOfUnionPointcuts() {
+		AtomicInteger classFilterCalls = new AtomicInteger();
+		ClassFilter countingClassFilter = clazz -> {
+			classFilterCalls.incrementAndGet();
+			return false;
+		};
+		Pointcut union = Pointcuts.union(
+				new ComposablePointcut(countingClassFilter, MethodMatcher.TRUE),
+				new StaticMethodMatcherPointcut() {
+					@Override
+					public boolean matches(Method method, Class<?> targetClass) {
+						return method.getName().equals("getName");
+					}
+				});
+		Pointcut intersection = Pointcuts.intersection(union, Pointcuts.GETTERS);
+
+		assertThat(AopUtils.canApply(intersection, TestBean.class)).isTrue();
+		assertThat(classFilterCalls).hasValueLessThanOrEqualTo(2);
 	}
 
 
