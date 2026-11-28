@@ -210,6 +210,13 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun nullableValueClassReturnValue() {
+		val method = ValueClassController::nullableValueClassReturnValue.javaMethod!!
+		val result = invoke(ValueClassController(), method)
+		assertHandlerResultValue(result, null)
+	}
+
+	@Test
 	fun nestedValueClassReturnValue() {
 		val method = ValueClassController::nestedValueClassReturnValue.javaMethod!!
 		val result = invoke(ValueClassController(), method)
@@ -284,6 +291,13 @@ class InvocableHandlerMethodKotlinTests {
 		val method = SuspendingValueClassController::valueClassReturnValue.javaMethod!!
 		val result = invoke(SuspendingValueClassController(), method)
 		assertHandlerResultValue(result, "foo")
+	}
+
+	@Test
+	fun suspendingNullableValueClassReturnValue() {
+		val method = SuspendingValueClassController::nullableValueClassReturnValue.javaMethod!!
+		val result = invoke(SuspendingValueClassController(), method)
+		assertComplete(result)
 	}
 
 	@Test
@@ -481,6 +495,8 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun valueClassReturnValue() = StringValueClass("foo")
 
+		fun nullableValueClassReturnValue() = NullableStringValueClass(null)
+
 		fun nestedValueClassReturnValue() = NestedStringValueClass(StringValueClass("foo"))
 
 		fun resultOfUnitReturnValue() = Result.success(Unit)
@@ -504,6 +520,11 @@ class InvocableHandlerMethodKotlinTests {
 		suspend fun valueClassReturnValue(): StringValueClass {
 			delay(1)
 			return StringValueClass("foo")
+		}
+
+		suspend fun nullableValueClassReturnValue(): NullableStringValueClass {
+			delay(1)
+			return NullableStringValueClass(null)
 		}
 
 		suspend fun resultOfUnitReturnValue(): Result<Unit> {
@@ -565,6 +586,9 @@ class InvocableHandlerMethodKotlinTests {
 
 	@JvmInline
 	value class StringValueClass(val value: String)
+
+	@JvmInline
+	value class NullableStringValueClass(val value: String?)
 
 	@JvmInline
 	value class NestedStringValueClass(val value: StringValueClass)
