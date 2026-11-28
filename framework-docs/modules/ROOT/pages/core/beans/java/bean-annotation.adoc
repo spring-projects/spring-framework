@@ -187,6 +187,78 @@ xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-inject
 for more details.
 
 
+[[beans-java-circular-dependencies]]
+=== Circular Dependencies
+
+Using `@Bean` method parameters to describe dependencies also helps to keep the bean
+dependency graph explicit. Since invoking a non-static `@Bean` method requires a fully
+initialized configuration class instance, dependencies injected into the enclosing
+`@Configuration` class are effectively part of the dependency graph of every such `@Bean`
+method. Such dependencies must therefore be resolved while the configuration class is
+being initialized, even when they are only needed by a single `@Bean` method. If one of
+those beans depends directly or indirectly on a bean defined by the same configuration
+class, a circular reference results. Whenever possible, declare bean dependencies as
+`@Bean` method parameters instead of injecting them into the configuration class. For
+bean definitions that do not depend on configuration instance state, a static `@Bean`
+method can also avoid requiring the enclosing configuration class instance. This is
+especially appropriate for `BeanPostProcessor` and `BeanFactoryPostProcessor`
+definitions.
+
+A circular reference often indicates that bean responsibilities or configuration
+boundaries should be revisited. Consider splitting large configuration classes, moving
+bean definitions closer to the components they create, or introducing an intermediary
+abstraction so that collaborators no longer depend on each other.
+
+If a circular reference cannot be removed, you can break the cycle at one injection point
+with a lazy-resolution proxy, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public BeanOne beanOne(BeanTwo beanTwo) {
+			return new BeanOne(beanTwo);
+		}
+
+		@Bean
+		public BeanTwo beanTwo(@Lazy BeanOne beanOne) {
+			return new BeanTwo(beanOne);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun beanOne(beanTwo: BeanTwo) = BeanOne(beanTwo)
+
+		@Bean
+		fun beanTwo(@Lazy beanOne: BeanOne) = BeanTwo(beanOne)
+	}
+----
+======
+
+In the preceding example, the container injects a lazy-resolution proxy for `beanOne`
+into `beanTwo`. The actual `beanOne` instance is resolved only when the proxy is first
+used. Consequently, the proxy must not be invoked during creation of either bean. Also
+note that `@Lazy` does not remove the circular dependency. It only defers resolution and
+should be used as a pragmatic fallback rather than as a substitute for a clear dependency
+graph. See
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-circular-dependencies[Circular dependencies]
+for general guidance.
+
+
 [[beans-java-lifecycle-callbacks]]
 == Receiving Lifecycle Callbacks
 

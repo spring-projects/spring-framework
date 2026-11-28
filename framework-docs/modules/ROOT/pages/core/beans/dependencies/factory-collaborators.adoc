@@ -366,6 +366,7 @@ graph of beans to be created, as the bean's dependencies and its dependencies'
 dependencies (and so on) are created and assigned. Note that resolution mismatches among
 those dependencies may show up late -- that is, on first creation of the affected bean.
 
+[[beans-circular-dependencies]]
 .Circular dependencies
 ****
 If you use predominantly constructor injection, it is possible to create an unresolvable
@@ -377,10 +378,27 @@ beans for classes A and B to be injected into each other, the Spring IoC contain
 detects this circular reference at runtime, and throws a
 `BeanCurrentlyInCreationException`.
 
-One possible solution is to edit the source code of some classes to be configured by
-setters rather than constructors. Alternatively, avoid constructor injection and use
-setter injection only. In other words, although it is not recommended, you can configure
-circular dependencies with setter injection.
+Changing field injection to constructor injection does not remove a circular dependency.
+Rather, constructor injection makes such a cycle visible as an unresolvable bean creation
+error. A circular dependency often indicates that bean responsibilities or configuration
+boundaries should be revisited. Before applying a workaround, consider splitting large
+configuration classes, moving bean definitions closer to the components they create, or
+introducing an intermediary abstraction so that collaborators no longer depend on each
+other.
+
+With Java-based configuration, prefer declaring bean dependencies as `@Bean` method
+parameters instead of injecting them into the enclosing `@Configuration` class. Method
+parameters keep the dependency graph precise and avoid unnecessary early instantiation
+of the configuration class. If a circular reference cannot be removed, one injection
+point in the cycle can use a lazy-resolution proxy. See
+xref:core/beans/java/bean-annotation.adoc#beans-java-circular-dependencies[Circular Dependencies]
+for an example that uses `@Lazy` on a `@Bean` method parameter.
+
+For singleton beans, another possible fallback is to edit the source code of some classes
+to be configured by setters rather than constructors. In other words, although it is not
+recommended, you can configure circular dependencies with setter injection. Note that
+support for circular references depends on the container configuration. For example,
+Spring Boot disallows circular references by default.
 
 Unlike the typical case (with no circular dependencies), a circular dependency
 between bean A and bean B forces one of the beans to be injected into the other prior to
