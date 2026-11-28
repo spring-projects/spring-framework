@@ -391,17 +391,17 @@ include-code::./../restmessageconversion/RestClientMessageConversion[tag=multipa
 === Client Request Factories
 
 To execute the HTTP request, `RestClient` uses a client HTTP library.
-These libraries are adapted via the `ClientRequestFactory` interface.
+These libraries are adapted via the `ClientHttpRequestFactory` interface.
 Various implementations are available:
 
 * `JdkClientHttpRequestFactory` for Java's `HttpClient`
 * `HttpComponentsClientHttpRequestFactory` for use with Apache HTTP Components `HttpClient`
 * `JettyClientHttpRequestFactory` for Jetty's `HttpClient`
-* `ReactorNettyClientRequestFactory` for Reactor Netty's `HttpClient`
+* `ReactorClientHttpRequestFactory` for Reactor Netty's `HttpClient`
 * `SimpleClientHttpRequestFactory` as a simple default
 
 
-If no request factory is specified when the `RestClient` was built, it will use the Apache or Jetty `HttpClient` if they are available on the classpath.
+If no request factory is specified when the `RestClient` was built, it will use the Apache, Jetty, or Reactor Netty `HttpClient` if they are available on the classpath, in that order.
 Otherwise, if the `java.net.http` module is loaded, it will use Java's `HttpClient`.
 Finally, it will resort to the simple default.
 
