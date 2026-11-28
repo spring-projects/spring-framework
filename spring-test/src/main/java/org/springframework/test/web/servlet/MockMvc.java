@@ -184,16 +184,20 @@ public final class MockMvc {
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, servletResponse));
 
-		MockFilterChain filterChain = new MockFilterChain(this.servlet, this.filters);
-		filterChain.doFilter(request, servletResponse);
+		try {
+			MockFilterChain filterChain = new MockFilterChain(this.servlet, this.filters);
+			filterChain.doFilter(request, servletResponse);
 
-		if (DispatcherType.ASYNC.equals(request.getDispatcherType()) &&
-				asyncContext != null && !request.isAsyncStarted()) {
-			asyncContext.complete();
+			if (DispatcherType.ASYNC.equals(request.getDispatcherType()) &&
+					asyncContext != null && !request.isAsyncStarted()) {
+				asyncContext.complete();
+			}
+
+			applyDefaultResultActions(mvcResult);
 		}
-
-		applyDefaultResultActions(mvcResult);
-		RequestContextHolder.setRequestAttributes(previousAttributes);
+		finally {
+			RequestContextHolder.setRequestAttributes(previousAttributes);
+		}
 
 		return new ResultActions() {
 			@Override
