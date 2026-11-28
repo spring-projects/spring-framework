@@ -858,6 +858,16 @@ class HttpHeadersTests {
 			assertThat(headers.getValuesAsList("Example-Dates")).containsExactly("Sat, 04 May 1996", "Wed, 14 Sep 2005");
 		}
 
+		@Test
+		void getValuesAsListWithEmptyQuotedValue() {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Foo", "a, \"\", b");
+			headers.add("Bar", "\"\", \"x,y\"");
+
+			assertThat(headers.getValuesAsList("Foo")).containsExactly("a", "b");
+			assertThat(headers.getValuesAsList("Bar")).containsExactly("x,y");
+		}
+
 	}
 
 }
