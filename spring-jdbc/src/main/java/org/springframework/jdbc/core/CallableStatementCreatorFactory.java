@@ -172,15 +172,18 @@ public class CallableStatementCreatorFactory {
 						// It's an output parameter: SqlReturnResultSet parameters already excluded.
 						// It need not (but may be) supplied by the caller.
 						if (declaredParam instanceof SqlOutParameter) {
-							if (declaredParam.getTypeName() != null) {
-								cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType(), declaredParam.getTypeName());
+							int sqlType = declaredParam.getSqlType();
+							String typeName = declaredParam.getTypeName();
+							if (typeName != null) {
+								cs.registerOutParameter(sqlColIndx, sqlType, typeName);
 							}
 							else {
-								if (declaredParam.getScale() != null) {
-									cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType(), declaredParam.getScale());
+								Integer scale = declaredParam.getScale();
+								if (scale != null) {
+									cs.registerOutParameter(sqlColIndx, sqlType, scale);
 								}
 								else {
-									cs.registerOutParameter(sqlColIndx, declaredParam.getSqlType());
+									cs.registerOutParameter(sqlColIndx, sqlType);
 								}
 							}
 							if (declaredParam.isInputValueProvided()) {

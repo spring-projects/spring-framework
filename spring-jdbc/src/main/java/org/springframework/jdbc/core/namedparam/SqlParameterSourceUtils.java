@@ -81,17 +81,17 @@ public abstract class SqlParameterSourceUtils {
 	/**
 	 * Create a wrapped value if parameter has type information, plain object if not.
 	 * @param source the source of parameter values and type information
-	 * @param parameterName the name of the parameter
+	 * @param paramName the name of the parameter
 	 * @return the value object
 	 * @see SqlParameterValue
 	 */
-	public static @Nullable Object getTypedValue(SqlParameterSource source, String parameterName) {
-		int sqlType = source.getSqlType(parameterName);
+	public static @Nullable Object getTypedValue(SqlParameterSource source, String paramName) {
+		int sqlType = source.getSqlType(paramName);
 		if (sqlType != SqlParameterSource.TYPE_UNKNOWN) {
-			return new SqlParameterValue(sqlType, source.getTypeName(parameterName), source.getValue(parameterName));
+			return new SqlParameterValue(sqlType, source.getTypeName(paramName), source.getValue(paramName));
 		}
 		else {
-			return source.getValue(parameterName);
+			return source.getValue(paramName);
 		}
 	}
 

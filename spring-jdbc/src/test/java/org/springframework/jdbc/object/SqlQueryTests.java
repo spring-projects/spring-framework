@@ -562,19 +562,16 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void namedParameterCustomerQueryWithUnnamedDeclarations()
-			throws SQLException {
+	void namedParameterCustomerQueryWithUnnamedDeclarations() throws SQLException {
 		doTestNamedParameterCustomerQuery(false);
 	}
 
 	@Test
-	void namedParameterCustomerQueryWithNamedDeclarations()
-			throws SQLException {
+	void namedParameterCustomerQueryWithNamedDeclarations() throws SQLException {
 		doTestNamedParameterCustomerQuery(true);
 	}
 
-	private void doTestNamedParameterCustomerQuery(final boolean namedDeclarations)
-			throws SQLException {
+	private void doTestNamedParameterCustomerQuery(final boolean namedDeclarations) throws SQLException {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
@@ -730,10 +727,8 @@ class SqlQueryTests {
 	}
 
 	@Test
-	void namedParameterUsingInvalidQuestionMarkPlaceHolders()
-			throws SQLException {
-		given(
-		connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,
+	void namedParameterUsingInvalidQuestionMarkPlaceholders() throws SQLException {
+		given(connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)).willReturn(preparedStatement);
 
 		class CustomerQuery extends MappingSqlQuery<Customer> {
@@ -782,8 +777,7 @@ class SqlQueryTests {
 			}
 
 			@Override
-			protected Customer updateRow(ResultSet rs, int rownum, @Nullable Map<? ,?> context)
-					throws SQLException {
+			protected Customer updateRow(ResultSet rs, int rownum, @Nullable Map<? ,?> context) throws SQLException {
 				rs.updateString(2, "" + context.get(rs.getInt(COLUMN_NAMES[0])));
 				return null;
 			}
