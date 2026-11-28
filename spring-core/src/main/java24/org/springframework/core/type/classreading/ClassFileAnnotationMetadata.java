@@ -6,19 +6,18 @@
 package org.springframework.core.type.classreading;
 
 import java.lang.classfile.AccessFlags;
+import java.lang.classfile.Attributes;
 import java.lang.classfile.ClassModel;
-import java.lang.classfile.Interfaces;
 import java.lang.classfile.MethodModel;
-import java.lang.classfile.Superclass;
 import java.lang.classfile.attribute.InnerClassInfo;
 import java.lang.classfile.attribute.InnerClassesAttribute;
-import java.lang.classfile.attribute.NestHostAttribute;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
 import java.lang.classfile.constantpool.ClassEntry;
 import java.lang.constant.ClassDesc;
 import java.lang.reflect.AccessFlag;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
@@ -27,6 +26,7 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -176,39 +176,78 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 
 
 	static ClassFileAnnotationMetadata of(ClassModel classModel, @Nullable ClassLoader classLoader) {
-		Builder builder = new Builder(classLoader);
-		builder.classEntry(classModel.thisClass());
-		String currentClassName = classModel.thisClass().name().stringValue();
-		classModel.elementStream().forEach(classElement -> {
-			switch (classElement) {
-				case AccessFlags flags -> {
-					builder.accessFlags(flags);
+		ClassEntry thisClass = classModel.thisClass();
+		String currentClassName = thisClass.name().stringValue();
+		String className = ClassUtils.convertResourcePathToClassName(currentClassName);
+		AccessFlags accessFlags = classModel.flags();
+		ClassEntry superClassEntry = classModel.superclass().orElse(null);
+		String superClassName = (superClassEntry != null ?
+				ClassUtils.convertResourcePathToClassName(superClassEntry.name().stringValue()) : null);
+
+		List<ClassEntry> interfaces = classModel.interfaces();
+		Set<String> interfaceNames;
+		if (interfaces.isEmpty()) {
+			interfaceNames = Collections.emptySet();
+		}
+		else {
+			interfaceNames = CollectionUtils.newLinkedHashSet(interfaces.size());
+			for (ClassEntry entry : interfaces) {
+				interfaceNames.add(ClassUtils.convertResourcePathToClassName(entry.name().stringValue()));
+			}
+		}
+
+		String enclosingClassName = null;
+		boolean staticInnerClass = false;
+		Set<String> memberClassNames = Collections.emptySet();
+		InnerClassesAttribute innerClasses = classModel.findAttribute(Attributes.innerClasses()).orElse(null);
+		if (innerClasses != null) {
+			for (InnerClassInfo classInfo : innerClasses.classes()) {
+				String innerClassName = classInfo.innerClass().name().stringValue();
+				ClassEntry outerClass = classInfo.outerClass().orElse(null);
+				if (currentClassName.equals(innerClassName)) {
+					// the current class is an inner class
+					staticInnerClass = (classInfo.flagsMask() & AccessFlag.STATIC.mask()) != 0;
+					if (outerClass != null) {
+						enclosingClassName = ClassUtils.convertResourcePathToClassName(outerClass.name().stringValue());
+					}
 				}
-				case NestHostAttribute _ -> {
-					builder.enclosingClassFromNestHost(classModel.thisClass());
-				}
-				case InnerClassesAttribute innerClasses -> {
-					builder.nestMembers(currentClassName, innerClasses);
-				}
-				case RuntimeVisibleAnnotationsAttribute annotationsAttribute -> {
-					builder.mergedAnnotations(ClassFileAnnotationDelegate.createMergedAnnotations(
-							ClassUtils.convertResourcePathToClassName(currentClassName), annotationsAttribute, classLoader));
-				}
-				case Superclass superclass -> {
-					builder.superClass(superclass);
-				}
-				case Interfaces interfaces -> {
-					builder.interfaces(interfaces);
-				}
-				case MethodModel method -> {
-					builder.method(method);
-				}
-				default -> {
-					// ignore class element
+				if (outerClass != null && outerClass.name().stringValue().equals(currentClassName)) {
+					// collecting data about actual inner classes
+					if (memberClassNames.isEmpty()) {
+						memberClassNames = new LinkedHashSet<>(4);
+					}
+					memberClassNames.add(ClassUtils.convertResourcePathToClassName(innerClassName));
 				}
 			}
-		});
-		return builder.build();
+		}
+		if (enclosingClassName == null && classModel.findAttribute(Attributes.nestHost()).isPresent()) {
+			int currentClassIndex = currentClassName.lastIndexOf('$');
+			if (currentClassIndex > 0) {
+				enclosingClassName = ClassUtils.convertResourcePathToClassName(
+						currentClassName.substring(0, currentClassIndex));
+			}
+		}
+		boolean independentInnerClass = (enclosingClassName != null && staticInnerClass);
+
+		RuntimeVisibleAnnotationsAttribute annotationsAttribute =
+				classModel.findAttribute(Attributes.runtimeVisibleAnnotations()).orElse(null);
+		MergedAnnotations mergedAnnotations = (annotationsAttribute != null ?
+				ClassFileAnnotationDelegate.createMergedAnnotations(className, annotationsAttribute, classLoader) :
+				MergedAnnotations.of(Collections.emptyList()));
+
+		List<MethodModel> methods = classModel.methods();
+		Set<MethodMetadata> declaredMethods = Collections.emptySet();
+		for (MethodModel method : methods) {
+			if (!method.flags().has(AccessFlag.SYNTHETIC) && !method.methodName().equalsString("<init>")) {
+				if (declaredMethods.isEmpty()) {
+					declaredMethods = CollectionUtils.newLinkedHashSet(methods.size());
+				}
+				declaredMethods.add(ClassFileMethodMetadata.of(method, className, classLoader));
+			}
+		}
+
+		return new ClassFileAnnotationMetadata(className, accessFlags, enclosingClassName, superClassName,
+				independentInnerClass, interfaceNames, memberClassNames, declaredMethods, mergedAnnotations);
 	}
 
 	static String resolveTypeName(ClassDesc type) {
@@ -221,102 +260,6 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 		}
 		String packageName = effectiveType.packageName();
 		return (packageName.isEmpty() ? type.displayName() : packageName + "." + type.displayName());
-	}
-
-
-	static class Builder {
-
-		private final ClassLoader classLoader;
-
-		private String className;
-
-		private AccessFlags accessFlags;
-
-		private Set<AccessFlag> innerAccessFlags;
-
-		private @Nullable String enclosingClassName;
-
-		private @Nullable String superClassName;
-
-		private Set<String> interfaceNames = new LinkedHashSet<>(4);
-
-		private Set<String> memberClassNames = new LinkedHashSet<>(4);
-
-		private Set<MethodMetadata> declaredMethods = new LinkedHashSet<>(4);
-
-		private MergedAnnotations mergedAnnotations = MergedAnnotations.of(Collections.emptyList());
-
-		public Builder(ClassLoader classLoader) {
-			this.classLoader = classLoader;
-		}
-
-		void classEntry(ClassEntry classEntry) {
-			this.className = ClassUtils.convertResourcePathToClassName(classEntry.name().stringValue());
-		}
-
-		void accessFlags(AccessFlags accessFlags) {
-			this.accessFlags = accessFlags;
-		}
-
-		void enclosingClassFromNestHost(ClassEntry thisClass) {
-			if (this.enclosingClassName != null) {
-				return;
-			}
-			String thisClassName = thisClass.name().stringValue();
-			int currentClassIndex = thisClassName.lastIndexOf('$');
-			if (currentClassIndex > 0) {
-				this.enclosingClassName = ClassUtils.convertResourcePathToClassName(
-						thisClassName.substring(0, currentClassIndex));
-			}
-		}
-
-		void superClass(Superclass superClass) {
-			this.superClassName = ClassUtils.convertResourcePathToClassName(
-					superClass.superclassEntry().name().stringValue());
-		}
-
-		void interfaces(Interfaces interfaces) {
-			for (ClassEntry entry : interfaces.interfaces()) {
-				this.interfaceNames.add(ClassUtils.convertResourcePathToClassName(entry.name().stringValue()));
-			}
-		}
-
-		void nestMembers(String currentClassName, InnerClassesAttribute innerClasses) {
-			for (InnerClassInfo classInfo : innerClasses.classes()) {
-				String innerClassName = classInfo.innerClass().name().stringValue();
-				if (currentClassName.equals(innerClassName)) {
-					// the current class is an inner class
-					this.innerAccessFlags = classInfo.flags();
-					classInfo.outerClass().ifPresent(outerClass ->
-							this.enclosingClassName = ClassUtils.convertResourcePathToClassName(outerClass.name().stringValue()));
-				}
-				classInfo.outerClass().ifPresent(outerClass -> {
-					if (outerClass.name().stringValue().equals(currentClassName)) {
-						// collecting data about actual inner classes
-						this.memberClassNames.add(ClassUtils.convertResourcePathToClassName(innerClassName));
-					}
-				});
-			}
-		}
-
-		void mergedAnnotations(MergedAnnotations mergedAnnotations) {
-			this.mergedAnnotations = mergedAnnotations;
-		}
-
-		void method(MethodModel method) {
-			ClassFileMethodMetadata classFileMethodMetadata = ClassFileMethodMetadata.of(method, this.classLoader);
-			if (!classFileMethodMetadata.isSynthetic() && !classFileMethodMetadata.isDefaultConstructor()) {
-				this.declaredMethods.add(classFileMethodMetadata);
-			}
-		}
-
-		ClassFileAnnotationMetadata build() {
-			boolean independentInnerClass = (this.enclosingClassName != null) &&
-					this.innerAccessFlags.contains(AccessFlag.STATIC);
-			return new ClassFileAnnotationMetadata(this.className, this.accessFlags, this.enclosingClassName,
-					this.superClassName, independentInnerClass, this.interfaceNames, this.memberClassNames,
-					this.declaredMethods, this.mergedAnnotations);
-		}
 	}
 
 }

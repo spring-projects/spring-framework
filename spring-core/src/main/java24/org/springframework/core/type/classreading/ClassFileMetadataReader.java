@@ -24,6 +24,11 @@ import org.springframework.core.type.ClassMetadata;
  */
 final class ClassFileMetadataReader implements MetadataReader {
 
+	private static final ClassFile CLASS_FILE = ClassFile.of(
+			ClassFile.DebugElementsOption.DROP_DEBUG,
+			ClassFile.LineNumbersOption.DROP_LINE_NUMBERS,
+			ClassFile.AttributesProcessingOption.DROP_UNKNOWN_ATTRIBUTES);
+
 	private final Resource resource;
 
 	private final AnnotationMetadata annotationMetadata;
@@ -36,7 +41,7 @@ final class ClassFileMetadataReader implements MetadataReader {
 
 	private static ClassModel parseClassModel(Resource resource) throws IOException {
 		try (InputStream inputStream = resource.getInputStream()) {
-			return ClassFile.of().parse(inputStream.readAllBytes());
+			return CLASS_FILE.parse(inputStream.readAllBytes());
 		}
 	}
 
