@@ -240,7 +240,7 @@ class should suffice. However, depending on what type of IoC you use for that sp
 bean, you may need a default (empty) constructor.
 
 The Spring IoC container can manage virtually any class you want it to manage. It is
-not limited to managing true JavaBeans. Most Spring users prefer actual JavaBeans with
+not limited to manage true JavaBeans. Most Spring users prefer actual JavaBeans with
 only a default (no-argument) constructor and appropriate setters and getters modeled
 after the properties in the container. You can also have more exotic non-bean-style
 classes in your container. If, for example, you need to use a legacy connection pool

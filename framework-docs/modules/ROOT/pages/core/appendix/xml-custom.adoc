@@ -303,7 +303,7 @@ http\://www.mycompany.example/schema/myns=org.springframework.samples.xml.MyName
 `:` character in the URI needs to be escaped with a backslash.)
 
 The first part (the key) of the key-value pair is the URI associated with your custom
-namespace extension and needs to exactly match exactly the value of the `targetNamespace`
+namespace extension and needs to exactly match the value of the `targetNamespace`
 attribute, as specified in your custom XSD schema.
 
 [[xsd-custom-registration-spring-schemas]]
