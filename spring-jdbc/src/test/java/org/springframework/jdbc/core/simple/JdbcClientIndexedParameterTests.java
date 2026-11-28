@@ -7,6 +7,7 @@ package org.springframework.jdbc.core.simple;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -389,6 +390,23 @@ class JdbcClientIndexedParameterTests {
 		verify(connection).prepareStatement(UPDATE_INDEXED_PARAMETERS);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setObject(2, 1, Types.INTEGER);
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	void updateWithSQLTypeParameters() throws SQLException {
+		given(preparedStatement.executeUpdate()).willReturn(1);
+
+		int rowsAffected = client.sql(UPDATE_INDEXED_PARAMETERS)
+				.param(1, 10, JDBCType.DECIMAL)
+				.param(2, 20, JDBCType.INTEGER)
+				.update();
+
+		assertThat(rowsAffected).isEqualTo(1);
+		verify(connection).prepareStatement(UPDATE_INDEXED_PARAMETERS);
+		verify(preparedStatement).setObject(1, 10, Types.DECIMAL);
+		verify(preparedStatement).setObject(2, 20, Types.INTEGER);
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
